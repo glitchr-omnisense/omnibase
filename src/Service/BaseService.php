@@ -6,10 +6,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Controller\BaseController;
 use Base\Entity\User;
-use Base\Traits\BaseNotificationTrait;
-use Base\Traits\BaseSymfonyTrait;
-use Base\Traits\BaseUtilsTrait;
-use Base\Traits\BaseTwigTrait;
+use Base\Service\Traits\BaseNotificationTrait;
+use Base\Service\Traits\BaseSymfonyTrait;
+use Base\Service\Traits\BaseUtilsTrait;
+use Base\Service\Traits\BaseTwigTrait;
 
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;

@@ -53,7 +53,7 @@ class DashboardController extends AbstractDashboardController
     }
 
    /**
-     * @Route("/google/analytics", name="app_dashboard_ga")
+     * @Route("/dashboard/google/analytics", name="base_dashboard_ga")
      */
     public function GoogleAnalytics(): Response
     {
@@ -65,7 +65,7 @@ class DashboardController extends AbstractDashboardController
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/", name="base_dashboard")
+     * @Route("/dashboard", name="base_dashboard")
      */
     public function index(): Response
     {

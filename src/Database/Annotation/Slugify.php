@@ -114,7 +114,7 @@ class Slugify extends AbstractAnnotation
             $candidateEntities[] = $entity2;
 
         $classMetadata = $this->getClassMetadata($entity);
-        $propertyClassOrigin = $classMetadata->getFieldMapping($property)["declared"];
+        $propertyClassOrigin = $classMetadata->getFieldMapping($property)["declared"] ?? null;
 
         $invalidSlugs = [];
         foreach ($candidateEntities as $entity2) {

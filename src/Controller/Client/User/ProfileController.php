@@ -25,14 +25,6 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @Route("/profile/search", name="base_search")
-     */
-    public function Search()
-    {
-        return $this->render('@Base/client/user/profile_search.html.twig');
-    }
-
-    /**
      * @Route("/profile/edit", name="base_profile_edit")
      */
     public function Edit()

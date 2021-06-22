@@ -83,6 +83,14 @@
 
             -->
         <service id="Base\Form\AbstractType" />
+
+        <service id="Base\Form\FormProxy" />
+        <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
+        <service id="Base\Twig\FormTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="base.form_proxy" />
+       </service>
+
         <service id="Base\Form\FormProcessor">
             <argument type="service" id="form.factory" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -132,7 +140,7 @@
             DOCTRINE
 
         -->
-        <service id="Base\Database\NamingStrategy"  public="true"/>
+        <service id="Base\Database\NamingStrategy"  public="true" />
         <service id="Base\Database\Factory\ConnectionFactory"  public="true"/>
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
 
@@ -204,6 +212,20 @@
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="base.service" />
             <argument type="service" id="cache.app" />
+        </service>
+
+        <service id="Base\Controller\Client\Thread\SearchController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="base.service" />
+            <argument type="service" id="App\Repository\ThreadRepository" />
+        </service>
+
+        <service id="Base\Controller\Client\User\SearchController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="base.service" />
+            <argument type="service" id="App\Repository\UserRepository" />
         </service>
 
         <service id="Base\Controller\Client\User\ProfileController">

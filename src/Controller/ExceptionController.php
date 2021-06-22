@@ -25,7 +25,6 @@ class ExceptionController extends AbstractController
     public function Main(FlattenException $exception) {
 
         $this->exception = $exception;
-
         foreach($this->getList() as $exception) {
 
             $notification = new Notification($exception);

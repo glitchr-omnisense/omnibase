@@ -131,7 +131,10 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $exception = $subject;
 
             $this->setSubject("Exception");
-            $this->setContent($exception->getMessage());
+            $this->setContent(
+                "<b>" . $exception->getFile() . ":" . $exception->getLine() . "</b>" .
+                    "<br/>" . $exception->getMessage()
+            );
 
         } else if(!$content){
 

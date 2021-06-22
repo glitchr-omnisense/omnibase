@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Traits;
+namespace Base\Service\Traits;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;

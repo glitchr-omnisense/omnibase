@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Traits;
+namespace Base\Service\Traits;
 
 use Base\Database\Factory\ClassMetadataFactory;
 use Base\Entity\Thread;
@@ -301,7 +301,12 @@ trait BaseSymfonyTrait
         return $this->router;
     }
 
-    public function getRoute($path = "", array $opts = [])
+    public function generateUrl(string $path = "", array $opts = [])
+    {
+        return $this->getRoute($path, $opts);
+    }
+
+    public function getRoute(string $path = "", array $opts = [])
     {
         if (!isset($this->router))
             throw new Exception("No router found in BaseService. Did you overloaded BaseService::__construct ?");

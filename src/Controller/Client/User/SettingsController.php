@@ -74,7 +74,7 @@ class SettingsController extends AbstractController
                 //     // generate a signed url and email it to the user
                 //     $this->emailVerifier->sendEmailConfirmation('base_verify_email', $newUser,
                 //         (new TemplatedEmail())
-                //             ->from(new Address('support@XXXX', 'XXX'))
+                //             ->from(new Address('support@example.com', 'Support'))
                 //             ->to($newUser->getEmail())
                 //             ->subject('Please Confirm your Email')
                 //             ->htmlTemplate('email/user/registration_email.html.twig')

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Traits;
+namespace Base\Service\Traits;
 
 use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\Config\Definition\Exception\Exception;

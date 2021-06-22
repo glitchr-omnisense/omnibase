@@ -14,7 +14,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-class FormProcessor
+class FormProcessor implements FormProcessorInterface
 {
     use FlowFormTrait;
 

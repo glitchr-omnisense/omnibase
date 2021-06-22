@@ -63,7 +63,11 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $projectDir = $baseService->getProjectDir();
         $this->addPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");
         $this->addPath($projectDir . "/vendor/xkzl/base-bundle/templates/layout");
+
         $this->addPath($projectDir . "/assets", "Assets");
+
+        $this->addPath($projectDir . "/src", "App");
+        $this->addPath($projectDir . "/src/Controller", "Controller");
 
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag("base.twig.paths");

@@ -265,7 +265,6 @@ class SecurityController extends AbstractController
         ]);
         $notification->send("success")->send("urgent");
 
-
         $this->getDoctrine()->getManager()->flush();
         return $this->redirectToRoute('base_settings');
     }

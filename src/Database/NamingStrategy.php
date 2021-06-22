@@ -2,6 +2,8 @@
 
 namespace Base\Database;
 
+use Base\Service\BaseService;
+
 /**
  * Custom Naming Strategy
  *

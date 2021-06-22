@@ -16,5 +16,7 @@
 
         <service id="base.twig_loader" alias="Base\Twig\Loader\FilesystemLoader" />
 
+        <service id="base.form_proxy" alias="Base\Form\FormProxyInterface" />
+
     </services>
 </container>

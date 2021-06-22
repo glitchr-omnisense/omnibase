@@ -14,6 +14,7 @@ use Exception;
 
 use Annotation as Test;
 use Base\Service\BaseService;
+use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 use ReflectionClass;
@@ -27,6 +28,8 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 class AnnotationReader
 {
+    use SingletonTrait;
+
     public const TARGET_CLASS    = "class";
     public const TARGET_METHOD   = "method";
     public const TARGET_PROPERTY = "property";
@@ -37,12 +40,6 @@ class AnnotationReader
         self::TARGET_PROPERTY
     ];
 
-    protected static $instance = null;
-    public static function getInstance()
-    {
-        return self::$instance;
-    }
-
     protected $bag;
     public function getParameterBag()
     {
@@ -51,8 +48,8 @@ class AnnotationReader
 
     public function __construct(ParameterBagInterface $bag, EntityManager $entityManager, CacheInterface $cache)
     {
-        if(!self::$instance)
-            self::$instance = $this;
+        if(!self::getInstance(false))
+            self::setInstance($this);
 
         $this->doctrineReader = new DoctrineAnnotationReader();
 

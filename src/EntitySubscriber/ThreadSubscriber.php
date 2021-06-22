@@ -2,8 +2,9 @@
 
 namespace Base\EntitySubscriber;
 
-use App\Entity\Thread;
-use App\EntityEvent\ThreadEvent;
+use Base\Entity\Thread;
+use Base\EntityEvent\ThreadEvent;
+use Base\Entity\Thread as EntityThread;
 use Base\Service\BaseService;
 use Base\Form\Type\RoleType;
 

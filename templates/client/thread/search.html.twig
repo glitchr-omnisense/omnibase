@@ -1,0 +1,14 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Search for a thread{% endblock %}
+{% block content %}
+
+    {{ form_start(form) }}
+        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+
+        {{ form_row(form.text) }}
+
+        <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
+    {{ form_end(form) }}
+
+{% endblock %}

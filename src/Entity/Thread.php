@@ -152,7 +152,7 @@ class Thread
      */
     protected $createdAt;
 
-    public function __construct(User $author, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
+    public function __construct(?User $author = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags = new ArrayCollection();
         $this->children = new ArrayCollection();
@@ -308,7 +308,6 @@ class Thread
         $this->publishedAt = $publishedAt;
         return $this;
     }
-
 
     public function getPrimaryTag()
     {
@@ -536,8 +535,10 @@ class Thread
         return $this->authors;
     }
 
-    public function addAuthor(User $author): self
+    public function addAuthor(?User $author): self
     {
+        if(!$author) return $this;
+
         if (!$this->authors->contains($author)) {
             $this->authors[] = $author;
         }

@@ -68,7 +68,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::TERMINATE => [['onKernelTerminate']],
-            KernelEvents::EXCEPTION => [['onKernelException']],
+            KernelEvents::EXCEPTION => [['onKernelException', -1024]],
 
             RequestEvent::class   => [['onInteractiveRequest']],
             InteractiveLoginEvent::class => ['onInteractiveLogin'],
@@ -190,6 +190,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function storeLog(KernelEvent $event, ?\Throwable $exception = null) {
 
+        if (self::$exceptionOnHold && self::$exceptionOnHold != $exception)
+            return;
+
         if (!$event->isMasterRequest()) return;
         $request = $event->getRequest();
 
@@ -258,27 +261,28 @@ class SecuritySubscriber implements EventSubscriberInterface
                     if (!preg_match($monitoredListener, $listener)) continue;
                 }
 
+                // Entity Manager closed means most likely an exception
+                // due within doctrine execution happened
+                $entityManager = $this->baseService->getEntityManager(true);
+                if (!$entityManager || !$entityManager->isOpen()) return;
+
+                // In the opposite case, we are storing the exception
                 $log = new Log($entry, $request);
                 $log->setException($exception ?? null);
 
-                $entityManager = $this->baseService->getEntityManager();
-                if(!$entityManager) $entityManager = $this->baseService->getEntityManager(true);
-                else {
+                $user = $this->security->getUser();
+                if($user) $user = $this->baseService->getEntityById(User::class, $user->getId());
 
-                    $user = $this->security->getUser();
-                    if($user) $user = $this->baseService->getEntityById(User::class, $user->getId());
+                $impersonator = null;
+                if ($this->security->getToken() instanceof SwitchUserToken) {
 
-                    $impersonator = null;
-                    if ($this->security->getToken() instanceof SwitchUserToken) {
-
-                        $impersonator = $this->security->getToken()->getOriginalToken()->getUser();
-                        if($impersonator)
-                            $impersonator = $this->baseService->getEntityById(User::class, $impersonator->getId());
-                    }
-
-                    $log->setImpersonator($impersonator);
-                    $log->setUser($user);
+                    $impersonator = $this->security->getToken()->getOriginalToken()->getUser();
+                    if($impersonator)
+                        $impersonator = $this->baseService->getEntityById(User::class, $impersonator->getId());
                 }
+
+                $log->setImpersonator($impersonator);
+                $log->setUser($user);
 
                 $entityManager->persist($log);
                 $entityManager->flush();
@@ -291,9 +295,20 @@ class SecuritySubscriber implements EventSubscriberInterface
         return $this->storeLog($event);
     }
 
+    private static $exceptionOnHold = null;
     public function onKernelException(ExceptionEvent $event)
     {
         $exception = $event->getThrowable();
-        return $this->storeLog($event, $exception);
+
+        // Initial exception held here, this is in case of nested exceptions..
+        // This guard must be set here, otherwise you are going to miss the first exception..
+        // In case the initial exception is related to doctrine, entity manager will be closed.
+        if(self::$exceptionOnHold)
+            throw self::$exceptionOnHold;
+
+        self::$exceptionOnHold = $exception;
+        $this->storeLog($event, $exception);
+        self::$exceptionOnHold = null;
+
     }
 }

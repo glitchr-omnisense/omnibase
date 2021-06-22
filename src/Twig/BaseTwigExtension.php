@@ -1,15 +1,7 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Base\Twig;
+
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
 use Base\Entity\User\Notification;
@@ -19,11 +11,10 @@ use Twig\Environment;
 use Twig\TwigFunction;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+
 /**
  * @author Marco Meyer <marco.meyerconde@gmail.com>
  *
- * @final
- * @experimental
  */
 
 use Twig\Extra\Intl\IntlExtension;
