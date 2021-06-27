@@ -10,6 +10,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
 use Base\Form\AbstractType;
+use Base\Form\Data\Thread\SearchData;
 use Base\Form\Traits\CsrfFormTrait;
 use Base\Form\Traits\BootstrapFormTrait;
 
@@ -23,14 +24,14 @@ class SearchType extends AbstractType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
-            'data_class' => Thread::class,
+            'data_class' => SearchData::class,
             'csrf_token_id' => "thread_search"
         ]);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('text', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
+        $builder->add('content', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
 
         parent::buildForm($builder, $options);
     }

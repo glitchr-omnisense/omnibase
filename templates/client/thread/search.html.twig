@@ -4,11 +4,18 @@
 {% block content %}
 
     {{ form_start(form) }}
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <h1 class="h3 mb-3 font-weight-normal">Search for thread</h1>
 
-        {{ form_row(form.text) }}
+        {{ form_row(form.content) }}
 
-        <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
+        <button class="btn btn-lg btn-primary" type="submit">Search</button>
     {{ form_end(form) }}
 
+    {% for thread in threads %}
+    <hr>
+    <h1>{{thread.title}}</h1>
+    <p>{{thread.excerpt}}</p>
+    {{thread.content}}
+    <p>{{thread.getAuthor()}}</p>
+    {% endfor %}
 {% endblock %}

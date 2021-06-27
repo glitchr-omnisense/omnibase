@@ -10,6 +10,7 @@ use App\Repository\UserRepository;
 use App\Form\User\ProfileEditType;
 use App\Form\User\ProfileSearchType;
 use Base\Entity\Thread;
+use Base\Form\Data\Thread\SearchData;
 use Base\Form\Type\Thread\SearchType;
 use Base\Repository\ThreadRepository;
 use Endroid\QrCode\QrCode;
@@ -36,18 +37,18 @@ class SearchController extends AbstractController
      */
     public function Main(Request $request, ?FormInterface $form = null)
     {
-        $form = $form ?? $this->createForm(SearchType::class, new Thread());
+        $form = $form ?? $this->createForm(SearchType::class, new SearchData());
         $form->handleRequest($request);
 
         $threads = [];
         if ($form->isSubmitted() && $form->isValid()) {
 
             $data = $form->getData();
-            $data->setText("%".$data->getText()."%");
-            $data->setTitle($data->getText());
-            $data->setExcerpt($data->getText());
+            $data->content = "%" . $data->content . "%";
+            $data->title   = $data->content;
+            $data->excerpt = $data->content;
 
-            $threads = $this->threadRepository->findByStateAndPartialEntity(Thread::STATE_PUBLISHED, $data);
+            $threads = $this->threadRepository->findByStateAndPartialModel(Thread::STATE_PUBLISHED, $data);
         }
 
         return $this->render('@Base/client/thread/search.html.twig', [

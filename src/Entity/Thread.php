@@ -75,7 +75,7 @@ class Thread
     protected $parent;
 
     /**
-     * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
      * @ORM\OrderBy({"createdAt" = "ASC"})
      */
     protected $children;
@@ -99,7 +99,7 @@ class Thread
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    protected $text;
+    protected $content;
 
     /**
      * @ORM\Column(type="string", length=32)
@@ -152,7 +152,7 @@ class Thread
      */
     protected $createdAt;
 
-    public function __construct(?User $author = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
+    public function __construct(User $author, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags = new ArrayCollection();
         $this->children = new ArrayCollection();
@@ -171,7 +171,7 @@ class Thread
 
     public function __toString()
     {
-        return $this->getTitle();
+        return $this->getTitle() ?? get_class($this);
     }
 
     public static function whoAmI(): string
@@ -231,14 +231,14 @@ class Thread
         return $this;
     }
 
-    public function getText(): ?string
+    public function getContent(): ?string
     {
-        return $this->text;
+        return $this->content;
     }
 
-    public function setText(?string $text): self
+    public function setContent(?string $content): self
     {
-        $this->text = $text;
+        $this->content = $content;
 
         return $this;
     }
@@ -342,7 +342,7 @@ class Thread
         return $this;
     }
 
-    public function removeTag(Tag $tag): self
+    public function removeTag(?Tag $tag): self
     {
         // if (!is_subclass_of($tag, Tag::class))
         //     throw new Exception("Passed variable \"$tag\" doesn't inherit from Base\Entity\Thread\Tag");
@@ -514,7 +514,7 @@ class Thread
         return $this;
     }
 
-    public function removeLike(Like $like): self
+    public function removeLike(?Like $like): self
     {
         $this->likes->removeElement($like);
         return $this;
@@ -546,7 +546,7 @@ class Thread
         return $this;
     }
 
-    public function removeAuthor(User $author): self
+    public function removeAuthor(?User $author): self
     {
         $this->authors->removeElement($author);
 

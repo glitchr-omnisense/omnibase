@@ -2,12 +2,15 @@
 
 namespace Base\Form;
 
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+
+use Doctrine\Common\Proxy\Proxy;
 
 abstract class AbstractType extends \Symfony\Component\Form\AbstractType
 {

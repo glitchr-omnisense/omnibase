@@ -33,7 +33,7 @@
             <argument type="service" id="kernel" />
             <argument type="service" id="twig" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="form.factory" />
+            <argument type="service" id="base.form.factory" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="notifier" />
             <argument type="service" id="notifier.channel_policy" />
@@ -84,15 +84,23 @@
             -->
         <service id="Base\Form\AbstractType" />
 
-        <service id="Base\Form\FormProxy" />
         <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
+        <service id="Base\Form\FormProxy">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
+        <!-- <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/> -->
+        <service id="Base\Form\FormFactory">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
         <service id="Base\Twig\FormTwigExtension" >
             <tag name="twig.extension" />
-            <argument type="service" id="base.form_proxy" />
+            <argument type="service" id="base.form.proxy" />
        </service>
 
         <service id="Base\Form\FormProcessor">
-            <argument type="service" id="form.factory" />
+            <argument type="service" id="base.form.factory" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="session" />
         </service>

@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
+use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 
@@ -22,7 +23,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 {
     public const OPTION_WITH_ROUTE = "WithRoute";
     public const OPTION_PARTIAL    = "Partial";
-    public const OPTION_ENTITY     = "Entity";
+    public const OPTION_MODEL     = "Model";
 
     public const SEPARATOR     = ":";
     public const OPERATOR_AND  = "And";
@@ -67,7 +68,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
             $lcField = strtolower($field);
             if (str_contains($lcField, strtolower(self::OPTION_WITH_ROUTE) )         ||
-                str_contains($lcField, strtolower(self::OPTION_ENTITY) )            ||
+                str_contains($lcField, strtolower(self::OPTION_MODEL) )            ||
                 str_contains($lcField, strtolower(self::OPTION_PARTIAL) )           ||
                 str_contains($lcField, strtolower(self::OPERATOR_AND) )               ||
                 str_contains($lcField, strtolower(self::SEPARATOR) ))
@@ -185,23 +186,36 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     $by = substr($by, strlen(self::OPTION_PARTIAL), strlen($by));
                 }
 
-                if ($by == self::OPTION_ENTITY) {
+                if ($by == self::OPTION_MODEL) {
 
-                    $method = substr($method, 0, strpos($method, self::OPTION_ENTITY));
+                    $method = substr($method, 0, strpos($method, self::OPTION_MODEL));
                     $by = lcfirst($by);
 
-                    $entityCriteria = [];
-                    $entity = array_shift($arguments);
-                    foreach ($classMetadata->getFieldNames() as $field) {
+                    $modelCriteria = [];
+                    $model = array_shift($arguments);
 
-                        $fieldValue = $classMetadata->getFieldValue($entity, $field) ?? null;
-                        if ($fieldValue) $entityCriteria[$field] = $fieldValue;
+                    $reflClass = new ReflectionClass(get_class($model));
+                    foreach ($reflClass->getProperties() as $field) {
+
+                        $fieldName = $field->getName();
+                        if($classMetadata->hasAssociation($fieldName)) {
+
+                            $associationField = $classMetadata->getAssociationMapping($fieldName);
+                            if (!array_key_exists("targetEntity", $associationField) || $field->getType() != $associationField["targetEntity"])
+                                throw new Exception("Invalid association mapping \"$fieldName\" found (found \"".$field->getType()."\", expected type \"". $associationField["targetEntity"]."\") in \"" . $this->getEntityName() . "\" entity, \"" . $reflClass->getName() . " cannot be applied\"");
+
+                        } else if(!$classMetadata->hasField($fieldName))
+                            throw new Exception("No field \"$fieldName\" (or association mapping) found in \"".$this->getEntityName(). "\" entity, \"".$reflClass->getName()." cannot be applied\"");
+
+                        if (!$field->isInitialized($model)) continue;
+                        if (( $fieldValue = $field->getValue($model) ))
+                            $modelCriteria[$fieldName] = $fieldValue;
                     }
 
-                    if(!empty($entityCriteria)) {
+                    if(!empty($modelCriteria)) {
 
-                        if($isPartial) $this->addPartialCriteria($criteria, $by, $entityCriteria);
-                        else $this->addCriteria($criteria, $by, $entityCriteria);
+                        if($isPartial) $this->addPartialCriteria($criteria, $by, $modelCriteria);
+                        else $this->addCriteria($criteria, $by, $modelCriteria);
                     }
 
                 } else {
@@ -220,7 +234,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         // Index definition:
         // "criteria"  = argument #0, after removal of the head parameters
-        $newArguments = $arguments;
+        $newArguments    = $arguments;
         $newArguments[0] = array_merge($newArguments[0] ?? [], $criteria ?? []);
 
         // Shaped return
@@ -259,16 +273,23 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $field     = explode(self::SEPARATOR, $field);
             $fieldName = $field[0];
 
-            if($fieldName == strtolower(self::OPTION_ENTITY)) {
+            if($fieldName == strtolower(self::OPTION_MODEL)) {
 
                 $expr = [];
                 foreach ($fieldValue as $entryID => $entryValue) {
 
                     $entry = $field;
                     $entry[0] = $entryID;
-                    $entry[1] = "entity_".$entry[1];
+                    $entry[1] = strtolower(self::OPTION_MODEL) . "_" . $entry[1];
 
-                    $expr[] = $this->buildQueryExpr($qb, $classMetadata, $entry, $entryValue);
+                    $queryExpr = $this->buildQueryExpr($qb, $classMetadata, $entry, $entryValue);
+
+                    // In case of association field, compare value directly
+                    if ($classMetadata->hasAssociation($entryID))
+                        $qb->andWhere($queryExpr);
+                    // If standard field, check for partial information
+                    else
+                        $expr[] = $queryExpr;
                 }
 
                 $expr = $qb->expr()->orX(...$expr);
@@ -289,7 +310,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     {
         $isPartial      = $field[2] ?? false;
         $fieldID        = implode("_", $field);
-        $fieldName          = $field[0];
+        $fieldName      = $field[0];
 
         // Prepare field parameter
         $qb->setParameter($fieldID, $fieldValue);
@@ -318,6 +339,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 }
 
                 $expr = $qb->expr()->orX(...$expr);
+
+            } else if ($classMetadata->hasAssociation($fieldName)) {
+
+                $expr = "${tableColumn} = :${fieldID}";
 
             } else {
 

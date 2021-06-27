@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\SingletonTrait;
+use Doctrine\Common\Proxy\Proxy;
+use Doctrine\ORM\EntityManager;
 
 class FormProxy implements FormProxyInterface
 {

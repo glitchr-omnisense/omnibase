@@ -14,9 +14,10 @@
         <service id="base.database.naming_strategy" alias="Base\Database\NamingStrategy" />
         <service id="base.database.annotation_reader" alias="Base\Database\AnnotationReader" />
 
-        <service id="base.twig_loader" alias="Base\Twig\Loader\FilesystemLoader" />
+        <service id="base.twig_loader"  alias="Base\Twig\Loader\FilesystemLoader" />
 
-        <service id="base.form_proxy" alias="Base\Form\FormProxyInterface" />
+        <service id="base.form.proxy"   alias="Base\Form\FormProxyInterface" />
+        <service id="base.form.factory" alias="Symfony\Component\Form\FormFactoryInterface" />
 
     </services>
 </container>
