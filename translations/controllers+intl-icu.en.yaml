@@ -54,3 +54,8 @@ terms:
 
 register:
     validation_required: This account requires to be verified
+
+search:
+  content: "Find in content box.."
+  excerpt: "Find in the excerpt"
+  title: "Find in the title field"

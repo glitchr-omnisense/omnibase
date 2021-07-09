@@ -2,13 +2,13 @@
 
 {% block title %}Log in!{% endblock %}
 
-{% block content %}
-<article>
-<div class=" card">
+{% block contentNoWrap %}
+<article class="wrapper w-50">
+<div class="card">
     <div class="card-header">
         <h3 class="text-center">{{'forms.login.title'|trans2}}</h3>
     </div>
-    <div class="card-body">
+    <div class="card-body" >
         {{ form_start(form) }}
 
         <input type="hidden" name="_target_path" value="{{ app.request.headers.get('referer') }}"/>
@@ -42,8 +42,7 @@
         {{ form_row(form._csrf_token) }}
 
         <div class="col d-flex justify-content-center">
-<button class="w-50 btn btn-lg btn-primary" type="submit">{{ 'forms.login.submit'|trans2 }}</button>
-
+            <button class="btn btn-lg btn-primary" type="submit">{{ 'forms.login.submit'|trans2 }}</button>
         </div>
         {{ form_end(form) }}
     </div>

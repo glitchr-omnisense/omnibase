@@ -17,7 +17,7 @@
         <service id="base.twig_loader"  alias="Base\Twig\Loader\FilesystemLoader" />
 
         <service id="base.form.proxy"   alias="Base\Form\FormProxyInterface" />
-        <service id="base.form.factory" alias="Symfony\Component\Form\FormFactoryInterface" />
+        <service id="base.form.factory" alias="Base\Form\FormFactoryInterface" />
 
     </services>
 </container>

@@ -5,6 +5,7 @@ namespace Base\Twig;
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
 use Base\Entity\User\Notification;
+use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Twig\Environment;
@@ -33,6 +34,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters()
     {
         return [
+            new TwigFilter('highlight', [$this, 'highlight']),
             new TwigFilter('trans2', [$this, 'trans2']),
             new TwigFilter('datetime', [$this,'datetime'], ['needs_environment' => true])
         ];
@@ -44,8 +46,82 @@ final class BaseTwigExtension extends AbstractExtension
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
-    public function trans2(string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null)
+    function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false)
     {
+        $maxLength -= strlen($replacement);
+        $length = strlen($string);
+
+        if($length <= $maxLength)
+            return $string;
+
+        if( $truncAtSpace && ($space_position = strrpos($string, ' ', $maxLength-$length)) )
+            $maxLength = $space_position;
+
+        return substr_replace($string, $replacement, $maxLength)."..";
+    }
+
+    public function highlight(?string $content, $pattern, $gate = 5)
+    {
+        // Empty entry
+        if ($content == null) return null;
+        if ($pattern == null) return null;
+
+        $highlightContent = "";
+        if( $gate < 0 ) {
+
+            $highlightContent = preg_replace_callback(
+                '/([^ ]*)(' . $pattern . ')([^ ]*)/im',
+                function($matches) {
+
+                    if(!isset($matches[2]) || empty($matches[2]))
+                        return $matches[0];
+
+                    return '<span class="highlightWord">'.
+                                $matches[1].
+                                '<span class="highlightPattern">'.$matches[2].'</span>'.
+                                $matches[3].
+                            '</span>';
+
+                }, $content);
+
+        } else if( preg_match_all('/((?:[^ ]+ ){0,' . $gate . '})([^ ]*)(' . $pattern . ')([^ ]*)((?: [^ ]+){0,' . $gate . '})/im',$content,$matches) ) {
+
+            $priorPatternGate = $matches[1][0] ?? "";
+            $priorPattern     = $matches[2][0] ?? "";
+            $pattern          = $matches[3][0] ?? ""; //(Case insensitive)
+            $afterPattern     = $matches[4][0] ?? "";
+            $afterPatternGate = $matches[5][0] ?? "";
+
+            $sentence = $priorPatternGate . $priorPattern . $pattern . $afterPattern . $afterPatternGate;
+
+            if( !str_starts_with($content, $sentence) )
+                $highlightContent .= "[..] ";
+
+            $highlightContent .= "<span class='highlightGate'>";
+            $highlightContent .= $priorPatternGate;
+            $highlightContent .= "<span class='highlightWord'>";
+            $highlightContent .= $priorPattern;
+            $highlightContent .= "<span class='highlightPattern'>";
+            $highlightContent .= $pattern;
+            $highlightContent .= "</span>";
+            $highlightContent .= $afterPattern;
+            $highlightContent .= "</span>";
+            $highlightContent .= $afterPatternGate;
+            $highlightContent .= "</span>";
+
+            if( !str_ends_with($content, $sentence) )
+                $highlightContent .= " [..]";
+
+        }
+
+        return ( empty($highlightContent) ? null : $highlightContent );
+    }
+
+    public function trans2(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null)
+    {
+        if($id === null)
+            throw new Exception("trans2() called, but translation ID is empty..");
+
         // Default locale translator
         $defaultLocale = "en";
         $locale = strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $locale ?? $defaultLocale, 0, 2));
@@ -77,14 +153,14 @@ final class BaseTwigExtension extends AbstractExtension
             $addBrackets  = is_string($key) && ($key[0] != '{' || $key[strlen($key) - 1] != '}');
             $addBrackets |= is_numeric($key);
 
-            $parameters[($addBrackets) ? "{" . ((string) $key) . "}" : $key] = htmlspecialchars($element);
+            $parameters[($addBrackets) ? "{" . ((string) $key) . "}" : $key] = $element; //htmlspecialchars($element);
             if ($addBrackets) unset($parameters[$key]);
         }
 
         // Call for translation with custom parameters
         $domain = $domain ?? "messages";
-
         $trans = $this->translator->trans($id, $parameters, $domain, $locale);
+
         if ($trans == $id && preg_match("/^\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*$/", $id))
             return $domain.'.'.$id;
 

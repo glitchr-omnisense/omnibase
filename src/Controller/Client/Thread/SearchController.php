@@ -11,6 +11,7 @@ use App\Form\User\ProfileEditType;
 use App\Form\User\ProfileSearchType;
 use Base\Entity\Thread;
 use Base\Form\Data\Thread\SearchData;
+use Base\Form\Type\Thread\SearchbarType;
 use Base\Form\Type\Thread\SearchType;
 use Base\Repository\ThreadRepository;
 use Endroid\QrCode\QrCode;
@@ -37,22 +38,47 @@ class SearchController extends AbstractController
      */
     public function Main(Request $request, ?FormInterface $form = null)
     {
+        $threads = [];
+
         $form = $form ?? $this->createForm(SearchType::class, new SearchData());
         $form->handleRequest($request);
 
-        $threads = [];
-        if ($form->isSubmitted() && $form->isValid()) {
+        $formSearchbar = $this->createForm(SearchbarType::class, new SearchData());
+        $formSearchbar->handleRequest($request);
 
-            $data = $form->getData();
-            $data->content = "%" . $data->content . "%";
-            $data->title   = $data->content;
-            $data->excerpt = $data->content;
+        $formattedData = null;
+        if ($formSearchbar->isSubmitted() && $formSearchbar->isValid()) {
 
-            $threads = $this->threadRepository->findByStateAndPartialModel(Thread::STATE_PUBLISHED, $data);
+            $formattedData = clone $formSearchbar->getData();
+            $formattedData->content = $formattedData->generic;
+            $formattedData->title   = $formattedData->generic;
+            $formattedData->excerpt = $formattedData->generic;
+
+        } else if ($form->isSubmitted() && $form->isValid()) {
+
+            $formattedData = clone $form->getData();
+            $formattedData->content = $formattedData->content ?? $formattedData->generic;
+            $formattedData->title   = $formattedData->title   ?? $formattedData->generic;
+            $formattedData->excerpt = $formattedData->excerpt ?? $formattedData->generic;
+        }
+
+        if($formattedData) {
+
+            $data = new SearchData();
+            $data->content = "%" . ($formattedData->content ?? $formattedData->generic) . "%";
+            $data->title   = "%" . ($formattedData->title   ?? $formattedData->generic ?? $formattedData->content) . "%";
+            $data->excerpt = "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%";
+            $data->generic = null;
+
+            $threads = $this->threadRepository->findByStateAndInsensitivePartialModel([Thread::STATE_PUBLISHED, Thread::STATE_APPROVED], $data);
+            usort($threads, function ($a, $b) {
+                return $a->getSection() < $b->getSection() ? -1 : 1;
+            });
         }
 
         return $this->render('@Base/client/thread/search.html.twig', [
             "form" => $form->createView(),
+            "form_data" => $formattedData ?? new SearchData(),
             "threads" => $threads
         ]);
     }

@@ -1,0 +1,8 @@
+thread:
+  in: "{0} in \"{1}\""
+  more: "See more.."
+  readingTime: "{0, plural,
+                     =0 {less than a minute}
+                     =1 {# minute read}
+                     other {# minutes read}
+                  }"

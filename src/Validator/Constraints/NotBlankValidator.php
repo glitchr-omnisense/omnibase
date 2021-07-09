@@ -3,6 +3,7 @@
 
 namespace Base\Validator\Constraints;
 
+use Base\Entity\User\Notification;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
@@ -12,24 +13,33 @@ class NotBlankValidator extends ConstraintValidator
     /**
      * {@inheritdoc}
      */
-    public function validate($value, Constraint $constraint)
+    public function validate($object, Constraint $constraint)
     {
         if (!$constraint instanceof NotBlank) {
             throw new UnexpectedTypeException($constraint, NotBlank::class);
         }
 
-        if ($constraint->allowNull && null === $value) {
+        if ($constraint->allowNull && null === $object) {
             return;
         }
 
-        if (\is_string($value) && null !== $constraint->normalizer) {
-            $value = ($constraint->normalizer)($value);
+        if (\is_string($object) && null !== $constraint->normalizer) {
+            $object = ($constraint->normalizer)($object);
         }
 
-        if (false === $value || (empty($value) && '0' != $value) || ($value instanceof \Doctrine\ORM\PersistentCollection && empty($value->toArray()))) {
-            $this->context->buildViolation($constraint->message)
-                ->setParameter('{{ value }}', $this->formatValue($value))
-                ->setCode(NotBlank::IS_BLANK_ERROR)
+        if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray()))) {
+
+            $this->context->buildViolation($constraint->message . ".property")
+                ->setParameter('{value}', $this->formatValue($object))
+                ->addViolation();
+        }
+
+        if (is_object($object) && empty(array_filter(get_object_vars($object)))) {
+
+            $notifications = new Notification("Validator", $constraint->message . ".class");
+            $notifications->send("warning");
+
+            $this->context->buildViolation($constraint->message . ".class")
                 ->addViolation();
         }
     }

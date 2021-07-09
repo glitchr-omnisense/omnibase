@@ -12,6 +12,19 @@
             Base features
 
             -->
+        <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
+        <service id="Base\Form\FormProxy" public="true" />
+
+        <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>
+        <service id="Base\Form\FormFactory" public="true">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
+        <service id="Base\Twig\FormTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="base.form.proxy" />
+       </service>
+
         <service id="Base\Command\MappingCommand">
             <tag name="console.command" />
         </service>
@@ -84,21 +97,6 @@
             -->
         <service id="Base\Form\AbstractType" />
 
-        <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
-        <service id="Base\Form\FormProxy">
-            <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
-
-        <!-- <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/> -->
-        <service id="Base\Form\FormFactory">
-            <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
-
-        <service id="Base\Twig\FormTwigExtension" >
-            <tag name="twig.extension" />
-            <argument type="service" id="base.form.proxy" />
-       </service>
-
         <service id="Base\Form\FormProcessor">
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -138,10 +136,18 @@
             <argument type="service" id="event_dispatcher" />
         </service>
 
+        <service id="Base\Service\SpamChecker" public="true">
+            <argument type="service" id="http_client" />
+            <bind key="$akismetKey">%env(AKISMET_KEY)%</bind>
+        </service>
 
         <service id="Base\Service\FileUploader" public="true">
             <bind key="$uploadDir">%base.upload_dir%</bind>
         </service>
+
+        <service id="Base\Twig\ClassTwigExtension" >
+            <tag name="twig.extension" />
+       </service>
 
         <!--
 

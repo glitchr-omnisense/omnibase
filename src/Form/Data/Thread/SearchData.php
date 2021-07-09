@@ -7,26 +7,33 @@ use Base\Entity\Thread;
 use Symfony\Component\Validator\Constraints as Assert;
 use Base\Validator\Constraints as AssertBase;
 
-
+/**
+ * @AssertBase\NotBlank
+ */
 class SearchData
 {
     /**
      * @var string
      */
-    public string $title;
-    /**
-     * @var string
-     */
-    public string $excerpt;
+    public $generic;
 
     /**
-     * @Assert\NotBlank()
      * @var string
      */
-    public string $content;
+    public $title;
+
+    /**
+     * @var string
+     */
+    public $excerpt;
+
+    /**
+     * @var string
+     */
+    public $content;
 
     /**
      * @var Thread
      */
-    public Thread $parent;
+    public ?Thread $parent = null;
 }

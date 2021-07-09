@@ -49,3 +49,8 @@ policy:
 terms:
     title: "Conditions Générales d'Utilisation"
     desc: "À Rédiger"
+
+search:
+  content: "Rechercher dans le contenu"
+  excerpt: "Rechercher dans l'extrait"
+  title: "Rechercher dans le titre"

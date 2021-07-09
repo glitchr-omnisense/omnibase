@@ -7,24 +7,22 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\InvalidArgumentException;
 
 /**
- * @Annotation
- * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
+ * Constraint for the Unique Entity validator.
  *
- * @author Bernhard Schussek <bschussek@gmail.com>
- * @author Kévin Dunglas <dunglas@gmail.com>
+ * @Annotation
+ * @Target({"CLASS", "PROPERTY", "METHOD", "ANNOTATION"})
+ *
  */
-#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class NotBlank extends Constraint
 {
-    public const IS_BLANK_ERROR = 'c1051bb4-d103-4f74-8988-acbcafc7fdc3';
-
-    protected static $errorNames = [
-        self::IS_BLANK_ERROR => 'IS_BLANK_ERROR',
-    ];
-
     public $message = 'validators.notBlank';
     public $allowNull = false;
     public $normalizer;
+
+    public function getTargets()
+    {
+        return [self::CLASS_CONSTRAINT, self::PROPERTY_CONSTRAINT];
+    }
 
     public function __construct(array $options = null, string $message = null, bool $allowNull = null, callable $normalizer = null, array $groups = null, $payload = null)
     {

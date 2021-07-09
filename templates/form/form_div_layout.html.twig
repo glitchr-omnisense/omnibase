@@ -1,5 +1,16 @@
 {% use "@Twig/Form/form_div_layout.html.twig" %}
 
+{%- block form_errors -%}
+
+    {%- if errors|length > 0 -%}
+    <ul>
+        {%- for error in errors -%}
+            <li>{{ error.message|trans2(error.getMessageParameters()|merge({'label':error.origin.name})) }}</li>
+        {%- endfor -%}
+    </ul>
+    {%- endif -%}
+{%- endblock form_errors -%}
+
 {%- block div_widget -%}
 <input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %}/>
 <div id="{{ id }}_editor" {{ block('attributes') }}>

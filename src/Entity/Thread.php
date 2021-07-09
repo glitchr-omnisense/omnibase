@@ -26,6 +26,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Doctrine\ORM\Mapping\JoinColumn;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -45,6 +46,32 @@ class Thread
                  STATE_FUTURE    = "STATE_FUTURE",
                  STATE_PUBLISHED = "STATE_PUBLISHED";
 
+    public const SECTION = null;
+    public const SECTION_SEPARATOR = "/";
+
+    public function getSection($id = -1, $separator = self::SECTION_SEPARATOR)
+    {
+        if ($id < 0) return static::SECTION ?? null;
+
+        $sections = $this->getSections($separator);
+        return $sections[$id] ?? null;
+    }
+
+    public function getNSections($separator = self::SECTION_SEPARATOR)
+    {
+        $sections = $this->getSections($separator);
+        return count($sections);
+    }
+
+    public function getSections($separator = self::SECTION_SEPARATOR)
+    {
+        if (static::SECTION === null)
+            throw new Exception("Missing section for class \"" . get_class($this) . "\"");
+
+        $sections = (is_array(static::SECTION) ? static::SECTION : explode($separator, static::SECTION));
+        return $sections;
+    }
+
     /**
      * @var SluggerInterface
      */
@@ -52,6 +79,15 @@ class Thread
     public static function getSlugger(): ?SluggerInterface
     {
         return self::$slugger;
+    }
+
+    /**
+     * @var UrlGeneratorInterface
+     */
+    public static $router = null;
+    public static function getUrlGenerator(): ?UrlGeneratorInterface
+    {
+        return self::$router;
     }
 
     /**
@@ -177,24 +213,7 @@ class Thread
     public static function whoAmI(): string
     {
         $array = explode('\\', get_called_class());
-        return strtolower(end($array));
-    }
-
-    protected $metadata = [];
-    public function getMetadata(string $datatype)
-    {
-        return $this->metadata[$this->whoAmI()][$datatype] ?? null;
-    }
-
-    public function addMetadata(string $datatype, $value)
-    {
-        $this->metadata[$this->whoAmI()][$datatype] = $value;
-    }
-
-    public function removeMetadata(string $datatype)
-    {
-        if(isset($this->metadata[$this->whoAmI()][$datatype]))
-            unset($this->metadata[$this->whoAmI()][$datatype]);
+        return lcfirst(end($array));
     }
 
     public function getId(): ?int
@@ -202,7 +221,7 @@ class Thread
         return $this->id;
     }
 
-    public function getUuid(): Uuid
+    public function getUuid()
     {
         return $this->uuid;
     }
@@ -251,7 +270,7 @@ class Thread
     public function setState(string $state): self
     {
         $this->state = $state;
-        if($this->state == self::STATE_PUBLISHED && !$this->getPublishedAt())
+        if(in_array($this->state, [self::STATE_PUBLISHED, self::STATE_APPROVED]) && !$this->getPublishedAt())
             $this->setPublishedAt(new \DateTime("now"));
 
         return $this;
@@ -268,18 +287,9 @@ class Thread
         return time() - $this->publishedAt->getTimestamp() >= 0;
     }
 
-    public function getSlug($addParent = false): ?string
+    public function getSlug(): ?string
     {
-        $prefix = "";
-        if ($addParent) {
-
-            $parent = $this;
-            while (($parent = $parent->getParent()))
-                $prefix .= $parent->getSlug() . "/";
-        }
-
-        $slug = $prefix . $this->slug;
-        return (!empty($slug) ? $slug : null);
+        return $this->slug;
     }
 
     public function setSlug(string $slug): self

@@ -31,7 +31,10 @@ class SearchType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        $builder->add('generic', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
         $builder->add('content', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
+        $builder->add('title', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
+        $builder->add('excerpt', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
 
         parent::buildForm($builder, $options);
     }

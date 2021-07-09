@@ -1,17 +1,21 @@
-validators:
-   alphanumeric: "It can only contain letters (a-zA-Z), numbers (0-9)"
-   alphanumeric_plus: "It can only contain letters (a-zA-Z), numbers (0-9) and specials (_ - .)"
-   user:
-      email:
-         unique: "This email is already used"
-      username:
-         unique: "This username is already used"
-   stringCase: "This string can only change its case"
-   file:
-      maxSize: "Provided file is too big (~{1}). Limit set at {0}"
-      mimeType: "{0, plural,
-                     =1 {Unsupported file type provided. A valid type is : {1}}
-                     other {Unsupported file type provided. Valid types are : {1}}
-                  }"
+alphanumeric: "It can only contain letters (a-zA-Z), numbers (0-9)"
+alphanumeric_plus: "It can only contain letters (a-zA-Z), numbers (0-9) and specials (_ - .)"
 
-   notBlank: "This value should not be blank."
+user:
+   email:
+      unique: "This email is already used"
+   username:
+      unique: "This username is already used"
+
+stringCase: "This string can only change its case"
+
+file:
+   maxSize: "Provided file is too big (~{1}). Limit set at {0}"
+   mimeType: "{0, plural,
+                  =1 {Unsupported file type provided. A valid type is : {1}}
+                  other {Unsupported file type provided. Valid types are : {1}}
+               }"
+
+notBlank:
+   property: "{ label } is blank."
+   class: "All fields are blank."

@@ -21,33 +21,53 @@ use Symfony\Component\HttpKernel\Event\KernelEvent;
  */
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
-    public const OPTION_WITH_ROUTE = "WithRoute";
-    public const OPTION_PARTIAL    = "Partial";
-    public const OPTION_MODEL     = "Model";
+    public const OPTION_WITH_ROUTE       = "WithRoute";
+    public const OPTION_PARTIAL          = "Partial";
+    public const OPTION_MODEL            = "Model";
+    public const OPTION_INSENSITIVE = "Insensitive";
 
     public const SEPARATOR     = ":";
     public const OPERATOR_AND  = "And";
 
-    public static function addCriteria(array &$criteria, string $by, $value)
-    {
-        $index = 0;
-        while( array_key_exists($by . self::SEPARATOR . $index, $criteria) )
-            $index++;
+    public array $criteria = [];
+    public array $options  = [];
 
-        $criteria[$by . self::SEPARATOR . $index] = $value;
+    public function resetCriteria()
+    {
+        $this->criteria = [];
     }
 
-    public static function addPartialCriteria(array &$criteria, string $by, $value)
+    public function addCriteria(string $by, $value)
     {
         $index = 0;
-        while (array_key_exists($by . self::SEPARATOR . $index . self::SEPARATOR . self::OPTION_PARTIAL, $criteria))
+        while( array_key_exists($by . self::SEPARATOR . $index, $this->criteria) )
             $index++;
 
-        $criteria[$by . self::SEPARATOR . $index . self::SEPARATOR . self::OPTION_PARTIAL] = $value;
+        $this->criteria[$by . self::SEPARATOR . $index] = $value;
+        return $by . self::SEPARATOR . $index;
+    }
+
+    public function resetCustomOptions()
+    {
+        $this->options = [];
+    }
+
+    public function addCustomOption(string $id, $option)
+    {
+        if(! array_key_exists($id, $this->criteria))
+            throw new Exception("Criteria ID \"$id\" not found in criteria list.. wrong usage? use \"addCriteria\" first.");
+
+        if(!array_key_exists($id, $this->options))
+            $this->options[$id] = [];
+
+        $this->options[$id][] = $option;
     }
 
     public function parseMethod($method, $arguments)
     {
+        $this->resetCriteria();
+        $this->resetCustomOptions();
+
         // Make sure arguments have at least 5 parameters :
         // Head parameters (depends on the method name) + default ones
         // Default parameters:
@@ -67,10 +87,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         foreach($classMetadata->getFieldNames() as $field) {
 
             $lcField = strtolower($field);
-            if (str_contains($lcField, strtolower(self::OPTION_WITH_ROUTE) )         ||
-                str_contains($lcField, strtolower(self::OPTION_MODEL) )            ||
-                str_contains($lcField, strtolower(self::OPTION_PARTIAL) )           ||
-                str_contains($lcField, strtolower(self::OPERATOR_AND) )               ||
+            if (str_contains($lcField, strtolower(self::OPTION_WITH_ROUTE) ) ||
+                str_contains($lcField, strtolower(self::OPTION_MODEL) )      ||
+                str_contains($lcField, strtolower(self::OPTION_PARTIAL))     ||
+                str_contains($lcField, strtolower(self::OPTION_INSENSITIVE)) ||
+                str_contains($lcField, strtolower(self::OPERATOR_AND) )      ||
                 str_contains($lcField, strtolower(self::SEPARATOR) ))
                 throw new Exception(
                     "\"".$this->getEntityName(). "\" entity has a field called \"$field\". ".
@@ -144,11 +165,39 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         // Divide in case of multiple variable
         // Only AND operation is tolerated.. because of obvious logical ambiguity.
-        $criteria = [];
 
         $methodBak = $method;
         $byNames = explode(self::OPERATOR_AND, $byNames);
         foreach($byNames as $by) {
+
+            $oldBy = null;
+
+            $isInsensitive = $isPartial = false;
+            while ($oldBy != $by) {
+
+                $oldBy = $by;
+
+                $option = null;
+                if ( str_starts_with($by, self::OPTION_PARTIAL) )
+                    $option = self::OPTION_PARTIAL;
+                else if ( str_starts_with($by, self::OPTION_INSENSITIVE) )
+                    $option = self::OPTION_INSENSITIVE;
+
+                switch($option) {
+                    case self::OPTION_PARTIAL:
+                        $isPartial = true;
+                        break;
+                    case self::OPTION_INSENSITIVE:
+                        $isInsensitive = true;
+                        break;
+                }
+
+                if($option) {
+
+                    $method = substr($method, strlen($option), strlen($method));
+                    $by = substr($by, strlen($option), strlen($by));
+                }
+            }
 
             // First check if WithRoute special argument is found..
             // This argument will retrieve the value of the corresponding route parameter
@@ -160,8 +209,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 $key       = array_shift($arguments);
 
                 // Stop dev using partial information when using route parameter
-                // Doing so user would be able to inject LIKE commands directly from URL..
-                $isPartial = str_starts_with($by, self::OPTION_PARTIAL);
+                // Doing so.. user would be able to inject LIKE commands directly from URL..
                 if($isPartial)
                     throw new Exception("Partial field \"$by\" using route parameter is not implemented. Consider removing \"Partial\" prefix from \"$methodBak\"");
 
@@ -174,17 +222,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
                     // Check if partial match is enabled
                     $by = lcfirst($by);
-                    $this->addCriteria($criteria, $by, $fieldValue);
+                    $this->addCriteria($by, $fieldValue);
                 }
 
             } else {
-
-                // Check if partial parameter is reuired
-                $isPartial = str_starts_with($by, self::OPTION_PARTIAL);
-                if ($isPartial) {
-                    $method = substr($method, strlen(self::OPTION_PARTIAL), strlen($method));
-                    $by = substr($by, strlen(self::OPTION_PARTIAL), strlen($by));
-                }
 
                 if ($by == self::OPTION_MODEL) {
 
@@ -198,7 +239,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     foreach ($reflClass->getProperties() as $field) {
 
                         $fieldName = $field->getName();
-                        if($classMetadata->hasAssociation($fieldName)) {
+
+                        if (!$field->isInitialized($model)) continue;
+                        if (!($fieldValue = $field->getValue($model)) ) continue;
+
+                        if ($classMetadata->hasAssociation($fieldName)) {
 
                             $associationField = $classMetadata->getAssociationMapping($fieldName);
                             if (!array_key_exists("targetEntity", $associationField) || $field->getType() != $associationField["targetEntity"])
@@ -207,15 +252,15 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         } else if(!$classMetadata->hasField($fieldName))
                             throw new Exception("No field \"$fieldName\" (or association mapping) found in \"".$this->getEntityName(). "\" entity, \"".$reflClass->getName()." cannot be applied\"");
 
-                        if (!$field->isInitialized($model)) continue;
                         if (( $fieldValue = $field->getValue($model) ))
                             $modelCriteria[$fieldName] = $fieldValue;
                     }
 
                     if(!empty($modelCriteria)) {
 
-                        if($isPartial) $this->addPartialCriteria($criteria, $by, $modelCriteria);
-                        else $this->addCriteria($criteria, $by, $modelCriteria);
+                        $id = $this->addCriteria($by, $modelCriteria);
+                        if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
+                        if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
                     }
 
                 } else {
@@ -225,8 +270,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     $fieldValue = array_shift($arguments);
                     if($fieldValue) {
 
-                        if ($isPartial) $this->addPartialCriteria($criteria, $by, $fieldValue);
-                        else $this->addCriteria($criteria, $by, $fieldValue);
+                        $id = $this->addCriteria($by, $fieldValue);
+                        if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
+                        if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
                     }
                 }
             }
@@ -235,8 +281,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         // Index definition:
         // "criteria"  = argument #0, after removal of the head parameters
         $newArguments    = $arguments;
-        $newArguments[0] = array_merge($newArguments[0] ?? [], $criteria ?? []);
+        $newArguments[0] = array_merge($newArguments[0] ?? [], $this->criteria ?? []);
 
+        //dump($newMethod, $newArguments);
         // Shaped return
         return [$newMethod, $newArguments];
     }
@@ -278,18 +325,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 $expr = [];
                 foreach ($fieldValue as $entryID => $entryValue) {
 
-                    $entry = $field;
-                    $entry[0] = $entryID;
-                    $entry[1] = strtolower(self::OPTION_MODEL) . "_" . $entry[1];
+                    $newField = [];
+                    foreach ($field as $key => $value)
+                        $newField[$key] = $value;
+                    array_unshift($newField, $entryID);
 
-                    $queryExpr = $this->buildQueryExpr($qb, $classMetadata, $entry, $entryValue);
+                    $queryExpr = $this->buildQueryExpr($qb, $classMetadata, $newField, $entryValue);
 
                     // In case of association field, compare value directly
-                    if ($classMetadata->hasAssociation($entryID))
-                        $qb->andWhere($queryExpr);
+                    if ($classMetadata->hasAssociation($entryID)) $qb->andWhere($queryExpr);
                     // If standard field, check for partial information
-                    else
-                        $expr[] = $queryExpr;
+                    else $expr[] = $queryExpr;
                 }
 
                 $expr = $qb->expr()->orX(...$expr);
@@ -302,15 +348,27 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $qb->andWhere($expr);
         }
 
-        //dump($qb->getQuery());
         return $qb->getQuery()->getResult();
+    }
+
+    public function getCustomOption(string $id)
+    {
+        return $this->options[$id] ?? [];
+    }
+
+    public function findCustomOption(string $id, string $option)
+    {
+        return in_array($option, $this->getCustomOption($id));
     }
 
     public function buildQueryExpr(QueryBuilder $qb, ClassMetadata $classMetadata, $field, $fieldValue)
     {
-        $isPartial      = $field[2] ?? false;
-        $fieldID        = implode("_", $field);
         $fieldName      = $field[0];
+        $fieldID        = implode("_", $field);
+        $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
+
+        $isPartial     = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
+        $isInsensitive = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
 
         // Prepare field parameter
         $qb->setParameter($fieldID, $fieldValue);
@@ -325,6 +383,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $qb->innerJoin("t.${fieldName}", $tableColumn);
         }
 
+        if ($isInsensitive) $tableColumn = "lower(" . $tableColumn . ")";
         if ($isPartial) {
 
             if (is_array($fieldValue)) {
@@ -333,7 +392,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 foreach ($fieldValue as $entryID => $entry) {
 
                     $entryID = $fieldID . "_" . $entryID;
-                    $qb->setParameter($entryID, $entry);
+                    $qb->setParameter($entryID, ($isInsensitive ? strtolower($entry) : $entry));
 
                     $expr[] = $qb->expr()->like($tableColumn, ":${entryID}");
                 }
