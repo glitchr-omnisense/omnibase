@@ -22,6 +22,15 @@ login:
     no_account: "Don't have an account?"
     forgot_password: "Forgot your password?"
 
+lost-password:
+    title: "Reset your password"
+    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
+        Duis non ornare tortor, sit amet tincidunt orci. 
+        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
+        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
+    email: "E-mail address"
+    submit: "Send a request"
+
 crud:
     roles:
         superAdministrator: "Super Administrator"

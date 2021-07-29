@@ -22,6 +22,15 @@ login:
     noAccount: "Pas encore de compte ?"
     forgotPassword: "Mot de passe oublié ?"
 
+lostPassword:
+    title: "Réinitialiser votre mot de passe"
+    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
+        Duis non ornare tortor, sit amet tincidunt orci. 
+        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
+        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
+    email: "Adresse e-mail"
+    submit: "Envoyer la demande"
+
 crud:
     roles:
         superAdministrator: "Super Administrateur"

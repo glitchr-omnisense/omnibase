@@ -83,6 +83,7 @@
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="base.service" />
+            <argument type="service" id="App\Repository\UserRepository" />
         </service>
         <service id="Base\Controller\MaintenanceController">
             <tag name="controller.service_arguments" />
@@ -220,13 +221,6 @@
             USER SECTION
 
         -->
-
-        <service id="Base\Controller\SecurityController">
-            <tag name="controller.service_arguments" />
-            <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="base.service" />
-            <argument type="service" id="cache.app" />
-        </service>
 
         <service id="Base\Controller\Client\Thread\SearchController">
             <tag name="controller.service_arguments" />

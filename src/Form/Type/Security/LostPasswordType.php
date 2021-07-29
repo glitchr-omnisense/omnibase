@@ -10,31 +10,42 @@ use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 use Base\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+use Base\Form\Traits\CsrfFormTrait;
+use Base\Form\Traits\BootstrapFormTrait;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
 
 class LostPasswordType extends AbstractType
 {
+    use BootstrapFormTrait;
+    use CsrfFormTrait;
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('plainPassword', RepeatedType::class, [
-                'type' => PasswordType::class,
-                'first_options' => [
-                    'validation_groups' => ["edit"],
-                    'label' => 'New password',
-                ],
-                'second_options' => [
-                    'label' => 'Repeat Password',
-                ],
-                'invalid_message' => 'The password fields must match.',
-                // Instead of being set onto the object directly,
-                // this is read and encoded in the controller
+            ->add('email', TextType::class, [
+                'validation_groups' => ["new"],
+                'label' => 'Email', 
                 'mapped' => false,
-            ])
-        ;
+            ]);
+
+        parent::buildForm($builder, $options);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([]);
+        $resolver->setDefaults(['csrf_token_id'   => 'lost-password']);
+    }
+
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::buildView($view, $form, $options);
+    }
+
+    public function finishView(FormView $view, FormInterface $form, array $options)
+    {
+        parent::finishView($view, $form, $options);
     }
 }

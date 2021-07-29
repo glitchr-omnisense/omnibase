@@ -124,6 +124,8 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setTranslator($this->container->get("translator"));
         $this->setNotifier($notifier, $notifierPolicy);
         $this->setSlugger($slugger);
+        $this->setProjectDir($this->kernel->getProjectDir());
+
         $this->setUserProperty($this->getParameterBag("base.user.property"));
 
         // Specific EA provider

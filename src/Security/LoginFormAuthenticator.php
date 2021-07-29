@@ -102,7 +102,7 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
-        // Check if target path provided..
+        // Check if target path provided via $_POST..
         $targetPath = $_POST["_target_path"] ?? null;
         if ($targetPath) {
 
@@ -111,7 +111,12 @@ class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements P
                 return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($request->headers->get('referer') ?? "/");
+        // Generic redirection rule
+        return new RedirectResponse(
+                    $request->getSession()->get('_security.main.target_path') ??
+                    $request->getSession()->get('_security.account.target_path') ??
+                    $request->headers->get('referer') ?? "/"
+        );
     }
 
     protected function getLoginUrl()

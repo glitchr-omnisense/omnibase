@@ -17,11 +17,8 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
-use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
@@ -29,20 +26,19 @@ use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Notifier\NotifierInterface;
-use Symfony\Component\Notifier\Recipient\Recipient;
 
-use Symfony\Component\Form\FormFactoryInterface;
-use Twig\Environment;
 use Base\Entity\User\Token;
+use Base\Form\Type\Security\LostPasswordType;
+use App\Repository\UserRepository;
 
 class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(
-        BaseService $baseService)
+    public function __construct(BaseService $baseService, UserRepository $userRepository)
     {
         $this->baseService = $baseService;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -58,16 +54,29 @@ class SecurityController extends AbstractController
      */
     public function Login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
-        // Check if user connected
+        // Redirect to the right page when accessdenied
         if ( ($user = $this->getUser()) && $user->isLegit() ) {
 
-            if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
-                return $this->redirectToRoute(($this->baseService->isMaintenance()) ? "dashboard": "base_profile");
+            if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
 
+                // Redirect to previous page
+                $targetPath = 
+                    $request->getSession()->get('_security.main.target_path') ??
+                    $request->getSession()->get('_security.account.target_path') ??
+                    $request->headers->get('referer') ?? null;
+                
+                $targetRoute = (basename($targetPath) ? $this->baseService->getRouteName("/".basename($targetPath)) : null) ?? null;
+                
+                if ($targetRoute && $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE && $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE)
+                    return $this->redirectToRoute($targetRoute);
+
+                return $this->redirectToRoute($this->baseService->isMaintenance() ? "dashboard": "base_profile");
+            }
+            
             $notification = new Notification("Login", "notifications.login.partial");
             $notification->send("info");
         }
-
+        
         // In case of maintenance, still allow users to login
         if($this->baseService->isMaintenance()) {
 
@@ -102,6 +111,9 @@ class SecurityController extends AbstractController
         $form = $this->createForm(LoginType::class, $user, ["username" => $lastUsername]);
         $form->handleRequest($request);
 
+        // Remove expired tokens
+        $user->removeExpiredTokens();
+
         return $this->render('@Base/security/login.html.twig', [
             "username" => $lastUsername,
             "form" => $form->createView()
@@ -129,9 +141,12 @@ class SecurityController extends AbstractController
             $notification = new Notification("Bye !", "notifications.logout.success", [$message]);
             $notification->send("success");
 
+            // Remove expired tokens
+            $user->removeExpiredTokens();
+            
             // Redirect to previous page
             $targetPath = $this->baseService->getRequest()->headers->get('referer') ?? null;
-            if ($targetPath) return new RedirectResponse($targetPath);
+            if ($targetPath) return $this->redirect($targetPath);
 
         }
 
@@ -151,10 +166,10 @@ class SecurityController extends AbstractController
      */
     public function Register(
         Request $request,
-        UserPasswordEncoderInterface $passwordEncoder,
         GuardAuthenticatorHandler $guardHandler,
         LoginFormAuthenticator $authenticator
     ): Response {
+
         // If already connected..
         if (($user = $this->getUser()) && $user->isLegit()) {
             return $this->redirectToRoute('base_profile');
@@ -209,6 +224,8 @@ class SecurityController extends AbstractController
                 $entityManager->persist($newUser);
                 $entityManager->flush();
             }
+            
+            $entityManager = $this->getDoctrine()->getManager();
 
             return $guardHandler->authenticateUserAndHandleSuccess(
                 $newUser,
@@ -319,42 +336,73 @@ class SecurityController extends AbstractController
     }
 
     /**
+     * @Route("/register/admin-approval", name="base_admin_approval_request")
+     */
+    public function AdminApprovalRequest(Request $request)
+    {
+        return $this->redirectToRoute('base_homepage');
+    }
+
+    /**
+     * @Route("/register/approval/{token}", name="base_admin_approval")
+     */
+    public function AdminApprovalResponse(Request $request, string $token = null): Response
+    {
+        return $this->redirectToRoute('base_homepage');
+    }
+
+    /**
      * Display & process form to request a password reset.
      *
-     * @Route("/reset-password", name="base_password")
+     * @Route("/reset-password", name="base_lost_password")
      */
     public function ResetPasswordRequest(Request $request, MailerInterface $mailer): Response
     {
-        $form = $this->createForm(ResetPasswordRequestType::class);
+        $form = $this->createForm(LostPasswordType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $submittedToken = $request->request->get('reset_password_request_form')["_csrf_token"] ?? null;
-
-            if (!$this->isCsrfTokenValid('forgot-password', $submittedToken)) {
+            $submittedToken = $request->request->get('lost_password')["_token"] ?? null;
+            if (!$this->isCsrfTokenValid('lost-password', $submittedToken)) {
 
                 $notification = new Notification("Invalid CSRF token detected. We cannot proceed with your request");
                 $notification->send("danger");
 
             } else {
 
-                return $this->processSendingPasswordResetEmail(
-                    $form->get('email')->getData(),
-                    $mailer
-                );
+                $email = $username = $form->get('email')->getData();
+                if( ($user = $this->userRepository->findOneByUsernameOrEmail($email, $username)) ) {
+
+                    $user->removeExpiredTokens("lost-password");
+                    
+                    $token = $user->getToken("lost-password");
+                    if (!$token) {
+
+                        $lostPasswordToken = new Token("lost-password", 3600);
+                        $user->addToken($lostPasswordToken);
+
+                        $notification = new Notification("Lost password");
+                        $notification->setHtmlTemplate("@Base/security/email/password_reset.html.twig", ["token" => $lostPasswordToken]);
+                        $notification->setUser($user);
+                        $notification->send("email");
+                    }
+
+                    $entityManager = $this->getDoctrine()->getManager();
+                    $entityManager->flush();
+                }
             }
         }
 
-        return $this->render('@Base/security/settings_password.html.twig', [
-            'requestForm' => $form->createView(),
+        return $this->render('@Base/security/lost_password.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 
     /**
      * Validates and process the reset URL that the user clicked in their email.
      *
-     * @Route("/reset-password/{token}", name="base_password_token")
+     * @Route("/reset-password/{token}", name="base_lost_password_token")
      */
     public function ResetPasswordResponse(Request $request, UserPasswordEncoderInterface $passwordEncoder, string $token = null): Response
     {
@@ -363,7 +411,7 @@ class SecurityController extends AbstractController
             // loaded in a browser and potentially leaking the token to 3rd party JavaScript.
             $this->storeTokenInSession($token);
 
-            return $this->redirectToRoute('base_password');
+            return $this->redirectToRoute('base_lost_password_token');
         }
 
         $token = $this->getTokenFromSession();
@@ -379,7 +427,7 @@ class SecurityController extends AbstractController
                 $e->getReason()
             ));
             $notification->send("danger");
-            return $this->redirectToRoute('base_password_request');
+            return $this->redirectToRoute('base_lost_password_request');
         }
 
         // The token is valid; allow the user to change their password.
@@ -402,8 +450,8 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('base_login');
         }
 
-        return $this->render('@Base/security/reset_password.html.twig', [
-            'resetForm' => $form->createView(),
+        return $this->render('@Base/security/lost_password.html.twig', [
+            'form' => $form->createView(),
         ]);
     }
 }

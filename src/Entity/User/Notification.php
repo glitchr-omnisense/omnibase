@@ -94,6 +94,9 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
      */
     protected $sentAt = [];
 
+    protected ?string $projectDir = null;
+    
+    protected ?BaseTwigExtension $translator = null;
     public function __construct($subject, ?string $content = null, array $parameters = array())
     {
         $this->recipient = new ArrayCollection();
@@ -106,7 +109,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         if (User::getTranslator() == null)
             throw new Exception("Translator not found in User class");
 
-        $translator = new BaseTwigExtension(User::getTranslator());
+        $this->projectDir = BaseService::getProjectDir();
+        $this->translator = new BaseTwigExtension(User::getTranslator());
 
         // Notification variables
         $this->importance = parent::getImportance();
@@ -114,6 +118,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->context = [];
         $this->isRead = false;
 
+        
         // Formatting strings if exception passed as argument
         if ( $subject instanceof ExceptionEvent ) {
 
@@ -139,15 +144,20 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         } else if(!$content){
 
             $this->setSubject("Unknown");
-            $this->setContent($translator->trans2($subject, $parameters) ?? "");
+            $this->setContent($this->translator->trans2($subject, $parameters) ?? "");
 
         } else {
 
-            $this->setSubject($translator->trans2($subject, $parameters) ?? "");
-            $this->setContent($translator->trans2($content, $parameters) ?? "");
+            $this->setSubject($this->translator->trans2($subject, $parameters) ?? "");
+            $this->setContent($this->translator->trans2($content, $parameters) ?? "");
         }
     }
 
+    public function getTranslator(): ?BaseTwigExtension
+    {
+        return $this->translator;
+    }
+    
     /**
      * Entity related methods
      */
@@ -214,6 +224,21 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return $this->user;
     }
 
+    public function __sleep()
+    {
+        $this->projectDir = null;
+        $this->translator = null;
+
+        return array_keys(get_object_vars($this));
+    }
+
+    public function __wakeup()
+    {
+        $this->projectDir = BaseService::getProjectDir();
+        $this->translator = new BaseTwigExtension(User::getTranslator());
+    }
+
+    
     public function setUser(?User $user): self
     {
         if($this->user) {
@@ -238,6 +263,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     {
         $this->htmlTemplate = $htmlTemplate;
         if($context) $this->setContext($context);
+
+        if(array_key_exists("subject", $context)) $this->setSubject($context["subject"]);
 
         return $this;
     }
@@ -333,12 +360,27 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $subject = "Fwd: " . $this->getSubject();
             $content = $user . " forwarded notification: \"" . $this->getContent() . "\"";
 
-            $message = EmailMessage::fromNotification($this, $recipient, $transport);
-            $message->getMessage()
+            $notification = EmailMessage::fromNotification($this, $recipient, $transport);
+            $email = $notification->getMessage();
+            foreach($context as $key => $value) {
+            
+                if(!$value) continue;
+                if(!is_string($value)) continue;
+                if(!str_starts_with($value, "cid:")) continue;
+                list($cid, $path) = explode(":", $value);
+
+                $email->embed(fopen($this->projectDir . "/" . $path, 'rb'), $path);
+            }
+
+            $email
                 ->subject($subject)
                 ->from($supportAddress->getEmail())
                 ->htmlTemplate("@Base/email/notifier/default.html.twig")
-                ->context($this->getContext(["content" => $content, "excerpt" => $this->excerpt_text, "footer_text" => $this->footer_text]));
+                ->context($this->getContext([
+                    "content" => $content, 
+                    "excerpt" => $this->excerpt_text, 
+                    "footer_text" => $this->footer_text
+                ]));
 
         } else {
 
@@ -348,17 +390,34 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $importance = $this->getImportance();
             $this->setImportance("");
 
-            $message = EmailMessage::fromNotification($this, $recipient, $transport);
-            $message->getMessage()
+            $context = $this->getContext([
+                "content" => $content, 
+                "excerpt_text" => $this->excerpt_text, 
+                "footer_text" => $this->footer_text
+            ]);
+
+            $notification = EmailMessage::fromNotification($this, $recipient, $transport);
+            $email = $notification->getMessage();
+            foreach($context as $key => $value) {
+            
+                if(!$value) continue;
+                if(!is_string($value)) continue;
+                if(!str_starts_with($value, "cid:")) continue;
+                list($cid, $path) = explode(":", $value);
+
+                $email->embed(fopen($this->projectDir . "/" . $path, 'rb'), $path);
+            }
+
+            $email
                 ->subject($subject)
                 ->from($supportAddress->getEmail())
                 ->htmlTemplate($this->htmlTemplate)
-                ->context($this->getContext(["content" => $content, "excerpt_text" => $excerpt_text, "footer_text" => $this->footer_text]));
+                ->context($context);
 
             $this->setImportance($importance);
         }
 
-        return $message;
+        return $notification;
     }
 
     public function asChatMessage(RecipientInterface $recipient, string $transport = null): ?ChatMessage

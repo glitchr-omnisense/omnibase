@@ -613,10 +613,10 @@ class User implements UserInterface, TwoFactorInterface
                     $tokens[] = $token;
                     break;
                 case self::VALID_TOKENS:
-                    if($token->isApproved()) $tokens[] = $token;
+                    if($token->isValid()) $tokens[] = $token;
                     break;
                 case self::EXPIRED_TOKENS:
-                    if (!$token->isApproved()) $tokens[] = $token;
+                    if (!$token->isValid()) $tokens[] = $token;
                     break;
                 }
         }
@@ -629,7 +629,7 @@ class User implements UserInterface, TwoFactorInterface
         return $this->getTokens(self::EXPIRED_TOKENS);
     }
 
-    public function getApprovedTokens(): ?array
+    public function getValidTokens(): ?array
     {
         return $this->getTokens(self::VALID_TOKENS);
     }
@@ -670,7 +670,7 @@ class User implements UserInterface, TwoFactorInterface
         return $this->getToken($name, self::EXPIRED_TOKENS);
     }
 
-    public function getApprovedToken(string $name): ?Token
+    public function getValidToken(string $name): ?Token
     {
         return $this->getToken($name, self::VALID_TOKENS);
     }

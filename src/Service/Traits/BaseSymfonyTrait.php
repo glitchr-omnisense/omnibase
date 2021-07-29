@@ -97,33 +97,38 @@ trait BaseSymfonyTrait
         return isset($_SESSION);
     }
 
-    public function getProjectDir()
+    public static $projectDir = null;
+    public static function getProjectDir(): ?string
     {
-        return $this->kernel->getProjectDir();
+        return self::$projectDir;
+    }
+    public static function setProjectDir($projectDir)
+    {
+        return self::$projectDir = $projectDir;
     }
     public function getPublicDir()
     {
-        return $this->kernel->getProjectDir() . "/public";
+        return $this->getProjectDir() . "/public";
     }
     public function getTemplateDir()
     {
-        return $this->kernel->getProjectDir() . "/templates";
+        return $this->getProjectDir() . "/templates";
     }
     public function getTranslationDir()
     {
-        return $this->kernel->getProjectDir() . "/translations";
+        return $this->getProjectDir() . "/translations";
     }
     public function getCacheDir()
     {
-        return $this->kernel->getProjectDir() . "/var/cache";
+        return $this->getProjectDir() . "/var/cache";
     }
     public function getLogDir()
     {
-        return $this->kernel->getProjectDir() . "/var/log";
+        return $this->getProjectDir() . "/var/log";
     }
     public function getDataDir()
     {
-        return $this->kernel->getProjectDir() . "/data";
+        return $this->getProjectDir() . "/data";
     }
 
     public function addSession($name, $value)

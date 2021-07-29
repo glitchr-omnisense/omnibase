@@ -34,9 +34,11 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('highlight', [$this, 'highlight']),
-            new TwigFilter('trans2', [$this, 'trans2']),
-            new TwigFilter('datetime', [$this,'datetime'], ['needs_environment' => true])
+            new TwigFilter('highlight',   [$this, 'highlight']),
+            new TwigFilter('trans2',      [$this, 'trans2']),
+            new TwigFilter('datetime',    [$this,'datetime'], ['needs_environment' => true]),
+            new TwigFilter('lessThan',    [$this,'lessThan'], ['needs_environment' => true]),
+            new TwigFilter('greaterThan', [$this,'greaterThan'], ['needs_environment' => true])
         ];
     }
 
@@ -44,6 +46,29 @@ final class BaseTwigExtension extends AbstractExtension
     {
         if(is_string($date)) return $date;
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    public function lessThan(Environment $env, $date, $diff): string
+    {
+        if(is_string($date)) $date = new \DateTime($date);
+        if($date instanceof \DateTime) $date = $date->getTimestamp();
+        if(is_string($diff)) $diff = new \DateTime($diff);
+        if($diff instanceof \DateTime) $diff = $diff->getTimestamp() - time();
+
+        $deltaTime = time() - $date;
+        dump($deltaTime, $diff, $deltaTime < $diff);
+        return $deltaTime < $diff;
+    }
+
+    public function greaterThan(Environment $env, $date, int $diff): string
+    {
+        if(is_string($date)) $date = new \DateTime($date);
+        if($date instanceof \DateTime) $date = $date->getTimestamp();
+        if(is_string($diff)) $diff = new \DateTime($diff);
+        if($diff instanceof \DateTime) $diff = $diff->getTimestamp() - time();
+
+        $deltaTime = time() - $date;
+        return $deltaTime > $diff;
     }
 
     function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false)
@@ -156,7 +181,7 @@ final class BaseTwigExtension extends AbstractExtension
             $parameters[($addBrackets) ? "{" . ((string) $key) . "}" : $key] = $element; //htmlspecialchars($element);
             if ($addBrackets) unset($parameters[$key]);
         }
-
+        
         // Call for translation with custom parameters
         $domain = $domain ?? "messages";
         $trans = $this->translator->trans($id, $parameters, $domain, $locale);

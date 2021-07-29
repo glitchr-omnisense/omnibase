@@ -28,6 +28,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public const SEPARATOR     = ":";
     public const OPERATOR_AND  = "And";
+    public const OPERATOR_OR   = "Or";
 
     public array $criteria = [];
     public array $options  = [];
@@ -63,6 +64,18 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->options[$id][] = $option;
     }
 
+    protected $operator;
+    public function setOperator($operator)
+    {
+        $this->operator = $operator;
+        return $this;
+    }
+
+    public function getOperator()
+    {
+        return $this->operator;
+    }
+
     public function parseMethod($method, $arguments)
     {
         $this->resetCriteria();
@@ -86,13 +99,13 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $classMetadata  = $this->getClassMetadata($this->getEntityName());
         foreach($classMetadata->getFieldNames() as $field) {
 
-            $lcField = strtolower($field);
-            if (str_contains($lcField, strtolower(self::OPTION_WITH_ROUTE) ) ||
-                str_contains($lcField, strtolower(self::OPTION_MODEL) )      ||
-                str_contains($lcField, strtolower(self::OPTION_PARTIAL))     ||
-                str_contains($lcField, strtolower(self::OPTION_INSENSITIVE)) ||
-                str_contains($lcField, strtolower(self::OPERATOR_AND) )      ||
-                str_contains($lcField, strtolower(self::SEPARATOR) ))
+            if (str_contains($field, self::OPTION_WITH_ROUTE ) ||
+                str_contains($field, self::OPTION_MODEL )      ||
+                str_contains($field, self::OPTION_PARTIAL)     ||
+                str_contains($field, self::OPTION_INSENSITIVE) ||
+                str_contains($field, self::OPERATOR_AND )      ||
+                str_contains($field, self::OPERATOR_OR )      ||
+                str_contains($field, self::SEPARATOR ))
                 throw new Exception(
                     "\"".$this->getEntityName(). "\" entity has a field called \"$field\". ".
                     "This is unfortunate, because this word is used to customize DQL queries. ".
@@ -165,9 +178,22 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         // Divide in case of multiple variable
         // Only AND operation is tolerated.. because of obvious logical ambiguity.
+        if (str_contains($byNames, self::OPERATOR_AND ) && str_contains($byNames, self::OPERATOR_OR )) {
+
+            throw new Exception("\"".$byNames. "\" method gets an AND/OR ambiguity");
+
+        } else if (str_contains($byNames, self::OPERATOR_OR)) {
+
+            $this->setOperator(self::OPERATOR_OR);
+            $byNames = explode(self::OPERATOR_OR, $byNames);
+
+        } else {
+
+            $this->setOperator(self::OPERATOR_AND);
+            $byNames = explode(self::OPERATOR_AND, $byNames);
+        }
 
         $methodBak = $method;
-        $byNames = explode(self::OPERATOR_AND, $byNames);
         foreach($byNames as $by) {
 
             $oldBy = null;
@@ -283,7 +309,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $newArguments    = $arguments;
         $newArguments[0] = array_merge($newArguments[0] ?? [], $this->criteria ?? []);
 
-        //dump($newMethod, $newArguments);
         // Shaped return
         return [$newMethod, $newArguments];
     }
@@ -320,7 +345,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $field     = explode(self::SEPARATOR, $field);
             $fieldName = $field[0];
 
-            if($fieldName == strtolower(self::OPTION_MODEL)) {
+            if($fieldName == lcfirst(self::OPTION_MODEL)) {
 
                 $expr = [];
                 foreach ($fieldValue as $entryID => $entryValue) {
@@ -328,6 +353,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     $newField = [];
                     foreach ($field as $key => $value)
                         $newField[$key] = $value;
+
                     array_unshift($newField, $entryID);
 
                     $queryExpr = $this->buildQueryExpr($qb, $classMetadata, $newField, $entryValue);
@@ -345,7 +371,14 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 $expr = $this->buildQueryExpr($qb, $classMetadata, $field, $fieldValue);
             }
 
-            $qb->andWhere($expr);
+            switch ($this->getOperator()) {
+                case self::OPERATOR_OR: $qb->orWhere($expr);
+                    break;
+
+                default:
+                case self::OPERATOR_AND: $qb->andWhere($expr);
+                    break;
+            }
         }
 
         return $qb->getQuery()->getResult();
