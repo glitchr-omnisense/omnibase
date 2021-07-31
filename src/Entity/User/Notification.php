@@ -264,7 +264,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->htmlTemplate = $htmlTemplate;
         if($context) $this->setContext($context);
 
-        if(array_key_exists("subject", $context)) $this->setSubject($context["subject"]);
+        if(array_key_exists("subject", $context))
+            $this->setSubject($context["subject"]);
 
         return $this;
     }
@@ -276,7 +277,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     protected array $context;
     public function getContext(array $additionalContext = [])
     {
-        if($additionalContext) return array_merge($this->context, $additionalContext);
+        if($additionalContext) return array_merge($additionalContext, $this->context);
         return $this->context;
     }
 
@@ -311,32 +312,31 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     /**
      * @var string
      */
-    protected string $footer_text = "";
+    protected string $footer = "";
 
-    public function getFooterText()
+    public function getFooter()
     {
-        return $this->footer_text;
+        return $this->footer;
     }
 
-    public function setFooterText(string $footer_text)
+    public function setFooter(string $footer)
     {
-        $this->footer_text = $footer_text;
+        $this->footer = $footer;
         return $this;
     }
 
     /**
      * @var string
      */
-    protected string $excerpt_text = "";
-
-    public function getExcerptText()
+    protected string $excerpt = "";
+    public function getExcerpt()
     {
-        return $this->excerpt_text;
+        return $this->excerpt;
     }
 
-    public function setExcerptText(string $excerpt_text)
+    public function setExcerpt(string $excerpt)
     {
-        $this->excerpt_text = $excerpt_text;
+        $this->excerpt = $excerpt;
         return $this;
     }
 
@@ -378,22 +378,22 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
                 ->htmlTemplate("@Base/email/notifier/default.html.twig")
                 ->context($this->getContext([
                     "content" => $content, 
-                    "excerpt" => $this->excerpt_text, 
-                    "footer_text" => $this->footer_text
+                    "excerpt" => $this->excerpt, 
+                    "footer" => $this->footer
                 ]));
 
         } else {
 
             $subject = $this->getSubject();
             $content = $this->getContent();
-
+           
             $importance = $this->getImportance();
             $this->setImportance("");
 
             $context = $this->getContext([
                 "content" => $content, 
-                "excerpt_text" => $this->excerpt_text, 
-                "footer_text" => $this->footer_text
+                "excerpt" => $this->excerpt, 
+                "footer" => $this->footer
             ]);
 
             $notification = EmailMessage::fromNotification($this, $recipient, $transport);

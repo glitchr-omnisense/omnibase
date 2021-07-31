@@ -34,7 +34,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('highlight',   [$this, 'highlight']),
+            new TwigFilter('url',         [$this, 'url']),
             new TwigFilter('trans2',      [$this, 'trans2']),
             new TwigFilter('datetime',    [$this,'datetime'], ['needs_environment' => true]),
             new TwigFilter('lessThan',    [$this,'lessThan'], ['needs_environment' => true]),
@@ -83,6 +83,14 @@ final class BaseTwigExtension extends AbstractExtension
             $maxLength = $space_position;
 
         return substr_replace($string, $replacement, $maxLength)."..";
+    }
+
+    public function url(string $url)
+    {
+        $parseUrl = parse_url($url);
+        if(!array_key_exists("schema", $parseUrl))
+            $url = ($_SERVER['HTTPS'] ? "https://" : "http://") . $_SERVER['SERVER_NAME'] . (str_starts_with($url, "/") ? "" : "/") . $url;
+        return $url;
     }
 
     public function highlight(?string $content, $pattern, $gate = 5)
