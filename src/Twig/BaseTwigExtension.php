@@ -56,7 +56,6 @@ final class BaseTwigExtension extends AbstractExtension
         if($diff instanceof \DateTime) $diff = $diff->getTimestamp() - time();
 
         $deltaTime = time() - $date;
-        dump($deltaTime, $diff, $deltaTime < $diff);
         return $deltaTime < $diff;
     }
 

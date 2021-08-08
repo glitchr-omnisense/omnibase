@@ -6,23 +6,28 @@ use Base\Entity\User\Notification;
 use Base\Form\Traits\FlowFormTrait;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class FormProcessor implements FormProcessorInterface
 {
     use FlowFormTrait;
 
-    public function __construct(FormFactoryInterface $formFactory, CsrfTokenManagerInterface $csrfTokenManager, SessionInterface $session)
+    public FormFactoryInterface $formFactory;
+    public CsrfTokenManagerInterface $csrfTokenManager;
+    public RequestStack $requestStack;
+
+    public function __construct(FormFactoryInterface $formFactory, CsrfTokenManagerInterface $csrfTokenManager, RequestStack $requestStack)
     {
+        
         $this->formFactory = $formFactory;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->session = $session;
+        $this->requestStack = $requestStack;
     }
 
     protected $onDefaultCallback = [];
@@ -95,7 +100,6 @@ class FormProcessor implements FormProcessorInterface
 
     public function getSession()
     {
-
         return $this->formType::getSession($this->getOptions());
     }
 
@@ -178,7 +182,7 @@ class FormProcessor implements FormProcessorInterface
             throw new Exception("Number of FormProcessor::onSubmit() calls is not matching the number of steps in ".$formType);
 
         // Bind session to form (retrieve previous step information)
-        $formType::bindSession($options, $this->session);
+        $formType::bindSession($options, $this->requestStack->getSession());
         $formSession = $this->getSession();
 
         // Check if tmp files are still available..

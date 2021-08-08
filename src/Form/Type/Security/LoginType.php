@@ -16,6 +16,7 @@ use Symfony\Component\Form\FormView;
 
 use Base\Form\AbstractType;
 use Base\Form\Traits\RememberMeFormTrait;
+use Base\Form\Traits\TargetPathFormTrait;
 use Base\Form\Traits\CsrfFormTrait;
 use Base\Form\Traits\BootstrapFormTrait;
 
@@ -34,8 +35,8 @@ class LoginType extends AbstractType
         $resolver->setDefaults([
             'data_class' => User::class,
             'username' => null, // to pass variable from controller to Type
-
-            'csrf_token_id'   => 'authenticate'
+            'csrf_token_id'   => 'authenticate',
+            'allow_extra_fields' => true
         ]);
     }
 

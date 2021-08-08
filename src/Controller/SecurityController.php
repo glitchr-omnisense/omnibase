@@ -20,10 +20,8 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
-
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\PasswordHasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 use Symfony\Component\Notifier\NotifierInterface;
 
@@ -164,11 +162,7 @@ class SecurityController extends AbstractController
     /**
      * @Route("/register", name="base_register")
      */
-    public function Register(
-        Request $request,
-        GuardAuthenticatorHandler $guardHandler,
-        LoginFormAuthenticator $authenticator
-    ): Response {
+    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
 
         // If already connected..
         if (($user = $this->getUser()) && $user->isLegit()) {
@@ -227,12 +221,7 @@ class SecurityController extends AbstractController
             
             $entityManager = $this->getDoctrine()->getManager();
 
-            return $guardHandler->authenticateUserAndHandleSuccess(
-                $newUser,
-                $request,
-                $authenticator,
-                $firewall = 'main'
-            );
+            return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
         }
 
         // Retrieve form if no social account connected
@@ -404,7 +393,7 @@ class SecurityController extends AbstractController
      *
      * @Route("/reset-password/{token}", name="base_lost_password_token")
      */
-    public function ResetPasswordResponse(Request $request, UserPasswordEncoderInterface $passwordEncoder, string $token = null): Response
+    public function ResetPasswordResponse(Request $request, UserPasswordHasherInterface $passwordHasher, string $token = null): Response
     {
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
@@ -439,10 +428,7 @@ class SecurityController extends AbstractController
             $this->resetPasswordHelper->removeResetRequest($token);
 
             // Encode the plain password, and set it.
-            $encodedPassword = $passwordEncoder->encodePassword(
-                $user,
-                $form->get('plainPassword')->getData()
-            );
+            $encodedPassword = $passwordHasher->hashPassword($user, $form->get('plainPassword')->getData());
 
             $user->setPassword($encodedPassword);
             $this->getDoctrine()->getManager()->flush();

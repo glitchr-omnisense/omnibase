@@ -39,6 +39,8 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
@@ -47,8 +49,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
-class User implements UserInterface, TwoFactorInterface
+class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface
 {
+    // TODO: Remove the two next methods in S6.0
+    public function getUsername() { return $this->getUserIdentifier(); }
+    public function getSalt() {}
+    // TODO-END
+    
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -295,7 +302,7 @@ class User implements UserInterface, TwoFactorInterface
 
     public function getTotpAuthenticationUsername(): string
     {
-        return $this->username;
+        return $this->getUserIdentifier();
     }
 
     const TOTP_LENGTH  = 6;
@@ -370,21 +377,13 @@ class User implements UserInterface, TwoFactorInterface
     /**
      * @see UserInterface
      */
-    public function getSalt()
-    {
-        // not needed when using the "bcrypt" algorithm in security.yaml
-    }
-
-    /**
-     * @see UserInterface
-     */
     public function eraseCredentials()
     {
         // If you store any temporary, sensitive data on the user, clear it here
         $this->plainPassword = null;
     }
 
-    public function getUsername(): ?string
+    public function getUserIdentifier(): string
     {
         return $this->email;
     }

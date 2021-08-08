@@ -193,7 +193,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (self::$exceptionOnHold && self::$exceptionOnHold != $exception)
             return;
 
-        if (!$event->isMasterRequest()) return;
+        if (!$event->isMainRequest()) return;
         $request = $event->getRequest();
 
         // Monitored listeners

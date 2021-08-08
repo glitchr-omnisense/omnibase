@@ -59,11 +59,6 @@ final class BaseService implements RuntimeExtensionInterface
     private $rstack;
 
     /**
-     * @var SessionInterface
-     */
-    private $session;
-
-    /**
      * @var RouterInterface
      */
     private $router;
@@ -117,7 +112,6 @@ final class BaseService implements RuntimeExtensionInterface
         $this->entityManager    = $entityManager;
 
         $this->rstack     = $this->container->get("request_stack");
-        $this->session    = $this->container->get("session");
         $this->router     = $this->container->get("router");
 
         // Additional services related to user class

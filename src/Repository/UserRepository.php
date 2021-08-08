@@ -33,7 +33,12 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $qb->getQuery()->getResult();
     }
 
-    public function loadUserByUsername(string $email) {
+
+    // TODO: Remove the two next methods in S6.0
+    public function loadUserByUsername(string $email) { return $this->loadUserByUserIdentifier($email); }
+    // TODO-END
+
+    public function loadUserByUserIdentifier(string $email) {
 
         return $this->getEntityManager()->createQuery(
             'SELECT u

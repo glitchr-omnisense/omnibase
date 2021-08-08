@@ -11,7 +11,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 use Base\Entity\User;
 
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -134,23 +133,21 @@ trait BaseSymfonyTrait
     public function addSession($name, $value)
     {
 
-        $this->session->set($name, $value);
+        $this->getSession()->set($name, $value);
     }
 
     public function getSession($name = null)
     {
-        if(!$name) return $this->session;
+        if(!$name) return $this->rstack->getSession();
 
-        return ($this->session && $this->session->has($name)) ? $this->session->get($name) : null;
+        return ($this->rstack && $this->rstack->getSession()->has($name)) ? $this->rstack->getSession()->get($name) : null;
     }
 
     public function removeSession($name)
     {
 
-        return ($this->session && $this->session->has($name)) ? $this->session->remove($name) : null;
+        return ($this->rstack && $this->rstack->getSession()->has($name)) ? $this->rstack->getSession()->remove($name) : null;
     }
-
-
 
     public function getUser()
     {
@@ -172,7 +169,7 @@ trait BaseSymfonyTrait
 
     public function Logout()
     {
-        return $this->container->get("security.token_storage")->setToken(null);
+        return $this->security->getToken()->setToken(null);
     }
 
     public function createForm($type, $data = null, array $options = []): FormInterface

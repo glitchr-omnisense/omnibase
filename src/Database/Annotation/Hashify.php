@@ -11,9 +11,10 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 use ReflectionObject;
-use Symfony\Component\Security\Core\Encoder\EncoderFactory;
-use Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder;
-use Symfony\Component\Security\Core\Encoder\PasswordEncoderInterface;
+
+use Symfony\Component\PasswordHasher\PasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
+use Symfony\Component\PasswordHasher\Hasher\MessageDigestPasswordHasher;
 
 /**
  * Class Hashify
@@ -46,7 +47,7 @@ class Hashify extends AbstractAnnotation
     public function __construct( array $data )
     {
         // Prepare messageHasher
-        $hasherFactory  = new EncoderFactory([__CLASS__ => [
+        $hasherFactory  = new PasswordHasherFactory([__CLASS__ => [
             "algorithm"        => $data["algorithm"] ?? "auto",
             "hash_algorithm"   => $data["hash_algorithm"] ?? "sha512",
             "migrate_from"     => $data["migrate_from"] ?? [],
@@ -59,7 +60,7 @@ class Hashify extends AbstractAnnotation
             "time_cost"        => $data["time_cost"] ?? null
         ]]);
 
-        $this->messageHasher = $hasherFactory->getEncoder(__CLASS__);
+        $this->messageHasher = $hasherFactory->getPasswordHasher(__CLASS__);
         $this->nullable      = $data["nullable"] ?? false;
         $this->saltColumn     = $data["salt"] ?? null;
         $this->referenceColumn     = $data["reference"] ?? null;

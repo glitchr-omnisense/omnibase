@@ -37,8 +37,10 @@
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="base.service" />
         </service>
-                <service id="Base\Subscriber\BaseSubscriber">
-            <tag name="kernel.event_subscriber" />
+
+        <service id="Base\Subscriber\BaseSubscriber">
+            <tag name="kernel.event_subscriber" />            
+            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -101,7 +103,7 @@
         <service id="Base\Form\FormProcessor">
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="session" />
+            <argument type="service" id="request_stack" />
         </service>
 
         <!--

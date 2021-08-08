@@ -19,10 +19,6 @@ use Base\Entity\User\Notification;
 class DashboardSubscriber implements EventSubscriberInterface
 {
     /**
-     * @var SessionInterface
-     */
-    private $session;
-    /**
      * @var AdminContextProvider
      */
     private $adminContextProvider;
