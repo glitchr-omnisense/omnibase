@@ -19,20 +19,11 @@ class BaseSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [KernelEvents::REQUEST => ['onKernelRequest']];
+        return [KernelEvents::RESPONSE => ['onKernelResponse']];
     }
 
-    public function onKernelRequest(RequestEvent $event)
+    public function onKernelResponse(ResponseEvent $event)
     {
         BaseController::$foundBaseSubscriber = true;
-
-        // if(!$this->baseService->isDebug()) return;
-        
-        // $request = $event->getRequest();
-        // if(!$request) return;
-        // if(!$request->isXmlHttpRequest()) return;
-
-        // $response = $event->getResponse();
-        // $response->headers->set('Symfony-Debug-Toolbar-Replace', 1);
     }
 }

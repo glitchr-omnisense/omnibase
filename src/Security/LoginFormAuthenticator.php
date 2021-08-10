@@ -63,6 +63,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): PassportInterface
     {
+        dump("----");
         $userIdentifier  = $request->request->get('username');
         $password  = $request->request->get('password');
         $csrfToken = $request->request->get('_csrf_token');
