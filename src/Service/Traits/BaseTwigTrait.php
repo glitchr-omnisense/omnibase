@@ -87,9 +87,8 @@ trait BaseTwigTrait {
         // Add information to EasyAdmin context (e.g. for instance if field uses select2)
         if ($this->adminContextProvider) {
             $adminContext = $this->adminContextProvider->getContext();
-            if ($adminContext) $adminContext->getAssets()->addCssFile($file);
+            if ($adminContext) $adminContext->getAssets()->addHtmlContentToHead("<link rel=\"stylesheet\" href=\"".$file."\">");
         }
-
         return $this;
     }
     public function addStylesheetCode($script)
@@ -193,8 +192,9 @@ trait BaseTwigTrait {
         if ($this->adminContextProvider) {
             $adminContext = $this->adminContextProvider->getContext();
             if ($adminContext) {
+
                 if ($location == "head") $adminContext->getAssets()->addHtmlContentToHead("<script src=\"$file\"></script>" . PHP_EOL);
-                else $adminContext->getAssets()->addJsFile($file);
+                else $adminContext->getAssets()->addHtmlContentToBody("<script src=\"$file\"></script>" . PHP_EOL);
             }
         }
 
@@ -202,7 +202,6 @@ trait BaseTwigTrait {
     }
     public function addJavascriptCode(string $block, $location = "body")
     {
-
         if (!isset($this->jsBlock[$location])) $this->jsBlock[$location] = [];
         $this->jsBlock[$location][] = $block . PHP_EOL;
 
@@ -210,7 +209,11 @@ trait BaseTwigTrait {
         if ($this->adminContextProvider) {
 
             $adminContext = $this->adminContextProvider->getContext();
-            if ($adminContext) $adminContext->getAssets()->addHtmlContentToBody(end($this->jsBlock[$location]));
+            if ($adminContext) {
+
+                if ($location == "head") $adminContext->getAssets()->addHtmlContentToHead(end($this->jsBlock[$location]));
+                else $adminContext->getAssets()->addHtmlContentToBody(end($this->jsBlock[$location]));
+            }
         }
 
         return $this;

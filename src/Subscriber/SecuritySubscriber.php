@@ -35,6 +35,8 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Http\Event\LoginFailureEvent;
+use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
@@ -70,10 +72,12 @@ class SecuritySubscriber implements EventSubscriberInterface
             KernelEvents::TERMINATE => [['onKernelTerminate']],
             KernelEvents::EXCEPTION => [['onKernelException', -1024]],
 
-            RequestEvent::class   => [['onInteractiveRequest']],
-            InteractiveLoginEvent::class => ['onInteractiveLogin'],
+            LoginSuccessEvent::class => ['onLoginSuccess'],
+            LoginFailureEvent::class  => ['onLoginFailure'],
+            LogoutEvent::class       => ['onLogout'],
+
             SwitchUserEvent::class => ['onSwitchUser'],
-            LogoutEvent::class => ['onInteractiveLogout'],
+            RequestEvent::class    => [['onRequest']],
 
             UserEvent::REGISTER => ['onRegistration'],
             UserEvent::VALIDATE => ['onValidation']
@@ -128,7 +132,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             return;
     }
 
-    public function onInteractiveRequest(RequestEvent $event)
+    public function onRequest(RequestEvent $event)
     {
         $request = $event->getRequest();
 
@@ -151,12 +155,18 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
     }
 
-    public function onInteractiveLogin(InteractiveLoginEvent $event)
+    public function onLoginFailure(LoginFailureEvent $event)
     {
-        // Notify user about the authentication method
-        if ($user = $event->getAuthenticationToken()->getUser()) {
+        $notification = new Notification("Invalid credentials", "notifications.login.failed");
+        $notification->send("danger");
+    }
 
-            if (!$user->isLegit()) {
+    public function onLoginSuccess(LoginSuccessEvent $event)
+    {
+            // Notify user about the authentication method
+        if ($user = $event->getUser()) {
+        
+		    if (!$user->isLegit()) {
 
                 $notification = new Notification("Login", "notifications.login.social", [$user]);
                 $notification->send("success");
@@ -177,7 +187,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
     }
 
-    public function onInteractiveLogout(LogoutEvent $event)
+    public function onLogout(LogoutEvent $event)
     {
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;

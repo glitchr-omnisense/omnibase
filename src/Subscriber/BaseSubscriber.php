@@ -25,5 +25,15 @@ class BaseSubscriber implements EventSubscriberInterface
     public function onKernelResponse(ResponseEvent $event)
     {
         BaseController::$foundBaseSubscriber = true;
+
+        if (!$this->baseService->isDebug())
+            return;
+
+        $request = $event->getRequest();
+        if (!$request->isXmlHttpRequest())
+            return;
+    
+        $response = $event->getResponse();
+        $response->headers->set('Symfony-Debug-Toolbar-Replace', 1);
     }
 }

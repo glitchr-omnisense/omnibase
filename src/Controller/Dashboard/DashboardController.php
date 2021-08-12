@@ -157,9 +157,9 @@ class DashboardController extends AbstractDashboardController
     {
         return parent::configureActions()
             ->update(Crud::PAGE_INDEX, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-pencil-alt')->setLabel(false))
+                fn (Action $action) => $action->setIcon('fa fa-fw fa-pencil-alt'))
             ->update(Crud::PAGE_INDEX, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-trash-alt')->setLabel(false))
+                fn (Action $action) => $action->setIcon('fa fa-fw fa-trash-alt'))
 
             ->update(Crud::PAGE_DETAIL, Action::EDIT,
                 fn (Action $action) => $action->setIcon('fa fa-fw fa-pencil-alt'))

@@ -2,16 +2,17 @@ invalidTimezone: "Invalid user timezone detected from your browser. Time are dis
 
 login:
     success:
-        normal: Hi {0}! You just logged in.
-        alien: "Welcome, visitor from the outside! Please consider signing up!"
-        back: "Welcome back {0} !"
+        normal: "Hi {0}! You just logged in."
+        alien :  "Welcome, visitor from the outside! Please consider signing up!"
+        back  :   "Welcome back {0} !"
 
-    already: You are already logged in !
-    partial: You're partially logged in ! You can sign in.
-    social: Hi ! You just got connected to thought your {0} account
+    already: "You are already logged in !"
+    partial: "You're partially logged in ! You can sign in."
+    social : "Hi ! You just got connected to thought your {0} account"
 
     pending: "Your user account requires to be moderated by an administrator"
-    banned: 'Your user account no longer exists.'
+    banned : "Your user account no longer exists."
+    failed : "Invalid login credentials"
 
 impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !

@@ -12,6 +12,7 @@ login:
 
     pending: "Ton compte doit d'abord être vérifié par un administrateur"
     banned: "Ton compte n'existe plus."
+    failed: "Les identifiants sont incorrects"
 
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurpé l'identité de <b>{0}</b> !

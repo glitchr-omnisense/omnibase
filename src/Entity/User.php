@@ -438,11 +438,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->isVerified;
     }
 
-    public function verify(bool $isVerified = true): self
+    public function setIsVerified(bool $isVerified = true): self
     {
         $this->isVerified = $isVerified;
 
         return $this;
+    }
+
+    public function verified(bool $isVerified = true): self
+    {
+        return $this->setIsVerified($isVerified);
     }
 
     public function isEnabled(): ?bool
@@ -450,11 +455,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->isEnabled;
     }
 
-    public function enable(bool $isEnabled = true): self
+    public function setIsEnabled(bool $isEnabled = true): self
     {
         $this->isEnabled = $isEnabled;
 
         return $this;
+    }
+
+    public function enable(bool $isEnabled = true): self
+    {
+        return $this->setIsEnabled($isEnabled);
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface

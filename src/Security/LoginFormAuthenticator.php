@@ -4,6 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use Base\Database\Annotation\Hashify;
+use Base\Entity\User\Notification;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -22,6 +23,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
@@ -63,17 +65,19 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): PassportInterface
     {
-        dump("----");
         $userIdentifier  = $request->request->get('username');
         $password  = $request->request->get('password');
         $csrfToken = $request->request->get('_csrf_token');
 
-        // $request->getSession()->set(Security::LAST_USERNAME, $credentials['username']);
-        dump("OK");
+        $request->getSession()->set(Security::LAST_USERNAME, $userIdentifier);
+
         return new Passport(
-            new UserBadge($userIdentifier), // Badge pour transporter l'user
-            new PasswordCredentials($password), // Badge pour transporter le password
-            [new CsrfTokenBadge('authenticate', $csrfToken)] // Badge pour transporter un token CSRF
+            new UserBadge($userIdentifier),
+            new PasswordCredentials($password),
+            [
+                new CsrfTokenBadge('authenticate', $csrfToken),
+                new RememberMeBadge()
+            ]
         );
     }
 
@@ -89,23 +93,15 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         }
 
         // Generic redirection rule
-        return null; /*new RedirectResponse(
+        return new RedirectResponse(
                     $request->getSession()->get('_security.main.target_path') ??
                     $request->getSession()->get('_security.account.target_path') ??
                     $request->headers->get('referer') ?? "/"
-        );*/
+        );
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        $data = [
-            // you may want to customize or obfuscate the message first
-            'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
-
-            // or to translate this message
-            // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
-        ];
-        
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
     }
 }
