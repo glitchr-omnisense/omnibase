@@ -9,7 +9,7 @@ use Base\Validator\Constraint;
  */
 class FileMimeType extends Constraint
 {
-    public $message = 'validators.file.mimeType';
+    public $message = 'file.mimeType';
 
     protected array $type;
     public function getAllowedMimeTypes()

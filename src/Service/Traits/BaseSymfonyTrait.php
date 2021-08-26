@@ -2,13 +2,7 @@
 
 namespace Base\Service\Traits;
 
-use Base\Database\Factory\ClassMetadataFactory;
 use Base\Entity\Thread;
-use Doctrine\Common\Util\ClassUtils;
-use Symfony\Component\DependencyInjection\Container;
-
-use Symfony\Component\HttpFoundation\RequestStack;
-
 use Base\Entity\User;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -19,17 +13,9 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\String\Slugger\SluggerInterface;
@@ -38,32 +24,17 @@ trait BaseSymfonyTrait
 {
     private static $startTime = 0;
 
-    private $protocol;
-    private $birthdate;
-    private $mail;
-
-    public function setSlugger(SluggerInterface $slugger)
+    public function initSymfonyTrait()
     {
-        Thread::$slugger = $slugger;
+
     }
 
-    public function getSlugger()
+    public function setSlugger(SluggerInterface $slugger) { Thread::$slugger = $slugger; }
+    public function getSlugger() { return Thread::$slugger; }
+    public function setRouter(UrlGeneratorInterface $router) { Thread::$router = $router; }
+    public function getRouter(): ?UrlGeneratorInterface { return Thread::$router; }
+    public function setUserProperty(string $userProperty)
     {
-        return Thread::$slugger;
-    }
-
-    public function setRouter(UrlGeneratorInterface $router)
-    {
-        Thread::$router = $router;
-    }
-
-    public function getRouter(): ?UrlGeneratorInterface
-    {
-        return Thread::$router;
-    }
-
-    public function setUserProperty(string $userProperty) {
-
         User::$property = $userProperty;
         return $this;
     }
@@ -74,65 +45,23 @@ trait BaseSymfonyTrait
         self::$startTime = $this->kernel->getStartTime();
         if (is_infinite(self::$startTime)) self::$startTime = microtime(true);
     }
-
-    public function initSymfonyTrait() {
-
-        // Get some parameters from the bag
-        $this->birthdate = $this->getParameterBag('base.birthdate');
-        $this->protocol  = $this->getParameterBag('base.protocol');
-        $this->mail      = $this->getParameterBag('base.mail');
-    }
-
-    public function hasPost()
-    {
-        return isset($_POST);
-    }
-    public function hasGet()
-    {
-        return isset($_GET);
-    }
-    public function hasSession()
-    {
-        return isset($_SESSION);
-    }
+    
+    public function hasPost() { return isset($_POST); }
+    public function hasGet() { return isset($_GET); }
+    public function hasSession() { return isset($_SESSION); }
 
     public static $projectDir = null;
-    public static function getProjectDir(): ?string
-    {
-        return self::$projectDir;
-    }
-    public static function setProjectDir($projectDir)
-    {
-        return self::$projectDir = $projectDir;
-    }
-    public function getPublicDir()
-    {
-        return $this->getProjectDir() . "/public";
-    }
-    public function getTemplateDir()
-    {
-        return $this->getProjectDir() . "/templates";
-    }
-    public function getTranslationDir()
-    {
-        return $this->getProjectDir() . "/translations";
-    }
-    public function getCacheDir()
-    {
-        return $this->getProjectDir() . "/var/cache";
-    }
-    public function getLogDir()
-    {
-        return $this->getProjectDir() . "/var/log";
-    }
-    public function getDataDir()
-    {
-        return $this->getProjectDir() . "/data";
-    }
+    public static function getProjectDir(): ?string { return self::$projectDir; }
+    public static function setProjectDir($projectDir) { return self::$projectDir = $projectDir; }
+    public function getPublicDir() { return $this->getProjectDir() . "/public"; }
+    public function getTemplateDir() { return $this->getProjectDir() . "/templates"; }
+    public function getTranslationDir() { return $this->getProjectDir() . "/translations"; }
+    public function getCacheDir() { return $this->getProjectDir() . "/var/cache"; }
+    public function   getLogDir() { return $this->getProjectDir() . "/var/log"; }
+    public function  getDataDir() { return $this->getProjectDir() . "/data"; }
 
     public function addSession($name, $value)
     {
-
         $this->getSession()->set($name, $value);
     }
 
@@ -145,31 +74,7 @@ trait BaseSymfonyTrait
 
     public function removeSession($name)
     {
-
         return ($this->rstack && $this->rstack->getSession()->has($name)) ? $this->rstack->getSession()->remove($name) : null;
-    }
-
-    public function getUser()
-    {
-        if (!isset($this->security))
-            throw new Exception("No security found in BaseService. Did you overloaded BaseService::__construct ?");
-
-        return $this->security->getUser();
-    }
-
-    public function isGranted($attribute, $subject = null): bool
-    {
-        if (!isset($this->security))
-            throw new Exception("No authorization checker found in BaseService. Did you overloaded BaseService::__construct ?");
-
-
-        if ($this->security->getToken() === null) return false;
-        return $this->security->isGranted($attribute, $subject);
-    }
-
-    public function Logout()
-    {
-        return $this->security->getToken()->setToken(null);
     }
 
     public function createForm($type, $data = null, array $options = []): FormInterface
@@ -177,28 +82,16 @@ trait BaseSymfonyTrait
         return $this->formFactory->create($type, $data, $options);
     }
 
-    public function isCsrfTokenValid(string $id, ?string $token): bool
-    {
-        if (!isset($this->csrfTokenManager))
-            throw new Exception("No CSRF token manager found in BaseService. Did you overloaded BaseService::__construct ?");
-
-        return $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
-    }
-
 
     public function getAvailableServices(): array
     {
-
         if (!isset($this->container))
             throw new Exception("Symfony container not found in BaseService. Did you overloaded BaseService::__construct ?");
 
         return $this->container->getServiceIds();
     }
 
-    public function getContainer($name)
-    {
-        return ($name ? $this->container->get($name) : $this->container);
-    }
+    public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
 
     public function getParameterBag(string $key = "", array $bag = null)
     {
@@ -248,14 +141,9 @@ trait BaseSymfonyTrait
         $arr = $value;
     }
 
-    public function getProfiler()
-    {
-        return $this->kernel->getContainer()->get('profiler');
-    }
-
+    public function getProfiler() { return $this->kernel->getContainer()->get('profiler'); }
     public function getProfile($response = null)
     {
-
         if (!$response) return null;
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
@@ -278,15 +166,8 @@ trait BaseSymfonyTrait
         return $this->entityManager;
     }
 
-    public function getRepository(string $className, bool $reopen = false)
-    {
-        return $this->getEntityManager($reopen)->getRepository($className);
-    }
-
-    public function getOriginalEntityData($entity, bool $reopen = false)
-    {
-        return $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
-    }
+    public function getRepository(string $className, bool $reopen = false) { return $this->getEntityManager($reopen)->getRepository($className); }
+    public function getOriginalEntityData($entity,   bool $reopen = false) { return $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity); }
 
     protected static $entitySerializer = null;
     public function getOriginalEntity($entity, bool $reopen)
@@ -304,16 +185,9 @@ trait BaseSymfonyTrait
         return $repository->findOneBy(["id" => $id]) ?? null;
     }
 
-    public function getRouteWithUrl($path = "", array $opts = [])
-    {
-        return $this->getWebsite() . "/" . $this->getRoute($path, $opts);
-    }
-
-    public function generateUrl(string $path = "", array $opts = [])
-    {
-        return $this->getRoute($path, $opts);
-    }
-
+    public function getRouteWithUrl(string $path = "", array $opts = []) { return $this->getWebsite() . $this->getRoute($path, $opts); }
+    public function     generateUrl(string $path = "", array $opts = []) { return $this->getRoute($path, $opts); }
+    public function getCurrentRoute() { return $this->getRoute(); }
     public function getRoute(string $path = "", array $opts = [])
     {
         if (!isset($this->router))
@@ -330,6 +204,7 @@ trait BaseSymfonyTrait
         return ($request = $this->getRequest()) ? $request->get('route') : null;
     }
 
+    public function getCurrentRouteName() { return $this->getRouteName(); }
     public function getRouteName($url = "")
     {
         if (!isset($this->router))
@@ -345,12 +220,8 @@ trait BaseSymfonyTrait
         }
     }
 
-    public function redirect(string $url, int $state = 302): RedirectResponse
-    {
-        return new RedirectResponse($url, $state);
-    }
-
-    public function redirectToRoute($event, $route, $exceptionPattern = "/^$/")
+    public function redirect(string $url, int $state = 302): RedirectResponse { return new RedirectResponse($url, $state); }
+    public function redirectToRoute($event, string $route, string $exceptionPattern = "/^$/", $callback = null)
     {
         $route     = $this->getRoute($route) ?? $route;
         $routeName = $this->getRouteName($route) ?? $route;
@@ -362,6 +233,7 @@ trait BaseSymfonyTrait
         if (preg_match($exceptionPattern, $currentRouteName))
             return false;
 
+        if(is_callable($callback)) $callback();
         $event->setResponse(new RedirectResponse($route));
         return true;
     }
@@ -374,7 +246,6 @@ trait BaseSymfonyTrait
 
     public function getEnvironment(): string
     {
-
         if (!isset($this->environment))
             throw new Exception("Symfony environment not found in BaseService. Did you overloaded BaseService::__construct ?");
 
@@ -382,113 +253,48 @@ trait BaseSymfonyTrait
     }
 
 
-    public function isProduction()
-    {
-        return $this->kernel->getEnvironment() == "prod";
-    }
-    public function isDevelopment()
-    {
-        return $this->kernel->getEnvironment() == "dev";
-    }
-    public function isDebug()
-    {
-        return $this->kernel->isDebug();
-    }
-    public function isMaintenance()
-    {
-        return file_exists($this->getParameterBag("base.maintenance_lockpath"));
-    }
+    public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
+    public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
+    public function isDebug() { return $this->kernel->isDebug(); }
 
-    public function duration()
-    {
-        return $this->getDuration();
-    }
-    public function getDuration(): float
-    {
-        return round(microtime(true) - self::$startTime, 2);
-    }
+    public function isMaintenance() { return file_exists($this->getParameterBag("base.maintenance.lockpath")); }
 
-    public function age()
-    {
-        return $this->getAge();
-    }
+    public function getDuration(): float { return round(microtime(true) - self::$startTime, 2); }
+
+    public function duration() { return $this->getDuration(); }
+    public function age() { return $this->getAge(); }
+    public function birthdate() { $this->getBirthdate(); }
+    public function protocol() { return $this->getProtocol(); }
+    public function domain() { return $this->getDomain(); }
+    public function www() { return $this->getWebsite(); }
+    public function url() { return $this->getWebsite(); }
+    public function assets() { return $this->getAssets(); }
+    public function vendor() { return $this->getVendor(); }
+
+    public function getBirthdate():string { return ($this->getParameterBag('base.birthdate') < 0) ? date("Y") : $this->getParameterBag('base.birthdate'); }
+    public function getProtocol(): string { return ($this->getParameterBag('base.use_https') ? "https" : "http"); }
+    public function getDomain()  : string { return  $this->getParameterBag("base.domain"); }
     public function getAge():string
     {
-        return (date("Y") == $this->birthdate) ? date("Y") : date("$this->birthdate-Y");
+        $birthdate = $this->getBirthdate();
+        return (date("Y") == $birthdate) ? date("Y") : date("$birthdate-Y");
     }
 
-    public function getProtocol():string
-    {
-        return $this->protocol;
-    }
-    public function protocol()
-    {
-        return $this->getProtocol();
-    }
-
-    public function getDomain(): string
-    {
-        //NB: Cache poisoning attack
-        return $this->getParameterBag("base.domain") ?? $_SERVER['SERVER_NAME'] ?? $_SERVER['HTTP_HOST'];
-    }
-
-    public function domain()
-    {
-        return $this->getDomain();
-    }
-
+    public function getWebsite()    { return $this->getProtocol() . "://" . $this->getDomain(); }
+    public function getAssets()     { return $this->getProtocol() . "://" . $this->getParameterBag('base.assets'); }
+    public function getVendor()     { return $this->getAssets(false) . "/vendor"; }
+    public function getServerName() { return $_SERVER["SERVER_NAME"] ?? $this->getDomain(); }
     public function getSubdomain()
     {
-        $subdomain = $this->getDomain();
-        if( ($subdomain = preg_replace("/.".$subdomain."$/", "", $_SERVER["SERVER_NAME"])) ) {
+        $serverName = $this->getServerName();
+        $domain     = $this->getDomain();
 
-            if($_SERVER["SERVER_NAME"] == $subdomain) return "";
+        if( ($subdomain = preg_replace("/.".$domain."$/", "", $serverName)) ) {
+
+            if($serverName == $subdomain) return "";
             return $subdomain;
         }
 
         return "";
-    }
-
-    public function getWebsite()
-    {
-        $subdomain = $this->getSubdomain();
-        $subdomain = (!empty($subdomain) ? $subdomain . "." : "");
-
-        return $this->getProtocol() . "://" . $subdomain . $this->getDomain();
-    }
-
-    public function www()
-    {
-        return $this->getWebsite();
-    }
-
-    public function url()
-    {
-        return $this->getWebsite();
-    }
-
-    public function getAssets($subdomain = true)
-    {
-        if (!$subdomain) $subdomain = "";
-        else {
-            $subdomain = $this->getSubdomain();
-            $subdomain = (!empty($subdomain) ? "/" . $subdomain : "");
-        }
-
-        return $this->getProtocol() . "://" . $this->getParameterBag('base.assets') . $subdomain;
-    }
-
-    public function assets($subdomain = true)
-    {
-        return $this->getAssets($subdomain);
-    }
-
-    public function getVendor()
-    {
-        return $this->getAssets(false) . "/vendor";
-    }
-    public function vendor()
-    {
-        return $this->getVendor();
     }
 }

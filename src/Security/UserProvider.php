@@ -13,10 +13,15 @@ use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
 {
+    // TODO: Remove the two next methods in S6.0
+    public function loadUserByUsername($response) { return $this->loadUserByIdentifier($response); }
+    // TODO-END
+
     /**
      * {@inheritdoc}
      */
-    public function loadUserByUsername($response)
+
+    public function loadUserByIdentifier($response)
     {
         $data = $response->getData();
 
@@ -38,7 +43,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      */
     public function loadUserByOAuthUserResponse(UserResponseInterface $response)
     {
-        return $this->loadUserByUsername($response);
+        return $this->loadUserByIdentifier($response);
     }
 
     /**
@@ -56,9 +61,8 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
      */
     public function refreshUser(UserInterface $user)
     {
-        if (!$user instanceof User) {
+        if (!$user instanceof User)
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
-        }
 
         return $user;
     }
@@ -74,10 +78,9 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     /**
      * Upgrades the encoded password of a user, typically for using a better hash algorithm.
      */
-    public function upgradePassword(UserInterface $user, string $newEncodedPassword): void
+    public function upgradePassword(UserInterface $user, string $newHashedPassword): void
     {
-        // TODO: when encoded passwords are in use, this method should:
-        // 1. persist the new password in the user storage
-        // 2. update the $user object with $user->setPassword($newEncodedPassword);
+        // set the new hashed password on the User object
+        $user->setPassword($newHashedPassword);
     }
 }

@@ -1,0 +1,11 @@
+{% extends 'email.html.twig' %}
+
+{% block content %}
+
+    {{ "notifications.verifyEmail.email.content"|trans2([signedUrl|url])|raw }}<br/>
+
+    {% if expiresAtMessageKey is defined and expiresAtMessageKey is not null %}
+        {{ "notifications.verifyEmail.email.expiracy"|trans2([expiresAtMessageKey])|raw }}
+    {% endif %}
+
+{% endblock %}

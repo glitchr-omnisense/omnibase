@@ -8,6 +8,7 @@ login:
 
     already: Oh, mais tu es déjà connecté !
     partial: Tu es partiellement connecté, connecte toi à nouveau pour modifier les informations sensibles de ton compte
+    full: "Authentication force requise pour cette action."
     social: Salut ! Tu t'es bien connecté à ton compte {0}
 
     pending: "Ton compte doit d'abord être vérifié par un administrateur"
@@ -18,15 +19,38 @@ impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurpé l'identité de <b>{0}</b> !
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Retour à ton compte</a>"
 
+maintenance:
+    banner: Ce site est actuellement en cours de <b>maintenance</b>. (Seul les super administrateurs peuvent voir cette page pour le moment !)
+
 logout:
     success: "{0} Tu es maintenant déconnecté."
     already: "Bizarre, tu n'es pas connecté :)"
 
+resetPassword:
+    title: "Réinitialisation de ton mot de passe"
+    email:
+        content: "Clique sur le lien: <a href=\"{0}\">ici</a>"
+        expiracy: "<i>Ce lien expirera dans {0} minute(s).</i>"
+    csrfToken: "Jeton CSRF invalide. Impossible de réinitialiser ton mot de passe"
+    invalidToken: "Jeton invalide. Vous ne pourrez pas réinitialiser votre mot de passe avec ce lien."
+    confirmation: "Un email sera envoyé à l'adresse mentionée (si celle-ci est trouvée)"
+    success: Ton mot de passe a bien été changé !
+
 register:
     csrfToken: "Jeton CSRF invalide. Impossible de soumettre le formulaire"
-    verifyEmail:
-        pending: Ton compte doit être vérifié. <a class='badge bg-warning badge-warning' href="{0}">Clique-ici</a> pour recevoir une nouvelle demande par email
-        success: "Ton compte a bien été créé et validé."
-        check:   "Un email vient de t'être envoyé. Merci de confirmer ton adresse en cliquant sur le lien."
-        already: "Ton compte est déjà validé!"
-        resend:  "Un email de confirmation a déjà été envoyé! Merci de patienter {0} minute(s) avant la prochaine demande."
+validation:
+    title: "Validation utilisateur demandée"
+    required: "Ton compte requière une validation par un administrateur. Ils ont été notifiés. Merci de patienter."
+
+verifyEmail:
+    title: "Confirme ton adresse mail !"
+    email:
+        content: "Confirme ton adresse en cliquant sur le lien suivant: <br><br>
+                    <a href=\"{0}\">confirmer l'adresse e-mail</a>. <br><br>"
+        expiracy: "<i>Ce lien expirera dans {0} minute(s).</i>"
+    pending: Ton adresse mail doit être vérifiée. <a class='badge bg-warning badge-warning' href="{0}">Clique-ici</a> pour recevoir une nouvelle demande par email
+    success: "Ton compte a bien été créé et validé."
+    check:   "Un email vient de t'être envoyé. Merci de confirmer ton adresse en cliquant sur le lien."
+    already: "Ton compte est déjà validé!"
+    resend:  "Un email de confirmation a déjà été envoyé ! Merci de patienter {0} minute(s) avant la prochaine demande."
+    invalidToken: "Token invalide. Nous ne pouvons pas confirmer ton adresse. Merci de renvoyer une demande."

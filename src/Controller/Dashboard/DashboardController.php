@@ -30,25 +30,34 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Google\Analytics\Service\GaService;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Twig\Environment;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
+
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class DashboardController extends AbstractDashboardController
 {
     protected $baseService;
     protected $adminUrlGenerator;
+    protected $authenticationUtils;
 
     public function __construct(
         AdminUrlGenerator $adminUrlGenerator,
         AdminContextProvider $adminContextProvider,
         BaseService $baseService,
+        AuthenticationUtils $authenticationUtils,
         ?GaService $gaService = null
     ) {
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->adminContextProvider  = $adminContextProvider;
 
         $this->baseService       = $baseService;
+        $this->authenticationUtils       = $authenticationUtils;
         $this->gaService = $gaService;
     }
 
@@ -77,8 +86,9 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
+        $logo = $this->baseService->getParameterBag("base.logo");
         return Dashboard::new()
-            ->setTitle('Dashboard')
+            ->setTitle('<img src="'.$logo.'" alt="Dashboard">')
             ->disableUrlSignatures();
     }
 

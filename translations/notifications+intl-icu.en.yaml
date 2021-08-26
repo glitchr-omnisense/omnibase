@@ -8,6 +8,7 @@ login:
 
     already: "You are already logged in !"
     partial: "You're partially logged in ! You can sign in."
+    full: "Full authentication required for this action"
     social : "Hi ! You just got connected to thought your {0} account"
 
     pending: "Your user account requires to be moderated by an administrator"
@@ -18,15 +19,39 @@ impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Exit impersonation</a>"
 
+maintenance:
+    banner: This website is currently <b>under maintenance</b>. (Only super administrators can see this page for the moment!)
+
+resetPassword:
+    title: "Reset your password"
+    email:
+        content: "Please visit the following link: <a href=\"{0}\">here</a>"
+        expiracy: "<i>This link will expire in {0} minute(s).</i>"
+    csrfToken: "Invalid CSRF token detected. You can't reset your password"
+    invalidToken: "Invalid token provided. You can't reset your password"
+    confirmation: "A mail has been sent to the provided address (if this one exists)"
+    success: Your password has successfully been changed 
+
 logout:
     success: "{0} You're now disconnected."
     already: "You're not logged in into your account anymore :D"
 
 register:
     csrfToken: "Invalid CSRF token detected. We cannot proceed with the registration"
-    verifyEmail:
-        pending: Your account needs to be verified. Please resend a confirmation by clicking <a class='badge bg-warning badge-warning' href="{0}">here</a>
-        success: "You've got successfully registered ! You account is already verified."
-        check:   "Please confirm your account by checking your email."
-        already: "Your account has already been verified !"
-        resend:  "A confirmation email has already been sent ! Please wait {0} minute(s) before next submission."
+validation:
+    title: "User validation required"
+    required: "Your account needs to be verified by an administrator. Please wait for their feedback"
+
+verifyEmail:
+    title: Please confirm your email!
+    email:
+        content: "Please confirm your email address by clicking the following link: <br><br>
+                    <a href=\"{0}\">Confirm my Email</a>. <br>"
+        expiracy: "<i>This link will expire in {0} minute(s).</i>"
+
+    invalidToken: "Invalid token. We cannot confirm your email address. Please resend a request"
+    pending: "Congratulations ! You've got successfully registered. Your account needs to be verified. "
+    check:   "Please confirm your account by checking your email."
+    already: "Your account has already been verified !"
+    resend:  "A confirmation email has already been sent ! Please wait {0} minute(s) before next submission."
+    success: "Congratulations ! You've got successfully registered !"

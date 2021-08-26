@@ -17,7 +17,7 @@ use Base\Form\Traits\BootstrapFormTrait;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-class LostPasswordType extends AbstractType
+class ResetPasswordType extends AbstractType
 {
     use BootstrapFormTrait;
     use CsrfFormTrait;
@@ -27,7 +27,6 @@ class LostPasswordType extends AbstractType
         $builder
             ->add('email', TextType::class, [
                 'validation_groups' => ["new"],
-                'label' => 'Email', 
                 'mapped' => false,
             ]);
 
@@ -36,7 +35,7 @@ class LostPasswordType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(['csrf_token_id'   => 'lost-password']);
+        $resolver->setDefaults(['csrf_token_id'   => 'reset-password']);
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

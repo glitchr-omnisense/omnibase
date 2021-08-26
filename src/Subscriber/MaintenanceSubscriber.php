@@ -26,18 +26,31 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     /**
     * @var string
     */
-    private $forceRedirect;
+    private $homepageRoute;
+    /**
+    * @var array
+    */
+    private $exceptionRoute;
+    /**
+    * @var string
+    */
+    private $maintenanceRoute;
 
     public function __construct(BaseService $baseService)
     {
     	$this->baseService = $baseService;
-        $this->baseService->redirect = $baseService->getParameterBag("base.maintenance");
-        $this->lockPath = $baseService->getParameterBag("base.maintenance_lockpath");
+        $this->lockPath = $baseService->getParameterBag("base.maintenance.lockpath");
+        $this->exceptionRoute   = $baseService->getParameterBag("base.maintenance.exception");
+        $this->exceptionRoute[] = "base_login";
+
+        $this->homepageRoute = $baseService->getParameterBag("base.maintenance.homepage");
+        $this->maintenanceRoute = $baseService->getParameterBag("base.maintenance.redirect");
+
     }
 
     public static function getSubscribedEvents()
     {
-        return [ RequestEvent::class => [['onRequestEvent']] ];
+        return [ RequestEvent::class => ['onRequestEvent'] ];
     }
 
     public function onRequestEvent(RequestEvent $event)
@@ -53,16 +66,16 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         // Check if lock file is found or not..
         if(!$this->baseService->isMaintenance()) {
 
-            if(preg_match('/^base_maintenance/', $this->getCurrentRoute($event)))
-                $this->baseService->redirectToRoute($event, "base_homepage");
-
+            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event)))
+                $this->baseService->redirectToRoute($event, $this->homepageRoute);
+                
             return;
         }
 
-        if(($user = $this->baseService->getUser()) && $this->baseService->isGranted("ROLE_SUPERADMIN")) {
-            $username = $user->getUsername();
-            $notification = new Notification("Maintenance", "This website is currently <b>under maintenance</b>. (Only super administrators can see this page!)");
-            $notification->send("danger");
+        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_SUPERADMIN")) {
+            
+            $notification = new Notification("notifications.maintenance.banner");
+            $notification->send("warning");
             return;
         }
 
@@ -70,14 +83,17 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         $this->baseService->Logout();
 
         // Apply redirection to maintenance page
-       if(!preg_match('/^base_(maintenance|login)/', $this->getCurrentRoute($event)))
-            $this->baseService->redirectToRoute($event, "base_maintenance");
+        
+        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event));
+        foreach($this->exceptionRoute as $exception)
+            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentRoute($event));
+
+        if (!$isException)
+            $this->baseService->redirectToRoute($event, $this->maintenanceRoute);
 
         // Stopping page execution
         $event->stopPropagation();
     }
 
     public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
-
-    public function allowRedirect() { return $this->baseService->redirect; }
 }

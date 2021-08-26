@@ -26,7 +26,7 @@ class MaintenanceController extends AbstractController
     {
         $downtime = $uptime = 0;
 
-        $fname = $this->baseService->getParameterBag("base.maintenance_lockpath");
+        $fname = $this->baseService->getParameterBag("base.maintenance.lockpath");
         $f = @fopen($fname, "r");
         if ($f) {
 

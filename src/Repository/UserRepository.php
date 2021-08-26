@@ -7,15 +7,22 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 
 use Base\Database\Repository\ServiceEntityRepository;
-
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
  * @method User|null findOneBy(array $criteria, array $orderBy = null)
  * @method User[]    findAll()
  * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements UserLoaderInterface
+class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
 {
+    // TODO: Remove the two next methods in S6.0
+    public function loadUserByUsername(string $email) { return $this->loadUserByIdentifier($email); }
+    // TODO-END
+
+
     public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
     {
         parent::__construct($registry, $entityClass ?? User::class);
@@ -33,12 +40,7 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $qb->getQuery()->getResult();
     }
 
-
-    // TODO: Remove the two next methods in S6.0
-    public function loadUserByUsername(string $email) { return $this->loadUserByUserIdentifier($email); }
-    // TODO-END
-
-    public function loadUserByUserIdentifier(string $email) {
+    public function loadUserByIdentifier($email) {
 
         return $this->getEntityManager()->createQuery(
             'SELECT u
@@ -47,5 +49,14 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         )
             ->setParameter('query', $email)
             ->getOneOrNullResult();
+    }
+
+    public function upgradePassword(UserInterface $user, string $newHashedPassword): void
+    {
+        // set the new hashed password on the User object
+        $user->setPassword($newHashedPassword);
+
+        // execute the queries on the database
+        $this->getEntityManager()->flush();
     }
 }

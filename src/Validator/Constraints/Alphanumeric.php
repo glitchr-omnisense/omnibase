@@ -9,5 +9,5 @@ use Base\Validator\Constraint;
  */
 class Alphanumeric extends Constraint
 {
-    public $message = 'validators.alphanumeric';
+    public $message = 'alphanumeric';
 }

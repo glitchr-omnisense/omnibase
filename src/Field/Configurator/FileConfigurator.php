@@ -25,11 +25,9 @@ final class FileConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $file = Uploader::getFile($entityDto->getInstance(), $field->getProperty());
-        if(!$file) $field->setValue(null);
 
-        $field->setFormattedValue($field->getValue());
-        $field->setFormTypeOption("empty_data", $field->getValue());
-
+        // 'allow_delete' => true,
+        
         // this check is needed to avoid displaying broken Files when File properties are optional
         if (empty($formattedValue) || $formattedValue === rtrim($configuredBasePath ?? '', '/')) {
             $field->setTemplateName('label/empty');

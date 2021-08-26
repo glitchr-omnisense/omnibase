@@ -7,6 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Base\Controller\BaseController;
 use Base\Entity\User;
 use Base\Service\Traits\BaseNotificationTrait;
+use Base\Service\Traits\BaseSecurityTrait;
 use Base\Service\Traits\BaseSymfonyTrait;
 use Base\Service\Traits\BaseUtilsTrait;
 use Base\Service\Traits\BaseTwigTrait;
@@ -36,6 +37,8 @@ use Twig\Extension\RuntimeExtensionInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Recipient\Recipient;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 /**
@@ -88,12 +91,15 @@ final class BaseService implements RuntimeExtensionInterface
         Environment $twig,
         EntityManagerInterface $entityManager,
         FormFactoryInterface $formFactory,
-        CsrfTokenManagerInterface $csrfTokenManager,
         NotifierInterface $notifier, ChannelPolicyInterface $notifierPolicy,
-        SluggerInterface $slugger)
+        SluggerInterface $slugger, 
+        
+        AuthorizationCheckerInterface $authorizationChecker,
+        TokenStorageInterface $tokenStorage,
+        CsrfTokenManagerInterface $csrfTokenManager)
     {
         BaseController::$foundBaseService = true;
-
+        
         $this->kernel  = $kernel;
         $this->container = $kernel->getContainer();
         $this->environment = $kernel->getEnvironment(); // "dev", "prod", etc..
@@ -102,8 +108,9 @@ final class BaseService implements RuntimeExtensionInterface
 
         // Security service is subdivided into authorization_checker, token, ..
         // Therefore the "Security" class is just a helper here
-        $this->security = new Security($this->container);
-
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
+        
         // Symfony basic services
         $this->twig             = $twig;
 
@@ -140,6 +147,11 @@ final class BaseService implements RuntimeExtensionInterface
      * Symfony kernel container related methods
      */
     use BaseSymfonyTrait;
+
+    /**
+     * Symfony security container related methods
+     */
+    use BaseSecurityTrait;
 
     /*
      * Util methods

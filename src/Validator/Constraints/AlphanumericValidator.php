@@ -26,6 +26,7 @@ class AlphanumericValidator extends ConstraintValidator
             // the argument must be a string or an object implementing __toString()
             $this->context->buildViolation($constraint->message)
             ->setParameter('{{ entry }}', $entry)
+            ->setTranslationDomain('validators')
             ->addViolation();
         }
     }

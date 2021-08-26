@@ -15,7 +15,9 @@ use ReflectionObject;
 use Symfony\Component\PasswordHasher\PasswordEncoderInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 use Symfony\Component\PasswordHasher\Hasher\MessageDigestPasswordHasher;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+use Doctrine\Common\Util\ClassUtils;
 /**
  * Class Hashify
  * package Base\Database\Annotation\Hashify
@@ -35,71 +37,20 @@ use Symfony\Component\PasswordHasher\Hasher\MessageDigestPasswordHasher;
  *   @Attribute("time_cost",        type = "int"),
  *
  *   @Attribute("plain", type = "string"),
- *   @Attribute("salt", type = "string"),
  *   @Attribute("nullable", type = "bool")
  * })
  */
 class Hashify extends AbstractAnnotation
 {
-    protected $reference;
+    protected $data;
     protected $nullable;
+    protected $reference;
 
     public function __construct( array $data )
     {
-        // Prepare messageHasher
-        $hasherFactory  = new PasswordHasherFactory([__CLASS__ => [
-            "algorithm"        => $data["algorithm"] ?? "auto",
-            "hash_algorithm"   => $data["hash_algorithm"] ?? "sha512",
-            "migrate_from"     => $data["migrate_from"] ?? [],
-            "key_length"       => $data["key_length"] ?? 40,
-            "ignore_case"      => $data["ignore_case"] ?? false,
-            "encode_as_base64" => $data["encode_as_base64"] ?? true,
-            "iterations"       => $data["iterations"] ?? 5000,
-            "cost"             => $data["cost"] ?? null,
-            "memory_cost"      => $data["memory_cost"] ?? null,
-            "time_cost"        => $data["time_cost"] ?? null
-        ]]);
-
-        $this->messageHasher = $hasherFactory->getPasswordHasher(__CLASS__);
+        $this->data = $data;
         $this->nullable      = $data["nullable"] ?? false;
-        $this->saltColumn     = $data["salt"] ?? null;
         $this->referenceColumn     = $data["reference"] ?? null;
-    }
-
-    private function getSalt($entity): ?string
-    {
-        if (!$this->saltColumn)
-            return null;
-
-        if ($this->hasField($entity, $this->saltColumn))
-            return $this->getFieldValue($entity, $this->saltColumn);
-    }
-
-    private function getPlainMessage($entity): ?string
-    {
-        if (!$this->referenceColumn)
-            throw new Exception("Attribute \"reference\" missing for @Hashify in " . get_class($entity));
-
-        if ($this->hasField($entity, $this->referenceColumn))
-            return $this->getFieldValue($entity, $this->referenceColumn);
-    }
-
-    private function erasePlainMessage($entity)
-    {
-        if (!$this->referenceColumn)
-            throw new Exception("Attribute \"plain\" missing for @Hashify in " . get_class($entity));
-
-        return $this->setFieldValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
-    }
-
-    private function getHashedMessage($entity, ?string $property = null): ?string
-    {
-        $salt         = $this->getSalt($entity)         ?? null;
-        $plainMessage = $this->getPlainMessage($entity) ?? null;
-        if($plainMessage)
-            return $this->messageHasher->encodePassword($plainMessage, $salt);
-
-        return ($property ? $this->getFieldValue($entity, $property) : null);
     }
 
     public static function getHashify($className, $property)
@@ -111,27 +62,68 @@ class Hashify extends AbstractAnnotation
         return ($that ? $that : null);
     }
 
-    public static function getMessageHasher($className, $property)
+    public function getMessageHasher($entity)
     {
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($className, Hashify::class);
-        $that = $annotations[$property] ?? [];
-        $that = array_pop($that);
+        $hasherFactory  = new PasswordHasherFactory([ClassUtils::getClass($entity) => [
+            "algorithm"        => $this->data["algorithm"] ?? "auto",
+            "hash_algorithm"   => $this->data["hash_algorithm"] ?? "sha512",
+            "migrate_from"     => $this->data["migrate_from"] ?? [],
+            "key_length"       => $this->data["key_length"] ?? 40,
+            "ignore_case"      => $this->data["ignore_case"] ?? false,
+            "encode_as_base64" => $this->data["encode_as_base64"] ?? true,
+            "iterations"       => $this->data["iterations"] ?? 5000,
+            "cost"             => $this->data["cost"] ?? null,
+            "memory_cost"      => $this->data["memory_cost"] ?? null,
+            "time_cost"        => $this->data["time_cost"] ?? null
+        ]]);
 
-        return ($that ? $that->messageHasher : null);
+        return $hasherFactory->getPasswordHasher(ClassUtils::getClass($entity)) ?? null;
     }
 
-    public static function isPasswordValid($entity, $property, $value): bool
+    private function getHashedMessage($entity, ?string $property = null): ?string
     {
-        $className = get_class($entity);
+        $plainMessage = $this->getPlainMessage($entity) ?? null;
+        if($plainMessage)
+            return $this->getMessageHasher($entity)->hash($plainMessage);
+
+        return ($property ? $this->getFieldValue($entity, $property) : null);
+    }
+
+    public function needsRehash($entity, string $hashedMessage): bool
+    {
+        return $this->getMessageHasher($entity)->needsRehash($hashedMessage);
+    }
+
+    public static function isValid($entity, $property, $hashedMessage): bool
+    {
+        $className = ClassUtils::getClass($entity);
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($className, Hashify::class);
         $that = $annotations[$property] ?? [];
 
         if( !($that = array_pop($that)) )
             throw new Exception("@Hashify annotation not found in \"$property\" for $className");
 
-        $hashedMessage = $that->getHashedMessage($entity, $property);
+        if($that->needsRehash($entity, $hashedMessage))
+            throw new Exception("Password in @Hashify annotation in \"$property\" for $className needs to be rehashed");
+        
+        return $that->getMessageHasher($entity)->verify($that->getHashedMessage($entity, $property), $value);
+    }
 
-        return $that->messageHasher->isPasswordValid($hashedMessage, $value, $that->getSalt(null, $entity));
+    private function getPlainMessage($entity): ?string
+    {
+        if (!$this->referenceColumn)
+            throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
+
+        if ($this->hasField($entity, $this->referenceColumn))
+            return $this->getFieldValue($entity, $this->referenceColumn);
+    }
+
+    private function erasePlainMessage($entity)
+    {
+        if (!$this->referenceColumn)
+            throw new Exception("Attribute \"plain\" missing for @Hashify in " . ClassUtils::getClass($entity));
+
+        return $this->setFieldValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
     }
 
     public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool

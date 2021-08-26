@@ -53,7 +53,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 {
     // TODO: Remove the two next methods in S6.0
     public function getUsername() { return $this->getUserIdentifier(); }
-    public function getSalt() {}
+    public function getSalt() { return null; }
     // TODO-END
     
     /**
@@ -73,6 +73,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Email(groups={"new", "edit"})
      */
     protected $email;
+
+    /**
+     * @ORM\Column(type="string", length=16)
+     */
+    protected $locale;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $timezone;
 
     /**
      * @var string Plain password should be empty unless you want to change it
@@ -362,7 +372,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @see UserInterface
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return (string) $this->password;
     }
@@ -401,6 +411,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function setPlainPassword(string $password): void
     {
         $this->plainPassword = $password;
+        $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
     }
 
     public function getCreatedAt(): ?\DateTimeInterface
@@ -445,7 +456,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function verified(bool $isVerified = true): self
+    public function verify(bool $isVerified = true): self
     {
         return $this->setIsVerified($isVerified);
     }

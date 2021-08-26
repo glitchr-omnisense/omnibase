@@ -96,11 +96,15 @@ class UserCrudController extends AbstractCrudController
         yield RoleField::new('roles')->allowMultipleChoices();
         foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
             yield $yield;
-
+    
         yield BooleanField::new("isVerified")->onlyOnIndex();
         foreach ( ($callbacks["isVerified"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
+        yield BooleanField::new("isApproved")->onlyOnIndex();
+        foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+            
         yield BooleanField::new("isEnabled")->onlyOnIndex();
         foreach ( ($callbacks["isEnabled"] ?? $defaultCallback)() as $yield)
             yield $yield;

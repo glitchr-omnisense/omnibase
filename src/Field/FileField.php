@@ -5,7 +5,7 @@ namespace Base\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Base\Field\Type\FileType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
@@ -20,13 +20,13 @@ final class FileField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel($label)
-            ->setTemplateName('crud/field/image')
+            ->setTemplateName('crud/field/file')
             ->setFormType(FileType::class)
-            ->addCssClass('field-avatar')
+            ->addCssClass('field-file')
+            ->addCssClass('file-widget')
             ->setTemplatePath('@Base/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
-            ->setFormTypeOption("data_class", null)
-            ->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+            ->setFormTypeOptionIfNotSet("data_class", null);
     }
 
     public function setMultipleFiles(bool $multipleFiles = true): self

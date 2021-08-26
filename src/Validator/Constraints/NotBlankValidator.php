@@ -31,15 +31,7 @@ class NotBlankValidator extends ConstraintValidator
 
             $this->context->buildViolation($constraint->message . ".property")
                 ->setParameter('{value}', $this->formatValue($object))
-                ->addViolation();
-        }
-
-        if (is_object($object) && empty(array_filter(get_object_vars($object)))) {
-
-            $notifications = new Notification("Validator", $constraint->message . ".class");
-            $notifications->send("warning");
-
-            $this->context->buildViolation($constraint->message . ".class")
+                ->setTranslationDomain('validators')
                 ->addViolation();
         }
     }

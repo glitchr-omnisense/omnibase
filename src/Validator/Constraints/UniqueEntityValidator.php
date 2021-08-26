@@ -133,6 +133,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
         $invalidValue = $criteria[$errorPath] ?? $criteria[$fields[0]];
 
-        $this->buildViolation($invalidValue, $constraint);
+        $this->buildViolation($invalidValue, $constraint)
+        ->setTranslationDomain('validators');
     }
 }

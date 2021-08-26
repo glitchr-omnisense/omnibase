@@ -47,14 +47,6 @@ trait BaseNotificationTrait
             User::$notifier->addAdminRecipient($adminUser->getRecipient());
     }
 
-    public function getNotification($title, $content, $channels)
-    {
-        $notification = new Notification($title, $channels);
-        $notification->content($content);
-
-        return $notification;
-    }
-
     public function getAdminUsers() {
 
         $roles = $this->getParameterBag("base.notifier.admin_recipients");

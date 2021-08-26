@@ -24,6 +24,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
         $buildViolation
             ->setParameter('{{ value }}', $value)
+            ->setTranslationDomain('validators')
             ->addViolation();
 
         return $buildViolation;

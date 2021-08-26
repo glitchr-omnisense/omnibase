@@ -33,7 +33,7 @@ abstract class ConstraintEntity extends Constraint
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
             $firstField = $fields['fields'][0] ?? "unknown";
 
-            $this->message = "validators." .
+            $this->message = 
                 self::camelToSnakeCase($firstField) .".".
                 self::camelToSnakeCase($constraintName);
         }
@@ -52,7 +52,7 @@ abstract class ConstraintEntity extends Constraint
 
         $constraintName = explode("\\", get_called_class());
         $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
-        $this->message = "validators.".
+        $this->message = 
             self::camelToSnakeCase($classname).".".
             self::camelToSnakeCase($firstField).".".
             self::camelToSnakeCase($constraintName);

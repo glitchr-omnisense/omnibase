@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  */
 class FileSize extends Constraint
 {
-    public $message = 'validators.file.maxSize';
+    public $message = 'file.maxSize';
 
     protected string $max;
 

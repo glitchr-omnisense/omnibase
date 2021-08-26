@@ -39,8 +39,8 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom_loader");
         if($useCustomLoader) {
 
-            $paths = $baseService->getParameterBag("base.twig.form_themes");
             $rootPath = $baseService->getParameterBag("base.twig.default_path");
+            $paths = $baseService->getParameterBag("base.twig.form_themes");
 
             parent::__construct($paths, $rootPath);
 

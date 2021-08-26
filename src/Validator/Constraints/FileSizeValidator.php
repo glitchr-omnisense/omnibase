@@ -28,6 +28,7 @@ class FileSizeValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->message)
             ->setParameter('{0}', $constraint->getMaxSizeStr())
             ->setParameter('{1}', $constraint->getSizeStr($entry->getSize()))
+            ->setTranslationDomain('validators')
             ->addViolation();
         }
     }

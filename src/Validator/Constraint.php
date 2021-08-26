@@ -19,7 +19,7 @@ class Constraint extends \Symfony\Component\Validator\Constraint
 
             $classname = explode("\\", get_called_class());
             $classname = array_pop($classname);
-            $this->message = "validators." . self::camelToSnakeCase($classname);
+            $this->message = self::camelToSnakeCase($classname);
         }
 
         parent::__construct($options, $groups, $payload);

@@ -52,15 +52,12 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function start(Request $request, AuthenticationException $authException = null)
     {
-        return new RedirectResponse(
-            $this->router->generate(self::LOGIN_ROUTE)
-        );
+        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
     }
 
     public function supports(Request $request): ?bool
     {
-        return self::LOGIN_ROUTE === $request->attributes->get('_route')
-            && $request->isMethod('POST');
+        return self::LOGIN_ROUTE === $request->attributes->get('_route') && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): PassportInterface
@@ -69,6 +66,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $password  = $request->request->get('password');
         $csrfToken = $request->request->get('_csrf_token');
 
+        dump($password);
+        
         $request->getSession()->set(Security::LAST_USERNAME, $userIdentifier);
 
         return new Passport(
@@ -102,6 +101,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
+        dump($exception);
+        
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
     }
 }

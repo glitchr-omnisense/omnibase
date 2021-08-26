@@ -1,13 +1,6 @@
 {% extends 'email.html.twig' %}
 
 {% block content %}
-<h1>Hi {{ user.getUsername() }} ! </h1>
-
-<p> Your account has been validated by an administrator. You can now sign in!<br/>
-Click here to go to the <a href='{{ path("base_login") }}'>login</a> page.
-</p>
-
-<p>
-    Cheers!
-</p>
+<b>{{ user.getUsername() }}</b> is ready for validation !<br/>
+Click here to go to the <a href='{{ path("base_dashboard") }}'>dashboard</a>.
 {% endblock %}

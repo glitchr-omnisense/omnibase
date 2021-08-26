@@ -67,7 +67,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     /**
      * @ORM\Column(type="json")
      */
-    protected $channels;
+    protected $channels = [];
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -90,17 +90,27 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     protected $isRead;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime", nullable="true")
      */
-    protected $sentAt = [];
+    protected $sentAt = null;
 
     protected ?string $projectDir = null;
     
-    protected ?BaseTwigExtension $translator = null;
-    public function __construct($subject, ?string $content = null, array $parameters = array())
+    protected string $backtrace = "";
+    public function getBacktrace() 
     {
-        $this->recipient = new ArrayCollection();
+        return $this->backtrace;
+    }
 
+    protected ?BaseTwigExtension $translator = null;
+    public function __construct($content = null, array $parameters = array())
+    {
+        $backtrace = debug_backtrace()[0];
+        $this->backtrace = $backtrace["file"].":".$backtrace["line"];
+
+        $this->recipient = new ArrayCollection();
+        $this->subject = "";
+        
         // Inject service from base class..
         if (User::getNotifier() == null)
             throw new Exception("Notifier not found in User class");
@@ -118,37 +128,24 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->context = [];
         $this->isRead = false;
 
-        
         // Formatting strings if exception passed as argument
-        if ( $subject instanceof ExceptionEvent ) {
+        if ( $content instanceof ExceptionEvent ) {
 
-            $event     = $subject;
-            $exception = $event->getThrowable();
-
-            $this->setSubject("Exception");
+            $exception = $content->getThrowable();
             $this->setContent(
                 "<b>".$exception->getFile() . ":" . $exception->getLine()."</b>".
                 "<br/>".$exception->getMessage()
             );
 
-        } else if ($subject instanceof FlattenException) {
+        } else if ($content instanceof FlattenException) {
 
-            $exception = $subject;
-
-            $this->setSubject("Exception");
             $this->setContent(
-                "<b>" . $exception->getFile() . ":" . $exception->getLine() . "</b>" .
-                    "<br/>" . $exception->getMessage()
+                "<b>" . $content->getFile() . ":" . $content->getLine() . "</b>" .
+                "<br/>" . $content->getMessage()
             );
-
-        } else if(!$content){
-
-            $this->setSubject("Unknown");
-            $this->setContent($this->translator->trans2($subject, $parameters) ?? "");
 
         } else {
 
-            $this->setSubject($this->translator->trans2($subject, $parameters) ?? "");
             $this->setContent($this->translator->trans2($content, $parameters) ?? "");
         }
     }
@@ -262,11 +259,24 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function setHtmlTemplate(?string $htmlTemplate, ?array $context = null)
     {
         $this->htmlTemplate = $htmlTemplate;
-        if($context) $this->setContext($context);
 
-        if(array_key_exists("subject", $context))
-            $this->setSubject($context["subject"]);
+        if($context) {
 
+            if(array_key_exists("subject", $context)) {
+                $context["subject"] = $this->translator->trans2($context["subject"], $context);
+                $this->setSubject($context["subject"] ?? "");
+            }
+            if(array_key_exists("content", $context)) {
+                $context["content"] = $this->translator->trans2($context["content"], $context);
+                $this->setContent($context["content"] ?? "");
+            }
+            if(array_key_exists("excerpt", $context)) {
+                $context["excerpt"] = $this->translator->trans2($context["excerpt"], $context);
+                $this->setExcerpt($context["excerpt"] ?? "");
+            }
+
+            $this->addContext($context);
+        }
         return $this;
     }
 
@@ -344,6 +354,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function asSmsMessage(SmsRecipientInterface $recipient, string $transport = null): ?SmsMessage
     {
+        // TODO..
         return null;
     }
 
@@ -353,70 +364,49 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         if($supportAddress instanceof NoRecipient)
             throw new Exception("Unexpected support address found.. Administrator has been notified");
 
+        $importance = $this->getImportance();
+        $this->setImportance(""); // Remove importance from email subject
+    
         if($this->isAdminChannels()) {
-
-            $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
-
-            $subject = "Fwd: " . $this->getSubject();
-            $content = $user . " forwarded notification: \"" . $this->getContent() . "\"";
-
-            $notification = EmailMessage::fromNotification($this, $recipient, $transport);
-            $email = $notification->getMessage();
-            foreach($context as $key => $value) {
             
-                if(!$value) continue;
-                if(!is_string($value)) continue;
-                if(!str_starts_with($value, "cid:")) continue;
-                list($cid, $path) = explode(":", $value);
-
-                $email->embed(fopen($this->projectDir . "/" . $path, 'rb'), $path);
-            }
-
-            $email
-                ->subject($subject)
-                ->from($supportAddress->getEmail())
-                ->htmlTemplate("@Base/email/notifier/default.html.twig")
-                ->context($this->getContext([
-                    "content" => $content, 
-                    "excerpt" => $this->excerpt, 
-                    "footer" => $this->footer
-                ]));
+            $subject = "Fwd: " . $this->getSubject();
+            
+            $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
+            $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
 
         } else {
 
             $subject = $this->getSubject();
             $content = $this->getContent();
-           
-            $importance = $this->getImportance();
-            $this->setImportance("");
-
-            $context = $this->getContext([
-                "content" => $content, 
-                "excerpt" => $this->excerpt, 
-                "footer" => $this->footer
-            ]);
-
-            $notification = EmailMessage::fromNotification($this, $recipient, $transport);
-            $email = $notification->getMessage();
-            foreach($context as $key => $value) {
-            
-                if(!$value) continue;
-                if(!is_string($value)) continue;
-                if(!str_starts_with($value, "cid:")) continue;
-                list($cid, $path) = explode(":", $value);
-
-                $email->embed(fopen($this->projectDir . "/" . $path, 'rb'), $path);
-            }
-
-            $email
-                ->subject($subject)
-                ->from($supportAddress->getEmail())
-                ->htmlTemplate($this->htmlTemplate)
-                ->context($context);
-
-            $this->setImportance($importance);
         }
 
+        $notification = EmailMessage::fromNotification($this, $recipient, $transport);
+        $email = $notification->getMessage(); // Embed image inside email (cid:/)
+        $context = $this->getContext([
+            "importance" => $importance,
+            "subject" => $subject,
+            "content" => $content, 
+            "excerpt" => $this->excerpt, 
+            "footer_text" => $this->getFooter(),
+        ]);
+
+        foreach($context as $key => $value) {
+        
+            if(!$value) continue;
+            if(!is_string($value)) continue;
+            if(!str_starts_with($value, "cid:")) continue;
+            list($cid, $path) = explode(":", $value);
+
+            $email->embed(fopen($this->projectDir . "/" . $path, 'rb'), $path);
+        }
+
+        $email
+            ->subject($subject)
+            ->from($supportAddress->getEmail())
+            ->htmlTemplate($this->htmlTemplate)
+            ->context($context);
+
+        $this->setImportance($importance);
         return $notification;
     }
 
@@ -424,19 +414,25 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     {
         $chatMessage = ChatMessage::fromNotification($this, $recipient, $transport);
 
-        if (!$this->isAdminChannels())
-            $subject = "[" . $this->getSubject() . "] " . $this->getContent();
-        else
-            $subject = "[Fwd: " . $this->getSubject()."] " . $this->getContent();
+        $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
+        if($this->isAdminChannels()) {
+            
+            $subject = "Fwd: " . $this->getSubject();
+            $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
+
+        } else {
+
+            $subject = $this->getSubject();
+            $content = $this->getContent();
+        }
 
         $username = ($this->user ? $this->user->getUsername() : "User \"" . User::getIp() . "\"");
         switch ($transport) {
-
             case 'discord':
                 $chatMessage->options(new DiscordOptions(["username" => $username]));
         }
 
-        $chatMessage->subject($subject);
+        $chatMessage->subject("[" . $subject. "] " . $content);
         return $chatMessage;
     }
 
@@ -445,12 +441,9 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return User::getNotifierPolicy()->getChannels($this->importance);
     }
 
-    public function getChannels(RecipientInterface $recipient): array
+    public function getChannels(?RecipientInterface $recipient = null): array
     {
-        if( !empty($this->channels) ) return $this->channels;
-
-        if( $this->isAdminChannels() ) return $this->getAdminChannels($recipient);
-        else return $this->getUserChannels($recipient);
+        return $this->channels;
     }
 
     public function setChannels(array $channels): self
@@ -557,6 +550,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         // Set importance of the notification
         $this->setImportance($importance);
         $this->setAdminChannels(false);
+
+        $channelBak = $this->getChannels();
         $this->setChannels([]);
 
         // Determine recipient information
@@ -564,8 +559,11 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         foreach ($recipients as $recipient) {
 
             // Set selected channels, if any
-            $channels    = $this->getChannels($recipient);
-            if (empty($channels)) return $this;
+            $channels    = $this->getUserChannels($recipient);
+            if (empty($channels)) 
+                throw new Exception("No valid channel for the notification \"".$this->getBacktrace()."\" sent with \"".$importance."\"");
+
+            $channelBak = array_merge($channelBak, $channels);
             $this->setChannels($channels);
 
             // Submit notification
@@ -573,6 +571,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
 
         $this->sentAt = new \DateTime("now");
+        $this->setChannels($channelBak);
+
         return $this;
     }
 
@@ -581,6 +581,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         // Set importance of the notification
         $this->setImportance(self::IMPORTANCE_DEFAULT);
         $this->setAdminChannels(false);
+
+        $channelBak = $this->getChannels();
         $this->setChannels([]);
 
         // NB: Main recipient is put last, therefore the channel set are matching
@@ -592,14 +594,17 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             if (!$recipient instanceof Recipient  ) continue;
 
             // Determine channels
-            $channels    = array_intersect($channels, $this->getChannels($recipient));
-            if (empty($channels)) continue;
+            $channels   = array_intersect($channels, $this->getUserChannels($recipient));
+            $channelBak = array_merge($channelBak, $channels);
 
+            if (empty($channels)) continue;
             $this->setChannels($channels);
 
             // Send notification
             User::getNotifier()->send($this, $recipient);
         }
+
+        $this->setChannels($channelBak);
 
         $this->sentAt = new \DateTime("now");
         return $this;
@@ -612,7 +617,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->setAdminChannels(true);
 
         // Reset channels and keep here them for later use
-        $channelsBak = $this->channels;
+        $channelBak = $this->getChannels();
         $this->setChannels([]);
 
         // Back up channels and importance variables..
@@ -634,7 +639,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
 
         // Put back channels
-        $this->channels = $channelsBak;
+        $this->setAdminChannels(false);
+        $this->setChannels($channelBak);
         return $this;
     }
 }

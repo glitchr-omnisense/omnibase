@@ -6,6 +6,7 @@ use Base\Service\BaseService;
 use Base\Controller\BaseController;
 use Base\Entity\User\Notification;
 use Exception;
+use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Twig\Environment;
@@ -23,12 +24,15 @@ use Symfony\Component\DependencyInjection\Container;
 
 final class BaseTwigExtension extends AbstractExtension
 {
+    protected string $projectDir;
     public function __construct(TranslatorInterface $translator) {
 
         BaseController::$foundBaseTwigExtension = true;
 
         $this->translator = $translator;
         $this->intlExtension = new IntlExtension();
+
+        $this->projectDir = dirname(__FILE__, 6); // Might be computed in a way that doesn't rely on file position..
     }
 
     public function getFilters()
@@ -36,10 +40,30 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFilter('url',         [$this, 'url']),
             new TwigFilter('trans2',      [$this, 'trans2']),
+            new TwigFilter('highlight',   [$this,'highlight']),
+            new TwigFilter('image',       [$this,'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFilter('datetime',    [$this,'datetime'], ['needs_environment' => true]),
             new TwigFilter('lessThan',    [$this,'lessThan'], ['needs_environment' => true]),
             new TwigFilter('greaterThan', [$this,'greaterThan'], ['needs_environment' => true])
         ];
+    }
+
+    public function image(Environment $env, array $context, $image, WrappedTemplatedEmail $email = null): string
+    {
+        $isEmail = array_key_exists("email", $context) && ($context["email"] instanceof WrappedTemplatedEmail);
+        if($isEmail) {
+
+            $email = $context["email"];
+            $path = $email->image($image);
+
+        } else {
+
+            $path = $env->getLoader()->getSourceContext($image)->getPath();
+            if (substr($path, 0, strlen($this->projectDir)) == $this->projectDir)
+                $path = substr($path, strlen($this->projectDir));
+        }
+
+        return $path;
     }
 
     public function datetime(Environment $env, $date, string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): string
@@ -87,8 +111,17 @@ final class BaseTwigExtension extends AbstractExtension
     public function url(string $url)
     {
         $parseUrl = parse_url($url);
-        if(!array_key_exists("schema", $parseUrl))
-            $url = ($_SERVER['HTTPS'] ? "https://" : "http://") . $_SERVER['SERVER_NAME'] . (str_starts_with($url, "/") ? "" : "/") . $url;
+        if(!array_key_exists("schema", $parseUrl)) {
+            
+            if(str_starts_with($url, "http://") || str_starts_with($url, "https://")) $domain = "";
+            else $domain = ($_SERVER['HTTPS'] ? "https://" : "http://") . $_SERVER['SERVER_NAME'];
+
+            if (!empty($domain)) $joint = (str_starts_with($url, "/")) ? "" : "/";
+            else $joint = "";
+            
+            $url = $domain . $joint . $url;
+        }
+
         return $url;
     }
 

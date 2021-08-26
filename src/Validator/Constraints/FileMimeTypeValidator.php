@@ -37,6 +37,7 @@ class FileMimeTypeValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{0}', count($mimeTypes))
                 ->setParameter('{1}', implode(", ", $types))
+                ->setTranslationDomain('validators')
                 ->addViolation();
         }
     }

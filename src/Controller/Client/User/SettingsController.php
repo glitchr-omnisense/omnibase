@@ -52,12 +52,12 @@ class SettingsController extends AbstractController
 
             $submittedToken = $request->request->get('login2_fa_form')["_csrf_token"] ?? null;
             if (!$this->isCsrfTokenValid('2fa', $submittedToken)) {
-                $notification = new Notification("Invalid token", "Invalid CSRF token detected. We cannot proceed with the 2FA authentification");
+                $notification = new Notification("Invalid CSRF token detected. We cannot proceed with the 2FA authentification");
                 $notification->send("danger");
 
             } else {
 
-                $notification = new Notification("Two-factor authentification", "The 2FA authentification is not yet enabled. Try this later");
+                $notification = new Notification("The 2FA authentification is not yet enabled. Try this later");
                 $notification->send("danger");
                 // $newUser->setTotpSecret($form->get('totpSecret')->getData());
                 // $entityManager = $this->getDoctrine()->getManager();

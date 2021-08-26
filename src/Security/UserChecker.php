@@ -8,6 +8,7 @@ use Base\Service\BaseService;
 use Exception;
 use Symfony\Component\Security\Core\Exception\AccountExpiredException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
+use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -18,17 +19,15 @@ class UserChecker implements UserCheckerInterface
 
     public function checkPreAuth(UserInterface $user)
     {
-        if (!$user instanceof User) return;
+        return false;
+        if (!$user instanceof User)
+            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
 
-        if (!$user->isApproved())
-            throw new CustomUserMessageAccountStatusException(
-               $this->translator->trans("login.pending", [], "notifications")
-            );
-
-        if ($user->isBanned())
-            throw new CustomUserMessageAccountStatusException(
-                $this->translator->trans("login.banned", [], "notifications")
-            );
+        if ($user->isBanned()) {
+            $notification = new Notification("notifications.login.banned");
+            $notification->send("danger");
+            throw new CustomUserMessageAccountStatusException();
+        }
     }
 
     public function checkPostAuth(UserInterface $user)

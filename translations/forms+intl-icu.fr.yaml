@@ -22,14 +22,20 @@ login:
     noAccount: "Pas encore de compte ?"
     forgotPassword: "Mot de passe oublié ?"
 
-lostPassword:
+resetPassword:
     title: "Réinitialiser votre mot de passe"
-    text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
+        Duis non ornare tortor, sit amet tincidunt orci. 
+        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
+        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
+    descriptionAction: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
         Duis non ornare tortor, sit amet tincidunt orci. 
         Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
         Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
     email: "Adresse e-mail"
     submit: "Envoyer la demande"
+    newPassword: "Nouveau mot de passe"
+    newPasswordConfirm: "Confirme nouveau mot de passe"
 
 crud:
     roles:

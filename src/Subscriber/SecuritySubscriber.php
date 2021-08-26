@@ -86,14 +86,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onRegistration(UserEvent $event)
     {
-//        dump("REGISTRATION EVENT: SECURITY SUSCRIBER");
+        dump("REGISTRATION EVENT: SECURITY SUSCRIBER");
     }
 
     private const EnableCache = true;
     private const ExpirationTime = 3600;
     public function onValidation(UserEvent $event)
     {
-    //    dump("VALIDATION EVENT: SECURITY SUSCRIBER");
+        dump("VALIDATION EVENT: SECURITY SUSCRIBER");
       //  dump($event);
         // $entity = $event->getEntityInstance();
         // if (!($entity instanceof User)) return;
@@ -134,30 +134,41 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onRequest(RequestEvent $event)
     {
-        $request = $event->getRequest();
-
         // Notify user about the authentication method
         if (!($user = $this->security->getUser())) return;
 
+        if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
+            return $this->baseService->redirectToRoute($event, "base_profile");
+
         if (! $user->isVerified()) {
 
-            $routeConfirmEmail = $this->baseService->getRoute("base_register_email");
-            $notification = new Notification("Verify account", "notifications.register.verifyEmail.pending", [$routeConfirmEmail]);
-            $notification->send("warning");
+            $this->baseService->redirectToRoute($event, "base_profile", "/^(app|base)_((register|verify)_email|logout|login|settings|profile)$/", function() {
+                
+                $notification = new Notification("notifications.verifyEmail.pending", [
+                    $this->baseService->getRoute("base_register_email")
+                ]);
+                $notification->send("warning");
+            });
 
-            $this->baseService->redirectToRoute($event, "base_profile", "/^(app|base)_((register|verify)_email|logout)$/");
+        } else if (! $user->isApproved()) {
+
+            $this->baseService->redirectToRoute($event, "base_profile", "/^(app|base)_((register|verify)_email|logout|login|settings|profile)$/", function() {
+
+                $notification = new Notification("notifications.login.pending");
+                $notification->send("warning");
+            });
         }
 
         if ($this->security->isGranted('IS_IMPERSONATOR')) {
 
-            $notification = new Notification("Impersonator", "notifications.impersonator", [$user]);
+            $notification = new Notification("notifications.impersonator", [$user]);
             $notification->send("warning");
         }
     }
 
     public function onLoginFailure(LoginFailureEvent $event)
     {
-        $notification = new Notification("Invalid credentials", "notifications.login.failed");
+        $notification = new Notification("notifications.login.failed");
         $notification->send("danger");
     }
 
@@ -168,7 +179,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         
 		    if (!$user->isLegit()) {
 
-                $notification = new Notification("Login", "notifications.login.social", [$user]);
+                $notification = new Notification("notifications.login.social", [$user]);
                 $notification->send("success");
 
             } else if($user->isVerified()) {
@@ -180,7 +191,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 else
                     $title = "notifications.login.success.alien";
 
-                $notification = new Notification("Login", $title, [$user]);
+                $notification = new Notification($title, [$user]);
                 $notification->send("success");
 
             }
@@ -319,6 +330,5 @@ class SecuritySubscriber implements EventSubscriberInterface
         self::$exceptionOnHold = $exception;
         $this->storeLog($event, $exception);
         self::$exceptionOnHold = null;
-
     }
 }

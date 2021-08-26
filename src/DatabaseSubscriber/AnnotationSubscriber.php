@@ -143,7 +143,7 @@ class AnnotationSubscriber implements EventSubscriber {
     }
 
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
-    {
+    {        
         $entity         = $event->getObject();
         $className      = get_class($entity);
 
@@ -152,6 +152,7 @@ class AnnotationSubscriber implements EventSubscriber {
 
         $classMetadata  = $this->entityManager->getClassMetadata($className);
         $annotations    = $this->annotationReader->getAnnotations($className);
+        
         foreach ($annotations[AnnotationReader::TARGET_CLASS][$className] as $entry) {
 
             if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))

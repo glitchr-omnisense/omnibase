@@ -49,10 +49,12 @@
             <argument type="service" id="twig" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.form.factory" />
-            <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="notifier" />
             <argument type="service" id="notifier.channel_policy" />
             <argument type="service" id="slugger" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="security.csrf.token_manager" />
         </service>
 
         <service id="Base\Twig\BaseTwigExtension" >
@@ -86,6 +88,7 @@
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="base.service" />
             <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="App\Repository\User\TokenRepository" />
         </service>
         <service id="Base\Controller\MaintenanceController">
             <tag name="controller.service_arguments" />
@@ -370,6 +373,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="security.authentication_utils" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
