@@ -64,12 +64,12 @@ final class BaseTwigExtension extends AbstractExtension
             $months        = fmod  ($remainingTime, 12);
             $years         = intdiv($remainingTime, 12);
 
-            return trim($this->trans2("messages.base.years",   [$years]).
-                   $this->trans2("messages.base.months",  [$months]).
-                   $this->trans2("messages.base.days",    [$days]).
-                   $this->trans2("messages.base.hours",   [$hours]).
-                   $this->trans2("messages.base.minutes", [$minutes]).
-                   $this->trans2("messages.base.seconds", [$seconds]));
+            return trim($this->trans2("messages.base.years",   [$years])  ." ".
+                        $this->trans2("messages.base.months",  [$months]) ." ".
+                        $this->trans2("messages.base.days",    [$days])   ." ".
+                        $this->trans2("messages.base.hours",   [$hours])  ." ".
+                        $this->trans2("messages.base.minutes", [$minutes])." ".
+                        $this->trans2("messages.base.seconds", [$seconds]));
         }
 
         return "";

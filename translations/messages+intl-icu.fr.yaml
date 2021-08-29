@@ -12,6 +12,8 @@ login:
     title: "Se connecter"
 
 base:
+    csrfToken: "Jeton CSRF invalide. Merci de recommencer."
+    return: "Page précédente"
     years: "{0, plural,
                 =0 { }
                 =1 {# an }

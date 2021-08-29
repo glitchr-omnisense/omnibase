@@ -42,7 +42,7 @@ adminApproval:
     approvedTitle: "Compte approuvé !"
     approved: "Ton compte vient d'être approuvé par un administration. Tu peux à présent te connecter et utiliser ton compte !"
     verifyFirst: "L'email de ton compte doit d'abord être vérifié."
-    alreadySent: "Merci de patienter le temps qu'un administrateur valide ta demande."
+    alreadySent: "Merci à présent de patienter le temps qu'un administrateur valide ta demande."
 
 verifyEmail:
     title: "Confirme ton adresse mail !"

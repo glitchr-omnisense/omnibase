@@ -223,17 +223,26 @@ trait BaseSymfonyTrait
     }
 
     public function redirect(string $url, int $state = 302): RedirectResponse { return new RedirectResponse($url, $state); }
-    public function redirectToRoute($event, string $route, string $exceptionPattern = "/^$/", $callback = null)
+    public function redirectToRoute($event, string $route, $exceptionPattern = null, $callback = null)
     {
         $route     = $this->getRoute($route) ?? $route;
         $routeName = $this->getRouteName($route) ?? $route;
-        $currentRouteName = $this->getRouteName();
 
+        $currentRouteName = $this->getRouteName();
         if ($currentRouteName == $routeName)
             return false;
 
-        if (preg_match($exceptionPattern, $currentRouteName))
-            return false;
+        if($exceptionPattern) {
+        
+            if(is_string($exceptionPattern))
+                $exceptionPattern = [$exceptionPattern];
+
+            foreach($exceptionPattern as $pattern) {
+                
+                if (preg_match($pattern, $currentRouteName))
+                    return false;
+            }
+        }
 
         if(is_callable($callback)) $callback();
         $event->setResponse(new RedirectResponse($route));

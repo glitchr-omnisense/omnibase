@@ -160,17 +160,22 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
             return $this->baseService->redirectToRoute($event, "base_profile");
 
+        $exceptionList = [
+            "/^(app|base)_(verifyEmail(_token)*)$/",
+            "/^(app|base)_(resetPassword(_token)*)$/",
+            "/^(app|base)_(logout|settings|profile)$/"];
+
         if (! $user->isVerified()) {
 
-            $this->baseService->redirectToRoute($event, "base_profile", "/^(app|base)_((register|verify)_email|logout|login|settings|profile)$/", function() {
+            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
                 
-                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_register_email")]);
+                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
                 $notification->send("warning");
             });
 
         } else if (! $user->isApproved()) {
 
-            $this->baseService->redirectToRoute($event, "base_profile", "/^(app|base)_((register|verify)_email|logout|login|settings|profile)$/", function() {
+            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
 
                 $notification = new Notification("notifications.login.pending");
                 $notification->send("warning");

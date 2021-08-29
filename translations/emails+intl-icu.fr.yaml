@@ -1,4 +1,7 @@
-action_text: "Voir le lien"
+action_text: Voir le lien
+unsubscribe:  "Pour se désabonner <a href=\"{0}\">cliquez ici</a>"
+returnHomepage:  "Click <a href='/'>here</a> to return to home page"
+itWorks: "Ca fonctionne !"
 
 resetPassword:
     subject: "Réinitialiser ton mot de passe"
@@ -14,10 +17,12 @@ verifyEmail:
     expiry: "Ce lien expirera dans {0}."
 
 adminApproval:
+  subject: "Validation demandée"
   content: <b>{0} \#{1}</b> est prêt pour validation !<br/>
   action_text: "Page d'administration"
 
 adminApprovalConfirm:
+  subject: "Compte validé !"
   content: "Bonjour <b>{0}</b> ! Ton compte vient d'être approuvé par un administrateur.
   Tu peux à présent te connecter ! Clique sur le lien suivant pour te connecter"
   action_text: "Se connecter"

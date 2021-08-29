@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block action_url %}
-    {{ path("base_verify_email", {"token": token.get()}) }}
+    {{ path("base_verifyEmail_token", {"token": token.get()}) }}
 {% endblock %}
 
 {% block footer_text %}

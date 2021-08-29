@@ -47,15 +47,6 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/clean/security", name="base_clean_security")
-     */
-    public function Clean()
-    {
-        //TODO.. Perhaps commands
-        throw new Exception("Clean UserLog not implemented yet");
-    }
-
-    /**
      * @Route("/login", name="base_login")
      */
     public function Login(Request $request, AuthenticationUtils $authenticationUtils): Response
@@ -136,7 +127,7 @@ class SecurityController extends AbstractController
 
         // If user is found.. go to the logout request page
         if($this->getUser())
-            return $this->redirectToRoute('base_logout_request');
+            return $this->redirectToRoute('base_logoutRequest');
 
         // Check if the session is found.. meaning, the user just logged out
         if($user = $this->baseService->removeSession("_user")) {
@@ -163,7 +154,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/logout-request", name="base_logout_request")
+     * @Route("/logout-request", name="base_logoutRequest")
      */
     public function LogoutRequest()
     {
@@ -225,7 +216,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/verify-email", name="base_register_email")
+     * @Route("/verify-email", name="base_verifyEmail")
      * @IsGranted("ROLE_USER")
      */
     public function VerifyEmailRequest(Request $request, NotifierInterface $notifier)
@@ -258,7 +249,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/verify-email/{token}", name="base_verify_email")
+     * @Route("/verify-email/{token}", name="base_verifyEmail_token")
      * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
     public function VerifyEmailResponse(Request $request): Response
@@ -333,7 +324,7 @@ class SecurityController extends AbstractController
     /**
      * Display & process form to request a password reset.
      *
-     * @Route("/reset-password", name="base_reset_password")
+     * @Route("/reset-password", name="base_resetPassword")
      */
     public function ResetPasswordRequest(Request $request): Response
     {
@@ -382,7 +373,7 @@ class SecurityController extends AbstractController
     /**
      * Validates and process the reset URL that the user clicked in their email.
      *
-     * @Route("/reset-password/{token}", name="base_reset_password_token")
+     * @Route("/reset-password/{token}", name="base_resetPassword_token")
      */
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {

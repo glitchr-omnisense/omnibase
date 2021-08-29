@@ -4,10 +4,6 @@
     {{ "emails.adminApproval.subject"|trans2|raw }}
 {% endblock %}
 
-{% block subject %}
-    {{ "emails.adminApproval.subject"|trans2|raw }}
-{% endblock %}
-
 {% block content %}
     {{ "emails.adminApproval.content"|trans2([
         user.getUsername(), 
@@ -21,12 +17,4 @@
 
 {% block action_url %}
     {{ path("base_dashboard") }}
-{% endblock %}
-
-{% block footer_text %}
-
-    {% if token.getExpiry() is not null %}
-        {{ "emails.adminApproval.expiry"|trans2([token.getRemainingTime()|time])|raw }}
-    {% endif %}
-
 {% endblock %}

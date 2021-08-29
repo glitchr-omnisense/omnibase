@@ -1,4 +1,3 @@
-
 dashboard:
     title: "Go to dashboard"
 
@@ -12,6 +11,8 @@ login:
     title: "Sign In"
 
 base: 
+    return: "Go back to previous page"
+    csrfToken: "Invalid CSRF token. Please try again"
     years: "{0, plural,
                 =0 { }
                 =1 {# year }

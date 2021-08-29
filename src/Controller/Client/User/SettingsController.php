@@ -72,7 +72,7 @@ class SettingsController extends AbstractController
                 // } else {
 
                 //     // generate a signed url and email it to the user
-                //     $this->emailVerifier->sendEmailConfirmation('base_verify_email', $newUser,
+                //     $this->emailVerifier->sendEmailConfirmation('base_verifyEmail_token', $newUser,
                 //         (new TemplatedEmail())
                 //             ->from(new Address('support@example.com', 'Support'))
                 //             ->to($newUser->getEmail())
