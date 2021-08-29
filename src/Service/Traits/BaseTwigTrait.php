@@ -2,6 +2,7 @@
 
 namespace Base\Service\Traits;
 
+use Base\Twig\BaseTwigExtension;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;
 
@@ -17,11 +18,6 @@ trait BaseTwigTrait {
     public function getFormFactory()
     {
         return $this->formFactory;
-    }
-
-    public function getTwig(): ?Environment
-    {
-        return $this->twig;
     }
 
     /**

@@ -178,6 +178,7 @@ class Log
     public function setUser(?User $user): self
     {
         $this->user = $user;
+        $this->user->addLog($this);
 
         return $this;
     }

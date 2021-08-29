@@ -303,7 +303,6 @@ class Uploader extends AbstractAnnotation
 
     protected static function deleteFile(string $location, FilesystemAdapter $adapter = null)
     {
-        dump("REMOVE: ".$location);
         $adapter = $adapter ?? self::getAdapter();
         if (!self::getFilesystem($adapter)->fileExists($location))
             return false;

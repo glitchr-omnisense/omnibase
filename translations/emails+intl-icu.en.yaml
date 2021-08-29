@@ -1,0 +1,25 @@
+action_text: "See link"
+
+resetPassword:
+  subject: "Reset your password"
+  content: 
+    "You are receiving this email, because you asked to reset your password. 
+    If it wasn't you please consider changing your password. Please visit the following link to reset your password."
+  action_text: "Reset your password"
+  expiry: "This link will expire in {0}."
+
+verifyEmail:
+    subject: "Verify your email"
+    content: "Bravo ! You are receiving this email because you successfully sign up to our website.
+              Please confirm your email address by clicking the link below"
+    action_text: "Confirm my Email"
+    expiry: "This link will expire in {0}."
+
+adminApproval:
+  content: <b>{0} \#{1}</b> is ready for validation !
+  action_text: dashboard
+
+adminApprovalConfirm:
+  content: "Hi <b>{0}</b> ! Your account has been validated by an administrator. You can now sign in !<br/>
+           Click on the link below to visit the website"
+  action_text: Sign in!

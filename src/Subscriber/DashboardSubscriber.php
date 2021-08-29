@@ -27,12 +27,12 @@ class DashboardSubscriber implements EventSubscriberInterface
      */
     private $adminUrlGenerator;
 
-    public function __construct(BaseService $baseService, AdminUrlGenerator$adminUrlGenerator, AdminContextProvider $adminContextProvider)
+    public function __construct(BaseService $baseService, AdminUrlGenerator $adminUrlGenerator, AdminContextProvider $adminContextProvider)
     {
         $this->baseService = $baseService;
 
         $this->adminContextProvider = $adminContextProvider;
-        $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->adminUrlGenerator    = $adminUrlGenerator;
     }
 
     public static function getSubscribedEvents()

@@ -9,8 +9,8 @@ use Base\Entity\User;
 use Base\Service\Traits\BaseNotificationTrait;
 use Base\Service\Traits\BaseSecurityTrait;
 use Base\Service\Traits\BaseSymfonyTrait;
-use Base\Service\Traits\BaseUtilsTrait;
 use Base\Service\Traits\BaseTwigTrait;
+use Base\Service\Traits\BaseUtilsTrait;
 
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -26,6 +26,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Base\Repository\UserRepository;
+use Base\Service\Traits\BaseCommonTrait;
+use Base\Service\Traits\BaseUserTrait;
 use Base\Twig\Loader\FilesystemLoader;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use Symfony\Component\Notifier\Channel\ChannelPolicy;
@@ -62,24 +64,9 @@ final class BaseService implements RuntimeExtensionInterface
     private $rstack;
 
     /**
-     * @var RouterInterface
-     */
-    private $router;
-
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-
-    /**
      * @var AdminContextProvider
      */
     private $adminContextProvider;
-
-    /**
-     * @var Environment
-     */
-    private $twig;
 
     /**
      * @var Security
@@ -93,7 +80,6 @@ final class BaseService implements RuntimeExtensionInterface
         FormFactoryInterface $formFactory,
         NotifierInterface $notifier, ChannelPolicyInterface $notifierPolicy,
         SluggerInterface $slugger, 
-        
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         CsrfTokenManagerInterface $csrfTokenManager)
@@ -112,31 +98,33 @@ final class BaseService implements RuntimeExtensionInterface
         $this->tokenStorage = $tokenStorage;
         
         // Symfony basic services
-        $this->twig             = $twig;
 
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
-        $this->entityManager    = $entityManager;
-
         $this->rstack     = $this->container->get("request_stack");
-        $this->router     = $this->container->get("router");
+
+        $this->setTwig($twig);
+        $this->setRouter($this->container->get("router"));
+        $this->setEntityManager($entityManager);
 
         // Additional services related to user class
         $this->setTranslator($this->container->get("translator"));
-        $this->setNotifier($notifier, $notifierPolicy);
         $this->setSlugger($slugger);
         $this->setProjectDir($this->kernel->getProjectDir());
-
+        $this->setEntityManager($entityManager);
         $this->setUserProperty($this->getParameterBag("base.user.property"));
+        $this->setNotifier($notifier, $notifierPolicy);
 
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->rstack);
 
         $this->addJavascriptFile("/bundles/base/app.js");
-
-        $this->initSymfonyTrait();
     }
 
+    /*
+     * Common variables between traits 
+     */
+    use BaseCommonTrait;
 
     /*
      * Stylesheet and javascripts blocks

@@ -20,13 +20,7 @@ use Base\Database\Annotation\GenerateUuid;
 use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Slugify;
 
-use Base\EntityEvent\ThreadEvent;
 use Exception;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\String\Slugger\SluggerInterface;
-
-use Doctrine\ORM\Mapping\JoinColumn;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -70,24 +64,6 @@ class Thread
 
         $sections = (is_array(static::SECTION) ? static::SECTION : explode($separator, static::SECTION));
         return $sections;
-    }
-
-    /**
-     * @var SluggerInterface
-     */
-    public static $slugger = null;
-    public static function getSlugger(): ?SluggerInterface
-    {
-        return self::$slugger;
-    }
-
-    /**
-     * @var UrlGeneratorInterface
-     */
-    public static $router = null;
-    public static function getUrlGenerator(): ?UrlGeneratorInterface
-    {
-        return self::$router;
     }
 
     /**

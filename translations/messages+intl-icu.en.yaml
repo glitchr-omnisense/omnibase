@@ -1,0 +1,44 @@
+
+dashboard:
+    title: "Go to dashboard"
+
+profile:
+    title: "See my profile"
+
+logout:
+    title: "Log out"
+
+login:
+    title: "Sign In"
+
+base: 
+    years: "{0, plural,
+                =0 { }
+                =1 {# year }
+                other {# years }
+            }"
+    months: "{0, plural,
+                =0 { }
+                =1 {# month }
+                other {# months }
+            }"
+    days: "{0, plural,
+            =0 { }
+            =1 {# day }
+            other {# days }
+            }"
+    hours: "{0, plural,
+            =0 { }
+            =1 {# year }
+            other {# years }
+            }"
+    minutes: "{0, plural,
+                =0 { }
+                =1 {# minute }
+                other {# minutes }
+            }"
+    seconds: "{0, plural,
+                =0 { }
+                =1 {# second }
+                other {# seconds }
+            }"

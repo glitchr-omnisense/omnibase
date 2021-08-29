@@ -31,15 +31,19 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Uploader;
 use Base\Database\Annotation\Hashify;
+use Base\Service\BaseService;
 use DateTime;
 use Exception;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Notifier\Channel\ChannelPolicy;
+use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+
+use Base\Traits\BaseTrait;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -51,6 +55,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
  */
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface
 {
+    use BaseTrait;
+
     // TODO: Remove the two next methods in S6.0
     public function getUsername() { return $this->getUserIdentifier(); }
     public function getSalt() { return null; }
@@ -194,15 +200,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $avatar;
 
-    public function getAvatar(): ?string
-    {
-        return $this->avatar;
-    }
-    public function getAvatarFile(): ?File
-    {
-        return Uploader::getFile($this, "avatar");
-    }
-
+    public function getAvatar(): ?string { return $this->avatar; }
+    public function getAvatarFile(): ?File { return Uploader::getFile($this, "avatar"); }
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
@@ -211,6 +210,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function __construct()
     {
+        $this->isEnabled  = false;
+        $this->isApproved = false;
+        $this->isVerified = false;
+
         $this->tokens = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->permissions = new ArrayCollection();
@@ -223,10 +226,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->mentions = new ArrayCollection();
         $this->authoredMentions = new ArrayCollection();
         $this->likes = new ArrayCollection();
-
-        $this->isEnabled  = true;
-        $this->isApproved    = true;
-        $this->isVerified = false;
     }
 
     public static $property = "email";
@@ -253,16 +252,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $cookie[$key] ?? null;
     }
 
-    public static function getLocale(): string
-    {
-        return strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? "en", 0, 2));
-    }
-
-    public static function getTimezone(): \DateTimeZone
-    {
-        return new \DateTimeZone(date_default_timezone_get());
-    }
-
+    public static function getLocale(): string { return strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? "en", 0, 2)); }
+    public static function getTimezone(): \DateTimeZone { return new \DateTimeZone(date_default_timezone_get()); }
     public static function getIp(): ?string
     {
         $keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
@@ -274,10 +265,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return null;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getId(): ?int { return $this->id; }
 
     public function setId($id): self
     {
@@ -285,14 +273,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function sameAs($other): bool
-    {
-        return ($other->getId() == $this->getId());
-    }
+    public function sameAs($other): bool { return ($other->getId() == $this->getId()); }
 
 
     public function isBanned() {
-        return false; // TO DO
+        return false;
     }
 
     public function setSecret($secret): self
@@ -300,26 +285,15 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->secret = $secret;
         return $this;
     }
-    public function getSecret()
-    {
-        return $this->secret;
-    }
-
-    public function isTotpAuthenticationEnabled(): bool
-    {
-        return $this->secret ? true : false;
-    }
-
-    public function getTotpAuthenticationUsername(): string
-    {
-        return $this->getUserIdentifier();
-    }
+    public function getSecret() { return $this->secret; }
+    public function isTotpAuthenticationEnabled(): bool { return $this->secret ? true : false; }
+    public function getTotpAuthenticationUsername(): string { return $this->getUserIdentifier(); }
 
     const TOTP_LENGTH  = 6;
     const TOTP_TIMEOUT = 30;
-    public function getTotpAuthenticationConfiguration(): TotpConfigurationInterface
+    public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
     {
-        // You could persist the other configuration options in the user entity to make it individual per user.
+        if($this->secret == null) return null;
         return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
     }
 
@@ -328,13 +302,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     const ROLE_USER       = "ROLE_USER";
     const ROLE_ADMIN      = "ROLE_ADMIN";
     const ROLE_SUPERADMIN = "ROLE_SUPERADMIN";
+
     /**
      * @see UserInterface
      */
-    public function getRoles(): array
-    {
-        return array_unique($this->roles);
-    }
+    public function getRoles(): array { return array_unique($this->roles); }
 
     public function setRoles(array $roles): self
     {
@@ -359,23 +331,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function isSocialAccount(): bool
-    {
-        return in_array(User::ROLE_SOCIAL, $this->roles);
-    }
+    public function isSocialAccount(): bool { return in_array(User::ROLE_SOCIAL, $this->roles); }
 
-    public function isLegit(): bool
-    {
-        return (!$this->isSocialAccount() || $this->id > 0);
-    }
+    public function isLegit(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
 
     /**
      * @see UserInterface
      */
-    public function getPassword(): ?string
-    {
-        return (string) $this->password;
-    }
+    public function getPassword(): ?string { return (string) $this->password; }
 
     public function setPassword(string $password): self
     {
@@ -387,26 +350,18 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
-    {
-        // If you store any temporary, sensitive data on the user, clear it here
-        $this->plainPassword = null;
-    }
+    public function eraseCredentials() { $this->plainPassword = null; }
 
-    public function getUserIdentifier(): string
-    {
-        return $this->email;
-    }
+    public function getUserIdentifier(): string { return $this->email; }
 
-    public function erasePlainPassword() {
+    public function erasePlainPassword()
+    {
         $this->plainPassword = null;
+
         return $this;
     }
 
-    public function getPlainPassword(): ?string
-    {
-        return $this->plainPassword;
-    }
+    public function getPlainPassword(): ?string { return $this->plainPassword; }
 
     public function setPlainPassword(string $password): void
     {
@@ -414,16 +369,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
     }
 
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
+    public function getEmail(): ?string { return $this->email; }
     public function setEmail(string $email): self
     {
         $this->email = $email;
@@ -431,58 +377,45 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function isApproved(): bool
-    {
-        return $this->isApproved;
-    }
+    public function isApproved(): bool { return $this->isApproved; }
 
-
-    public function approve(bool $isApproved = true): self
+    public function setIsApproved(bool $isApproved = true): self
     {
         $this->isApproved = $isApproved;
-
         return $this;
     }
 
-    public function isVerified(): bool
-    {
-        return $this->isVerified;
-    }
+    public function approve(bool $isApproved = true): self { return $this->setIsApproved($isApproved); }
 
+    public function isVerified(): bool { return $this->isVerified; }
     public function setIsVerified(bool $isVerified = true): self
     {
         $this->isVerified = $isVerified;
-
         return $this;
     }
 
-    public function verify(bool $isVerified = true): self
-    {
-        return $this->setIsVerified($isVerified);
-    }
+    public function verify(bool $isVerified = true): self { return $this->setIsVerified($isVerified); }
+    
+    public function isEnabled (): ?bool { return $this->isEnabled; }
+    public function isDisabled(): ?bool { return !$this->isEnabled; }
 
-    public function isEnabled(): ?bool
-    {
-        return $this->isEnabled;
-    }
+    public function enable(bool $isEnabled = true): self { return $this->setIsEnabled($isEnabled); }
+    public function disable(bool $isDisabled = true): self { return $this->setIsDisabled($isDisabled); }
 
     public function setIsEnabled(bool $isEnabled = true): self
     {
         $this->isEnabled = $isEnabled;
-
         return $this;
     }
 
-    public function enable(bool $isEnabled = true): self
+    public function setIsDisabled(bool $isDisabled = true): self
     {
-        return $this->setIsEnabled($isEnabled);
+        $this->isEnabled = !$isDisabled;
+        return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
+    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
 
     /**
      * @return array|Group[]
@@ -589,7 +522,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @return array|Notification[]
      */
-    public function getNotifications(): array
+    public function getNotifications()
     {
         return $this->notifications;
     }
@@ -863,37 +796,5 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             return new Recipient($email, $this->getPhone());
 
         return new Recipient($email);
-    }
-
-    /**
-     * @var TranslatorInterface
-     */
-    public static $translator = null;
-    public static function getTranslator(): ?TranslatorInterface
-    {
-        return self::$translator;
-    }
-
-    public static $slugger = null;
-    public static function getSlugger(): ?NotifierInterface
-    {
-        return self::$slugger;
-    }
-
-    /**
-     * @var NotifierInterface
-     */
-    public static $notifier = null;
-    public static function getNotifier(): ?NotifierInterface
-    {
-        return self::$notifier;
-    }
-    /**
-     * @var ChannelPolicy
-     */
-    public static $notifierPolicy = [];
-    public static function getNotifierPolicy(): ?ChannelPolicy
-    {
-        return self::$notifierPolicy;
     }
 }

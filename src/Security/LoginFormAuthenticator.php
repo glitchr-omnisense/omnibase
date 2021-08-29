@@ -66,8 +66,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $password  = $request->request->get('password');
         $csrfToken = $request->request->get('_csrf_token');
 
-        dump($password);
-        
         $request->getSession()->set(Security::LAST_USERNAME, $userIdentifier);
 
         return new Passport(
@@ -101,8 +99,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        dump($exception);
-        
+	dump($exception);
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
     }
 }

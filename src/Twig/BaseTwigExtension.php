@@ -38,6 +38,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters()
     {
         return [
+            new TwigFilter('time',        [$this,'time']),
             new TwigFilter('url',         [$this, 'url']),
             new TwigFilter('trans2',      [$this, 'trans2']),
             new TwigFilter('highlight',   [$this,'highlight']),
@@ -46,6 +47,32 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('lessThan',    [$this,'lessThan'], ['needs_environment' => true]),
             new TwigFilter('greaterThan', [$this,'greaterThan'], ['needs_environment' => true])
         ];
+    }
+
+    public function time(int $remainingTime): string
+    {
+        if($remainingTime > 0) {
+        
+            $seconds       = fmod  ($remainingTime, 60);
+            $remainingTime = intdiv($remainingTime, 60);
+            $minutes       = fmod  ($remainingTime, 60);
+            $remainingTime = intdiv($remainingTime, 60);
+            $hours         = fmod  ($remainingTime, 24);
+            $remainingTime = intdiv($remainingTime, 24);
+            $days          = fmod  ($remainingTime, 30);
+            $remainingTime = intdiv($remainingTime, 30);
+            $months        = fmod  ($remainingTime, 12);
+            $years         = intdiv($remainingTime, 12);
+
+            return trim($this->trans2("messages.base.years",   [$years]).
+                   $this->trans2("messages.base.months",  [$months]).
+                   $this->trans2("messages.base.days",    [$days]).
+                   $this->trans2("messages.base.hours",   [$hours]).
+                   $this->trans2("messages.base.minutes", [$minutes]).
+                   $this->trans2("messages.base.seconds", [$seconds]));
+        }
+
+        return "";
     }
 
     public function image(Environment $env, array $context, $image, WrappedTemplatedEmail $email = null): string
@@ -94,7 +121,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $deltaTime > $diff;
     }
 
-    function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false)
+    public function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false)
     {
         $maxLength -= strlen($replacement);
         $length = strlen($string);
@@ -110,6 +137,8 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function url(string $url)
     {
+        $url = trim($url);
+        
         $parseUrl = parse_url($url);
         if(!array_key_exists("schema", $parseUrl)) {
             
@@ -222,13 +251,13 @@ final class BaseTwigExtension extends AbstractExtension
             if ($addBrackets) unset($parameters[$key]);
         }
         
-        // Call for translation with custom parameters
+        // Call for translation with custom parameters        
         $domain = $domain ?? "messages";
         $trans = $this->translator->trans($id, $parameters, $domain, $locale);
 
         if ($trans == $id && preg_match("/^\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*$/", $id))
             return $domain.'.'.$id;
 
-        return $trans;
+        return trim($trans);
     }
 }

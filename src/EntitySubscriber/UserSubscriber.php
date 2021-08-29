@@ -3,15 +3,19 @@
 namespace Base\EntitySubscriber;
 
 use App\Entity\User;
-use App\EntityEvent\UserEvent;
+
+use Base\EntityEvent\UserEvent;
 use Base\Service\BaseService;
 
 use Doctrine\ORM\Events;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
+
 use Exception;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
 class UserSubscriber implements EventSubscriber
 {
@@ -46,19 +50,29 @@ class UserSubscriber implements EventSubscriber
         if (!$user instanceof User) return;
 
         // Update only if required
-        $this->events[spl_object_id($user)][] = UserEvent::REGISTER;
+        $this->addEvent($user, UserEvent::REGISTER);
     }
 
-    public function preUpdate(LifecycleEventArgs $event)
+    public function preUpdate(PreUpdateEventArgs $event)
     {
         $user = $event->getObject();
         if (!$user instanceof User) return;
 
         // Update only if required
-        $oldUser = $this->baseService->getOriginalEntity($user, User::class);
+        $oldUser = $this->baseService->getOriginalEntity($event);
+        if (!$oldUser instanceof User) return;
 
         if($user->isApproved() && !$oldUser->isApproved())
-            $this->events[spl_object_id($user)][] = UserEvent::VALIDATE;
+            $this->addEvent($user, UserEvent::APPROVAL);
+
+        if($user->isVerified() && !$oldUser->isVerified())
+            $this->addEvent($user, UserEvent::VERIFIED);
+        
+        if($user->isEnabled() && !$oldUser->isEnabled())
+            $this->addEvent($user, UserEvent::ENABLED);
+
+        if($user->isDisabled() && !$oldUser->isDisabled())
+            $this->addEvent($user, UserEvent::DISABLED);
     }
 
     public function postPersist(LifecycleEventArgs $event): void
@@ -90,13 +104,28 @@ class UserSubscriber implements EventSubscriber
             throw new Exception("Unauthorized action: you can't delete your own account");
     }
 
+    public function addEvent(User $user, string $event)
+    {
+        $id = spl_object_id($user);
+
+        if(!array_key_exists($id, $this->events))
+            $this->events[$id] = [];
+
+        if(!in_array($event, $this->events[$id]))
+            $this->events[$id][$event] = false;
+    }
+
     public function dispatchEvents($user)
     {
         $id = spl_object_id($user);
         if (!array_key_exists($id, $this->events)) return;
 
-        foreach ($this->events[$id] as $event)
-            $this->dispatcher->dispatch(new UserEvent($user), $event);
+	    foreach ($this->events[$id] as $event => $triggered) {
+
+            $this->events[$id][$event] = true;
+            if(!$triggered) // Dispatch only once
+                $this->dispatcher->dispatch(new UserEvent($user), $event);
+        }
     }
 
 }

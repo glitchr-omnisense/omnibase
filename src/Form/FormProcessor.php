@@ -24,7 +24,6 @@ class FormProcessor implements FormProcessorInterface
 
     public function __construct(FormFactoryInterface $formFactory, CsrfTokenManagerInterface $csrfTokenManager, RequestStack $requestStack)
     {
-        
         $this->formFactory = $formFactory;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->requestStack = $requestStack;

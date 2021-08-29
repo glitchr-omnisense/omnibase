@@ -269,9 +269,11 @@
         <!-- Listener declarations -->
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
             <argument type="service" id="security.helper" />
             <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="App\Repository\User\NotificationRepository" />
+            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\EntitySubscriber\UserSubscriber">

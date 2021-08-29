@@ -1,0 +1,29 @@
+{% extends 'email.html.twig' %}
+
+{% block subject %}
+    {{ "emails.adminApprovalConfirm.subject"|trans2|raw }}
+{% endblock %}
+
+{% block subject %}
+    {{ "emails.adminApprovalConfirm.subject"|trans2|raw }}
+{% endblock %}
+
+{% block content %}
+    {{ "emails.adminApprovalConfirm.content"|trans2()|raw }}
+{% endblock %}
+
+{% block action_text %}
+    {{ "emails.adminApprovalConfirm.action_text" | raw }}
+{% endblock %}
+
+{% block action_url %}
+    {{ path("base_login") }}
+{% endblock %}
+
+{% block footer_text %}
+
+    {% if token.getExpiry() is not null %}
+        {{ "emails.adminApprovalConfirm.expiry"|trans2([token.getRemainingTime()|time])|raw }}
+    {% endif %}
+
+{% endblock %}

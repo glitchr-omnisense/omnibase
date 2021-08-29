@@ -1,0 +1,43 @@
+
+dashboard:
+    title: "Administration"
+
+profile:
+    title: "Voir mon profil"
+
+logout:
+    title: "Se déconnecter"
+
+login:
+    title: "Se connecter"
+
+base:
+    years: "{0, plural,
+                =0 { }
+                =1 {# an }
+                other {# ans }
+            }"
+    months: "{0, plural,
+                =0 { }
+                other {#  }
+            }"
+    days: "{0, plural,
+                =0 { }
+                =1 {# jour }
+                other {# jours }
+            }"
+    hours: "{0, plural,
+                =0 { }
+                =1 {# heure }
+                other {# heures }
+            }"
+    minutes: "{0, plural,
+                =0 { }
+                =1 {# minute }
+                other {# minutes }
+                }"
+    seconds: "{0, plural,
+                =0 { }
+                =1 {# seconde }
+                other {# secondes }
+                }"

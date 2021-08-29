@@ -1,6 +1,0 @@
-{% extends 'email.html.twig' %}
-
-{% block content %}
-<b>{{ user.getUsername() }}</b> is ready for validation !<br/>
-Click here to go to the <a href='{{ path("base_dashboard") }}'>dashboard</a>.
-{% endblock %}

@@ -37,11 +37,15 @@ use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Base\Traits\BaseTrait;
+
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
  */
 class Notification extends \Symfony\Component\Notifier\Notification\Notification implements SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface
 {
+    use BaseTrait;
+    
     // Default notification
     public const IMPORTANCE_DEFAULT = "default";
 
@@ -87,46 +91,32 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isRead;
+    protected $isRead = false;
 
     /**
      * @ORM\Column(type="datetime", nullable="true")
      */
     protected $sentAt = null;
 
-    protected ?string $projectDir = null;
-    
-    protected string $backtrace = "";
-    public function getBacktrace() 
-    {
-        return $this->backtrace;
-    }
+    /**
+     * @ORM\Column(type="text")
+     */
+    protected string $backtrace = ""; // Internal use only (code line might be changing..)
 
-    protected ?BaseTwigExtension $translator = null;
     public function __construct($content = null, array $parameters = array())
     {
         $backtrace = debug_backtrace()[0];
         $this->backtrace = $backtrace["file"].":".$backtrace["line"];
-
         $this->recipient = new ArrayCollection();
-        $this->subject = "";
         
         // Inject service from base class..
         if (User::getNotifier() == null)
             throw new Exception("Notifier not found in User class");
 
-        // Inject translator from base class..
-        if (User::getTranslator() == null)
-            throw new Exception("Translator not found in User class");
-
-        $this->projectDir = BaseService::getProjectDir();
-        $this->translator = new BaseTwigExtension(User::getTranslator());
-
         // Notification variables
         $this->importance = parent::getImportance();
-        $this->htmlTemplate = "";
-        $this->context = [];
-        $this->isRead = false;
+        $this->setSubject("");
+        $this->setFooter("");
 
         // Formatting strings if exception passed as argument
         if ( $content instanceof ExceptionEvent ) {
@@ -146,32 +136,19 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         } else {
 
-            $this->setContent($this->translator->trans2($content, $parameters) ?? "");
+            $this->setContent($this->getTwigExtension()->trans2($content, $parameters) ?? "");
         }
     }
 
-    public function getTranslator(): ?BaseTwigExtension
-    {
-        return $this->translator;
-    }
     
     /**
      * Entity related methods
      */
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getIsRead(): bool
-    {
-        return $this->isRead;
-    }
-
+    public function getId(): ?int { return $this->id; }
+    public function getIsRead(): bool { return $this->isRead; }
     public function setIsRead(bool $isRead): self
     {
         $this->isRead = $isRead;
-
         return $this;
     }
 
@@ -181,23 +158,14 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return $this->sentAt[$channel];
     }
 
-    public function getSubject(): string
-    {
-        return $this->subject;
-    }
-
+    public function getSubject(): string { return $this->subject; }
     public function setSubject(string $subject): self
     {
         $this->subject = $subject;
-
         return $this;
     }
 
-    public function getContent(): string
-    {
-        return $this->content;
-    }
-
+    public function getContent(): string { return $this->content; }
     public function setContent(string $content): self
     {
         $this->content = trim($content);
@@ -205,36 +173,28 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return $this;
     }
 
-    public function getImportance(): string
+    public function getExcerpt() { return  $this->context["excerpt"] ?? ""; }
+    public function setExcerpt(string $excerpt)
     {
-        return $this->importance;
+        $this->context["excerpt"] = $excerpt;
+        return $this;
     }
 
-    public function setImportance(?string $importance)
+    public function getFooter() { return $this->context["footer_text"] ?? ""; }
+    public function setFooter(string $footer)
     {
-        $this->importance = $importance;
+        $this->context["footer_text"] = $footer;
+        return $this;
+    }
+
+    public function getImportance(): string { return $this->importance; }
+    public function setImportance(?string $importance): self {
+        $this->importance = $importance; 
+        return $this;
     }
 
     /* Inherited methods from Symfony */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    public function __sleep()
-    {
-        $this->projectDir = null;
-        $this->translator = null;
-
-        return array_keys(get_object_vars($this));
-    }
-
-    public function __wakeup()
-    {
-        $this->projectDir = BaseService::getProjectDir();
-        $this->translator = new BaseTwigExtension(User::getTranslator());
-    }
-
+    public function getUser() { return $this->user; }
     
     public function setUser(?User $user): self
     {
@@ -244,70 +204,49 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
 
         $this->user = $user;
-        $this->user->addNotification($this);
+        if($this->user)
+		$this->user->addNotification($this);
 
         $this->addContextKey("user", $this->user);
         return $this;
     }
 
     /* Handle custom emails */
-    protected string $htmlTemplate;
-    public function getHtmlTemplate()
-    {
-        return $this->htmlTemplate;
-    }
-    public function setHtmlTemplate(?string $htmlTemplate, ?array $context = null)
+    protected string $htmlTemplate = "";
+    public function getHtmlTemplate() { return $this->htmlTemplate; }
+    public function setHtmlTemplate(?string $htmlTemplate, array $context = [])
     {
         $this->htmlTemplate = $htmlTemplate;
 
-        if($context) {
-
-            if(array_key_exists("subject", $context)) {
-                $context["subject"] = $this->translator->trans2($context["subject"], $context);
-                $this->setSubject($context["subject"] ?? "");
-            }
-            if(array_key_exists("content", $context)) {
-                $context["content"] = $this->translator->trans2($context["content"], $context);
-                $this->setContent($context["content"] ?? "");
-            }
-            if(array_key_exists("excerpt", $context)) {
-                $context["excerpt"] = $this->translator->trans2($context["excerpt"], $context);
-                $this->setExcerpt($context["excerpt"] ?? "");
-            }
-
+        if(!empty($context))
             $this->addContext($context);
-        }
+
         return $this;
     }
 
     /**
      * @var array
      */
-
-    protected array $context;
+    protected array $context = [];
     public function getContext(array $additionalContext = [])
     {
         if($additionalContext) return array_merge($additionalContext, $this->context);
         return $this->context;
     }
 
+    public function addContext(array $context = []): self 
+    {
+        if(empty($context)) return $this;
+        return $this->setContext(array_merge($this->context, $context));
+    }
+    public function addContextKey(string $key, $value = null): self { return $this->addContext([$key => $value]); }
     public function setContext(array $context): self
     {
+        if(array_key_exists("subject", $context)) $this->setSubject($context["subject"]);
+        if(array_key_exists("content", $context)) $this->setContent($context["content"]);
+        
         $this->context = $context;
-        return $this;
-    }
 
-    public function addContext(array $context = []): self
-    {
-        if($context)
-            $this->context = array_merge($this->context, $context);
-
-        return $this;
-    }
-
-    public function addContextKey(string $key, $value = null): self
-    {
-        $this->context[$key] = $value;
         return $this;
     }
 
@@ -316,41 +255,10 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         if(array_key_exists($key, $this->context))
             unset($this->context[$key]);
 
+        if($key == "subject") $this->setSubject("");
+
         return $this;
     }
-
-    /**
-     * @var string
-     */
-    protected string $footer = "";
-
-    public function getFooter()
-    {
-        return $this->footer;
-    }
-
-    public function setFooter(string $footer)
-    {
-        $this->footer = $footer;
-        return $this;
-    }
-
-    /**
-     * @var string
-     */
-    protected string $excerpt = "";
-    public function getExcerpt()
-    {
-        return $this->excerpt;
-    }
-
-    public function setExcerpt(string $excerpt)
-    {
-        $this->excerpt = $excerpt;
-        return $this;
-    }
-
-
 
     public function asSmsMessage(SmsRecipientInterface $recipient, string $transport = null): ?SmsMessage
     {
@@ -385,27 +293,34 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $context = $this->getContext([
             "importance" => $importance,
             "subject" => $subject,
-            "content" => $content, 
-            "excerpt" => $this->excerpt, 
-            "footer_text" => $this->getFooter(),
+            "content" => $content
         ]);
 
+        // Attach images using cid:/
+        $projectDir = BaseService::getProjectDir();
         foreach($context as $key => $value) {
         
             if(!$value) continue;
             if(!is_string($value)) continue;
             if(!str_starts_with($value, "cid:")) continue;
-            list($cid, $path) = explode(":", $value);
 
-            $email->embed(fopen($this->projectDir . "/" . $path, 'rb'), $path);
+            list($cid, $path) = explode(":", $value);
+            $email->embed(fopen($projectDir . "/" . $path, 'rb'), $path);
         }
+
+        // Render html template to get back email title..
+        // I was hoping to replace content with html(), but this gets overriden by Symfony notification
+        $htmlTemplate = $this->getTwig()->render($this->htmlTemplate, $context);
+        if(preg_match('/<title>(.*)<\/title>/ims', $htmlTemplate, $matches))
+            $subject = trim($matches[1] ?? $this->getSubject());
 
         $email
             ->subject($subject)
             ->from($supportAddress->getEmail())
+            //->html($html) // overriden by default notification template by Symfony
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
-
+            
         $this->setImportance($importance);
         return $notification;
     }
@@ -455,12 +370,11 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     /**
      * @var bool
      */
-    protected bool $adminChannels = false;
-    public function isAdminChannels()
-    {
-        return $this->adminChannels;
-    }
-
+    protected bool $adminChannels = false; 
+    
+    // I don't like parent::markAsPublic, 
+    // because it just erase a few context variable..
+    public function isAdminChannels() { return $this->adminChannels; }
     public function setAdminChannels(bool $adminChannels)
     {
         $this->adminChannels = $adminChannels;
@@ -561,7 +475,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             // Set selected channels, if any
             $channels    = $this->getUserChannels($recipient);
             if (empty($channels)) 
-                throw new Exception("No valid channel for the notification \"".$this->getBacktrace()."\" sent with \"".$importance."\"");
+                throw new Exception("No valid channel for the notification \"".$this->backtrace."\" sent with \"".$importance."\"");
 
             $channelBak = array_merge($channelBak, $channels);
             $this->setChannels($channels);

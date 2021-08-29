@@ -132,7 +132,8 @@ trait BaseUtilsTrait
         $vars = "";
         foreach ($classVars as $varName => $value) {
 
-            $value = (is_array($value)) ? print_r($value, true) : $value;
+            $value = ( is_array($value)) ? print_r($value, true) : (
+                     (is_object($value) && !method_exists($value, '__toString')) ? get_class($value)."(not stringeable)" : $value);
 
             $vars .= (!empty($vars)) ? ",\n" : "";
             $vars .= "     $" . $varName . " = \"" . $value . "\"";

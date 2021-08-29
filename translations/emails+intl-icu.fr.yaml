@@ -1,0 +1,23 @@
+action_text: "Voir le lien"
+
+resetPassword:
+    subject: "Réinitialiser ton mot de passe"
+    content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe<br/>
+    action_text: "Réinitialise ton mot de passe"
+    expiry: "Ce lien expirera dans {0}."
+
+verifyEmail:
+    subject: "Vérifie ton email"
+    content: "Bravo ! Tu as reçu cet email car tu t'es correctement inscrit sur notre site.
+              Clique sur le lien suivant pour confirmer ton inscription et ton adresse e-mail."
+    action_text: "Confirmer ton compte"
+    expiry: "Ce lien expirera dans {0}."
+
+adminApproval:
+  content: <b>{0} \#{1}</b> est prêt pour validation !<br/>
+  action_text: "Page d'administration"
+
+adminApprovalConfirm:
+  content: "Bonjour <b>{0}</b> ! Ton compte vient d'être approuvé par un administrateur.
+  Tu peux à présent te connecter ! Clique sur le lien suivant pour te connecter"
+  action_text: "Se connecter"

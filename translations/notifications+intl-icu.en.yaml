@@ -24,9 +24,6 @@ maintenance:
 
 resetPassword:
     title: "Reset your password"
-    email:
-        content: "Please visit the following link: <a href=\"{0}\">here</a>"
-        expiracy: "<i>This link will expire in {0} minute(s).</i>"
     csrfToken: "Invalid CSRF token detected. You can't reset your password"
     invalidToken: "Invalid token provided. You can't reset your password"
     confirmation: "A mail has been sent to the provided address (if this one exists)"
@@ -38,20 +35,20 @@ logout:
 
 register:
     csrfToken: "Invalid CSRF token detected. We cannot proceed with the registration"
-validation:
-    title: "User validation required"
-    required: "Your account needs to be verified by an administrator. Please wait for their feedback"
 
+adminApproval:
+    requiredTitle: "User validation required !"
+    required: "Your account needs to be verified by an administrator. Please wait for their feedback"
+    approvedTitle: "User account approved !"
+    approved: "Your account just got approved. You can now log in and visit !"
+    verifyFirst: "You need to verify first your email address"
+    alreadySent: "You already asked administrators for approval, please be patient."
+    
 verifyEmail:
     title: Please confirm your email!
-    email:
-        content: "Please confirm your email address by clicking the following link: <br><br>
-                    <a href=\"{0}\">Confirm my Email</a>. <br>"
-        expiracy: "<i>This link will expire in {0} minute(s).</i>"
-
     invalidToken: "Invalid token. We cannot confirm your email address. Please resend a request"
-    pending: "Congratulations ! You've got successfully registered. Your account needs to be verified. "
+    pending: "Your email address has to be verified. <a class='badge bg-warning badge-warning' href=\"{0}\">Click here</a> to receive a new request"
     check:   "Please confirm your account by checking your email."
     already: "Your account has already been verified !"
-    resend:  "A confirmation email has already been sent ! Please wait {0} minute(s) before next submission."
+    resend:  "A confirmation email has already been sent ! Please wait {0} before next submission."
     success: "Congratulations ! You've got successfully registered !"

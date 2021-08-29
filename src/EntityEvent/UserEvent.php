@@ -12,7 +12,10 @@ use Symfony\Contracts\EventDispatcher\Event;
 class UserEvent extends Event
 {
     public const REGISTER = 'user.register';
-    public const VALIDATE = 'user.validate';
+    public const VERIFIED = 'user.verified';
+    public const APPROVAL = 'user.approval';
+    public const DISABLED = 'user.disabled';
+    public const ENABLED  = 'user.enabled' ;
 
     protected $user;
 

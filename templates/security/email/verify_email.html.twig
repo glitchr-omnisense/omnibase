@@ -1,11 +1,27 @@
 {% extends 'email.html.twig' %}
 
+{% block subject %}
+    {{ "emails.verifyEmail.subject"|trans2|raw }}
+{% endblock %}
+
 {% block content %}
+    {{ "emails.verifyEmail.content"|trans2|raw }}
+{% endblock %}
 
-    {{ "notifications.verifyEmail.email.content"|trans2([signedUrl|url])|raw }}<br/>
+{% block action_text %}
+    {{ "emails.verifyEmail.action_text"|trans2 | raw }}
+{% endblock %}
 
-    {% if expiresAtMessageKey is defined and expiresAtMessageKey is not null %}
-        {{ "notifications.verifyEmail.email.expiracy"|trans2([expiresAtMessageKey])|raw }}
+{% block action_url %}
+    {{ path("base_verify_email", {"token": token.get()}) }}
+{% endblock %}
+
+{% block footer_text %}
+
+    {% if token.getExpiry() is not null %}
+        {{ "emails.verifyEmail.expiry" | trans2([
+            token.getLifetime()|time
+        ]) | raw }}
     {% endif %}
 
 {% endblock %}

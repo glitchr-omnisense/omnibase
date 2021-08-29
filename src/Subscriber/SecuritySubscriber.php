@@ -21,7 +21,9 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
+use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
+use Base\Repository\User\NotificationRepository;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -37,6 +39,7 @@ use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
@@ -56,14 +59,18 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $dispatcher;
 
     public function __construct(
-        BaseService $baseService,
         Security $security,
-        TraceableEventDispatcher $dispatcher) {
+        TraceableEventDispatcher $dispatcher,
+        TranslatorInterface $translator,
+        NotificationRepository $notificationRepository,
+        BaseService $baseService) {
 
         $this->security    = $security;
         $this->dispatcher  = $dispatcher;
         $this->baseService = $baseService;
-        $this->translator  = $baseService->getTranslator();
+        $this->translator  = $translator;
+        $this->notificationRepository = $notificationRepository;
+        
     }
 
     public static function getSubscribedEvents()
@@ -80,49 +87,62 @@ class SecuritySubscriber implements EventSubscriberInterface
             RequestEvent::class    => [['onRequest']],
 
             UserEvent::REGISTER => ['onRegistration'],
-            UserEvent::VALIDATE => ['onValidation']
+            UserEvent::APPROVAL => ['onApproval'],
+            UserEvent::ENABLED  => ['onEnabling'],
+            UserEvent::DISABLED => ['onDisabling'],
+            UserEvent::VERIFIED => ['onVerification']
         ];
     }
 
-    public function onRegistration(UserEvent $event)
+    public function onEnabling(UserEvent $event)
     {
-        dump("REGISTRATION EVENT: SECURITY SUSCRIBER");
+        $user = $event->getUser();
     }
 
-    private const EnableCache = true;
-    private const ExpirationTime = 3600;
-    public function onValidation(UserEvent $event)
+    public function onDisabling(UserEvent $event)
     {
-        dump("VALIDATION EVENT: SECURITY SUSCRIBER");
-      //  dump($event);
-        // $entity = $event->getEntityInstance();
-        // if (!($entity instanceof User)) return;
+        $user = $event->getUser();
+    }
 
-        // if ($this->entity && !$this->entity->getIsValid() && $entity->getIsValid()) {
+    public function onVerification(UserEvent $event) { }
+    public function onRegistration(UserEvent $event)
+    {
+        $user = $event->getUser();
+        if ($user && $user->isVerified()) { // Social account connection
+                
+            $notification = new Notification("notifications.verifyEmail.success");
+            $notification->send("success");
 
-        //     return $this->cache->get(
-        //         $entity->getId() . "-validation-email",
-        //         function (ItemInterface $item) use ($entity) {
+        } else {
 
-        //             $item->expiresAfter(self::EnableCache ? self::ExpirationTime : 0);
+            $verifyEmailToken = new Token('verify-email', 3600);
+            $user->addToken($verifyEmailToken);
 
-        //             // generate a signed url and email it to the user
-        //             $support   = $this->baseService->getMailTo(2);
-        //             $support_name = $this->baseService->getMailTo(1);
+            $notification = new Notification('notifications.verifyEmail.check');
+            $notification->setUser($user);
+            $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
-        //             $email = (new TemplatedEmail())
-        //                 ->from(new Address($support, $support_name))
-        //                 ->to($entity->getEmail())
-        //                 ->subject('Your account has been validated !')
-        //                 ->htmlTemplate('email/user/account_validation.html.twig')
-        //                 ->context(["user" => $entity]);
+            $notification->send("email")->send("success");
+        }
+    }
 
-        //             $this->mailer->send($email);
+    public function onApproval(UserEvent $event)
+    {
+        $user = $event->getUser();
+        $user->approve();
 
-        //             return "CACHED";
-        //         }
-        //     );
-        // }
+        $adminApprovalToken = $user->getValidToken("admin-approval");
+        if ($adminApprovalToken) { 
+
+            $adminApprovalToken->revoke();
+
+            $notification = new Notification("notifications.adminApproval.approval");
+            $notification->setUser($user);
+            $notification->setHtmlTemplate("@Base/security/email/admin_approval_confirm.html.twig");
+            $notification->send("email");
+        }
+
+        $this->baseService->getEntityManager()->flush();
     }
 
     public function onSwitchUser(SwitchUserEvent $event)
@@ -144,9 +164,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             $this->baseService->redirectToRoute($event, "base_profile", "/^(app|base)_((register|verify)_email|logout|login|settings|profile)$/", function() {
                 
-                $notification = new Notification("notifications.verifyEmail.pending", [
-                    $this->baseService->getRoute("base_register_email")
-                ]);
+                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_register_email")]);
                 $notification->send("warning");
             });
 

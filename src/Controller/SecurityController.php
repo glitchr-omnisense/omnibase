@@ -51,6 +51,7 @@ class SecurityController extends AbstractController
      */
     public function Clean()
     {
+        //TODO.. Perhaps commands
         throw new Exception("Clean UserLog not implemented yet");
     }
 
@@ -187,51 +188,31 @@ class SecurityController extends AbstractController
         );
 
         // An account might require to be verified by an admin
-        $validationRequired = $this->baseService->getParameterBag("base_security.user.validation") ?? false;
-        $newUser->approve(!$validationRequired);
+        $adminApprovalRequired = $this->baseService->getParameterBag("base_security.user.adminApproval") ?? false;
+        $newUser->approve(!$adminApprovalRequired);
 
         $form->handleRequest($request);
 
         // Registration form registered
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $submittedToken = $request->request->get('registration_form')["_csrf_token"] ?? null;
-            if (!$this->isCsrfTokenValid('registration', $submittedToken)) {
-
+            if ($this->baseService->isCsrfTokenValid('registration', $form, $request)) {
+        
                 $notification = new Notification("notification.register.csrfToken");
                 $notification->send("danger");
-
+                
             } else {
-
+            
                 $newUser->setPlainPassword($form->get('plainPassword')->getData());
-                if ($user && $user->isVerified()) {
-
+                if ($user && $user->isVerified()) // Social account connection
                     $newUser->verify($user->isVerified());
-                    $notification = new Notification("notifications.verifyEmail.success");
-                    $notification->send("success");
-
-                } else {
-
-                    $verifyEmailToken = new Token('verify-email', 3600);
-                    $user->addToken($verifyEmailToken);
-
-                    $notification = new Notification('notifications.verifyEmail.check');
-                    $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', [
-                        "signedUrl" => $this->baseService->getRouteWithUrl("base_verify_email", ["token" => $verifyEmailToken->get()]),
-                        "expiresAtMessageKey" => ceil($verifyEmailToken->getRemainingTime()/60)
-                    ]);
-                    $notification->setUser($newUser);
-                    $notification->send("success")->send("low");
-                }
 
                 $entityManager = $this->getDoctrine()->getManager();
                 $entityManager->persist($newUser);
                 $entityManager->flush();
-            }
-            
-            $entityManager = $this->getDoctrine()->getManager();
 
-            return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
+                return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
+            }
         }
 
         // Retrieve form if no social account connected
@@ -245,42 +226,32 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/verify-email", name="base_register_email")
+     * @IsGranted("ROLE_USER")
      */
     public function VerifyEmailRequest(Request $request, NotifierInterface $notifier)
     {
         // Check if accound is already verified..
         $user = $this->getUser();
-        if (!$user) return $this->redirectToRoute("base_login");
-
         if ($user->isVerified()) {
 
-            $notification = new Notification("notifications.verifyEmail.success");
+            $notification = new Notification("notifications.verifyEmail.already");
             $notification->send("success");
 
-            return $this->redirectToRoute('base_profile');
-        }
+        } else if ( ($verifyEmailToken = $user->getValidToken("verify-email")) ) {
 
-        $verifyEmailToken = $user->getValidToken("verify-email");
-        if ($verifyEmailToken) {
-
-            $remainingTime = ceil($verifyEmailToken->getRemainingTime()/60);
-            $notification = new Notification("notifications.verifyEmail.resend", [$remainingTime]);
+            $notification = new Notification("notifications.verifyEmail.resend", [$verifyEmailToken->getRemainingTimeStr()]);
             $notification->send("danger");
 
-            return $this->redirectToRoute('base_profile');
+        } else {
+
+            $verifyEmailToken = new Token("verify-email", 24*3600);
+            $verifyEmailToken->setUser($user);
+
+            $notification = new Notification('notifications.verifyEmail.check');
+            $notification->setUser($user);
+            $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
+            $notification->send("success")->send("urgent");
         }
-
-        $verifyEmailToken = new Token("verify-email", 3600);
-        $user->addToken($verifyEmailToken);
-
-        $notification = new Notification('notifications.verifyEmail.check');
-        $notification->setUser($user);
-        $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", [
-            "subject" => "notifications.verifyEmail.title",
-            "signedUrl" => $this->baseService->getRouteWithUrl("base_verify_email", ["token" => $verifyEmailToken->get()]),
-            "expiresAtMessageKey" => ceil($verifyEmailToken->getRemainingTime()/60)
-        ]);
-        $notification->send("success")->send("urgent");
 
         $this->getDoctrine()->getManager()->flush();
         return $this->redirectToRoute('base_profile');
@@ -288,72 +259,75 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/verify-email/{token}", name="base_verify_email")
+     * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
     public function VerifyEmailResponse(Request $request): Response
     {
-        if (!$this->isGranted("IS_AUTHENTICATED_FULLY"))
-            return $this->redirectToRoute("base_login");
-
         $user = $this->getUser();
         $user->removeExpiredTokens("verify-email");
-        $verifyEmailToken = $user->getValidToken("verify-email");
-        if (!$verifyEmailToken) {
+
+        if ($user->isVerified()) {
+
+            $notification = new Notification('notifications.verifyEmail.already');
+            $notification->setUser($user);
+            $notification->send('warning');
+
+        } else if (!($verifyEmailToken = $user->getValidToken("verify-email"))) {
 
             $notification = new Notification("notifications.verifyEmail.invalidToken");
             $notification->send("danger");
 
         } else {
 
-            if ($user->isVerified()) {
+            $user->setIsVerified(true);
+            $verifyEmailToken->revoke();
 
-                $notification = new Notification('notifications.verifyEmail.already');
-                $notification->setUser($user);
-                $notification->send('warning');
+            $notification = new Notification("notifications.verifyEmail.success");
+            $notification->setUser($user);
+            $notification->send('success');
+
+            if (!$user->isApproved()) // If the account needs further validation by admin..
+                $this->AdminApprovalRequest($request);
+        }
+
+        $this->userRepository->flush();
+        return $this->redirectToRoute('base_profile');
+    }
+
+    /**
+     * @Route("/admin-approval", name="base_adminApproval")
+     */
+    public function AdminApprovalRequest(Request $request)
+    {
+        $user = $this->getUser();
+        $user->removeExpiredTokens("admin-approval");
+
+        if(!$user->isVerified()) {
+
+            $notification = new Notification("notifications.adminApproval.verifyFirst");  
+            $notification->send("warning");
+
+        } else if (!$user->isApproved()) {
+
+            if ( ($adminApprovalToken = $user->getValidToken("admin-approval")) ) { 
+
+                $notification = new Notification("notifications.adminApproval.alreadySent");  
+                $notification->send("warning");
 
             } else {
 
-                $user->setIsVerified(true);
-                if ($user->isApproved()) { // If the account needs further validation by admin..
-
-                    $notification = new Notification("notifications.verifyEmail.success");
-                    $notification->setUser($user);
-                    $notification->send('success');
-                    
-                } else {
-
-                    $validationToken = new Token("validate-account");
-                    $user->addToken($validationToken);
-
-                    $notification = new Notification("notifications.validation.required");
-                    $notification->setUser($user);
-                    $notification->setHtmlTemplate("@Base/security/email/validation.html.twig",[
-                        "subject" => "notifications.validation.title"
-                    ]);
-
-                    $notification->sendAdmins("low")->send("success");
-                }
+                $adminApprovalToken = new Token("admin-approval");
+                $adminApprovalToken->setUser($user);
+            
+                $notification = new Notification("notifications.adminApproval.required");
+                $notification->setUser($user);
+                $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["token" => $adminApprovalToken]);
+                $notification->sendAdmins("low")->send("success");
             }
         }
 
         $this->getDoctrine()->getManager()->flush();
         return $this->redirectToRoute('base_profile');
-    }
-
-    /**
-     * @Route("/register/admin-approval", name="base_validation_request")
-     */
-    public function AdminApprovalRequest(Request $request)
-    {
-        return $this->redirectToRoute('base_homepage');
-    }
-
-    /**
-     * @Route("/register/admin-approval/{token}", name="base_validation")
-     * @IsGranted("ROLE_ADMIN")
-     */
-    public function AdminApprovalResponse(Request $request, string $token = null): Response
-    {
-        return $this->redirectToRoute('base_homepage');
     }
 
     /**
@@ -371,12 +345,11 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $submittedToken = $request->request->get('reset_password')["_token"] ?? null;
-            if (!$this->isCsrfTokenValid('reset-password', $submittedToken)) {
+            if (!$this->baseService->isCsrfTokenValid('reset-password', $form, $request)) {
 
-                $notification = new Notification("notifications.resetPassword.csrfToken");
+                $notification = new Notification("notification.resetPassword.csrfToken");
                 $notification->send("danger");
-
+                
             } else {
 
                 $notification = new Notification("notifications.resetPassword.confirmation");
@@ -385,24 +358,18 @@ class SecurityController extends AbstractController
                 if( ($user = $this->userRepository->findOneByUsernameOrEmail($email, $username)) ) {
 
                     $user->removeExpiredTokens("reset-password");
-                    $token = $user->getToken("reset-password");
-                    if (!$token) {
+                    if (!$user->getToken("reset-password")) {
 
                         $resetPasswordToken = new Token("reset-password", 3600);
-                        $user->addToken($resetPasswordToken);
+                        $resetPasswordToken->setUser($user);
 
-                        $notification->setHtmlTemplate("@Base/security/email/reset_password_request.html.twig", [
-                            "subject" => "notifications.resetPassword.title",
-                            "signedUrl" => $this->baseService->getRouteWithUrl("base_reset_password_token", ["token" => $resetPasswordToken->get()]),
-                            "expiresAtMessageKey" => ceil($resetPasswordToken->getRemainingTime()/60)
-                        ]);
+                        $notification->setHtmlTemplate("@Base/security/email/reset_password_request.html.twig", ["token" => $resetPasswordToken]);
                         $notification->setUser($user);
                         $notification->send("urgent");
                     }
-
-                    $this->getDoctrine()->getManager()->flush();
                 }
 
+                $this->getDoctrine()->getManager()->flush();
                 $notification->send("success");
             }
         }
@@ -440,11 +407,10 @@ class SecurityController extends AbstractController
                 if($resetPasswordToken) $user->removeToken($resetPasswordToken);
                 $user->setPlainPassword($form->get('plainPassword')->getData());
 
-                $this->getDoctrine()->getManager()->flush();
-
                 $notification = new Notification("notifications.resetPassword.success");
                 $notification->send("success");
 
+                $this->getDoctrine()->getManager()->flush();
                 return $userAuthenticator->authenticateUser($user, $authenticator, $request);
             }
 

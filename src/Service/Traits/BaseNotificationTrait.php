@@ -14,37 +14,26 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Entity\User\Notification;
+use Base\Service\BaseService;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 trait BaseNotificationTrait
 {
-    public static function getTranslator()
-    {
-        return User::$translator;
-    }
-    public function setTranslator(?TranslatorInterface $translator)
-    {
-        User::$translator = $translator;
-    }
-
-    public static function getNotifier()
-    {
-        return User::$notifier;
-    }
-
     public function setNotifier(NotifierInterface $notifier, ?ChannelPolicyInterface $notifierPolicy = null)
     {
-        if (User::$notifier) return $this;
+        if (BaseService::$notifier) return $this;
 
         // Update user notifier
-        User::$notifier = $notifier;
-        User::$notifierPolicy = $notifierPolicy;
+        BaseService::$notifier = $notifier;
+        BaseService::$notifierPolicy = $notifierPolicy;
 
         // Address support only once..
-        User::$notifier->addAdminRecipient(new Recipient($this->getMail()));
+        BaseService::$notifier->addAdminRecipient(new Recipient($this->getMail()));
 
         // Add additional admin users.
         foreach ($this->getAdminUsers() as $adminUser)
-            User::$notifier->addAdminRecipient($adminUser->getRecipient());
+            BaseService::$notifier->addAdminRecipient($adminUser->getRecipient());
     }
 
     public function getAdminUsers() {
@@ -52,7 +41,7 @@ trait BaseNotificationTrait
         $roles = $this->getParameterBag("base.notifier.admin_recipients");
         if(!$roles) return null;
 
-        $userRepository = $this->entityManager->getRepository(User::class);
+        $userRepository = $this->getEntityManager()->getRepository(User::class);
         return $userRepository->findByRoles($roles);
     }
 

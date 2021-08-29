@@ -4,7 +4,7 @@ namespace Base\Service\Traits;
 
 use Base\Entity\Thread;
 use Base\Entity\User;
-
+use Base\Service\BaseService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -12,6 +12,8 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -24,21 +26,6 @@ trait BaseSymfonyTrait
 {
     private static $startTime = 0;
 
-    public function initSymfonyTrait()
-    {
-
-    }
-
-    public function setSlugger(SluggerInterface $slugger) { Thread::$slugger = $slugger; }
-    public function getSlugger() { return Thread::$slugger; }
-    public function setRouter(UrlGeneratorInterface $router) { Thread::$router = $router; }
-    public function getRouter(): ?UrlGeneratorInterface { return Thread::$router; }
-    public function setUserProperty(string $userProperty)
-    {
-        User::$property = $userProperty;
-        return $this;
-    }
-
     public function setStartTime()
     {
         // Provide the kernel start time as time reference
@@ -49,16 +36,6 @@ trait BaseSymfonyTrait
     public function hasPost() { return isset($_POST); }
     public function hasGet() { return isset($_GET); }
     public function hasSession() { return isset($_SESSION); }
-
-    public static $projectDir = null;
-    public static function getProjectDir(): ?string { return self::$projectDir; }
-    public static function setProjectDir($projectDir) { return self::$projectDir = $projectDir; }
-    public function getPublicDir() { return $this->getProjectDir() . "/public"; }
-    public function getTemplateDir() { return $this->getProjectDir() . "/templates"; }
-    public function getTranslationDir() { return $this->getProjectDir() . "/translations"; }
-    public function getCacheDir() { return $this->getProjectDir() . "/var/cache"; }
-    public function   getLogDir() { return $this->getProjectDir() . "/var/log"; }
-    public function  getDataDir() { return $this->getProjectDir() . "/data"; }
 
     public function addSession($name, $value)
     {
@@ -148,34 +125,52 @@ trait BaseSymfonyTrait
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
 
-    public function getEntityManager(bool $reopen = false): ?EntityManagerInterface
-    {
-        if (!isset($this->entityManager))
-            throw new Exception("No entity manager found in BaseService. Did you overloaded BaseService::__construct ?");
-
-        if (!$this->entityManager->isOpen()) {
-
-            if(!$reopen) return null;
-
-            $this->entityManager = $this->entityManager->create(
-                $this->entityManager->getConnection(),
-                $this->entityManager->getConfiguration()
-            );
-        }
-
-        return $this->entityManager;
+    public function getRepository(string $className, bool $reopen = false) 
+    { 
+        return $this->getEntityManager($reopen)->getRepository($className); 
     }
 
-    public function getRepository(string $className, bool $reopen = false) { return $this->getEntityManager($reopen)->getRepository($className); }
-    public function getOriginalEntityData($entity,   bool $reopen = false) { return $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity); }
+    public function isWithinDoctrine()
+    {
+        $debug_backtrace = debug_backtrace();
+        foreach($debug_backtrace as $trace)
+            if(str_starts_with($trace["class"], "Doctrine")) return true;
+
+        return false;
+    }
+
+    public function getOriginalEntityData($eventOrEntity, bool $reopen = false)
+    { 
+        $entity = $eventOrEntity->getObject();
+        $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
+
+        if($eventOrEntity instanceof PreUpdateEventArgs) {
+
+            $event = $eventOrEntity;
+            foreach($event->getEntityChangeSet() as $field => $data)
+                $originalEntityData[$field] = $data[0];
+
+        } else if($this->isWithinDoctrine()) {
+
+            dump("Achtung ! You are trying to access data object within a Doctrine method..".
+                        "Original entity might have already been updated.");
+            return null;
+        }
+
+        return $originalEntityData;
+    }
 
     protected static $entitySerializer = null;
-    public function getOriginalEntity($entity, bool $reopen)
-    {
+    public function getOriginalEntity($eventOrEntity, bool $reopen = false)
+    { 
         if (!self::$entitySerializer)
             self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
-        $data = $this->getOriginalEntityData($entity, $reopen);
+        $data = $this->getOriginalEntityData($eventOrEntity, $reopen);
+
+        if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
+        else $entity = $eventOrEntity->getObject();
+
         return self::$entitySerializer->deserialize(json_encode($data), get_class($entity), 'json');
     }
 
@@ -185,17 +180,27 @@ trait BaseSymfonyTrait
         return $repository->findOneBy(["id" => $id]) ?? null;
     }
 
+    public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
+    {
+        if (!BaseService::$entityManager) return null;
+        if (!BaseService::$entityManager->isOpen()) {
+
+            if(!$reopen) return null;
+            BaseService::$entityManager = BaseService::$entityManager->create(
+                BaseService::$entityManager->getConnection(), BaseService::$entityManager->getConfiguration());
+        }
+
+        return BaseService::$entityManager;
+    }
+    
     public function getRouteWithUrl(string $path = "", array $opts = []) { return $this->getWebsite() . $this->getRoute($path, $opts); }
     public function     generateUrl(string $path = "", array $opts = []) { return $this->getRoute($path, $opts); }
     public function getCurrentRoute() { return $this->getRoute(); }
     public function getRoute(string $path = "", array $opts = [])
     {
-        if (!isset($this->router))
-            throw new Exception("No router found in BaseService. Did you overloaded BaseService::__construct ?");
-
         if (!empty($path)) {
             try {
-                return $this->router->generate( $path, $opts);
+                return BaseService::$router->generate( $path, $opts);
             } catch (RouteNotFoundException $e) {
                 return null;
             }
@@ -207,14 +212,11 @@ trait BaseSymfonyTrait
     public function getCurrentRouteName() { return $this->getRouteName(); }
     public function getRouteName($url = "")
     {
-        if (!isset($this->router))
-            throw new Exception("No router found in BaseService. Did you overloaded BaseService::__construct ?");
-
         if (empty($url)) $url = $_SERVER["REQUEST_URI"];
         $path = parse_url($url, PHP_URL_PATH);
 
         try {
-            return $this->router->match($path)['_route'];
+            return $this->getRouter()->match($path)['_route'];
         } catch (ResourceNotFoundException $e) {
             return null;
         }
@@ -265,7 +267,7 @@ trait BaseSymfonyTrait
     public function age() { return $this->getAge(); }
     public function birthdate() { $this->getBirthdate(); }
     public function protocol() { return $this->getProtocol(); }
-    public function domain() { return $this->getDomain(); }
+    public function domain(int $level = 0) { return $this->getDomain($level); }
     public function www() { return $this->getWebsite(); }
     public function url() { return $this->getWebsite(); }
     public function assets() { return $this->getAssets(); }
@@ -273,7 +275,14 @@ trait BaseSymfonyTrait
 
     public function getBirthdate():string { return ($this->getParameterBag('base.birthdate') < 0) ? date("Y") : $this->getParameterBag('base.birthdate'); }
     public function getProtocol(): string { return ($this->getParameterBag('base.use_https') ? "https" : "http"); }
-    public function getDomain()  : string { return  $this->getParameterBag("base.domain"); }
+    public function getDomain(int $level = 0)  : string 
+    {
+        $domain = $this->getParameterBag("base.domain");
+        while($level-- > 0)
+            $domain = preg_replace("/^(\w+)./i", "", $domain);
+        
+        return $domain;
+    }
     public function getAge():string
     {
         $birthdate = $this->getBirthdate();

@@ -2,7 +2,11 @@
 
 namespace Base\Service\Traits;
 
+use Base\Entity\User;
+use Base\Entity\User\Notification;
 use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use Symfony\Component\Security\Csrf\CsrfToken;
@@ -10,6 +14,11 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 trait BaseSecurityTrait
 {
+    public function setUserProperty(string $userProperty)
+    {
+        User::$property = $userProperty;
+        return $this;
+    }
 
     public function Logout()
     {
@@ -21,12 +30,38 @@ trait BaseSecurityTrait
             return $this->getToken()->setToken(null);
     }
 
-    public function isCsrfTokenValid(string $id, ?string $token): bool
+    public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null): bool
     {
         if (!isset($this->csrfTokenManager))
             throw new Exception("No CSRF token manager found in BaseService. Did you overloaded BaseService::__construct ?");
-    
-        return $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
+
+        // Prepare token parameter
+        $token = null;
+        if (!$tokenOrForm instanceof FormInterface) $token = $tokenOrForm;
+        else {
+            
+            $form = $tokenOrForm;
+            if($request == null)
+                throw new Exception("Request required as FormInterface provided");
+
+            //$form->handleRequest($request); // TBC
+            if($request->request->has($form->getName()))
+                $token = $request->request->get($form->getName())["_csrf_token"] ?? null;
+        }
+
+        // Handling CSRF token exception
+        if($token && !is_string($token))
+            throw new Exception("Unexpected token value provided: string expected");
+
+        // Checking validity
+        $isValid = $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
+        if (!$isValid) {
+
+            $notification = new Notification("notification.csrfToken");
+            $notification->send("danger");
+        }
+
+        return $isValid;
     }
     
     public function getToken()
