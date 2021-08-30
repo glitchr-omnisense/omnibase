@@ -30,7 +30,7 @@ class TimezoneSubscriber implements EventSubscriberInterface
         $defaultTimezone = date_default_timezone_get();
 
         if($timezone != $defaultTimezone) {
-            $notification = new Notification("Timezone", "notifications.invalidTimezone", [$timezone]);
+            $notification = new Notification("notifications.invalidTimezone", [$timezone]);
             $notification->send("info");
         }
     }

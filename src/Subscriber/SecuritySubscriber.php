@@ -88,20 +88,30 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             UserEvent::REGISTER => ['onRegistration'],
             UserEvent::APPROVAL => ['onApproval'],
-            UserEvent::ENABLED  => ['onEnabling'],
-            UserEvent::DISABLED => ['onDisabling'],
-            UserEvent::VERIFIED => ['onVerification']
+            UserEvent::VERIFIED => ['onVerification'],
+            UserEvent::ENABLED => ['onEnabling'],
+            UserEvent::DISABLED => ['onDisabling']
         ];
     }
 
     public function onEnabling(UserEvent $event)
     {
         $user = $event->getUser();
+
+        $notification = new Notification("notifications.accountWelcomeBack.success", [$user]);
+        $notification->setUser($user);
+        $notification->setHtmlTemplate("@Base/security/email/account_welcomeBack.html.twig");
+        $notification->send("success")->send("email");
     }
 
     public function onDisabling(UserEvent $event)
     {
         $user = $event->getUser();
+
+        $notification = new Notification("notifications.accountGoodbye.success", [$user]);
+        $notification->setUser($user);
+        $notification->setHtmlTemplate("@Base/security/email/account_goodbye.html.twig");
+        $notification->send("success")->send("email");
     }
 
     public function onVerification(UserEvent $event) { }
@@ -130,7 +140,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $user = $event->getUser();
         $user->approve();
-
+        
         $adminApprovalToken = $user->getValidToken("admin-approval");
         if ($adminApprovalToken) { 
 
@@ -197,10 +207,15 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event)
     {
-            // Notify user about the authentication method
+        // Notify user about the authentication method
         if ($user = $event->getUser()) {
         
-		    if (!$user->isLegit()) {
+            if($user->isDisabled()) {
+
+                $user->enable();
+                $this->baseService->getEntityManager()->flush();
+
+            } else if (!$user->isLegit()) {
 
                 $notification = new Notification("notifications.login.social", [$user]);
                 $notification->send("success");
@@ -226,13 +241,13 @@ class SecuritySubscriber implements EventSubscriberInterface
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
 
-        if ($user instanceof User)
+        if ($user instanceof User) // Just to remember username.. after logout & first redirection
             $this->baseService->addSession("_user", $user);
 
         return $this->baseService->redirectToRoute($event, LoginFormAuthenticator::LOGOUT_ROUTE);
     }
 
-    public function storeLog(KernelEvent $event, ?\Throwable $exception = null) {
+    public function onStoreLog(KernelEvent $event, ?\Throwable $exception = null) {
 
         if (self::$exceptionOnHold && self::$exceptionOnHold != $exception)
             return;
@@ -336,7 +351,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate(TerminateEvent $event)
     {
-        return $this->storeLog($event);
+        return $this->onStoreLog($event);
     }
 
     private static $exceptionOnHold = null;
@@ -351,7 +366,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             throw self::$exceptionOnHold;
 
         self::$exceptionOnHold = $exception;
-        $this->storeLog($event, $exception);
+        $this->onStoreLog($event, $exception);
         self::$exceptionOnHold = null;
     }
 }

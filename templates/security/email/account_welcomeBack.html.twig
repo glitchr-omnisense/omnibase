@@ -1,0 +1,17 @@
+{% extends 'email.html.twig' %}
+
+{% block subject %}
+    {{ "emails.accountWelcomeBack.subject" | trans2([user.getUsername()]) | raw }}
+{% endblock %}
+
+{% block content %}
+    {{ "emails.accountWelcomeBack.content" | trans2 | raw }}
+{% endblock %}
+
+{% block action_text %}
+    {{ "emails.accountWelcomeBack.action_text" | trans2 | raw }}
+{% endblock %}
+
+{% block action_url %}
+    {{ path("base_profile") }}
+{% endblock %}

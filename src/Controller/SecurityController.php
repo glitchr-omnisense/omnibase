@@ -322,6 +322,31 @@ class SecurityController extends AbstractController
     }
 
     /**
+     * @Route("/goodbye", name="base_accountGoodbye")
+     */
+    public function DisableAccountRequest(Request $request)
+    {
+        $user = $this->getUser();
+
+        if($user->isDisabled()) {
+
+            $notification = new Notification("notifications.accountGoodbye.already");  
+            $notification->send("warning");
+
+            return $this->redirectToRoute('base_homepage');
+
+        } else {
+
+            $user->disable();
+
+            $this->baseService->Logout();
+
+            $this->getDoctrine()->getManager()->flush();
+            return $this->redirectToRoute('base_homepage');
+        }
+    }
+
+    /**
      * Display & process form to request a password reset.
      *
      * @Route("/reset-password", name="base_resetPassword")
@@ -356,7 +381,7 @@ class SecurityController extends AbstractController
 
                         $notification->setHtmlTemplate("@Base/security/email/reset_password_request.html.twig", ["token" => $resetPasswordToken]);
                         $notification->setUser($user);
-                        $notification->send("urgent");
+                        $notification->send("email");
                     }
                 }
 
@@ -405,9 +430,7 @@ class SecurityController extends AbstractController
                 return $userAuthenticator->authenticateUser($user, $authenticator, $request);
             }
 
-            return $this->render('@Base/security/reset_password.html.twig', [
-                'form' => $form->createView(),
-            ]);
+            return $this->render('@Base/security/reset_password.html.twig', ['form' => $form->createView()]);
         }
 
     }

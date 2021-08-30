@@ -22,8 +22,9 @@ class UserChecker implements UserCheckerInterface
         return false;
         if (!$user instanceof User)
             throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
-
+        
         if ($user->isBanned()) {
+            
             $notification = new Notification("notifications.login.banned");
             $notification->send("danger");
             throw new CustomUserMessageAccountStatusException();

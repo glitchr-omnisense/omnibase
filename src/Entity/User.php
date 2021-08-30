@@ -396,21 +396,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function verify(bool $isVerified = true): self { return $this->setIsVerified($isVerified); }
     
-    public function isEnabled (): ?bool { return $this->isEnabled; }
-    public function isDisabled(): ?bool { return !$this->isEnabled; }
-
-    public function enable(bool $isEnabled = true): self { return $this->setIsEnabled($isEnabled); }
+    public function isDisabled(): ?bool { return !$this->isEnabled(); }
+    public function isEnabled (): ?bool { return  $this->isEnabled; }
     public function disable(bool $isDisabled = true): self { return $this->setIsDisabled($isDisabled); }
-
+    public function enable(bool $isEnabled = true): self { return $this->setIsEnabled($isEnabled); }
+    public function setIsDisabled(bool $isDisabled = true): self {   return $this->setIsEnabled(!$isDisabled); }
     public function setIsEnabled(bool $isEnabled = true): self
     {
         $this->isEnabled = $isEnabled;
-        return $this;
-    }
-
-    public function setIsDisabled(bool $isDisabled = true): self
-    {
-        $this->isEnabled = !$isDisabled;
         return $this;
     }
 

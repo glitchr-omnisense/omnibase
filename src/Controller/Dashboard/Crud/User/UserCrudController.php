@@ -101,12 +101,8 @@ class UserCrudController extends AbstractCrudController
         foreach ( ($callbacks["isVerified"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield BooleanField::new("isApproved")->onlyOnIndex();
+        yield BooleanField::new("isApproved")->onlyOnIndex() /*->withConfirmation()*/;
         foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        yield BooleanField::new("isEnabled")->onlyOnIndex();
-        foreach ( ($callbacks["isEnabled"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield DateTimeField::new('updatedAt')->onlyOnDetail();

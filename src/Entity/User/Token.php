@@ -162,6 +162,9 @@ class Token
     public function setIsRevoked($isRevoked = true): self
     {
         $this->isRevoked = $isRevoked;
+        if($isRevoked) $this->getUser()->removeToken($this);
+        else $this->getUser()->addToken($this);
+
         return $this;
     }
 

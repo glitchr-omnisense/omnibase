@@ -52,3 +52,11 @@ verifyEmail:
     already: "Your account has already been verified !"
     resend:  "A confirmation email has already been sent ! Please wait {0} before next submission."
     success: "Congratulations ! You've got successfully registered !"
+
+accountGoodbye:
+    success: We're sorry to see you leave.. Good bye buddy ! Your account is now disabled.
+    already: Your account is already disabled..
+
+accountWelcomeBack:
+    success: Oh ! Long time no see.. Welcome back buddy ! Your account is now re-enabled.
+    already: Your account is already enabled.

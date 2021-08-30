@@ -3,7 +3,6 @@ unsubscribe:  "Click <a href='{0}'>here</a> to unsubscribe"
 returnHomepage:  "Click <a href='/'>here</a> to return to home page"
 itWorks: "It works!"
 
-
 resetPassword:
   subject: "Reset your password"
   content: 
@@ -26,6 +25,18 @@ adminApproval:
 
 adminApprovalConfirm:
   subject: "Account approved"
-  content: "Hi <b>{0}</b> ! Your account has been validated by an administrator. You can now sign in !<br/>
+  content: "Hi <b>{0}</b> ! Your account has been validated by an administrator. You can now sign in ! 
            Click on the link below to visit the website"
   action_text: Sign in!
+
+accountWelcomeBack:
+  subject: "Welcome back, {0} ! "
+  content: "Long time no see ! We're so glad you're finally here. 
+           Click on the link below to update your profile and visit the website"
+  action_text: Go online !
+
+accountGoodbye:
+  subject: "Time to say goodbye, {0} !"
+  content: "We're so sorry to see you leave. If you changed your mind just log back in ! 
+           Click on the link below to return online"
+  action_text: Sign back in !

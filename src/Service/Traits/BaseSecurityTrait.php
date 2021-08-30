@@ -25,9 +25,9 @@ trait BaseSecurityTrait
         if (!isset($this->tokenStorage))
             throw new Exception("No token storage found in BaseService. Did you overloaded BaseService::__construct ?");
 
-        $token = $this->getToken();
-        if($token)
-            return $this->getToken()->setToken(null);
+        $this->tokenStorage->setToken(null);
+        if(array_key_exists("REMEMBERME", $_COOKIE)) 
+            setcookie("REMEMBERME", '', time()-1);
     }
 
     public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null): bool

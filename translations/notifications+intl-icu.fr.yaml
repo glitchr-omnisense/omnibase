@@ -52,3 +52,11 @@ verifyEmail:
     already: "Ton compte est déjà validé!"
     resend:  "Un email de confirmation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
     invalidToken: "Token invalide. Nous ne pouvons pas confirmer ton adresse. Merci de renvoyer une demande."
+
+accountGoodbye:
+    success: Désolé de te voir partir {0}, mais à une prochaine ! Ton compte est à présent désactivé
+    already: Ton compte est déjà désactivé..
+
+accountWelcomeBack:
+    success: Oh ! Ça faisait un bail.. Bienvenue {0} ! Ton compte est à présent réactivé
+    already: Ton compte est déjà actif !

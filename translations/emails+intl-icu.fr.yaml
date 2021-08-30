@@ -5,7 +5,7 @@ itWorks: "Ca fonctionne !"
 
 resetPassword:
     subject: "Réinitialiser ton mot de passe"
-    content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe<br/>
+    content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe.
     action_text: "Réinitialise ton mot de passe"
     expiry: "Ce lien expirera dans {0}."
 
@@ -18,7 +18,7 @@ verifyEmail:
 
 adminApproval:
   subject: "Validation demandée"
-  content: <b>{0} \#{1}</b> est prêt pour validation !<br/>
+  content: <b>{0} \#{1}</b> est prêt pour validation !
   action_text: "Page d'administration"
 
 adminApprovalConfirm:
@@ -26,3 +26,15 @@ adminApprovalConfirm:
   content: "Bonjour <b>{0}</b> ! Ton compte vient d'être approuvé par un administrateur.
   Tu peux à présent te connecter ! Clique sur le lien suivant pour te connecter"
   action_text: "Se connecter"
+
+accountWelcomeBack:
+  subject: "Bon retour, {0} ! "
+  content: "Ça faisait longtemps ! Nous sommes heureux de te voir revenir !
+           Tu peux cliquer sur le lien ci-dessous pour retourner directement sur le site"
+  action_text: Se connecter
+
+accountGoodbye:
+  subject: "Aurevoir, {0} !"
+  content: "Désolé de te voir partir, mais on espère te revoir vite ! Si tu changes d'avis tu pourras te reconnecter à tout instant.
+           Clique sur le lien ci-dessous si tu veux revenir !"
+  action_text: Sign back in !

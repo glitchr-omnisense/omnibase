@@ -1,0 +1,17 @@
+{% extends 'email.html.twig' %}
+
+{% block subject %}
+    {{ "emails.accountGoodbye.subject" | trans2([user.getUsername()]) | raw }}
+{% endblock %}
+
+{% block content %}
+    {{ "emails.accountGoodbye.content" | trans2 | raw }}
+{% endblock %}
+
+{% block action_text %}
+    {{ "emails.accountGoodbye.action_text" | trans2 | raw }}
+{% endblock %}
+
+{% block action_url %}
+    {{ path("base_login") }}
+{% endblock %}
