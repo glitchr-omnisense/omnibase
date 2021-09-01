@@ -99,7 +99,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        dump($exception);
         return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
     }
 }

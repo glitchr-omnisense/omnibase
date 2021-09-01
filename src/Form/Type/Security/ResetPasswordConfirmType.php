@@ -22,8 +22,20 @@ class ResetPasswordConfirmType extends AbstractType
     use BootstrapFormTrait;
     use CsrfFormTrait;
 
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults([
+            'csrf_token_id'   => 'reset-password-confirm',
+            "translation_domain" => false
+        ]);
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        parent::buildForm($builder, $options);
+
         $builder
         ->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
@@ -32,12 +44,6 @@ class ResetPasswordConfirmType extends AbstractType
 
         parent::buildForm($builder, $options);
     }
-
-    public function configureOptions(OptionsResolver $resolver): void
-    {
-        $resolver->setDefaults(['csrf_token_id'   => 'reset-password-confirm']);
-    }
-
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);

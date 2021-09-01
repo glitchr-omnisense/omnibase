@@ -60,3 +60,5 @@ accountGoodbye:
 accountWelcomeBack:
     success: Oh ! Long time no see.. Welcome back buddy ! Your account is now re-enabled.
     already: Your account is already enabled.
+    tokenFound: "A confirmation email has already been sent ! Please wait {0} before next submission."
+    invalidToken: "Invalid token. We cannot reactivate your email address. Please resend a request"

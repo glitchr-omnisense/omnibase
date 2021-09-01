@@ -10,6 +10,7 @@ use Base\Field\PasswordField;
 use Base\Field\ImpersonateField;
 use Base\Field\LinkIdField;
 use Base\Field\RoleField;
+use Base\Field\BooleanField;
 
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -21,7 +22,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -42,16 +42,14 @@ class UserCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            //->showEntityActionsAsDropdown()
             ->setPageTitle('index', 'User Management')
-
             ->setDefaultSort(['id' => 'DESC'])
-            //->setSearchFields(['firstname', 'lastname', 'username', 'email', 'country'])
             ->setFormOptions(
                 ['validation_groups' => ['new']], // Crud::PAGE_NEW
                 ['validation_groups' => ['edit']] // Crud::PAGE_EDIT
             );
     }
+    
     public function configureActions(Actions $actions): Actions
     {
         return $actions
@@ -97,14 +95,18 @@ class UserCrudController extends AbstractCrudController
         foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
             yield $yield;
     
-        yield BooleanField::new("isVerified")->onlyOnIndex();
+        yield BooleanField::new("isVerified")->onlyOnIndex()->withConfirmation();
         foreach ( ($callbacks["isVerified"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield BooleanField::new("isApproved")->onlyOnIndex() /*->withConfirmation()*/;
+        yield BooleanField::new("isApproved")->onlyOnIndex()->withConfirmation();
         foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
+        yield BooleanField::new("isEnabled")->onlyOnIndex()->withConfirmation();
+        foreach ( ($callbacks["isEnabled"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+            
         yield DateTimeField::new('updatedAt')->onlyOnDetail();
         foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
             yield $yield;

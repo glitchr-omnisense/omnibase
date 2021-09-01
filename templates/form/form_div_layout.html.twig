@@ -17,7 +17,7 @@
 	{{ value | raw }}
 </div>{%- endblock div_widget -%}
 
-{% block slug_widget %}
+{%- block slug_widget -%}
 
 	{% set attr = attr|merge({
         'data-slug-field': '',
@@ -32,9 +32,9 @@
 			</button>
 		</div>
 	</div>
-{% endblock %}
+{%- endblock -%}
 
-{% block fileupload_widget %}
+{%- block fileupload_widget -%}
     {# <div class="file-widget">
         <div class="input-group">
             {% set placeholder = '' %}
@@ -96,4 +96,4 @@
         {% endif %}
     </div>
     {{ form_errors(form.file) }} #} TODO..
-{% endblock %}
+{%- endblock -%}

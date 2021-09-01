@@ -44,6 +44,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 use Base\Traits\BaseTrait;
+use DateTimeZone;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -82,6 +83,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @ORM\Column(type="string", length=16)
+     * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
 
@@ -168,17 +170,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isApproved;
+    protected $isApproved = false;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isVerified;
+    protected $isVerified = false;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isEnabled;
+    protected $isEnabled = false;
 
     /**
      * @ORM\Column(type="datetime")
@@ -210,10 +212,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function __construct()
     {
-        $this->isEnabled  = false;
-        $this->isApproved = false;
-        $this->isVerified = false;
-
         $this->tokens = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->permissions = new ArrayCollection();
@@ -226,6 +224,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->mentions = new ArrayCollection();
         $this->authoredMentions = new ArrayCollection();
         $this->likes = new ArrayCollection();
+
+        $this->setDefaultTimezone();
+        $this->setDefaultLocale();
     }
 
     public static $property = "email";
@@ -252,15 +253,49 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $cookie[$key] ?? null;
     }
 
-    public static function getLocale(): string { return strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? "en", 0, 2)); }
-    public static function getTimezone(): \DateTimeZone { return new \DateTimeZone(date_default_timezone_get()); }
+    public function setDefaultLocale(): self
+    {
+        $this->locale = User::getCookie("locale") ?? "en";
+        return $this;
+    }
+
+    public function setLocale($locale): self
+    {
+        $this->locale = $locale;
+        return $this;
+    }
+
+    public function getLocale(): string
+    {
+        return explode("-", $this->locale)[0];
+    }
+
+    public function setDefaultTimezone(): self
+    {
+        $timezone = User::getCookie("timezone") ?? "UTC";
+        return $this->setTimezone($timezone);
+    }
+
+    public function setTimezone(string $timezone): self
+    {
+        if( !in_array($timezone, timezone_identifiers_list()) )
+            $timezone = "UTC";
+
+        $this->timezone = $timezone;
+        return $this;
+    }
+
+    public function getTimezone(): string 
+    {
+        return $this->timezone;
+    }
+
     public static function getIp(): ?string
     {
         $keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
         foreach ($keys as $k) {
-            if (!empty($_SERVER[$k]) && filter_var($_SERVER[$k], FILTER_VALIDATE_IP)) {
+            if (!empty($_SERVER[$k]) && filter_var($_SERVER[$k], FILTER_VALIDATE_IP))
                 return $_SERVER[$k];
-            }
         }
         return null;
     }
@@ -297,8 +332,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
     }
 
-    const ROLE_SOCIAL       = "ROLE_SOCIAL";
-
+    const ROLE_SOCIAL     = "ROLE_SOCIAL";
     const ROLE_USER       = "ROLE_USER";
     const ROLE_ADMIN      = "ROLE_ADMIN";
     const ROLE_SUPERADMIN = "ROLE_SUPERADMIN";
@@ -306,12 +340,18 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @see UserInterface
      */
-    public function getRoles(): array { return array_unique($this->roles); }
+    public function getRoles(): array 
+    { 
+        return $this->roles;
+    }
 
     public function setRoles(array $roles): self
     {
-        $this->roles = $roles;
-
+        if(empty($roles)) 
+            $roles[] = User::ROLE_USER;
+            
+        $this->roles = array_unique($roles);
+        
         return $this;
     }
 

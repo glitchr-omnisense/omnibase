@@ -12,6 +12,7 @@
         {{ form_start(form) }}
 
         <input type="hidden" name="_target_path" value="{{ app.request.headers.get('referer') }}"/>
+        {{ form_row(form._csrf_token) }}
 
         <div class="col d-flex justify-content-center">
         <div class="input-group form-group mb-2">

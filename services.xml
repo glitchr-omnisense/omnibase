@@ -116,6 +116,7 @@
             -->
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="security.helper" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -244,7 +245,6 @@
         <service id="Base\Controller\Client\User\ProfileController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="base.service" />
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
 
@@ -259,6 +259,7 @@
         <service id="Base\Security\UserChecker"           >
             <argument type="service" id="base.service" />
         </service>
+        
         <service id="Base\Security\UserProvider"           />
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -329,6 +330,11 @@
 
         <service id="Base\Field\Configurator\FontAwesomeConfigurator">
             <tag name="ea.field_configurator" />
+        </service>
+
+        <service id="Base\Field\Configurator\BooleanConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
         <service id="Base\Field\Configurator\SelectConfigurator">

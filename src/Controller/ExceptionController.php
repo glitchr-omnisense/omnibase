@@ -64,6 +64,7 @@ class ExceptionController extends AbstractController
     {
         $exception = $exception ?? $this->exception;
         $code = $this->getCode($exception);
+	dump($exception->getStatusText());
         if (!$this->isKnown($exception)) return $exception->getStatusText();
         return $this->translator->trans("exception.".$code, [], "controllers");
     }

@@ -73,7 +73,6 @@ trait BaseUtilsTrait
         return !$this->getEntityManager()->getMetadataFactory()->isTransient($class);
     }
 
-
     public static function camelToSnakeCase($input)
     {
         return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));

@@ -31,7 +31,8 @@ class LostTwoFactorType extends AbstractType
 
         $resolver->setDefaults([
             'data_class' => User::class,
-            'csrf_token_id' => "2fa"
+            'csrf_token_id' => "2fa",
+            "translation_domain" => false
         ]);
     }
 

@@ -86,7 +86,7 @@ class SelectType extends AbstractType
 
             // Default options
             $placeholder = $options["placeholder"] ?? "";
-            $language    = User::getLocale() ?? "en";
+            $language    = $options["locale"] ?? \Locale::getDefault();
             $tokenSeparators  = $options["tokenSeparators"]    ?? [" "];
             $tokenSeparators  = "['" . implode("','", $tokenSeparators) . "']";
 

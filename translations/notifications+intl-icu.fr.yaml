@@ -12,7 +12,8 @@ login:
     social: Salut ! Tu t'es bien connecté à ton compte {0}
 
     pending: "Ton compte compte est en attente de vérification par un administrateur"
-    banned: "Ton compte n'existe plus."
+    disabled: "Ce compte est actuellement désactivé. Un email d'activation vient d'être envoyé à son adresse"
+    banned: "Ce compte a été banni."
     failed: "Les identifiants sont incorrects"
 
 impersonator:
@@ -51,7 +52,7 @@ verifyEmail:
     check:   "Un email vient de t'être envoyé. Merci de confirmer ton adresse en cliquant sur le lien."
     already: "Ton compte est déjà validé!"
     resend:  "Un email de confirmation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
-    invalidToken: "Token invalide. Nous ne pouvons pas confirmer ton adresse. Merci de renvoyer une demande."
+    invalidToken: "Jeton invalide. Nous ne pouvons pas confirmer ton adresse. Merci de renvoyer une demande."
 
 accountGoodbye:
     success: Désolé de te voir partir {0}, mais à une prochaine ! Ton compte est à présent désactivé
@@ -60,3 +61,6 @@ accountGoodbye:
 accountWelcomeBack:
     success: Oh ! Ça faisait un bail.. Bienvenue {0} ! Ton compte est à présent réactivé
     already: Ton compte est déjà actif !
+    foundToken: "Un email de réactivation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
+    invalidToken: "Jeton invalide. Nous ne pouvons pas confirmer ton adresse avec ce lien. Merci de renvoyer une demande"
+    

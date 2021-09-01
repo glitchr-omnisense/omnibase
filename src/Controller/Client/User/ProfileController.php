@@ -17,10 +17,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class ProfileController extends AbstractController
 {
-    private $baseService;
-    public function __construct(BaseService $baseService, UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository)
     {
-        $this->baseService = $baseService;
         $this->userRepository = $userRepository;
     }
 

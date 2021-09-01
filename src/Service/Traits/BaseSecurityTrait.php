@@ -36,6 +36,7 @@ trait BaseSecurityTrait
             throw new Exception("No CSRF token manager found in BaseService. Did you overloaded BaseService::__construct ?");
 
         // Prepare token parameter
+       
         $token = null;
         if (!$tokenOrForm instanceof FormInterface) $token = $tokenOrForm;
         else {
@@ -54,14 +55,7 @@ trait BaseSecurityTrait
             throw new Exception("Unexpected token value provided: string expected");
 
         // Checking validity
-        $isValid = $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
-        if (!$isValid) {
-
-            $notification = new Notification("notification.csrfToken");
-            $notification->send("danger");
-        }
-
-        return $isValid;
+        return $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
     }
     
     public function getToken()

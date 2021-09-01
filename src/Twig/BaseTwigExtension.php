@@ -211,19 +211,13 @@ final class BaseTwigExtension extends AbstractExtension
         return ( empty($highlightContent) ? null : $highlightContent );
     }
 
+    public const DOT_STRUCTURE = "\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*";
     public function trans2(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null)
     {
-        if($id === null)
-            throw new Exception("trans2() called, but translation ID is empty..");
+        if($id === null) throw new Exception("trans2() called, but translation ID is empty..");
 
-        // Default locale translator
-        $defaultLocale = "en";
-        $locale = strtolower(substr($_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? $locale ?? $defaultLocale, 0, 2));
-        setLocale(LC_ALL, $locale); // might be used by some default functions
-
-        // Default domain fallback
-        $domain = $domain ?? null;
-        if (preg_match("/^\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*$/", $id)) {
+        $domain = $domain ?? null; // Default domain fallback
+        if (preg_match("/^".self::DOT_STRUCTURE."$/", $id)) {
 
             $array  = explode(".", $id);
             if ($domain == null) {
@@ -231,14 +225,13 @@ final class BaseTwigExtension extends AbstractExtension
                 $id     = implode(".", $array);
             }
 
-        } else {
+        } else { // Check if recursive dot structure
 
-            // Check if dot structure
-            return preg_replace_callback(
-                "/\{[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}/",
-                function ($key) use ($id, $parameters, $domain, $locale) {
-                    return $this->trans2($id, $parameters, $domain, $locale);
-                }, $id);
+            $count = 0;
+            $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans2($id, $parameters, $domain, $locale); };
+            $ret = preg_replace_callback("/".self::DOT_STRUCTURE."/", $fn, $id, -1, $count);
+
+            if($count > 0) return $ret; // If no replacement go to default fallback
         }
 
         // Replace parameter between brackets
@@ -254,8 +247,7 @@ final class BaseTwigExtension extends AbstractExtension
         // Call for translation with custom parameters        
         $domain = $domain ?? "messages";
         $trans = $this->translator->trans($id, $parameters, $domain, $locale);
-
-        if ($trans == $id && preg_match("/^\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*$/", $id))
+        if ($trans == $id && preg_match("/^".self::DOT_STRUCTURE."$/", $id))
             return $domain.'.'.$id;
 
         return trim($trans);

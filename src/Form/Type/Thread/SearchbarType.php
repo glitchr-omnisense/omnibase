@@ -25,7 +25,8 @@ class SearchbarType extends AbstractType
 
         $resolver->setDefaults([
             'data_class' => SearchData::class,
-            'csrf_token_id' => "thread_search"
+            'csrf_token_id' => "thread_search",
+            "translation_domain" => false
         ]);
     }
 

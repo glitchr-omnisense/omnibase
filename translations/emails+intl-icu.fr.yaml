@@ -31,10 +31,10 @@ accountWelcomeBack:
   subject: "Bon retour, {0} ! "
   content: "Ça faisait longtemps ! Nous sommes heureux de te voir revenir !
            Tu peux cliquer sur le lien ci-dessous pour retourner directement sur le site"
-  action_text: Se connecter
+  action_text: Réactiver le compte !
 
 accountGoodbye:
   subject: "Aurevoir, {0} !"
   content: "Désolé de te voir partir, mais on espère te revoir vite ! Si tu changes d'avis tu pourras te reconnecter à tout instant.
            Clique sur le lien ci-dessous si tu veux revenir !"
-  action_text: Sign back in !
+  action_text: Oups, j'ai changé d'avis !

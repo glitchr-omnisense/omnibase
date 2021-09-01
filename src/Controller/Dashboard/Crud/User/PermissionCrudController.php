@@ -41,11 +41,8 @@ class PermissionCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            //->showEntityActionsAsDropdown()
             ->setPageTitle('index', 'Permission Management')
-
             ->setDefaultSort(['id' => 'DESC'])
-            //->setSearchFields(['firstname', 'lastname', 'username', 'email', 'country'])
             ->setFormOptions(
                 ['validation_groups' => ['new']], // Crud::PAGE_NEW
                 ['validation_groups' => ['edit']] // Crud::PAGE_EDIT

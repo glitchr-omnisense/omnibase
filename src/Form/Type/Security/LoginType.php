@@ -36,7 +36,8 @@ class LoginType extends AbstractType
             'data_class' => User::class,
             'username' => null, // to pass variable from controller to Type
             'csrf_token_id'   => 'authenticate',
-            'allow_extra_fields' => true
+            'allow_extra_fields' => true,
+            "translation_domain" => false
         ]);
     }
 

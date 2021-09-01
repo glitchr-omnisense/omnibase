@@ -24,14 +24,10 @@ login:
 
 resetPassword:
     title: "Réinitialiser votre mot de passe"
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
-        Duis non ornare tortor, sit amet tincidunt orci. 
-        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
-        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
-    descriptionAction: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
-        Duis non ornare tortor, sit amet tincidunt orci. 
-        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
-        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
+    descriptionRequest: "Si tu as oublié ton mot de passe ou si tu veux le réinitialiser, tu es au bon endroit !.
+    Merci d'écrire ton adresse email dans le champ à cet effet.
+    Si ton adresse est utilisée sur notre site, tu recevras un email permettant de réinitialiser ton mot de passe."
+    description: "Tu t'appretes à changer de mot de passe ! Choisis en un nouveau."
     email: "Adresse e-mail"
     submit: "Envoyer la demande"
     newPassword: "Nouveau mot de passe"

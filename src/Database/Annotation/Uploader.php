@@ -161,6 +161,8 @@ class Uploader extends AbstractAnnotation
     protected static $tmpHashTable = [];
     public static function getFile($entity, string $mapping)
     {
+	if($entity === null) return null;
+
         $annotations = self::getAnnotationReader()->getPropertyAnnotations(get_class($entity), self::class);
         if(!array_key_exists($mapping, $annotations))
             throw new Exception("Annotation \"".self::class."\" not found in the mapped property \"$mapping\"");

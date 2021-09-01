@@ -17,21 +17,16 @@ login:
     title: "Sign In"
     submit: "Sign In"
     username: "Pseudonyme / Email"
-    password: "Mot de passe"
-    remember_me: "Remember me !"
-    no_account: "Don't have an account?"
-    forgot_password: "Forgot your password?"
+    password: "Password"
+    rememberMe: "Remember me !"
+    noAccount: "Don't have an account?"
+    forgotPassword: "Forgot your password?"
 
 resetPassword:
     title: "Reset your password"
-    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
-        Duis non ornare tortor, sit amet tincidunt orci. 
-        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
-        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
-    descriptionAction: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque dapibus in nisi blandit luctus. 
-        Duis non ornare tortor, sit amet tincidunt orci. 
-        Aenean purus lectus, aliquet eu tincidunt sed, interdum sit amet velit. 
-        Cras dapibus, urna vitae aliquam imperdiet, urna enim bibendum ipsum, at porttitor sem nibh ac arcu."
+    descriptionRequest: "If you forgot your password or just want to reset it, please enter your email address ! 
+    In case the address you used is in our records, you will receive a special email to reinitialise your password."
+    description: "You are now about to change your password, please enter the password of your choice."
     email: "E-mail address"
     submit: "Send a request"
     newPassword: "Enter new password"

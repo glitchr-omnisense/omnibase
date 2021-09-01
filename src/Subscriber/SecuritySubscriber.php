@@ -37,6 +37,7 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -84,7 +85,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             LogoutEvent::class       => ['onLogout'],
 
             SwitchUserEvent::class => ['onSwitchUser'],
-            RequestEvent::class    => [['onRequest']],
+            RequestEvent::class    => [['onKernelRequest']],
 
             UserEvent::REGISTER => ['onRegistration'],
             UserEvent::APPROVAL => ['onApproval'],
@@ -97,28 +98,38 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onEnabling(UserEvent $event)
     {
         $user = $event->getUser();
+        if($this->security->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         $notification = new Notification("notifications.accountWelcomeBack.success", [$user]);
         $notification->setUser($user);
-        $notification->setHtmlTemplate("@Base/security/email/account_welcomeBack.html.twig");
-        $notification->send("success")->send("email");
+
+        if($this->security->getToken()->getUser() == $user)
+            $notification->send("success");
     }
 
     public function onDisabling(UserEvent $event)
     {
         $user = $event->getUser();
+        if($this->security->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         $notification = new Notification("notifications.accountGoodbye.success", [$user]);
         $notification->setUser($user);
         $notification->setHtmlTemplate("@Base/security/email/account_goodbye.html.twig");
-        $notification->send("success")->send("email");
+
+            $notification->send("success")->send("email");
     }
 
     public function onVerification(UserEvent $event) { }
+
+    protected bool $onRegistrationEvent = false;
     public function onRegistration(UserEvent $event)
     {
+        $this->onRegistrationEvent = true;
+
         $user = $event->getUser();
-        if ($user && $user->isVerified()) { // Social account connection
+        if($this->security->getToken()->getUser() != $user) return; // Only notify when user requests itself
+
+        if ($user->isVerified()) { // Social account connection
                 
             $notification = new Notification("notifications.verifyEmail.success");
             $notification->send("success");
@@ -162,7 +173,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             return;
     }
 
-    public function onRequest(RequestEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
         // Notify user about the authentication method
         if (!($user = $this->security->getUser())) return;
@@ -177,11 +188,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         if (! $user->isVerified()) {
 
-            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
-                
-                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
-                $notification->send("warning");
-            });
+            if(!$this->onRegistrationEvent) {
+
+                $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
+                    
+                    $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
+                    $notification->send("warning");
+                });
+            }
 
         } else if (! $user->isApproved()) {
 
@@ -201,8 +215,20 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginFailure(LoginFailureEvent $event)
     {
-        $notification = new Notification("notifications.login.failed");
-        $notification->send("danger");
+        $message = "notifications.login.failed";
+        $importance = "danger";
+        $data = [];
+
+        if( ($exception = $event->getException()) ) {
+
+            $importance = $exception->getMessageData()["importance"] ?? $importance;
+            $data = $exception->getMessageData();
+
+            $message = $this->translator->trans($exception->getMessageKey() ?? $message, $data, "security");
+        }
+
+        $notification = new Notification($message, $data);
+        $notification->send($importance);
     }
 
     public function onLoginSuccess(LoginSuccessEvent $event)
@@ -210,12 +236,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         // Notify user about the authentication method
         if ($user = $event->getUser()) {
         
-            if($user->isDisabled()) {
-
-                $user->enable();
-                $this->baseService->getEntityManager()->flush();
-
-            } else if (!$user->isLegit()) {
+            if (!$user->isLegit()) {
 
                 $notification = new Notification("notifications.login.social", [$user]);
                 $notification->send("success");

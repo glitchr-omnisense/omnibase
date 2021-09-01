@@ -22,8 +22,20 @@ class ResetPasswordType extends AbstractType
     use BootstrapFormTrait;
     use CsrfFormTrait;
 
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults([
+            'csrf_token_id'   => 'reset-password',
+            "translation_domain" => false
+        ]);
+    }
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        parent::buildForm($builder, $options);
+
         $builder
             ->add('email', TextType::class, [
                 'validation_groups' => ["new"],
@@ -31,11 +43,6 @@ class ResetPasswordType extends AbstractType
             ]);
 
         parent::buildForm($builder, $options);
-    }
-
-    public function configureOptions(OptionsResolver $resolver): void
-    {
-        $resolver->setDefaults(['csrf_token_id'   => 'reset-password']);
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

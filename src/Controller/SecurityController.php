@@ -62,7 +62,6 @@ class SecurityController extends AbstractController
 
             $logo = $this->baseService->getParameterBag("base.logo");
             return $this->render('@EasyAdmin/page/login.html.twig', [
-                'error' => $error,
                 'last_username' => $lastUsername,
                 'translation_domain' => 'admin',
                 'csrf_token_intention' => 'authenticate',
@@ -94,13 +93,6 @@ class SecurityController extends AbstractController
 
             $notification = new Notification("notifications.login.partial");
             $notification->send("info");
-        }
-
-        // Get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-        if($error) {
-            $notification = new Notification($error->getMessage());
-            $notification->send("warning");
         }
 
         // Last username entered by the user
@@ -187,9 +179,9 @@ class SecurityController extends AbstractController
         // Registration form registered
         if ($form->isSubmitted() && $form->isValid()) {
 
-            if ($this->baseService->isCsrfTokenValid('registration', $form, $request)) {
+            if (!$this->baseService->isCsrfTokenValid('registration', $form, $request)) {
         
-                $notification = new Notification("notification.register.csrfToken");
+                $notification = new Notification("notifications.register.csrfToken");
                 $notification->send("danger");
                 
             } else {
@@ -322,7 +314,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/goodbye", name="base_accountGoodbye")
+     * @Route("/account-goodbye", name="base_accountGoodbye")
      */
     public function DisableAccountRequest(Request $request)
     {
@@ -347,6 +339,47 @@ class SecurityController extends AbstractController
     }
 
     /**
+     * @Route("/welcome-back/{token}", name="base_accountWelcomeBack_token")
+     */
+    public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
+    {
+        $user = null;
+
+        $welcomeBackToken = $this->tokenRepository->findOneByValue($token);
+        if($welcomeBackToken) $user = $welcomeBackToken->getUser();
+
+        if($user === null || !$welcomeBackToken || !$welcomeBackToken->isValid()) {
+
+            if ($welcomeBackToken)
+                $welcomeBackToken->revoke();
+            
+            $notification = new Notification("notifications.accountWelcomeBack.invalidToken");  
+            $notification->send("danger");
+            
+            return $this->redirectToRoute('base_homepage');
+        
+        } else if(!$user->isDisabled()) {
+
+            $welcomeBackToken->revoke();
+            
+            $notification = new Notification("notifications.accountWelcomeBack.already");  
+            $notification->send("warning");
+
+            return $this->redirectToRoute('base_homepage');
+
+        
+        } else if ($user->getValidToken("welcome-back")){
+
+            $user->enable();
+
+            $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
+            
+            $this->getDoctrine()->getManager()->flush();
+            return $authenticateUser;
+        }
+    }
+
+    /**
      * Display & process form to request a password reset.
      *
      * @Route("/reset-password", name="base_resetPassword")
@@ -363,7 +396,7 @@ class SecurityController extends AbstractController
 
             if (!$this->baseService->isCsrfTokenValid('reset-password', $form, $request)) {
 
-                $notification = new Notification("notification.resetPassword.csrfToken");
+                $notification = new Notification("notifications.resetPassword.csrfToken");
                 $notification->send("danger");
                 
             } else {
@@ -379,7 +412,7 @@ class SecurityController extends AbstractController
                         $resetPasswordToken = new Token("reset-password", 3600);
                         $resetPasswordToken->setUser($user);
 
-                        $notification->setHtmlTemplate("@Base/security/email/reset_password_request.html.twig", ["token" => $resetPasswordToken]);
+                        $notification->setHtmlTemplate("@Base/security/email/reset_password.html.twig", ["token" => $resetPasswordToken]);
                         $notification->setUser($user);
                         $notification->send("email");
                     }
@@ -402,6 +435,9 @@ class SecurityController extends AbstractController
      */
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
+        if (($user = $this->getUser()) && $user->isLegit())
+            return $this->redirectToRoute('base_profile');
+            
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {
 
@@ -420,18 +456,19 @@ class SecurityController extends AbstractController
         
             if ($form->isSubmitted() && $form->isValid()) {
 
-                if($resetPasswordToken) $user->removeToken($resetPasswordToken);
+                $resetPasswordToken->revoke();
                 $user->setPlainPassword($form->get('plainPassword')->getData());
 
                 $notification = new Notification("notifications.resetPassword.success");
+               
+                $this->getDoctrine()->getManager()->flush();
+                $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
                 $notification->send("success");
 
-                $this->getDoctrine()->getManager()->flush();
-                return $userAuthenticator->authenticateUser($user, $authenticator, $request);
+                return $authenticateUser;
             }
 
             return $this->render('@Base/security/reset_password.html.twig', ['form' => $form->createView()]);
         }
-
     }
 }

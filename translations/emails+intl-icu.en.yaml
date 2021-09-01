@@ -21,7 +21,7 @@ verifyEmail:
 adminApproval:
   subject: "Validation requested"
   content: <b>{0} \#{1}</b> is ready for validation !
-  action_text: dashboard
+  action_text: Go to dashboard
 
 adminApprovalConfirm:
   subject: "Account approved"
@@ -33,7 +33,7 @@ accountWelcomeBack:
   subject: "Welcome back, {0} ! "
   content: "Long time no see ! We're so glad you're finally here. 
            Click on the link below to update your profile and visit the website"
-  action_text: Go online !
+  action_text: Reactivate your account
 
 accountGoodbye:
   subject: "Time to say goodbye, {0} !"
