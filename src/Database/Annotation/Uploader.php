@@ -331,19 +331,19 @@ class Uploader extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function prePersist(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->uploadFiles($entity, $property);
     }
 
-    public function preUpdate(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $oldEntity = $this->getOldEntity($entity);
         if ($this->uploadFiles($entity, $property))
             $this->deleteFiles($oldEntity, $property);
     }
 
-    public function postRemove(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->deleteFiles($entity, $property);
     }

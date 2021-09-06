@@ -131,24 +131,24 @@ class Hashify extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function prePersist(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
         if($value) $this->setFieldValue($entity, $property, $value);
     }
 
-    public function preUpdate(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
         if($value) $this->setFieldValue($entity, $property, $value);
     }
 
-    public function postPersist(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->erasePlainMessage($entity);
     }
 
-    public function postUpdate(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->erasePlainMessage($entity);
     }

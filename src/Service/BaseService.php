@@ -11,6 +11,8 @@ use Base\Service\Traits\BaseSecurityTrait;
 use Base\Service\Traits\BaseSymfonyTrait;
 use Base\Service\Traits\BaseTwigTrait;
 use Base\Service\Traits\BaseUtilsTrait;
+use Base\Service\Traits\BaseDoctrineTrait;
+use Base\Traits\BaseTrait;
 
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -42,6 +44,8 @@ use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @class Base interface to be used with custom base
@@ -76,7 +80,7 @@ final class BaseService implements RuntimeExtensionInterface
     public function __construct(
         KernelInterface $kernel,
         Environment $twig,
-        EntityManagerInterface $entityManager,
+        ManagerRegistry $doctrine,
         FormFactoryInterface $formFactory,
         NotifierInterface $notifier, ChannelPolicyInterface $notifierPolicy,
         SluggerInterface $slugger, 
@@ -104,14 +108,14 @@ final class BaseService implements RuntimeExtensionInterface
         $this->rstack     = $this->container->get("request_stack");
 
         $this->setTwig($twig);
+        $this->setDoctrine($doctrine);
+        $this->setEntityManager($doctrine->getManager());
         $this->setRouter($this->container->get("router"));
-        $this->setEntityManager($entityManager);
 
         // Additional services related to user class
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
         $this->setProjectDir($this->kernel->getProjectDir());
-        $this->setEntityManager($entityManager);
         $this->setUserProperty($this->getParameterBag("base.user.property"));
         $this->setNotifier($notifier, $notifierPolicy);
 
@@ -120,10 +124,11 @@ final class BaseService implements RuntimeExtensionInterface
 
         $this->addJavascriptFile("/bundles/base/app.js");
     }
-
+    
     /*
      * Common variables between traits 
      */
+    use BaseTrait;
     use BaseCommonTrait;
 
     /*
@@ -137,9 +142,14 @@ final class BaseService implements RuntimeExtensionInterface
     use BaseSymfonyTrait;
 
     /**
-     * Symfony security container related methods
+     * Security container related methods
      */
     use BaseSecurityTrait;
+
+    /**
+     * Doctrine related methods
+     */
+    use BaseDoctrineTrait;
 
     /*
      * Util methods

@@ -123,14 +123,14 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
             $exception = $content->getThrowable();
             $this->setContent(
-                "<b>".$exception->getFile() . ":" . $exception->getLine()."</b>".
+                "<b>".str_replace($this->getProjectDir(),'.', $exception->getFile()) . ":" . $exception->getLine()."</b>".
                 "<br/>".$exception->getMessage()
             );
 
         } else if ($content instanceof FlattenException) {
 
             $this->setContent(
-                "<b>" . $content->getFile() . ":" . $content->getLine() . "</b>" .
+                "<b>" . str_replace($this->getProjectDir(),'.', $content->getFile()) . ":" . $content->getLine() . "</b>" .
                 "<br/>" . $content->getMessage()
             );
 

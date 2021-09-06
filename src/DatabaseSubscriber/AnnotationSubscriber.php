@@ -6,6 +6,7 @@ use Base\Database\AbstractAnnotation;
 use Base\Database\AnnotationReader;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Annotation\Slugify;
+use Doctrine\Common\EventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\EventSubscriber;
@@ -28,8 +29,9 @@ class AnnotationSubscriber implements EventSubscriber {
     {
         return [
             Events::loadClassMetadata,
+            Events::postLoad,
 
-            Events::onFlush,
+            Events::onFlush, 
             Events::prePersist,  Events::preUpdate,  Events::preRemove,
             Events::postPersist, Events::postUpdate, Events::postRemove,
         ];
@@ -107,7 +109,6 @@ class AnnotationSubscriber implements EventSubscriber {
             $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
             $classMetadata  = $this->entityManager->getClassMetadata($className);
-
             $annotations = $this->annotationReader->getAnnotations($className);
             foreach ($annotations[AnnotationReader::TARGET_CLASS][$className] as $entry) {
 
@@ -117,7 +118,7 @@ class AnnotationSubscriber implements EventSubscriber {
                 if (!$entry->supports($classMetadata, AnnotationReader::TARGET_CLASS, $className, $entity))
                     continue;
 
-                $entry->onFlush($event, $entity);
+                $entry->onFlush($event, $classMetadata, $entity);
             }
 
             /** ** TARGET_METHOD is missing on purpose ** */
@@ -136,14 +137,14 @@ class AnnotationSubscriber implements EventSubscriber {
                     if (!$entry->supports($classMetadata, AnnotationReader::TARGET_PROPERTY, $property, $entity))
                         continue;
 
-                    $entry->onFlush($event, $entity, $property);
+                    $entry->onFlush($event, $classMetadata, $entity, $property);
                 }
             }
         }
     }
 
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
-    {        
+    {
         $entity         = $event->getObject();
         $className      = get_class($entity);
 
@@ -161,7 +162,7 @@ class AnnotationSubscriber implements EventSubscriber {
             if (!$entry->supports($classMetadata, AnnotationReader::TARGET_CLASS, $className, $entity))
                 continue;
 
-            $entry->{$eventName}($event, $entity);
+            $entry->{$eventName}($event, $classMetadata, $entity);
         }
 
         foreach ($annotations[AnnotationReader::TARGET_PROPERTY][$className] as $property => $array) {
@@ -174,7 +175,7 @@ class AnnotationSubscriber implements EventSubscriber {
                 if (!$entry->supports($classMetadata, AnnotationReader::TARGET_PROPERTY, $property, $entity))
                     continue;
 
-                $entry->{$eventName}($event, $entity, $property);
+                $entry->{$eventName}($event, $classMetadata, $entity, $property);
             }
         }
     }
@@ -182,6 +183,7 @@ class AnnotationSubscriber implements EventSubscriber {
     public function preUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function preRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
 
+    public function postLoad(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function postPersist(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function postUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function postRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }

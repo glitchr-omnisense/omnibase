@@ -12,6 +12,8 @@ use Base\Database\Annotation\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\DiscriminatorEntry;
 
+use Base\Traits\ColumnAliasTrait;
+
 /**
  * @ORM\Entity(repositoryClass=TagRepository::class)
  * @ORM\InheritanceType( "JOINED" )
@@ -20,6 +22,8 @@ use Base\Database\Annotation\DiscriminatorEntry;
  */
 class Tag
 {
+    use ColumnAliasTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

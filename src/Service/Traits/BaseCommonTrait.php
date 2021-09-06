@@ -15,10 +15,10 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Doctrine\Persistence\ManagerRegistry;
+
 trait BaseCommonTrait {
 
-    use BaseTrait;
-    
     /**
      * @var string
      */
@@ -47,20 +47,10 @@ trait BaseCommonTrait {
     public static function setSlugger(?SluggerInterface $slugger) {  self::$slugger = $slugger; }
 
     /**
-     * @var NotifierInterface
+     * @var DoctrineInterface
      */
-    public static $notifier = null;
-
-    /**
-     * @var ChannelPolicyInterface
-     */
-    public static $notifierPolicy = [];
-
-    /**
-     * @var EntityManagerInterface
-     */
-    public static $entityManager;
-    public static function setEntityManager(EntityManagerInterface $entityManager) { self::$entityManager = $entityManager; }
+    public static $doctrine;
+    public static function setDoctrine(ManagerRegistry $doctrine) { self::$doctrine = $doctrine; }
 
     /**
      * @var RouterInterface

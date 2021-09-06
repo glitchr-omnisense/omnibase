@@ -107,20 +107,13 @@ class AnnotationReader
      * @var bool
      */
     protected bool $enabled;
-    public function isEnabled(): bool
-    {
-        return $this->enabled;
-    }
+    public function isEnabled(): bool { return $this->enabled; }
 
     /**
      * @var array
      */
     protected array $paths = [];
-    public function getPaths(): array
-    {
-        return $this->paths;
-    }
-
+    public function getPaths(): array { return $this->paths; }
     public function addPath(string $path): self
     {
         if (in_array($path, $this->paths)) return $this;
@@ -263,11 +256,7 @@ class AnnotationReader
      * @var array
      */
     protected $hierarchy   = [];
-    public function getParent($className): ?string
-    {
-        return $this->hierarchy[$className] ?? null;
-    }
-
+    public function getParent($className): ?string { return $this->hierarchy[$className] ?? null; }
     public function getAncestor($className): ?string
     {
         $ancestor = $this->getParent($className);
@@ -384,20 +373,23 @@ class AnnotationReader
 
         // If annotation already computed
         $annotations = $this->cachePool['classAnnotations']->get() ?? [];
+
         if (!array_key_exists($reflClass->name, $annotations)) {
 
             // Compute the class annotations
             $annotations[$reflClass->name] = [];
-            foreach ($this->getKnownAnnotations() as $annotationName) {
 
+            foreach ($this->getDoctrineReader()->getClassAnnotations($reflClass) as $annotation)
+            {
                 // Only look for AbstractAnnotation classes
-                if (!is_subclass_of($annotationName, AbstractAnnotation::class))
+                if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                    continue;
+                if (!in_array(get_class($annotation), $this->getKnownAnnotations()))
                     continue;
 
-                if (($annotation = $this->getDoctrineReader()->getClassAnnotation($reflClass, $annotationName)))
-                    $annotations[$reflClass->name][] = $annotation;
+                $annotations[$reflClass->name][] = $annotation;
             }
-
+ 
             $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
         }
 
@@ -412,6 +404,7 @@ class AnnotationReader
             if( in_array(get_class($annotation), $annotationNames) )
                 $filteredAnnotations[] = $annotation;
         }
+
         return $filteredAnnotations;
     }
 

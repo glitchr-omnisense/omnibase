@@ -11,15 +11,9 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 trait BaseSymfonyTrait
@@ -123,74 +117,6 @@ trait BaseSymfonyTrait
     {
         if (!$response) return null;
         return $this->getProfiler()->loadProfileFromResponse($response);
-    }
-
-    public function getRepository(string $className, bool $reopen = false) 
-    { 
-        return $this->getEntityManager($reopen)->getRepository($className); 
-    }
-
-    public function isWithinDoctrine()
-    {
-        $debug_backtrace = debug_backtrace();
-        foreach($debug_backtrace as $trace)
-            if(str_starts_with($trace["class"], "Doctrine")) return true;
-
-        return false;
-    }
-
-    public function getOriginalEntityData($eventOrEntity, bool $reopen = false)
-    { 
-        $entity = $eventOrEntity->getObject();
-        $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
-
-        if($eventOrEntity instanceof PreUpdateEventArgs) {
-
-            $event = $eventOrEntity;
-            foreach($event->getEntityChangeSet() as $field => $data)
-                $originalEntityData[$field] = $data[0];
-
-        } else if($this->isWithinDoctrine()) {
-
-            dump("Achtung ! You are trying to access data object within a Doctrine method..".
-                        "Original entity might have already been updated.");
-            return null;
-        }
-
-        return $originalEntityData;
-    }
-
-    protected static $entitySerializer = null;
-    public function getOriginalEntity($eventOrEntity, bool $reopen = false)
-    { 
-        if (!self::$entitySerializer)
-            self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
-
-        $data = $this->getOriginalEntityData($eventOrEntity, $reopen);
-
-        if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
-        else $entity = $eventOrEntity->getObject();
-
-        return self::$entitySerializer->deserialize(json_encode($data), get_class($entity), 'json');
-    }
-
-    public function getEntityById(string $className, int $id, bool $reopen = false)
-    {
-        $repository = $this->getRepository($className, $reopen);
-        return $repository->findOneBy(["id" => $id]) ?? null;
-    }
-
-    public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
-    {
-        if (!BaseService::$entityManager) return null;
-        if (!BaseService::$entityManager->isOpen()) {
-
-            if(!$reopen) return null;
-            BaseService::$entityManager = BaseService::$entityManager->create(
-                BaseService::$entityManager->getConnection(), BaseService::$entityManager->getConfiguration());
-        }
-
-        return BaseService::$entityManager;
     }
     
     public function getRouteWithUrl(string $path = "", array $opts = []) { return $this->getWebsite() . $this->getRoute($path, $opts); }

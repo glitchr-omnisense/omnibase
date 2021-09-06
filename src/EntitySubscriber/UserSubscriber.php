@@ -44,6 +44,30 @@ class UserSubscriber implements EventSubscriber
         ];
     }
 
+    public function addEvent(User $user, string $event)
+    {
+        $id = spl_object_id($user);
+
+        if(!array_key_exists($id, $this->events))
+            $this->events[$id] = [];
+
+        if(!in_array($event, $this->events[$id]))
+            $this->events[$id][$event] = false;
+    }
+
+    public function dispatchEvents($user)
+    {
+        $id = spl_object_id($user);
+        if (!array_key_exists($id, $this->events)) return;
+
+	    foreach ($this->events[$id] as $event => $triggered) {
+
+            $this->events[$id][$event] = true;
+            if(!$triggered) // Dispatch only once
+                $this->dispatcher->dispatch(new UserEvent($user), $event);
+        }
+    }
+
     public function prePersist(LifecycleEventArgs $event)
     {
         $user = $event->getObject();
@@ -102,30 +126,6 @@ class UserSubscriber implements EventSubscriber
 
         if($impersonator == $this->tokenStorage->getToken()->getUser() || $user == $this->tokenStorage->getToken()->getUser())
             throw new Exception("Unauthorized action: you can't delete your own account");
-    }
-
-    public function addEvent(User $user, string $event)
-    {
-        $id = spl_object_id($user);
-
-        if(!array_key_exists($id, $this->events))
-            $this->events[$id] = [];
-
-        if(!in_array($event, $this->events[$id]))
-            $this->events[$id][$event] = false;
-    }
-
-    public function dispatchEvents($user)
-    {
-        $id = spl_object_id($user);
-        if (!array_key_exists($id, $this->events)) return;
-
-	    foreach ($this->events[$id] as $event => $triggered) {
-
-            $this->events[$id][$event] = true;
-            if(!$triggered) // Dispatch only once
-                $this->dispatcher->dispatch(new UserEvent($user), $event);
-        }
     }
 
 }

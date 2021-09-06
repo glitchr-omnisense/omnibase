@@ -19,17 +19,26 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Annotation\GenerateUuid;
 use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\EntityHierarchy;
+use Base\Service\BaseService;
 
-use Exception;
+use Base\Traits\EntityHierarchyTrait;
+use Base\Traits\ColumnAliasTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
+ * 
+ * @EntityHierarchy(null, separator = "/" );
  */
+
 class Thread
 {
+    use EntityHierarchyTrait;
+    use ColumnAliasTrait;
+    
     public const STATE_APPROVED  = "STATE_APPROVED",
                  STATE_PENDING   = "STATE_PENDING",
                  STATE_REJECTED  = "STATE_REJECTED",
@@ -39,32 +48,6 @@ class Thread
                  STATE_DRAFT     = "STATE_DRAFT",
                  STATE_FUTURE    = "STATE_FUTURE",
                  STATE_PUBLISHED = "STATE_PUBLISHED";
-
-    public const SECTION = null;
-    public const SECTION_SEPARATOR = "/";
-
-    public function getSection($id = -1, $separator = self::SECTION_SEPARATOR)
-    {
-        if ($id < 0) return static::SECTION ?? null;
-
-        $sections = $this->getSections($separator);
-        return $sections[$id] ?? null;
-    }
-
-    public function getNSections($separator = self::SECTION_SEPARATOR)
-    {
-        $sections = $this->getSections($separator);
-        return count($sections);
-    }
-
-    public function getSections($separator = self::SECTION_SEPARATOR)
-    {
-        if (static::SECTION === null)
-            throw new Exception("Missing section for class \"" . get_class($this) . "\"");
-
-        $sections = (is_array(static::SECTION) ? static::SECTION : explode($separator, static::SECTION));
-        return $sections;
-    }
 
     /**
      * @ORM\Id
@@ -93,15 +76,15 @@ class Thread
     protected $children;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $title;
-
-    /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Slugify(reference="title")
      */
     protected $slug;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $title;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -252,42 +235,30 @@ class Thread
         return $this;
     }
 
-    public function isDraft(): bool { return $this->state == self::STATE_DRAFT; }
-    public function isPublish(): bool { return $this->state == self::STATE_PUBLISHED; }
-    public function isFuture(): bool { return $this->state == self::STATE_FUTURE; }
-    public function isSecret(): bool { return $this->state == self::STATE_SECRET; }
 
+    public function isDeleted(): bool { return $this->state == self::STATE_DELETED;   }
+    public function isDraft()  : bool { return $this->state == self::STATE_DRAFT;     }
+    public function isPublish(): bool { return $this->state == self::STATE_PUBLISHED; }
+    public function isFuture() : bool { return $this->state == self::STATE_FUTURE;    }
+    public function isSecret() : bool { return $this->state == self::STATE_SECRET;    }
     public function isPublishable(): bool
     {
         if(!$this->publishedAt) return false;
         return time() - $this->publishedAt->getTimestamp() >= 0;
     }
 
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
-
+    public function getSlug(): ?string { return $this->slug; }
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
         return $this;
     }
 
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
+    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
 
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
 
-    public function getPublishedAt(): ?\DateTimeInterface
-    {
-        return $this->publishedAt;
-    }
+    public function getPublishedAt(): ?\DateTimeInterface { return $this->publishedAt; }
 
     public function setPublishedAt(?\DateTimeInterface $publishedAt): self
     {
@@ -295,54 +266,33 @@ class Thread
         return $this;
     }
 
-    public function getPrimaryTag()
-    {
-        return $this->tags->first();
-    }
+    public function getPrimaryTag() { return $this->tags->first(); }
 
     /**
      * @return Collection|Tag[]
      */
-    public function getSecondaryTags(): array
-    {
-        return $this->tags->slice(1);
-    }
+    public function getSecondaryTags(): array { return $this->tags->slice(1); }
 
     /**
      * @return Collection|Tag[]
      */
-    public function getTags(): Collection
-    {
-        return $this->tags;
-    }
-
+    public function getTags(): Collection { return $this->tags; }
     public function addTag(Tag $tag): self
     {
-        // if(!is_subclass_of($tag, Tag::class))
-        //     throw new Exception("Passed variable \"$tag\" doesn't inherit from Base\Entity\Thread\Tag");
-
-        if (!$this->tags->contains($tag)) {
+        if (!$this->tags->contains($tag))
             $this->tags[] = $tag;
-        }
 
         return $this;
     }
 
     public function removeTag(?Tag $tag): self
     {
-        // if (!is_subclass_of($tag, Tag::class))
-        //     throw new Exception("Passed variable \"$tag\" doesn't inherit from Base\Entity\Thread\Tag");
-
         $this->tags->removeElement($tag);
 
         return $this;
     }
 
-    public function getParent(): ?self
-    {
-        return $this->parent;
-    }
-
+    public function getParent(): ?self { return $this->parent; }
     public function setParent(?self $parent): self
     {
         $this->parent = $parent;
@@ -355,11 +305,7 @@ class Thread
     /**
      * @return Collection|self[]
      */
-    public function getChildren(): Collection
-    {
-        return $this->children;
-    }
-
+    public function getChildren(): Collection { return $this->children; }
     public function addChild(self $child): self
     {
         if (!$this->children->contains($child)) {
@@ -385,11 +331,7 @@ class Thread
     /**
      * @return Collection|User[]
      */
-    public function getParticipants(): Collection
-    {
-        return $this->participants;
-    }
-
+    public function getParticipants(): Collection { return $this->participants; }
     public function addParticipant(User $participant): self
     {
         if (!$this->participants->contains($participant)) {
@@ -409,11 +351,7 @@ class Thread
     /**
      * @return Collection|User[]
      */
-    public function getFollowers(): Collection
-    {
-        return $this->followers;
-    }
-
+    public function getFollowers(): Collection { return $this->followers; }
     public function addFollower(User $follower): self
     {
         if (!$this->followers->contains($follower)) {
@@ -477,11 +415,7 @@ class Thread
         return false;
     }
 
-    public function getLikes(): Collection
-    {
-        return $this->likes;
-    }
-
+    public function getLikes(): Collection { return $this->likes; }
     public function addLike(Like $like): self
     {
         // Check if user already likes
@@ -509,18 +443,11 @@ class Thread
     /**
      * @return |User
      */
-    public function getAuthor(): ?User
-    {
-        return $this->authors[0] ?? null;
-    }
+    public function getAuthor(): ?User { return $this->authors[0] ?? null; }
     /**
      * @return Collection|User[]
      */
-    public function getAuthors(): Collection
-    {
-        return $this->authors;
-    }
-
+    public function getAuthors(): Collection { return $this->authors; }
     public function addAuthor(?User $author): self
     {
         if(!$author) return $this;
@@ -538,4 +465,5 @@ class Thread
 
         return $this;
     }
+
 }

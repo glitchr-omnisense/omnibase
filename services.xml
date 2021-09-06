@@ -47,7 +47,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="kernel" />
             <argument type="service" id="twig" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="doctrine" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="notifier" />
             <argument type="service" id="notifier.channel_policy" />

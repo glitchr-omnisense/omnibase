@@ -25,7 +25,7 @@ use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Repository\User\NotificationRepository;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
-
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
@@ -40,6 +40,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
+use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SecuritySubscriber implements EventSubscriberInterface
@@ -61,17 +62,19 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function __construct(
         Security $security,
-        TraceableEventDispatcher $dispatcher,
+        EventDispatcherInterface $dispatcher,
         TranslatorInterface $translator,
         NotificationRepository $notificationRepository,
         BaseService $baseService) {
 
         $this->security    = $security;
-        $this->dispatcher  = $dispatcher;
-        $this->baseService = $baseService;
+        $this->dispatcher  = ($dispatcher instanceof TraceableEventDispatcher ? $dispatcher : 
+                              new TraceableEventDispatcher($dispatcher, new Stopwatch()));
+
         $this->translator  = $translator;
-        $this->notificationRepository = $notificationRepository;
-        
+        $this->baseService = $baseService;
+
+        $this->notificationRepository = $notificationRepository;        
     }
 
     public static function getSubscribedEvents()
@@ -121,13 +124,11 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onVerification(UserEvent $event) { }
 
-    protected bool $onRegistrationEvent = false;
     public function onRegistration(UserEvent $event)
     {
-        $this->onRegistrationEvent = true;
-
+        $token = $this->security->getToken();
         $user = $event->getUser();
-        if($this->security->getToken()->getUser() != $user) return; // Only notify when user requests itself
+        if($token && $token->getUser() != $user) return; // Only notify when user requests itself
 
         if ($user->isVerified()) { // Social account connection
                 
@@ -143,8 +144,11 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
+            $this->baseService->getDoctrine()->getManager()->flush();
             $notification->send("email")->send("success");
         }
+
+        $this->baseService->redirectToRoute($event, "base_profile");
     }
 
     public function onApproval(UserEvent $event)
@@ -163,7 +167,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("email");
         }
 
-        $this->baseService->getEntityManager()->flush();
+        $this->baseService->getDoctrine()->getManager()->flush();
     }
 
     public function onSwitchUser(SwitchUserEvent $event)
@@ -176,41 +180,38 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         // Notify user about the authentication method
-        if (!($user = $this->security->getUser())) return;
+        // if (!($user = $this->security->getUser())) return;
 
-        if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
-            return $this->baseService->redirectToRoute($event, "base_profile");
+        // if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
+        //     return $this->baseService->redirectToRoute($event, "base_profile");
 
-        $exceptionList = [
-            "/^(app|base)_(verifyEmail(_token)*)$/",
-            "/^(app|base)_(resetPassword(_token)*)$/",
-            "/^(app|base)_(logout|settings|profile)$/"];
+        // $exceptionList = [
+        //     "/^(app|base)_(verifyEmail(_token)*)$/",
+        //     "/^(app|base)_(resetPassword(_token)*)$/",
+        //     "/^(app|base)_(logout|settings|profile)$/"];
 
-        if (! $user->isVerified()) {
+        // if (! $user->isVerified()) {
 
-            if(!$this->onRegistrationEvent) {
+        //     $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
+                
+        //         $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
+        //         $notification->send("warning");
+        //     });
 
-                $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
-                    
-                    $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
-                    $notification->send("warning");
-                });
-            }
+        // } else if (! $user->isApproved()) {
 
-        } else if (! $user->isApproved()) {
+        //     $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
 
-            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
+        //         $notification = new Notification("notifications.login.pending");
+        //         $notification->send("warning");
+        //     });
+        // }
 
-                $notification = new Notification("notifications.login.pending");
-                $notification->send("warning");
-            });
-        }
+        // if ($this->security->isGranted('IS_IMPERSONATOR')) {
 
-        if ($this->security->isGranted('IS_IMPERSONATOR')) {
-
-            $notification = new Notification("notifications.impersonator", [$user]);
-            $notification->send("warning");
-        }
+        //     $notification = new Notification("notifications.impersonator", [$user]);
+        //     $notification->send("warning");
+        // }
     }
 
     public function onLoginFailure(LoginFailureEvent $event)
@@ -236,7 +237,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         // Notify user about the authentication method
         if ($user = $event->getUser()) {
         
-            if (!$user->isLegit()) {
+            if (!$user->isPersistent()) {
 
                 $notification = new Notification("notifications.login.social", [$user]);
                 $notification->send("success");

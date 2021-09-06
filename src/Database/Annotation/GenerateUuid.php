@@ -84,7 +84,7 @@ class GenerateUuid extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function onFlush(OnFlushEventArgs $args, $entity, ?string $property = null)
+    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $this->setFieldValue($entity, $property, $this->getUuid($entity));
     }

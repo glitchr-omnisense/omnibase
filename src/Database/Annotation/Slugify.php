@@ -70,8 +70,13 @@ class Slugify extends AbstractAnnotation
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"reference\" missing for @Slugify in " . get_class($entity));
 
-        // Check if field already set.. (it needs to be checked)
-        $input = $defaultInput ?? $this->getFieldValue($entity, $this->referenceColumn);
+        // Check if field already set.. get field value or by default class name
+        $className = explode("\\", get_class($entity));
+
+        $input = $defaultInput ?? 
+                 $this->getFieldValue($entity, $this->referenceColumn) ??
+                 end($className);
+
         $input = $input . (!empty($suffix) ? $this->separator.$suffix : "");
 
         $slug = $this->slugger->slug($input, $this->separator);
@@ -96,14 +101,14 @@ class Slugify extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function prePersist(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $defaultInput = $this->getFieldValue($entity, $property);
         $slug = $this->getSlug($entity, $defaultInput);
         $this->setFieldValue($entity, $property, $slug);
     }
 
-    public function onFlush(OnFlushEventArgs $event, $entity, ?string $property = null)
+    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
 

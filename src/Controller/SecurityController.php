@@ -54,7 +54,7 @@ class SecurityController extends AbstractController
         // In case of maintenance, still allow users to login
         if($this->baseService->isMaintenance()) {
 
-            if ( ($user = $this->getUser()) && $user->isLegit() )
+            if ( ($user = $this->getUser()) && $user->isPersistent() )
             return $this->redirectToRoute("base_dashboard");
 
             $error = $authenticationUtils->getLastAuthenticationError();
@@ -74,7 +74,7 @@ class SecurityController extends AbstractController
         }
 
         // Redirect to the right page when access denied
-        if ( ($user = $this->getUser()) && $user->isLegit() ) {
+        if ( ($user = $this->getUser()) && $user->isPersistent() ) {
 
             if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
 
@@ -159,7 +159,7 @@ class SecurityController extends AbstractController
     public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
 
         // If already connected..
-        if (($user = $this->getUser()) && $user->isLegit())
+        if (($user = $this->getUser()) && $user->isPersistent())
             return $this->redirectToRoute('base_profile');
 
         // Prepare registration form
@@ -248,7 +248,7 @@ class SecurityController extends AbstractController
     {
         $user = $this->getUser();
         $user->removeExpiredTokens("verify-email");
-
+            
         if ($user->isVerified()) {
 
             $notification = new Notification('notifications.verifyEmail.already');
@@ -273,7 +273,7 @@ class SecurityController extends AbstractController
                 $this->AdminApprovalRequest($request);
         }
 
-        $this->userRepository->flush();
+        $this->getDoctrine()->getManager()->flush();
         return $this->redirectToRoute('base_profile');
     }
 
@@ -386,7 +386,7 @@ class SecurityController extends AbstractController
      */
     public function ResetPasswordRequest(Request $request): Response
     {
-        if (($user = $this->getUser()) && $user->isLegit())
+        if (($user = $this->getUser()) && $user->isPersistent())
             return $this->redirectToRoute('base_profile');
             
         $form = $this->createForm(ResetPasswordType::class);
@@ -435,7 +435,7 @@ class SecurityController extends AbstractController
      */
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
-        if (($user = $this->getUser()) && $user->isLegit())
+        if (($user = $this->getUser()) && $user->isPersistent())
             return $this->redirectToRoute('base_profile');
             
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);

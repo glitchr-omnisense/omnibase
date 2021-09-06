@@ -27,7 +27,7 @@ class ProfileController extends AbstractController
      */
     public function Edit()
     {
-        if (!($user = $this->getUser()) || !$user->isLegit())
+        if (!($user = $this->getUser()) || !$user->isPersistent())
             return $this->redirectToRoute('base_login');
 
         return $this->render('@Base/client/user/profile_edit.html.twig', ['user' => $user]);
@@ -46,7 +46,7 @@ class ProfileController extends AbstractController
 
         } else {
 
-            if (!($user = $this->getUser()) || !$user->isLegit())
+            if (!($user = $this->getUser()) || !$user->isPersistent())
                 return $this->redirectToRoute('base_search');
         }
 

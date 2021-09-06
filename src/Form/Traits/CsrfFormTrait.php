@@ -9,7 +9,12 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
+
+use Base\Subscriber\CsrfSubscriber;
+use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 
 trait CsrfFormTrait
 {
@@ -36,5 +41,12 @@ trait CsrfFormTrait
                 'mapped' => false,
                 "attr" => ["value" => $csrfToken]
             ]);
+
+        // ADD POST SUBMIT CHECK 
+        $builder->addEventListener(FormEvents::POST_SUBMIT,
+            function (FormEvent $event) {
+//                throw new InvalidCsrfTokenException();
+            }
+        );
     }
 }

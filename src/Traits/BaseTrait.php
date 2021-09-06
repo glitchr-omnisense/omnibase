@@ -19,13 +19,14 @@ trait BaseTrait
     public static function getTemplateDir(): string { return BaseService::getProjectDir() . "/templates"; }
     public static function getTranslationDir(): string { return BaseService::getProjectDir() . "/translations"; }
     public static function getCacheDir(): string { return BaseService::getProjectDir() . "/var/cache"; }
-    public static function  getLogDir(): string { return BaseService::getProjectDir() . "/var/log"; }
-    public static function  getDataDir(): string { return BaseService::getProjectDir() . "/data"; }
+    public static function getLogDir(): string { return BaseService::getProjectDir() . "/var/log"; }
+    public static function getDataDir(): string { return BaseService::getProjectDir() . "/data"; }
 
     public static function getRouter(): ?RouterInterface { return BaseService::$router; }
     public static function getTwigExtension(): ?BaseTwigExtension { return BaseService::$twigExtension; }
     public static function getTwig(): ?Environment { return BaseService::$twig; }
-
+    public static function getDoctrine() { return BaseService::$doctrine; }
+    
     public static function getNotifier(): ?NotifierInterface { return BaseService::$notifier; }
     public static function getNotifierPolicy(): ?ChannelPolicyInterface { return BaseService::$notifierPolicy; }
 

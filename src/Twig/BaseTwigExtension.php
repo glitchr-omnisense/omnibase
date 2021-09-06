@@ -212,7 +212,7 @@ final class BaseTwigExtension extends AbstractExtension
     }
 
     public const DOT_STRUCTURE = "\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*";
-    public function trans2(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null)
+    public function trans2(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, $recursive = true)
     {
         if($id === null) throw new Exception("trans2() called, but translation ID is empty..");
 
@@ -225,13 +225,13 @@ final class BaseTwigExtension extends AbstractExtension
                 $id     = implode(".", $array);
             }
 
-        } else { // Check if recursive dot structure
+        } else if($recursive) { // Check if recursive dot structure
 
             $count = 0;
-            $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans2($id, $parameters, $domain, $locale); };
-            $ret = preg_replace_callback("/".self::DOT_STRUCTURE."/", $fn, $id, -1, $count);
+            $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans2($id, $parameters, $domain, $locale, false); };
+            $ret = preg_replace_callback("/^".self::DOT_STRUCTURE."/", $fn, $id, -1, $count);
 
-            if($count > 0) return $ret; // If no replacement go to default fallback
+            return $ret; // If no replacement go to default fallback
         }
 
         // Replace parameter between brackets

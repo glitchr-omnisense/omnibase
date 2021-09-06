@@ -6,6 +6,7 @@ use BadMethodCallException;
 use Base\Entity\Thread;
 use Base\Entity\Thread\Tag;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -15,45 +16,34 @@ use Symfony\Component\HttpKernel\Event\KernelEvent;
 
 /**
  * @method Thread|null find($id, $lockMode = null, $lockVersion = null)
- * @method Thread|null findOneBy(array $criteria, array ?array $orderBy = null)
- * @method Thread[]    findAll()
- * @method Thread[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method Thread|null findOneBy(array $criteria, array ?array $orderBy = null, $groupBy = null)
+ * @method Thread[]    findAll(?array $orderBy = null, $groupBy = null)
+ * @method Thread[]    findBy(array $criteria, array ?array $orderBy = null, $groupBy = null, $limit = null, $offset = null)
  */
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
-    public const OPTION_WITH_ROUTE       = "WithRoute";
-    public const OPTION_PARTIAL          = "Partial";
-    public const OPTION_MODEL            = "Model";
     public const OPTION_INSENSITIVE = "Insensitive";
+    public const OPTION_WITH_ROUTE  = "WithRoute";
+    public const OPTION_PARTIAL     = "Partial";
+    public const OPTION_MODEL       = "Model";
 
     public const SEPARATOR     = ":";
     public const OPERATOR_AND  = "And";
     public const OPERATOR_OR   = "Or";
 
-    public array $criteria = [];
-    public array $options  = [];
+    public const MODE_ALL = "ALL";
+    public const MODE_DISTINCT = "DISTINCT";
 
-    public function resetCriteria()
-    {
-        $this->criteria = [];
-    }
+    protected $classMetaData = null;
 
-    public function addCriteria(string $by, $value)
-    {
-        $index = 0;
-        while( array_key_exists($by . self::SEPARATOR . $index, $this->criteria) )
-            $index++;
+    protected $operator = null;
+    protected $column = null;
+    protected array $criteria = [];
+    protected array $options  = [];
 
-        $this->criteria[$by . self::SEPARATOR . $index] = $value;
-        return $by . self::SEPARATOR . $index;
-    }
-
-    public function resetCustomOptions()
-    {
-        $this->options = [];
-    }
-
-    public function addCustomOption(string $id, $option)
+    public function  getCustomOption(string $id) { return $this->options[$id] ?? []; }
+    public function findCustomOption(string $id, string $option) { return in_array($option, $this->getCustomOption($id)); }
+    protected function addCustomOption(string $id, $option)
     {
         if(! array_key_exists($id, $this->criteria))
             throw new Exception("Criteria ID \"$id\" not found in criteria list.. wrong usage? use \"addCriteria\" first.");
@@ -63,49 +53,81 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         $this->options[$id][] = $option;
     }
+    
+    protected function getAlias($alias) { 
 
-    protected $operator;
-    public function setOperator($operator)
+        $this->getClassMetadata()->fieldNames[$alias] ?? $alias;
+        return $this->getClassMetadata()->fieldNames[$alias] ?? $alias;
+    }
+    
+    protected function getColumn() { return $this->column; }
+    
+    protected function setColumn(string $column)
+    {
+        $this->column = $column;
+        return $this;
+    }
+
+    protected function getOperator() { return $this->operator; }
+    protected function setOperator($operator)
     {
         $this->operator = $operator;
         return $this;
     }
 
-    public function getOperator()
+    protected function addCriteria(string $by, $value)
     {
-        return $this->operator;
+        if(empty($by)) 
+            throw new Exception("Tried to add unnamed criteria");
+
+        $index = 0;
+        while( array_key_exists($by . self::SEPARATOR . $index, $this->criteria) )
+            $index++;
+
+        $this->criteria[$by . self::SEPARATOR . $index] = $value;
+        return $by . self::SEPARATOR . $index;
     }
 
-    public function parseMethod($method, $arguments)
-    {
-        $this->resetCriteria();
-        $this->resetCustomOptions();
+    public function flush() { return $this->getEntityManager()->flush(); }
 
-        // Make sure arguments have at least 5 parameters :
+    public function __call($method, $arguments)
+    {
+        // Parse method and call it
+        list($method, $arguments) = $this->parseMethod($method, $arguments);
+        $ret = $this->$method(...$arguments);
+
+        // Reset internal variables
+        $this->criteria = [];
+        $this->options = [];
+        $this->operator = null;
+
+        return $ret;
+    }
+
+    protected function parseMethod($method, $arguments)
+    {
         // Head parameters (depends on the method name) + default ones
         // Default parameters:
         // - 0: criteria
         // - 1: orderBy
-        // - 2: limit
-        // - 3: offset
-
-        $arguments = array_pad($arguments, 4, null);
-
+        // - 2: groupBy
+        // - 3: limit
+        // - 4: offset
+        
         // Definition of the returned values
         $newMethod = null;
-        $newArguments = array_pad([], 4, null);
+        $newArguments = [];
 
         // TODO: Safety check in dev mode only (maybe..)
-        $classMetadata  = $this->getClassMetadata($this->getEntityName());
-        foreach($classMetadata->getFieldNames() as $field) {
+        foreach($this->getClassMetadata()->getFieldNames() as $field) {
 
             if (str_contains($field, self::OPTION_WITH_ROUTE ) ||
-                str_contains($field, self::OPTION_MODEL )      ||
-                str_contains($field, self::OPTION_PARTIAL)     ||
+                str_contains($field, self::OPTION_MODEL      ) ||
+                str_contains($field, self::OPTION_PARTIAL    ) ||
                 str_contains($field, self::OPTION_INSENSITIVE) ||
-                str_contains($field, self::OPERATOR_AND )      ||
-                str_contains($field, self::OPERATOR_OR )      ||
-                str_contains($field, self::SEPARATOR ))
+                str_contains($field, self::OPERATOR_AND      ) ||
+                str_contains($field, self::OPERATOR_OR       ) ||
+                str_contains($field, self::SEPARATOR         ))
                 throw new Exception(
                     "\"".$this->getEntityName(). "\" entity has a field called \"$field\". ".
                     "This is unfortunate, because this word is used to customize DQL queries. ".
@@ -152,37 +174,40 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         // Extract method name and extra parameters
-        if (strpos($method, 'findBy') === 0) {
-            $newMethod = "findBy";
-            $byNames = substr($method, strlen("findBy"));
-        }
+        if (preg_match('/^(find(?:One)?By)(.*)/', $method, $matches)) {
 
-        if (strpos($method, 'findOneBy') === 0) {
-            $newMethod = "findOneBy";
-            $byNames  = substr($method, strlen("findOneBy"));
-        }
+            $newMethod = $matches[1] ?? "";
+            $byNames   = $matches[2] ?? "";
+            
+        } else if (preg_match('/^(distinctCount|count)(?:For([^By]*))?(?:By){0,1}(.*)/', $method, $matches)) {
+            
+            $newMethod = $matches[1] ?? "";
+            $byNames   = $matches[3] ?? "";
 
-        if (strpos($method, 'count') === 0) {
-            $newMethod = "countBy";
-            $byNames  = substr($method, strlen("countBy"));
-        }
+            $this->setColumn(lcfirst($matches[2]) ?? null);
 
-        if(empty($newMethod)) {
+        } else if (preg_match('/^(lengthOf)([^By]+)(?:By){0,1}(.*)/', $method, $matches)) {
+            
+            $newMethod = $matches[1] ?? "";
+            $byNames   = $matches[3] ?? "";
 
-            throw new BadMethodCallException(sprintf(
+            $this->setColumn(lcfirst($matches[2]) ?? null);
+
+        } else {
+
+            throw new Exception(sprintf(
                 'Undefined method "%s". The method name must start with ' .
-                'either findBy, findOneBy or countBy!',
+                'either findBy, findOneBy, distinctCount, count, lengthOf!',
                 $method
             ));
         }
 
-        // Divide in case of multiple variable
-        // Only AND operation is tolerated.. because of obvious logical ambiguity.
-        if (str_contains($byNames, self::OPERATOR_AND ) && str_contains($byNames, self::OPERATOR_OR )) {
-
+        // Reveal obvious logical ambiguities..
+        if (str_contains($byNames, self::OPERATOR_AND ) && str_contains($byNames, self::OPERATOR_OR ))
             throw new Exception("\"".$byNames. "\" method gets an AND/OR ambiguity");
 
-        } else if (str_contains($byNames, self::OPERATOR_OR)) {
+        // Desintangle logical operators
+        if (str_contains($byNames, self::OPERATOR_OR)) {
 
             $this->setOperator(self::OPERATOR_OR);
             $byNames = explode(self::OPERATOR_OR, $byNames);
@@ -197,7 +222,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         foreach($byNames as $by) {
 
             $oldBy = null;
-
+            
             $isInsensitive = $isPartial = false;
             while ($oldBy != $by) {
 
@@ -231,8 +256,8 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             if (str_ends_with($by, self::OPTION_WITH_ROUTE)) {
 
                 $method = substr($method, 0, strpos($method, self::OPTION_WITH_ROUTE));
-                $by = substr($by, 0, strlen($by) - strlen(self::OPTION_WITH_ROUTE));
-                $key       = array_shift($arguments);
+                $by     = substr($by, 0, strlen($by) - strlen(self::OPTION_WITH_ROUTE));
+                $key    = array_shift($arguments);
 
                 // Stop dev using partial information when using route parameter
                 // Doing so.. user would be able to inject LIKE commands directly from URL..
@@ -269,13 +294,13 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         if (!$field->isInitialized($model)) continue;
                         if (!($fieldValue = $field->getValue($model)) ) continue;
 
-                        if ($classMetadata->hasAssociation($fieldName)) {
+                        if ($this->getClassMetadata()->hasAssociation($fieldName)) {
 
-                            $associationField = $classMetadata->getAssociationMapping($fieldName);
+                            $associationField = $this->getClassMetadata()->getAssociationMapping($fieldName);
                             if (!array_key_exists("targetEntity", $associationField) || $field->getType() != $associationField["targetEntity"])
                                 throw new Exception("Invalid association mapping \"$fieldName\" found (found \"".$field->getType()."\", expected type \"". $associationField["targetEntity"]."\") in \"" . $this->getEntityName() . "\" entity, \"" . $reflClass->getName() . " cannot be applied\"");
 
-                        } else if(!$classMetadata->hasField($fieldName))
+                        } else if(!$this->getClassMetadata()->hasField($fieldName))
                             throw new Exception("No field \"$fieldName\" (or association mapping) found in \"".$this->getEntityName(). "\" entity, \"".$reflClass->getName()." cannot be applied\"");
 
                         if (( $fieldValue = $field->getValue($model) ))
@@ -305,98 +330,19 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         // Index definition:
-        // "criteria"  = argument #0, after removal of the head parameters
-        $newArguments    = $arguments;
-        $newArguments[0] = array_merge($newArguments[0] ?? [], $this->criteria ?? []);
+        // "criteria"  = argument #0, after removal of head parameters
+        foreach($arguments as $i => $arg)
+            $newArguments[$i] = $arg;
 
+        $newArguments[0] = array_merge($newArguments[0] ?? [], $this->criteria ?? []);
+        
         // Shaped return
         return [$newMethod, $newArguments];
     }
 
-    public function flush()
+    protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
     {
-        return $this->getEntityManager()->flush();
-    }
-
-    public function __call($method, $arguments)
-    {
-        list($method, $arguments) = $this->parseMethod($method, $arguments);
-        return $this->$method(...$arguments);
-    }
-
-    public function findOneBy(array $criteria = [], ?array $orderBy = null)
-    {
-        $findBy = $this->findBy($criteria, $orderBy, 1, null) ?? [];
-        return $findBy[0] ?? null;
-    }
-
-    public function findBy   (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null)
-    {
-        $qb = $this->createQueryBuilder('t')
-            ->setMaxResults($limit ? $limit : null)
-            ->setFirstResult($offset ? $offset : null);
-
-        foreach ($orderBy ?? [] as $name => $value)
-            $qb->orderBy("t.${name}", $value);
-
-        $classMetadata  = $this->getClassMetadata($this->getEntityName());
-        foreach ($criteria as $field => $fieldValue) {
-
-            $field     = explode(self::SEPARATOR, $field);
-            $fieldName = $field[0];
-
-            if($fieldName == lcfirst(self::OPTION_MODEL)) {
-
-                $expr = [];
-                foreach ($fieldValue as $entryID => $entryValue) {
-
-                    $newField = [];
-                    foreach ($field as $key => $value)
-                        $newField[$key] = $value;
-
-                    array_unshift($newField, $entryID);
-
-                    $queryExpr = $this->buildQueryExpr($qb, $classMetadata, $newField, $entryValue);
-
-                    // In case of association field, compare value directly
-                    if ($classMetadata->hasAssociation($entryID)) $qb->andWhere($queryExpr);
-                    // If standard field, check for partial information
-                    else $expr[] = $queryExpr;
-                }
-
-                $expr = $qb->expr()->orX(...$expr);
-
-            } else {
-
-                $expr = $this->buildQueryExpr($qb, $classMetadata, $field, $fieldValue);
-            }
-
-            switch ($this->getOperator()) {
-                case self::OPERATOR_OR: $qb->orWhere($expr);
-                    break;
-
-                default:
-                case self::OPERATOR_AND: $qb->andWhere($expr);
-                    break;
-            }
-        }
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function getCustomOption(string $id)
-    {
-        return $this->options[$id] ?? [];
-    }
-
-    public function findCustomOption(string $id, string $option)
-    {
-        return in_array($option, $this->getCustomOption($id));
-    }
-
-    public function buildQueryExpr(QueryBuilder $qb, ClassMetadata $classMetadata, $field, $fieldValue)
-    {
-        $fieldName      = $field[0];
+        $fieldName      = $this->getAlias($field[0]);
         $fieldID        = implode("_", $field);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
 
@@ -407,7 +353,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $qb->setParameter($fieldID, $fieldValue);
 
         // Regular field: string, datetime..
-        if (!$classMetadata->hasAssociation($fieldName))
+        if (!$this->getClassMetadata()->hasAssociation($fieldName))
             $tableColumn = "t.${fieldName}";
 
         else { // Relationship field: ManyToMany,ManyToOne, OneToMany..
@@ -432,7 +378,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
                 $expr = $qb->expr()->orX(...$expr);
 
-            } else if ($classMetadata->hasAssociation($fieldName)) {
+            } else if ($this->getClassMetadata()->hasAssociation($fieldName)) {
 
                 $expr = "${tableColumn} = :${fieldID}";
 
@@ -448,5 +394,145 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         return $expr;
+    }
+
+    public function getQueryBuilder(array $criteria = [], ?array $orderBy = null, $groupBy = null, $limit = null, $offset = null)
+    {
+        $qb = $this->createQueryBuilder('t')
+                   ->setMaxResults($limit ?? null)
+                   ->setFirstResult($offset ?? null);
+
+        foreach ($orderBy ?? [] as $name => $value)
+            $qb->orderBy("t.".$this->getAlias($name), $value);
+
+        // Prepare criteria variable
+        foreach ($criteria as $field => $fieldValue) {
+
+            $field     = explode(self::SEPARATOR, $field);
+            $fieldName = $field[0];
+
+            if($fieldValue instanceof PersistentCollection)
+                 throw new Exception("You passed a PersistentCollection for field \"".$fieldName."\"");
+
+            // Handle partial entity/model input criteria
+            if($fieldName == lcfirst(self::OPTION_MODEL)) {
+                
+                $expr = [];
+                foreach ($fieldValue as $entryID => $entryValue) {
+
+                    $newField = [];
+                    foreach ($field as $key => $value) $newField[$key] = $value;
+                    array_unshift($newField, $entryID);
+
+                    $queryExpr = $this->buildQueryExpr($qb, $newField, $entryValue);
+
+                    // In case of association field, compare value directly
+                    if ($this->getClassMetadata()->hasAssociation($entryID)) $qb->andWhere($queryExpr);
+                    // If standard field, check for partial information
+                    else $expr[] = $queryExpr;
+                }
+
+                $expr = $qb->expr()->orX(...$expr);
+
+            } else {
+
+                //Default query builder
+                $expr = $this->buildQueryExpr($qb, $field, $fieldValue);
+            }
+
+            // Set logical operator
+            switch ($this->getOperator()) {
+
+                case self::OPERATOR_OR: $qb->orWhere($expr);
+                    break;
+
+                default:
+                case self::OPERATOR_AND: $qb->andWhere($expr);
+                    break;
+            }
+        }
+
+        // Sort result by group
+        if($groupBy) $qb->select("t as entity");
+        else $qb->select("t");
+        
+        $qb = $this->groupBy($qb, $groupBy);
+        return $qb;
+    }
+
+    // public function find($id, $lockMode = null, $lockVersion = null)
+    // {
+    //     return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
+    // }
+
+    // public function findAll(?array $orderBy = null, $groupBy = null)
+    // {
+    //     return $this->findBy([], $orderBy = null, $groupBy = null);
+    // }
+    
+    protected function groupBy($qb, $groupBy)
+    {
+        if($groupBy) {
+
+            $column = explode("\\", $this->getEntityName());
+            $column = lcfirst(end($column));
+
+            if(is_string($groupBy)) $groupBy = [$groupBy];
+            if(!is_array($groupBy)) throw new Exception("Unexpected \"groupBy\" argument type provided \"".gettype($groupBy)."\"");
+
+            foreach ($groupBy ?? [] as $name => $value) {
+
+                $alias = str_replace(".", "_", $value);
+                $value = implode(".", array_map(fn ($value) => $this->getAlias($value), explode(".", $value)));
+
+                $firstValue = explode(".", $value)[0] ?? $value;
+                $groupBy[$name] = $this->getClassMetadata()->hasAssociation($firstValue) ? "t_".$value : "t.".$value;
+                
+                if($groupBy[$name] == "t.".$alias) $qb->addSelect($groupBy[$name]);
+                else $qb->addSelect("(".$groupBy[$name].") AS ".$alias);
+            }
+
+            $qb->groupBy(implode(",", $groupBy));
+        }
+
+        return $qb;
+    }
+    public function findOneBy(array $criteria = [], ?array $orderBy = null, $groupBy = null                               ) { return $this->findBy($criteria, $orderBy, $groupBy, 1, null)[0] ?? null; }
+    public function findBy   (array $criteria = [], ?array $orderBy = null, $groupBy = null, $limit = null, $offset = null) { return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery()->getResult() ?? []; }
+
+    public function distinctCount(array $criteria, $groupBy = null) { return $this->count($criteria, self::MODE_DISTINCT, $groupBy); }
+    public function count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null)
+    {
+        if($mode == self::MODE_ALL) $mode = "";
+        if($mode && $mode != self::MODE_DISTINCT)
+            throw new Exception("Unexpected \"mode\" provided: \"". $mode."\"");
+        
+        $column = $this->getAlias($this->getColumn());
+        $column = ($this->getClassMetadata()->hasAssociation($column) ? "t_".$column : "t");
+        
+        if($groupBy) $groupBy = implode(",", $groupBy);
+        $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy);
+        $qb->select('COUNT('.trim($mode.' '.$column).') AS count');
+        
+        $column = $this->getAlias($this->getColumn());
+        if ($this->getClassMetadata()->hasAssociation($column))
+            $qb->innerJoin("t.".$column, "t_".$column);
+
+        $qb = $this->groupBy($qb, $groupBy);
+
+        $fnResult = ($groupBy ? "getResult" : "getSingleScalarResult");
+        return $qb->getQuery()->$fnResult();
+    }
+    
+    public function lengthOf(array $criteria = [], ?array $orderBy = null, $groupBy = null, $limit = null, $offset = null)
+    {
+        $column = $this->getAlias($this->getColumn());
+        $column = ($this->getClassMetadata()->hasAssociation($column) ? "t_".$column : "t");
+
+        $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset);
+        $qb->select("LENGTH(t.".$column.") as length");
+        $qb = $this->groupBy($qb, $groupBy);
+
+        return $qb->getQuery()->getResult() ?? 0;
     }
 }

@@ -48,8 +48,23 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return self::$entitySerializer;
     }
 
+    public static function isWithinDoctrine()
+    {
+        $debug_backtrace = debug_backtrace();
+        foreach($debug_backtrace as $trace)
+            if(str_starts_with($trace["class"], "Doctrine")) return true;
+
+        return false;
+    }
+
     public static function getEntityFromData($classname, $data)
     {
+        if(self::isWithinDoctrine()) {
+
+            throw new Exception("Achtung ! You are trying to access data object within a Doctrine method..".
+                                "Original entity might have already been updated.");
+        }
+
         $entity = self::getSerializer()->deserialize(json_encode($data), $classname, 'json');
         foreach ($data as $property => $data) {
 
@@ -110,13 +125,14 @@ abstract class AbstractAnnotation implements AnnotationInterface
     abstract public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null): bool;
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null) {}
 
-    public function onFlush(OnFlushEventArgs $args, $entity, ?string $property = null) { }
+    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null) { }
 
-    public function prePersist(LifecycleEventArgs $event, $entity, ?string $property = null) {}
-    public function preUpdate (LifecycleEventArgs $event, $entity, ?string $property = null) {}
-    public function preRemove (LifecycleEventArgs $event, $entity, ?string $property = null) {}
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
+    public function preUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
+    public function preRemove (LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
 
-    public function postPersist(LifecycleEventArgs $event, $entity, ?string $property = null) {}
-    public function postUpdate (LifecycleEventArgs $event, $entity, ?string $property = null) {}
-    public function postRemove (LifecycleEventArgs $event, $entity, ?string $property = null) {}
+    public function postLoad   (LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
+    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
+    public function postUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
+    public function postRemove (LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null) {}
 }

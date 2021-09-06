@@ -60,14 +60,14 @@ class TrackIp extends AbstractAnnotation
         return in_array("update", $this->context) || in_array("create", $this->context);
     }
 
-    public function prePersist(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if(!in_array("create", $this->context)) return;
 
         $this->setFieldValue($entity, $property, $this->getValue());
     }
 
-    public function preUpdate(LifecycleEventArgs $event, $entity, ?string $property = null)
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if (!in_array("update", $this->context)) return;
 

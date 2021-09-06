@@ -20,6 +20,16 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 trait BaseNotificationTrait
 {
+    /**
+     * @var NotifierInterface
+     */
+    public static $notifier = null;
+
+    /**
+     * @var ChannelPolicyInterface
+     */
+    public static $notifierPolicy = [];
+
     public function setNotifier(NotifierInterface $notifier, ?ChannelPolicyInterface $notifierPolicy = null)
     {
         if (BaseService::$notifier) return $this;

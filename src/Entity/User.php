@@ -113,22 +113,22 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     protected $roles = [];
 
     /**
-     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $logs;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="members", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="members", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $groups;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="uid")
+     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $permissions;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid")
+     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $penalties;
 
@@ -143,12 +143,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     protected $tokens;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors")
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $threads;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers")
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $followedThreads;
 
@@ -170,17 +170,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isApproved = false;
+    protected $isApproved;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isVerified = false;
+    protected $isVerified;
 
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $isEnabled = false;
+    protected $isEnabled;
 
     /**
      * @ORM\Column(type="datetime")
@@ -212,6 +212,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function __construct()
     {
+        $this->roles = [self::ROLE_USER];
+        $this->isApproved = false;
+        $this->isVerified = false;
+        $this->isEnabled  = true;
+
         $this->tokens = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->permissions = new ArrayCollection();
@@ -243,6 +248,15 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $str;
     }
 
+    public function getId(): ?int { return $this->id; }
+    public function setId($id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    public function sameAs($other): bool { return ($other->getId() == $this->getId()); }
+
     public static function getCookie(string $key = null)
     {
         $cookie = json_decode($_COOKIE["user"] ?? "", true);
@@ -259,15 +273,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    public function getLocale(): string { return explode("-", $this->locale)[0]; }
     public function setLocale($locale): self
     {
         $this->locale = $locale;
         return $this;
-    }
-
-    public function getLocale(): string
-    {
-        return explode("-", $this->locale)[0];
     }
 
     public function setDefaultTimezone(): self
@@ -276,6 +286,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this->setTimezone($timezone);
     }
 
+    public function getTimezone(): string { return $this->timezone; }
     public function setTimezone(string $timezone): self
     {
         if( !in_array($timezone, timezone_identifiers_list()) )
@@ -283,11 +294,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
         $this->timezone = $timezone;
         return $this;
-    }
-
-    public function getTimezone(): string 
-    {
-        return $this->timezone;
     }
 
     public static function getIp(): ?string
@@ -299,17 +305,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         }
         return null;
     }
-
-    public function getId(): ?int { return $this->id; }
-
-    public function setId($id): self
-    {
-        $this->id = $id;
-        return $this;
-    }
-
-    public function sameAs($other): bool { return ($other->getId() == $this->getId()); }
-
 
     public function isBanned() {
         return false;
@@ -373,7 +368,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function isSocialAccount(): bool { return in_array(User::ROLE_SOCIAL, $this->roles); }
 
-    public function isLegit(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
+    public function isPersistent(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
 
     /**
      * @see UserInterface
@@ -705,7 +700,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @return array|Thread[]
      */
-    public function getFollowedThreads(): array
+    public function getFollowedThreads(): ArrayCollection
     {
         return $this->followedThreads;
     }
@@ -762,7 +757,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @return array|Mention[]
      */
-    public function getAuthoredMentions(): array
+    public function getAuthoredMentions(): ArrayCollection
     {
         return $this->authoredMentions;
     }
