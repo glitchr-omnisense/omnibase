@@ -57,7 +57,6 @@ class SecurityController extends AbstractController
             if ( ($user = $this->getUser()) && $user->isPersistent() )
             return $this->redirectToRoute("base_dashboard");
 
-            $error = $authenticationUtils->getLastAuthenticationError();
             $lastUsername = $authenticationUtils->getLastUsername();
 
             $logo = $this->baseService->getParameterBag("base.logo");
@@ -164,11 +163,7 @@ class SecurityController extends AbstractController
 
         // Prepare registration form
         $newUser = new User();
-        $form = $this->createForm(
-            RegistrationType::class,
-            $newUser,
-            ['validation_groups' => ['new']]
-        );
+        $form = $this->createForm(RegistrationType::class, $newUser, ['validation_groups' => ['new']]);
 
         // An account might require to be verified by an admin
         $adminApprovalRequired = $this->baseService->getParameterBag("base_security.user.adminApproval") ?? false;
@@ -179,23 +174,15 @@ class SecurityController extends AbstractController
         // Registration form registered
         if ($form->isSubmitted() && $form->isValid()) {
 
-            if (!$this->baseService->isCsrfTokenValid('registration', $form, $request)) {
         
-                $notification = new Notification("notifications.register.csrfToken");
-                $notification->send("danger");
-                
-            } else {
-            
-                $newUser->setPlainPassword($form->get('plainPassword')->getData());
-                if ($user && $user->isVerified()) // Social account connection
-                    $newUser->verify($user->isVerified());
+            $newUser->setPlainPassword($form->get('plainPassword')->getData());
+            if ($user && $user->isVerified()) // Social account connection
+                $newUser->verify($user->isVerified());
 
-                $entityManager = $this->getDoctrine()->getManager();
-                $entityManager->persist($newUser);
-                $entityManager->flush();
+            $this->getDoctrine()->getManager()->persist($newUser);
+            $this->getDoctrine()->getManager()->flush();
 
-                return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
-            }
+            return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
         }
 
         // Retrieve form if no social account connected
@@ -394,33 +381,25 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            if (!$this->baseService->isCsrfTokenValid('reset-password', $form, $request)) {
+            $notification = new Notification("notifications.resetPassword.confirmation");
 
-                $notification = new Notification("notifications.resetPassword.csrfToken");
-                $notification->send("danger");
-                
-            } else {
+            $email = $username = $form->get('email')->getData();
+            if( ($user = $this->userRepository->findOneByUsernameOrEmail($email, $username)) ) {
 
-                $notification = new Notification("notifications.resetPassword.confirmation");
+                $user->removeExpiredTokens("reset-password");
+                if (!$user->getToken("reset-password")) {
 
-                $email = $username = $form->get('email')->getData();
-                if( ($user = $this->userRepository->findOneByUsernameOrEmail($email, $username)) ) {
+                    $resetPasswordToken = new Token("reset-password", 3600);
+                    $resetPasswordToken->setUser($user);
 
-                    $user->removeExpiredTokens("reset-password");
-                    if (!$user->getToken("reset-password")) {
-
-                        $resetPasswordToken = new Token("reset-password", 3600);
-                        $resetPasswordToken->setUser($user);
-
-                        $notification->setHtmlTemplate("@Base/security/email/reset_password.html.twig", ["token" => $resetPasswordToken]);
-                        $notification->setUser($user);
-                        $notification->send("email");
-                    }
+                    $notification->setHtmlTemplate("@Base/security/email/reset_password.html.twig", ["token" => $resetPasswordToken]);
+                    $notification->setUser($user);
+                    $notification->send("email");
                 }
-
-                $this->getDoctrine()->getManager()->flush();
-                $notification->send("success");
             }
+
+            $this->getDoctrine()->getManager()->flush();
+            $notification->send("success");
         }
 
         return $this->render('@Base/security/reset_password_request.html.twig', [

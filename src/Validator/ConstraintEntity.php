@@ -13,7 +13,7 @@ abstract class ConstraintEntity extends Constraint
     /**
      * {@inheritdoc}
      *
-     * @param array|string $fields the combination of fields that must contain unique values or a set of options
+     * @param array|string $fields the combination of fields that must contain values or a set of options
      */
     public function __construct(
         $fields,

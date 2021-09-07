@@ -3,11 +3,13 @@
 namespace Base\Field\Type;
 
 use Base\Entity\User;
+use Base\Enum\UserRole;
 use Base\Field\Traits\SelectTypeInterface;
 use Base\Field\Traits\SelectTypeTrait;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+
 
 class RoleType extends AbstractType implements SelectTypeInterface
 {
@@ -18,9 +20,9 @@ class RoleType extends AbstractType implements SelectTypeInterface
         return [
             "Generics" => [
 
-                "Super Administrator" => User::ROLE_SUPERADMIN,
-                "Administrator" => User::ROLE_ADMIN,
-                "User" => User::ROLE_USER
+                "Super Administrator" => UserRole::SUPERADMIN,
+                "Administrator" => UserRole::ADMIN,
+                "User" => UserRole::USER
             ]
         ];
     }
@@ -28,18 +30,18 @@ class RoleType extends AbstractType implements SelectTypeInterface
     public static function getIcons(): array
     {
         return [
-            User::ROLE_SUPERADMIN => "fas fa-fw fa-crown",
-            User::ROLE_ADMIN => "fas fa-fw fa-star",
-            User::ROLE_USER => "fas fa-fw fa-user",
+            UserRole::SUPERADMIN => "fas fa-fw fa-crown",
+            UserRole::ADMIN => "fas fa-fw fa-star",
+            UserRole::USER => "fas fa-fw fa-user",
         ];
     }
 
     public static function getAltIcons(): array
     {
         return [
-            User::ROLE_SUPERADMIN => "fas fa-fw fa-user-cog",
-            User::ROLE_ADMIN => "fas fa-fw fa-user-check",
-            User::ROLE_USER => "fas fa-fw fa-tags",
+            UserRole::SUPERADMIN => "fas fa-fw fa-user-cog",
+            UserRole::ADMIN => "fas fa-fw fa-user-check",
+            UserRole::USER => "fas fa-fw fa-tags",
         ];
     }
 
@@ -48,7 +50,7 @@ class RoleType extends AbstractType implements SelectTypeInterface
         $resolver->setDefaults([
             'choices' => self::getChoices(),
             'choice_icons' => self::getIcons(),
-            'empty_data'   => User::ROLE_USER,
+            'empty_data'   => UserRole::USER,
             'invalid_message' => function (Options $options, $previousValue) {
                 return ($options['legacy_error_messages'] ?? true)
                     ? $previousValue

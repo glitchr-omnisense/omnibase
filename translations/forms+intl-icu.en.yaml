@@ -16,7 +16,7 @@ logout:
 login:
     title: "Sign In"
     submit: "Sign In"
-    username: "Pseudonyme / Email"
+    identifier: "Pseudonyme / Email"
     password: "Password"
     rememberMe: "Remember me !"
     noAccount: "Don't have an account?"

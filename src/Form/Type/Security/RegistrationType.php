@@ -16,29 +16,19 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-use Base\Form\AbstractType;
-use Base\Form\Traits\CsrfFormTrait;
-use Base\Form\Traits\BootstrapFormTrait;
+use Symfony\Component\Form\AbstractType;
 
 class RegistrationType extends AbstractType
 {
-    use BootstrapFormTrait;
-    use CsrfFormTrait;
-
     public function configureOptions(OptionsResolver $resolver)
     {
-        parent::configureOptions($resolver);
-
         $resolver->setDefaults([
-            'data_class' => User::class,
-            'csrf_token_id' => "registration"
+            'data_class' => User::class
         ]);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::buildForm($builder, $options);
-
         $builder
             ->add('email', EmailType::class)
             ->add('agreeTerms', CheckboxType::class, [
@@ -60,15 +50,5 @@ class RegistrationType extends AbstractType
                     ]
                 ],
             ]);
-    }
-
-    public function buildView(FormView $view, FormInterface $form, array $options)
-    {
-        parent::buildView($view, $form, $options);
-    }
-
-    public function finishView(FormView $view, FormInterface $form, array $options)
-    {
-        parent::finishView($view, $form, $options);
     }
 }

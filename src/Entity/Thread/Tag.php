@@ -22,8 +22,6 @@ use Base\Traits\ColumnAliasTrait;
  */
 class Tag
 {
-    use ColumnAliasTrait;
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

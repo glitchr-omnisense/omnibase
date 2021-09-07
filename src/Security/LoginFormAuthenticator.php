@@ -61,21 +61,17 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     }
 
     public function authenticate(Request $request): PassportInterface
-    {
-        $userIdentifier  = $request->request->get('username');
-        $password  = $request->request->get('password');
-        $csrfToken = $request->request->get('_csrf_token');
+    {        
+        $identifier = $request->get('username');
+        $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 
-        $request->getSession()->set(Security::LAST_USERNAME, $userIdentifier);
-
+        $badges   = [];
+        if( $request->get('_remember_me') )
+            $badges[] = new RememberMeBadge();
+            
         return new Passport(
-            new UserBadge($userIdentifier),
-            new PasswordCredentials($password),
-            [
-                new CsrfTokenBadge('authenticate', $csrfToken),
-                new RememberMeBadge()
-            ]
-        );
+            new UserBadge($identifier), 
+            new PasswordCredentials($request->get('password')), $badges);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewall): ?Response

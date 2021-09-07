@@ -12,14 +12,13 @@
         {{ form_start(form) }}
 
         <input type="hidden" name="_target_path" value="{{ app.request.headers.get('referer') }}"/>
-        {{ form_row(form._csrf_token) }}
 
         <div class="col d-flex justify-content-center">
         <div class="input-group form-group mb-2">
             <div class="input-group-prepend">
                 <span class="input-group-text"><i class="fa-fw fas fa-user"></i></span>
             </div>
-            {{ form_widget(form.username, {attr:{placeholder:'forms.login.username'|trans2}}) }}
+            {{ form_widget(form.username, {attr:{placeholder:'forms.login.identifier'|trans2}}) }}
         </div>
         </div>
 

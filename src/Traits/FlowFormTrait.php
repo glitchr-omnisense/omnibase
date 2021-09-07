@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Form\Traits;
+namespace Base\Traits;
 use Base\Subscriber\FlowFormSubscriber;
 
 use Symfony\Component\Config\Definition\Exception\Exception;

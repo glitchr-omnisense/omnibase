@@ -38,7 +38,7 @@ class ThreadSubscriber implements EventSubscriber
 
         // Update publishable articles
         if ($thread->isFuture() && $thread->isPublishable())
-            $thread->setState(Thread::STATE_PUBLISHED);
+            $thread->setState(ThreadState::PUBLISHED);
 
         if ($thread->isPublish())
             $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISH;
@@ -52,7 +52,7 @@ class ThreadSubscriber implements EventSubscriber
         // Update publishable articles
         if ($thread->isFuture() && $thread->isPublishable()) {
 
-            $thread->setState(Thread::STATE_PUBLISHED);
+            $thread->setState(ThreadState::PUBLISHED);
             $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISH;
         }
     }

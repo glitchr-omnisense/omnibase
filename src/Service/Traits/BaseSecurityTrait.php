@@ -30,7 +30,7 @@ trait BaseSecurityTrait
             setcookie("REMEMBERME", '', time()-1);
     }
 
-    public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null): bool
+    public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null, string $csrfFieldId = "_csrf_token"): bool
     {
         if (!isset($this->csrfTokenManager))
             throw new Exception("No CSRF token manager found in BaseService. Did you overloaded BaseService::__construct ?");
@@ -47,7 +47,7 @@ trait BaseSecurityTrait
 
             //$form->handleRequest($request); // TBC
             if($request->request->has($form->getName()))
-                $token = $request->request->get($form->getName())["_csrf_token"] ?? null;
+                $token = $request->request->get($form->getName())[$csrfFieldId] ?? null;
         }
 
         // Handling CSRF token exception

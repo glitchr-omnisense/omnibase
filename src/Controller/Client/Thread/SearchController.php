@@ -63,6 +63,7 @@ class SearchController extends AbstractController
         }
 
         if($formattedData) {
+            
 
             $data = new SearchData();
             $data->content = "%" . ($formattedData->content ?? $formattedData->generic) . "%";
@@ -70,10 +71,8 @@ class SearchController extends AbstractController
             $data->excerpt = "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%";
             $data->generic = null;
 
-            $threads = $this->threadRepository->findByStateAndInsensitivePartialModel([Thread::STATE_PUBLISHED, Thread::STATE_APPROVED], $data);
-            usort($threads, function ($a, $b) {
-                return $a->getSection() < $b->getSection() ? -1 : 1;
-            });
+            $threads = $this->threadRepository->findByStateAndInsensitivePartialModel([ThreadState::PUBLISHED, ThreadState::APPROVED], $data);
+            usort($threads, fn ($a, $b) => $a->getHierarchyById() < $b->getHierarchyById() ? -1 : 1);
         }
 
         return $this->render('@Base/client/thread/search.html.twig', [

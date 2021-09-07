@@ -31,6 +31,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Uploader;
 use Base\Database\Annotation\Hashify;
+use Base\Enum\UserRole;
 use Base\Service\BaseService;
 use DateTime;
 use Exception;
@@ -143,7 +144,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     protected $tokens;
 
     /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors", orphanRemoval=true, cascade={"remove"})
      */
     protected $threads;
 
@@ -342,8 +343,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function setRoles(array $roles): self
     {
-        if(empty($roles)) 
-            $roles[] = User::ROLE_USER;
+        if(empty($roles))
+            $roles[] = UserRole::USER;
             
         $this->roles = array_unique($roles);
         
@@ -366,7 +367,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function isSocialAccount(): bool { return in_array(User::ROLE_SOCIAL, $this->roles); }
+    public function isSocialAccount(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
 
     public function isPersistent(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
 

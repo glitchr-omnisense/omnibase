@@ -93,6 +93,13 @@ trait BaseUtilsTrait
         return $randomString;
     }
 
+    public static function hasInterface($objectOrClass, $interface)
+    {
+        if(!is_string($objectOrClass) && !is_object($objectOrClass)) return false;
+
+        $classImplements = class_implements($objectOrClass); 
+        return array_key_exists($interface, $classImplements);
+    }
     public static function getSynopsis($object)
     {
         return self::get_class_synopsis($object);
@@ -100,7 +107,6 @@ trait BaseUtilsTrait
 
     public static function get_class_synopsis($object)
     {
-
         if (!$object) return dump("Object passed is null");
         $objectID = (is_object($object)) ? "Object: 0x" . spl_object_hash($object) . "\n" : "";
 

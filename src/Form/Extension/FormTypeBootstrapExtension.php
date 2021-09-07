@@ -1,37 +1,57 @@
 <?php
 
-namespace Base\Form\Traits;
+namespace Base\Form\Extension;
 
+use Symfony\Component\Config\Definition\Exception\Exception;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
+
+use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+
+use Symfony\Component\Form\AbstractTypeExtension;
+
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
-trait BootstrapFormTrait
+
+class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
-    public static function configureOptions(OptionsResolver $resolver)
+    protected $defaultEnabled;
+    public function __construct(bool $defaultEnabled = true)
     {
-        $resolver->setDefaults([
-            'bootstrap' => true,
-            'select2-theme' => "bootstrap"
-        ]);
+        $this->defaultEnabled = $defaultEnabled;
     }
 
-    public static function finishView(FormView $view, FormInterface $form, array $options)
+    /**
+     * {@inheritdoc}
+     */
+    public static function getExtendedTypes(): iterable
     {
-        $formChildren = $form->all();
+        return [FormType::class];
+    }
 
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults(['bootstrap' => $this->defaultEnabled]);
+    }
+
+    public function finishView(FormView $view, FormInterface $form, array $options)
+    {
+        if(!$options["bootstrap"]) return;
+
+        $formChildren = $form->all();
         foreach($view->children as $key => $viewChild) {
 
             if(!array_key_exists($key, $formChildren))
                 continue; // (e.g. happends for CSRF _token)
 
-            self::finishView($viewChild, $formChildren[$key], $options);
+            $this->finishView($viewChild, $formChildren[$key], $options);
         }
 
         if(count($view->children) == 0) {

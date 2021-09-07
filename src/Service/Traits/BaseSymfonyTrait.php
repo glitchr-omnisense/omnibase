@@ -189,7 +189,6 @@ trait BaseSymfonyTrait
         return $this->environment;
     }
 
-
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }

@@ -27,7 +27,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
 
         $user = new User();
         $user->setId(0);
-        $user->setRoles([User::ROLE_SOCIAL]);
+        $user->setRoles([UserRole::SOCIAL]);
         $user->setIsVerified($data["verified_email"]);
         $user->setEmail($data["email"]);
 

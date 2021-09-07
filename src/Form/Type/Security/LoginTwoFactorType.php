@@ -16,42 +16,21 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-use Base\Form\AbstractType;
-use Base\Form\Traits\CsrfFormTrait;
-use Base\Form\Traits\BootstrapFormTrait;
+use Symfony\Component\Form\AbstractType;
 
-class LostTwoFactorType extends AbstractType
+class LoginTwoFactorType extends AbstractType
 {
-    use BootstrapFormTrait;
-    use CsrfFormTrait;
-
     public function configureOptions(OptionsResolver $resolver)
     {
-        parent::configureOptions($resolver);
-
         $resolver->setDefaults([
-            'data_class' => User::class,
-            'csrf_token_id' => "2fa",
-            "translation_domain" => false
+            'data_class' => User::class
         ]);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        parent::buildForm($builder, $options);
-
         $builder->add('totpSecret', PasswordType::class, [
             "attr" => ["placeholder" => "Code 2FA"]
         ]);
-    }
-
-    public function buildView(FormView $view, FormInterface $form, array $options)
-    {
-        parent::buildView($view, $form, $options);
-    }
-
-    public function finishView(FormView $view, FormInterface $form, array $options)
-    {
-        parent::finishView($view, $form, $options);
     }
 }

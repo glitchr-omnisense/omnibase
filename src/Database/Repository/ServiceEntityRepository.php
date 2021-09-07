@@ -22,10 +22,17 @@ use Symfony\Component\HttpKernel\Event\KernelEvent;
  */
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
-    public const OPTION_INSENSITIVE = "Insensitive";
-    public const OPTION_WITH_ROUTE  = "WithRoute";
-    public const OPTION_PARTIAL     = "Partial";
-    public const OPTION_MODEL       = "Model";
+    public const OPTION_INSENSITIVE  = "Insensitive";
+    public const OPTION_WITH_ROUTE   = "WithRoute";
+    public const OPTION_PARTIAL      = "Partial";
+    public const OPTION_MODEL        = "Model";
+
+    public const OPTION_GREATER      = "GreaterThan";
+    public const OPTION_GREATER_EQUAL = "GreaterEqualTo";
+    public const OPTION_LOWER        = "LowerThan";
+    public const OPTION_LOWER_EQUAL   = "LowerEqualTo";
+    public const OPTION_EQUAL        = "EqualTo";
+    public const OPTION_NOT_EQUAL    = "NotEqualTo";
 
     public const SEPARATOR     = ":";
     public const OPERATOR_AND  = "And";
@@ -89,6 +96,20 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     }
 
     public function flush() { return $this->getEntityManager()->flush(); }
+    
+    protected function stripByFront($method, $by, $option)
+    {
+        $method = substr($method, strlen($option), strlen($method));
+        $by = substr($by, strlen($option), strlen($by));
+        return [$method, $by];
+    }
+
+    protected function stripByEnd($method, $by, $option)
+    {
+        $method = substr($method, 0, strpos($method, $option));
+        $by     = substr($by, 0, strlen($by) - strlen($option));
+        return [$method, $by];
+    }
 
     public function __call($method, $arguments)
     {
@@ -121,13 +142,23 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         // TODO: Safety check in dev mode only (maybe..)
         foreach($this->getClassMetadata()->getFieldNames() as $field) {
 
-            if (str_contains($field, self::OPTION_WITH_ROUTE ) ||
-                str_contains($field, self::OPTION_MODEL      ) ||
-                str_contains($field, self::OPTION_PARTIAL    ) ||
-                str_contains($field, self::OPTION_INSENSITIVE) ||
-                str_contains($field, self::OPERATOR_AND      ) ||
-                str_contains($field, self::OPERATOR_OR       ) ||
+            if (str_contains($field, self::OPTION_WITH_ROUTE )  ||
+                str_contains($field, self::OPTION_MODEL      )  ||
+                str_contains($field, self::OPTION_PARTIAL    )  ||
+                str_contains($field, self::OPTION_INSENSITIVE)  ||
+
+                str_contains($field, self::OPTION_LOWER)        ||
+                str_contains($field, self::OPTION_GREATER)      ||
+                str_contains($field, self::OPTION_LOWER_EQUAL)   ||
+                str_contains($field, self::OPTION_GREATER_EQUAL) ||
+
+                str_contains($field, self::OPTION_EQUAL)        ||
+                str_contains($field, self::OPTION_NOT_EQUAL)    ||
+
+                str_contains($field, self::OPERATOR_AND      )  ||
+                str_contains($field, self::OPERATOR_OR       )  ||
                 str_contains($field, self::SEPARATOR         ))
+
                 throw new Exception(
                     "\"".$this->getEntityName(). "\" entity has a field called \"$field\". ".
                     "This is unfortunate, because this word is used to customize DQL queries. ".
@@ -137,9 +168,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         // Find and sort the "With" list
         $withs = array_filter([
-            self::OPTION_WITH_ROUTE => strpos($method, self::OPTION_WITH_ROUTE)],
-            fn ($value)  => ($value !== false)
-        );
+            self::OPTION_WITH_ROUTE => strpos($method, self::OPTION_WITH_ROUTE)
+            /* ... */
+        ],fn ($value)  => ($value !== false));
         asort($withs);
 
         // Here are the resulting parameters
@@ -223,6 +254,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
             $oldBy = null;
             
+            $operator = self::OPTION_EQUAL;
             $isInsensitive = $isPartial = false;
             while ($oldBy != $by) {
 
@@ -233,21 +265,45 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     $option = self::OPTION_PARTIAL;
                 else if ( str_starts_with($by, self::OPTION_INSENSITIVE) )
                     $option = self::OPTION_INSENSITIVE;
+            
+                else if ( str_ends_with($by, self::OPTION_LOWER_EQUAL) )
+                    $option = self::OPTION_LOWER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_LOWER) )
+                    $option = self::OPTION_LOWER;
+                
+                else if ( str_ends_with($by, self::OPTION_GREATER_EQUAL) )
+                    $option = self::OPTION_GREATER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_GREATER) )
+                    $option = self::OPTION_GREATER;
+                
+                else if ( str_ends_with($by, self::OPTION_NOT_EQUAL) )
+                    $option = self::OPTION_NOT_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_EQUAL) )
+                    $option = self::OPTION_EQUAL;
 
                 switch($option) {
+
                     case self::OPTION_PARTIAL:
                         $isPartial = true;
+                        list($method, $by) = $this->stripByFront($method, $by, $option);
                         break;
+
                     case self::OPTION_INSENSITIVE:
                         $isInsensitive = true;
+                        list($method, $by) = $this->stripByFront($method, $by, $option);
+                        break;
+
+                    case self::OPTION_LOWER:
+                    case self::OPTION_LOWER_EQUAL:
+                    case self::OPTION_GREATER:
+                    case self::OPTION_GREATER_EQUAL:
+                    case self::OPTION_EQUAL:
+                    case self::OPTION_NOT_EQUAL:
+                        $operator = $option;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
                         break;
                 }
 
-                if($option) {
-
-                    $method = substr($method, strlen($option), strlen($method));
-                    $by = substr($by, strlen($option), strlen($by));
-                }
             }
 
             // First check if WithRoute special argument is found..
@@ -255,8 +311,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             // and use it in the query
             if (str_ends_with($by, self::OPTION_WITH_ROUTE)) {
 
-                $method = substr($method, 0, strpos($method, self::OPTION_WITH_ROUTE));
-                $by     = substr($by, 0, strlen($by) - strlen(self::OPTION_WITH_ROUTE));
+                list($method, $by) = $this->stripByEnd($method, $by, self::OPTION_WITH_ROUTE);
                 $key    = array_shift($arguments);
 
                 // Stop dev using partial information when using route parameter
@@ -267,19 +322,23 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 // Process self::OPTION_WITH_ROUTE method
                 if ($method == self::OPTION_WITH_ROUTE)
                     throw new Exception("Missing parameter to associate with operator 'withRouteParameter'");
-
+                    
                 $fieldValue = $routeParameters[$key] ?? null;
                 if(!empty($fieldValue)) {
 
                     // Check if partial match is enabled
                     $by = lcfirst($by);
-                    $this->addCriteria($by, $fieldValue);
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    if ($operator == self::OPTION_EQUAL) $this->addCustomOption($id, $operator);
+                    else throw new Exception("Unexpected operator \"".$operator."\" found in model definition");    
                 }
 
             } else {
 
                 if ($by == self::OPTION_MODEL) {
 
+                    list($method, $_) = $this->stripByEnd($method, $by, $option);
                     $method = substr($method, 0, strpos($method, self::OPTION_MODEL));
                     $by = lcfirst($by);
 
@@ -312,6 +371,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         $id = $this->addCriteria($by, $modelCriteria);
                         if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
                         if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
+                        
+                        if ($operator == self::OPTION_EQUAL || $operator == self::OPTION_NOT_EQUAL) $this->addCustomOption($id, $operator);
+                        else throw new Exception("Unexpected operator \"".$operator."\" found in model definition");
                     }
 
                 } else {
@@ -324,6 +386,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         $id = $this->addCriteria($by, $fieldValue);
                         if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
                         if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
+                        if ($operator) $this->addCustomOption($id, $operator);
                     }
                 }
             }
@@ -342,12 +405,22 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
     {
-        $fieldName      = $this->getAlias($field[0]);
-        $fieldID        = implode("_", $field);
+        $fieldName = $this->getAlias($field[0]);
+        $fieldID   = implode("_", $field);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
 
         $isPartial     = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
         $isInsensitive = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
+        $tableOperator = 
+            ($this->findCustomOption ($fieldRoot, self::OPTION_EQUAL)         ? self::OPTION_EQUAL :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER)       ? self::OPTION_GREATER :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER_EQUAL) ? self::OPTION_GREATER_EQUAL :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL : null))))));
+
+        if(is_array($tableOperator))
+            throw new Exception("Too many operator requested for \"$fieldName\": ".implode(",", $tableOperator));
 
         // Prepare field parameter
         $qb->setParameter($fieldID, $fieldValue);
@@ -362,7 +435,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $qb->innerJoin("t.${fieldName}", $tableColumn);
         }
 
-        if ($isInsensitive) $tableColumn = "lower(" . $tableColumn . ")";
+        if ($isInsensitive) $tableColumn = "LOWER(" . $tableColumn . ")";
         if ($isPartial) {
 
             if (is_array($fieldValue)) {
@@ -380,17 +453,40 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
             } else if ($this->getClassMetadata()->hasAssociation($fieldName)) {
 
-                $expr = "${tableColumn} = :${fieldID}";
+                     if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
+                else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
+                else throw new Exception("Invalid operator for association field \"$fieldName\": ".$tableOperator);
+
+                $expr = "${tableColumn} ${tableOperator} :${fieldID}";
 
             } else {
 
-                $expr = "${tableColumn} LIKE :${fieldID}";
+                     if($tableOperator == self::OPTION_EQUAL)     $tableOperator = "LIKE";
+                else if($tableOperator == self::OPTION_NOT_EQUAL) $tableOperator = "NOT LIKE";
+                else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+
+                $expr = "${tableColumn} ${tableOperator} :${fieldID}";
             }
 
-        } else {
+        } else if (is_array($fieldValue)) {
 
-            if (is_array($fieldValue)) $expr = "${tableColumn} IN (:${fieldID})";
-            else $expr = "${tableColumn} = :${fieldID}";
+                 if($tableOperator == self::OPTION_EQUAL)     $tableOperator = "IN";
+            else if($tableOperator == self::OPTION_NOT_EQUAL) $tableOperator = "NOT IN";
+            else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+
+            $expr = "${tableColumn} ${tableOperator} (:${fieldID})";
+            
+        } else {
+            
+                 if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
+            else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
+            else if($tableOperator == self::OPTION_GREATER)       $tableOperator = ">";
+            else if($tableOperator == self::OPTION_GREATER_EQUAL) $tableOperator = ">=";
+            else if($tableOperator == self::OPTION_LOWER)         $tableOperator = "<";
+            else if($tableOperator == self::OPTION_LOWER_EQUAL)   $tableOperator = "<=";
+            else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+
+            $expr = "${tableColumn} $tableOperator :${fieldID}";
         }
 
         return $expr;

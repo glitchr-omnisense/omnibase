@@ -2,6 +2,7 @@
 
 namespace Base;
 
+use Doctrine\DBAL\Types\Type;
 use EasyCorp\Bundle\EasyAdminBundle\DependencyInjection\EasyAdminExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -13,27 +14,43 @@ use Symfony\Component\Finder\Finder;
 
 use Symfony\Component\DependencyInjection\Loader\Configurator as Config;
 
-BaseBundle::setMapping("./Form",       "Base\Form",       "App\Form");
-BaseBundle::setMapping("./Entity",     "Base\Entity",     "App\Entity");
-BaseBundle::setMapping("./Repository", "Base\Repository", "App\Repository");
-
 class BaseBundle extends Bundle
 {
-    public static $aliasedRepositories = [];
+    public function boot()
+    {
+        $em = $this->container->get('doctrine.orm.entity_manager');
+        
+        $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
+        $classList = BaseBundle::getAllClasses($projectDir . "./Enum");
+        $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
+        
+        /* Register enum types: priority to App namespace */
+        foreach($classList as $className) {
+         
+            if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
+            else Type::addType($className::getStaticName(), $className);
+
+            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className, $className::getStaticName());
+        }
+    }
+
+    const __ROOT__ = "Base\\BaseBundle";
+    public static function getBundleLocation() {
+        return dirname((new \ReflectionClass(self::__ROOT__))->getFileName()) . "/";
+    }
 
     public static function setMapping(string $location = "./", string $inputNamespace, string $outputNamespace)
     {
-        $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName()) . "/";
-        $classList = BaseBundle::getAllClasses($inputNamespace, $baseLocation . $location);
+        $classList = BaseBundle::getAllClasses(self::getBundleLocation() . $location, $inputNamespace);
 
         $aliasList = [];
         foreach ($classList as $class)
             $aliasList[$inputNamespace."\\".$class] = $outputNamespace."\\".$class;
 
-
         self::setAlias($aliasList);
     }
 
+    public static $aliasedRepositories = [];
     public static function setAlias(array $classes)
     {
         foreach ($classes as $input => $output) {
@@ -94,7 +111,7 @@ class BaseBundle extends Bundle
         }
     }
 
-    public static function getAllClasses($prefix, $path): array
+    public static function getAllClasses($path, $prefix = ""): array
     {
         $namespaces = [];
 
@@ -132,6 +149,8 @@ class BaseBundle extends Bundle
 
     public static function getFilenames($path)
     {
+        if(!file_exists($path)) return [];
+
         $finderFiles = Finder::create()->files()->in($path)->name('*.php');
         $filenames = [];
         foreach ($finderFiles as $finderFile) {
@@ -140,3 +159,8 @@ class BaseBundle extends Bundle
         return $filenames;
     }
 }
+
+BaseBundle::setMapping("./Enum",       "Base\Enum",       "App\Enum");
+BaseBundle::setMapping("./Form",       "Base\Form",       "App\Form");
+BaseBundle::setMapping("./Entity",     "Base\Entity",     "App\Entity");
+BaseBundle::setMapping("./Repository", "Base\Repository", "App\Repository");

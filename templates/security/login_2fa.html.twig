@@ -32,7 +32,7 @@
                 {% if displayTrustedOption %}
                     <p class="widget"><label for="_trusted"><input id="_trusted" type="checkbox" name="{{ trustedParameterName }}" /> {{ "trusted"|trans({}, 'SchebTwoFactorBundle') }}</label></p>
                 {% endif %}
-                <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+                
             </form>
 
         </div>

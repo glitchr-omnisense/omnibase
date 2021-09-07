@@ -2,6 +2,7 @@
 
 namespace Base\Service\Traits;
 
+use Base\Service\BaseService;
 use Base\Twig\BaseTwigExtension;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;
@@ -23,18 +24,20 @@ trait BaseTwigTrait {
     /**
      *  Twig related methods
      */
-    public function getParameterTwig(string $name)
+    public function getParameterTwig(string $name = "")
     {
-        if (!isset($this->twig))
+        if (!isset(BaseService::$twig))
             throw new Exception("No twig found in BaseService. Did you overloaded BaseService::__construct ?");
 
-        $globals = $this->twig->getGlobals();
+        $globals = BaseService::$twig->getGlobals();
+        if(!$name) return $globals;
+        
         return (array_key_exists($name, $globals)) ? $globals[$name] : null;
     }
 
     public function addParameterTwig(string $name, $newValue)
     {
-        if (!isset($this->twig))
+        if (!isset(BaseService::$twig))
             throw new Exception("No twig found in BaseService. Did you overloaded BaseService::__construct ?");
 
         $value = $this->getParameterTwig($name);
@@ -48,7 +51,7 @@ trait BaseTwigTrait {
             else throw new Exception("Ambiguity for merging the two \"$name\" entities..");
         }
 
-        return $this->twig->addGlobal($name, $value);
+        return BaseService::$twig->addGlobal($name, $value);
     }
 
     public function stylesheets()
@@ -217,17 +220,17 @@ trait BaseTwigTrait {
 
     public function setParameterTwig(string $name, $value)
     {
-        if (!isset($this->twig))
+        if (!isset(BaseService::$twig))
             throw new Exception("No twig found in BaseService. Did you overloaded BaseService::__construct ?");
 
-        return $this->twig->addGlobal($name, $value);
+        return BaseService::$twig->addGlobal($name, $value);
     }
 
     public function issetTwig(string $name)
     {
-        if (!isset($this->twig))
+        if (!isset(BaseService::$twig))
             throw new Exception("No twig found in BaseService. Did you overloaded BaseService::__construct ?");
 
-        return in_array($name, $this->twig->getGlobals());
+        return in_array($name, BaseService::$twig->getGlobals());
     }
 }

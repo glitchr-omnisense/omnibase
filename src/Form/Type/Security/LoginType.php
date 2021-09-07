@@ -14,30 +14,18 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-use Base\Form\AbstractType;
-use Base\Form\Traits\RememberMeFormTrait;
-use Base\Form\Traits\TargetPathFormTrait;
-use Base\Form\Traits\CsrfFormTrait;
-use Base\Form\Traits\BootstrapFormTrait;
+use Symfony\Component\Form\AbstractType;
 
 class LoginType extends AbstractType
 {
-    use RememberMeFormTrait;
-    use BootstrapFormTrait;
-    use CsrfFormTrait;
-
     public function getBlockPrefix() { return ""; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        parent::configureOptions($resolver);
-
         $resolver->setDefaults([
             'data_class' => User::class,
             'username' => null, // to pass variable from controller to Type
-            'csrf_token_id'   => 'authenticate',
-            'allow_extra_fields' => true,
-            "translation_domain" => false
+            'allow_extra_fields' => true
         ]);
     }
 
@@ -55,18 +43,11 @@ class LoginType extends AbstractType
                 'attr'  => [
                     'id' => "inputPassword"  // used in Symfony kernel
                 ]
-            ]);
-
-        parent::buildForm($builder, $options);
-    }
-
-    public function buildView(FormView $view, FormInterface $form, array $options)
-    {
-        parent::buildView($view, $form, $options);
-    }
-
-    public function finishView(FormView $view, FormInterface $form, array $options)
-    {
-        parent::finishView($view, $form, $options);
+            ])
+            ->add("_remember_me", CheckboxType::class, [
+                    'mapped' => false,
+                    'required' => false,
+                    'attr' => ["checked" => "checked"]
+                ]);;
     }
 }

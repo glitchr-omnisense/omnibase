@@ -179,39 +179,39 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        // Notify user about the authentication method
-        // if (!($user = $this->security->getUser())) return;
+        //Notify user about the authentication method
+        if (!($user = $this->security->getUser())) return;
 
-        // if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
-        //     return $this->baseService->redirectToRoute($event, "base_profile");
+        if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
+            return $this->baseService->redirectToRoute($event, "base_profile");
 
-        // $exceptionList = [
-        //     "/^(app|base)_(verifyEmail(_token)*)$/",
-        //     "/^(app|base)_(resetPassword(_token)*)$/",
-        //     "/^(app|base)_(logout|settings|profile)$/"];
+        $exceptionList = [
+            "/^(app|base)_(verifyEmail(_token)*)$/",
+            "/^(app|base)_(resetPassword(_token)*)$/",
+            "/^(app|base)_(logout|settings|profile)$/"];
 
-        // if (! $user->isVerified()) {
+        if (! $user->isVerified()) {
 
-        //     $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
+            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
                 
-        //         $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
-        //         $notification->send("warning");
-        //     });
+                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
+                $notification->send("warning");
+            });
 
-        // } else if (! $user->isApproved()) {
+        } else if (! $user->isApproved()) {
 
-        //     $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
+            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
 
-        //         $notification = new Notification("notifications.login.pending");
-        //         $notification->send("warning");
-        //     });
-        // }
+                $notification = new Notification("notifications.login.pending");
+                $notification->send("warning");
+            });
+        }
 
-        // if ($this->security->isGranted('IS_IMPERSONATOR')) {
+        if ($this->security->isGranted('IS_IMPERSONATOR')) {
 
-        //     $notification = new Notification("notifications.impersonator", [$user]);
-        //     $notification->send("warning");
-        // }
+            $notification = new Notification("notifications.impersonator", [$user]);
+            $notification->send("warning");
+        }
     }
 
     public function onLoginFailure(LoginFailureEvent $event)

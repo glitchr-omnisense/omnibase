@@ -4,9 +4,11 @@ namespace Base;
 
 use Base\Entity\User;
 
-use Base\Type\UTCDateTimeType;
+use Base\Database\Types\UTCDateTimeType;
 use Symfony\Bundle\FrameworkBundle\HttpCache\HttpCache;
 use Symfony\Component\HttpFoundation\Session\Session;
+
+use Doctrine\DBAL\Types\Type;
 
 class Kernel extends HttpCache
 {
@@ -25,9 +27,10 @@ class Kernel extends HttpCache
 
         // Set default time to UTC everywhere
         date_default_timezone_set($timezone ?? "UTC");
-
-        \Doctrine\DBAL\Types\Type::overrideType('date', UTCDateTimeType::class);
-        \Doctrine\DBAL\Types\Type::overrideType('datetime', UTCDateTimeType::class);
-        \Doctrine\DBAL\Types\Type::overrideType('datetimetz', UTCDateTimeType::class);
+ 
+        // Override doctrine datetime types
+        Type::overrideType('date', UTCDateTimeType::class);
+        Type::overrideType('datetime', UTCDateTimeType::class);
+        Type::overrideType('datetimetz', UTCDateTimeType::class);
     }
 }

@@ -3,6 +3,10 @@
 namespace Base\Service;
 
 use App\Entity\Thread;
+use Base\Entity\User\Notification;
+use Base\Enum\SpamApi;
+use Base\Model\SpamProtectionInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SpamChecker
@@ -10,13 +14,23 @@ class SpamChecker
     private $client;
     private $endpoint;
 
-    public function __construct(HttpClientInterface $client, string $akismetKey)
+    public function __construct(RequestStack $requestStack,  HttpClientInterface $client, BaseService $baseService)
     {
+        $this->requestStack = $requestStack;
         $this->client = $client;
-        $this->endpoint = sprintf('https://%s.rest.akismet.com/1.1/comment-check', $akismetKey);
+        $this->baseService = $baseService;
     }
 
-    public function getBlog()
+    public function getLang()
+    {
+        $defaultLocale = $this->baseService->getParameterBag("kernel.default_locale");
+        $fallbacks = $this->baseService->getTranslator()->getFallbackLocales();
+        $locale = $this->baseService->getTranslator()->getLocale();
+
+        return (in_array($locale, $fallbacks) ? $locale : $defaultLocale);
+    }
+
+    public function getUrl()
     {
         return sprintf(
             "%s://%s%s",
@@ -26,37 +40,78 @@ class SpamChecker
         );
     }
 
+    public function getKey($api): string
+    {
+        switch($api) {
+
+            case SpamApi::ASKISMET:
+                return $this->baseService->getParameterBag("base.spam.askismet");
+
+            default:
+                throw new \RuntimeException("Unknown Spam API \"".$api."\".");
+        }
+    }
+
+    public function getEndpoint($api): string
+    {
+        switch($api) {
+
+            case SpamApi::ASKISMET:
+                return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $this->getKey($api));
+            
+            default:
+                throw new \RuntimeException("Unknown Spam API \"".$api."\".");
+        }
+    }
+
     /**
      * @return int Spam score: 0: not spam, 1: maybe spam, 2: blatant spam
      *
      * @throws \RuntimeException if the call did not work
      */
-    public function getSpamScore(Thread $thread, array $context): int
+    public function getScore(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::ASKISMET): int
     {
-        $response = $this->client->request('POST', $this->endpoint, [
-            'body' => array_merge($context, [
-                'blog' => $this->getBlog(),
-                'comment_type' => 'comment',
-                'comment_author' => $thread->getAuthor(),
-                'comment_author_email' => $thread->getAuthor()->getEmail(),
-                'comment_content' => $thread->getContent(),
-                'comment_date_gmt' => $thread->getCreatedAt(),
-                'blog_lang' => $thread->getAuthor()->getLocale(),
-                'blog_charset' => 'UTF-8',
-                'is_test' => true
-            ]),
-        ]);
+        $request = $this->requestStack->getCurrentRequest();
+        switch($api) {
+            
+            default:
+                throw new \RuntimeException("Unknown Spam API \"".$api."\".");
 
-        $headers = $response->getHeaders();
-        if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) {
-            return 2;
+            case SpamApi::ASKISMET :
+                $options = [
+                    'body' => array_merge($context, [
+                        'is_test' => $this->baseService->isDebug(),
+                        'user_ip' => $request->getClientIp(),
+                        'user_agent' => $request->headers->get('user-agent'),
+                        'referrer' => $request->headers->get('referer'),
+                        'permalink' => $request->getUri(),
+
+                        'blog' => $this->getUrl(),
+                        'blog_charset' => 'UTF-8',
+                        'blog_lang' => $this->getLang(),
+
+                        'comment_type' => 'comment',
+                        'comment_author' => $candidate->getAuthor(),
+                        'comment_author_email' => $candidate->getAuthor()->getEmail(),
+                        'comment_content' => $candidate->getSpamText(),
+                        'comment_date_gmt' => $candidate->getSpamDate()
+                    ])
+                ];
+
+                $response = $this->client->request('POST', $this->getEndpoint($api), $options);
+
+                $headers = $response->getHeaders();
+                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = 2;
+                else {
+
+                    $content = $response->getContent();
+                    if (isset($headers['x-akismet-debug-help'][0]))
+                        throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
+
+                    $score = ($content === "true" ? 1 : 0);
+                }
         }
 
-        $content = $response->getContent();
-        if (isset($headers['x-akismet-debug-help'][0])) {
-            throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
-        }
-
-        return 'true' === $content ? 1 : 0;
+        return $score;
     }
 }

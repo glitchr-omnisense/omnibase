@@ -20,10 +20,8 @@ use Base\Database\Annotation\GenerateUuid;
 use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Slugify;
 use Base\Database\Annotation\EntityHierarchy;
-use Base\Service\BaseService;
-
+use Base\Enum\ThreadState;
 use Base\Traits\EntityHierarchyTrait;
-use Base\Traits\ColumnAliasTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -37,17 +35,6 @@ use Base\Traits\ColumnAliasTrait;
 class Thread
 {
     use EntityHierarchyTrait;
-    use ColumnAliasTrait;
-    
-    public const STATE_APPROVED  = "STATE_APPROVED",
-                 STATE_PENDING   = "STATE_PENDING",
-                 STATE_REJECTED  = "STATE_REJECTED",
-                 STATE_DELETED   = "STATE_DELETED",
-
-                 STATE_SECRET    = "STATE_SECRET",
-                 STATE_DRAFT     = "STATE_DRAFT",
-                 STATE_FUTURE    = "STATE_FUTURE",
-                 STATE_PUBLISHED = "STATE_PUBLISHED";
 
     /**
      * @ORM\Id
@@ -97,11 +84,11 @@ class Thread
     protected $content;
 
     /**
-     * @ORM\Column(type="string", length=32)
+     * @ORM\Column(type="thread_state", length=1)
      *
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
-    protected $state = [];
+    protected $state;
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
@@ -147,7 +134,7 @@ class Thread
      */
     protected $createdAt;
 
-    public function __construct(User $author, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
+    public function __construct(?User $author = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags = new ArrayCollection();
         $this->children = new ArrayCollection();
@@ -161,7 +148,7 @@ class Thread
 
         $this->title  = $title;
         $this->slug   = $slug;
-        $this->state = self::STATE_DRAFT;
+        $this->state = ThreadState::DRAFT;
     }
 
     public function __toString()
@@ -221,26 +208,26 @@ class Thread
         return $this;
     }
 
-    public function getState(): ?string
+    public function getState()
     {
         return $this->state;
     }
 
-    public function setState(string $state): self
+    public function setState($state): self
     {
         $this->state = $state;
-        if(in_array($this->state, [self::STATE_PUBLISHED, self::STATE_APPROVED]) && !$this->getPublishedAt())
+        if(in_array($this->state, [ThreadState::PUBLISHED, ThreadState::APPROVED]) && !$this->getPublishedAt())
             $this->setPublishedAt(new \DateTime("now"));
 
         return $this;
     }
 
 
-    public function isDeleted(): bool { return $this->state == self::STATE_DELETED;   }
-    public function isDraft()  : bool { return $this->state == self::STATE_DRAFT;     }
-    public function isPublish(): bool { return $this->state == self::STATE_PUBLISHED; }
-    public function isFuture() : bool { return $this->state == self::STATE_FUTURE;    }
-    public function isSecret() : bool { return $this->state == self::STATE_SECRET;    }
+    public function isDeleted(): bool { return $this->state == ThreadState::DELETED;   }
+    public function isDraft()  : bool { return $this->state == ThreadState::DRAFT;     }
+    public function isPublish(): bool { return $this->state == ThreadState::PUBLISHED; }
+    public function isFuture() : bool { return $this->state == ThreadState::FUTURE;    }
+    public function isSecret() : bool { return $this->state == ThreadState::SECRET;    }
     public function isPublishable(): bool
     {
         if(!$this->publishedAt) return false;

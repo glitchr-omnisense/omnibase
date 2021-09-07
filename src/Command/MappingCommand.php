@@ -25,12 +25,13 @@ class MappingCommand extends Command
         $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, ['bold']));
         $output->getFormatter()->setStyle('ln', new OutputFormatterStyle('cyan', null, ['bold']));
 
-        $appList = BaseBundle::getAllNameSpaces("App", "./src");
+        $appList = BaseBundle::getAllClasses("./src", "App");
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $baseList = array_merge(
-            BaseBundle::getAllNameSpaces("Base", $baseLocation."/Form"),
-            BaseBundle::getAllNameSpaces("Base", $baseLocation."/Entity"),
-            BaseBundle::getAllNameSpaces("Base", $baseLocation."/Repository")
+            BaseBundle::getAllClasses($baseLocation."/Enum", "Base"),
+            BaseBundle::getAllClasses($baseLocation."/Form", "Base"),
+            BaseBundle::getAllClasses($baseLocation."/Entity", "Base"),
+            BaseBundle::getAllClasses($baseLocation."/Repository", "Base")
         );
 
         $output->section()->writeln('');
