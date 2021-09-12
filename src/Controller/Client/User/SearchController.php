@@ -2,8 +2,6 @@
 
 namespace Base\Controller\Client\User;
 
-use Base\Service\BaseService;
-
 use App\Entity\User;
 use App\Repository\UserRepository;
 
@@ -20,9 +18,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SearchController extends AbstractController
 {
-    public function __construct(BaseService $baseService, UserRepository $userRepository)
+    public function __construct(UserRepository $userRepository)
     {
-        $this->baseService = $baseService;
         $this->userRepository = $userRepository;
     }
 

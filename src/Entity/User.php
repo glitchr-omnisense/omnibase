@@ -108,10 +108,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     protected $password;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="user_role")
      * @Assert\NotBlank(groups={"new", "edit"})
      */
-    protected $roles = [];
+    protected $roles;
 
     /**
      * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
@@ -213,7 +213,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function __construct()
     {
-        $this->roles = [self::ROLE_USER];
+        $this->roles = [UserRole::USER];
         $this->isApproved = false;
         $this->isVerified = false;
         $this->isEnabled  = true;
@@ -307,6 +307,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return null;
     }
 
+    public static function getBrowser(): ?string
+    {
+        return $_SERVER['HTTP_USER_AGENT'] ?? null;
+    }
+
     public function isBanned() {
         return false;
     }
@@ -328,19 +333,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
     }
 
-    const ROLE_SOCIAL     = "ROLE_SOCIAL";
-    const ROLE_USER       = "ROLE_USER";
-    const ROLE_ADMIN      = "ROLE_ADMIN";
-    const ROLE_SUPERADMIN = "ROLE_SUPERADMIN";
-
     /**
      * @see UserInterface
      */
-    public function getRoles(): array 
-    { 
-        return $this->roles;
-    }
-
+    public function getRoles(): array { return $this->roles; }
     public function setRoles(array $roles): self
     {
         if(empty($roles))

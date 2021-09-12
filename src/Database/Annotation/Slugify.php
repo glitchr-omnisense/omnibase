@@ -82,14 +82,13 @@ class Slugify extends AbstractAnnotation
         $slug = $this->slugger->slug($input, $this->separator);
         return ($this->lowercase ? $slug->lower() : $slug);
     }
-
+    
     public function getUniqueSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): string
     {
+        $repository  = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->getSlug($entity, $defaultInput);
 
         $slug = $defaultSlug;
-        $repository = $this->getEntityManager()->getRepository(get_class($entity));
-
         for($i = 1; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
 
@@ -104,7 +103,7 @@ class Slugify extends AbstractAnnotation
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $defaultInput = $this->getFieldValue($entity, $property);
-        $slug = $this->getSlug($entity, $defaultInput);
+        $slug = $this->getUniqueSlug($entity, $property, $defaultInput);
         $this->setFieldValue($entity, $property, $slug);
     }
 

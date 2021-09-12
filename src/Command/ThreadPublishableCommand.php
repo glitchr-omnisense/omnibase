@@ -3,6 +3,7 @@
 namespace Base\Command;
 
 use Base\Entity\Thread;
+use Base\Enum\ThreadState;
 use Base\Repository\ThreadRepository;
 
 use Doctrine\ORM\EntityManager;
@@ -38,7 +39,7 @@ class ThreadPublishableCommand extends Command
         $actionShow    = $input->getOption('show');
 
         $threadRepository = $this->entityManager->getRepository(Thread::class);
-        $threads = $threadRepository->findBy(["state" => ThreadState::FUTURE]);
+        $threads = $threadRepository->findByState(ThreadState::FUTURE);
 
         $publishableThreads = array_filter($threads,
         function($thread) use ($actionPublish) {

@@ -2,18 +2,19 @@
 
 namespace Base\Controller\Client\Thread;
 
-use Base\Service\BaseService;
-
 use App\Entity\User;
 use App\Repository\UserRepository;
 
 use App\Form\User\ProfileEditType;
 use App\Form\User\ProfileSearchType;
 use Base\Entity\Thread;
+use Base\Enum\ThreadState;
 use Base\Form\Data\Thread\SearchData;
 use Base\Form\Type\Thread\SearchbarType;
 use Base\Form\Type\Thread\SearchType;
 use Base\Repository\ThreadRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Endroid\QrCode\QrCode;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,13 +25,12 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SearchController extends AbstractController
 {
-    protected $baseService;
     protected $threadRepository;
 
-    public function __construct(BaseService $baseService, ThreadRepository $threadRepository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->baseService = $baseService;
-        $this->threadRepository = $threadRepository;
+        $this->entityManager    = $entityManager;
+        $this->threadRepository = $entityManager->getRepository(Thread::class);
     }
 
     /**
@@ -71,8 +71,11 @@ class SearchController extends AbstractController
             $data->excerpt = "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%";
             $data->generic = null;
 
+            $entityManager = $this->entityManager;
             $threads = $this->threadRepository->findByStateAndInsensitivePartialModel([ThreadState::PUBLISHED, ThreadState::APPROVED], $data);
-            usort($threads, fn ($a, $b) => $a->getHierarchyById() < $b->getHierarchyById() ? -1 : 1);
+            usort($threads, function ($a, $b) use ($entityManager) {
+                return $entityManager->getRepository(get_class($a))->getHierarchy() < $entityManager->getRepository(get_class($b))->getHierarchy() ? -1 : 1;
+            });
         }
 
         return $this->render('@Base/client/thread/search.html.twig', [

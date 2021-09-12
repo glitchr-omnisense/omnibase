@@ -93,6 +93,17 @@ trait BaseUtilsTrait
         return $randomString;
     }
 
+    public static function shortenStr(?string $str, int $length = 100): ?string
+    {
+        $nChr = strlen($str);
+
+        $separator = " [..] ";
+        if($nChr > $length + strlen($separator))
+            return substr($str, 0, $length/2) . $separator . substr($str, $nChr-$length/2, $length/2);
+
+        return $str;
+    }
+
     public static function hasInterface($objectOrClass, $interface)
     {
         if(!is_string($objectOrClass) && !is_object($objectOrClass)) return false;

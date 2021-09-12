@@ -21,6 +21,7 @@ use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Slugify;
 use Base\Database\Annotation\EntityHierarchy;
 use Base\Enum\ThreadState;
+use Base\Traits\BaseTrait;
 use Base\Traits\EntityHierarchyTrait;
 
 /**
@@ -34,8 +35,8 @@ use Base\Traits\EntityHierarchyTrait;
 
 class Thread
 {
-    use EntityHierarchyTrait;
-
+    use BaseTrait;
+    
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -84,8 +85,8 @@ class Thread
     protected $content;
 
     /**
-     * @ORM\Column(type="thread_state", length=1)
-     *
+     * @ORM\Column(type="thread_state")
+     * 
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $state;

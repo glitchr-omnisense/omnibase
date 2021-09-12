@@ -117,7 +117,7 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setSlugger($slugger);
         $this->setProjectDir($this->kernel->getProjectDir());
         $this->setUserProperty($this->getParameterBag("base.user.property"));
-        $this->setNotifier($notifier, $notifierPolicy);
+        $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
 
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->rstack);

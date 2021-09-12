@@ -5,6 +5,7 @@ namespace Base\Traits;
 use Base\Service\BaseService;
 use Base\Twig\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -30,6 +31,7 @@ trait BaseTrait
     public static function getNotifier(): ?NotifierInterface { return BaseService::$notifier; }
     public static function getNotifierPolicy(): ?ChannelPolicyInterface { return BaseService::$notifierPolicy; }
 
+    public static function getRepository(): ?EntityRepository { return BaseService::$doctrine->getRepository(get_called_class()); }
     public static function getTranslator(): ?TranslatorInterface { return BaseService::$translator; }
     public static function getSlugger(): ?SluggerInterface { return BaseService::$slugger; }
 }

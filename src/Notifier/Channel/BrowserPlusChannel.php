@@ -16,11 +16,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
-/**
- * @author Fabien Potencier <fabien@symfony.com>
- */
 final class BrowserPlusChannel implements ChannelInterface
 {
+    
     private $stack;
 
     public function __construct(RequestStack $stack)
@@ -35,13 +33,8 @@ final class BrowserPlusChannel implements ChannelInterface
 
     public function notify(Notification $notification, RecipientInterface $recipient, string $transportName = null): void
     {
-        if (null === $request = $this->stack->getCurrentRequest()) {
-            return;
-        }
-
-        if (!$request->hasSession()) {
-            return;
-        }
+        if (null === $request = $this->stack->getCurrentRequest()) return;
+        if (!$request->hasSession()) return;
 
         // Prepare variables
         $type    = $notification->getImportance();
@@ -57,7 +50,6 @@ final class BrowserPlusChannel implements ChannelInterface
         }
 
         // Send notification to flashbag
-        $request->getSession()->getFlashBag()
-                ->add($notification->getImportance(), $message);
+        $request->getSession()->getFlashBag()->add($notification->getImportance(), $message);
     }
 }

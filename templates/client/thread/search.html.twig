@@ -48,17 +48,17 @@
         {% set lastSection = null %}
         {% for thread in threads %}
 
-            {% set nSections = thread.getHierarchyDepth() %}
+            {% set depth = thread.getRepository().getHierarchyDepth() %}
 
-            {% if lastSection != thread.getHierarchyById() %}
+            {% if lastSection != thread.getRepository().getHierarchy() %}
                 <article>
                 <div class="headline">
-                    {% for section in thread.getHierarchy() %}
+                    {% for section in thread.getRepository().getHierarchyTree() %}
                     > {{ section|capitalize }}
                     {% endfor %}
                 </div>
                 </article>
-                {% set lastSection = thread.getHierarchyById() %}
+                {% set lastSection = thread.getRepository().getHierarchy() %}
             {% endif %}
 
             <article class="wrapper">
@@ -74,7 +74,7 @@
 
                         <h1 class="title">
                             {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
-                            {% if nSections > 1 and thread.parent() != null %}
+                            {% if depth > 1 and thread.parent() != null %}
                                 {{ 'entities.thread.in'|trans2([threadTitle, thread.parent().title]) | raw }}
                             {% else %}
                                 {{ threadTitle |raw }}

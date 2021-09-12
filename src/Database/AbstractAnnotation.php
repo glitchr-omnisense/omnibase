@@ -57,6 +57,20 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return false;
     }
 
+    public function getPropertyOwnerRepository($entity, string $property)
+    {
+        $className = get_class($entity);
+        $repository = $this->getEntityManager()->getRepository($className);
+
+        while($className = get_parent_class($className)) {
+
+            if(property_exists($className, $property))
+                $repository = $this->getEntityManager()->getRepository($className);
+        }
+
+        return $repository;
+    }
+
     public static function getEntityFromData($classname, $data)
     {
         if(self::isWithinDoctrine()) {

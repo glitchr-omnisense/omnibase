@@ -20,7 +20,7 @@ class BaseExtension extends Extension
     {
         //
         // Load service declaration (includes services, controllers,..)
-
+        
         // Format XML
         $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__, 2).'/config'));
         $loader->load('services.xml');

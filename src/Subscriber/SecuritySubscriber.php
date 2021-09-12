@@ -24,8 +24,12 @@ use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Repository\User\NotificationRepository;
+use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\Event\PostResponseEvent;
@@ -37,9 +41,12 @@ use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
+use Symfony\Component\Security\Http\SecurityEvents;
 use Symfony\Component\Stopwatch\Stopwatch;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -51,30 +58,34 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $baseService;
 
     /**
-     * @var Security
+     * @var TokenStorageInterface
      */
-    private $security;
+    private $tokenStorage;
 
     /**
-     * @var TraceableEventDispatcher
+     * @var array[TraceableEventDispatcher]
      */
-    private $dispatcher;
+    private $dispatchers = [];
 
     public function __construct(
-        Security $security,
-        EventDispatcherInterface $dispatcher,
+        AuthorizationChecker $authorizationChecker,
+        TokenStorageInterface $tokenStorage,
+        ServiceLocator $dispatcherLocator,
         TranslatorInterface $translator,
-        NotificationRepository $notificationRepository,
         BaseService $baseService) {
 
-        $this->security    = $security;
-        $this->dispatcher  = ($dispatcher instanceof TraceableEventDispatcher ? $dispatcher : 
-                              new TraceableEventDispatcher($dispatcher, new Stopwatch()));
-
+        $this->authorizationChecker = $authorizationChecker;
+        $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
         $this->baseService = $baseService;
+    
+        foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
-        $this->notificationRepository = $notificationRepository;        
+            $dispatcher = $dispatcherLocator->get($dispatcherId);
+            if (!$dispatcher instanceof TraceableEventDispatcher) continue;
+
+            $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
+        }
     }
 
     public static function getSubscribedEvents()
@@ -84,7 +95,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             KernelEvents::EXCEPTION => [['onKernelException', -1024]],
 
             LoginSuccessEvent::class => ['onLoginSuccess'],
-            LoginFailureEvent::class  => ['onLoginFailure'],
+            LoginFailureEvent::class => ['onLoginFailure'],
             LogoutEvent::class       => ['onLogout'],
 
             SwitchUserEvent::class => ['onSwitchUser'],
@@ -101,19 +112,19 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onEnabling(UserEvent $event)
     {
         $user = $event->getUser();
-        if($this->security->getToken()->getUser() != $user) return; // Only notify when user requests itself
+        if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         $notification = new Notification("notifications.accountWelcomeBack.success", [$user]);
         $notification->setUser($user);
 
-        if($this->security->getToken()->getUser() == $user)
+        if($this->tokenStorage->getToken()->getUser() == $user)
             $notification->send("success");
     }
 
     public function onDisabling(UserEvent $event)
     {
         $user = $event->getUser();
-        if($this->security->getToken()->getUser() != $user) return; // Only notify when user requests itself
+        if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         $notification = new Notification("notifications.accountGoodbye.success", [$user]);
         $notification->setUser($user);
@@ -126,7 +137,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onRegistration(UserEvent $event)
     {
-        $token = $this->security->getToken();
+        $token = $this->tokenStorage->getToken();
         $user = $event->getUser();
         if($token && $token->getUser() != $user) return; // Only notify when user requests itself
 
@@ -174,13 +185,14 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $request = $event->getRequest();
         if (!($user = $event->getTargetUser()))
-            return;
+            return; // Useful ? x(
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
         //Notify user about the authentication method
-        if (!($user = $this->security->getUser())) return;
+        if(!($token = $this->tokenStorage->getToken()) ) return;
+        if(!($user = $token->getUser())) return;
 
         if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
             return $this->baseService->redirectToRoute($event, "base_profile");
@@ -207,7 +219,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             });
         }
 
-        if ($this->security->isGranted('IS_IMPERSONATOR')) {
+        if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 
             $notification = new Notification("notifications.impersonator", [$user]);
             $notification->send("warning");
@@ -244,9 +256,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             } else if($user->isVerified()) {
 
-                if ($this->security->isGranted('IS_AUTHENTICATED_FULLY'))
+                if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY'))
                     $title = "notifications.login.success.normal";
-                else if ($this->security->isGranted('IS_AUTHENTICATED_REMEMBERED'))
+                else if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED'))
                     $title = "notifications.login.success.back";
                 else
                     $title = "notifications.login.success.alien";
@@ -258,13 +270,20 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
     }
 
+    private $_onLogoutUser = null;
+    private $_onLogoutImpersonator = null;
     public function onLogout(LogoutEvent $event)
     {
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
+        $impersonator = ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
 
         if ($user instanceof User) // Just to remember username.. after logout & first redirection
             $this->baseService->addSession("_user", $user);
+
+        // Get back onLogout token information (to be used to store logs)
+        $this->_onLogoutUser = $user;
+        $this->_onLogoutImpersonator = $impersonator;
 
         return $this->baseService->redirectToRoute($event, LoginFormAuthenticator::LOGOUT_ROUTE);
     }
@@ -277,27 +296,31 @@ class SecuritySubscriber implements EventSubscriberInterface
         if (!$event->isMainRequest()) return;
         $request = $event->getRequest();
 
+        // Handle security (not mandatory, $user is null if not defined)
+        $token = $this->tokenStorage->getToken();
+        $impersonator = ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : $this->_onLogoutImpersonator);
+        $user = ($token ? $token->getUser() : $this->_onLogoutUser);
+        if(!$user) return;
+
         // Monitored listeners
-        $monitoredEntries = $this->baseService->getParameterBag("base.logging");
-        if(empty($monitoredEntries)) return;
+        $monitoredEntries = $this->baseService->getParameterBag("base.logging") ?? [];
+        if(!$monitoredEntries) return;
 
         // Format monitored entries
         foreach ($monitoredEntries as $key => $entry) {
 
             if (!array_key_exists("event", $monitoredEntries[$key]))
                 throw new Exception("Missing key \"event\" in monitored events #" . $key);
-
-            if (!array_key_exists("listener", $monitoredEntries[$key]))
-                $monitoredEntries[$key]["listener"] = "*";
-
+            if (!array_key_exists("pretty", $monitoredEntries[$key]))
+                $monitoredEntries[$key]["pretty"] = "*";
             if (!array_key_exists("statusCode", $monitoredEntries[$key]))
                 $monitoredEntries[$key]["statusCode"] = "*";
 
-            $monitoredEntries[$key]["listener"] = str_replace("\\", "\\\\", $monitoredEntries[$key]["listener"]);
-            $monitoredEntries[$key]["listener"] = trim(ltrim($monitoredEntries[$key]["listener"], '\\'));
-            $monitoredEntries[$key]["listener"] = "/" . $monitoredEntries[$key]["listener"] . "/";
-            if ($monitoredEntries[$key]["listener"] == "/*/")
-                $monitoredEntries[$key]["listener"] = "/.*/";
+            $monitoredEntries[$key]["pretty"] = str_replace("\\", "\\\\", $monitoredEntries[$key]["pretty"]);
+            $monitoredEntries[$key]["pretty"] = trim(ltrim($monitoredEntries[$key]["pretty"], '\\'));
+            $monitoredEntries[$key]["pretty"] = "/" . $monitoredEntries[$key]["pretty"] . "/";
+            if ($monitoredEntries[$key]["pretty"] == "/*/")
+                $monitoredEntries[$key]["pretty"] = "/.*/";
 
             $monitoredEntries[$key]["statusCode"] = trim($monitoredEntries[$key]["statusCode"]);
             $monitoredEntries[$key]["statusCode"] = "/" . $monitoredEntries[$key]["statusCode"] . "/";
@@ -306,41 +329,39 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         // Check called listeners
-        $entries = $this->dispatcher->getCalledListeners();
-        foreach ($entries as $entry) {
+        $calledListeners = [];
+        foreach($this->dispatchers as $dispatcher)
+            $calledListeners = array_merge($calledListeners, $dispatcher->getCalledListeners());
 
-            if (!array_key_exists("event", $entry))
-                throw new Exception("Array key \"event\" missing in dispatcher entry");
-            if (!array_key_exists("pretty", $entry))
-                throw new Exception("Array key \"pretty\" missing in dispatcher entry");
+        foreach ($calledListeners as $listener) {
 
-            $event    = $entry["event"];
-            $listener = $entry["pretty"];
+            if (!array_key_exists("event", $listener))
+                throw new Exception("Array key \"event\" missing in dispatcher listener");
+            if (!array_key_exists("pretty", $listener))
+                throw new Exception("Array key \"pretty\" missing in dispatcher listener");
+
+            $event  = $listener["event"];
+            $pretty = $listener["pretty"];
+            
             foreach ($monitoredEntries as $monitoredEntry) {
 
-                $monitoredEvent      = $monitoredEntry["event"];
-                $monitoredListener   = $monitoredEntry["listener"];
                 $monitoredStatusCode = $monitoredEntry["statusCode"];
+                $monitoredPretty   = $monitoredEntry["pretty"];
+                $monitoredEvent      = $monitoredEntry["event"];
                 if ($monitoredEvent != $event)                   continue;
 
                 if($event == "kernel.exception") {
 
                     // If kernel exception, listener regex is inhibited
-                    if ($listener != __CLASS__ . "::onKernelException") continue;
+                    if ($pretty != __CLASS__ . "::onKernelException") continue;
 
                     // Handle exception
                     if ($exception == null) continue;
-                    if ($exception instanceof HttpException) {
-                        if (!preg_match($monitoredStatusCode, $exception->getStatusCode())) continue;
-                    } else {
-                        if (!preg_match($monitoredStatusCode, $exception->getCode())) continue;
-                    }
 
-                } else {
+                    if ($exception instanceof HttpException && !preg_match($monitoredStatusCode, $exception->getStatusCode())) continue;
+                    else if (!preg_match($monitoredStatusCode, $exception->getCode())) continue;
 
-                    // Else just check the provided regex
-                    if (!preg_match($monitoredListener, $listener)) continue;
-                }
+                } else if (!preg_match($monitoredPretty, $pretty)) continue; // Else just check the provided regex
 
                 // Entity Manager closed means most likely an exception
                 // due within doctrine execution happened
@@ -348,20 +369,8 @@ class SecuritySubscriber implements EventSubscriberInterface
                 if (!$entityManager || !$entityManager->isOpen()) return;
 
                 // In the opposite case, we are storing the exception
-                $log = new Log($entry, $request);
+                $log = new Log($listener, $request);
                 $log->setException($exception ?? null);
-
-                $user = $this->security->getUser();
-                if($user) $user = $this->baseService->getEntityById(User::class, $user->getId());
-
-                $impersonator = null;
-                if ($this->security->getToken() instanceof SwitchUserToken) {
-
-                    $impersonator = $this->security->getToken()->getOriginalToken()->getUser();
-                    if($impersonator)
-                        $impersonator = $this->baseService->getEntityById(User::class, $impersonator->getId());
-                }
-
                 $log->setImpersonator($impersonator);
                 $log->setUser($user);
 

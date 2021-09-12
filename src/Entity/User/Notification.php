@@ -363,7 +363,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function setChannels(array $channels): self
     {
-        $this->channels = $channels;
+        $this->channels = array_unique($channels);
         return $this;
     }
 
@@ -479,15 +479,32 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
             $channelBak = array_merge($channelBak, $channels);
             $this->setChannels($channels);
+            $this->markAsReadIfNeeded($channels);
 
             // Submit notification
-            User::getNotifier()->send($this, $recipient);
+            BaseService::getNotifier()->send($this, $recipient);
+
         }
 
         $this->sentAt = new \DateTime("now");
+
         $this->setChannels($channelBak);
 
         return $this;
+    }
+
+    public function markAsRead(bool $isRead) { return $this->setIsRead($isRead); }
+    public function markAsReadIfNeeded(array $channels = [])
+    {
+        $options = [];
+        foreach(BaseService::getNotifierOptions() as $option)
+            $options[$option["channel"]] = $option;
+
+        foreach($this->channels as $channel) {
+
+            if(array_key_exists($channel, $options) && !$this->getIsRead())
+                $this->markAsRead($options[$channel]["markAsRead"]);
+        }
     }
 
     public function sendBy(array $channels, array $recipients = [] /* additional recipients */)

@@ -45,9 +45,9 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $this->getEntityManager()->createQuery(
             'SELECT u
                 FROM App\Entity\User u
-                OR u.email = :query'
+                WHERE u.email = :email'
         )
-            ->setParameter('query', $email)
+            ->setParameter('email', $email)
             ->getOneOrNullResult();
     }
 

@@ -14,29 +14,29 @@ abstract class EnumType extends Type
     }
 
     public function getName() { return self::getStaticName(); }
-    public function getValues() { 
+    public function getPermittedValues() { 
 
         $refl = new \ReflectionClass(get_called_class());
-        $values = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
+        $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
         
-        if(!$values)
+        if(!$permittedValues)
             throw new \Exception("Enum type \"".get_called_class()."\" is empty");
 
-        return $values;
+        return $permittedValues;
     }
     
     public function requiresSQLCommentHint(AbstractPlatform $platform) { return true; }
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        $values = array_map(fn($val) => "'".$val."'", $this->getValues());
+        $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
 
-        return "ENUM(".implode(", ", $values).")";
+        return "ENUM(".implode(", ", $permittedValues).")";
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform) { return $value; }
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        if (!in_array($value, $this->getValues())) {
+        if (!in_array($value, $this->getPermittedValues())) {
             throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
         }
         return $value;

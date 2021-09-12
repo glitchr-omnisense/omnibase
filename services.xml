@@ -81,14 +81,22 @@
         </service>
 
         <!--
-
             Commands
-
         -->
 
         <service id="Base\Command\ThreadPublishableCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        <service id="Base\Command\UserLogCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Command\UserNotificationCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
         </service>
 
         <!--
@@ -236,9 +244,7 @@
 
 
         <!--
-
             Notifier
-
         -->
         <service id="Base\Notifier\Channel\BrowserPlusChannel">
             <tag name="notifier.channel" channel="browser+" />
@@ -250,22 +256,17 @@
         </service>
 
         <!--
-
             USER SECTION
-
         -->
-
         <service id="Base\Controller\Client\Thread\SearchController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="base.service" />
-            <argument type="service" id="App\Repository\ThreadRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Controller\Client\User\SearchController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="base.service" />
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
 
@@ -294,13 +295,14 @@
             <argument type="service" id="security.csrf.token_manager" />
         </service>
 
-        <!-- Listener declarations -->
+        <!-- Listener declarations 
+        NB: SecuritySubscriber is now defined in BaseExtension.php due to security.event_dispatcher. -->
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="security.helper" />
-            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="security.untracked_token_storage" />
+            <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
             <argument type="service" id="translator" />
-            <argument type="service" id="App\Repository\User\NotificationRepository" />
             <argument type="service" id="base.service" />
         </service>
 

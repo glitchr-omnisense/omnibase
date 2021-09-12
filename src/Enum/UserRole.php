@@ -2,9 +2,9 @@
 
 namespace Base\Enum;
 
-use Base\Database\Types\EnumType;
+use Base\Database\Types\SetType;
 
-class UserRole extends EnumType
+class UserRole extends SetType
 {
     const SUPERADMIN  = "ROLE_SUPERADMIN";
     const ADMIN       = "ROLE_ADMIN";

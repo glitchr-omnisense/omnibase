@@ -19,10 +19,10 @@ trait BaseDoctrineTrait
     public static $entityManager;
     public static function setEntityManager(EntityManagerInterface $entityManager) { self::$entityManager = $entityManager; }
 
-    public function getRepository(string $className, bool $reopen = false) 
-    { 
-        return $this->getEntityManager($reopen)->getRepository($className); 
-    }
+    // public function getRepository(string $className, bool $reopen = false) 
+    // { 
+    //     return $this->getEntityManager($reopen)->getRepository($className); 
+    // }
 
     public function isWithinDoctrine()
     {

@@ -30,14 +30,20 @@ trait BaseNotificationTrait
      */
     public static $notifierPolicy = [];
 
-    public function setNotifier(NotifierInterface $notifier, ?ChannelPolicyInterface $notifierPolicy = null)
+    /**
+     * @var array
+     */
+    public static $notifierOptions = [];
+
+    public function setNotifier(NotifierInterface $notifier, ?ChannelPolicyInterface $policy = null, array $options)
     {
         if (BaseService::$notifier) return $this;
 
         // Update user notifier
-        BaseService::$notifier = $notifier;
-        BaseService::$notifierPolicy = $notifierPolicy;
-
+        BaseService::$notifier        = $notifier;
+        BaseService::$notifierPolicy  = $policy;
+        BaseService::$notifierOptions = $options;
+        
         // Address support only once..
         BaseService::$notifier->addAdminRecipient(new Recipient($this->getMail()));
 
@@ -46,13 +52,26 @@ trait BaseNotificationTrait
             BaseService::$notifier->addAdminRecipient($adminUser->getRecipient());
     }
 
-    public function getAdminUsers() {
-
+    public function getAdminUsers()
+    {
         $roles = $this->getParameterBag("base.notifier.admin_recipients");
         if(!$roles) return null;
 
         $userRepository = $this->getEntityManager()->getRepository(User::class);
         return $userRepository->findByRoles($roles);
+    }
+
+    public static function getNotifierOptions(?string $channel = null)
+    {
+        if($channel) {
+
+            foreach(BaseService::$notifierOptions as $option)
+                if($option["channel"] == $channel) return $option;
+            
+            return [];
+        }
+
+        return BaseService::$notifierOptions;
     }
 
     public function getMail()

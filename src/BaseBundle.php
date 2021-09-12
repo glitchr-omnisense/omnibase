@@ -18,22 +18,28 @@ class BaseBundle extends Bundle
 {
     public function boot()
     {
+        $this->defineDoctrineType();
+    }
+
+    public function defineDoctrineType()
+    {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
+    
         $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
         $classList = BaseBundle::getAllClasses($projectDir . "./Enum");
         $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
-        
+
         /* Register enum types: priority to App namespace */
         foreach($classList as $className) {
          
             if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
             else Type::addType($className::getStaticName(), $className);
 
-            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className, $className::getStaticName());
+            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
         }
     }
-
     const __ROOT__ = "Base\\BaseBundle";
     public static function getBundleLocation() {
         return dirname((new \ReflectionClass(self::__ROOT__))->getFileName()) . "/";
@@ -50,22 +56,21 @@ class BaseBundle extends Bundle
         self::setAlias($aliasList);
     }
 
-    public static $aliasedRepositories = [];
+    public static $aliasList;
+    public static $aliasRepositoryList = [];
+    public static function getAlias($alias) { return self::$aliasList[$alias] ?? $alias; }
+    public static function getAliasRepository($aliasRepository) { return self::$aliasRepositoryList[$aliasRepository] ?? $aliasRepository; }
     public static function setAlias(array $classes)
     {
         foreach ($classes as $input => $output) {
 
             // Autowire base repositories
-            if (str_ends_with($input, "Repository"))
-                self::$aliasedRepositories[$input] = null;
-
             if (class_exists($input) && !class_exists($output)) {
 
                 class_alias($input, $output);
 
-                // Autowire
-                if (array_key_exists($input, self::$aliasedRepositories))
-                    self::$aliasedRepositories[$input] = $output;
+                if (str_ends_with($input, "Repository")) self::$aliasRepositoryList[$input] = $output;
+                else self::$aliasList[$input] = $output;
             }
 
         }
@@ -97,7 +102,7 @@ class BaseBundle extends Bundle
         parent::build($container);
 
         /* Register aliased repositories */
-        foreach(self::$aliasedRepositories as $baseRepository => $aliasedRepository) {
+        foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
 
             $container->register($baseRepository)->addTag("doctrine.repository_service")
                       ->addArgument(new Reference('doctrine'));
