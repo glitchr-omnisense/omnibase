@@ -15,6 +15,7 @@ use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
 
 use Base\Config\WidgetItem;
+use Base\Enum\UserRole;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -56,7 +57,8 @@ class DashboardController extends AbstractDashboardController
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->adminContextProvider  = $adminContextProvider;
 
-        $this->baseService       = $baseService;
+        $this->baseService = $baseService;
+        $this->translator  = $baseService->getTwigExtension();
         $this->authenticationUtils       = $authenticationUtils;
         $this->gaService = $gaService;
     }
@@ -79,8 +81,8 @@ class DashboardController extends AbstractDashboardController
     public function index(): Response
     {
         return $this->render('dashboard/index.html.twig', [
-            "content_title" => "Dashboard: home page",
-            "content_header" => "Welcome to this administration page."
+            "content_title" => $this->translator->trans2("Dashboard: home page"),
+            "content_header" => $this->translator->trans2("Welcome to this administration page.")
         ]);
     }
 
@@ -88,6 +90,7 @@ class DashboardController extends AbstractDashboardController
     {
         $logo = $this->baseService->getParameterBag("base.logo");
         return Dashboard::new()
+            ->setTranslationDomain('dashboard')
             ->setTitle('<img src="'.$logo.'" alt="Dashboard">')
             ->disableUrlSignatures();
     }
@@ -110,7 +113,7 @@ class DashboardController extends AbstractDashboardController
 
         foreach ($roles as $label => $role) {
 
-            if ($role == "ROLE_USER") continue;
+            if ($role == UserRole::USER) continue;
             $value = $label;
             $icon  = RoleType::getAltIcons()[$role] ?? "fa fa-fw";
 
@@ -138,12 +141,12 @@ class DashboardController extends AbstractDashboardController
             $ga = $this->gaService->getBasics();
 
             $gaMenu = [];
-            $gaMenu["users"]        = ["label" => $ga["users"] . " visit(s)", "icon"  => 'fas fa-user'];
-            $gaMenu["users_1day"]   = ["label" => $ga["users_1day"] . " visit(s) in one day", "icon"  => 'fas fa-user-clock'];
-            $gaMenu["views"]        = ["label" => $ga["views"] . " visit(s)", "icon"  => 'far fa-eye'];
-            $gaMenu["views_1day"]   = ["label" => $ga["views_1day"] . " visit(s) in one day", "icon"  => 'fas fa-eye'];
-            $gaMenu["sessions"]     = ["label" => $ga["sessions"] . " sessions(s)", "icon"  => 'fas fa-stopwatch'];
-            $gaMenu["bounces_1day"] = ["label" => $ga["bounces_1day"] . " bounce(s) in one day", "icon"  => 'fas fa-meteor'];
+            $gaMenu["users"]        = ["label" => $this->translator->trans2("dashboard.users", [$ga["users"]]), "icon"  => 'fas fa-user'];
+            $gaMenu["users_1day"]   = ["label" => $this->translator->trans2("dashboard.users_1day", [$ga["users_1day"]]), "icon"  => 'fas fa-user-clock'];
+            $gaMenu["views"]        = ["label" => $this->translator->trans2("dashboard.views", [$ga["views"]]), "icon"  => 'far fa-eye'];
+            $gaMenu["views_1day"]   = ["label" => $this->translator->trans2("dashboard.views_1day", [$ga["views_1day"]]) , "icon"  => 'fas fa-eye'];
+            $gaMenu["sessions"]     = ["label" => $this->translator->trans2("dashboard.sessions", [$ga["sessions"]]), "icon"  => 'fas fa-stopwatch'];
+            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans2("dashboard.bounces_1day", [$ga["bounces_1day"]]), "icon"  => 'fas fa-meteor'];
 
             $menu[] = MenuItem::section('STATISTICS');
             foreach ($gaMenu as $key => $entry) {

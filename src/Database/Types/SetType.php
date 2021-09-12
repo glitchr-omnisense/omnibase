@@ -35,12 +35,15 @@ abstract class SetType extends Type
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform) { return explode(",", $value); }
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($values, AbstractPlatform $platform)
     {
-        if (!in_array($value, $this->getPermittedValues())) {
-            throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
+        foreach($values as $value) {
+        
+            if (!in_array($value, $this->getPermittedValues()))
+                throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
         }
-        return $value;
+
+        return implode(",", $values);
     }
 
 }

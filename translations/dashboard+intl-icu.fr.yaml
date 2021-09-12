@@ -1,0 +1,35 @@
+users: "{0, plural,
+          =0 {aucune visite}
+          =1 {# visite }
+          other {# visites }
+        }"
+users_1day: "{0, plural,
+              =0 {aucune visite}
+              =1 {# visite aujourd'hui }
+              other {# visites aujourd'hui }
+            }"
+views:  "{0, plural,
+          =0 {aucune vue}
+          =1 {# vue }
+          other {# vues }
+        }"
+views_1day: "{0, plural,
+              =0 {aucune vue}
+              =1 {# vue aujourd'hui }
+              other {# vues aujourd'hui }
+            }"
+sessions: "{0, plural,
+            =0 {aucune session }
+            =1 {# session }
+            other {# sessions }
+          }"
+bounces_1day: "{0, plural,
+                =0 {pas de rebond }
+                =1 {# rebond aujourd'hui }
+                other {# rebonds aujourd'hui }
+              }"
+
+homepage:
+  title: "Dashboard: Page d'accueil"
+  text: "Bienvenue sur le dashboard, cette page vous permet d'administrer votre site web"
+  

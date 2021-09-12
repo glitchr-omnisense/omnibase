@@ -73,12 +73,6 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function getEntityFromData($classname, $data)
     {
-        if(self::isWithinDoctrine()) {
-
-            throw new Exception("Achtung ! You are trying to access data object within a Doctrine method..".
-                                "Original entity might have already been updated.");
-        }
-
         $entity = self::getSerializer()->deserialize(json_encode($data), $classname, 'json');
         foreach ($data as $property => $data) {
 
