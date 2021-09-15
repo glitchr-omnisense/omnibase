@@ -16,6 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 class UserLogCommand extends Command
 {
@@ -46,7 +47,7 @@ class UserLogCommand extends Command
     {
         if (!$output instanceof ConsoleOutputInterface)
             throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
-
+    
         $output->getFormatter()->setStyle('info', new OutputFormatterStyle('green', null, ['bold']));
         $output->getFormatter()->setStyle('warning', new OutputFormatterStyle('yellow', null, ['bold']));
         $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, ['bold']));

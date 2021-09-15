@@ -11,11 +11,12 @@
     {%- endif -%}
 {%- endblock form_errors -%}
 
-{%- block div_widget -%}
+{%- block quill_widget -%}
 <input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %}/>
 <div id="{{ id }}_editor" {{ block('attributes') }}>
 	{{ value | raw }}
-</div>{%- endblock div_widget -%}
+</div>
+{%- endblock quill_widget -%}
 
 {%- block slug_widget -%}
 

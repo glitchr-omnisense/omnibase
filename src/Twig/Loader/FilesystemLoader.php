@@ -58,7 +58,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             $chainLoader = new ChainLoader($loaders);
             $twig->setLoader($chainLoader);
         }
-
+        
         // Add @Twig, @Assets and @BaseLayout variables
         $projectDir = $baseService->getProjectDir();
         $this->addPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");

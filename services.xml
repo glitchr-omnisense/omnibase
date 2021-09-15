@@ -230,18 +230,6 @@
             <tag name="validator.constraint_validator" />
             <argument type="service" id="doctrine" />
         </service>
-        <service id="Base\Validator\Constraints\SpamValidator">
-            <tag name="validator.constraint_validator" />
-            <argument type="service" id="doctrine" />
-        </service>
-
-        <service id="Base\Validator\Constraints\CsrfValidator">
-            <tag name="validator.constraint_validator" />
-            <argument type="service" id="security.csrf.token_manager" />
-        </service>
-
-            
-
 
         <!--
             Notifier
