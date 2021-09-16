@@ -15,10 +15,11 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class LoginType extends AbstractType
 {
-    public function getBlockPrefix() { return ""; }
+    public function getBlockPrefix() { return "login"; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -48,6 +49,6 @@ class LoginType extends AbstractType
                     'mapped' => false,
                     'required' => false,
                     'attr' => ["checked" => "checked"]
-                ]);;
+            ]);
     }
 }

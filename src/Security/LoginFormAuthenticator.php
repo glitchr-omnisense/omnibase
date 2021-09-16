@@ -8,6 +8,8 @@ use Base\Entity\User\Notification;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Google\ReCaptcha\Badge\CaptchaBadge;
+use Google\ReCaptcha\Service\GrService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +25,7 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\PasswordUpgradeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
@@ -46,6 +49,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->entityManager = $entityManager;
+        $this->userRepository = $entityManager->getRepository(User::class);
+
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
     }
@@ -61,17 +66,24 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     }
 
     public function authenticate(Request $request): PassportInterface
-    {        
-        $identifier = $request->get('username');
+    {
+        $identifier = $request->get('login')["username"] ?? "";
+        $password   = $request->get('login')["password"] ?? "";
         $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 
         $badges   = [];
-        if( $request->get('_remember_me') )
+        if( array_key_exists("_remember_me", $request->get('login')) )
             $badges[] = new RememberMeBadge();
-            
+        if( array_key_exists("_csrf_token", $request->get('login')) )
+            $badges[] = new CsrfTokenBadge("login", $request->get('login')["_csrf_token"]);
+        if( array_key_exists("password", $request->get('login')) )
+            $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
+        if( array_key_exists("_captcha", $request->get('login')) && class_exists(CaptchaBadge::class) )
+            $badges[] = new CaptchaBadge("_captcha", $request->get('login')["_captcha"]);
+
         return new Passport(
             new UserBadge($identifier), 
-            new PasswordCredentials($request->get('password')), $badges);
+            new PasswordCredentials($password), $badges);
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewall): ?Response
