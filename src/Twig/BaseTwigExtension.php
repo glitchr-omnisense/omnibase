@@ -99,18 +99,21 @@ final class BaseTwigExtension extends AbstractExtension
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
-    public function lessThan(Environment $env, $date, $diff): string
+    public function lessThan(Environment $env, $date, $diff): bool
     {
         if(is_string($date)) $date = new \DateTime($date);
         if($date instanceof \DateTime) $date = $date->getTimestamp();
         if(is_string($diff)) $diff = new \DateTime($diff);
         if($diff instanceof \DateTime) $diff = $diff->getTimestamp() - time();
-
+      
         $deltaTime = time() - $date;
+
+        // dump($deltaTime . "<". $diff . " => ". ($deltaTime < $diff));
+
         return $deltaTime < $diff;
     }
 
-    public function greaterThan(Environment $env, $date, int $diff): string
+    public function greaterThan(Environment $env, $date, int $diff): bool
     {
         if(is_string($date)) $date = new \DateTime($date);
         if($date instanceof \DateTime) $date = $date->getTimestamp();
@@ -121,7 +124,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $deltaTime > $diff;
     }
 
-    public function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false)
+    public function truncate($string, $maxLength = 30, $replacement = '', $truncAtSpace = false): string
     {
         $maxLength -= strlen($replacement);
         $length = strlen($string);
@@ -135,7 +138,7 @@ final class BaseTwigExtension extends AbstractExtension
         return substr_replace($string, $replacement, $maxLength)."..";
     }
 
-    public function url(string $url)
+    public function url(string $url): string
     {
         $url = trim($url);
         
