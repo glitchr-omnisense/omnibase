@@ -105,7 +105,7 @@ class DashboardController extends AbstractDashboardController
     {
         $menu   = [];
         $menu[] = MenuItem::section('MENU');
-        $menu[] = MenuItem::linktoUrl('Home', 'fa fa-home', $this->baseService->getRoute("base_dashboard"));
+        $menu[] = MenuItem::linktoUrl('Home', 'fa fa-home', $this->baseService->getPath("base_dashboard"));
         $menu[] = MenuItem::linktoUrl('Back to website', 'fa fa-door-open', "/");
 
         $menu[] = MenuItem::section('MEMBERSHIP');
@@ -233,8 +233,8 @@ class DashboardController extends AbstractDashboardController
 
             // you can use any type of menu item, except submenus
             ->addMenuItems([
-                MenuItem::linkToUrl('My Profile', 'fa fa-id-card', $this->baseService->getRoute("base_profile")),
-                MenuItem::linkToUrl('My Settings', 'fa fa-user-cog', $this->baseService->getRoute("base_settings"))
+                MenuItem::linkToUrl('My Profile', 'fa fa-id-card', $this->baseService->getPath("base_profile")),
+                MenuItem::linkToUrl('My Settings', 'fa fa-user-cog', $this->baseService->getPath("base_settings"))
             ]);
     }
 }

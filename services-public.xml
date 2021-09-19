@@ -12,7 +12,6 @@
 
         <service id="base.uploader" alias="Base\Service\FileUploader" />
 
-        <service id="base.database.connection_factory" alias="Base\Database\Factory\ConnectionFactory" />
         <service id="base.database.class_metadata_factory_name" alias="Base\Database\Factory\ClassMetadataFactory" />
         <service id="base.database.naming_strategy" alias="Base\Database\NamingStrategy" />
         <service id="base.database.annotation_reader" alias="Base\Database\AnnotationReader" />

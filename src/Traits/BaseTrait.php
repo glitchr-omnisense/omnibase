@@ -23,7 +23,7 @@ trait BaseTrait
     public static function getLogDir(): string { return BaseService::getProjectDir() . "/var/log"; }
     public static function getDataDir(): string { return BaseService::getProjectDir() . "/data"; }
 
-    public static function getRouter(): ?RouterInterface { return BaseService::$router; }
+    public static function getPathr(): ?RouterInterface { return BaseService::$router; }
     public static function getTwigExtension(): ?BaseTwigExtension { return BaseService::$twigExtension; }
     public static function getTwig(): ?Environment { return BaseService::$twig; }
     public static function getDoctrine() { return BaseService::$doctrine; }

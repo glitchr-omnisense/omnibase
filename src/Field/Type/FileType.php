@@ -2,22 +2,9 @@
 
 namespace Base\Field\Type;
 
-use EasyCorp\Bundle\EasyAdminBundle\Form\DataTransformer\StringToFileTransformer;
-use EasyCorp\Bundle\EasyAdminBundle\Form\Type\Model\FileUploadState;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\OptionsResolver\Exception\InvalidArgumentException;
-use Symfony\Component\OptionsResolver\Options;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\String\Slugger\AsciiSlugger;
-use Symfony\Component\Uid\Ulid;
-use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FileType extends AbstractType
 {

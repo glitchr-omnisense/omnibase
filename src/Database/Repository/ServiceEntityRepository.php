@@ -725,12 +725,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->count($criteria, self::MODE_DISTINCT, $groupBy);
     }
 
-    public function count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null): int
+    public function count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null)
     {
         if($mode == self::MODE_ALL) $mode = "";
         if($mode && $mode != self::MODE_DISTINCT)
             throw new Exception("Unexpected \"mode\" provided: \"". $mode."\"");
-        
         $column = $this->getAlias($this->getColumn());
         $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy);
         $this->innerJoin($qb, $column);
@@ -742,10 +741,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->groupBy($qb, $groupBy);
 
         $fnResult = ($groupBy ? "getResult" : "getSingleScalarResult");
-        return $qb->getQuery()->$fnResult() ?? 0;
+        return $qb->getQuery()->$fnResult();
     }
     
-    public function lengthOf(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): int
+    public function lengthOf(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
     {
         $column = $this->getAlias($this->getColumn());
         $column = ($this->getClassMetadata()->hasAssociation($column) ? "t_".$column : "t");
@@ -758,6 +757,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->orderBy($qb, $orderBy);
         $this->groupBy($qb, $groupBy);
 
-        return $qb->getQuery()->getResult() ?? 0;
+        return $qb->getQuery()->getResult();
     }
 }

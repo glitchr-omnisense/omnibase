@@ -64,7 +64,7 @@ class SecurityController extends AbstractController
                 'last_username' => $lastUsername,
                 'translation_domain' => 'admin',
                 'csrf_token_intention' => 'authenticate',
-                'target_path' => $this->baseService->getRoute('base_dashboard'),
+                'target_path' => $this->baseService->getPath('base_dashboard'),
                 'username_label' => 'Your username',
                 'password_label' => 'Your password',
                 'sign_in_label' => 'Log in',
@@ -83,9 +83,9 @@ class SecurityController extends AbstractController
                     $request->getSession()->get('_security.account.target_path') ??
                     $request->headers->get('referer') ?? null;
 
-                $targetRoute = (basename($targetPath) ? $this->baseService->getRouteName("/".basename($targetPath)) : null) ?? null;
-                if ($targetRoute && $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE && $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE)
-                    return $this->redirectToRoute($targetRoute);
+                $targetPath = (basename($targetPath) ? $this->baseService->getPathName("/".basename($targetPath)) : null) ?? null;
+                if ($targetPath && $targetPath != LoginFormAuthenticator::LOGIN_ROUTE && $targetPath != LoginFormAuthenticator::LOGOUT_ROUTE)
+                    return $this->redirectToRoute($targetPath);
 
                 return $this->redirectToRoute("base_profile");
             }

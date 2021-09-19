@@ -194,7 +194,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!($token = $this->tokenStorage->getToken()) ) return;
         if(!($user = $token->getUser())) return;
 
-        if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentRouteName() == LoginFormAuthenticator::LOGIN_ROUTE)
+        if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentPathName() == LoginFormAuthenticator::LOGIN_ROUTE)
             return $this->baseService->redirectToRoute($event, "base_profile");
 
         $exceptionList = [
@@ -206,7 +206,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
                 
-                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getRoute("base_verifyEmail")]);
+                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getPath("base_verifyEmail")]);
                 $notification->send("warning");
             });
 

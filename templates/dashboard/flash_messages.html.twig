@@ -1,0 +1,36 @@
+{% if app.session is not null and app.session.started %}
+    {% set flashbag = app.session.flashbag.all %}
+
+    {% if flashbag|length > 0 %}
+        <div id="flash-messages">
+            {% for label, flashes in flashbag %}
+                {% for flash in flashes %}
+
+                    <div class="alert alert-{{ label }}">
+                        <button type="button" class="btn-close" onclick="this.closest('div').style.display='none'"></button>
+                        <p>
+                        {% if flash is iterable %}
+
+                                {% if flash|length > 1 %}
+                                    {% set flash_title = flash|first %}
+                                    {% set flash_message = flash|slice(1,flash|length) %}
+
+                                    <b>{{flash_title|trans|raw}}</b>
+                                    {% for message in flash_message %}
+                                        <br/>{{ message|trans|raw }}
+                                    {% endfor %}
+                                {% else %}
+                                    {{ flash|trans|raw }}
+                                {% endif %}
+
+                        {% else %}
+                                {{ flash|trans|raw }}
+                        {% endif %}
+                        </p>
+
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endif %}

@@ -87,8 +87,8 @@ class UserLogCommand extends Command
                 $filter['expiry']       = $expiry ?? $defaultExpiry;
                 $filter['statusCode']   = trim($statusCode ?? ".*");
 
-                if($user) $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]]);
-                else      $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $event]);
+                if($user) $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
+                else      $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $event])->getResult();
 
                 $filteredLogs = $this->applyFilter($logs, $filter);
 
@@ -109,8 +109,8 @@ class UserLogCommand extends Command
                     $filter['expiry']       = $expiry ?? $entry["expiry"] ?? $defaultExpiry;
                     $filter["statusCode"]   = trim($entry["statusCode"] ?? ".*");
 
-                    if($user) $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]]);
-                    else      $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $filter["event"]]);
+                    if($user) $logs = $logRepository->findByUserAndCreatedAtYoungerThan($user, $filter["expiry"], ["event" => $filter["event"]])->getResult();
+                    else      $logs = $logRepository->findByCreatedAtYoungerThan($filter["expiry"], ["event" => $filter["event"]])->getResult();
 
                     $filteredLogs = array_merge($filteredLogs, $this->applyFilter($logs, $filter));
                 }

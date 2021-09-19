@@ -32,23 +32,32 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
      */
     public function __construct(BaseService $baseService, Environment $twig)
     {
+        $this->twig = $twig;
+
+        // Add base service to the default variables
+        $this->twig->addGlobal("base", $baseService);
+        
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%} (Actually this needs to be fixed.. TODO)
-
+        $projectDir = $baseService->getProjectDir();
         $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom_loader");
         if($useCustomLoader) {
 
             $rootPath = $baseService->getParameterBag("base.twig.default_path");
-            $paths = $baseService->getParameterBag("base.twig.form_themes");
+            parent::__construct([], $rootPath);
 
-            parent::__construct($paths, $rootPath);
-
-            $mainLoader = $twig->getLoader();
+            $mainLoader = $this->twig->getLoader();
             if($mainLoader instanceof ChainLoader) {
 
-                $loaders = $twig->getLoader()->getLoaders();
-                array_unshift($loaders, $this);
+                $loaders = $mainLoader->getLoaders();
+                $loaders[] = $this;
+
+                // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
+                if( ($defaultLoader = $loaders[0]) ){
+                    $defaultLoader->prependPath($projectDir."/templates/dashboard", "EasyAdmin");
+                    $defaultLoader->prependPath($rootPath."/dashboard", "EasyAdmin");
+                }
 
             } else {
 
@@ -58,16 +67,18 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             $chainLoader = new ChainLoader($loaders);
             $twig->setLoader($chainLoader);
         }
-        
-        // Add @Twig, @Assets and @BaseLayout variables
-        $projectDir = $baseService->getProjectDir();
-        $this->addPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");
-        $this->addPath($projectDir . "/vendor/xkzl/base-bundle/templates/layout");
 
-        $this->addPath($projectDir . "/assets", "Assets");
+        // Add @Twig, @Assets and @Layout variables
+        $this->prependPath($projectDir . "/templates");
+        $this->prependPath($projectDir . "/vendor/symfony/twig-bridge/Resources/views", "Twig");
 
-        $this->addPath($projectDir . "/src", "App");
-        $this->addPath($projectDir . "/src/Controller", "Controller");
+        $this->prependPath($rootPath);
+        $this->prependPath($rootPath, "Base");
+        $this->prependPath($rootPath."/dashboard", "EasyAdmin");
+
+        $this->prependPath($projectDir . "/src", "App");
+        $this->prependPath($projectDir . "/src/Controller", "Controller");
+        $this->prependPath($projectDir . "/assets", "Assets");
 
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag("base.twig.paths");
@@ -79,10 +90,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             if (empty($path))
                 throw new Exception("Missing path variable for @".$namespace." in \"base.twig.paths\"");
 
-            $this->addPath($path, $namespace);
+            $this->prependPath($path, $namespace);
         }
-
-        // Add base service to the default variables
-        $twig->addGlobal("base", $baseService);
     }
 }

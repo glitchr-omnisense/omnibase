@@ -119,14 +119,13 @@ trait BaseSymfonyTrait
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
     
-    public function getRouteWithUrl(string $path = "", array $opts = []) { return $this->getWebsite() . $this->getRoute($path, $opts); }
-    public function     generateUrl(string $path = "", array $opts = []) { return $this->getRoute($path, $opts); }
-    public function getCurrentRoute() { return $this->getRoute(); }
-    public function getRoute(string $path = "", array $opts = [])
+    public function generateUrl(string $name = "", array $opts = []) { return $this->getPath($name, $opts); }
+    public function getCurrentPath() { return $this->getPath(); }
+    public function getPath(string $name = "", array $opts = [])
     {
-        if (!empty($path)) {
+        if (!empty($name)) {
             try {
-                return BaseService::$router->generate( $path, $opts);
+                return BaseService::$router->generate( $name, $opts);
             } catch (RouteNotFoundException $e) {
                 return null;
             }
@@ -135,14 +134,14 @@ trait BaseSymfonyTrait
         return ($request = $this->getRequest()) ? $request->get('route') : null;
     }
 
-    public function getCurrentRouteName() { return $this->getRouteName(); }
-    public function getRouteName($url = "")
+    public function getCurrentPathName() { return $this->getPathName(); }
+    public function getPathName($path = "")
     {
-        if (empty($url)) $url = $_SERVER["REQUEST_URI"];
-        $path = parse_url($url, PHP_URL_PATH);
+        if (empty($path)) $path = $_SERVER["REQUEST_URI"];
+        $path = parse_url($path, PHP_URL_PATH);
 
         try {
-            return $this->getRouter()->match($path)['_route'];
+            return $this->getPathr()->match($path)['_route'];
         } catch (ResourceNotFoundException $e) {
             return null;
         }
@@ -151,10 +150,10 @@ trait BaseSymfonyTrait
     public function redirect(string $url, int $state = 302): RedirectResponse { return new RedirectResponse($url, $state); }
     public function redirectToRoute($event, string $route, $exceptionPattern = null, $callback = null)
     {
-        $route     = $this->getRoute($route) ?? $route;
-        $routeName = $this->getRouteName($route) ?? $route;
+        $route     = $this->getPath($route) ?? $route;
+        $routeName = $this->getPathName($route) ?? $route;
 
-        $currentRouteName = $this->getRouteName();
+        $currentRouteName = $this->getPathName();
         if ($currentRouteName == $routeName)
             return false;
 

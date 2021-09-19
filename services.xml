@@ -158,10 +158,6 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
-        <service id="Base\DatabaseSubscriber\ConnectionSubscriber">
-            <tag name="kernel.event_subscriber" />
-        </service>
-
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -196,12 +192,7 @@
             DOCTRINE
         -->
         <service id="Base\Database\NamingStrategy"  public="true" />
-        <service id="Base\Database\Factory\ConnectionFactory"  public="true"/>
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
-
-        <service id="Base\DatabaseSubscriber\ConnectionSubscriber">
-            <tag name="kernel.event_subscriber" />
-        </service>
 
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" />
@@ -345,6 +336,15 @@
         <service id="Base\Field\Type\SlugType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />
+        </service>
+
+
+        <service id="Base\Field\Type\ImageType">
+            <tag name="form.type" />
+        </service>
+        <service id="Base\Field\Type\FileType">
+            <tag name="form.type" />
+            <argument type="service" id="translator" />
         </service>
 
         <service id="Base\Field\Configurator\DateTimePickerConfigurator">

@@ -32,6 +32,12 @@ class BaseExtension extends Extension
         $configuration = new BaseConfiguration();
         $config = $processor->processConfiguration($configuration, $configs);
         $this->setConfiguration($container, $config, $configuration->getTreeBuilder()->getRootNode()->getNode()->getName());
+    
+        // Override and merge form_themes.. to add some features..
+        $container->setParameter('twig.form.resources', array_merge(
+            $config["twig"]["form_themes"],
+            $container->getParameter('twig.form.resources')
+        ));
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")

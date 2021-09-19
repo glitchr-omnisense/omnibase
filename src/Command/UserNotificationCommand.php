@@ -65,15 +65,15 @@ class UserNotificationCommand extends Command
         $user               = $userRepository->loadUserByIdentifier($userIdentifier);
         if($user) {
 
-            $notifications  = $notificationRepository->findByUser($user);
-            $notifications_toErase  = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry, [], "user.id");
-            $notifications_isRead  = $notificationRepository->findByUserAndByIsRead($user, true, [], "user.id");
+            $notifications  = $notificationRepository->findByUser($user)->getResult();
+            $notifications_toErase  = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry, [], "user.id")->getResult();
+            $notifications_isRead  = $notificationRepository->findByUserAndByIsRead($user, true, [], "user.id")->getResult();
         
         } else {
 
-            $notifications  = $notificationRepository->findAll();
-            $notifications_toErase  = $notificationRepository->findByIsReadAndSentAtOlderThan(true, $notificationExpiry, [], "user.id");
-            $notifications_isRead  = $notificationRepository->findByIsRead(true, [], "user.id");
+            $notifications  = $notificationRepository->findAll()->getResult();
+            $notifications_toErase  = $notificationRepository->findByIsReadAndSentAtOlderThan(true, $notificationExpiry, [], "user.id")->getResult();
+            $notifications_isRead  = $notificationRepository->findByIsRead(true, [], "user.id")->getResult();
         }
 
         // Show notification list

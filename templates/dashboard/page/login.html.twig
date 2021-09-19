@@ -1,0 +1,245 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# This template checks for 'ea' variable existence because it can
+   be used in a EasyAdmin Dashboard controller, where 'ea' is defined
+   or from any other Symfony controller, where 'ea' is not defined #}
+{% extends ea is defined ? ea.templatePath('layout') : '@EasyAdmin/page/login_minimal.html.twig' %}
+{% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? 'messages') %}
+
+{% block body_class 'page-login' %}
+{% block page_title %}{{ page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '') }}{% endblock %}
+
+{% block wrapper_wrapper %}
+    {% set page_title = block('page_title') %}
+    {% set _username_label = username_label is defined ? username_label|trans : 'login_page.username'|trans({}, 'EasyAdminBundle') %}
+    {% set _password_label = password_label is defined ? password_label|trans : 'login_page.password'|trans({}, 'EasyAdminBundle') %}
+    {% set _sign_in_label = sign_in_label is defined ? sign_in_label|trans : 'login_page.sign_in'|trans({}, 'EasyAdminBundle') %}
+
+    <style>
+        .custom-file { max-width: 355px; }
+        .custom-file-label { margin-top: 0 !important; text-align: left !important; }
+
+        .content-top
+        {
+            height:90px;
+        }
+
+        .content-header {
+            padding: 0 0 2em 0 !important;
+        }
+
+        .content-body .ea-edit-form {
+
+            margin:auto;
+            width:50%;
+        }
+
+        .content-body .flex-fill{
+            display:none;
+        }
+        
+        #navigation-toggler { 
+            width: 100% ! important;
+            height: 100% !important;
+            margin: auto;
+        }
+
+        .responsive-logo img
+        {
+            width: 100%;
+        }
+        
+        #header-logo .spacer
+        {
+            height:125px;
+        }
+
+        .content-wrapper
+        {
+            margin-top:2.5em !important;
+        }
+        .user-menu-wrapper .user-details .user-name { margin-left: 15px; }
+        .user-avatar, .image-avatar {
+            overflow:hidden;
+            border-radius:50% !important;
+            box-shadow: 0 0 0 2px var(--white),0 0 4px 1px var(--gray-600) !important;
+            
+            margin: 10px !important;
+            
+            max-height: 50px !important;
+            height: 50px !important;
+            max-width: 50px !important;
+            width: 50px !important;
+
+            padding:4px;
+        }
+
+        .image-avatar img, .image-avatar img:hover {
+            border: 0 !important;
+            background-color:transparent !important;
+            padding:0 !important;
+
+            margin-left:-4px;
+            margin-top:-4px;
+        }
+
+        .image-avatar i, .image-avatar i:hover {
+
+            margin-left: -5px !important;
+            margin-top: 0px !important;
+
+        }
+
+        #header-logo 
+        {
+            margin-top:20px;
+        }
+
+        .list-pagination 
+        {
+            padding:0 !important;
+        }
+        
+        .logo, .responsive-logo {
+            
+            border-radius:50% !important;
+            box-shadow: 0 0 0 5px var(--white),0 0 8px 2px var(--gray-600) !important;
+
+            margin:1em auto !important;
+            max-height: 150px !important;
+            height: 150px !important;
+            max-width: 150px !important;
+            width: 150px !important;
+
+            overflow:hidden;
+
+        }
+
+        ul.sidebar-menu {
+            list-style:none;
+        }
+
+        .content-header-title .title {
+            color: var(--sidebar-logo-color);
+        }
+
+        fieldset .sidebar-menu {
+        
+            margin:0.25em 0em 0.25em 0 !important;
+        }
+        fieldset {
+            padding:1em 0em 0.5em 1em!important;
+        }
+        
+        .content-panel
+        {
+            height:100% !important;
+            margin: 0 !important;
+            padding: 0em 0em 1.6em 0.6em !important;
+        }
+
+        .main-header #header-logo a {
+            padding:unset
+        }
+        
+        .main-header #header-logo .logo-custom {
+            height: 100% !important;
+            width: 100% !important;
+
+            display:flex !important;
+            justify-content : space-between;
+            align-content   : center;
+        }
+
+        .logo-custom img
+        {
+            margin-left: auto;
+            margin-right: auto;
+            margin-top:auto;
+            margin-bottom:auto;
+            display: block;
+        }
+
+        .content-panel-body.without-footer, .content-panel-footer
+        {
+            padding: 1em !important;
+            background: var(--fieldset-bg);
+            border: var(--border-width) var(--border-style) var(--border-color);
+            border-radius: var(--border-radius);                
+        }
+        fieldset .sidebar-menu li {
+        
+            padding:0.25em 0em 0.25em 0!important;
+        }
+
+        ul.sidebar-menu a {
+            color: var(--sidebar-menu-color);
+        }
+        
+        .field-avatar .image-avatar i, img.image-avatar
+        {
+            border-radius: 50%;
+            overflow:hidden;
+        }
+
+        .user-menu hr {
+            display:none;
+        }
+
+    </style>
+
+    <div class="login-wrapper">
+    
+        <header class="main-header mb-4">
+            <div id="header-logo" style="padding: 1em !important;">
+                {% block header_logo %}
+                    {% if page_title %}
+                        <div class="logo-custom">
+                        {% if ea is defined %}
+                            <a class="logo {{ page_title|length > 14 ? 'logo-long' }}" title="{{ page_title|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
+                                {{ ea.dashboardTitle|raw }}
+                            </a>
+                        {% else %}
+                            <div class="logo {{ page_title|length > 14 ? 'logo-long' }}">
+                                {{ page_title|raw }}
+                            </div>
+                        {% endif %}
+                        </div>
+                    {% endif %}
+                {% endblock header_logo %}
+            </div>
+        </header>
+        
+        {{ include('@EasyAdmin/flash_messages.html.twig') }}
+
+        {% if error|default(false) %}
+            <div class="w-100 alert alert-danger">
+                {{ error.messageKey|trans(error.messageData, 'security') }}
+            </div>
+        {% endif %}
+        <section class="content">
+
+            <h1>Login page</h1>
+            <form method="post" action="{{ action|default('') }}">
+                {% if csrf_token_intention|default(false) %}
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_token_intention) }}">
+                {% endif %}
+
+                <input type="hidden" name="{{ target_path_parameter|default('_target_path') }}" value="{{ target_path|default(ea is defined ? path(ea.dashboardRouteName) : '/') }}" />
+
+                <div class="input-group mt-4 mb-3">
+                    <span class="input-group-text h-auto" id="username-addons"><i class="fa fa-fw fa-user"></i></span>
+                    <input type="text" id="username" name="{{ username_parameter|default('username') }}" class="form-control" placeholder="{{ _username_label }}" value="{{ last_username|default('') }}" required autofocus>
+                </div>
+
+                <div class="input-group field-password mb-3">
+                    <span class="input-group-text h-auto" id="username-addons"><i class="fa fa-fw fa-lock"></i></span>
+                    <input type="password" id="password" name="{{ password_parameter|default('password') }}" class="form-control" placeholder="{{ _password_label }}" required>
+                </div>
+
+                <div class="form-group field-button">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="this.form.submit(); this.disabled=true;">{{ _sign_in_label }}</button>
+                </div>
+            </form>
+        </section>
+    </div>
+{% endblock %}

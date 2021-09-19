@@ -39,7 +39,7 @@ class ThreadPublishableCommand extends Command
         $actionShow    = $input->getOption('show');
 
         $threadRepository = $this->entityManager->getRepository(Thread::class);
-        $threads = $threadRepository->findByState(ThreadState::FUTURE);
+        $threads = $threadRepository->findByState(ThreadState::FUTURE)->getResult();
 
         $publishableThreads = array_filter($threads,
         function($thread) use ($actionPublish) {

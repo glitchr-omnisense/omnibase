@@ -56,7 +56,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     public function onRequestEvent(RequestEvent $event)
     {
         // Exception triggered
-        if( empty($this->getCurrentRoute($event)) )
+        if( empty($this->getCurrentPath($event)) )
             return;
 
         // Avoid symfony profiler ajax request to go through this..
@@ -66,7 +66,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         // Check if lock file is found or not..
         if(!$this->baseService->isMaintenance()) {
 
-            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event)))
+            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentPath($event)))
                 $this->baseService->redirectToRoute($event, $this->homepageRoute);
                 
             return;
@@ -84,9 +84,9 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
         // Apply redirection to maintenance page
         
-        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event));
+        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentPath($event));
         foreach($this->exceptionRoute as $exception)
-            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentRoute($event));
+            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentPath($event));
 
         if (!$isException)
             $this->baseService->redirectToRoute($event, $this->maintenanceRoute);
@@ -95,5 +95,5 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         $event->stopPropagation();
     }
 
-    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
+    public function getCurrentPath($event) { return $event->getRequest()->get('_route'); }
 }
