@@ -7,6 +7,9 @@
         <defaults public="true" />
 
         <service id="base.service" alias="Base\Service\BaseService" />
+        <service id="base.paginator" alias="Base\Service\Paginator" />
+        <service id="Base\Service\PaginatorInterface" alias="base.paginator"/>
+
         <service id="base.uploader" alias="Base\Service\FileUploader" />
 
         <service id="base.database.connection_factory" alias="Base\Database\Factory\ConnectionFactory" />

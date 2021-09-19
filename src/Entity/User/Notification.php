@@ -120,19 +120,20 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         // Formatting strings if exception passed as argument
         if ( $content instanceof ExceptionEvent ) {
-
+            
             $exception = $content->getThrowable();
-            $this->setContent(
-                "<b>".str_replace($this->getProjectDir(),'.', $exception->getFile()) . ":" . $exception->getLine()."</b>".
-                "<br/>".$exception->getMessage()
-            );
+            $location = str_replace($this->getProjectDir(),'.', $exception->getFile()) . ":" . $exception->getLine();
+            $message = $exception->getMessage();
+
+            $this->setContent("<b>".$location."</b>"."<br/>".$message);
 
         } else if ($content instanceof FlattenException) {
+            
+            $location = str_replace($this->getProjectDir(),'.', $content->getFile()) . ":" . $content->getLine();
+            $message = $content->getMessage();
 
-            $this->setContent(
-                "<b>" . str_replace($this->getProjectDir(),'.', $content->getFile()) . ":" . $content->getLine() . "</b>" .
-                "<br/>" . $content->getMessage()
-            );
+            $this->setContent("<b>".$location."</b>"."<br/>".$message);
+
 
         } else {
 

@@ -1,0 +1,30 @@
+
+<span class="paginator rewind">{{ paginator_rewind(pagination, path, path_parameters, rewind) }} </span>
+
+<span class="paginator first">
+{% for link in paginator_firstOnes(pagination, path, path_parameters, "messages.paginator.page") %}
+{{ link|raw }}{% if not loop.last %}, {% endif %}
+{% endfor %}</span>
+
+{% set separator = paginator_firstSeparator(pagination, "...") %}
+{% if separator %}
+<span class="paginator-separator">{{separator}}</span>
+{% endif %}
+
+<span class="paginator previous">{{ paginator_previous(pagination, path, path_parameters) }}</span>
+
+<span class="paginator current">{{ paginator_current(pagination) }}</span>
+
+<span class="paginator next">{{ paginator_next(pagination, path, path_parameters) }}</span>
+
+{% set separator = paginator_lastSeparator(pagination, "...") %}
+{% if separator %}
+<span class="paginator-separator">{{separator}}</span>
+{% endif %}
+
+<span class="paginator last">
+{% for link in paginator_lastOnes(pagination, path, path_parameters, "messages.paginator.page") %}
+{{ link|raw }}{% if not loop.last %}, {% endif %}
+{% endfor %}</span>
+
+<span class="paginator fast-forward">{{ paginator_fastforward(pagination, path, path_parameters, fastforward) }}</span>

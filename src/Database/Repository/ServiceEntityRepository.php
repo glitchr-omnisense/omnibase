@@ -8,6 +8,7 @@ use Base\Entity\Thread\Tag;
 use DateInterval;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -710,11 +711,21 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         return $qb;
     }
-    public function findOneBy(array $criteria = [], $orderBy = null, $groupBy = null                               ) { return $this->findBy($criteria, $orderBy, $groupBy, 1, null)[0] ?? null; }
-    public function findBy   (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null) { return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery()->getResult() ?? []; }
+    public function findOneBy(array $criteria = [], $orderBy = null, $groupBy = null)
+    {
+        return $this->findBy($criteria, $orderBy, $groupBy, 1, null)->getResult()[0] ?? null;
+    }
+    public function findBy(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
+    {
+        return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();
+    }
 
-    public function distinctCount(array $criteria, $groupBy = null) { return $this->count($criteria, self::MODE_DISTINCT, $groupBy); }
-    public function count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null)
+    public function distinctCount(array $criteria, $groupBy = null): int
+    {
+        return $this->count($criteria, self::MODE_DISTINCT, $groupBy);
+    }
+
+    public function count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null): int
     {
         if($mode == self::MODE_ALL) $mode = "";
         if($mode && $mode != self::MODE_DISTINCT)
@@ -731,10 +742,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $this->groupBy($qb, $groupBy);
 
         $fnResult = ($groupBy ? "getResult" : "getSingleScalarResult");
-        return $qb->getQuery()->$fnResult();
+        return $qb->getQuery()->$fnResult() ?? 0;
     }
     
-    public function lengthOf(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
+    public function lengthOf(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): int
     {
         $column = $this->getAlias($this->getColumn());
         $column = ($this->getClassMetadata()->hasAssociation($column) ? "t_".$column : "t");

@@ -217,7 +217,7 @@ final class BaseTwigExtension extends AbstractExtension
     public const DOT_STRUCTURE = "\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*";
     public function trans2(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, $recursive = true)
     {
-        if($id === null) throw new Exception("trans2() called, but translation ID is empty..");
+        if($id === null) return null;
 
         $domain = $domain ?? null; // Default domain fallback
         if (preg_match("/^".self::DOT_STRUCTURE."$/", $id)) {

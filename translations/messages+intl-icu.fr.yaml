@@ -1,3 +1,13 @@
+paginator:
+    first: "Première page"
+    previous: "Page précédente"
+    current: "{0, plural,
+                =0 {Aucune page selectionnée}
+                other {Page # sur {1}}
+            }"
+    next: "Page suivante"
+    last: "Dernière page"
+    page: "Page {0}"
 
 dashboard:
     title: "Administration"

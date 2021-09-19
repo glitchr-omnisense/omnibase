@@ -1,0 +1,33 @@
+<span class="paginator-rewind">{{ paginator_rewind(pagination, path, path_parameters, rewind) }}</span>
+
+{% set separator = paginator_firstSeparator(pagination, "...") %}
+{% if separator %}
+<span class="paginator-separator">{{separator}}</span>
+{% endif %}
+
+<span class="paginator-previous">
+{% for link in paginator_previousOnes(pagination, path, path_parameters) %}
+{{ link|raw }}{% if not loop.last %}, {% endif %}
+{% endfor %}
+</span>{% apply spaceless %}
+
+{% endapply %}<span class="paginator-current">{% if pagination.getPage() > 0 %}{% apply spaceless %}
+
+    {% endapply %}{% if pagination.getPage() > 1 %}, {% endif %}{% apply spaceless %}
+    {% endapply %}{{ pagination.getPage() }}{% apply spaceless %}
+    {% endapply %}{% if pagination.getTotalPages() > 1 and pagination.getPage() != pagination.getTotalPages() %}, {% endif %}{% apply spaceless %}
+
+{% endapply %}{% endif %}</span>
+
+<span class="paginator-forward">
+{% for link in paginator_nextOnes(pagination, path, path_parameters) %}
+{{ link|raw }}{% if not loop.last %}, {% endif %}
+{% endfor %}
+</span>
+
+{% set separator = paginator_lastSeparator(pagination, "...") %}
+{% if separator %}
+<span class="paginator-separator">{{separator}}</span>
+{% endif %}
+
+<span class="paginator-fastforward">{{ paginator_fastforward(pagination, path, path_parameters, fastforward) }}</span>

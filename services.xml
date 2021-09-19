@@ -43,6 +43,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Service\Paginator" public="true">
+            <argument type="service" id="router.default" />
+            <argument type="service" id="base.service" />
+        </service>
+
         <service id="Base\Service\BaseService" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="kernel" />
@@ -179,6 +184,12 @@
 
         <service id="Base\Twig\ClassTwigExtension" >
             <tag name="twig.extension" />
+       </service>
+
+        <service id="Base\Twig\PaginatorTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="base.service" />
        </service>
 
         <!--

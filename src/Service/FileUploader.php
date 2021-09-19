@@ -1,5 +1,8 @@
 <?php
+
 // src/Service/FileUploader.php
+// deprecated.. to be replaced by "Flysystem" and "Uploader" annotation
+
 namespace Base\Service;
 
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
