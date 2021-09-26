@@ -1,3 +1,7 @@
+dropzone:
+    title: "Upload files here"
+    description: "Drop files here or click to upload"
+
 paginator:
     first: "First page"
     previous: "Previous page"

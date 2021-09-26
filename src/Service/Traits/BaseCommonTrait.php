@@ -24,6 +24,8 @@ trait BaseCommonTrait {
      */
     public static $projectDir = null;
     public static function setProjectDir($projectDir) { return self::$projectDir = $projectDir; }
+    public static $environment = null;
+    public static function setEnvironment($environment) { return self::$environment = $environment; }
 
     /**
      * @var TranslatorInterface

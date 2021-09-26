@@ -39,7 +39,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
-        // 2/ Infinite loop when using {%use%} (Actually this needs to be fixed.. TODO)
+        // 2/ Infinite loop when using {%use%}
         $projectDir = $baseService->getProjectDir();
         $useCustomLoader = $baseService->getParameterBag("base.twig.use_custom_loader");
         if($useCustomLoader) {

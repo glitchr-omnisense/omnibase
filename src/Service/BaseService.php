@@ -93,8 +93,7 @@ final class BaseService implements RuntimeExtensionInterface
         
         $this->kernel  = $kernel;
         $this->container = $kernel->getContainer();
-        $this->environment = $kernel->getEnvironment(); // "dev", "prod", etc..
-
+        
         $this->setStartTime();
 
         // Security service is subdivided into authorization_checker, token, ..
@@ -117,13 +116,14 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
         $this->setProjectDir($this->kernel->getProjectDir());
+        $this->setEnvironment($this->kernel->getEnvironment());
         $this->setUserProperty($this->getParameterBag("base.user.property"));
         $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
 
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->rstack);
-
         $this->addJavascriptFile("/bundles/base/app.js");
+        $this->addStylesheetFile("/bundles/base/app.css");
     }
     
     /*

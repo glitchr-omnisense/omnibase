@@ -338,14 +338,28 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Controller\DropzoneController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+            <argument type="service" id="app.cache.apcu" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
+        </service>
 
-        <service id="Base\Field\Type\ImageType">
+        <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType">
+            <tag name="form.type" />
+        </service>
+        <service id="Base\Field\Type\ImageType" parent="Base\Field\Type\FileType">
             <tag name="form.type" />
         </service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="security.csrf.token_manager" />
         </service>
+
+
 
         <service id="Base\Field\Configurator\DateTimePickerConfigurator">
             <tag name="ea.field_configurator" />
@@ -401,6 +415,7 @@
             <argument type="service" id="translator" />
         </service>-->
 
+        
         <service id="Base\Controller\Dashboard\DashboardController">
             <tag name="controller.service_arguments" />
             <call method="setContainer">

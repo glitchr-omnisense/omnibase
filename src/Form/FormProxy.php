@@ -40,6 +40,9 @@ class FormProxy implements FormProxyInterface
         if (array_key_exists($name, $this->forms))
             throw new Exception("Form identifier \"$name\" already exists.");
 
+        // Create dummy view to avoid error during twig rendering..
+        $form->createView();
+
         if (!in_array($form, $this->forms))
             $this->forms[$name] = $form;
 

@@ -7,10 +7,10 @@
         <defaults public="true" />
 
         <service id="base.service" alias="Base\Service\BaseService" />
+        <service id="base.uploader" alias="Base\Service\FileUploader" />
+
         <service id="base.paginator" alias="Base\Service\Paginator" />
         <service id="Base\Service\PaginatorInterface" alias="base.paginator"/>
-
-        <service id="base.uploader" alias="Base\Service\FileUploader" />
 
         <service id="base.database.class_metadata_factory_name" alias="Base\Database\Factory\ClassMetadataFactory" />
         <service id="base.database.naming_strategy" alias="Base\Database\NamingStrategy" />

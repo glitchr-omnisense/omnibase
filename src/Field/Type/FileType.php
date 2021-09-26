@@ -2,28 +2,44 @@
 
 namespace Base\Field\Type;
 
+use Base\Field\Transformer\StringToFileTransformer;
+use Base\Service\BaseService;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class FileType extends AbstractType
+class FileType extends AbstractType implements DataMapperInterface
 {
     public const KIB_BYTES = 1024;
     public const MIB_BYTES = 1048576;
-
-    private const SUFFIXES = [
+    public const SUFFIXES = [
         1 => 'bytes',
         self::KIB_BYTES => 'KiB',
         self::MIB_BYTES => 'MiB',
     ];
 
-    private $translator;
+    protected $baseService;
+    protected $translator;
 
-    public function __construct(TranslatorInterface $translator = null)
+    public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager)
     {
-        $this->translator = $translator;
-    }
+        $this->baseService = $baseService;
+        $this->translator  = $baseService->getTwigExtension();
 
+        $this->csrfTokenManager = $csrfTokenManager;
+    }
 
     /**
      * {@inheritdoc}
@@ -32,225 +48,203 @@ class FileType extends AbstractType
     {
         return 'fileupload';
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'dropzone'     => [],
+            'dropzone-js'  => $this->baseService->getParameterBag("base.vendor.dropzone.js"),
+            'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.css"),
+
+            'allow_delete' => true,
+            'multiple'     => false,
+            'required'     => false,
+            
+            // Flysystem related
+            'max_filesize' => null,
+            'max_files'    => null,
+            'mime_types'   => null,
+        ]);
+    }
+
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $allowDelete = $options["allow_delete"];
+        $multiple = $options["multiple"];
+
+        if($options["dropzone"] !== null && $options["multiple"]) $builder->add('file', HiddenType::class);
+        else $builder->add('file', \Symfony\Component\Form\Extension\Core\Type\FileType::class, ["multiple" => $options["multiple"]]);
+
+        if($allowDelete)
+            $builder->add('delete', CheckboxType::class, ['required' => false]);
+
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($options) {
+
+            $data = $event->getData();
+            if(is_string($data)) {
+
+                $cacheDir = $this->baseService->getCacheDir()."/dropzone";
+
+                $data = explode("|", $data);
+                foreach($data as $key => $uuid)
+                    if(!empty($uuid)) $data[$key] = $cacheDir."/".$uuid;
+
+                $data = !empty($data) ? array_map(fn ($fname) => new UploadedFile($fname, $fname), $data) : [];
+            }
+
+            $event->setData($data);
+        });
+        
+        $builder->setDataMapper($this);
+    }
+
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        $files = null;
+        if ([] === $files) {
+            $data = $form->getNormData();
+
+            if (null !== $data && [] !== $data) {
+                $files = \is_array($data) ? $data : [$data];
+
+                foreach ($files as $i => $file) {
+                    if ($file instanceof UploadedFile) {
+                        unset($files[$i]);
+                    }
+                }
+            }
+        }
+
+        $id = $view->vars["id"];
+        $view->vars['files'] = $files;
+        $view->vars['multiple'] = $options['multiple'];
+        $view->vars['allow_delete'] = $options['allow_delete'];
+        $view->vars['max_filesize'] = $options['max_filesize'];
+        
+        $acceptedFiles = ($options["mime_types"] ? implode(",", $options["mime_types"]) : null);
+
+        $view->vars['dropzone'] = ($options["dropzone"] !== null);
+        if($options["dropzone"] !== null && $options["multiple"]) {
+
+            if($options["dropzone-js"]) $this->baseService->addJavascriptFile($options["dropzone-js"]);
+            if($options["dropzone-css"]) $this->baseService->addStylesheetFile($options["dropzone-css"]);
+
+            $editor = $view->vars["id"]."_dropzone";
+            $action = (!empty($options["action"]) ? $options["action"] : ".");
+            
+            $view->vars["attr"]["class"] = "dropzone";
+            $view->vars["value"] = ""; // find existing file (todo)
+
+            $dzOptions = $options["dropzone"];
+            if(!array_key_exists("url", $dzOptions)) $dzOptions["url"] = $action;
+            if($options['allow_delete'] !== null) $dzOptions["addRemoveLinks"] = $options['allow_delete'];
+            if($options['max_filesize'] !== null) $dzOptions["max_filesize"]   = $options["max_filesize"];
+            if($options['max_files']    !== null) $dzOptions["max_files"]      = $options["max_files"];
+            if($acceptedFiles           !== null) $dzOptions["acceptedFiles"]  = $acceptedFiles;
+            
+            $dzOptions["dictDefaultMessage"] = $dzOptions["dictDefaultMessage"]
+                ?? '<h4>'.$this->translator->trans2("messages.dropzone.title").'</h4><p>'.$this->translator->trans2("messages.dropzone.description").'</p>';
+
+            unset($dzOptions["init"]);
+            
+            $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
+            $dzOptions["url"] = $this->baseService->getPath("ux_dropzone", ["token" => $token]);
+            $dzOptions  = preg_replace(["/^{/", "/}$/"], ["", ""], json_encode($dzOptions));
+            $dzOptions .= ",init:".$editor."_dropzoneInit";
+
+            //
+            // Default initialializer
+            $this->baseService->addJavascriptCode(
+                "<script>
+                    Dropzone.autoDiscover = false;
+
+                    function ".$editor."_dropzoneInit() {
+
+                        this.on('success', function(file, response) {
+                            file.serverId = response;
+                            var val = $('#".$id."').val();
+                                val = (!val || val.length === 0 ? [] : val.split('|'));
+
+                            val.push(file.serverId['uuid']);
+                            $('#".$id."').val(val.join('|'));
+                        });
+
+                        this.on('removedfile', function(file) {
+
+                            if (!file.serverId) { return; }
+                            $.post('/ux/dropzone/$token/' + file.serverId['uuid']+'/delete');
+
+                            var val = $('#".$id."').val();
+                                val = (!val || val.length === 0 ? [] : val.split('|'));
+
+                            const index = val.indexOf(file.serverId['uuid']);
+                            if (index > -1) val.splice(index, 1);
+                           
+                            $('#".$id."').val(val.join('|'));
+                        });
+                    }
+
+                    let ".$editor." = new Dropzone('#".$editor."', {".$dzOptions."});
+                </script>"
+            );
+
+        } else {
+
+            $view->vars["deleteOpt"]["attr"]["onclick"] 
+                = ($view->vars["deleteOpt"]["attr"]["onclick"] ?? "")." ".$id."_deleteFiles();";
+            $view->vars["deleteOpt"]["attr"]["onchange"] 
+                = ($view->vars["deleteOpt"]["attr"]["onchange"] ?? "")." ".$id."_onChange();";
+
+            $view->vars["file"]["attr"]["accept"] = $acceptedFiles; 
+            $view->vars["file"]["attr"]["onchange"] 
+                = ($view->vars["file"]["attr"]["onchange"] ?? "")." ".$id."_onChange();";
+                
+            $this->baseService->addJavascriptCode(
+                "<script>
+                    function ".$id."_deleteFiles() {
+                        $('#".$id."_file').val('');
+                        ".$id."_onChange();
+                    }
+
+                    function ".$id."_onChange() {
+                        if( $('#".$id."_file').val() !== '') {
+                            $('#".$id."_frame').css('display', 'block');
+                            $('#".$id."_deleteBtn').css('display', 'block');
+                        } else {
+                            $('#".$id."_frame').css('display', 'none');
+                            $('#".$id."_deleteBtn').css('display', 'none');
+                        }
+                    }
+                </script>"
+            );
+            
+        }
+    }
+
+    public function mapDataToForms($viewData, \Traversable $forms): void
+    {
+        // there is no data yet, so nothing to prepopulate
+        if (null === $viewData) {
+            return;
+        }
+
+        // invalid data type
+        if (!$viewData instanceof File) {
+            throw new UnexpectedTypeException($viewData, File::class);
+        }
+
+        $fileForm = current(iterator_to_array($forms));
+        $fileForm->setData($viewData);
+    }
+
+    public function mapFormsToData(\Traversable $forms, &$viewData): void
+    {
+        $children = iterator_to_array($forms);
+        $uploadedFiles = $children['file']->getData();
+
+        $viewData = $uploadedFiles;
+    }
 }
-
-// class FileType extends AbstractType implements DataMapperInterface
-// {
-
-//     public function __construct()
-//     {
-//     }
-
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function buildForm(FormBuilderInterface $builder, array $options): void
-//     {
-//         $uploadDir = $options['upload_dir'];
-//         $uploadFilename = $options['upload_filename'];
-//         $uploadValidate = $options['upload_validate'];
-//         $allowAdd = $options['allow_add'];
-//         unset($options['upload_dir'], $options['upload_new'], $options['upload_delete'], $options['upload_filename'], $options['upload_validate'], $options['download_path'], $options['allow_add'], $options['allow_delete'], $options['compound']);
-
-//         $builder->add('file', \Symfony\Component\Form\Extension\Core\Type\FileType::class, $options);
-//         $builder->add('delete', CheckboxType::class, ['required' => false]);
-
-//         $builder->setDataMapper($this);
-//         $builder->setAttribute('state', new FileUploadState($allowAdd));
-//         $builder->addModelTransformer(new StringToFileTransformer($uploadDir, $uploadFilename, $uploadValidate, $options['multiple']));
-//     }
-
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function buildView(FormView $view, FormInterface $form, array $options): void
-//     {
-//         /** @var FileUploadState $state */
-//         $state = $form->getConfig()->getAttribute('state');
-
-//         if ([] === $currentFiles = $state->getCurrentFiles()) {
-//             $data = $form->getNormData();
-
-//             if (null !== $data && [] !== $data) {
-//                 $currentFiles = \is_array($data) ? $data : [$data];
-
-//                 foreach ($currentFiles as $i => $file) {
-//                     if ($file instanceof UploadedFile) {
-//                         unset($currentFiles[$i]);
-//                     }
-//                 }
-//             }
-//         }
-
-//         $view->vars['currentFiles'] = $currentFiles;
-//         $view->vars['multiple'] = $options['multiple'];
-//         $view->vars['allow_add'] = $options['allow_add'];
-//         $view->vars['allow_delete'] = $options['allow_delete'];
-//         $view->vars['download_path'] = $options['download_path'];
-//     }
-
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function configureOptions(OptionsResolver $resolver): void
-//     {
-//         $uploadNew = static function (UploadedFile $file, string $uploadDir, string $fileName) {
-//             $file->move($uploadDir, $fileName);
-//         };
-
-//         $uploadDelete = static function (File $file) {
-//             unlink($file->getPathname());
-//         };
-
-//         $uploadFilename = static function (UploadedFile $file): string {
-//             return $file->getClientOriginalName();
-//         };
-
-//         $uploadValidate = static function (string $filename): string {
-//             if (!file_exists($filename)) {
-//                 return $filename;
-//             }
-
-//             $index = 1;
-//             $pathInfo = pathinfo($filename);
-//             while (file_exists($filename = sprintf('%s/%s_%d.%s', $pathInfo['dirname'], $pathInfo['filename'], $index, $pathInfo['extension']))) {
-//                 ++$index;
-//             }
-
-//             return $filename;
-//         };
-
-//         $downloadPath = function (Options $options) {
-//             return mb_substr($options['upload_dir'], mb_strlen('/public/'));
-//         };
-
-//         $allowAdd = static function (Options $options) {
-//             return $options['multiple'];
-//         };
-
-//         $dataClass = static function (Options $options) {
-//             return $options['multiple'] ? null : File::class;
-//         };
-
-//         $emptyData = static function (Options $options) {
-//             return $options['multiple'] ? [] : null;
-//         };
-
-//         $resolver->setDefaults([
-//             'upload_dir' => '/public/uploads/files/',
-//             'upload_new' => $uploadNew,
-//             'upload_delete' => $uploadDelete,
-//             'upload_filename' => $uploadFilename,
-//             'upload_validate' => $uploadValidate,
-//             'download_path' => $downloadPath,
-//             'allow_add' => $allowAdd,
-//             'allow_delete' => true,
-//             'data_class' => $dataClass,
-//             'empty_data' => $emptyData,
-//             'multiple' => false,
-//             'required' => false,
-//             'error_bubbling' => false,
-//             'allow_file_upload' => true,
-//         ]);
-
-//         $resolver->setAllowedTypes('upload_dir', 'string');
-//         $resolver->setAllowedTypes('upload_new', 'callable');
-//         $resolver->setAllowedTypes('upload_delete', 'callable');
-//         $resolver->setAllowedTypes('upload_filename', ['string', 'callable']);
-//         $resolver->setAllowedTypes('upload_validate', 'callable');
-//         $resolver->setAllowedTypes('download_path', ['null', 'string']);
-//         $resolver->setAllowedTypes('allow_add', 'bool');
-//         $resolver->setAllowedTypes('allow_delete', 'bool');
-
-//         $resolver->setNormalizer('upload_dir', function (Options $options, string $value): string {
-//             if (\DIRECTORY_SEPARATOR !== mb_substr($value, -1)) {
-//                 $value .= \DIRECTORY_SEPARATOR;
-//             }
-
-//             // if (0 !== mb_strpos($value, $this->projectDir)) {
-//             //     $value = $this->projectDir.'/'.$value;
-//             // }
-
-//             // if ('' !== $value && (!is_dir($value) || !is_writable($value))) {
-//             //     throw new InvalidArgumentException(sprintf('Invalid upload directory "%s" it does not exist or is not writable.', $value));
-//             // }
-
-//             return $value;
-//         });
-//         $resolver->setNormalizer('upload_filename', static function (Options $options, $fileNamePatternOrCallable) {
-//             if (\is_callable($fileNamePatternOrCallable)) {
-//                 return $fileNamePatternOrCallable;
-//             }
-
-//             return static function (UploadedFile $file) use ($fileNamePatternOrCallable) {
-//                 return strtr($fileNamePatternOrCallable, [
-//                     '[contenthash]' => sha1_file($file->getRealPath()),
-//                     '[day]' => date('d'),
-//                     '[extension]' => $file->guessClientExtension(),
-//                     '[month]' => date('m'),
-//                     '[name]' => pathinfo($file->getClientOriginalName(), \PATHINFO_FILENAME),
-//                     '[randomhash]' => bin2hex(random_bytes(20)),
-//                     '[slug]' => (new AsciiSlugger())
-//                         ->slug(pathinfo($file->getClientOriginalName(), \PATHINFO_FILENAME))
-//                         ->lower()
-//                         ->toString(),
-//                     '[timestamp]' => time(),
-//                     '[uuid]' => Uuid::v4()->toRfc4122(),
-//                     '[ulid]' => new Ulid(),
-//                     '[year]' => date('Y'),
-//                 ]);
-//             };
-//         });
-//         $resolver->setNormalizer('allow_add', static function (Options $options, string $value): bool {
-//             if ($value && !$options['multiple']) {
-//                 throw new InvalidArgumentException('Setting "allow_add" option to "true" when "multiple" option is "false" is not supported.');
-//             }
-
-//             return $value;
-//         });
-//     }
-
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function getBlockPrefix(): string
-//     {
-//         return 'fileupload';
-//     }
-
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function mapDataToForms($currentFiles, $forms): void
-//     {
-//         /** @var FormInterface $fileForm */
-//         $fileForm = current(iterator_to_array($forms));
-//         $fileForm->setData($currentFiles);
-//     }
-
-//     /**
-//      * {@inheritdoc}
-//      */
-//     public function mapFormsToData($forms, &$currentFiles): void
-//     {
-//         /** @var FormInterface[] $children */
-//         $children = iterator_to_array($forms);
-//         $uploadedFiles = $children['file']->getData();
-
-//         /** @var FileUploadState $state */
-//         $state = $children['file']->getParent()->getConfig()->getAttribute('state');
-//         $state->setCurrentFiles($currentFiles);
-//         $state->setUploadedFiles($uploadedFiles);
-//         $state->setDelete($children['delete']->getData());
-
-//         if (!$state->isModified()) {
-//             return;
-//         }
-
-//         if ($state->isAddAllowed() && !$state->isDelete()) {
-//             $currentFiles = array_merge($currentFiles, $uploadedFiles);
-//         } else {
-//             $currentFiles = $uploadedFiles;
-//         }
-//     }
-// }

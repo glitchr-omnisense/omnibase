@@ -316,6 +316,36 @@ class BaseConfiguration implements ConfigurationInterface
                         ->end()
                     ->end()
 
+                    ->arrayNode('dropzone')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('js')
+                                ->info('')
+                                ->defaultValue("/bundles/base/vendor/dropzone/5.9.2/min/dropzone.min.js") // @Base directory
+                                ->end()
+                        ->end()
+                        ->children()
+                            ->scalarNode('css')
+                                ->info('')
+                                ->defaultValue("/bundles/base/vendor/dropzone/5.9.2/min/dropzone.min.css") // @Base directory
+                                ->end()
+                        ->end()
+                    ->end()
+
+                    ->arrayNode('cropperjs')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('js')
+                                ->info('')
+                                ->defaultValue("/bundles/base/vendor/cropperjs/1.5.12/dist/cropper.min.js") // @Base directory
+                                ->end()
+                        ->end()
+                        ->children()
+                            ->scalarNode('css')
+                                ->info('')
+                                ->defaultValue("/bundles/base/vendor/cropperjs/1.5.12/dist/cropper.min.css") // @Base directory
+                                ->end()
+                        ->end()
+                    ->end()
+
                     ->arrayNode('datetimepicker')->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('js')

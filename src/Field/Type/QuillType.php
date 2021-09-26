@@ -32,6 +32,7 @@ class QuillType extends AbstractType
             'empty_data', null,
 
             'theme' => $this->baseService->getParameterBag("base.vendor.quill.theme"),
+            'placeholder' => "Compose an epic..",
             'modules' => [
                 "syntax" => true,
                 "toolbar" => [
@@ -113,7 +114,7 @@ class QuillType extends AbstractType
             var ".$editor." = new Quill('#".$editor."', {
                 theme: '".$theme. "',
                 modules: ".json_encode($modules). ",
-                placeholder: 'Compose an epic..'
+                placeholder: '".$options["placeholder"]."'
             });
 
             $editor.on('text-change', function() {

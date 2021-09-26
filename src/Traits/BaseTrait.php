@@ -15,15 +15,16 @@ use Twig\Environment;
 
 trait BaseTrait
 {
+    public static function getEnvironment(): string { return BaseService::$environment; }
     public static function getProjectDir(): string { return BaseService::$projectDir; }
     public static function getPublicDir(): string { return BaseService::getProjectDir() . "/public"; }
     public static function getTemplateDir(): string { return BaseService::getProjectDir() . "/templates"; }
     public static function getTranslationDir(): string { return BaseService::getProjectDir() . "/translations"; }
-    public static function getCacheDir(): string { return BaseService::getProjectDir() . "/var/cache"; }
+    public static function getCacheDir(): string { return BaseService::getProjectDir() . "/var/cache/".BaseService::getEnvironment(); }
     public static function getLogDir(): string { return BaseService::getProjectDir() . "/var/log"; }
     public static function getDataDir(): string { return BaseService::getProjectDir() . "/data"; }
 
-    public static function getPathr(): ?RouterInterface { return BaseService::$router; }
+    public static function getRouter(): ?RouterInterface { return BaseService::$router; }
     public static function getTwigExtension(): ?BaseTwigExtension { return BaseService::$twigExtension; }
     public static function getTwig(): ?Environment { return BaseService::$twig; }
     public static function getDoctrine() { return BaseService::$doctrine; }

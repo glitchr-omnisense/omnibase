@@ -180,14 +180,6 @@ trait BaseSymfonyTrait
         return $this->rstack->getCurrentRequest();
     }
 
-    public function getEnvironment(): string
-    {
-        if (!isset($this->environment))
-            throw new Exception("Symfony environment not found in BaseService. Did you overloaded BaseService::__construct ?");
-
-        return $this->environment;
-    }
-
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }

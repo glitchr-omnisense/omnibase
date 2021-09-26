@@ -38,15 +38,30 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters()
     {
         return [
-            new TwigFilter('time',        [$this,'time']),
-            new TwigFilter('url',         [$this, 'url']),
-            new TwigFilter('trans2',      [$this, 'trans2']),
-            new TwigFilter('highlight',   [$this,'highlight']),
-            new TwigFilter('image',       [$this,'image'], ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFilter('datetime',    [$this,'datetime'], ['needs_environment' => true]),
-            new TwigFilter('lessThan',    [$this,'lessThan'], ['needs_environment' => true]),
-            new TwigFilter('greaterThan', [$this,'greaterThan'], ['needs_environment' => true])
+            new TwigFilter('time',          [$this,'time']),
+            new TwigFilter('url',           [$this, 'url']),
+            new TwigFilter('trans2',        [$this, 'trans2']),
+            new TwigFilter('highlight',     [$this,'highlight']),
+            new TwigFilter('flatten_array', [$this, 'flattenArray']),
+            new TwigFilter('filesize',      [$this, 'filesize']),
+            new TwigFilter('image',         [$this,'image'], ['needs_environment' => true, 'needs_context' => true]),
+            new TwigFilter('datetime',      [$this,'datetime'], ['needs_environment' => true]),
+            new TwigFilter('lessThan',      [$this,'lessThan'], ['needs_environment' => true]),
+            new TwigFilter('greaterThan',   [$this,'greaterThan'], ['needs_environment' => true])
         ];
+    }
+
+    public function filesize($bytes): string
+    {
+        $size = ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+        $factor = (int) floor(log($bytes) / log(1024));
+
+        return (int) ($bytes / (1024 ** $factor)).@$size[$factor];
+    }
+
+    public function flattenArray($array): ?array
+    {
+        return BaseService::array_flatten($array);
     }
 
     public function time(int $remainingTime): string
