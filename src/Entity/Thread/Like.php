@@ -7,7 +7,6 @@ use App\Entity\Thread;
 
 use App\Repository\Thread\LikeRepository;
 
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\DiscriminatorEntry;
 

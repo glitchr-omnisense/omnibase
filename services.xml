@@ -328,6 +328,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Type\TranslatableType">
+            <tag name="form.type" />
+            <argument type="service" id="doctrine" />
+        </service>
+
         <service id="Base\Field\Type\RelationType">
             <tag name="form.type" />
             <argument type="service" id="doctrine" />

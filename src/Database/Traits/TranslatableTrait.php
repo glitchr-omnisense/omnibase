@@ -7,10 +7,35 @@ use Exception;
 
 trait TranslatableTrait
 {
-    public static function getTranslationEntityClass(): string
+    private static $translationClass;
+    public static function getTranslationEntityClass(bool $withInheritance = true): ?string
     {
-        return get_class() . 'Translation';
+        $class = static::class;
+        if($withInheritance) {
+
+            self::$translationClass = $class . 'Translation';
+            while(!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
+
+                if(!get_parent_class($class)) throw new Exception("No translation entity class found.");
+
+                $class = get_parent_class($class);
+                self::$translationClass = $class . 'Translation';
+            }
+
+            return self::$translationClass;
+        }
+
+        $translationClass = $class . 'Translation';
+        if(!class_exists($translationClass) || !is_subclass_of($translationClass, TranslationInterface::class))
+            return null;
+
+        return $translationClass;
     }
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    protected $translatable_id;
 
     /**
      * @var TranslationInterface[]|Collection

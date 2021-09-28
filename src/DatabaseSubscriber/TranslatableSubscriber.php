@@ -3,7 +3,8 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\Service\LocaleProviderInterface;
-use Base\DAtabase\TranslatableInterface;
+use Base\Database\TranslatableInterface;
+use Base\Database\TranslationInterface;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -40,9 +41,10 @@ class TranslatableSubscriber implements EventSubscriber
 
         if ($classMetadata->isMappedSuperclass) return;
 
-        if (is_a($classMetadata->reflClass->getName(), TranslatableInterface::class, true))
+        if (is_subclass_of($classMetadata->reflClass->getName(), TranslatableInterface::class, true))
             $this->mapTranslatable($classMetadata);
-        if (is_a($classMetadata->reflClass->getName(), TranslationInterface::class, true))
+
+        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))
             $this->mapTranslation($classMetadata);
     }
 
@@ -67,7 +69,7 @@ class TranslatableSubscriber implements EventSubscriber
         if ($classMetadataInfo->hasAssociation('translations')) {
             return;
         }
-
+        
         $classMetadataInfo->mapOneToMany([
             'fieldName' => 'translations',
             'mappedBy' => 'translatable',
@@ -83,7 +85,9 @@ class TranslatableSubscriber implements EventSubscriber
 
     private function mapTranslation(ClassMetadataInfo $classMetadataInfo): void
     {
-        if (! $classMetadataInfo->hasAssociation('translatable')) {
+
+        if(!$classMetadataInfo->hasAssociation('translatable')) {
+
             $classMetadataInfo->mapManyToOne([
                 'fieldName' => 'translatable',
                 'inversedBy' => 'translations',
@@ -101,11 +105,13 @@ class TranslatableSubscriber implements EventSubscriber
         }
 
         $name = $classMetadataInfo->getTableName() . '_unique_translation';
-        if (! $this->hasUniqueTranslationConstraint($classMetadataInfo, $name)) {
+        if (!$this->hasUniqueTranslationConstraint($classMetadataInfo, $name) &&
+            $classMetadataInfo->getName() == $classMetadataInfo->rootEntityName) {
             $classMetadataInfo->table['uniqueConstraints'][$name] = [
-                'columns' => ['translatable_id', self::LOCALE],
+                'columns' => ['translatable_id', self::LOCALE]
             ];
         }
+
 
         if (! $classMetadataInfo->hasField(self::LOCALE) && ! $classMetadataInfo->hasAssociation(self::LOCALE)) {
             $classMetadataInfo->mapField([

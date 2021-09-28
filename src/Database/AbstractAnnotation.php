@@ -21,8 +21,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getParameterBag() { return AnnotationReader::getInstance()->getParameterBag(); }
     public static function getDoctrineReader() { return AnnotationReader::getInstance()->getDoctrineReader(); }
     public static function getEntityManager() { return AnnotationReader::getInstance()->getEntityManager(); }
-    public static function getClassMetadata($entity): ?ClassMetadata { return self::getEntityManager()->getClassMetadata(get_class($entity)); }
-    public static function getRepository($entity) { return AnnotationReader::getInstance()->getRepository(get_class($entity)); }
+    public static function getClassMetadata($className): ?ClassMetadata { return self::getEntityManager()->getClassMetadata($className); }
+    public static function getRepository($className) { return AnnotationReader::getInstance()->getRepository($className); }
 
     /**
      * Minimize the use unit of work to very specific context.. (doctrine internal use only)
@@ -33,7 +33,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         // (NB: /!\ computeChangeSets != recomputeSingleChangeSets)
         self::getUnitOfWork()->recomputeSingleEntityChangeSet(
-            self::getClassMetadata($entity), $entity
+            self::getClassMetadata(get_class($entity)), $entity
         );
 
         return self::getUnitOfWork()->getEntityChangeSet($entity);
@@ -109,11 +109,11 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $entityData;
     }
 
-    public static function getPrimaryKey($entity) { return self::getClassMetadata($entity)->getSingleIdentifierFieldName(); }
+    public static function getPrimaryKey($entity) { return self::getClassMetadata(get_class($entity))->getSingleIdentifierFieldName(); }
     public static function hasField($entity, string $property) { return property_exists($entity, $property); }
     public static function getFieldValue($entity, string $property)
     {
-        $classMetadata = self::getClassMetadata($entity);
+        $classMetadata = self::getClassMetadata(get_class($entity));
         if ($classMetadata->hasField($property))
             return $classMetadata->getFieldValue($entity, $property);
 
@@ -122,7 +122,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
     public static function setFieldValue($entity, string $property, $value)
     {
-        $classMetadata = self::getClassMetadata($entity);
+        $classMetadata = self::getClassMetadata(get_class($entity));
         if($classMetadata->hasField($property))
             return $classMetadata->setFieldValue($entity, $property, $value);
 

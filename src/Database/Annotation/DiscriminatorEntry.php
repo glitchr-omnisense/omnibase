@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Database\AbstractAnnotation;
 use Base\Database\AnnotationReader;
+use Base\Database\TranslatableInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;

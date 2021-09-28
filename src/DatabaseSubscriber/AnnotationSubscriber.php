@@ -4,8 +4,6 @@ namespace Base\DatabaseSubscriber;
 
 use Base\Database\AbstractAnnotation;
 use Base\Database\AnnotationReader;
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\Slugify;
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManager;
@@ -183,7 +181,7 @@ class AnnotationSubscriber implements EventSubscriber {
     public function preUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function preRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
 
-    public function postLoad(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
+    public function postLoad   (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function postPersist(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function postUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function postRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }

@@ -2,6 +2,8 @@
 
 namespace Base\Database\Factory;
 
+use Base\Database\TranslatableInterface;
+use Base\Database\TranslationInterface;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -111,7 +113,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         /** @var ClassMetadata $class */
         /** @var ClassMetadata $parent */
+
         if ($parent) {
+
             $class->setInheritanceType($parent->inheritanceType);
             $class->setDiscriminatorColumn($parent->discriminatorColumn);
             $class->setIdGeneratorType($parent->generatorType);
@@ -291,6 +295,25 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      */
     private function resolveDiscriminatorValue(ClassMetadata $metadata)
     {
+        //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
+        if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
+
+            $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
+
+            if(!$metadata->discriminatorMap)
+                $metadata->discriminatorMap = array_filter(array_map(function($class) {
+
+                    return (is_subclass_of($class, TranslatableInterface::class, true)) 
+                        ? $class::getTranslationEntityClass(false) 
+                        : null;
+
+                }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
+
+            $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
+            $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
+            $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()];
+        }
+
         if (
             $metadata->discriminatorValue
             || ! $metadata->discriminatorMap
@@ -314,7 +337,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
             if ($metadata->name === $this->getMetadataFor($discriminatorClass)->getName()) {
                 $metadata->discriminatorValue = $discriminatorValue;
-
                 return;
             }
         }

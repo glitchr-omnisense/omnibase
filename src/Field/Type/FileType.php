@@ -239,7 +239,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $fileForm = current(iterator_to_array($forms));
         dump($fileForm->getConfig()->getOptions());
-        
+
         $fileForm->setData($viewData);
     }
 

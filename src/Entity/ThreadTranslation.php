@@ -26,14 +26,22 @@ use Base\Traits\BaseTrait;
 use Base\Database\Traits\TranslationTrait;
 use Base\Traits\EntityHierarchyTrait;
 
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
 
 /**
- * @ORM\Entity(repositoryClass=ThreadRepository::class)
+ * @ORM\Entity()
  */
 
 class ThreadTranslation implements TranslationInterface
 {
     use TranslationTrait;
+
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
