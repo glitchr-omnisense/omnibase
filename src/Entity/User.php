@@ -231,8 +231,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->authoredMentions = new ArrayCollection();
         $this->likes = new ArrayCollection();
 
-        $this->setDefaultTimezone();
-        $this->setDefaultLocale();
+        $this->setTimezone();
+        $this->setLocale();
     }
 
     public static $property = "email";
@@ -268,34 +268,23 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $cookie[$key] ?? null;
     }
 
-    public function setDefaultLocale(): self
-    {
-        $this->locale = User::getCookie("locale") ?? "en";
-        return $this;
-    }
-
     public function getLocale(): string { return explode("-", $this->locale)[0]; }
-    public function setLocale($locale): self
+    public function setLocale($locale = null): self
     {
-        $this->locale = $locale;
+        $this->locale = explode("-", $locale)[0] ?? User::getCookie("locale") ?? "en";
         return $this;
     }
-
-    public function setDefaultTimezone(): self
-    {
-        $timezone = User::getCookie("timezone") ?? "UTC";
-        return $this->setTimezone($timezone);
-    }
-
+    
     public function getTimezone(): string { return $this->timezone; }
-    public function setTimezone(string $timezone): self
+    public function setTimezone(string $timezone = null): self
     {
+        $this->timezone = $timezone ?? User::getCookie("timezone") ?? "UTC";
         if( !in_array($timezone, timezone_identifiers_list()) )
-            $timezone = "UTC";
+            $this->timezone = "UTC";
 
-        $this->timezone = $timezone;
         return $this;
     }
+
 
     public static function getIp(): ?string
     {

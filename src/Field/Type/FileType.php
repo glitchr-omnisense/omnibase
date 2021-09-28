@@ -64,20 +64,24 @@ class FileType extends AbstractType implements DataMapperInterface
             'required'     => false,
             
             // Flysystem related
+            'pool'         => '',
             'max_filesize' => null,
             'max_files'    => null,
             'mime_types'   => null,
         ]);
+
+        $resolver->setAllowedTypes("dropzone", ['null', 'array']);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $allowDelete = $options["allow_delete"];
-        $multiple = $options["multiple"];
+        $isDropzone  = $options["dropzone"];
+        $multiple    = $options["multiple"];
 
-        if($options["dropzone"] !== null && $options["multiple"]) $builder->add('file', HiddenType::class);
-        else $builder->add('file', \Symfony\Component\Form\Extension\Core\Type\FileType::class, ["multiple" => $options["multiple"]]);
-
+        $builder->add('file', HiddenType::class);
+        if(!$isDropzone || !$multiple)
+            $builder->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, ["multiple" => $multiple]);
         if($allowDelete)
             $builder->add('delete', CheckboxType::class, ['required' => false]);
 
@@ -87,14 +91,15 @@ class FileType extends AbstractType implements DataMapperInterface
             if(is_string($data)) {
 
                 $cacheDir = $this->baseService->getCacheDir()."/dropzone";
-
                 $data = explode("|", $data);
                 foreach($data as $key => $uuid)
                     if(!empty($uuid)) $data[$key] = $cacheDir."/".$uuid;
 
                 $data = !empty($data) ? array_map(fn ($fname) => new UploadedFile($fname, $fname), $data) : [];
+                if(!$options["multiple"]) $data = $data[0] ?? null;
             }
 
+            dump($data);
             $event->setData($data);
         });
         
@@ -103,31 +108,40 @@ class FileType extends AbstractType implements DataMapperInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        //
+        // VIEW: 
+        // - <id>_raw  = file,
+        // - <id>_file = hidden,
+        // - <id>_deleteBtn = btn "x",
+        // - <id>_deleteAvatarBtn = btn "x",
+        // - <id>_figcaption = btn "+"
+        // - dropzone: <id>_dropzone = btn "x",
+        //
+
         $files = null;
-        if ([] === $files) {
-            $data = $form->getNormData();
+        // if ([] === $files) {
+        //     $data = $form->getNormData();
 
-            if (null !== $data && [] !== $data) {
-                $files = \is_array($data) ? $data : [$data];
+        //     if (null !== $data && [] !== $data) {
+        //         $files = \is_array($data) ? $data : [$data];
 
-                foreach ($files as $i => $file) {
-                    if ($file instanceof UploadedFile) {
-                        unset($files[$i]);
-                    }
-                }
-            }
-        }
-
-        $id = $view->vars["id"];
-        $view->vars['files'] = $files;
-        $view->vars['multiple'] = $options['multiple'];
-        $view->vars['allow_delete'] = $options['allow_delete'];
-        $view->vars['max_filesize'] = $options['max_filesize'];
+        //         foreach ($files as $i => $file) {
+        //             if ($file instanceof UploadedFile) {
+        //                 unset($files[$i]);
+        //             }
+        //         }
+        //     }
+        // }
         
         $acceptedFiles = ($options["mime_types"] ? implode(",", $options["mime_types"]) : null);
+        $view->vars["accept"] = $acceptedFiles; 
 
+        $view->vars['files']        = $files;
+        $view->vars['multiple']     = $options['multiple'];
+        $view->vars['allow_delete'] = $options['allow_delete'];
+        $view->vars['max_filesize'] = $options['max_filesize'];
         $view->vars['dropzone'] = ($options["dropzone"] !== null);
-        if($options["dropzone"] !== null && $options["multiple"]) {
+        if(is_array($options["dropzone"]) && $options["multiple"]) {
 
             if($options["dropzone-js"]) $this->baseService->addJavascriptFile($options["dropzone-js"]);
             if($options["dropzone-css"]) $this->baseService->addStylesheetFile($options["dropzone-css"]);
@@ -139,6 +153,8 @@ class FileType extends AbstractType implements DataMapperInterface
             $view->vars["value"] = ""; // find existing file (todo)
 
             $dzOptions = $options["dropzone"];
+            unset($dzOptions["init"]); // init is ignored..
+
             if(!array_key_exists("url", $dzOptions)) $dzOptions["url"] = $action;
             if($options['allow_delete'] !== null) $dzOptions["addRemoveLinks"] = $options['allow_delete'];
             if($options['max_filesize'] !== null) $dzOptions["max_filesize"]   = $options["max_filesize"];
@@ -147,16 +163,17 @@ class FileType extends AbstractType implements DataMapperInterface
             
             $dzOptions["dictDefaultMessage"] = $dzOptions["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans2("messages.dropzone.title").'</h4><p>'.$this->translator->trans2("messages.dropzone.description").'</p>';
-
-            unset($dzOptions["init"]);
             
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
+            $postDelete = "/ux/dropzone/".$token."/'+file.serverId['uuid']+'/delete"; //ux_dropzone_delete
+
             $dzOptions["url"] = $this->baseService->getPath("ux_dropzone", ["token" => $token]);
             $dzOptions  = preg_replace(["/^{/", "/}$/"], ["", ""], json_encode($dzOptions));
             $dzOptions .= ",init:".$editor."_dropzoneInit";
 
             //
             // Default initialializer
+            
             $this->baseService->addJavascriptCode(
                 "<script>
                     Dropzone.autoDiscover = false;
@@ -165,25 +182,25 @@ class FileType extends AbstractType implements DataMapperInterface
 
                         this.on('success', function(file, response) {
                             file.serverId = response;
-                            var val = $('#".$id."').val();
+                            var val = $('#".$view->vars["id"]."').val();
                                 val = (!val || val.length === 0 ? [] : val.split('|'));
 
                             val.push(file.serverId['uuid']);
-                            $('#".$id."').val(val.join('|'));
+                            $('#".$view->vars["id"]."').val(val.join('|'));
                         });
 
                         this.on('removedfile', function(file) {
 
                             if (!file.serverId) { return; }
-                            $.post('/ux/dropzone/$token/' + file.serverId['uuid']+'/delete');
+                            $.post('$postDelete');
 
-                            var val = $('#".$id."').val();
+                            var val = $('#".$view->vars["id"]."').val();
                                 val = (!val || val.length === 0 ? [] : val.split('|'));
 
                             const index = val.indexOf(file.serverId['uuid']);
                             if (index > -1) val.splice(index, 1);
                            
-                            $('#".$id."').val(val.join('|'));
+                            $('#".$view->vars["id"]."').val(val.join('|'));
                         });
                     }
 
@@ -193,34 +210,19 @@ class FileType extends AbstractType implements DataMapperInterface
 
         } else {
 
-            $view->vars["deleteOpt"]["attr"]["onclick"] 
-                = ($view->vars["deleteOpt"]["attr"]["onclick"] ?? "")." ".$id."_deleteFiles();";
-            $view->vars["deleteOpt"]["attr"]["onchange"] 
-                = ($view->vars["deleteOpt"]["attr"]["onchange"] ?? "")." ".$id."_onChange();";
-
-            $view->vars["file"]["attr"]["accept"] = $acceptedFiles; 
-            $view->vars["file"]["attr"]["onchange"] 
-                = ($view->vars["file"]["attr"]["onchange"] ?? "")." ".$id."_onChange();";
-                
             $this->baseService->addJavascriptCode(
                 "<script>
-                    function ".$id."_deleteFiles() {
-                        $('#".$id."_file').val('');
-                        ".$id."_onChange();
-                    }
-
-                    function ".$id."_onChange() {
-                        if( $('#".$id."_file').val() !== '') {
-                            $('#".$id."_frame').css('display', 'block');
-                            $('#".$id."_deleteBtn').css('display', 'block');
-                        } else {
-                            $('#".$id."_frame').css('display', 'none');
-                            $('#".$id."_deleteBtn').css('display', 'none');
-                        }
-                    }
+                    $('#".$view->vars["id"]."_deleteBtn').on('click', function() {
+                        $('#".$view->vars["id"]."_raw').val('');
+                        $('#".$view->vars["id"]."_deleteBtn').css('display', 'none');
+                    });
+                    
+                    $('#".$view->vars["id"]."_raw').on('change', function() {
+                        if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn').css('display', 'block');
+                        else $('#".$view->vars["id"]."_deleteBtn').css('display', 'none');
+                    });
                 </script>"
             );
-            
         }
     }
 
@@ -232,19 +234,18 @@ class FileType extends AbstractType implements DataMapperInterface
         }
 
         // invalid data type
-        if (!$viewData instanceof File) {
-            throw new UnexpectedTypeException($viewData, File::class);
-        }
+        // if (!$viewData instanceof File) 
+        //     $viewData = new File($viewData);
 
         $fileForm = current(iterator_to_array($forms));
+        dump($fileForm->getConfig()->getOptions());
+        
         $fileForm->setData($viewData);
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);
-        $uploadedFiles = $children['file']->getData();
-
-        $viewData = $uploadedFiles;
+        $viewData = $children['file']->getData() ?? $children['raw']->getData() ?? [];
     }
 }

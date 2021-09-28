@@ -89,7 +89,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewall): ?Response
     {
         // Check if target path provided via $_POST..
-        $targetPath = $_POST["_target_path"] ?? null;
+        $targetPath = $request->request->get("_target_path") ?? null;
         if ($targetPath) {
 
             $path = parse_url($targetPath, PHP_URL_PATH);

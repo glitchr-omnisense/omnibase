@@ -1,0 +1,94 @@
+<?php
+
+namespace Base\Entity;
+
+use App\Entity\User;
+use App\Entity\Thread\Tag;
+use App\Entity\Thread\Like;
+use App\Entity\Thread\Mention;
+
+use Base\Repository\ThreadRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+use Symfony\Component\Validator\Constraints as Assert;
+use Base\Validator\Constraints as AssertBase;
+
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\GenerateUuid;
+use Base\Database\Annotation\Timestamp;
+use Base\Database\Annotation\Slugify;
+use Base\Database\Annotation\EntityHierarchy;
+use Base\Enum\ThreadState;
+use Base\Database\TranslationInterface;
+use Base\Traits\BaseTrait;
+use Base\Database\Traits\TranslationTrait;
+use Base\Traits\EntityHierarchyTrait;
+
+
+/**
+ * @ORM\Entity(repositoryClass=ThreadRepository::class)
+ */
+
+class ThreadTranslation implements TranslationInterface
+{
+    use TranslationTrait;
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $title;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $excerpt;
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $content;
+
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getTitle(): ?string
+    {
+        return $this->title;
+    }
+
+    public function setTitle(string $title): self
+    {
+        $this->title = $title;
+
+        return $this;
+    }
+
+    public function getExcerpt(): ?string
+    {
+        return $this->excerpt;
+    }
+
+    public function setExcerpt(?string $excerpt): self
+    {
+        $this->excerpt = $excerpt;
+
+        return $this;
+    }
+
+    public function getContent(): ?string
+    {
+        return $this->content;
+    }
+
+    public function setContent(?string $content): self
+    {
+        $this->content = $content;
+
+        return $this;
+    }
+}

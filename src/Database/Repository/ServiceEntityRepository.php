@@ -234,19 +234,19 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         // Extract method name and extra parameters
         if (preg_match('/^(find(?:One)?By)(.*)/', $method, $matches)) {
 
-            $newMethod = $matches[1] ?? "";
+            $newMethod = "__".$matches[1] ?? "";
             $byNames   = $matches[2] ?? "";
             
         } else if (preg_match('/^(distinctCount|count)(?:For([^By]*))?(?:By){0,1}(.*)/', $method, $matches)) {
             
-            $newMethod = $matches[1] ?? "";
+            $newMethod = "__".$matches[1] ?? "";
             $byNames   = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
 
         } else if (preg_match('/^(lengthOf)([^By]+)(?:By){0,1}(.*)/', $method, $matches)) {
             
-            $newMethod = $matches[1] ?? "";
+            $newMethod = "__".$matches[1] ?? "";
             $byNames   = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
@@ -567,7 +567,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         throw new Exception("Failed to build expression \"".$field."\": ".$fieldValue);
     }
 
-    public function getQueryBuilder(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
+    protected function getQueryBuilder(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
     {
         $qb = $this->createQueryBuilder('t')
                    ->setMaxResults($limit ?? null)
@@ -632,16 +632,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $qb;
     }
 
-    // public function find($id, $lockMode = null, $lockVersion = null)
-    // {
-    //     return $this->_em->find($this->_entityName, $id, $lockMode, $lockVersion);
-    // }
-
-    // public function findAll(?array $orderBy = null, $groupBy = null)
-    // {
-    //     return $this->findBy([], $orderBy = null, $groupBy = null);
-    // }
-    
     protected function groupBy($qb, $groupBy)
     {
         if($groupBy) {
@@ -711,21 +701,21 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         return $qb;
     }
-    public function findOneBy(array $criteria = [], $orderBy = null, $groupBy = null)
-    {
-        return $this->findBy($criteria, $orderBy, $groupBy, 1, null)->getResult()[0] ?? null;
-    }
-    public function findBy(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
+
+    protected function __findBy(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
     {
         return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();
     }
-
-    public function distinctCount(array $criteria, $groupBy = null): int
+    protected function __findOneBy(array $criteria = [], $orderBy = null, $groupBy = null)
     {
-        return $this->count($criteria, self::MODE_DISTINCT, $groupBy);
+        return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getResult()[0] ?? null;
+    }
+    protected function __distinctCount(array $criteria, $groupBy = null): int
+    {
+        return $this->__count($criteria, self::MODE_DISTINCT, $groupBy);
     }
 
-    public function count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null)
+    protected function __count(array $criteria, ?string $mode = "", ?array $orderBy = null, $groupBy = null)
     {
         if($mode == self::MODE_ALL) $mode = "";
         if($mode && $mode != self::MODE_DISTINCT)
@@ -744,7 +734,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $qb->getQuery()->$fnResult();
     }
     
-    public function lengthOf(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
+    protected function __lengthOf(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
     {
         $column = $this->getAlias($this->getColumn());
         $column = ($this->getClassMetadata()->hasAssociation($column) ? "t_".$column : "t");

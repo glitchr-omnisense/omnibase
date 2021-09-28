@@ -62,6 +62,12 @@
             <argument type="service" id="security.csrf.token_manager" />
         </service>
 
+        <service id="Base\Service\LocaleProvider" public="true">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
+        </service>
+
         <service id="Base\Twig\BaseTwigExtension" >
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
@@ -145,8 +151,7 @@
             -->
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="security.helper" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Subscriber\MaintenanceSubscriber">
@@ -161,6 +166,11 @@
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
+        <service id="Base\DatabaseSubscriber\TranslatableSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="base.locale_provider" />
         </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
@@ -358,7 +368,6 @@
             <argument type="service" id="base.service" />
             <argument type="service" id="security.csrf.token_manager" />
         </service>
-
 
 
         <service id="Base\Field\Configurator\DateTimePickerConfigurator">

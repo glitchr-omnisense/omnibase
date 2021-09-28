@@ -335,13 +335,13 @@ class BaseConfiguration implements ConfigurationInterface
                         ->children()
                             ->scalarNode('js')
                                 ->info('')
-                                ->defaultValue("/bundles/base/vendor/cropperjs/1.5.12/dist/cropper.min.js") // @Base directory
+                                ->defaultValue("/bundles/base/vendor/cropperjs/1.5.12/dist/cropper.js") // @Base directory
                                 ->end()
                         ->end()
                         ->children()
                             ->scalarNode('css')
                                 ->info('')
-                                ->defaultValue("/bundles/base/vendor/cropperjs/1.5.12/dist/cropper.min.css") // @Base directory
+                                ->defaultValue("/bundles/base/vendor/cropperjs/1.5.12/dist/cropper.css") // @Base directory
                                 ->end()
                         ->end()
                     ->end()

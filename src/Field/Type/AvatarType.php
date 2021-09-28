@@ -22,24 +22,21 @@ class AvatarType extends AbstractType
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'avatar';
     }
 
-    public function configureOptions(OptionsResolver $resolver): void
-    {
-        $resolver->setDefaults([
-            'max_filesize' => null
-        ]);
-    }
-
     public function getParent()
     {
         return ImageType::class;
+    }
+
+    public function configureOptions(OptionsResolver $resolver): void
+    {
+        $resolver->setDefaults([
+            'thumbnail'   => "/bundles/base/user.svg"
+        ]);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -50,28 +47,39 @@ class AvatarType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $id = $view->vars["id"];
-        
-        $view->vars["file"]["attr"]["accept"] = "image/*"; 
+        //
+        // VIEW: 
+        // - <id>_raw  = file,
+        // - <id>_file = hidden,
+        // - <id>_deleteBtn = btn "x",
+        // - <id>_deleteAvatarBtn = btn "x",
+        // - <id>_figcaption = btn "+"
+        // - dropzone: <id>_dropzone = btn "x",
+        // - cropper: <id>_modal     = modal
+        // - cropper: <id>_cropper   = cropper
+        // - cropper: <id>_thumbnail = thumbnail
+        //
 
-        $view->vars["file"]["attr"]["onchange"] 
-            = ($view->vars["file"]["attr"]["onchange"] ?? "")." ".$id."_updatePreview();";
-        $view->vars["deleteOpt"]["attr"]["onclick"] 
-            = ($view->vars["deleteOpt"]["attr"]["onclick"] ?? "")." ".$id."_updatePreview();";
+        $view->vars["thumbnail"] = $options["thumbnail"];
         $this->baseService->addJavascriptCode(
             "<script>
-                function ".$id."_updatePreview() {
-                    
-                    if( $('#".$id."_file').val() !== '') {
-                        $('#".$id."_thumbnail').css('display', 'block');
-                        $('#".$id."_figcaption').css('display', 'none');
-                        $('#".$id."_image')[0].src = URL.createObjectURL(event.target.files[0]);
-                    } else {
-                        $('#".$id."_thumbnail').css('display', 'none');
-                        $('#".$id."_figcaption').css('display', 'block');
-                        $('#".$id."_image')[0].src = '/bundles/base/user.svg';
-                    }
-                }
+
+            $('#".$view->vars["id"]."_deleteBtn2').on('click', function() {
+                $('#".$view->vars["id"]."_raw').val('');
+                $('#".$view->vars["id"]."_deleteBtn').click();
+            });
+
+            $('#".$view->vars["id"]."_deleteBtn').on('click', function() {
+                $('#".$view->vars["id"]."_raw').val('');
+                $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
+            });
+          
+            $('#".$view->vars["id"]."_raw').on('change', function() {
+
+                if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn2').css('display', 'block');
+                else $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
+            });
+
             </script>");
     }
 }

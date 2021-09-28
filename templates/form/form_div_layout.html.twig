@@ -1,110 +1,130 @@
 {% use "@Twig/Form/form_div_layout.html.twig" %}
 
 {%- block form_errors -%}
-    {%- if errors|length > 0 -%}
-    <ul>
-        {%- for error in errors -%}
-            <li>{{ error.message|trans2(error.getMessageParameters()|merge({'label':error.origin.name})) }}</li>
-        {%- endfor -%}
-    </ul>
-    {%- endif -%}
+{%- if errors|length > 0 -%}
+<ul>
+    {%- for error in errors -%}
+    <li>{{ error.message|trans2(error.getMessageParameters()|merge({'label':error.origin.name})) }}</li>
+    {%- endfor -%}
+</ul>
+{%- endif -%}
 {%- endblock form_errors -%}
 
 {%- block quill_widget -%}
-<input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %}/>
+<input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %}
+    value="{{ value }}" {% endif %} />
 <div id="{{ id }}_editor" {{ block('attributes') }}>
-	{{ value | raw }}
+    {{ value | raw }}
 </div>
 {%- endblock quill_widget -%}
 
 {%- block slug_widget -%}
 
-	{% set attr = attr|merge({
+{% set attr = attr|merge({
         'data-slug-field': '',
         'data-target': form.parent[target].vars.id
     }) %}
 
-	<div class="input-group">
-		{{ block('form_widget') }}
-		<div class="input-group-append">
-			<button class="btn btn-outline-secondary" type="button">
-				<i class="fas fa-lock fa-fw"></i>
-			</button>
-		</div>
-	</div>
+<div class="input-group">
+    {{ block('form_widget') }}
+    <div class="input-group-append">
+        <button class="btn btn-outline-secondary" type="button">
+            <i class="fas fa-lock fa-fw"></i>
+        </button>
+    </div>
+</div>
 {%- endblock -%}
 
 {%- block avatar_widget -%}
 <div class="avatarupload">
-    <div class="avatar-image">
-        <label class="label">
-        
-            {{ form_widget(form.file, { attr: form.file.vars.attr|merge({ accept: file.attr.accept, onchange: file.attr.onchange }) }) }}
-            <figure class="avatar-figure">
-                <img id="{{id}}_image" src="/bundles/base/user.svg" class="avatar">
-                <figcaption id="{{id}}_figcaption" class="avatar-figcaption">
-                    <i class="fas fa-plus-circle fa-3x"></i>
-                </figcaption>
-            </figure>
-        </label>
+    {{ form_widget(form, { attr: form.vars.attr }) }}
 
     {% if allow_delete %}
-        <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
-            <i class="fas fa-plus-circle fa-2x btn" onclick="{{deleteOpt.attr.onclick}}"></i>
-        </div>
-    {% endif %}
-
+    <div id="{{id}}_deleteBtn2" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
+        <i class="fas fa-plus-circle fa-2x"></i>
     </div>
+    {% endif %}
 </div>
 {%- endblock -%}
 
 {%- block imageupload_widget -%}
 <div class="imageupload">
-    {{ form_widget(form, { attr: form.vars.attr }) }}
+
     {% if not multiple %}
-    <div class="imageupload_thumbnail" id="{{id}}_thumbnail" style="">
-        <img id="{{id}}_image" src="/bundles/base/images.svg"/>
-    </div>
+        <figure>
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{thumbnail}}" />
+            <figcaption id="{{id}}_figcaption">
+                <i class="fas fa-plus-circle fa-3x"></i>
+            </figcaption>
+        </figure>
+        
+        {% if cropper %}
+
+            <!-- Modal -->
+            <div class="modal fade" id="{{id}}_modal">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Image cropper</h5>
+                    <button type="button" class="btn-close {{id}}_modalClose" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="img-container">
+                        <img id="{{id}}_cropper" src="" style="visibility:hidden">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary {{id}}_modalClose">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
+                </div>
+                </div>
+            </div>
+            </div>
+
+        {% endif %}
     {% endif %}
+
+    {{ form_widget(form, { attr: form.vars.attr }) }}
+
 </div>
 {%- endblock -%}
 
 {%- block fileupload_widget -%}
 
-    <div class="fileupload">
+<div class="fileupload">
     {% if multiple and dropzone %}
-        
+
         <div id="{{ id }}_dropzone" {{ block('attributes') }}></div>
         {{ form_widget(form.file, { id: id, value:value }) }}
-        
+
     {% else %}
-        
+
         {% set placeholder = '' %}
         {% set title = '' %}
         {% set filesLabel = 'files'|trans %}
         {% if files %}
-            {% if multiple %}
-                {% set placeholder = files|length ~ ' ' ~ filesLabel %}
-            {% else %}
-                {% set placeholder = (files|first).filename %}
-                {% set title = (files|first).mTime|date %}
-            {% endif %}
+        {% if multiple %}
+        {% set placeholder = files|length ~ ' ' ~ filesLabel %}
+        {% else %}
+        {% set placeholder = (files|first).filename %}
+        {% set title = (files|first).mTime|date %}
+        {% endif %}
         {% endif %}
 
-        <div>
-            {{ form_widget(form.file, { attr: form.file.vars.attr|merge({ accept: file.attr.accept, onchange: file.attr.onchange, placeholder: placeholder, title: title, 'data-files-label': filesLabel }) }) }}
+            {{ form_widget(form.file, { attr: form.file.vars.attr }) }}
+            {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept, placeholder: placeholder, title: title, 'data-files-label': filesLabel }) }) }}
             {% if allow_delete %}
             <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
-                <span class="input-group-text btn" style="cursor:pointer;" onclick="{{deleteOpt.attr.onclick}}">&#x2715;</span>
+                <span style="cursor:pointer;">&#x2715;</span>
             </div>
             {% endif %}
-        </div>
-        
-    {% endif %}
-        {% if max_filesize %}
-            <div class="form-text text-muted">The maximum file size allowed is {{max_filesize|filesize}}.</div>
-        {% endif %}
-    </div>
 
-    {{ form_errors(form.file) }}
+    {% endif %}
+    {% if max_filesize %}
+    <div class="form-text text-muted">The maximum file size allowed is {{max_filesize|filesize}}.</div>
+    {% endif %}
+</div>
+
+{{ form_errors(form.raw) }}
 {%- endblock -%}

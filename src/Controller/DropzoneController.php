@@ -67,7 +67,6 @@ class DropzoneController extends AbstractController
         $fileMetadata = [
             "status"    => self::STATUS_OK,
             "uuid"      => $fileUuid,
-            "path"      => $filePath,
             "mime_type" => $file->getMimeType(),
             "size"      => $file->getSize(),
             "error"     => $file->getError(),

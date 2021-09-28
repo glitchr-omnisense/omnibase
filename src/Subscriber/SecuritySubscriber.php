@@ -29,6 +29,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
@@ -193,9 +194,6 @@ class SecuritySubscriber implements EventSubscriberInterface
         //Notify user about the authentication method
         if(!($token = $this->tokenStorage->getToken()) ) return;
         if(!($user = $token->getUser())) return;
-
-        if ($this->baseService->isGranted("IS_AUTHENTICATED_FULLY") && $this->baseService->getCurrentPathName() == LoginFormAuthenticator::LOGIN_ROUTE)
-            return $this->baseService->redirectToRoute($event, "base_profile");
 
         $exceptionList = [
             "/^(app|base)_(verifyEmail(_token)*)$/",

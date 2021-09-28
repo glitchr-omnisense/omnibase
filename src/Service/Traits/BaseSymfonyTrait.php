@@ -141,13 +141,13 @@ trait BaseSymfonyTrait
         $path = parse_url($path, PHP_URL_PATH);
 
         try {
-            return $this->getPathr()->match($path)['_route'];
+            return $this->getRouter()->match($path)['_route'];
         } catch (ResourceNotFoundException $e) {
             return null;
         }
     }
 
-    public function redirect(string $url, int $state = 302): RedirectResponse { return new RedirectResponse($url, $state); }
+    public function redirect(string $url, int $state = 302, $headers = null): RedirectResponse { return new RedirectResponse($url, $state, $headers); }
     public function redirectToRoute($event, string $route, $exceptionPattern = null, $callback = null)
     {
         $route     = $this->getPath($route) ?? $route;

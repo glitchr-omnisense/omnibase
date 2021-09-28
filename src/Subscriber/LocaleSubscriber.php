@@ -17,10 +17,10 @@ use Twig\Environment;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    public function __construct(Security $security, BaseService $baseService)
+    public function __construct(ParameterBagInterface $parameterBag)
     {
-        $this->security = $security;
-        $this->defaultLocale = $baseService->getParameterBag("kernel.default_locale");
+        $this->defaultLocale = $parameterBag->has("kernel.default_locale") 
+                             ? $parameterBag->get("kernel.default_locale") : "en";
     }
 
     public static function getSubscribedEvents()
@@ -39,8 +39,6 @@ class LocaleSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $request = $event->getRequest();
-
-        $locale = explode("-", User::getCookie("locale") ?? $this->defaultLocale)[0];
-        $request->setLocale($locale);
+        $request->setLocale(explode("-", User::getCookie("locale"))[0] ?? $this->defaultLocale);
     }
 }

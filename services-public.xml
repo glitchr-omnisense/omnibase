@@ -12,6 +12,9 @@
         <service id="base.paginator" alias="Base\Service\Paginator" />
         <service id="Base\Service\PaginatorInterface" alias="base.paginator"/>
 
+        <service id="base.locale_provider" alias="Base\Service\LocaleProvider" />
+        <service id="Base\Service\LocaleProviderInterface" alias="base.locale_provider"/>
+
         <service id="base.database.class_metadata_factory_name" alias="Base\Database\Factory\ClassMetadataFactory" />
         <service id="base.database.naming_strategy" alias="Base\Database\NamingStrategy" />
         <service id="base.database.annotation_reader" alias="Base\Database\AnnotationReader" />

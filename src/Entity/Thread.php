@@ -21,8 +21,10 @@ use Base\Database\Annotation\Timestamp;
 use Base\Database\Annotation\Slugify;
 use Base\Database\Annotation\EntityHierarchy;
 use Base\Enum\ThreadState;
+use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
 use Base\Traits\EntityHierarchyTrait;
+use Base\Database\Traits\TranslatableTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -33,10 +35,19 @@ use Base\Traits\EntityHierarchyTrait;
  * @EntityHierarchy(null, separator = "/" );
  */
 
-class Thread
+class Thread implements TranslatableInterface
 {
     use BaseTrait;
     
+    use TranslatableTrait;
+    public function getTitle()  : ?string { return $this->translate()->getTitle(); }
+    public function getExcerpt(): ?string { return $this->translate()->getExcerpt(); }
+    public function getContent(): ?string { return $this->translate()->getContent(); }
+    
+    public function setTitle(?string $title)   { return $this->translate()->setTitle($title); }
+    public function setExcerpt(?string $excerpt) { return $this->translate()->setExcerpt($excerpt); }
+    public function setContent(?string $content) { return $this->translate()->setContent($content); }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -68,21 +79,6 @@ class Thread
      * @Slugify(reference="title")
      */
     protected $slug;
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    protected $title;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $excerpt;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $content;
 
     /**
      * @ORM\Column(type="thread_state")
@@ -171,42 +167,6 @@ class Thread
     public function getUuid()
     {
         return $this->uuid;
-    }
-
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
-    public function setTitle(string $title): self
-    {
-        $this->title = $title;
-
-        return $this;
-    }
-
-    public function getExcerpt(): ?string
-    {
-        return $this->excerpt;
-    }
-
-    public function setExcerpt(?string $excerpt): self
-    {
-        $this->excerpt = $excerpt;
-
-        return $this;
-    }
-
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
-    public function setContent(?string $content): self
-    {
-        $this->content = $content;
-
-        return $this;
     }
 
     public function getState()
