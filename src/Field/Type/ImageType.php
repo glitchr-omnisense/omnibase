@@ -83,6 +83,8 @@ class ImageType extends AbstractType
 
             $cropperOptions = $options["cropper"];
             if(!array_key_exists('viewMode', $cropperOptions)) $cropperOptions['viewMode'] = 2;
+            if(!array_key_exists('aspectRatio', $cropperOptions)) $cropperOptions['aspectRatio'] = 1;
+
         
             $this->baseService->addJavascriptCode(
             "<script>

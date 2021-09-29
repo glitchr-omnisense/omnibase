@@ -151,7 +151,7 @@
             -->
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.locale_provider" />
         </service>
 
         <service id="Base\Subscriber\MaintenanceSubscriber">
@@ -330,7 +330,7 @@
 
         <service id="Base\Field\Type\TranslatableType">
             <tag name="form.type" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.locale_provider" />
         </service>
 
         <service id="Base\Field\Type\RelationType">

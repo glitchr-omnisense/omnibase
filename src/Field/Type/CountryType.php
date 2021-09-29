@@ -81,7 +81,7 @@ class CountryType extends AbstractType implements SelectTypeInterface
             'choice_translation_domain' => false,
             'choice_translation_locale' => null,
             'alpha3' => false,
-            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img style=\"margin-right: 2px;max-height: 18px;vertical-align: text-top;\" src=\"/bundles/base/flags/'+option.id+'.png\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }",
+            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"/bundles/base/flags/'+option.id+'.png\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }",
             'invalid_message' => function (Options $options, $previousValue) {
                 return ($options['legacy_error_messages'] ?? true)
                     ? $previousValue

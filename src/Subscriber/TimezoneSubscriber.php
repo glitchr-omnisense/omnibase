@@ -4,7 +4,6 @@ namespace Base\Subscriber;
 
 use App\Entity\User;
 use App\Entity\User\Notification;
-
 use Base\Service\BaseService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -28,7 +27,7 @@ class TimezoneSubscriber implements EventSubscriberInterface
     {
         $timezone = User::getCookie("timezone") ?? "UTC";
         $defaultTimezone = date_default_timezone_get();
-
+        
         if($timezone != $defaultTimezone) {
             $notification = new Notification("notifications.invalidTimezone", [$timezone]);
             $notification->send("info");

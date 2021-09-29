@@ -67,6 +67,7 @@ class DashboardSubscriber implements EventSubscriberInterface
         // - If exception happened after submitting a form, just redirect to the initial page
         $url = $this->adminUrlGenerator->unsetAll();
         switch($action) {
+            
             case "index": break;
             default:
                 $url = $url->setController($controller);

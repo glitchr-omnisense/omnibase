@@ -58,9 +58,9 @@ trait TranslatableTrait
         if( $locale = $this->getLocale() ) {
 
             $translationEntityClass = self::getTranslationEntityClass();
-            return $translations[$locale] ?? new $translationEntityClass;    
+            return $translations[$locale] ?? new $translationEntityClass;
         }
-        
+
         throw new Exception("Unknown locale provided in \"".get_class()."\"");
     }
 
@@ -73,9 +73,6 @@ trait TranslatableTrait
         $locale = $this->locale;
         if( in_array($locale, $this->fallbackLocales) ) return $locale;
 
-        $locale = explode('-', $locale)[0];
-        if( in_array($locale, $this->fallbackLocales) ) return $locale;
-
         return $this->defaultLocale;
     }
     public function setLocale(string $locale)
@@ -83,7 +80,7 @@ trait TranslatableTrait
         $this->locale = $locale;
         return $this;
     }
-    
+
     /**
      * @var string
      */

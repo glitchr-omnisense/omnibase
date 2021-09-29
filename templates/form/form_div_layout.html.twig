@@ -20,21 +20,27 @@
 
 
 {%- block translatable_widget -%}
-<ul class="nav nav-tabs" id="myTab" role="tablist">
-  <li class="nav-item" role="presentation">
-    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Home</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Profile</button>
-  </li>
-  <li class="nav-item" role="presentation">
-    <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Contact</button>
-  </li>
+<ul class="nav nav-tabs" role="tablist">
+{% for availableLocale in availableLocales %}
+    <li class="nav-item" role="presentation">
+        {% set lang    = availableLocale|split('_')[0] %}
+        {% set country = availableLocale|split('_')[1] %}
+        <button class="nav-link {% if availableLocale == defaultLocale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
+            <img class="country-flag" src="/bundles/base/flags/{{ country }}.png" alt="{{ availableLocale }}">
+        </button>
+    </li>
+{% endfor %}
 </ul>
+
 <div class="tab-content" id="myTabContent">
-  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">...</div>
-  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">...</div>
-  <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">...</div>
+{% for availableLocale in availableLocales %}
+    {% set lang    = availableLocale|split('_')[0] %}
+    {% set country = availableLocale|split('_')[1] %}
+    <div class="tab-pane fade {% if availableLocale == defaultLocale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
+        {{ availableLocale }}
+        {{ block('form_widget') }}
+    </div>
+{% endfor %}
 </div>
 {%- endblock translatable_widget -%}
 

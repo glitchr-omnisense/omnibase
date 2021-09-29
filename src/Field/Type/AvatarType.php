@@ -35,7 +35,8 @@ class AvatarType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'   => "/bundles/base/user.svg"
+            'thumbnail'   => "/bundles/base/user.svg",
+            'cropper'     => null,
         ]);
     }
 

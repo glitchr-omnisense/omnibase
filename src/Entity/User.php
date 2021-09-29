@@ -2,6 +2,8 @@
 
 namespace Base\Entity;
 
+use Base\Exception\MissingLocaleException;
+
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Mention;
@@ -268,13 +270,15 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $cookie[$key] ?? null;
     }
 
-    public function getLocale(): string { return explode("-", $this->locale)[0]; }
-    public function setLocale($locale = null): self
+    public function getLocale(): string { return $this->locale; }
+    public function setLocale(?string $locale = null): self
     {
-        $this->locale = explode("-", $locale)[0] ?? User::getCookie("locale") ?? "en";
+        $this->locale = $locale ?? User::getCookie("locale") ?? null;
+        if(!$this->locale) throw new MissingLocaleException("Missing locale.");
+
         return $this;
     }
-    
+
     public function getTimezone(): string { return $this->timezone; }
     public function setTimezone(string $timezone = null): self
     {
