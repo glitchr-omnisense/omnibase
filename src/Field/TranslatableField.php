@@ -2,6 +2,7 @@
 
 namespace Base\Field;
 
+use Base\Field\Type\TranslatableType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 

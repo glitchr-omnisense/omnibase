@@ -330,7 +330,7 @@
 
         <service id="Base\Field\Type\TranslatableType">
             <tag name="form.type" />
-            <argument type="service" id="doctrine" />
+            <argument type="service" id="translator" />
         </service>
 
         <service id="Base\Field\Type\RelationType">
