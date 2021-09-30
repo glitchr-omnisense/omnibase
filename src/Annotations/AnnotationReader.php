@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database;
+namespace Base\Annotations;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
@@ -8,7 +8,7 @@ use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\ClassLoader\ClassMapGenerator;
 
-use Base\Database\AbstractAnnotation;
+use Base\Annotations\AbstractAnnotation;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Exception;
 
@@ -40,13 +40,9 @@ class AnnotationReader
         self::TARGET_PROPERTY
     ];
 
-    protected $bag;
-    public function getParameterBag()
-    {
-        return $this->bag;
-    }
+    protected $parameterBag;
 
-    public function __construct(ParameterBagInterface $bag, EntityManager $entityManager, CacheInterface $cache)
+    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -54,13 +50,12 @@ class AnnotationReader
         $this->doctrineReader = new DoctrineAnnotationReader();
 
         // Check if custom reader is enabled
-        $this->bag = $bag;
-        $this->enabled = $bag->get("base.annotations.use_custom_reader");
+        $this->parameterBag = $parameterBag;
+        $this->enabled = $parameterBag->get("base.annotations.use_custom_reader");
 
         $paths = [];
-        if ( ($matches = preg_grep('/base.annotations.paths\.[0-9]*\.[.*]*/', array_keys($bag->all()))) )
-            foreach ($matches as $match)
-                $paths[] = $match;
+        if ( ($matches = preg_grep('/^base.annotations.paths\.[0-9]*\.[.*]*$/', array_keys($parameterBag->all()))) )
+            foreach ($matches as $match) $paths[] = $parameterBag->get($match);
 
         // Paths to look for annotations
         $paths[] = __DIR__ . "/Annotation";

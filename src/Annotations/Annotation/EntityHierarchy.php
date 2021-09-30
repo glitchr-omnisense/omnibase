@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
 use App\Entity\Gallery\Gallery;
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use App\Entity\Thread;
 use Base\Service\BaseService;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -14,7 +14,7 @@ use Exception;
 
 /**
  * Class EntityHierarchy
- * package Base\Database\Annotation\EntityHierarchy
+ * package Base\Annotations\Annotation\EntityHierarchy
  *
  * @Annotation
  * @Target({"CLASS"})

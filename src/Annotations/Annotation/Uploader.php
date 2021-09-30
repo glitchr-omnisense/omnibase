@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use DateTime;
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -22,7 +22,7 @@ use Symfony\Component\Uid\Uuid;
 
 /**
  * Class Uploader
- * package Base\Database\Annotation\Uploader
+ * package Base\Annotations\Annotation\Uploader
  *
  * @Annotation
  * @Target({"CLASS", "PROPERTY"})

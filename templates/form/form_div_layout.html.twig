@@ -20,25 +20,26 @@
 
 
 {%- block translatable_widget -%}
-<ul class="nav nav-tabs" role="tablist">
-{% for availableLocale in availableLocales %}
+<ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
+{% for locale, formChild in form.children %}
     <li class="nav-item" role="presentation">
-        {% set lang    = availableLocale|split('_')[0] %}
-        {% set country = availableLocale|split('_')[1] %}
-        <button class="nav-link {% if availableLocale == defaultLocale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-            <img class="country-flag" src="/bundles/base/flags/{{ country }}.png" alt="{{ availableLocale }}">
+        {% set lang    = locale|split('_')[0] %}
+        {% set country = locale|split('_')[1] %}
+        <button class="nav-link {% if locale == defaultLocale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
+            <img class="country-flag" src="/bundles/base/flags/{{ country }}.png" alt="{{ locale }}">
         </button>
     </li>
 {% endfor %}
 </ul>
 
-<div class="tab-content" id="myTabContent">
-{% for availableLocale in availableLocales %}
-    {% set lang    = availableLocale|split('_')[0] %}
-    {% set country = availableLocale|split('_')[1] %}
-    <div class="tab-pane fade {% if availableLocale == defaultLocale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
-        {{ availableLocale }}
-        {{ block('form_widget') }}
+<div class="tab-content" id="{{ form.vars['id'] }}_tab">
+{% for locale, formChild in form.children %}
+    {% set lang    = locale|split('_')[0] %}
+    {% set country = locale|split('_')[1] %}
+    <div class="tab-pane fade {% if locale == defaultLocale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
+        {% for row in formChild %}
+        {{ form_row(row) }}<br/>
+        {% endfor %}
     </div>
 {% endfor %}
 </div>

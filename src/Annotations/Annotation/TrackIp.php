@@ -1,63 +1,62 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use DateTime;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
- * Class Timestamp
- * package Base\Database\Annotation\Timestamp
+ * Class TrackIp
+ * package Base\Annotations\Annotation\TrackIp
  *
  * @Annotation
- * @Target({"CLASS", "PROPERTY"})
+ * @Target({"PROPERTY"})
  * @Attributes({
  *   @Attribute("on", type = "array"),
- *   @Attribute("fields", type = "array"),
- *   @Attribute("value", type = "datetime")
  * })
  */
-class Timestamp extends AbstractAnnotation
+
+class TrackIp extends AbstractAnnotation
 {
-    private array $fields;
     private array $context;
 
     /**
      * @var DateTime
      */
-    private $value;
+    private string $value;
 
     public function __construct( array $data ) {
 
         $this->context = array_map("strtolower", $data['on']);
-        $this->fields = $data['fields'] ?? [];
-        $this->value = $data['value'] ?? "";
     }
 
     public function getContext(): array {
         return $this->context;
     }
 
-    public function getFields(): array {
-        return $this->fields;
+    public function getValue(): ?string {
+
+        if(!$this->value) {
+
+            $keys = ['HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR'];
+            foreach ($keys as $k) {
+
+                if (!empty($_SERVER[$k]) && filter_var($_SERVER[$k], FILTER_VALIDATE_IP)) {
+                    $this->value = $_SERVER[$k];
+                    break;
+                }
+            }
+        }
+
+        return (filter_var($_SERVER[$k], FILTER_VALIDATE_IP)) ? $this->value : null;
     }
 
-    public function getValue(): \DateTime {
-
-        if(!$this->value)
-            $this->value = new DateTime("now");
-            
-        return $this->value;
-    }
-
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
     {
-        if(!empty($this->fields) && !in_array($targetValue, $this->fields)) return false;
-
         return in_array("update", $this->context) || in_array("create", $this->context);
     }
 

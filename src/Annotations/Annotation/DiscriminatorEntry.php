@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use Base\Database\TranslatableInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class DiscriminatorEntry
- * package Base\Database\Annotation\DiscriminatorEntry
+ * package Base\Annotations\Annotation\DiscriminatorEntry
  *
  * @Annotation
  * @Target({"CLASS"})

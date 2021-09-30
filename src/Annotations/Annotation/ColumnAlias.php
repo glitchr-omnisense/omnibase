@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -13,7 +13,7 @@ use ReflectionProperty;
 
 /**
  * Class EntityHierarchy
- * package Base\Database\Annotation\EntityHierarchy
+ * package Base\Annotations\Annotation\EntityHierarchy
  *
  * @Annotation
  * @Target({"CLASS", "PROPERTY"})

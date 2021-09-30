@@ -30,7 +30,7 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Base\Entity\User\Token;
 use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
-use Base\Database\Annotation\Hashify;
+use Base\Annotations\Annotation\Hashify;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;

@@ -3,7 +3,7 @@
 namespace Base\Security;
 
 use App\Entity\User;
-use Base\Database\Annotation\Hashify;
+use Base\Annotations\Annotation\Hashify;
 use Base\Entity\User\Notification;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;

@@ -29,10 +29,10 @@ use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 
-use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Annotation\Timestamp;
-use Base\Database\Annotation\Uploader;
-use Base\Database\Annotation\Hashify;
+use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\Timestamp;
+use Base\Annotations\Annotation\Uploader;
+use Base\Annotations\Annotation\Hashify;
 use Base\Enum\UserRole;
 use Base\Service\BaseService;
 use DateTime;

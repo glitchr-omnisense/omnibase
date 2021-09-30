@@ -2,8 +2,8 @@
 
 namespace Base\DatabaseSubscriber;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManager;

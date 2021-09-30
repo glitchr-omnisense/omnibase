@@ -2,7 +2,7 @@
 
 namespace Base\Repository;
 
-use Base\Database\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\EntityHierarchy;
 use Base\Entity\Thread;
 use Doctrine\Persistence\Event\ManagerEventArgs;
 use Doctrine\Persistence\ManagerRegistry;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database;
+namespace Base\Annotations;
 
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;

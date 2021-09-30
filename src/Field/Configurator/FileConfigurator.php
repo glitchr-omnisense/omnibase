@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Database\Annotation\Uploader;
+use Base\Annotations\Annotation\Uploader;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;

@@ -29,6 +29,21 @@ class BaseConfiguration implements ConfigurationInterface
     {
         $rootNode
             ->children()
+
+                ->arrayNode('database')->addDefaultsIfNotSet()
+                ->children()
+                    ->arrayNode('excluded_fields')
+                        ->defaultValue(['id', 'locale', 'translatable'])
+                        ->beforeNormalization()
+                            ->ifString()
+                            ->then(function ($v) { return preg_split('/\s*,\s*/', $v); })
+                    ->end()
+                    ->prototype('scalar')
+                        ->info('Global list of fields to exclude from form generation. (Default: id, locale, translatable)')->end()
+                    ->end()
+                ->end()
+                ->end()
+
                 ->arrayNode('user')->addDefaultsIfNotSet()
                     ->children()
                         ->booleanNode('validation')

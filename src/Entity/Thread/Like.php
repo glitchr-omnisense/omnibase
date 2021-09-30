@@ -8,7 +8,7 @@ use App\Entity\Thread;
 use App\Repository\Thread\LikeRepository;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\DiscriminatorEntry;
 
 /**
  * @ORM\Entity(repositoryClass=LikeRepository::class)

@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 
 /**
  * Class GeneratedUuid
- * package Base\Database\Annotation\GeneratedUuid
+ * package Base\Annotations\Annotation\GeneratedUuid
  *
  * @Annotation
  * @Target({"PROPERTY"})

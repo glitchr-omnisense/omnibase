@@ -8,9 +8,9 @@ use Base\Repository\Thread\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-use Base\Database\Annotation\Slugify;
+use Base\Annotations\Annotation\Slugify;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\DiscriminatorEntry;
 
 use Base\Traits\ColumnAliasTrait;
 

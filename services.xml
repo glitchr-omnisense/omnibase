@@ -204,15 +204,24 @@
         <service id="Base\Database\NamingStrategy"  public="true" />
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
 
+        <service id="Doctrine\Persistence\Mapping\ClassMetadataFactory">
+            <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />
+        </service>
+
+        <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
+            <argument type="service" id="base.database.metadata_factory" />
+            <argument type="service" id="parameter_bag" />
+        </service>
+
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.annotation_reader" />
         </service>
 
-        <service id="Base\Database\AnnotationReader" public="true">
-            <argument type="service" id="parameter_bag" />
+        <service id="Base\Annotations\AnnotationReader" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="cache.app" />
         </service>
 
@@ -330,13 +339,20 @@
 
         <service id="Base\Field\Type\TranslatableType">
             <tag name="form.type" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.locale_provider" />
+        </service>
+
+        <service id="Base\Field\Type\EntityType">
+            <tag name="form.type" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\Field\Type\RelationType">
             <tag name="form.type" />
             <argument type="service" id="doctrine" />
         </service>
+
 
         <service id="Base\Field\Type\FontAwesomeType">
             <tag name="form.type" />

@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
 use BaconQrCode\Encoder\Encoder;
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use DateTime;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -20,7 +20,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\Common\Util\ClassUtils;
 /**
  * Class Hashify
- * package Base\Database\Annotation\Hashify
+ * package Base\Annotations\Annotation\Hashify
  *
  * @Annotation
  * @Target({"PROPERTY"})

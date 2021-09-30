@@ -7,7 +7,7 @@ use App\Entity\Thread;
 
 use Base\Repository\MentionRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\DiscriminatorEntry;
 
 /**
  * @ORM\Entity(repositoryClass=MentionRepository::class)

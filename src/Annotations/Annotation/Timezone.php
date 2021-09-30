@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Database\Annotation;
+namespace Base\Annotations\Annotation;
 
-use Base\Database\AbstractAnnotation;
-use Base\Database\AnnotationReader;
+use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\AnnotationReader;
 use DateTime;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * Class Timezone
- * package Base\Database\Annotation\Timezone
+ * package Base\Annotations\Annotation\Timezone
  *
  * @Annotation
  * @Target({"PROPERTY"})

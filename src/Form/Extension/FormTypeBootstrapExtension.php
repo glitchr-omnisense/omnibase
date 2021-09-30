@@ -38,7 +38,10 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(['bootstrap' => $this->defaultEnabled]);
+        $resolver->setDefaults([
+            'bootstrap' => $this->defaultEnabled,
+            'bootstrap_label' => true
+        ]);
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
@@ -82,10 +85,12 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
                 default:
                     self::addAttribute("class", "form-control", $view);
+                    if(!$options["bootstrap_label"]) $view->vars["label"] = false;
             }
-
-            if(!array_key_exists("placeholder", $attr) || $attr["placeholder"] == null)
-                $view->vars["attr"]["placeholder"] = $label;
+ 
+            if(!array_key_exists("placeholder", $attr) || $attr["placeholder"] == null) {
+                if(!$options["bootstrap_label"]) $view->vars["attr"]["placeholder"] = $label;
+            }
 
         }
     }
