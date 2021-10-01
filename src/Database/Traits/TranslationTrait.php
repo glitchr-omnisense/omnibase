@@ -25,7 +25,7 @@ trait TranslationTrait
         // By default, the translatable class has the same name but without the "Translation" suffix
         return substr(static::class, 0, -11);
     }
-    
+
     /**
      * Will be mapped to translatable entity by TranslatableSubscriber
      *
@@ -41,7 +41,7 @@ trait TranslationTrait
     }
 
     /**
-     * @ORM\Column(type="string", length=16)
+     * @ORM\Column(type="string", length=5)
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;

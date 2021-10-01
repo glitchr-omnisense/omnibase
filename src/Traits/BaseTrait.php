@@ -3,6 +3,7 @@
 namespace Base\Traits;
 
 use Base\Service\BaseService;
+use Base\Service\LocaleProviderInterface;
 use Base\Twig\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
@@ -25,6 +26,7 @@ trait BaseTrait
     public static function getDataDir(): string { return BaseService::getProjectDir() . "/data"; }
 
     public static function getRouter(): ?RouterInterface { return BaseService::$router; }
+    public static function getLocaleProvider(): ?LocaleProviderInterface { return BaseService::$localeProvider; }
     public static function getTwigExtension(): ?BaseTwigExtension { return BaseService::$twigExtension; }
     public static function getTwig(): ?Environment { return BaseService::$twig; }
     public static function getDoctrine() { return BaseService::$doctrine; }

@@ -54,6 +54,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.locale_provider" />
             <argument type="service" id="notifier" />
             <argument type="service" id="notifier.channel_policy" />
             <argument type="service" id="slugger" />
@@ -209,7 +210,7 @@
         </service>
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
-            <argument type="service" id="base.database.metadata_factory" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
         </service>
 

@@ -3,6 +3,7 @@
 namespace Base\Service\Traits;
 
 use Base\Service\BaseService;
+use Base\Service\LocaleProviderInterface;
 use Base\Twig\BaseTwigExtension;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;
@@ -41,6 +42,12 @@ trait BaseCommonTrait {
         self::$translator = $translator; 
         self::$twigExtension = new BaseTwigExtension($translator);
     }
+
+    /**
+     * @var LocaleProviderInterface
+     */
+    public static $localeProvider = null;
+    public static function setLocaleProvider(?LocaleProviderInterface $localeProvider) {  self::$localeProvider = $localeProvider; }
 
     /**
      * @var SluggerInterface

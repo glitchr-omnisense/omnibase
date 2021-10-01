@@ -3,6 +3,10 @@
 namespace Base\Database\Traits;
 
 use Base\Database\TranslationInterface;
+use Base\Exception\MissingLocaleException;
+use Base\Exception\TranslationAmbiguityException;
+use Base\Service\BaseService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Exception;
 
 trait TranslatableTrait
@@ -33,19 +37,30 @@ trait TranslatableTrait
     }
 
     /**
-     * @ORM\Column(type="integer")
-     */
-    protected $translatable_id;
-
-    /**
      * @var TranslationInterface[]|Collection
      */
     protected $translations;
 
-    public function addTranslation(TranslationInterface $translation): void
+    public function getTranslations()
     {
-        $this->getTranslations()->set((string) $translation->getLocale(), $translation);
-        $translation->setTranslatable($this);
+        if ($this->translations === null)
+            $this->translations = new ArrayCollection();
+
+        return $this->translations;
+    }
+
+    public function addTranslation($translation)
+    {
+        if($translation !== null) {
+
+            if(!$translation->getLocale())
+                throw new MissingLocaleException("Missing locale information.");
+
+            $this->getTranslations()->set($translation->getLocale(), $translation);
+            $translation->setTranslatable($this);
+        }
+
+        return $this;
     }
 
     public function removeTranslation(TranslationInterface $translation): void
@@ -55,53 +70,29 @@ trait TranslatableTrait
 
     public function translate(?string $locale = null)
     {
-        if( $locale = $this->getLocale() ) {
+        $locale = $locale ?? BaseService::getLocaleProvider()->getLocale();
+        if(!$locale) throw new MissingLocaleException("Missing locale information.");
 
-            $translationEntityClass = self::getTranslationEntityClass();
-            return $translations[$locale] ?? new $translationEntityClass;
+        $translations = $this->getTranslations();
+        $translationClass = self::getTranslationEntityClass();
+        
+        $translation = $translations[$locale] ?? null;
+        if(!$translation) {
+
+            if( \count($keys = $translations->getKeys()) > 1 )
+                throw new TranslationAmbiguityException("Translation ambiguity exception.");
+
+            $firstKey = $keys[0] ?? null;
+            $translation = $firstKey ? $translations[$firstKey] : null;            
+            if(!$translation) {
+
+                $translation = new $translationClass;
+                $translation->setLocale($locale);
+
+                $this->addTranslation($translation);
+            }
         }
 
-        throw new Exception("Unknown locale provided in \"".get_class()."\"");
-    }
-
-    /**
-     * @var string
-     */
-    protected string $locale = "";
-    public function getLocale(): string
-    {
-        $locale = $this->locale;
-        if( in_array($locale, $this->fallbackLocales) ) return $locale;
-
-        return $this->defaultLocale;
-    }
-    public function setLocale(string $locale)
-    {
-        $this->locale = $locale;
-        return $this;
-    }
-
-    /**
-     * @var string
-     */
-    protected string $defaultLocale = "";
-
-    public function getDefaultLocale(): string { return $this->defaultLocale; }
-    public function setDefaultLocale(string $defaultLocale)
-    {
-        $this->defaultLocale = $defaultLocale;
-        return $this;
-    }
-
-    /**
-     * @var array
-     */
-    protected array $fallbackLocales = [];
-
-    public function getFallbackLocales(): array { return $this->fallbackLocale ?? []; }
-    public function setFallbackLocales(array $fallbackLocales)
-    {
-        $this->fallbackLocales = $fallbackLocales;
-        return $this;
+        return $translation;
     }
 }

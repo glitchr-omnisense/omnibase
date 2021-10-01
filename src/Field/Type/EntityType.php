@@ -31,7 +31,7 @@ class EntityType extends AbstractType
 
                 $fieldType = $field['field_type'] ?? null;
                 unset($field['field_type']);
-    
+
                 $form->add($fieldName, $fieldType, $field);
             }
         });

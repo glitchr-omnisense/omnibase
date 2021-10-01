@@ -41,13 +41,24 @@ class Thread implements TranslatableInterface
     use BaseTrait;
     
     use TranslatableTrait;
-    public function getTitle()  : ?string { return $this->translate()->getTitle(); }
+    public function getTitle()  : ?string { return $this->translate()->getTitle()  ; }
     public function getExcerpt(): ?string { return $this->translate()->getExcerpt(); }
     public function getContent(): ?string { return $this->translate()->getContent(); }
     
-    public function setTitle(?string $title)   { return $this->translate()->setTitle($title); }
-    public function setExcerpt(?string $excerpt) { return $this->translate()->setExcerpt($excerpt); }
-    public function setContent(?string $content) { return $this->translate()->setContent($content); }
+    public function setTitle(?string $title) {
+        $this->translate()->setTitle($title);  
+        return $this; 
+    }
+
+    public function setExcerpt(?string $excerpt) { 
+        $this->translate()->setExcerpt($excerpt); 
+        return $this; 
+    }
+
+    public function setContent(?string $content) { 
+        $this->translate()->setContent($content); 
+        return $this; 
+    }
 
     /**
      * @ORM\Id
@@ -77,7 +88,7 @@ class Thread implements TranslatableInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * @Slugify(reference="title")
+     * @Slugify(reference="translations.title")
      */
     protected $slug;
 
@@ -143,10 +154,11 @@ class Thread implements TranslatableInterface
 
         $this->setParent($parent);
         $this->addAuthor($author);
+        $this->setTitle($title);
 
-        $this->title  = $title;
-        $this->slug   = $slug;
-        $this->state = ThreadState::DRAFT;
+        $this->slug = $slug;
+
+        $this->setState(ThreadState::DRAFT);
     }
 
     public function __toString()

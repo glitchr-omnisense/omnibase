@@ -2,6 +2,8 @@
 
 namespace Base\Annotations;
 
+use Base\Service\BaseService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -113,12 +115,34 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function hasField($entity, string $property) { return property_exists($entity, $property); }
     public static function getFieldValue($entity, string $property)
     {
+        if(!$entity)
+            throw new \Exception("Entity is null for property \"$property\"");
+
         $classMetadata = self::getClassMetadata(get_class($entity));
+        if( ($dot = strpos($property, ".")) > 0 ) {
+        
+            $field    = trim(substr($property, 0, $dot));
+            $property = trim(substr($property,    $dot+1));
+            
+            if(!$classMetadata->hasAssociation($field))
+                throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
+
+            $targetEntity = $classMetadata->getAssociationMapping($field)['targetEntity'];
+            $entity = self::getFieldValue($entity, $field);
+            if ($entity instanceof ArrayCollection)
+                $entity = $entity->first();
+            else if(is_array($entity))
+                $entity = current($entity) ?? null;
+            
+            return self::getFieldValue($entity, $property);
+        }
+        
         if ($classMetadata->hasField($property))
             return $classMetadata->getFieldValue($entity, $property);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         return $propertyAccessor->getValue($entity, $property);
+            
     }
     public static function setFieldValue($entity, string $property, $value)
     {

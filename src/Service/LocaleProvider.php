@@ -33,8 +33,9 @@ class LocaleProvider implements LocaleProviderInterface
      */
     protected $translator = null;
     
-    protected string $defaultLocale;
-    protected array $fallbackLocales = [];
+    protected static ?string $defaultLocale   = null;    
+    protected static ?array $fallbackLocales  = null;
+    protected static ?array $availableLocales = null;
 
     public function __construct(RequestStack $requestStack, ParameterBagInterface $parameterBag, ?TranslatorInterface $translator)
     {
@@ -44,17 +45,18 @@ class LocaleProvider implements LocaleProviderInterface
 
         if(! $parameterBag->has("kernel.default_locale")) 
             throw new MissingLocaleException("Missing default locale.");
-        
-        $this->defaultLocale    = $this->normalize($parameterBag->get("kernel.default_locale"));
-        $this->fallbackLocales  = $this->normalizeArray($this->translator->getFallbackLocales());
-        $this->availableLocales = array_unique(array_merge([$this->defaultLocale], $this->fallbackLocales));
+            
+        self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($parameterBag->get("kernel.default_locale"));
+        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalizeArray($this->translator->getFallbackLocales());
     }
 
-    protected static array $locales = [];
+    private static ?array $locales = null;
+
     public static function getLocales() 
     { 
-        if(empty(self::$locales)) {
+        if(!self::$locales) {
 
+            self::$locales = [];
             foreach(Locales::getLocales() as $locale) {
 
                 if(!preg_match('/[a-z]{2}.[A-Z]{2}/', $locale)) continue;
@@ -70,29 +72,8 @@ class LocaleProvider implements LocaleProviderInterface
         return self::$locales;
     }
     
-    public function normalize(?string $locale): ?string { return $this->getLocale($locale); }
-    public function normalizeArray(?array $locales): ?array
-    {
-        foreach($locales as $key => $locale)
-            $locales[$key] = $this->getLocale($locale);
-        
-        return $locales;
-    }
-
-    public function getDefaultLocale(): ?string
-    {
-        return $this->defaultLocale;
-    }
-    
-    public function getFallbackLocales(): array
-    {
-        return $this->fallbackLocales;
-    }
-
-    public function getAvailableLocales(): array
-    {
-        return $this->availableLocales;
-    }
+    public static function normalize(?string $locale): ?string { return self::getLang($locale) . self::SEPARATOR . self::getCountry($locale); }
+    public static function normalizeArray(?array $locales): ?array { return array_map(fn ($l) => self::normalize($l), $locales); }
 
     public function getLocale(?string $locale = null): ?string
     {
@@ -115,23 +96,30 @@ class LocaleProvider implements LocaleProviderInterface
         if(!$locale)
             throw new MissingLocaleException("Missing locale.");
 
-        return $this->getLang($locale) . self::SEPARATOR . $this->getCountry($locale);
+        return self::normalize($locale);
     }
 
-    public function getLang(string $locale): string
+    public static function getDefaultLocale(): ?string { return self::$defaultLocale; }
+    public static function getFallbackLocales(): array { return self::$fallbackLocales; }
+    public static function getAvailableLocales(): array 
+    { 
+        return array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales));
+    }
+    
+    public static function getLang(string $locale): string
     {
         $lang = substr($locale,0,2);
-        if(!array_key_exists($lang, $this->getLocales()))
-            $lang = substr($this->getDefaultLocale(),0,2);
+        if(!array_key_exists($lang, self::getLocales()))
+            $lang = substr(self::getDefaultLocale(),0,2);
 
         return $lang;
     }
 
-    public function getCountry(string $locale): string
+    public static function getCountry(string $locale): string
     {
-        $lang = $this->getLang($locale);
-        $langCountries = $this->getLocales()[$lang];
-        $locale = in_array($locale, $langCountries) ? $locale : ($langCountries[0] ?? $this->getDefaultLocale());
+        $lang = self::getLang($locale);
+        $langCountries = self::getLocales()[$lang];
+        $locale = in_array($locale, $langCountries) ? $locale : ($langCountries[0] ?? self::getDefaultLocale());
 
         return substr($locale,3,2);
     }

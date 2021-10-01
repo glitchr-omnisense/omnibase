@@ -4,6 +4,7 @@ namespace Base\Database\Factory;
 
 use Base\Field\Type\EntityType;
 use Base\Service\BaseService;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
@@ -14,18 +15,18 @@ use Symfony\Component\Form\FormInterface;
 class ClassMetadataManipulator
 {
     /** 
-     * @var ClassMetadataFactory
+     * @var EntityManagerInterface
      * */
-    protected $classMetadataFactory;
+    protected $entityManager;
 
     /**
      * @var array
      */
     protected array $globalExcludedFields;
 
-    public function __construct(ClassMetadataFactory $classMetadataFactory, ParameterBagInterface $parameterBag)
+    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
-        $this->classMetadataFactory = $classMetadataFactory;
+        $this->entityManager = $entityManager;
 
         $this->globalExcludedFields = [];
         if ( ($matches = preg_grep('/^base.database.excluded_fields\.[0-9]*$/', array_keys($parameterBag->all()))) )
@@ -34,7 +35,7 @@ class ClassMetadataManipulator
 
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
-        $metadata = $this->classMetadataFactory->getMetadataFor($class);
+        $metadata = $this->entityManager->getClassMetadata($class);
 
         if(!BaseService::isAssoc($fields))
             throw new \Exception("Associative array expected for 'fields' parameter");
@@ -113,7 +114,7 @@ class ClassMetadataManipulator
 
     public function getAssociationTargetClass(string $class, string $fieldName): string
     {
-        $metadata = $this->classMetadataFactory->getMetadataFor($class);
+        $metadata = $this->entityManager->getClassMetadata($class);
 
         if (!$metadata->hasAssociation($fieldName)) {
             throw new \RuntimeException(sprintf('Unable to find the association target class of "%s" in %s.', $fieldName, $class));
@@ -178,7 +179,7 @@ class ClassMetadataManipulator
                 continue;
             }
 
-            return $this->classMetadataManipulator->getAssociationTargetClass($dataClass, $form->getName());
+            return $this->getAssociationTargetClass($dataClass, $form->getName());
         }
 
         throw new \RuntimeException('Unable to get "data_class" in form "'.$form->getName().'"');

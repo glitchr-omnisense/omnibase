@@ -82,7 +82,8 @@ final class BaseService implements RuntimeExtensionInterface
         KernelInterface $kernel,
         Environment $twig,
         ManagerRegistry $doctrine,
-        FormFactoryInterface $formFactory,
+        FormFactoryInterface $formFactory, 
+        LocaleProviderInterface $localeProvider,
         NotifierInterface $notifier, ChannelPolicyInterface $notifierPolicy,
         SluggerInterface $slugger, 
         AuthorizationCheckerInterface $authorizationChecker,
@@ -102,10 +103,11 @@ final class BaseService implements RuntimeExtensionInterface
         $this->tokenStorage = $tokenStorage;
         
         // Symfony basic services
-
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
         $this->rstack     = $this->container->get("request_stack");
+
+        $this->setLocaleProvider($localeProvider);
 
         $this->setTwig($twig);
         $this->setDoctrine($doctrine);

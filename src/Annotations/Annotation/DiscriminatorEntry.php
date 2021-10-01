@@ -55,6 +55,8 @@ class DiscriminatorEntry extends AbstractAnnotation
 
         // Apply new discriminator
         $classMetadata->discriminatorMap   = array_flip($discriminatorValues);
-        $classMetadata->discriminatorValue = $discriminatorValues[$className];
+        $classMetadata->discriminatorValue = $discriminatorValues[$classMetadata->getName()] ?? null;
+        if($classMetadata->discriminatorValue === null)
+            throw new \Exception("Missing discriminator entry in ".$classMetadata->getName());
     }
 }

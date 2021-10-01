@@ -98,8 +98,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $data = !empty($data) ? array_map(fn ($fname) => new UploadedFile($fname, $fname), $data) : [];
                 if(!$options["multiple"]) $data = $data[0] ?? null;
             }
-
-            dump($data);
+            
             $event->setData($data);
         });
         

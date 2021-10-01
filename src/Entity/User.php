@@ -35,6 +35,7 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\Annotation\Hashify;
 use Base\Enum\UserRole;
 use Base\Service\BaseService;
+use Base\Service\LocaleProvider;
 use DateTime;
 use Exception;
 use Symfony\Component\HttpFoundation\File\File;
@@ -273,7 +274,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getLocale(): string { return $this->locale; }
     public function setLocale(?string $locale = null): self
     {
-        $this->locale = $locale ?? User::getCookie("locale") ?? null;
+        $this->locale = $locale ?? User::getCookie("locale") ?? LocaleProvider::getDefaultLocale();
         if(!$this->locale) throw new MissingLocaleException("Missing locale.");
 
         return $this;

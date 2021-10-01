@@ -312,7 +312,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
             $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
             $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
             $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()];
-        }
+        } 
 
         if (
             $metadata->discriminatorValue

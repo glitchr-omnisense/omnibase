@@ -5,6 +5,7 @@ namespace Base\Service;
 interface LocaleProviderInterface
 {
     public function getLocale(): ?string;
-    public function getDefaultLocale(): ?string;
-    public function getFallbackLocales(): array;
+    public static function getDefaultLocale(): ?string;
+    public static function getFallbackLocales(): array;
+    public static function getAvailableLocales(): array;
 }

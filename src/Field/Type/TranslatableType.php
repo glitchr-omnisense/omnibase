@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
+use Base\Exception\MissingLocaleException;
 use Base\Field\Traits\SelectTypeInterface;
 use Base\Field\Traits\SelectTypeTrait;
 use Base\Service\BaseService;
@@ -26,16 +27,8 @@ class TranslatableType extends AbstractType
     protected $fallbackLocales = [];
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
     {
-        $this->localeProvider = $localeProvider;
         $this->classMetadataManipulator = $classMetadataManipulator;
-    }
-
-    public static function getSubscribedEvents(): array
-    {
-        return [
-            FormEvents::PRE_SET_DATA => 'preSetData',
-            FormEvents::SUBMIT => 'submit',
-        ];
+        $this->localeProvider = $localeProvider;
     }
 
     public function getFields(FormInterface $form, array $options): array
@@ -71,9 +64,17 @@ class TranslatableType extends AbstractType
 
     private function getTranslationDataClass(FormInterface $form): string
     {
-        do {
-            $translatableClass = $form->getConfig()->getDataClass();
-        } while ((null === $translatableClass) && $form->getConfig()->getInheritData() && (null !== $form = $form->getParent()));
+        $translatableClass = $form->getConfig()->getDataClass();
+        $translatableClass = is_subclass_of($form->getConfig()->getDataClass(), TranslatableInterface::class) ? $form->getConfig()->getDataClass() : null;
+
+        while($translatableClass === null) {
+
+            $translatableClass = $form->getParent()->getConfig()->getDataClass();
+            $form = $form->getParent();
+        };
+
+        if(!$translatableClass)
+            throw new \Exception("Missing \"data_class\" option in FormType \"".$form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType()).")");
 
         if(!is_subclass_of($translatableClass, TranslatableInterface::class))
             throw new \Exception("Translatable interface not implemented in \"".$translatableClass."\"");
@@ -93,7 +94,8 @@ class TranslatableType extends AbstractType
 
             $options = $form->getConfig()->getOptions();
             $fields = $this->getFields($form, $options);
-            $translationClass = $this->getTranslationDataClass($formParent);
+
+            $translationClass = $this->getTranslationDataClass($form);
 
             foreach ($options['available_locales'] as $locale) {
 
@@ -105,7 +107,7 @@ class TranslatableType extends AbstractType
                     'data_class' => $translationClass,
                     'required' => \in_array($locale, $options['required_locales'], true),
                     'fields' => $fields[$locale],
-                    'excluded_fields' => $options['excluded_fields'],
+                    'excluded_fields' => $options['excluded_fields']
                 ]);
             }
         });
@@ -113,18 +115,17 @@ class TranslatableType extends AbstractType
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) {
 
             $data = $event->getData();
-
             foreach ($data as $locale => $translation) {
-                // Remove useless Translation object
-                if ((method_exists($translation, 'isEmpty') && $translation->isEmpty()) // Knp
-                    || empty($translation) // Default
-                ) {
-                    $data->removeElement($translation);
-                    continue;
-                }
 
-                $translation->setLocale($locale);
+                if ($translation === null)
+                    $data->removeElement($translation);
+                else if ($translation->isEmpty())
+                    $data->removeElement($translation);
+                else 
+                    $translation->setLocale($locale);
             }
+
+            $event->setData($data);
         });
     }
 
@@ -141,6 +142,8 @@ class TranslatableType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
+            'label' => false,
+            
             'locale'            => $this->localeProvider->getLocale(),
             'locale_options'    => [],
             'default_locale'    => $this->localeProvider->getDefaultLocale(),
@@ -148,12 +151,10 @@ class TranslatableType extends AbstractType
             'available_locales' => $this->localeProvider->getAvailableLocales(),
 
             'by_reference' => false,
-            'empty_data' => fn (FormInterface $form) => new ArrayCollection(),
+            'empty_data' => fn(FormInterface $form) => new ArrayCollection,
             
-            'fields' => [
-                "content" => ["field_type" => QuillType::class]
-            ],
-            'excluded_fields' => ["excerpt"],
+            'fields' => [],
+            'excluded_fields' => [],
         ]);
     }
 
