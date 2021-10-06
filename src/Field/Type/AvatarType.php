@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Annotations\Annotation\Uploader;
 use Base\Service\BaseService;
 use Exception;
 use InvalidArgumentException;
@@ -36,7 +37,7 @@ class AvatarType extends AbstractType
     {
         $resolver->setDefaults([
             'thumbnail'   => "/bundles/base/user.svg",
-            'cropper'     => null,
+            'cropper'     => null
         ]);
     }
 
@@ -60,8 +61,41 @@ class AvatarType extends AbstractType
         // - cropper: <id>_cropper   = cropper
         // - cropper: <id>_thumbnail = thumbnail
         //
+        $view->vars['avatar']        = $view->vars['files'][0] ?? null;
+        $view->vars['files'] = [];
+         
+        if(!($view->vars["accept"] ?? false) ) 
+             $view->vars["accept"] = "image/*";
 
         $view->vars["thumbnail"] = $options["thumbnail"];
+        if($options["cropper"]) {
+            
+            $this->baseService->addJavascriptCode(
+                "<script>
+
+                $('#".$view->vars["id"]."_file').on('change', function() {
+
+                    if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn2').css('display', 'flex');
+                    else $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
+                });
+
+                </script>");
+                
+        } else {
+
+            $this->baseService->addJavascriptCode(
+                "<script>
+
+                $('#".$view->vars["id"]."_raw').on('change', function() {
+
+                    if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn2').css('display', 'flex');
+                    else $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
+                });
+
+                </script>");
+
+        }
+
         $this->baseService->addJavascriptCode(
             "<script>
 
@@ -73,12 +107,6 @@ class AvatarType extends AbstractType
             $('#".$view->vars["id"]."_deleteBtn').on('click', function() {
                 $('#".$view->vars["id"]."_raw').val('');
                 $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
-            });
-          
-            $('#".$view->vars["id"]."_raw').on('change', function() {
-
-                if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn2').css('display', 'block');
-                else $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
             });
 
             </script>");

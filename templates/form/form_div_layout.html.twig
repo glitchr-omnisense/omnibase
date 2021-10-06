@@ -11,13 +11,11 @@
 {%- endblock form_errors -%}
 
 {%- block quill_widget -%}
-<input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %}
-    value="{{ value }}" {% endif %} />
+<input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %} />
 <div id="{{ id }}_editor" {{ block('attributes') }}>
     {{ value | raw }}
 </div>
 {%- endblock quill_widget -%}
-
 
 {%- block translatable_widget -%}
 {% if form.children|length == 1 %}
@@ -31,10 +29,13 @@
     <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
     {% for formLocale, formChild in form.children %}
         <li class="nav-item" role="presentation">
-            {% set lang    = formLocale|split('_')[0] %}
-            {% set country = formLocale|split('_')[1] %}
+
+            {% set lang    = formLocale|lang %}
+            {% set country = formLocale|country %}
             <button class="nav-link {% if locale == formLocale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-                <img class="country-flag" src="/bundles/base/flags/{{ country }}.png" alt="{{ formLocale }}">
+                <label {% if formChild.vars['required'] %}class="required"{% endif %}>
+                    <img class="country-flag {% if defaultLocale == formLocale %}default{% endif %} " src="/bundles/base/flags/{{ country }}.png" alt="{{ formLocale }}">
+                </label>
             </button>
         </li>
     {% endfor %}
@@ -42,8 +43,8 @@
 
     <div class="tab-content" id="{{ form.vars['id'] }}_tab">
     {% for formLocale, formChild in form.children %}
-        {% set lang    = formLocale|split('_')[0] %}
-        {% set country = formLocale|split('_')[1] %}
+        {% set lang    = formLocale|lang %}
+        {% set country = formLocale|country %}
         <div class="tab-pane fade {% if locale == formLocale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
             {% for row in formChild %}
             {{ form_row(row) }}<br/>
@@ -56,10 +57,20 @@
 
 {%- block slug_widget -%}
 
+{# Search for target inside form based on parent including translation #}
+{% set form = form.parent %}
+{% for child in target %}
+    {% set form = form[child] %}
+    {% if child == "translations" %}
+        {% set form = form[form.vars.defaultLocale]|default(form[form.vars.locale]) %}
+    {% endif %}
+{% endfor %}
+
+{# Define slug parameters #}
 {% set attr = attr|merge({
-        'data-slug-field': '',
-        'data-target': form.parent[target].vars.id
-    }) %}
+    'data-slug-field': '',
+    'data-target': form.vars.id
+}) %}
 
 <div class="input-group">
     {{ block('form_widget') }}
@@ -72,11 +83,17 @@
 {%- endblock -%}
 
 {%- block avatar_widget -%}
+
+{# {% set attr = attr|merge({
+    'data-slug-field': '',
+    'data-target': form.vars.id
+}) %} #}
+
 <div class="avatarupload">
     {{ form_widget(form, { attr: form.vars.attr }) }}
 
     {% if allow_delete %}
-    <div id="{{id}}_deleteBtn2" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
+    <div id="{{id}}_deleteBtn2" class="deleteBtn" style="{% if avatar is empty %}display:none;{% endif %}">
         <i class="fas fa-plus-circle fa-2x"></i>
     </div>
     {% endif %}
@@ -88,12 +105,12 @@
 
     {% if not multiple %}
         <figure>
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{thumbnail}}" />
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | default(thumbnail)}}" />
             <figcaption id="{{id}}_figcaption">
                 <i class="fas fa-plus-circle fa-3x"></i>
             </figcaption>
         </figure>
-        
+
         {% if cropper %}
 
             <!-- Modal -->
@@ -129,6 +146,7 @@
 {%- block fileupload_widget -%}
 
 <div class="fileupload">
+    <div class="field">
     {% if multiple and dropzone %}
 
         <div id="{{ id }}_dropzone" {{ block('attributes') }}></div>
@@ -139,24 +157,26 @@
         {% set placeholder = '' %}
         {% set title = '' %}
         {% set filesLabel = 'files'|trans %}
+        
         {% if files %}
-        {% if multiple %}
-        {% set placeholder = files|length ~ ' ' ~ filesLabel %}
-        {% else %}
-        {% set placeholder = (files|first).filename %}
-        {% set title = (files|first).mTime|date %}
-        {% endif %}
+            {% if multiple %}
+                {% set placeholder = files|length ~ ' ' ~ filesLabel %}
+            {% else %}
+                {% set placeholder = (files|first).filename %}
+                {% set title = (files|first).mTime|date %}
+            {% endif %}
         {% endif %}
 
-            {{ form_widget(form.file, { attr: form.file.vars.attr }) }}
-            {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept, placeholder: placeholder, title: title, 'data-files-label': filesLabel }) }) }}
-            {% if allow_delete %}
-            <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
-                <span style="cursor:pointer;">&#x2715;</span>
-            </div>
-            {% endif %}
+        {{ form_widget(form.file, { attr: form.file.vars.attr }) }}
+        {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept, placeholder: placeholder, title: title, 'data-files-label': filesLabel }) }) }}
+        {% if allow_delete %}
+        <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
+            <span style="cursor:pointer;">&#x2715;</span>
+        </div>
+        {% endif %}
 
     {% endif %}
+    </div>
     {% if max_filesize %}
     <div class="form-text text-muted">The maximum file size allowed is {{max_filesize|filesize}}.</div>
     {% endif %}

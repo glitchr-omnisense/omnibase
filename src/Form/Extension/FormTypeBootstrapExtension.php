@@ -87,7 +87,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
                     self::addAttribute("class", "form-control", $view);
                     if(!$options["bootstrap_label"]) $view->vars["label"] = false;
             }
- 
+
             if(!array_key_exists("placeholder", $attr) || $attr["placeholder"] == null) {
                 if(!$options["bootstrap_label"]) $view->vars["attr"]["placeholder"] = $label;
             }

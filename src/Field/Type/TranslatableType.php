@@ -36,12 +36,21 @@ class TranslatableType extends AbstractType
         $translatableClass = $this->getTranslationDataClass($form);
         $rawFields = $this->classMetadataManipulator->getFields($translatableClass, $options["fields"], $options["excluded_fields"]);
 
+        $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
+        if(count($locales) == 1) $defaultLocale = $locales[0];
+        else $defaultLocale = $options["default_locale"];
+
         foreach ($rawFields as $fieldName => $fieldConfig) {
+
+            $fieldConfig["required"] = $fieldConfig["required"] ?? false;
 
             // Simplest case: General options for all locales
             if (!isset($fieldConfig['locale_options'])) {
+
                 foreach ($options['available_locales'] as $locale) {
+                    
                     $fields[$locale][$fieldName] = $fieldConfig;
+                    $fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
                 }
 
                 continue;
@@ -52,10 +61,12 @@ class TranslatableType extends AbstractType
             unset($fieldConfig['locale_options']);
 
             foreach ($options['available_locales'] as $locale) {
+
                 $localeFieldOptions = $localesFieldOptions[$locale] ?? [];
-                if (!isset($localeFieldOptions['display']) || (true === $localeFieldOptions['display'])) {
+                if (!isset($localeFieldOptions['display']) || (true === $localeFieldOptions['display']))
                     $fields[$locale][$fieldName] = $localeFieldOptions + $fieldConfig;
-                }
+
+                $fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
             }
         }
 
@@ -87,7 +98,6 @@ class TranslatableType extends AbstractType
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
             
             $form = $event->getForm();
-
             if (null === $formParent = $form->getParent()) {
                 throw new \RuntimeException('Parent form missing');
             }
@@ -97,17 +107,26 @@ class TranslatableType extends AbstractType
 
             $translationClass = $this->getTranslationDataClass($form);
 
-            foreach ($options['available_locales'] as $locale) {
+            $unavailableRequiredLocales = array_diff($options['required_locales'], $options['available_locales']);
+            if(!empty($unavailableRequiredLocales))
+                throw new MissingLocaleException("The locale(s) \"".implode(",", $unavailableRequiredLocales)."\" are missing, but required by FormType \"".$form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType()).")");
 
-                if (!isset($fields[$locale])) {
+            $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
+            foreach ($locales as $key => $locale) {
+
+                if (!isset($fields[$locale]))
                     continue;
-                }
 
-                $form->add($locale, EntityType::class, [
+                if(count($locales) == 1) $defaultLocale = $locale;
+                else $defaultLocale = $options["default_locale"];
+                
+                $required = \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
+
+                $form->add(str_replace("-", "_", $locale), EntityType::class, [
                     'data_class' => $translationClass,
-                    'required' => \in_array($locale, $options['required_locales'], true),
+                    'required' => $required,
                     'fields' => $fields[$locale],
-                    'excluded_fields' => $options['excluded_fields']
+                    'excluded_fields' => $options['excluded_fields'],
                 ]);
             }
         });
@@ -131,9 +150,9 @@ class TranslatableType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["locale"]           = $options["locale"];
-        $view->vars["defaultLocale"]    = $options["default_locale"];
-        $view->vars["availableLocales"] = $options["available_locales"];
+        $view->vars["locale"]           = str_replace("-", "_", $options["locale"]);
+        $view->vars["defaultLocale"]    = str_replace("-", "_", $options["default_locale"]);
+        $view->vars["availableLocales"] = str_replace("-", "_", $options["available_locales"]);
     }
 
     /**
@@ -146,6 +165,8 @@ class TranslatableType extends AbstractType
             
             'locale'            => $this->localeProvider->getLocale(),
             'locale_options'    => [],
+            
+            'single_locale'     => false,
             'default_locale'    => $this->localeProvider->getDefaultLocale(),
             'required_locales'  =>  [],
             'available_locales' => $this->localeProvider->getAvailableLocales(),
@@ -154,7 +175,8 @@ class TranslatableType extends AbstractType
             'empty_data' => fn(FormInterface $form) => new ArrayCollection,
             
             'fields' => [],
-            'excluded_fields' => [],
+            'excluded_fields' => []
+
         ]);
     }
 

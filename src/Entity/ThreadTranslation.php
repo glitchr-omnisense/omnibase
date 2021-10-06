@@ -37,13 +37,6 @@ class ThreadTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-
-    /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $title;
@@ -57,12 +50,6 @@ class ThreadTranslation implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $content;
-
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 
     public function getTitle(): ?string
     {

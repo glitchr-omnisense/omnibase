@@ -16,7 +16,12 @@ use Annotation as Test;
 use Base\Service\BaseService;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
-
+use League\Flysystem\Filesystem;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\FilesystemOperator;
+use League\Flysystem\Local\LocalFilesystemAdapter;
+use League\Flysystem\PathPrefixer;
+use League\FlysystemBundle\Lazy\LazyFactory;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionProperty;
@@ -42,7 +47,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache)
+    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, LazyFactory $lazyFactory)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -73,7 +78,16 @@ class AnnotationReader
 
         // Get entity manager for later use
         $this->entityManager = $entityManager;
+
+        // Lazy factory for flysystem
+        $this->lazyFactory = $lazyFactory;
     }
+
+    public function getProjectDir()
+    {
+        return dirname(__DIR__, 5);
+    }
+
     /**
      * @var EntityManager
      */
@@ -88,6 +102,40 @@ class AnnotationReader
         return $this->entityManager->getRepository($entity);
     }
 
+    public function getParameterBag()
+    {
+        return $this->parameterBag;
+    }
+
+    public function getFilesystem(string $storage)
+    {
+        return $this->lazyFactory->createStorage($storage, $storage);
+    }
+
+    public function getFilesystemPathPrefixer($storage): PathPrefixer
+    {
+        $reflectionProperty = new \ReflectionProperty(LocalFilesystemAdapter::class, 'prefixer');
+        $reflectionProperty->setAccessible(true);
+
+        $adapter = $this->getFilesystemAdapter($storage);
+        if($adapter instanceof LocalFilesystemAdapter)
+            return $reflectionProperty->getValue($adapter);
+
+        return null;
+    }
+
+    public function getFilesystemAdapter($storage): FilesystemAdapter
+    {
+        $reflectionProperty = new \ReflectionProperty(Filesystem::class, 'adapter');
+        $reflectionProperty->setAccessible(true);
+
+        if($storage instanceof FilesystemOperator)
+            $filesystem = $storage;
+        else if(is_string($storage))
+            $filesystem = $this->getFilesystem($storage); 
+
+        return $reflectionProperty->getValue($filesystem);
+    }
 
     /**
      * @var SimpleAnnotationReader

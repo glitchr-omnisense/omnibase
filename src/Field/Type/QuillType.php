@@ -103,8 +103,6 @@ class QuillType extends AbstractType
         }
         $this->baseService->addStylesheetFile($themeCssFile);
         $modules = $options["modules"] ?? [];
-
-        $id = $view->vars["id"];
         $editor = $view->vars["id"]."_editor";
 
         //
@@ -122,7 +120,7 @@ class QuillType extends AbstractType
                 var delta = ".$editor.".getContents();
                 var html = ".$editor.".root.innerHTML;
 
-                document.getElementById('" . $id . "').value = html;
+                document.getElementById('" . $view->vars["id"] . "').value = html;
 
             });
         </script>");

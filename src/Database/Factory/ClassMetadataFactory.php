@@ -4,6 +4,8 @@ namespace Base\Database\Factory;
 
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
+use Base\Exception\MissingDiscriminatorMapException;
+use Base\Exception\MissingDiscriminatorValueException;
 use Doctrine\ORM\Mapping\MappingException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -299,8 +301,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
 
             $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
-
-            if(!$metadata->discriminatorMap)
+            
+            if(!$metadata->discriminatorMap) {
+                
                 $metadata->discriminatorMap = array_filter(array_map(function($class) {
 
                     return (is_subclass_of($class, TranslatableInterface::class, true)) 
@@ -309,9 +312,19 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
                 }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
 
+                if(!in_array($metadata->getName(), $metadata->discriminatorMap)) 
+                    throw new MissingDiscriminatorMapException(
+                        "Discriminator map missing for \"".$metadata->getName().
+                        "\". Did you forgot to implement \"".TranslatableInterface::class.
+                        "\" in \"".$metadata->getName()::getTranslatableEntityClass()."\".");
+            }
+
             $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
             $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
-            $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()];
+            $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()] ?? null;
+
+            if(!$metadata->discriminatorValue) 
+                throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
         } 
 
         if (

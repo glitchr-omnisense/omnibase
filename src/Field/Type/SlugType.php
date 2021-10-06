@@ -34,10 +34,10 @@ final class SlugType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options): void
     {
-        $view->vars['target'] = $options['target'];
+        $targetPath = explode(".", $options["target"]);
+        $view->vars['target'] = $targetPath;
 
         $this->baseService->addJavascriptFile("/bundles/base/form-type-slug.js");
-
     }
 
     public function getParent(): string

@@ -200,13 +200,13 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(size="1024K", mime={"image/jpg", "image/png"})
+     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/jpg", "image/png"})
      * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      * @AssertBase\FileMimeType(type={"image/jpg", "image/png"}, groups={"new", "edit"})
      */
     protected $avatar;
 
-    public function getAvatar(): ?string { return $this->avatar; }
+    public function getAvatar(): ?string { return Uploader::getPublicPath($this, "avatar"); }
     public function getAvatarFile(): ?File { return Uploader::getFile($this, "avatar"); }
     public function setAvatar($avatar)
     {
@@ -274,9 +274,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getLocale(): string { return $this->locale; }
     public function setLocale(?string $locale = null): self
     {
+        if(empty($locale)) $locale = null;
         $this->locale = $locale ?? User::getCookie("locale") ?? LocaleProvider::getDefaultLocale();
-        if(!$this->locale) throw new MissingLocaleException("Missing locale.");
-
+        
+        if(!$this->locale)
+            throw new MissingLocaleException("Missing locale.");
+    
         return $this;
     }
 
@@ -284,7 +287,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function setTimezone(string $timezone = null): self
     {
         $this->timezone = $timezone ?? User::getCookie("timezone") ?? "UTC";
-        if( !in_array($timezone, timezone_identifiers_list()) )
+        if( !in_array($this->timezone, timezone_identifiers_list()) )
             $this->timezone = "UTC";
 
         return $this;

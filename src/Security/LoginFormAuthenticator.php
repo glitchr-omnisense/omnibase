@@ -72,8 +72,11 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 
         $badges   = [];
-        if( array_key_exists("_remember_me", $request->get('login')) )
+        if( array_key_exists("_remember_me", $request->get('login')) ) {
             $badges[] = new RememberMeBadge();
+            if($request->get('login')["_remember_me"]) end($badges)->enable();
+        }
+
         if( array_key_exists("_csrf_token", $request->get('login')) )
             $badges[] = new CsrfTokenBadge("login", $request->get('login')["_csrf_token"]);
         if( array_key_exists("password", $request->get('login')) )
@@ -88,6 +91,14 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewall): ?Response
     {
+        // Update client information
+        if( ($user = $token->getUser()) ) {
+            $user->setLocale();
+            $user->setTimezone();
+
+            $this->entityManager->flush();
+        }
+
         // Check if target path provided via $_POST..
         $targetPath = $request->request->get("_target_path") ?? null;
         if ($targetPath) {

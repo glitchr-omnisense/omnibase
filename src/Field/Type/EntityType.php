@@ -31,6 +31,9 @@ class EntityType extends AbstractType
 
                 $fieldType = $field['field_type'] ?? null;
                 unset($field['field_type']);
+                
+                if(array_key_exists("required", $field))
+                    $field['required'] = $field['required'] & $options["required"];
 
                 $form->add($fieldName, $fieldType, $field);
             }

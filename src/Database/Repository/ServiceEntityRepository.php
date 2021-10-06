@@ -19,6 +19,7 @@ use Symfony\Component\HttpKernel\Event\KernelEvent;
 /**
  * @method Thread|null find($id, $lockMode = null, $lockVersion = null)
  * @method Thread|null findOneBy(array $criteria, array ?array $orderBy = null, $groupBy = null)
+ * @method Thread|null findLastBy(array $criteria, array ?array $orderBy = null, $groupBy = null)
  * @method Thread[]    findAll(?array $orderBy = null, $groupBy = null)
  * @method Thread[]    findBy(array $criteria, array ?array $orderBy = null, $groupBy = null, $limit = null, $offset = null)
  */
@@ -232,7 +233,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         // Extract method name and extra parameters
-        if (preg_match('/^(find(?:One)?By)(.*)/', $method, $matches)) {
+        if (preg_match('/^(find(?:One|Last)?By)(.*)/', $method, $matches)) {
 
             $newMethod = "__".$matches[1] ?? "";
             $byNames   = $matches[2] ?? "";
@@ -255,7 +256,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
             throw new Exception(sprintf(
                 'Undefined method "%s". The method name must start with ' .
-                'either findBy, findOneBy, distinctCount, count, lengthOf!',
+                'either findBy, findOneBy, findLastBy, distinctCount, count, lengthOf!',
                 $method
             ));
         }
@@ -705,6 +706,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     protected function __findBy(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
     {
         return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();
+    }
+    protected function __findLastBy(array $criteria = [], $orderBy = null, $groupBy = null)
+    {
+        return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null;
     }
     protected function __findOneBy(array $criteria = [], $orderBy = null, $groupBy = null)
     {

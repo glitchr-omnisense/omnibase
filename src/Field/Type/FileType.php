@@ -2,6 +2,8 @@
 
 namespace Base\Field\Type;
 
+use Base\Annotations\Annotation\Uploader;
+use Base\Entity\User;
 use Base\Field\Transformer\StringToFileTransformer;
 use Base\Service\BaseService;
 use Symfony\Component\Form\AbstractType;
@@ -60,11 +62,12 @@ class FileType extends AbstractType implements DataMapperInterface
             'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.css"),
 
             'allow_delete' => true,
-            'multiple'     => false,
             'required'     => false,
-            
-            // Flysystem related
-            'pool'         => '',
+            'multiple'     => false,
+
+            'sortable'     => true,
+            'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.js"),
+
             'max_filesize' => null,
             'max_files'    => null,
             'mime_types'   => null,
@@ -92,13 +95,15 @@ class FileType extends AbstractType implements DataMapperInterface
 
                 $cacheDir = $this->baseService->getCacheDir()."/dropzone";
                 $data = explode("|", $data);
+
                 foreach($data as $key => $uuid)
                     if(!empty($uuid)) $data[$key] = $cacheDir."/".$uuid;
 
-                $data = !empty($data) ? array_map(fn ($fname) => new UploadedFile($fname, $fname), $data) : [];
+                $data = !empty($data) ? array_map(fn ($fname) => (file_exists($fname) ? new UploadedFile($fname, $fname) : basename($fname)), $data): [];
                 if(!$options["multiple"]) $data = $data[0] ?? null;
             }
-            
+
+            if(empty($data)) $data = null;
             $event->setData($data);
         });
         
@@ -116,26 +121,19 @@ class FileType extends AbstractType implements DataMapperInterface
         // - <id>_figcaption = btn "+"
         // - dropzone: <id>_dropzone = btn "x",
         //
+            
+        $parent = $form->getParent();
+        $entity = $parent->getData();
 
-        $files = null;
-        // if ([] === $files) {
-        //     $data = $form->getNormData();
+        $files = Uploader::getFile($entity, $form->getName());
+        if(!is_array($files)) $files = ($files ? [$files] : []);
+        $view->vars['files'] = $files;
 
-        //     if (null !== $data && [] !== $data) {
-        //         $files = \is_array($data) ? $data : [$data];
-
-        //         foreach ($files as $i => $file) {
-        //             if ($file instanceof UploadedFile) {
-        //                 unset($files[$i]);
-        //             }
-        //         }
-        //     }
-        // }
-        
         $acceptedFiles = ($options["mime_types"] ? implode(",", $options["mime_types"]) : null);
-        $view->vars["accept"] = $acceptedFiles; 
+        if(!$acceptedFiles && $entity) $acceptedFiles = implode(",", Uploader::getMimeTypes($options["data_class"], $form->getName()));
+        $view->vars["accept"] = $acceptedFiles;
 
-        $view->vars['files']        = $files;
+        $view->vars['value'] = Uploader::getPublicPath($options["data_class"], $form->getName());
         $view->vars['multiple']     = $options['multiple'];
         $view->vars['allow_delete'] = $options['allow_delete'];
         $view->vars['max_filesize'] = $options['max_filesize'];
@@ -186,6 +184,16 @@ class FileType extends AbstractType implements DataMapperInterface
 
                             val.push(file.serverId['uuid']);
                             $('#".$view->vars["id"]."').val(val.join('|'));
+
+                            console.log(val);
+                            // $.each(val, function(key,value) {
+                            //     var mockFile = { name: value.name, size: value.size };
+                    
+                            //     myDropzone.emit('addedfile', mockFile);
+                            //     myDropzone.emit('thumbnail', mockFile, value.path);
+                            //     myDropzone.emit('complete', mockFile);
+                    
+                            // });
                         });
 
                         this.on('removedfile', function(file) {
@@ -204,8 +212,21 @@ class FileType extends AbstractType implements DataMapperInterface
                     }
 
                     let ".$editor." = new Dropzone('#".$editor."', {".$dzOptions."});
-                </script>"
-            );
+                </script>");
+
+            if($options["sortable"]) {
+
+                if($options["sortable-js"]) $this->baseService->addJavascriptFile($options["sortable-js"]);
+
+                $this->baseService->addJavascriptCode(
+                "<script>
+                    var ".$editor."_sortable = new Sortable(document.getElementById('".$editor."'), {
+                        draggable: '.dz-preview'
+                    });
+
+                    console.log(".$editor."_sortable, document.getElementById('".$editor."'));
+                </script>");
+            }
 
         } else {
 
@@ -237,9 +258,7 @@ class FileType extends AbstractType implements DataMapperInterface
         //     $viewData = new File($viewData);
 
         $fileForm = current(iterator_to_array($forms));
-        dump($fileForm->getConfig()->getOptions());
-
-        $fileForm->setData($viewData);
+        $fileForm->setData(basename($viewData));
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void

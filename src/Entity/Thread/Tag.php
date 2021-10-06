@@ -11,7 +11,8 @@ use Doctrine\Common\Collections\Collection;
 use Base\Annotations\Annotation\Slugify;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Annotations\Annotation\DiscriminatorEntry;
-
+use Base\Database\Traits\TranslatableTrait;
+use Base\Database\TranslatableInterface;
 use Base\Traits\ColumnAliasTrait;
 
 /**
@@ -20,24 +21,16 @@ use Base\Traits\ColumnAliasTrait;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
-class Tag
+class Tag implements TranslatableInterface
 {
+    use TranslatableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     protected $id;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $name;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $description;
 
     /**
      * @ORM\Column(length=255, unique=true)
@@ -70,30 +63,6 @@ class Tag
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): self
-    {
-        $this->description = $description;
-
-        return $this;
     }
 
     public function __toString()

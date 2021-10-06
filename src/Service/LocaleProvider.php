@@ -16,8 +16,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleProvider implements LocaleProviderInterface
 {
-    public const SEPARATOR = "_";
-
+    public const SEPARATOR = "-";
+    
     /**
      * @var RequestStack
      */
@@ -45,9 +45,10 @@ class LocaleProvider implements LocaleProviderInterface
 
         if(! $parameterBag->has("kernel.default_locale")) 
             throw new MissingLocaleException("Missing default locale.");
-            
+
         self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($parameterBag->get("kernel.default_locale"));
         self::$fallbackLocales  = self::$fallbackLocales ?? self::normalizeArray($this->translator->getFallbackLocales());
+
     }
 
     private static ?array $locales = null;
@@ -65,7 +66,7 @@ class LocaleProvider implements LocaleProviderInterface
                 $country = substr($locale,3,2);
 
                 if(!array_key_exists($lang, self::$locales)) self::$locales[$lang] = [];
-                self::$locales[$lang][] = $lang . self::SEPARATOR . $country;
+                self::$locales[$lang][] = $country;
             }
         }
 
@@ -102,7 +103,7 @@ class LocaleProvider implements LocaleProviderInterface
     public static function getDefaultLocale(): ?string { return self::$defaultLocale; }
     public static function getFallbackLocales(): array { return self::$fallbackLocales; }
     public static function getAvailableLocales(): array 
-    { 
+    {
         return array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales));
     }
     
@@ -117,10 +118,14 @@ class LocaleProvider implements LocaleProviderInterface
 
     public static function getCountry(string $locale): string
     {
-        $lang = self::getLang($locale);
-        $langCountries = self::getLocales()[$lang];
-        $locale = in_array($locale, $langCountries) ? $locale : ($langCountries[0] ?? self::getDefaultLocale());
+        $lang           = self::getLang($locale);
+        $langCountries  = self::getLocales()[$lang];
 
-        return substr($locale,3,2);
+        $defaultCountry = substr(self::getDefaultLocale(),3,2);
+        
+        $country = substr($locale,3,2);
+        $country = in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);        
+
+        return $country;
     }
 }

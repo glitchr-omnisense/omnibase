@@ -224,6 +224,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="cache.app" />
+            <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
         <!--
@@ -399,6 +400,10 @@
         <service id="Base\Field\Configurator\SlugConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Field\Configurator\TranslatableConfigurator">
+            <tag name="ea.field_configurator" />
         </service>
 
         <service id="Base\Field\Configurator\FontAwesomeConfigurator">

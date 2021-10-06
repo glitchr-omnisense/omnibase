@@ -99,7 +99,7 @@ class FontAwesomeType extends AbstractType implements SelectTypeInterface
     {
         // Default metadata location
         if (empty(self::$metadata))
-            self::$metadata = dirname(__DIR__,3)."/Resources/public/vendor/font-awesome/5.15.1/metadata/icons.json";
+            self::$metadata = dirname(__DIR__,2)."/Resources/public/vendor/font-awesome/5.15.1/metadata/icons.json";
 
         if (empty(self::$icons)) {
 

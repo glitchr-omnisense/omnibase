@@ -20,12 +20,28 @@ use Symfony\Component\Serializer\Serializer;
 abstract class AbstractAnnotation implements AnnotationInterface
 {
     public static function getAnnotationReader() { return AnnotationReader::getInstance(); }
+    public static function getProjectDir() { return AnnotationReader::getInstance()->getProjectDir(); }
     public static function getParameterBag() { return AnnotationReader::getInstance()->getParameterBag(); }
+    public static function getFilesystem(string $storage) { return AnnotationReader::getInstance()->getFilesystem($storage); }
+    public static function getAdapter($storage) { return AnnotationReader::getInstance()->getFilesystemAdapter($storage); }
+    public static function getPathPrefixer($storage) { return AnnotationReader::getInstance()->getFilesystemPathPrefixer($storage); }
     public static function getDoctrineReader() { return AnnotationReader::getInstance()->getDoctrineReader(); }
     public static function getEntityManager() { return AnnotationReader::getInstance()->getEntityManager(); }
     public static function getClassMetadata($className): ?ClassMetadata { return self::getEntityManager()->getClassMetadata($className); }
     public static function getRepository($className) { return AnnotationReader::getInstance()->getRepository($className); }
 
+    public static function getAnnotation($entity, string $mapping)
+    {
+        $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
+        if(!$classname) return null;
+        
+        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($classname, static::class);
+        if(!array_key_exists($mapping, $annotations))
+            throw new Exception("Annotation \"".self::class."\" not found in the mapped property \"$mapping\"");
+
+        return end($annotations[$mapping]);
+    }
+    
     /**
      * Minimize the use unit of work to very specific context.. (doctrine internal use only)
      * Please use getNativeEntity() to get back the
@@ -115,9 +131,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function hasField($entity, string $property) { return property_exists($entity, $property); }
     public static function getFieldValue($entity, string $property)
     {
-        if(!$entity)
-            throw new \Exception("Entity is null for property \"$property\"");
-
+        if(!$entity) return null;
+        
         $classMetadata = self::getClassMetadata(get_class($entity));
         if( ($dot = strpos($property, ".")) > 0 ) {
         
@@ -127,7 +142,6 @@ abstract class AbstractAnnotation implements AnnotationInterface
             if(!$classMetadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
 
-            $targetEntity = $classMetadata->getAssociationMapping($field)['targetEntity'];
             $entity = self::getFieldValue($entity, $field);
             if ($entity instanceof ArrayCollection)
                 $entity = $entity->first();

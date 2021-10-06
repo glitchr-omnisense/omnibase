@@ -44,6 +44,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('highlight',     [$this,'highlight']),
             new TwigFilter('flatten_array', [$this, 'flattenArray']),
             new TwigFilter('filesize',      [$this, 'filesize']),
+            new TwigFilter('lang',          [$this, 'lang']),
+            new TwigFilter('country',       [$this, 'country']),
             new TwigFilter('image',         [$this,'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFilter('datetime',      [$this,'datetime'], ['needs_environment' => true]),
             new TwigFilter('lessThan',      [$this,'lessThan'], ['needs_environment' => true]),
@@ -64,6 +66,8 @@ final class BaseTwigExtension extends AbstractExtension
         return BaseService::array_flatten($array);
     }
 
+    public function lang(string $locale):     string { return substr($locale, 0, 2); }
+    public function country(string $locale):  string { return substr($locale, 3, 2); }
     public function time(int $remainingTime): string
     {
         if($remainingTime > 0) {

@@ -79,10 +79,10 @@ trait TranslatableTrait
         $translation = $translations[$locale] ?? null;
         if(!$translation) {
 
-            if( \count($keys = $translations->getKeys()) > 1 )
-                throw new TranslationAmbiguityException("Translation ambiguity exception.");
-
-            $firstKey = $keys[0] ?? null;
+            $keys = $translations->getKeys();
+            $defaultKey = array_search($locale, $keys);
+            $firstKey = ( \count($keys) > 1 ) ? $keys[$defaultKey] : $keys[0] ?? null;
+            
             $translation = $firstKey ? $translations[$firstKey] : null;            
             if(!$translation) {
 

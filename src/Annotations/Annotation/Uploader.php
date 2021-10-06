@@ -4,6 +4,14 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Exception\InvalidMimeTypeException;
+use Base\Exception\InvalidSizeException;
+use Base\Exception\InvalidUuidException;
+use Base\Exception\MissingPublicPathException;
+use Base\Exception\NotDeletableException;
+use Base\Exception\NotReadableException;
+use Base\Exception\NotWritableException;
+use Base\Service\BaseService;
 use DateTime;
 
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -16,6 +24,7 @@ use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
@@ -27,9 +36,9 @@ use Symfony\Component\Uid\Uuid;
  * @Annotation
  * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
- *   @Attribute("config",  type = "array"),
- *   @Attribute("options", type = "array"),
+ *   @Attribute("storage", type = "string"),
  *   @Attribute("pool",    type = "string"),
+ *   @Attribute("public",  type = "string"),
  *
  *   @Attribute("size", type = "string"),
  *   @Attribute("mime", type = "array"),
@@ -37,10 +46,9 @@ use Symfony\Component\Uid\Uuid;
  */
 class Uploader extends AbstractAnnotation
 {
-    private $adapter;
-
-    private string $poolDir;
-    private string $path;
+    private $filesystem;
+    private string $storage;
+    private string $pool;
 
     private array $config;
     private array $mimeTypes;
@@ -65,237 +73,196 @@ class Uploader extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $options = self::getOptions($data["options"] ?? []);
-
-        $this->adapter  = self::getAdapter($options);
-        $this->path     = $options["path"];
-        $this->config   = $data["config"]  ?? [];
-
+        $this->filesystem = $this->getFilesystem($data["storage"] ?? null);
+        $this->public = (!empty($data["public"] ?? null) ? "/" . trim($data["public"],"/") : null);
+        $this->pool       = (!empty($data["pool"] ?? null) ? trim($data["pool"],"/") : "default");
+        
+        $this->storage    = $data["storage"] ?? null;
+        $this->config     = $data["config"] ?? [];
         $this->mimeTypes  = $data["mime"] ?? [];
-        $this->maxSize  = self::str2bytes($data["size"] ?? UploadedFile::getMaxFilesize());
-        $this->poolDir = $config["pool"] ?? "/storage/default";
+        $this->maxSize    = self::str2bytes($data["size"] ?? UploadedFile::getMaxFilesize());
     }
 
-    protected static $projectDir;
-    public static function getProjectDir()
-    {
-        if (!self::$projectDir)
-            self::$projectDir = dirname(__DIR__, 6);
-
-        return self::$projectDir;
-    }
-
-    public static function getOptions($options = [])
-    {
-        $options["adapter"] = $options["adapter"] ?? "local";
-        $options["path"]    = $options["path"]    ?? self::getProjectDir() . "/var";
-        return $options;
-    }
-
-    /**
-     * This method can be overloaded to include more adapter
-     */
-    public static function getAdapter(array $options = []): FilesystemAdapter
-    {
-        $options = self::getOptions($options);
-        $adapter = $options["adapter"] ?? "";
-        switch ($adapter) {
-
-            case "local":
-                $path = $options["path"] ?? null;
-                if(!$path) throw new Exception("Path variable missing for local adapter");
-
-                return new LocalFilesystemAdapter($path);
-
-            //case "aws":
-            //case "ftp":
-        }
-
-        return null;
-    }
-
-    protected static $fsHashTable = [];
-    public static function getFilesystem(FilesystemAdapter $adapter): Filesystem
-    {
-        $index = spl_object_hash($adapter);
-        if (!array_key_exists($index, self::$fsHashTable))
-            self::$fsHashTable[$index] = new Filesystem($adapter);
-
-        return self::$fsHashTable[$index];
-    }
-
-    public function getPoolDir($entity): string {
-
-        $projectDir = $this->getProjectDir();
-        $poolDir = $this->poolDir;
-
-        // Strip project directory path if found.. don't want to rely on absolute path
-        if (substr($poolDir, 0, strlen($projectDir)) == $projectDir)
-            $poolDir = substr($poolDir, strlen($projectDir)+1);
-
-        $namespace = get_class($entity);
-        $namespaceRoot = "Entity";
-        $namespaceDir = strtolower(str_replace("\\", "/", substr($namespace, strpos($namespace, $namespaceRoot)-1)));
-
-        return $poolDir . $namespaceDir;
-    }
-
-    public function generateLocation($entity, File $file): string
-    {
-        $uuid = Uuid::v4();
-        $extension = $file->guessExtension();
-
-        return rtrim($this->getPoolDir($entity) . "/" . $uuid . "." . $extension, ".");
-    }
-
-    public function getContents(): string
+    protected function getContents(): string
     {
         return file_get_contents($this->file["tmp_name"]);
     }
 
-    public function getConfig(): array
+    protected function getConfig(): array
     {
         return $this->config;
+    }
+
+    public function getPath($entity, ?string $uuid = null): string
+    {
+        $pool     = $this->pool;
+        $uuid     = $uuid ?? Uuid::v4();
+
+        if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
+            throw new InvalidUuidException("Invalid UUID exception: ".$uuid);
+
+        $namespaceDir = "";
+        if($entity) {
+
+            $namespace = get_class($entity);
+            $namespaceRoot = "Entity";
+            $namespaceDir = strtolower(str_replace("\\", "/", substr($namespace, strpos($namespace, $namespaceRoot)-1)));
+        }
+
+        return rtrim("/" . $pool . $namespaceDir . "/" . $uuid, ".");
+    }
+    
+    public static function getPublicPath($entity, $mapping): ?string
+    {
+        $that = self::getAnnotation($entity, $mapping);
+        if(!$that) return null;
+        
+        if($that->public === null)
+            throw new MissingPublicPathException("No public path provided for \"$mapping\" property annotation for \"".get_class($entity)."\".");
+
+        $uuid = self::getFieldValue($entity, $mapping);
+        if(!$uuid) return null;
+
+        $path = $that->getPath($entity, $uuid);
+        if(!$that->filesystem->fileExists($path)) 
+            return null;
+
+        return rtrim($that->public . $path, ".");
+    }
+    
+    public static function getMimeTypes($entity, $mapping): array
+    {
+        $that = self::getAnnotation($entity, $mapping);
+        if(!$that) return [];
+        return $that->mimeTypes;
     }
 
     protected static $tmpHashTable = [];
     public static function getFile($entity, string $mapping)
     {
-	if($entity === null) return null;
+        if($entity === null) return null;
 
-        $annotations = self::getAnnotationReader()->getPropertyAnnotations(get_class($entity), self::class);
-        if(!array_key_exists($mapping, $annotations))
-            throw new Exception("Annotation \"".self::class."\" not found in the mapped property \"$mapping\"");
-
-        $uploaderAnnotation = end($annotations[$mapping]);
-        $adapter  = $uploaderAnnotation->adapter;
-        $config   = $uploaderAnnotation->config;
+        $that       = self::getAnnotation($entity, $mapping);
+        $config     = $that->config;
+        $filesystem = $that->filesystem;
+        $adapter    = $that->getAdapter($filesystem);
+        $pathPrefixer = $that->getPathPrefixer($that->storage);
 
         $fieldValue = self::getFieldValue($entity, $mapping);
         if (!$fieldValue) return null;
-
+    
         $fileList = [];
-        foreach((is_array($fieldValue) ? $fieldValue : [$fieldValue]) as $file) {
+        foreach((is_array($fieldValue) ? $fieldValue : [$fieldValue]) as $uuid) {
 
-            if($file instanceof File) {
-
-                $fileList[] = $file;
-                continue;
-            }
-
-            if(!is_string($file)) {
-
-                $fileList[] = null;
-                continue;
-            }
-
-            if (!self::getFilesystem($adapter)->fileExists($file)) {
-
-                $fileList[] = null;
-                continue;
-            }
-
-            // Special case fro location adapter, if not.. it requires a temp file..
+            // Special case for local adapter, if not found.. it requires a temp file..
+            $path = $that->getPath($entity, $fieldValue);
             if($adapter instanceof LocalFilesystemAdapter) {
 
-                $isAbsolutePath = ($file == realpath($file));
-                if( !$isAbsolutePath ) $file = $uploaderAnnotation->path . $file;
+                if ($filesystem->fileExists($path))
+                    $fileList[] = new File($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
 
-                $fileList[] = new File($file);
                 continue;
             }
 
             // Copy file content in a tmp file
-            $index = spl_object_hash($adapter) . ":" . $file;
+            $index = spl_object_hash($adapter) . ":" . $uuid;
             if (!array_key_exists($index, self::$tmpHashTable))
                 self::$tmpHashTable[$index] = tmpfile();
 
-            $tmp = self::$tmpHashTable[$index];
-            fwrite($tmp, self::readFile($file, $adapter, $config));
-            $fileList[] = new File(stream_get_meta_data($tmp)['uri']); // .. and return a File
+            fwrite(self::$tmpHashTable[$index], $that->readFile($path, $filesystem, $config));
+            $fileList[] = new File(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
         }
 
-        if(is_array($fieldValue)) return $fileList;
-        else if(count($fileList) < 1) return null;
-        else if(count($fileList) < 2) return $fileList[0];
-        else return $fileList;
+
+        if(is_array($fieldValue)) $file = $fileList;
+        else if(count($fileList) < 1) $file = null;
+        else if(count($fileList) < 2) $file = $fileList[0];
+        else $file = $fileList;
+    
+        return $file;
     }
 
-    public static function readFile(string $location, ?FilesystemAdapter $adapter = null): string
+    protected function readFile(string $location, ?FilesystemOperator $filesystem = null): ?string
     {
-        $adapter = $adapter ?? self::getAdapter();
-        if(!self::getFilesystem($adapter)->fileExists($location))
+        $filesystem = $filesystem ?? $this->filesystem;
+        if(!$filesystem->fileExists($location))
             return null;
 
         try {
-            return self::getFilesystem($adapter)->read($location);
+            return $filesystem->read($location);
         } catch (FilesystemError | UnableToReadFile $exception) {
-            throw new Exception("Unable to read file \"$location\"");
+            throw new NotReadableException("Unable to read file \"$location\"");
         }
     }
 
-    protected static function uploadFile(string $location, string $contents, ?FilesystemAdapter $adapter = null, array $config = [])
+    protected function uploadFile(string $location, string $contents, ?FilesystemOperator $filesystem = null, array $config = [])
     {
-        $adapter = $adapter ?? self::getAdapter();
-        if (self::getFilesystem($adapter)->fileExists($location))
+        $filesystem = $filesystem ?? $this->filesystem;
+        if ($filesystem->fileExists($location))
             return false;
 
         try {
-            self::getFilesystem($adapter)->write($location, $contents, $config);
+            $filesystem->write($location, $contents, $config);
             return true;
         } catch (FilesystemError | UnableToWriteFile $exception) {
-            throw new Exception("Unable to write file \"$location\"..");
+            throw new NotWritableException("Unable to write file \"$location\"..");
             return false;
         }
     }
 
-    public function uploadFiles($entity, ?string $property = null)
+    protected function uploadFiles($entity, $oldEntity, ?string $property = null)
     {
-        $fieldValue = $this->getFieldValue($entity, $property);
+        $new = $this->getFieldValue($entity, $property);
+        $old = $this->getFieldValue($oldEntity, $property);
+        if($new == $old) return true;
 
-        if ($fieldValue == null) {
+        // Nothing to upload, empty field..
+        if ($new == null) {
 
             $this->setFieldValue($entity, $property, null);
             return true;
         }
 
-        $locationList = [];
-        foreach ((is_array($fieldValue) ? $fieldValue : [$fieldValue]) as $index => $uploadedFile) {
+        // Field value can be an array or just a single path
+        $fileList = [];
+        foreach ((is_array($new) ? $new : [$new]) as $index => $file) {
 
             // In case of string casting, and UploadedFile might be returned as a string..
-            if (is_string($uploadedFile) && file_exists($uploadedFile))
-                $uploadedFile = new File($uploadedFile);
+            if (is_string($file) && file_exists($file))
+                $file = new File($file);
 
-            if (!$uploadedFile instanceof File) continue;
+            if (!$file instanceof File) continue;
 
             // Check size restriction
-            if ($uploadedFile->getSize() > $this->maxSize) continue;
+            if ($file->getSize() > $this->maxSize) 
+                throw new InvalidSizeException("Invalid filesize exception in property \"$property\" in ".get_class($entity).".");
 
             // Check mime restriction
             $compatibleMimeType = empty($this->mimeTypes);
-
             foreach($this->mimeTypes as $mimeType)
-                $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $uploadedFile->getMimeType());
+                $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
 
-            if(!$compatibleMimeType) continue;
+            if(!$compatibleMimeType) 
+                throw new InvalidMimeTypeException("Invalid MIME type exception for property \"$property\" in ".get_class($entity).".");
 
             // Upload files
-            $location = $this->generateLocation($entity, $uploadedFile);
-            $contents = ($uploadedFile ? file_get_contents($uploadedFile->getPathname()) : "");
+            $pathPrefixer = $this->getPathPrefixer($this->storage);
+            $path = $this->getPath($entity);
 
-            if ($this->uploadFile($location, $contents, $this->adapter))
-                $locationList[] = $location;
+            $contents = ($file ? file_get_contents($file->getPathname()) : "");
+            if ($this->uploadFile($path, $contents, $this->filesystem))
+                $fileList[] = ($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
         }
 
-        if (!empty($locationList)) {
+        if (!empty($fileList)) {
 
             // Reshape depending on the output
-            if (is_array($fieldValue)) $value = $locationList;
-            else if (count($locationList) < 1) $value = null;
-            else if (count($locationList) < 2) $value = $locationList[0];
-            else $value = $locationList;
+            if (is_array($new)) $value = $fileList;
+            else if (count($fileList) < 1) $value = null;
+            else if (count($fileList) < 2) $value = $fileList[0];
+            else $value = $fileList;
 
-            $this->setFieldValue($entity, $property, $value);
+            $this->setFieldValue($entity, $property, basename($value));
             return true;
         }
 
@@ -303,27 +270,41 @@ class Uploader extends AbstractAnnotation
         return false;
     }
 
-    protected static function deleteFile(string $location, FilesystemAdapter $adapter = null)
+    protected function deleteFile(string $location, ?FilesystemOperator $filesystem = null)
     {
-        $adapter = $adapter ?? self::getAdapter();
-        if (!self::getFilesystem($adapter)->fileExists($location))
+        $filesystem = $filesystem ?? $this->filesystem;
+        if (!$filesystem->fileExists($location))
             return false;
 
         try {
-            self::getFilesystem($adapter)->delete($location);
+        
+            $filesystem->delete($location);
             return true;
+        
         } catch (FilesystemError | UnableToDeleteMetadata $exception) {
-            throw new Exception("Unable to delete file \"$location\"..");
+
+            throw new NotDeletableException("Unable to delete file \"$location\"..");
         }
     }
 
-    public function deleteFiles($entity, ?string $property = null)
+    protected function deleteFiles($entity, $oldEntity, ?string $property = null)
     {
-        $fieldValue = $this->getFieldValue($entity, $property);
-        foreach ((is_array($fieldValue) ? $fieldValue : [$fieldValue]) as $location)
-            if ($location) $this->deleteFile($location, $this->adapter);
+        $new = self::getFieldValue($entity, $property);
+        $old = self::getFieldValue($oldEntity, $property);
+        if(!$old) return;
 
-        $this->setFieldValue($entity, $property, null);
+        $files = (is_array($new) ? array_diff($old,$new) : ($new != $old ? [$old] : []));
+        foreach ($files as $file) {
+
+            if(!$file) continue;
+
+            if($file instanceof File) $path = $file->getRealPath();
+            else $path = $this->getPath($entity, $file);
+
+            $this->deleteFile($path, $this->filesystem);
+        }
+
+        $this->setFieldValue($entity, $property, $new);
     }
 
     public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
@@ -332,15 +313,27 @@ class Uploader extends AbstractAnnotation
     }
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        $this->uploadFiles($entity, $property);
+    {  
+        try {
+            $this->uploadFiles($entity, null, $property);
+        } catch(Exception $e) {
+            self::setFieldValue($entity, $property, null);
+        }
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $oldEntity = $this->getOldEntity($entity);
-        if ($this->uploadFiles($entity, $property))
-            $this->deleteFiles($oldEntity, $property);
+        
+        try {
+
+            if ($this->uploadFiles($entity, $oldEntity, $property))
+                $this->deleteFiles($entity, $oldEntity, $property);
+
+        } catch(Exception $e) {
+
+            $this->deleteFiles($oldEntity, $entity, $property);
+        }
     }
 
     public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

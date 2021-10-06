@@ -67,7 +67,9 @@ class ImageType extends AbstractType
         // - cropper: <id>_thumbnail = thumbnail
         //
 
-        $view->vars["raw"]["attr"]["accept"] = "image/*"; 
+        if(!($view->vars["accept"] ?? false) ) 
+             $view->vars["accept"] = "image/*";
+
         $view->vars["cropper"] = ($options["cropper"] !== null);
         $view->vars["thumbnail"] = $options["thumbnail"];
 
@@ -110,8 +112,8 @@ class ImageType extends AbstractType
                     $('#".$view->vars["id"]."_file').val(".$view->vars["id"]."_blob);
                     $('#".$view->vars["id"]."_thumbnail').val(".$view->vars["id"]."_blob);
 
-                    if($('#".$view->vars["id"]."_file').val() === '')
-                    $('#".$view->vars["id"]."_deleteBtn').click();
+                    if ($('#".$view->vars["id"]."_file').val() === '')
+                        $('#".$view->vars["id"]."_deleteBtn').click();
                 });
 
                 $(document).on('keypress',function(e) {
@@ -126,14 +128,14 @@ class ImageType extends AbstractType
 
                         var canvas = ".$view->vars["id"]."_cropper.getCroppedCanvas({width: 160, height: 160});
                         $('#".$view->vars["id"]."_thumbnail')[0].src = canvas.toDataURL();
-                        
+
                         canvas.toBlob(function (blob) {
 
                             var formData = new FormData();
-                
+
                             var file = $('#".$view->vars["id"]."_file').val();
                             if(file !== '') $.post('".$postDelete."');
-                            
+
                             formData.append('file', blob, $('#".$view->vars["id"]."_raw').val());
                             ".$view->vars["id"]."_blob = blob;
 
@@ -143,7 +145,7 @@ class ImageType extends AbstractType
                                 processData: false,
                                 contentType: false,
 
-                                success: function (file) { $('#".$view->vars["id"]."_file').val(file.uuid); },
+                                success: function (file) { $('#".$view->vars["id"]."_file').val(file.uuid).trigger('change'); },
                                 error: function (file) { $('#".$view->vars["id"]."_thumbnail')[0].src = '".$options["thumbnail"]."'; },
                                 complete: function () { },
                             });
@@ -171,7 +173,6 @@ class ImageType extends AbstractType
 
                 $('#".$view->vars["id"]."_raw').on('change', function() {
         
-                    console.log('xxx', $('#".$view->vars["id"]."_raw').val());
                     if( $('#".$view->vars["id"]."_raw').val() !== '') {
         
                         $('#".$view->vars["id"]."_modal').modal('show'); 
