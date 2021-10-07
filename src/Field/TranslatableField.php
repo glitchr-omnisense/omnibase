@@ -4,6 +4,7 @@ namespace Base\Field;
 
 use Base\Field\Type\TranslatableType;
 use Base\Service\LocaleProvider;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
@@ -16,12 +17,26 @@ class TranslatableField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel(false)
+            ->hideOnIndex()
+            ->setTemplateName('crud/field/text')
+            ->setTemplatePath('@Base/crud/field/translatable.html.twig')
             ->setFormType(TranslatableType::class);
     }
 
     public function setFields(array $fields): self
     {
         $this->setFormTypeOption("fields", $fields);
+        return $this;
+    }
+
+    public function showOnIndex(string $field): self
+    {
+        $this->setCustomOption("show_field", $field);
+        
+        $displayedOn = $this->dto->getDisplayedOn();
+        $displayedOn->set(Crud::PAGE_INDEX, Crud::PAGE_INDEX);
+        $this->dto->setDisplayedOn($displayedOn);
+
         return $this;
     }
 

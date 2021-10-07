@@ -23,13 +23,32 @@ class TranslatableSubscriber implements EventSubscriber
      */
     public function getSubscribedEvents(): array
     {
-        return [Events::loadClassMetadata];
+        return [Events::loadClassMetadata, Events::prePersist, Events::preUpdate];
     }
 
-    public function __construct(LocaleProviderInterface $localeProvider) {
+    public function __construct(LocaleProviderInterface $localeProvider)
+    {
         $this->localeProvider = $localeProvider;
     }
 
+    public function prePersist(LifecycleEventArgs $event)
+    {
+        if (is_subclass_of($event->getEntity(), TranslationInterface::class, true)) 
+            $this->removeIfEmpty($event->getEntity());
+    }
+
+    public function preUpdate(LifecycleEventArgs $event)
+    {
+        if (is_subclass_of($event->getEntity(), TranslationInterface::class, true)) 
+            $this->removeIfEmpty($event->getEntity());
+    }
+
+    private function removeIfEmpty(TranslationInterface $translation)
+    {
+        $translatable = $translation->getTranslatable();
+        if($translation->isEmpty())
+            $translatable->removeTranslation($translation);
+    }
     /**
      * Adds mapping to the translatable and translations.
      */
@@ -45,7 +64,7 @@ class TranslatableSubscriber implements EventSubscriber
         if (is_subclass_of($classMetadata->reflClass->getName(), TranslatableInterface::class, true))
             $this->mapTranslatable($classMetadata);
 
-        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))
+        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))  
             $this->mapTranslation($classMetadata);
     }
 

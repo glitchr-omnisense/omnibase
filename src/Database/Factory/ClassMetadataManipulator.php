@@ -33,13 +33,17 @@ class ClassMetadataManipulator
             foreach ($matches as $match) $this->globalExcludedFields[] = $parameterBag->get($match);
     }
 
+    public function getClassMetadata($class)
+    {
+        return $this->entityManager->getClassMetadata($class);
+    }
+
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
-        $metadata = $this->entityManager->getClassMetadata($class);
-
         if(!BaseService::isAssoc($fields))
             throw new \Exception("Associative array expected for 'fields' parameter");
 
+        $metadata = $this->getClassMetadata($class);
         $validFields = array_fill_keys($metadata->getFieldNames(), []);
         if (!empty($associationNames = $metadata->getAssociationNames()))
             $validFields += $this->getAssociationMapping($metadata, $associationNames);

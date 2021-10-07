@@ -36,6 +36,14 @@ class TranslatableType extends AbstractType
         $translatableClass = $this->getTranslationDataClass($form);
         $rawFields = $this->classMetadataManipulator->getFields($translatableClass, $options["fields"], $options["excluded_fields"]);
 
+        $metadata = $this->classMetadataManipulator->getClassMetadata($translatableClass);
+        $excludedFields = $options["excluded_fields"] ?? [];
+        foreach($excludedFields as $field) {
+
+            if(!$metadata->hasField($field) && !$metadata->hasAssociation($field))
+                throw new \Exception("Field \"".$field."\" requested for exclusion doesn't exist in \"".$form->getName()."\"");
+        }
+
         $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
         if(count($locales) == 1) $defaultLocale = $locales[0];
         else $defaultLocale = $options["default_locale"];
@@ -48,7 +56,7 @@ class TranslatableType extends AbstractType
             if (!isset($fieldConfig['locale_options'])) {
 
                 foreach ($options['available_locales'] as $locale) {
-                    
+
                     $fields[$locale][$fieldName] = $fieldConfig;
                     $fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
                 }
@@ -90,13 +98,13 @@ class TranslatableType extends AbstractType
         if(!is_subclass_of($translatableClass, TranslatableInterface::class))
             throw new \Exception("Translatable interface not implemented in \"".$translatableClass."\"");
 
-        return $translatableClass::getTranslationEntityClass();
+        return $translatableClass::getTranslationEntityClass(true, false);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
-            
+
             $form = $event->getForm();
             if (null === $formParent = $form->getParent()) {
                 throw new \RuntimeException('Parent form missing');
@@ -122,7 +130,7 @@ class TranslatableType extends AbstractType
                 
                 $required = \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
 
-                $form->add(str_replace("-", "_", $locale), EntityType::class, [
+                $form->add($locale, EntityType::class, [
                     'data_class' => $translationClass,
                     'required' => $required,
                     'fields' => $fields[$locale],
@@ -150,9 +158,9 @@ class TranslatableType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["locale"]           = str_replace("-", "_", $options["locale"]);
-        $view->vars["defaultLocale"]    = str_replace("-", "_", $options["default_locale"]);
-        $view->vars["availableLocales"] = str_replace("-", "_", $options["available_locales"]);
+        $view->vars["locale"]           = $options["locale"];
+        $view->vars["defaultLocale"]    = $options["default_locale"];
+        $view->vars["availableLocales"] = $options["available_locales"];
     }
 
     /**

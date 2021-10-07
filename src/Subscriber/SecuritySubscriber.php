@@ -160,7 +160,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("email")->send("success");
         }
 
-        $this->baseService->redirectToRoute($event, "base_profile");
+        $this->baseService->getDoctrine()->getManager()->flush();
+//        $this->baseService->redirectToRoute($event, "base_profile");
     }
 
     public function onApproval(UserEvent $event)

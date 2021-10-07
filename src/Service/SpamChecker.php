@@ -5,6 +5,7 @@ namespace Base\Service;
 use App\Entity\Thread;
 use Base\Entity\User\Notification;
 use Base\Enum\SpamApi;
+use Base\Enum\SpamScore;
 use Base\Model\SpamProtectionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -71,6 +72,9 @@ class SpamChecker
      */
     public function getScore(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::ASKISMET): int
     {
+        if(empty($candidate->getSpamText()))
+            return SpamScore::NO_TEXT;
+
         $request = $this->requestStack->getCurrentRequest();
         switch($api) {
             
@@ -101,14 +105,14 @@ class SpamChecker
                 $response = $this->client->request('POST', $this->getEndpoint($api), $options);
 
                 $headers = $response->getHeaders();
-                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = 2;
+                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = SpamScore::BLATANT_SPAM;
                 else {
 
                     $content = $response->getContent();
                     if (isset($headers['x-akismet-debug-help'][0]))
                         throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
 
-                    $score = ($content === "true" ? 1 : 0);
+                    $score = ($content === "true" ? SpamScore::MAYBE_SPAM : SpamScore::NOT_SPAM);
                 }
         }
 

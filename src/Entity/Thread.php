@@ -163,7 +163,7 @@ class Thread implements TranslatableInterface
 
     public function __toString()
     {
-        return $this->getTitle() ?? get_class($this);
+        return $this->getTitle() ?? $this->getSlug() ?? get_class($this);
     }
 
     public static function whoAmI(): string

@@ -103,6 +103,8 @@ class QuillType extends AbstractType
         }
         $this->baseService->addStylesheetFile($themeCssFile);
         $modules = $options["modules"] ?? [];
+        
+        $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
         $editor = $view->vars["id"]."_editor";
 
         //

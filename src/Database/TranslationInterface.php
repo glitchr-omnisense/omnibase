@@ -9,4 +9,6 @@ interface TranslationInterface
 
     public function getLocale(): string;
     public function setLocale(string $locale);
+
+    public function isEmpty(): bool;
 }

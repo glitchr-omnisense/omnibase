@@ -301,13 +301,12 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
 
             $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
-            
             if(!$metadata->discriminatorMap) {
-                
+
                 $metadata->discriminatorMap = array_filter(array_map(function($class) {
 
                     return (is_subclass_of($class, TranslatableInterface::class, true)) 
-                        ? $class::getTranslationEntityClass(false) 
+                        ? $class::getTranslationEntityClass(false, false) 
                         : null;
 
                 }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
@@ -339,9 +338,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
         // minor optimization: avoid loading related metadata when not needed
         foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
+
             if ($discriminatorClass === $metadata->name) {
                 $metadata->discriminatorValue = $discriminatorValue;
-
                 return;
             }
         }

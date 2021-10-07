@@ -12,9 +12,12 @@ use Exception;
 trait TranslatableTrait
 {
     private static $translationClass;
-    public static function getTranslationEntityClass(bool $withInheritance = true): ?string
+    public static function getTranslationEntityClass(
+        bool $withInheritance = true, // Required in some cases where you must access main class without inheritance
+        bool $selfClass = true // Proxies\__CG__ error, if not false during discriminator map building (TranslationType)
+    ): ?string
     {
-        $class = static::class;
+        $class = ($selfClass ? self::class : static::class);
         if($withInheritance) {
 
             self::$translationClass = $class . 'Translation';
@@ -49,7 +52,7 @@ trait TranslatableTrait
         return $this->translations;
     }
 
-    public function addTranslation($translation)
+    public function addTranslation(TranslationInterface $translation)
     {
         if($translation !== null) {
 
@@ -74,8 +77,8 @@ trait TranslatableTrait
         if(!$locale) throw new MissingLocaleException("Missing locale information.");
 
         $translations = $this->getTranslations();
-        $translationClass = self::getTranslationEntityClass();
-        
+        $translationClass = self::getTranslationEntityClass(true, false);
+
         $translation = $translations[$locale] ?? null;
         if(!$translation) {
 

@@ -21,14 +21,16 @@ use Twig\TwigFilter;
 
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 final class BaseTwigExtension extends AbstractExtension
 {
     protected string $projectDir;
-    public function __construct(TranslatorInterface $translator) {
+    public function __construct(TranslatorInterface $translator, ?ParameterBagInterface $parameterBag = null) {
 
         BaseController::$foundBaseTwigExtension = true;
 
+        $this->parameterBag = $parameterBag;
         $this->translator = $translator;
         $this->intlExtension = new IntlExtension();
 
@@ -164,13 +166,16 @@ final class BaseTwigExtension extends AbstractExtension
         $parseUrl = parse_url($url);
         if(!array_key_exists("schema", $parseUrl)) {
             
-            if(str_starts_with($url, "http://") || str_starts_with($url, "https://")) $domain = "";
-            else $domain = ($_SERVER['HTTPS'] ? "https://" : "http://") . $_SERVER['SERVER_NAME'];
+            $https = $_SERVER['HTTPS'] ?? ($this->parameterBag->get("base.use_https") ? $this->parameterBag->get("base.use_https") : true);
+            $serverName = $_SERVER['SERVER_NAME'] ?? ($this->parameterBag->has("base.domain") ? $this->parameterBag->get("base.domain") : "localhost");
 
-            if (!empty($domain)) $joint = (str_starts_with($url, "/")) ? "" : "/";
-            else $joint = "";
+            if(str_starts_with($url, "http://") || str_starts_with($url, "https://")) $domain = "";
+            else $domain = ($https ? "https://" : "http://") . $serverName;
+
+            if (!empty($domain)) $join = (str_starts_with($url, "/")) ? "" : "/";
+            else $join = "";
             
-            $url = $domain . $joint . $url;
+            $url = $domain . $join . $url;
         }
 
         return $url;

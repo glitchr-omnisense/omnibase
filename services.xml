@@ -72,6 +72,7 @@
         <service id="Base\Twig\BaseTwigExtension" >
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
+            <argument type="service" id="parameter_bag" />
        </service>
 
         <service id="Base\Form\Extension\FormTypeBootstrapExtension" >
@@ -404,6 +405,7 @@
 
         <service id="Base\Field\Configurator\TranslatableConfigurator">
             <tag name="ea.field_configurator" />
+            <argument type="service" id="base.locale_provider" />
         </service>
 
         <service id="Base\Field\Configurator\FontAwesomeConfigurator">

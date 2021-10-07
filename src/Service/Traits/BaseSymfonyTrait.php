@@ -135,12 +135,13 @@ trait BaseSymfonyTrait
     }
 
     public function getCurrentPathName() { return $this->getPathName(); }
-    public function getPathName($path = "")
+    public function getPathName(?string $path = null)
     {
-        if (empty($path)) $path = $_SERVER["REQUEST_URI"];
-        $path = parse_url($path, PHP_URL_PATH);
+        if(!$path) $path = $_SERVER["REQUEST_URI"] ?? null;
+	if(!$path) return null;
 
         try {
+            $path = parse_url($path, PHP_URL_PATH);
             return $this->getRouter()->match($path)['_route'];
         } catch (ResourceNotFoundException $e) {
             return null;
@@ -158,17 +159,18 @@ trait BaseSymfonyTrait
             return false;
 
         if($exceptionPattern) {
-        
+
             if(is_string($exceptionPattern))
                 $exceptionPattern = [$exceptionPattern];
 
             foreach($exceptionPattern as $pattern) {
-                
+
                 if (preg_match($pattern, $currentRouteName))
                     return false;
             }
         }
 
+dump($route, $event, debug_backtrace());
         if(is_callable($callback)) $callback();
         $event->setResponse(new RedirectResponse($route));
         return true;

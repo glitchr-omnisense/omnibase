@@ -24,6 +24,18 @@ use Base\Traits\ColumnAliasTrait;
 class Tag implements TranslatableInterface
 {
     use TranslatableTrait;
+    public function getName()  : ?string { return $this->translate()->getName(); }
+    public function getDescription(): ?string { return $this->translate()->getDescription(); }
+    
+    public function setName(?string $name) {
+        $this->translate()->setName($name);  
+        return $this; 
+    }
+
+    public function setDescription(?string $content) { 
+        $this->translate()->setDescription($content); 
+        return $this; 
+    }
 
     /**
      * @ORM\Id
@@ -38,25 +50,60 @@ class Tag implements TranslatableInterface
      */
     protected $slug;
 
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $icon;
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(?string $color): self
+    {
+        $this->color = $color;
+        return $this;
+    }
 
     /**
      * @ORM\Column(type="string", length=9, nullable=true)
      */
     protected $color;
 
+    public function getIcon(): ?string
+    {
+        return $this->icon;
+    }
+
+    public function setIcon(?string $icon): self
+    {
+        $this->icon = $icon;
+        return $this;
+    }
+
     /**
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="tags")
      */
     protected $threads;
 
-    public function __construct(string $name = null, ?string $slug = null)
+    public function __construct(?string $name = null, ?string $slug = null)
     {
         $this->threads = new ArrayCollection();
-        $this->name = $name;
+
+        $this->setName($name);
         $this->slug = $slug;
     }
 
@@ -67,12 +114,7 @@ class Tag implements TranslatableInterface
 
     public function __toString()
     {
-        return $this->name;
-    }
-
-    public function getSlug(): ?string
-    {
-        return $this->slug;
+        return $this->getName() ?? $this->getSlug() ?? get_class($this);
     }
 
     /**
@@ -98,30 +140,6 @@ class Tag implements TranslatableInterface
         if ($this->threads->removeElement($thread)) {
             $thread->removeTag($this);
         }
-
-        return $this;
-    }
-
-    public function getColor(): ?string
-    {
-        return $this->color;
-    }
-
-    public function setColor(?string $color): self
-    {
-        $this->color = $color;
-
-        return $this;
-    }
-
-    public function getIcon(): ?string
-    {
-        return $this->icon;
-    }
-
-    public function setIcon(?string $icon): self
-    {
-        $this->icon = $icon;
 
         return $this;
     }
