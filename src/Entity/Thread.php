@@ -101,7 +101,6 @@ class Thread implements TranslatableInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
-     *
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $authors;

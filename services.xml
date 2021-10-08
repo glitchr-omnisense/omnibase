@@ -421,10 +421,6 @@
             <tag name="ea.field_configurator" />
         </service>
 
-        <service id="Base\Field\Configurator\FileConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
-
         <service id="Base\Field\Configurator\CountryConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="assets.packages" />

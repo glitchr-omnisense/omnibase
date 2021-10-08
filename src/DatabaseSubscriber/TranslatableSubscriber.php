@@ -86,13 +86,12 @@ class TranslatableSubscriber implements EventSubscriber
         if ($classMetadataInfo->hasAssociation('translations'))
             return;
 
-        
         $classMetadataInfo->mapOneToMany([
             'fieldName' => 'translations',
             'mappedBy' => 'translatable',
             'indexBy' => self::LOCALE,
             'cascade' => ['persist', 'merge', 'remove'],
-            'fetch' => $this->convertFetchString("LAZY"),
+            //'fetch' => $this->convertFetchString("LAZY"),
             'targetEntity' => $classMetadataInfo->getReflectionClass()
                 ->getMethod('getTranslationEntityClass')
                 ->invoke(null),

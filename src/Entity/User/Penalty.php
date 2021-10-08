@@ -22,37 +22,37 @@ class Penalty
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="penalties")
      */
-    private $uid;
+    protected $uid;
 
     /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="penalties")
      */
-    private $gid;
+    protected $gid;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $type;
+    protected $type;
 
     /**
      * @ORM\Column(type="datetime", nullable=true)
      */
-    private $duration;
+    protected $duration;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $extra;
+    protected $extra;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdAt;
+    protected $createdAt;
 
     public function __construct()
     {

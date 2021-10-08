@@ -28,7 +28,6 @@ final class ColorType extends AbstractType
     {
         $resolver->setDefaults([
             'jscolor-js'    => $this->baseService->getParameterBag("base.vendor.jscolor.js"),
-            'jscolor-css'   => $this->baseService->getParameterBag("base.vendor.jscolor.css"),
         ]);
     }
 
@@ -57,7 +56,6 @@ final class ColorType extends AbstractType
 
         // Import JSColor
         $this->baseService->addJavascriptFile($options["jscolor-js"]);
-        $this->baseService->addStylesheetFile($options["jscolor-css"]);
 
     }
 

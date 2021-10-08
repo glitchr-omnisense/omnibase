@@ -50,7 +50,7 @@ class RoleType extends AbstractType implements SelectTypeInterface
         $resolver->setDefaults([
             'choices' => self::getChoices(),
             'choice_icons' => self::getIcons(),
-            'empty_data'   => UserRole::USER,
+            'empty_data'   => null,
             'invalid_message' => function (Options $options, $previousValue) {
                 return ($options['legacy_error_messages'] ?? true)
                     ? $previousValue

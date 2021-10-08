@@ -99,7 +99,7 @@ trait BaseUtilsTrait
 
         $separator = " [..] ";
         if($nChr > $length + strlen($separator))
-            return substr($str, 0, $length/2) . $separator . substr($str, $nChr-$length/2, $length/2);
+            return substr($str, 0, $length/2) . $separator . substr($str, $nChr-$length/2, $length/2+1);
 
         return $str;
     }

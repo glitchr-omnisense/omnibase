@@ -21,37 +21,37 @@ class Permission
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $tag;
+    protected $tag;
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="permissions")
      */
-    private $uid;
+    protected $uid;
 
     /**
      * @ORM\ManyToMany(targetEntity=Group::class, mappedBy="permissions")
      */
-    private $gid;
+    protected $gid;
 
     /**
      * @ORM\Column(type="json")
      */
-    private $empower = [];
+    protected $empower = [];
 
     /**
      * @ORM\Column(type="text", nullable=true)
      */
-    private $icon;
+    protected $icon;
 
     /**
      * @ORM\Column(type="text")
      */
-    private $description;
+    protected $description;
 
     public function __construct()
     {

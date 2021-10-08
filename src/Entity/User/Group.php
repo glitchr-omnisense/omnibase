@@ -26,47 +26,47 @@ class Group
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $name;
+    protected $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $icon;
+    protected $icon;
 
     /**
      * @ORM\Column(type="string", length=7, nullable=true)
      */
-    private $color;
+    protected $color;
 
     /**
      * @ORM\Column(type="json")
      */
-    private $roles = [];
+    protected $roles = [];
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, mappedBy="groups")
      */
-    private $members;
+    protected $members;
 
     /**
      * @ORM\Column(type="datetime")
      */
-    private $createdAt;
+    protected $createdAt;
 
     /**
      * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="gid")
      */
-    private $permissions;
+    protected $permissions;
 
     /**
      * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="gid")
      */
-    private $penalties;
+    protected $penalties;
 
     public function __construct()
     {

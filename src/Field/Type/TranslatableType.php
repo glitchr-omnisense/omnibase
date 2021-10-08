@@ -98,7 +98,7 @@ class TranslatableType extends AbstractType
         if(!is_subclass_of($translatableClass, TranslatableInterface::class))
             throw new \Exception("Translatable interface not implemented in \"".$translatableClass."\"");
 
-        return $translatableClass::getTranslationEntityClass(true, false);
+        return $translatableClass::getTranslationEntityClass(true, false); //, false);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -114,20 +114,24 @@ class TranslatableType extends AbstractType
             $fields = $this->getFields($form, $options);
 
             $translationClass = $this->getTranslationDataClass($form);
-
+           
             $unavailableRequiredLocales = array_diff($options['required_locales'], $options['available_locales']);
             if(!empty($unavailableRequiredLocales))
                 throw new MissingLocaleException("The locale(s) \"".implode(",", $unavailableRequiredLocales)."\" are missing, but required by FormType \"".$form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType()).")");
-
+            
+            $dataLocale = $event->getData()->getKeys();
             $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
             foreach ($locales as $key => $locale) {
 
                 if (!isset($fields[$locale]))
                     continue;
 
-                if(count($locales) == 1) $defaultLocale = $locale;
-                else $defaultLocale = $options["default_locale"];
-                
+                $defaultLocale = $options["default_locale"];
+                if($options["single_locale"] && \count($dataLocale) == 1) {
+                    $defaultLocale = $dataLocale[0];
+                    $locale = $dataLocale[0];
+                }
+
                 $required = \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
 
                 $form->add($locale, EntityType::class, [
@@ -158,9 +162,11 @@ class TranslatableType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["locale"]           = $options["locale"];
-        $view->vars["defaultLocale"]    = $options["default_locale"];
-        $view->vars["availableLocales"] = $options["available_locales"];
+        $view->vars["locale"]            = $options["locale"];
+        $view->vars["single_locale"]     = $options["single_locale"];
+    
+        $view->vars["default_locale"]    = $options["default_locale"];
+        $view->vars["available_locales"] = $options["available_locales"];
     }
 
     /**

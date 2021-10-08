@@ -17,5 +17,5 @@ file:
                }"
 
 notBlank:
-   property: "{ label } is blank."
+   property: "This field is blank."
    class: "All fields are blank."

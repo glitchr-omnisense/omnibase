@@ -60,7 +60,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications")

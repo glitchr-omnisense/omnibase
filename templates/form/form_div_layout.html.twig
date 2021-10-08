@@ -18,7 +18,8 @@
 {%- endblock quill_widget -%}
 
 {%- block translatable_widget -%}
-{% if form.children|length == 1 %}
+
+{% if form.children|length == 1 and single_locale %}
 
     {% for row in form.children %}
         {{ form_widget(row) }}<br/>
@@ -27,14 +28,14 @@
 {% else %}
 
     <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
-    {% for formLocale, formChild in form.children %}
+    {% for form_locale, form_child in form.children %}
         <li class="nav-item" role="presentation">
 
-            {% set lang    = formLocale|lang %}
-            {% set country = formLocale|country %}
-            <button class="nav-link {% if locale == formLocale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-                <label {% if formChild.vars['required'] %}class="required"{% endif %}>
-                    <img class="country-flag {% if defaultLocale == formLocale %}default{% endif %} " src="/bundles/base/flags/{{ country }}.png" alt="{{ formLocale }}">
+            {% set lang    = form_locale|lang %}
+            {% set country = form_locale|country %}
+            <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
+                <label {% if form_child.vars['required'] %}class="required"{% endif %}>
+                    <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="/bundles/base/flags/{{ country }}.png" alt="{{ form_locale }}">
                 </label>
             </button>
         </li>
@@ -42,10 +43,10 @@
     </ul>
 
     <div class="tab-content" id="{{ form.vars['id'] }}_tab">
-    {% for formLocale, formChild in form.children %}
-        {% set lang    = formLocale|lang %}
-        {% set country = formLocale|country %}
-        <div class="tab-pane fade {% if locale == formLocale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
+    {% for form_locale, formChild in form.children %}
+        {% set lang    = form_locale|lang %}
+        {% set country = form_locale|country %}
+        <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
             {% for row in formChild %}
             {{ form_row(row) }}<br/>
             {% endfor %}
@@ -62,7 +63,11 @@
 {% for child in target %}
     {% set form = form[child] %}
     {% if child == "translations" %}
-        {% set form = form[form.vars.defaultLocale]|default(form[form.vars.locale]) %}
+        {% if form.vars.default_locale in form|keys %}
+            {% set form = form[form.vars.default_locale] %}
+        {% else %} 
+            {% set form = form|first %}
+        {% endif %}
     {% endif %}
 {% endfor %}
 

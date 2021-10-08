@@ -713,7 +713,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     }
     protected function __findOneBy(array $criteria = [], $orderBy = null, $groupBy = null)
     {
-        return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getResult()[0] ?? null;
+        return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult();
     }
     protected function __distinctCount(array $criteria, $groupBy = null): int
     {

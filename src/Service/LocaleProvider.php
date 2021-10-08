@@ -100,6 +100,7 @@ class LocaleProvider implements LocaleProviderInterface
         return self::normalize($locale);
     }
 
+    public static function setDefaultLocale(?string $defaultLocale) { self::$defaultLocale = $defaultLocale; }
     public static function getDefaultLocale(): ?string { return self::$defaultLocale; }
     public static function getFallbackLocales(): array { return self::$fallbackLocales; }
     public static function getAvailableLocales(): array 

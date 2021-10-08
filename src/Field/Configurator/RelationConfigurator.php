@@ -55,8 +55,6 @@ final class RelationConfigurator implements FieldConfiguratorInterface
             $field->setFormTypeOption('attr.data-widget', 'select2');
         }
 
-        $field->setFormTypeOptionIfNotSet('empty_data', []);
-
         if ($entityDto->isToOneAssociation($propertyName)) {
             $this->configureToOneAssociation($field);
         }
@@ -118,6 +116,8 @@ final class RelationConfigurator implements FieldConfiguratorInterface
             : $this->entityFactory->createForEntityInstance($field->getValue());
         $field->setFormTypeOptionIfNotSet('class', $targetEntityDto->getFqcn());
 
+        $field->setFormTypeOptionIfNotSet('empty_data', null);
+
         $field->setCustomOption(RelationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
 
         $field->setFormattedValue($this->formatAsString($field->getValue(), $targetEntityDto));
@@ -131,6 +131,7 @@ final class RelationConfigurator implements FieldConfiguratorInterface
         $field->setSortable(false);
 
         $field->setFormTypeOptionIfNotSet('multiple', true);
+        $field->setFormTypeOptionIfNotSet('empty_data', []);
 
         /* @var PersistentCollection $collection */
         $field->setFormTypeOptionIfNotSet('class', $field->getDoctrineMetadata()->get('targetEntity'));

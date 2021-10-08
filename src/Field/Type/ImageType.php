@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Annotations\Annotation\Uploader;
 use Base\Service\BaseService;
 use InvalidArgumentException;
 use Symfony\Component\Form\AbstractType;

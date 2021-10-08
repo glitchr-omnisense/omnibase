@@ -21,5 +21,4 @@ class SelectConfigurator implements FieldConfiguratorInterface
     {
         return SelectField::class === $field->getFieldFqcn();
     }
-
 }

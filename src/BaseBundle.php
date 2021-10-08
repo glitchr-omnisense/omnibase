@@ -15,7 +15,9 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\DependencyInjection\Loader\Configurator as Config;
 
 class BaseBundle extends Bundle
-{
+{   
+    public const VERSION = '1.0.0';
+
     public function boot()
     {
         $this->defineDoctrineType();

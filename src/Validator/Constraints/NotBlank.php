@@ -27,7 +27,6 @@ class NotBlank extends Constraint
     public function __construct(array $options = null, string $message = null, bool $allowNull = null, callable $normalizer = null, array $groups = null, $payload = null)
     {
         parent::__construct($options ?? [], $groups, $payload);
-
         $this->message = $message ?? $this->message;
         $this->allowNull = $allowNull ?? $this->allowNull;
         $this->normalizer = $normalizer ?? $this->normalizer;

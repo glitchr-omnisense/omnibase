@@ -16,6 +16,8 @@ use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
 use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
@@ -64,7 +66,7 @@ class SelectType extends AbstractType
             'template'          => "function(option, that) { if (option.element) { var icon = $(option.element).attr('data-icon') || ''; if(icon) icon = '<i class=\"'+icon+'\"></i> '; return $('<span>'+icon+option.text + '</span>'); } return option.text; }",
             'templateSelection' => null,
             'templateResult'    => null,
-            'empty_data'        => "",
+            'empty_data'        => null,
 
             // Generic parameters
             'placeholder'     => "",

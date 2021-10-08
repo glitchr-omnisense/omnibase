@@ -14,10 +14,15 @@ trait TranslatableTrait
     private static $translationClass;
     public static function getTranslationEntityClass(
         bool $withInheritance = true, // Required in some cases where you must access main class without inheritance
-        bool $selfClass = true // Proxies\__CG__ error, if not false during discriminator map building (TranslationType)
+        bool $selfClass = false // Proxies\__CG__ error, if not true during discriminator map building (TranslationType)
     ): ?string
     {
         $class = ($selfClass ? self::class : static::class);
+        
+        $prefix = "Proxies\__CG__\\";
+        if (strpos($class, $prefix) === 0) 
+            $class = substr($class, strlen($prefix));
+
         if($withInheritance) {
 
             self::$translationClass = $class . 'Translation';
@@ -86,7 +91,7 @@ trait TranslatableTrait
             $defaultKey = array_search($locale, $keys);
             $firstKey = ( \count($keys) > 1 ) ? $keys[$defaultKey] : $keys[0] ?? null;
             
-            $translation = $firstKey ? $translations[$firstKey] : null;            
+            $translation = $firstKey ? $translations[$firstKey] : null;
             if(!$translation) {
 
                 $translation = new $translationClass;

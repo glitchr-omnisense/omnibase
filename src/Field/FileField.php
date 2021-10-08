@@ -60,11 +60,4 @@ final class FileField implements FieldInterface
              ->setFormType(ImageType::class);
         return $this;
     }
-
-    public function renderAsAvatar(): self
-    {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar")
-             ->setFormType(AvatarType::class);
-        return $this;
-    }
 }

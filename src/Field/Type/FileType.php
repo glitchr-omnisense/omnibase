@@ -130,10 +130,10 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['files'] = $files;
 
         $acceptedFiles = ($options["mime_types"] ? implode(",", $options["mime_types"]) : null);
-        if(!$acceptedFiles && $entity) $acceptedFiles = implode(",", Uploader::getMimeTypes($options["data_class"], $form->getName()));
+        if(!$acceptedFiles && $entity) $acceptedFiles = implode(",", Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName()));
         $view->vars["accept"] = $acceptedFiles;
 
-        $view->vars['value'] = Uploader::getPublicPath($options["data_class"], $form->getName());
+        $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $form->getName());
         $view->vars['multiple']     = $options['multiple'];
         $view->vars['allow_delete'] = $options['allow_delete'];
         $view->vars['max_filesize'] = $options['max_filesize'];

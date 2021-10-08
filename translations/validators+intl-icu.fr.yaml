@@ -17,5 +17,5 @@ file:
    }"
 
 notBlank:
-   property: "Le champ \"{ label } \" ne peut pas être vide."
+   property: "Ce champ ne peut pas être vide."
    class: "Tous les champs du formulaire sont vides."

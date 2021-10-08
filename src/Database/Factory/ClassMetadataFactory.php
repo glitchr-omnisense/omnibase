@@ -295,6 +295,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      *
      * @throws MappingException
      */
+    
     private function resolveDiscriminatorValue(ClassMetadata $metadata)
     {
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
@@ -324,6 +325,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
             if(!$metadata->discriminatorValue) 
                 throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
+
         } 
 
         if (
@@ -376,7 +378,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
         $duplicates = [];
         foreach ($allClasses as $subClassCandidate) {
+            
             if (is_subclass_of($subClassCandidate, $fqcn)) {
+
                 $shortName = $this->getShortName($subClassCandidate);
 
                 if (isset($map[$shortName])) {

@@ -41,16 +41,6 @@ class ThreadTranslation implements TranslationInterface
      */
     protected $title;
 
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $excerpt;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $content;
-
     public function getTitle(): ?string
     {
         return $this->title;
@@ -63,6 +53,11 @@ class ThreadTranslation implements TranslationInterface
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $excerpt;
+
     public function getExcerpt(): ?string
     {
         return $this->excerpt;
@@ -74,6 +69,11 @@ class ThreadTranslation implements TranslationInterface
 
         return $this;
     }
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $content;
 
     public function getContent(): ?string
     {

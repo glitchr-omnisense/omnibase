@@ -1,0 +1,39 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{% if field.value is iterable %}
+
+    {% for fieldKey,fieldValue in field.value %}
+
+    {% if fieldValue != "ROLE_USER" and field.value|length != 1 %}
+    <span class="badge badge-secondary">
+        {% if field.formattedValue[fieldKey] is iterable and field.formattedValue[fieldKey]|length > 1 %}
+            <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[fieldKey][0] }}">
+                {{field.formattedValue[fieldKey][1] | raw}}
+            </div>
+        {% else %}
+            {{ field.formattedValue[fieldKey] }}
+        {% endif %}
+    </span>
+    {% endif %}
+
+    {% endfor %}
+
+{% else %}
+
+        <span class="badge badge-secondary">
+        
+            {% if field.formattedValue is iterable and field.formattedValue|length > 1 %}
+                    <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[0] }}">
+                    {{field.formattedValue[1] | raw}}
+                    </div>
+            {% else %}
+                {% if field.value is null %}
+                <i class="fa fa-fw">-</i>
+                {% else %}
+                {{field.value}}
+                {% endif %}
+            {% endif %}
+        </span>
+{% endif %}
