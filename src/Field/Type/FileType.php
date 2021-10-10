@@ -139,7 +139,6 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["accept"] = $acceptedFiles;
 
         $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $form->getName());
-
         if(is_array($view->vars['value']))
              $view->vars["value"] = implode("|", $view->vars["value"]);
 

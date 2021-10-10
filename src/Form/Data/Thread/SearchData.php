@@ -31,9 +31,4 @@ class SearchData
      * @var string
      */
     public $content;
-
-    /**
-     * @var Thread
-     */
-    public ?Thread $parent = null;
 }

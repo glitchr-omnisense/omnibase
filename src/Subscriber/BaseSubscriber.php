@@ -26,6 +26,9 @@ class BaseSubscriber implements EventSubscriberInterface
     {
         BaseController::$foundBaseSubscriber = true;
 
+        $this->baseService->addJavascriptFile("bundles/base/app.js");
+        $this->baseService->addStylesheetFile("bundles/base/app.css");
+
         if (!$this->baseService->isDebug())
             return;
 

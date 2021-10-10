@@ -46,6 +46,9 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bridge\Twig\Extension\AssetExtension;
+use Symfony\Component\Asset\PackageInterface;
+use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -88,7 +91,8 @@ final class BaseService implements RuntimeExtensionInterface
         SluggerInterface $slugger, 
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
-        CsrfTokenManagerInterface $csrfTokenManager)
+        CsrfTokenManagerInterface $csrfTokenManager,
+        Packages $packages)
     {
         BaseController::$foundBaseService = true;
         
@@ -105,8 +109,8 @@ final class BaseService implements RuntimeExtensionInterface
         // Symfony basic services
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
-        $this->rstack     = $this->container->get("request_stack");
-
+        $this->rstack           = $this->container->get("request_stack");
+        $this->packages           = $packages;
         $this->setLocaleProvider($localeProvider);
 
         $this->setTwig($twig);
@@ -124,8 +128,6 @@ final class BaseService implements RuntimeExtensionInterface
 
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->rstack);
-        $this->addJavascriptFile("/bundles/base/app.js");
-        $this->addStylesheetFile("/bundles/base/app.css");
     }
     
     /*

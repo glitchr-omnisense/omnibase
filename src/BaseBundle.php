@@ -15,7 +15,7 @@ use Symfony\Component\Finder\Finder;
 use Symfony\Component\DependencyInjection\Loader\Configurator as Config;
 
 class BaseBundle extends Bundle
-{   
+{
     public const VERSION = '1.0.0';
 
     public function boot()
@@ -26,22 +26,27 @@ class BaseBundle extends Bundle
     public function defineDoctrineType()
     {
         $em = $this->container->get('doctrine.orm.entity_manager');
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-        $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
-    
+        try {
+            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
+        } catch(\Exception $e) {}
+
         $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
         $classList = BaseBundle::getAllClasses($projectDir . "./Enum");
         $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
 
         /* Register enum types: priority to App namespace */
         foreach($classList as $className) {
-         
+
             if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
             else Type::addType($className::getStaticName(), $className);
 
-            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
+            try {
+                $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
+            } catch(\Exception $e) { dump($e); }
         }
     }
+
     const __ROOT__ = "Base\\BaseBundle";
     public static function getBundleLocation() {
         return dirname((new \ReflectionClass(self::__ROOT__))->getFileName()) . "/";

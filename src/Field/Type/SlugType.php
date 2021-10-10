@@ -37,7 +37,7 @@ final class SlugType extends AbstractType
         $targetPath = explode(".", $options["target"]);
         $view->vars['target'] = $targetPath;
 
-        $this->baseService->addJavascriptFile("/bundles/base/form-type-slug.js");
+        $this->baseService->addJavascriptFile("bundles/base/form-type-slug.js");
     }
 
     public function getParent(): string

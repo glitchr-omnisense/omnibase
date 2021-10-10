@@ -25,7 +25,7 @@ class ImageType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'   => "/bundles/base/images.svg",
+            'thumbnail'   => "bundles/base/images.svg",
 
             'cropper'     => null,
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.js"),

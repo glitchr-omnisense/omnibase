@@ -5,6 +5,7 @@ namespace Base\Security;
 use App\Entity\User;
 use Base\Annotations\Annotation\Hashify;
 use Base\Entity\User\Notification;
+use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -46,13 +47,14 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     private $csrfTokenManager;
     private $router;
 
-    public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager)
+    public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
     {
         $this->entityManager = $entityManager;
         $this->userRepository = $entityManager->getRepository(User::class);
 
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
+        $this->baseService = $baseService;
     }
 
     public function start(Request $request, AuthenticationException $authException = null)
@@ -103,8 +105,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $targetPath = $request->request->get("_target_path") ?? null;
         if ($targetPath) {
 
-            $path = parse_url($targetPath, PHP_URL_PATH);
-            if($this->router->match($path)['_route'] != self::LOGOUT_ROUTE)
+            if($this->baseService->getPathName($targetPath) != self::LOGOUT_ROUTE)
                 return new RedirectResponse($targetPath);
         }
 

@@ -26,7 +26,7 @@ trait BaseSymfonyTrait
         self::$startTime = $this->kernel->getStartTime();
         if (is_infinite(self::$startTime)) self::$startTime = microtime(true);
     }
-    
+
     public function hasPost() { return isset($_POST); }
     public function hasGet() { return isset($_GET); }
     public function hasSession() { return isset($_SESSION); }
@@ -169,8 +169,7 @@ trait BaseSymfonyTrait
                     return false;
             }
         }
-
-dump($route, $event, debug_backtrace());
+        
         if(is_callable($callback)) $callback();
         $event->setResponse(new RedirectResponse($route));
         return true;
@@ -196,10 +195,11 @@ dump($route, $event, debug_backtrace());
     public function protocol() { return $this->getProtocol(); }
     public function domain(int $level = 0) { return $this->getDomain($level); }
     public function www() { return $this->getWebsite(); }
-    public function url() { return $this->getWebsite(); }
+    public function url($url, $packages = null) { return $this->getUrl($url, $packages); }
     public function assets() { return $this->getAssets(); }
     public function vendor() { return $this->getVendor(); }
 
+    public function getUrl($url, $packages = null) { return $this->packages->getUrl($url, $packages); }
     public function getBirthdate():string { return ($this->getParameterBag('base.birthdate') < 0) ? date("Y") : $this->getParameterBag('base.birthdate'); }
     public function getProtocol(): string { return ($this->getParameterBag('base.use_https') ? "https" : "http"); }
     public function getDomain(int $level = 0)  : string 
@@ -207,7 +207,7 @@ dump($route, $event, debug_backtrace());
         $domain = $this->getParameterBag("base.domain");
         while($level-- > 0)
             $domain = preg_replace("/^(\w+)./i", "", $domain);
-        
+
         return $domain;
     }
     public function getAge():string
@@ -217,8 +217,8 @@ dump($route, $event, debug_backtrace());
     }
 
     public function getWebsite()    { return $this->getProtocol() . "://" . $this->getDomain(); }
-    public function getAssets()     { return $this->getProtocol() . "://" . $this->getParameterBag('base.assets'); }
-    public function getVendor()     { return $this->getAssets(false) . "/vendor"; }
+    public function getAssets()     { return $this->getWebsite()."/assets"; }
+    public function getVendor()     { return $this->getWebsite()."/assets/vendor"; }
     public function getServerName() { return $_SERVER["SERVER_NAME"] ?? $this->getDomain(); }
     public function getSubdomain()
     {

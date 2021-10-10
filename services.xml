@@ -54,6 +54,7 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="assets.packages" />
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">
@@ -111,16 +112,6 @@
             <argument type="service" id="base.service" />
         </service>
         <service id="Base\Command\UploaderEntitiesCommand">
-            <tag name="console.command" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Command\UploaderListCommand">
-            <tag name="console.command" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Command\UploaderOrphanCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.service" />
@@ -318,6 +309,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="router.default" />
             <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.service" />
         </service>
 
         <!-- Listener declarations 

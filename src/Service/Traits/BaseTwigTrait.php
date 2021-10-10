@@ -76,18 +76,26 @@ trait BaseTwigTrait {
         return $this->addStylesheetCode($stylesheet);
     }
 
-    public function addStylesheetFile($file)
+    public function addStylesheetFile($files)
     {
-        if (!$this->isStylesheetFile($file)) throw new Exception("File $file is not a valid stylesheet extension");
+        if (!is_array($files)) $files = [$files];
+        foreach($files as $file) {
 
-        if (is_array($file)) $this->cssFile = $this->cssFile + $file;
-        else $this->cssFile[] = $file;
+            if (!$this->isStylesheetFile($file))
+                throw new Exception("File $file is not a valid stylesheet extension");
+            
+            $file = $this->packages->getUrl($file);
 
-        // Add information to EasyAdmin context (e.g. for instance if field uses select2)
-        if ($this->adminContextProvider) {
-            $adminContext = $this->adminContextProvider->getContext();
-            if ($adminContext) $adminContext->getAssets()->addHtmlContentToHead("<link rel=\"stylesheet\" href=\"".$file."\">");
+            // Add information to EasyAdmin context (e.g. for instance if field uses select2)
+            if ($this->adminContextProvider) {
+                $adminContext = $this->adminContextProvider->getContext();
+                if ($adminContext) $adminContext->getAssets()->addHtmlContentToHead("<link rel=\"stylesheet\" href=\"".$file."\">");
+            }
+
+            // Base css list
+            $this->cssFile[] = $file;
         }
+
         return $this;
     }
     public function addStylesheetCode($script)
@@ -177,24 +185,30 @@ trait BaseTwigTrait {
         return $this->addJavascriptCode($javascript, $location);
     }
 
-    public function addJavascriptFile(string $file, $location = "body")
+    public function addJavascriptFile(string $files, $location = "body")
     {
-        if (!$file) return $this;
+        if (!$files) return $this;
 
-        if (!$this->isJavascriptFile($file)) throw new Exception("File $file is not a valid javascript file extension");
-        if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
+        if (!is_array($files)) $files = [$files];
+        foreach($files as $file) {
 
-        if (is_array($file)) $this->jsFile[$location] = $this->jsFile[$location] + $file;
-        else $this->jsFile[$location][] = $file;
+            $file = $this->packages->getUrl($file);
+            
+            if (!$this->isJavascriptFile($file)) throw new Exception("File $file is not a valid javascript file extension");
+            if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
 
-        // Add file to admin context (if necessary)
-        if ($this->adminContextProvider) {
-            $adminContext = $this->adminContextProvider->getContext();
-            if ($adminContext) {
+            // Add file to admin context (if necessary)
+            if ($this->adminContextProvider) {
+                $adminContext = $this->adminContextProvider->getContext();
+                if ($adminContext) {
 
-                if ($location == "head") $adminContext->getAssets()->addHtmlContentToHead("<script src=\"$file\"></script>" . PHP_EOL);
-                else $adminContext->getAssets()->addHtmlContentToBody("<script src=\"$file\"></script>" . PHP_EOL);
+                    if ($location == "head") $adminContext->getAssets()->addHtmlContentToHead("<script src=\"$file\"></script>" . PHP_EOL);
+                    else $adminContext->getAssets()->addHtmlContentToBody("<script src=\"$file\"></script>" . PHP_EOL);
+                }
             }
+
+            if (is_array($file)) $this->jsFile[$location] = $this->jsFile[$location] + $file;
+            else $this->jsFile[$location][] = $file;
         }
 
         return $this;
