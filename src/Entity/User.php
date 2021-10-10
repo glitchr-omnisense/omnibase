@@ -206,8 +206,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $avatar;
 
-    public function getAvatar(): ?string { return Uploader::getPublicPath($this, "avatar"); }
-    public function getAvatarFile(): ?File { return Uploader::getFile($this, "avatar"); }
+    public function getAvatar() { return Uploader::getPublicPath($this, "avatar"); }
+    public function getAvatarFile() { return Uploader::getFile($this, "avatar"); }
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
@@ -333,7 +333,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @see UserInterface
      */
-    public function getRoles(): array { return $this->roles; }
+    public function getRoles(): array { 
+        
+        if(empty($roles))
+            $roles[] = UserRole::USER;
+
+        return $this->roles;
+    }
+
     public function setRoles(array $roles): self
     {
         if(empty($roles))
@@ -344,21 +351,24 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function addRole(string $role): self
-    {
-        if (!in_array($role, $this->roles))
-            $this->roles[] = $role;
+    //
+    // NB: DON'T USE addRole or removeRole, it seems to be changing ChoiceType behavior
+    //
+    // public function addRole(string $role): self
+    // {
+    //     if (!in_array($role, $this->roles))
+    //         $this->roles[] = $role;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
-    public function removeRole(string $role): self
-    {
-        if ( ($pos = array_search($role, $this->roles)) )
-            unset($this->roles[$pos]);
+    // public function removeRole(string $role): self
+    // {
+    //     if ( ($pos = array_search($role, $this->roles)) )
+    //         unset($this->roles[$pos]);
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function isSocialAccount(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
 

@@ -121,10 +121,10 @@ trait BaseUtilsTrait
         if (!$object) return dump("Object passed is null");
         $objectID = (is_object($object)) ? "Object: 0x" . spl_object_hash($object) . "\n" : "";
 
-        if (!is_object($object)) return dump($object);
+        if (!is_object($object) && !is_string($object)) return dump($object);
 
-        $className    = get_class($object);
-        $classParent  = get_parent_class($object);
+        $className    = (is_string($object) ? $object : get_class($object));
+        $classParent  = get_parent_class($className);
         $classMethods = get_class_methods($className);
         $classVars    = get_class_vars($className);
 

@@ -77,7 +77,7 @@ class SelectType extends AbstractType
             'tokenSeparators' => [' ', ',', ';'],
         ]);
     }
-
+    
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         if($options["select2"]) {

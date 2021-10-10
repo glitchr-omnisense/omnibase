@@ -1,6 +1,8 @@
 <?php
 
 namespace Base\Field\Configurator;
+
+use Base\Enum\UserRole;
 use Base\Field\RoleField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -14,5 +16,4 @@ final class RoleConfigurator extends SelectConfigurator implements FieldConfigur
     {
         return RoleField::class === $field->getFieldFqcn();
     }
-
 }

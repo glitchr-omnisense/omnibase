@@ -172,8 +172,9 @@
             {% endif %}
         {% endif %}
 
-        {{ form_widget(form.file, { attr: form.file.vars.attr }) }}
+        {{ form_widget(form.file, { attr: form.file.vars.attr, value: form.vars.value }) }}
         {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept, placeholder: placeholder, title: title, 'data-files-label': filesLabel }) }) }}
+
         {% if allow_delete %}
         <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
             <span style="cursor:pointer;">&#x2715;</span>
@@ -184,6 +185,9 @@
     </div>
     {% if max_filesize %}
     <div class="form-text text-muted">The maximum file size allowed is {{max_filesize|filesize}}.</div>
+    {% endif %}
+    {% if form.vars.value and multiple %}
+    <div class="form-text text-muted">{{form.vars.data|length}} file(s) found.</div>
     {% endif %}
 </div>
 

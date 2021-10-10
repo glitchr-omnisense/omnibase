@@ -79,6 +79,10 @@ class UserCrudController extends AbstractCrudController
         foreach ( ($callbacks["username"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
+        yield RoleField::new('roles')->allowMultipleChoices();
+        foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+            
         yield PasswordField::new('plainPassword')->onlyOnForms();
         foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
             yield $yield;
@@ -89,10 +93,6 @@ class UserCrudController extends AbstractCrudController
 
         yield EmailField::new('email')->hideOnIndex();
         foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield RoleField::new('roles')->allowMultipleChoices();
-        foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
             yield $yield;
     
         yield BooleanField::new("isVerified")->onlyOnIndex()->withConfirmation();

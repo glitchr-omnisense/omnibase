@@ -6,6 +6,7 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Entity\User;
 use Base\Field\Transformer\StringToFileTransformer;
 use Base\Service\BaseService;
+use InvalidArgumentException;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
@@ -124,6 +125,10 @@ class FileType extends AbstractType implements DataMapperInterface
             
         $parent = $form->getParent();
         $entity = $parent->getData();
+        
+        $propertyType = Uploader::getTypeOfField($entity, $form->getName());
+        if($options["multiple"] && $propertyType != "array")
+            throw new InvalidArgumentException("Property ".$form->getName()." is \"$propertyType\", please disable 'multiple' option or turn property type into an 'array'");
 
         $files = Uploader::getFile($entity, $form->getName());
         if(!is_array($files)) $files = ($files ? [$files] : []);
@@ -134,6 +139,10 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["accept"] = $acceptedFiles;
 
         $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $form->getName());
+
+        if(is_array($view->vars['value']))
+             $view->vars["value"] = implode("|", $view->vars["value"]);
+
         $view->vars['multiple']     = $options['multiple'];
         $view->vars['allow_delete'] = $options['allow_delete'];
         $view->vars['max_filesize'] = $options['max_filesize'];
@@ -147,24 +156,24 @@ class FileType extends AbstractType implements DataMapperInterface
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             
             $view->vars["attr"]["class"] = "dropzone";
-            $view->vars["value"] = ""; // find existing file (todo)
-
+            
             $dzOptions = $options["dropzone"];
             unset($dzOptions["init"]); // init is ignored..
 
             if(!array_key_exists("url", $dzOptions)) $dzOptions["url"] = $action;
             if($options['allow_delete'] !== null) $dzOptions["addRemoveLinks"] = $options['allow_delete'];
-            if($options['max_filesize'] !== null) $dzOptions["max_filesize"]   = $options["max_filesize"];
-            if($options['max_files']    !== null) $dzOptions["max_files"]      = $options["max_files"];
+            if($options['max_filesize'] !== null) $dzOptions["maxFilesize"]   = $options["max_filesize"];
+            if($options['max_files']    !== null) $dzOptions["maxFiles"]      = $options["max_files"];
             if($acceptedFiles           !== null) $dzOptions["acceptedFiles"]  = $acceptedFiles;
             
             $dzOptions["dictDefaultMessage"] = $dzOptions["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans2("messages.dropzone.title").'</h4><p>'.$this->translator->trans2("messages.dropzone.description").'</p>';
-            
-            $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $postDelete = "/ux/dropzone/".$token."/'+file.serverId['uuid']+'/delete"; //ux_dropzone_delete
 
-            $dzOptions["url"] = $this->baseService->getPath("ux_dropzone", ["token" => $token]);
+            if(array_key_exists("maxFiles", $dzOptions) && !empty($view->vars["value"]))
+                $dzOptions["maxFiles"] -= count(explode("|", $view->vars["value"]));
+
+            $view->vars["token"] = $this->csrfTokenManager->getToken("dropzone")->getValue();
+            $dzOptions["url"] = $this->baseService->getPath("ux_dropzone", ["token" => $view->vars["token"]]);
             $dzOptions  = preg_replace(["/^{/", "/}$/"], ["", ""], json_encode($dzOptions));
             $dzOptions .= ",init:".$editor."_dropzoneInit";
 
@@ -176,35 +185,73 @@ class FileType extends AbstractType implements DataMapperInterface
                     Dropzone.autoDiscover = false;
 
                     function ".$editor."_dropzoneInit() {
+                        
+                        // Initialize existing pictures
+                        var val = $('#".$view->vars["id"]."').val();
+                        val = (!val || val.length === 0 ? [] : val.split('|'));
+
+                        $('#".$view->vars["id"]."').val(val.map(path => {
+                            return path.substring(path.lastIndexOf('/') + 1);
+                        }).join('|'));
+
+                        var arr = []
+                        $.each(val, function(key,path) { 
+                            arr.push(fetch(path).then(p => p.blob()).then(function(blob) {
+                                return {path:path, blob: blob};
+                            })); 
+                        });
+
+                        Promise.all(arr).then(function(val){
+                            $.each(val, function(key,file) {
+                                
+                                var path = file.path;
+                                var blob = file.blob;
+
+                                var id = parseInt(key)+1;
+                                var uuid = path.substring(path.lastIndexOf('/') + 1);
+                                var mock = {status: 'existing', name: '#'+id, uuid: uuid, type: blob.type, dataURL:URL.createObjectURL(blob), size: blob.size};
+
+                                ".$editor.".files.push(mock);
+                                ".$editor.".displayExistingFile(mock, path);
+                            });
+                        });
+
+                        this.on('dragend', function(file) {
+
+                            var queue = [];
+                            
+                            var files = this.files;
+                            $('#".$editor." .dz-preview .dz-image img').each(function (count, el) {
+
+                                var name = el.getAttribute('alt');
+                                $.each(this.files, function(key,file) {
+                                    if(name == file.name) queue.push(file.uuid);
+                                });
+                            }.bind(this));
+
+                            $('#".$view->vars["id"]."').val(queue.join('|'));
+                        });
 
                         this.on('success', function(file, response) {
+
                             file.serverId = response;
                             var val = $('#".$view->vars["id"]."').val();
                                 val = (!val || val.length === 0 ? [] : val.split('|'));
 
                             val.push(file.serverId['uuid']);
                             $('#".$view->vars["id"]."').val(val.join('|'));
-
-                            console.log(val);
-                            // $.each(val, function(key,value) {
-                            //     var mockFile = { name: value.name, size: value.size };
-                    
-                            //     myDropzone.emit('addedfile', mockFile);
-                            //     myDropzone.emit('thumbnail', mockFile, value.path);
-                            //     myDropzone.emit('complete', mockFile);
-                    
-                            // });
                         });
 
                         this.on('removedfile', function(file) {
-
-                            if (!file.serverId) { return; }
-                            $.post('$postDelete');
-
+                            
+                            // Max files must be updated based on existing files 
+                            if (file.status == 'existing') ".$editor.".options.maxFiles += 1;
+                            else if (file.serverId) $.post('/ux/dropzone/".$view->vars["token"]."/'+file.serverId['uuid']+'/delete');
+                            
                             var val = $('#".$view->vars["id"]."').val();
                                 val = (!val || val.length === 0 ? [] : val.split('|'));
 
-                            const index = val.indexOf(file.serverId['uuid']);
+                            const index = val.indexOf((file.serverId ? file.serverId['uuid'] : file.uuid));
                             if (index > -1) val.splice(index, 1);
                            
                             $('#".$view->vars["id"]."').val(val.join('|'));
@@ -223,8 +270,6 @@ class FileType extends AbstractType implements DataMapperInterface
                     var ".$editor."_sortable = new Sortable(document.getElementById('".$editor."'), {
                         draggable: '.dz-preview'
                     });
-
-                    console.log(".$editor."_sortable, document.getElementById('".$editor."'));
                 </script>");
             }
 
@@ -253,12 +298,11 @@ class FileType extends AbstractType implements DataMapperInterface
             return;
         }
 
-        // invalid data type
-        // if (!$viewData instanceof File) 
-        //     $viewData = new File($viewData);
-
         $fileForm = current(iterator_to_array($forms));
-        $fileForm->setData(basename($viewData));
+        if(is_array($viewData)) $viewData = array_map("basename", $viewData);
+        else $viewData = basename($viewData);
+
+        $fileForm->setData($viewData);
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void

@@ -14,7 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class RoleType extends AbstractType implements SelectTypeInterface
 {
     use SelectTypeTrait;
-
+    
     public static function getChoices(): array
     {
         return [
@@ -48,9 +48,10 @@ class RoleType extends AbstractType implements SelectTypeInterface
     public function configureOptions(OptionsResolver $resolver) {
 
         $resolver->setDefaults([
+            'multiple' => true,
             'choices' => self::getChoices(),
             'choice_icons' => self::getIcons(),
-            'empty_data'   => null,
+            'empty_data'   => UserRole::USER,
             'invalid_message' => function (Options $options, $previousValue) {
                 return ($options['legacy_error_messages'] ?? true)
                     ? $previousValue

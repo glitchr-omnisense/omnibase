@@ -3,11 +3,13 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Exception\OwnerSideException;
 use Base\Field\RelationField;
-
+use Base\Service\BaseService;
 use Doctrine\ORM\EntityRepository;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -127,6 +129,11 @@ final class RelationConfigurator implements FieldConfiguratorInterface
     {
         $field->setCustomOption(RelationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
 
+        $displayedOn = $field->getDisplayedOn();
+        $onForm = $displayedOn->has(Crud::PAGE_EDIT) || $displayedOn->has(Crud::PAGE_NEW);
+        if(!$field->getDoctrineMetadata()->get("isOwningSide") && $onForm)
+            throw new OwnerSideException("Only owner-side modification is allowed for \"".$field->getProperty()."\" using DTO field \"".$field->getFieldFqcn()."\".");
+
         // associations different from *-to-one cannot be sorted
         $field->setSortable(false);
 
@@ -141,7 +148,6 @@ final class RelationConfigurator implements FieldConfiguratorInterface
         }
 
         $showFirst = $field->getCustomOption("showFirst");
-
         if($field->getValue()) {
 
             $classFilter = $field->getFormTypeOption('class');

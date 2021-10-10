@@ -33,12 +33,8 @@
 
 {% block menu %}
     <span class="label {{ not collector.isEasyAdminRequest ? 'disabled' }}">
-        <span class="icon">{{ include('@!EasyAdmin/inspector/icon.svg.twig') }}</span>
-        <strong>EasyAdmin</strong>
-    </span>
-    <span class="label {{ not collector.isEasyAdminRequest ? 'disabled' }}">
         <span class="icon">{{ include('@EasyAdmin/inspector/icon.svg.twig') }}</span>
-        <strong>EasyAdmin</strong>
+        <strong>Base</strong>
     </span>
 {% endblock %}
 

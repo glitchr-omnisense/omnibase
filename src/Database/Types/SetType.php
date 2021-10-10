@@ -20,7 +20,7 @@ abstract class SetType extends Type
         $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
         
         if(!$permittedValues)
-            throw new \Exception("Enum type \"".get_called_class()."\" is empty");
+            throw new \Exception("Set type \"".get_called_class()."\" is empty");
 
         return $permittedValues;
     }
@@ -30,19 +30,18 @@ abstract class SetType extends Type
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
         $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
-
+                
         return "SET(".implode(", ", $permittedValues).")";
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform) { return explode(",", $value); }
+    public function convertToPHPValue($value, AbstractPlatform $platform) { 
+        $values = explode(",", $value);
+        return array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
+    }
+    
     public function convertToDatabaseValue($values, AbstractPlatform $platform)
     {
-        foreach($values as $value) {
-        
-            if (!in_array($value, $this->getPermittedValues()))
-                throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
-        }
-
+        $values = array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
         return implode(",", $values);
     }
 

@@ -6,15 +6,26 @@
 
     {% for fieldKey,fieldValue in field.value %}
     <span class="badge badge-secondary">
-        {% if field.formattedValue[fieldKey] is iterable and field.formattedValue[fieldKey]|length > 1 %}
-            <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[fieldKey][0] }}">
-                 {{field.formattedValue[fieldKey][1] | raw}}
-            </div>
+    
+    {% if fieldKey not in field.formattedValue|keys %}
+        ?
+    {% else %}
+        {% if field.formattedValue[fieldKey] is iterable %}
+            {% if field.formattedValue[fieldKey]|length > 1 %}
+                <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[fieldKey][0] }}">
+                    {{field.formattedValue[fieldKey][1] | raw}}
+                </div>
+            {% else %}
+                ?
+            {% endif %}
         {% else %}
             {{ field.formattedValue[fieldKey] }}
         {% endif %}
+    {% endif %}
+    
     </span>
     {% endfor %}
+    
 
 {% else %}
 

@@ -81,7 +81,7 @@ class UserSubscriber implements EventSubscriber
     {
         $user = $event->getObject();
         if (!$user instanceof User) return;
-
+        
         // Update only if required
         $oldUser = $this->baseService->getOriginalEntity($event);
         if (!$oldUser instanceof User) return;

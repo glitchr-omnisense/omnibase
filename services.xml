@@ -25,13 +25,6 @@
             <argument type="service" id="base.form.proxy" />
        </service>
 
-        <service id="Base\Command\MappingCommand">
-            <tag name="console.command" />
-        </service>
-        <service id="Base\Command\StatusCommand">
-            <tag name="console.command" />
-        </service>
-
         <service id="Base\Controller\BaseController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
@@ -97,6 +90,12 @@
             Commands
         -->
 
+        <service id="Base\Command\MappingCommand">
+            <tag name="console.command" />
+        </service>
+        <service id="Base\Command\StatusCommand">
+            <tag name="console.command" />
+        </service>
         <service id="Base\Command\ThreadPublishableCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -111,7 +110,21 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.service" />
         </service>
-
+        <service id="Base\Command\UploaderEntitiesCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Command\UploaderListCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Command\UploaderOrphanCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
         <!--
 
             Controllers
