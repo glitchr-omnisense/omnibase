@@ -23,6 +23,10 @@ use Doctrine\ORM\Id\IdentityGenerator;
 use Doctrine\ORM\Id\SequenceGenerator;
 use Doctrine\ORM\Id\UuidGenerator;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Mapping\Exception\CannotGenerateIds;
+use Doctrine\ORM\Mapping\Exception\InvalidCustomGenerator;
+use Doctrine\ORM\Mapping\Exception\TableGeneratorNotImplementedYet;
+use Doctrine\ORM\Mapping\Exception\UnknownGeneratorType;
 use Doctrine\Persistence\Mapping\AbstractClassMetadataFactory;
 use Doctrine\Persistence\Mapping\ClassMetadata as ClassMetadataInterface;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
@@ -610,21 +614,13 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * Completes the ID generator mapping. If "auto" is specified we choose the generator
      * most appropriate for the targeted database platform.
      *
-     * @return void
-     *
      * @throws ORMException
      */
-    private function completeIdGeneratorMapping(ClassMetadataInfo $class)
+    private function completeIdGeneratorMapping(ClassMetadataInfo $class): void
     {
         $idGenType = $class->generatorType;
         if ($idGenType === ClassMetadata::GENERATOR_TYPE_AUTO) {
-            if ($this->getTargetPlatform()->prefersSequences()) {
-                $class->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_SEQUENCE);
-            } elseif ($this->getTargetPlatform()->prefersIdentityColumns()) {
-                $class->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_IDENTITY);
-            } else {
-                $class->setIdGeneratorType(ClassMetadata::GENERATOR_TYPE_TABLE);
-            }
+            $class->setIdGeneratorType($this->determineIdGeneratorStrategy($this->getTargetPlatform()));
         }
 
         // Create & assign an appropriate ID generator instance
@@ -640,7 +636,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                     $sequencePrefix = $class->getSequencePrefix($this->getTargetPlatform());
                     $sequenceName   = $this->getTargetPlatform()->getIdentitySequenceName($sequencePrefix, $columnName);
                     $definition     = [
-                        'sequenceName' => $this->getTargetPlatform()->fixSchemaElementName($sequenceName),
+                        'sequenceName' => $this->truncateSequenceName($sequenceName),
                     ];
 
                     if ($quoted) {
@@ -672,7 +668,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                     $quoted       = isset($class->fieldMappings[$fieldName]['quoted']) || isset($class->table['quoted']);
 
                     $definition = [
-                        'sequenceName'      => $this->getTargetPlatform()->fixSchemaElementName($sequenceName),
+                        'sequenceName'      => $this->truncateSequenceName($sequenceName),
                         'allocationSize'    => 1,
                         'initialValue'      => 1,
                     ];
@@ -686,7 +682,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
                 $sequenceGenerator = new SequenceGenerator(
                     $this->em->getConfiguration()->getQuoteStrategy()->getSequenceName($definition, $class, $this->getTargetPlatform()),
-                    $definition['allocationSize']
+                    (int) $definition['allocationSize']
                 );
                 $class->setIdGenerator($sequenceGenerator);
                 break;
@@ -696,31 +692,68 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 break;
 
             case ClassMetadata::GENERATOR_TYPE_UUID:
+                Deprecation::trigger(
+                    'doctrine/orm',
+                    'https://github.com/doctrine/orm/issues/7312',
+                    'Mapping for %s: the "UUID" id generator strategy is deprecated with no replacement',
+                    $class->name
+                );
                 $class->setIdGenerator(new UuidGenerator());
-                break;
-
-            case ClassMetadata::GENERATOR_TYPE_TABLE:
-                throw new ORMException('TableGenerator not yet implemented.');
-
                 break;
 
             case ClassMetadata::GENERATOR_TYPE_CUSTOM:
                 $definition = $class->customGeneratorDefinition;
                 if ($definition === null) {
-                    throw new ORMException("Can't instantiate custom generator : no custom generator definition");
+                    throw InvalidCustomGenerator::onClassNotConfigured();
                 }
 
                 if (! class_exists($definition['class'])) {
-                    throw new ORMException("Can't instantiate custom generator : " .
-                        $definition['class']);
+                    throw InvalidCustomGenerator::onMissingClass($definition);
                 }
 
                 $class->setIdGenerator(new $definition['class']());
                 break;
 
             default:
-                throw new ORMException('Unknown generator type: ' . $class->generatorType);
+                throw UnknownGeneratorType::create($class->generatorType);
         }
+    }
+
+    private function determineIdGeneratorStrategy(AbstractPlatform $platform): int
+    {
+        if (
+            $platform instanceof Platforms\OraclePlatform
+            || $platform instanceof Platforms\PostgreSQL94Platform
+            || $platform instanceof Platforms\PostgreSQLPlatform
+        ) {
+            return ClassMetadata::GENERATOR_TYPE_SEQUENCE;
+        }
+
+        if ($platform->supportsIdentityColumns()) {
+            return ClassMetadata::GENERATOR_TYPE_IDENTITY;
+        }
+
+        if ($platform->supportsSequences()) {
+            return ClassMetadata::GENERATOR_TYPE_SEQUENCE;
+        }
+
+        throw CannotGenerateIds::withPlatform($platform);
+    }
+
+    private function truncateSequenceName(string $schemaElementName): string
+    {
+        $platform = $this->getTargetPlatform();
+        if (! in_array($platform->getName(), ['oracle', 'sqlanywhere'], true)) {
+            return $schemaElementName;
+        }
+
+        $maxIdentifierLength = $platform->getMaxIdentifierLength();
+
+        if (strlen($schemaElementName) > $maxIdentifierLength) {
+            return substr($schemaElementName, 0, $maxIdentifierLength);
+        }
+
+        return $schemaElementName;
     }
 
     /**
