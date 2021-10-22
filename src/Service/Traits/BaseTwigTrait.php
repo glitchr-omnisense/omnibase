@@ -133,6 +133,27 @@ trait BaseTwigTrait {
         return $jsHtml;
     }
 
+    public function noscripts($location = "body")
+    {
+        $jsHtml = "";
+
+        if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
+        $this->jsFile[$location] = array_unique($this->jsFile[$location]);
+
+        foreach ($this->jsFile[$location] as $file) {
+
+            $array = explode(" ", $file);
+            $src   = $array[0];
+            $type  = $array[1] ?? "";
+            $jsHtml .= "<script src=\"".$src."\" ".$type."></script>" .PHP_EOL;
+        }
+        if (!isset($this->jsBlock[$location])) $this->jsBlock[$location] = [];
+        foreach ($this->jsBlock[$location] as $block)
+            $jsHtml .= $block . PHP_EOL;
+
+        return $jsHtml;
+    }
+
     public function isValidUrl($url): bool
     {
 
