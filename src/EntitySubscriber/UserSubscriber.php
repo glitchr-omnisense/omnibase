@@ -14,6 +14,7 @@ use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 use Exception;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
@@ -26,7 +27,7 @@ class UserSubscriber implements EventSubscriber
     private $tokenStorage;
 
     protected array $events;
-    public function __construct(BaseService $baseService, TokenStorageInterface $tokenStorage, TraceableEventDispatcher $dispatcher){
+    public function __construct(BaseService $baseService, TokenStorageInterface $tokenStorage, $dispatcher){
 
         $this->dispatcher   = $dispatcher;
         $this->baseService  = $baseService;

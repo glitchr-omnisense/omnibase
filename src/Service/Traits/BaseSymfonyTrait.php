@@ -64,6 +64,14 @@ trait BaseSymfonyTrait
 
     public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
 
+    public function getSettings(string $key = "")
+    {
+        if (empty($key))
+            return $this->baseSettings()->all();
+
+        return $this->baseSettings->get($key);
+    }
+
     public function getParameterBag(string $key = "", array $bag = null)
     {
         // NB: Container::getParameter() pick into Container::parameterBag

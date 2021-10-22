@@ -28,7 +28,7 @@ trait TranslatableTrait
             self::$translationClass = $class . 'Translation';
             while(!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
 
-                if(!get_parent_class($class)) throw new Exception("No translation entity class found.");
+                if(!get_parent_class($class)) throw new Exception("No translation entity found for ".$class);
 
                 $class = get_parent_class($class);
                 self::$translationClass = $class . 'Translation';

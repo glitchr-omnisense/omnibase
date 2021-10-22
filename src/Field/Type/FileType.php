@@ -174,16 +174,17 @@ class FileType extends AbstractType implements DataMapperInterface
             $view->vars["token"] = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $dzOptions["url"] = $this->baseService->getPath("ux_dropzone", ["token" => $view->vars["token"]]);
             $dzOptions  = preg_replace(["/^{/", "/}$/"], ["", ""], json_encode($dzOptions));
-            $dzOptions .= ",init:".$editor."_dropzoneInit";
+            $dzOptions .= ",init:".$view->vars["id"]."_dropzoneInit";
 
             //
             // Default initialializer
             
+            //$this->baseService->addJavascriptFile("bundles/base/form-type-dropzone.js");
             $this->baseService->addJavascriptCode(
                 "<script>
                     Dropzone.autoDiscover = false;
 
-                    function ".$editor."_dropzoneInit() {
+                    function ".$view->vars["id"]."_dropzoneInit() {
                         
                         // Initialize existing pictures
                         var val = $('#".$view->vars["id"]."').val();
@@ -210,8 +211,8 @@ class FileType extends AbstractType implements DataMapperInterface
                                 var uuid = path.substring(path.lastIndexOf('/') + 1);
                                 var mock = {status: 'existing', name: '#'+id, uuid: uuid, type: blob.type, dataURL:URL.createObjectURL(blob), size: blob.size};
 
-                                ".$editor.".files.push(mock);
-                                ".$editor.".displayExistingFile(mock, path);
+                                ".$view->vars["id"]."_editor.files.push(mock);
+                                ".$view->vars["id"]."_editor.displayExistingFile(mock, path);
                             });
                         });
 
@@ -220,7 +221,7 @@ class FileType extends AbstractType implements DataMapperInterface
                             var queue = [];
                             
                             var files = this.files;
-                            $('#".$editor." .dz-preview .dz-image img').each(function (count, el) {
+                            $('#".$view->vars["id"]."_editor .dz-preview .dz-image img').each(function (count, el) {
 
                                 var name = el.getAttribute('alt');
                                 $.each(this.files, function(key,file) {
@@ -244,7 +245,7 @@ class FileType extends AbstractType implements DataMapperInterface
                         this.on('removedfile', function(file) {
                             
                             // Max files must be updated based on existing files 
-                            if (file.status == 'existing') ".$editor.".options.maxFiles += 1;
+                            if (file.status == 'existing') ".$view->vars["id"]."_editor.options.maxFiles += 1;
                             else if (file.serverId) $.post('/ux/dropzone/".$view->vars["token"]."/'+file.serverId['uuid']+'/delete');
                             
                             var val = $('#".$view->vars["id"]."').val();
@@ -257,7 +258,7 @@ class FileType extends AbstractType implements DataMapperInterface
                         });
                     }
 
-                    let ".$editor." = new Dropzone('#".$editor."', {".$dzOptions."});
+                    let ".$view->vars["id"]."_editor = new Dropzone('#".$editor."_editor', {".$dzOptions."});
                 </script>");
 
             if($options["sortable"]) {
@@ -266,7 +267,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
                 $this->baseService->addJavascriptCode(
                 "<script>
-                    var ".$editor."_sortable = new Sortable(document.getElementById('".$editor."'), {
+                    var ".$editor."_sortable = new Sortable(document.getElementById('".$view->vars["id"]."_editor'), {
                         draggable: '.dz-preview'
                     });
                 </script>");

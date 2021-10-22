@@ -19,16 +19,22 @@ class BaseSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return [KernelEvents::RESPONSE => ['onKernelResponse']];
+        return [
+            KernelEvents::REQUEST => ['onKernelRequest'],
+            KernelEvents::RESPONSE => ['onKernelResponse'],
+        ];
     }
 
-    public function onKernelResponse(ResponseEvent $event)
+    public function onKernelRequest(RequestEvent $event)
     {
         BaseController::$foundBaseSubscriber = true;
 
         $this->baseService->addJavascriptFile("bundles/base/app.js");
         $this->baseService->addStylesheetFile("bundles/base/app.css");
+    }
 
+    public function onKernelResponse(ResponseEvent $event)
+    {
         if (!$this->baseService->isDebug())
             return;
 

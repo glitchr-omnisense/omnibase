@@ -81,17 +81,18 @@ class LocaleProvider implements LocaleProviderInterface
         if($locale === null) {
 
             $currentRequest = $this->requestStack->getCurrentRequest();
-            if ($userLocale = User::getCookie("locale"))
+            if ($userLocale = User::getCookie("locale")) {
                 $locale = $userLocale;
 
-            else if (! $currentRequest instanceof Request)
+            } else if (! $currentRequest instanceof Request) {
                 $locale = $this->getDefaultLocale();
 
-            else if ( ($currentLocale = $currentRequest->getLocale()) )
+            } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
                 $locale = $currentLocale;
 
-            else if ($this->translator !== null)
+            } else if ($this->translator !== null) {
                 $locale = $this->translator->getLocale();
+            }
         }
         
         if(!$locale)

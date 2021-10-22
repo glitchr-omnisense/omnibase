@@ -72,5 +72,4 @@ trait BaseCommonTrait {
      */
     public static $twig;
     public static function setTwig(Environment $twig) { self::$twig = $twig; }
-
 }

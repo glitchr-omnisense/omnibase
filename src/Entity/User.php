@@ -98,9 +98,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @var string Plain password should be empty unless you want to change it
-     * @Assert\Length(min=8, groups={"new", "edit"})
-     * @Assert\NotBlank(groups={"new"})
-     *  */
+     */
     protected $plainPassword;
 
     /**
@@ -200,9 +198,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/jpg", "image/png"})
+     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/*"})
      * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
-     * @AssertBase\FileMimeType(type={"image/jpg", "image/png"}, groups={"new", "edit"})
      */
     protected $avatar;
 
@@ -292,7 +289,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
         return $this;
     }
-
 
     public static function getIp(): ?string
     {

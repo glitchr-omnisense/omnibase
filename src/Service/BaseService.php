@@ -87,12 +87,14 @@ final class BaseService implements RuntimeExtensionInterface
         ManagerRegistry $doctrine,
         FormFactoryInterface $formFactory, 
         LocaleProviderInterface $localeProvider,
-        NotifierInterface $notifier, ChannelPolicyInterface $notifierPolicy,
+        NotifierInterface $notifier, 
+        ChannelPolicyInterface $notifierPolicy,
         SluggerInterface $slugger, 
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         CsrfTokenManagerInterface $csrfTokenManager,
-        Packages $packages)
+        Packages $packages, 
+        BaseSettings $settings)
     {
         BaseController::$foundBaseService = true;
         
@@ -110,7 +112,7 @@ final class BaseService implements RuntimeExtensionInterface
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
         $this->rstack           = $this->container->get("request_stack");
-        $this->packages           = $packages;
+        $this->packages         = $packages;
         $this->setLocaleProvider($localeProvider);
 
         $this->setTwig($twig);

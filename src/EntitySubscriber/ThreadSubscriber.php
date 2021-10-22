@@ -12,11 +12,12 @@ use Doctrine\ORM\Events;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ThreadSubscriber implements EventSubscriber
 {
     protected array $events;
-    public function __construct(TraceableEventDispatcher $dispatcher) {
+    public function __construct($dispatcher) {
         $this->dispatcher = $dispatcher;
         $this->events = [];
     }

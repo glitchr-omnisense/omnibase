@@ -114,11 +114,11 @@ trait BaseTwigTrait {
 
     public function javascripts($location = "body")
     {
-
         $jsHtml = "";
 
         if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
         $this->jsFile[$location] = array_unique($this->jsFile[$location]);
+
         foreach ($this->jsFile[$location] as $file) {
 
             $array = explode(" ", $file);
@@ -149,7 +149,6 @@ trait BaseTwigTrait {
 
     public function addResourceFile($files, $location = "head"): bool
     {
-
         if (is_array($files)) {
 
             $ret = true;
@@ -193,7 +192,7 @@ trait BaseTwigTrait {
         foreach($files as $file) {
 
             $file = $this->packages->getUrl($file);
-            
+
             if (!$this->isJavascriptFile($file)) throw new Exception("File $file is not a valid javascript file extension");
             if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
 

@@ -77,7 +77,7 @@ class Uploader extends AbstractAnnotation
         $this->filesystem = $this->getFilesystem($data["storage"] ?? null);
         $this->public     = (!empty($data["public"] ?? null) ? trim($data["public"], "/") : null);
         $this->pool       = (!empty($data["pool"]   ?? null) ? trim($data["pool"], "/") : "default");
-        dump($this->public);
+       
         $this->storage    = $data["storage"] ?? null;
         $this->config     = $data["config"] ?? [];
         $this->mimeTypes  = $data["mime"] ?? [];
