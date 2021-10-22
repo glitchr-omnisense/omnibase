@@ -83,8 +83,8 @@ class SelectType extends AbstractType
         if($options["select2"]) {
 
             // Import select2
-            $this->baseService->addJavascriptFile($options["select2-js"]);
-            $this->baseService->addStylesheetFile($options["select2-css"]);
+            $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);
+            $this->baseService->addHtmlContent("stylesheets", $options["select2-css"]);
 
             // Default options
             $placeholder = $options["placeholder"] ?? "";
@@ -114,12 +114,12 @@ class SelectType extends AbstractType
                     $themeCssFile = $themeArray[0];
                 }
 
-                $this->baseService->addStylesheetFile($themeCssFile);
+                $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
             }
 
             //
             // Default select2 initialializer
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
             "<script>
                 $(\"#". $view->vars['id'] . "\").select2({
                     theme: \"".$theme."\",

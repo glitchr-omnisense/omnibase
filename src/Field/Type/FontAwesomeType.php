@@ -37,8 +37,8 @@ class FontAwesomeType extends AbstractType implements SelectTypeInterface
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         // Import select2
-        $this->baseService->addJavascriptFile($options["select2-js"]);
-        $this->baseService->addStylesheetFile($options["select2-css"]);
+        $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);
+        $this->baseService->addHtmlContent("stylesheets", $options["select2-css"]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

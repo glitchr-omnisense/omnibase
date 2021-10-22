@@ -76,8 +76,8 @@ class ImageType extends AbstractType
 
         if(is_array($options["cropper"])) {
 
-            $this->baseService->addJavascriptFile($options["cropper-js"]);
-            $this->baseService->addStylesheetFile($options["cropper-css"]);
+            $this->baseService->addHtmlContent("javascripts", $options["cropper-js"]);
+            $this->baseService->addHtmlContent("stylesheets", $options["cropper-css"]);
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
 
@@ -88,7 +88,7 @@ class ImageType extends AbstractType
             if(!array_key_exists('viewMode', $cropperOptions)) $cropperOptions['viewMode'] = 2;
             if(!array_key_exists('aspectRatio', $cropperOptions)) $cropperOptions['aspectRatio'] = 1;
         
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
             "<script>
 
                 var ".$view->vars["id"]."_cropper;
@@ -158,7 +158,7 @@ class ImageType extends AbstractType
 
         if(is_array($options["cropper"])) {
 
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
             "<script>
 
                 $('#".$view->vars["id"]."_thumbnail').on('click', function() {
@@ -191,7 +191,7 @@ class ImageType extends AbstractType
 
         } else {
 
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
             "<script>
                 $('#".$view->vars["id"]."_raw').on('change', function() {
             
@@ -210,7 +210,7 @@ class ImageType extends AbstractType
             </script>");
         }
 
-        $this->baseService->addJavascriptCode(
+        $this->baseService->addHtmlContent("javascripts:body", 
         "<script>
         $('#".$view->vars["id"]."_figcaption').on('click', function() {
             $('#".$view->vars["id"]."_raw').click();

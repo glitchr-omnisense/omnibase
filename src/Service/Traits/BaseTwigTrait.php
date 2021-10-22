@@ -9,17 +9,8 @@ use Twig\Environment;
 
 trait BaseTwigTrait {
 
-    private $cssFile = [];
-    private $cssBlock = [];
-
-    private $jsFile = [];
-    private $jsBlock = [];
-
     private $formFactory;
-    public function getFormFactory()
-    {
-        return $this->formFactory;
-    }
+    public function getFormFactory() { return $this->formFactory; }
 
     /**
      *  Twig related methods
@@ -54,202 +45,12 @@ trait BaseTwigTrait {
         return BaseService::$twig->addGlobal($name, $value);
     }
 
-    public function stylesheets()
+    public function hasParameterTwig(string $name)
     {
-        $cssHtml = "";
+        if (!isset(BaseService::$twig))
+            throw new Exception("No twig found in BaseService. Did you overloaded BaseService::__construct ?");
 
-        $this->cssFile = array_unique($this->cssFile);
-        foreach ($this->cssFile as $file)
-            $cssHtml .= "<link rel=\"stylesheet\" href=\"$file\">";
-
-        foreach ($this->cssBlock as $block)
-            $cssHtml .= $block;
-
-        return $cssHtml;
-    }
-
-    public function addStylesheet($stylesheet)
-    {
-        if ($this->isValidUrl($stylesheet))
-            return $this->addStylesheetFile($stylesheet);
-
-        return $this->addStylesheetCode($stylesheet);
-    }
-
-    public function addStylesheetFile($files)
-    {
-        if (!is_array($files)) $files = [$files];
-        foreach($files as $file) {
-
-            if (!$this->isStylesheetFile($file))
-                throw new Exception("File $file is not a valid stylesheet extension");
-            
-            $file = $this->packages->getUrl($file);
-
-            // Add information to EasyAdmin context (e.g. for instance if field uses select2)
-            if ($this->adminContextProvider) {
-                $adminContext = $this->adminContextProvider->getContext();
-                if ($adminContext) $adminContext->getAssets()->addHtmlContentToHead("<link rel=\"stylesheet\" href=\"".$file."\">");
-            }
-
-            // Base css list
-            $this->cssFile[] = $file;
-        }
-
-        return $this;
-    }
-    public function addStylesheetCode($script)
-    {
-
-        $this->cssBlock[] = "<style>" . $script . "</style>";
-
-        // Add information to EasyAdmin context (e.g. for instance if field uses select2)
-        if ($this->adminContextProvider) {
-            $adminContext = $this->adminContextProvider->getContext();
-            if ($adminContext) $adminContext->getAssets()->addHtmlContentToHead(end($this->cssBlock));
-        }
-
-        return $this;
-    }
-
-    public function javascripts($location = "body")
-    {
-        $jsHtml = "";
-
-        if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
-        $this->jsFile[$location] = array_unique($this->jsFile[$location]);
-
-        foreach ($this->jsFile[$location] as $file) {
-
-            $array = explode(" ", $file);
-            $src   = $array[0];
-            $type  = $array[1] ?? "";
-            $jsHtml .= "<script src=\"".$src."\" ".$type."></script>" .PHP_EOL;
-        }
-        if (!isset($this->jsBlock[$location])) $this->jsBlock[$location] = [];
-        foreach ($this->jsBlock[$location] as $block)
-            $jsHtml .= $block . PHP_EOL;
-
-        return $jsHtml;
-    }
-
-    public function noscripts($location = "body")
-    {
-        $jsHtml = "";
-
-        if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
-        $this->jsFile[$location] = array_unique($this->jsFile[$location]);
-
-        foreach ($this->jsFile[$location] as $file) {
-
-            $array = explode(" ", $file);
-            $src   = $array[0];
-            $type  = $array[1] ?? "";
-            $jsHtml .= "<script src=\"".$src."\" ".$type."></script>" .PHP_EOL;
-        }
-        if (!isset($this->jsBlock[$location])) $this->jsBlock[$location] = [];
-        foreach ($this->jsBlock[$location] as $block)
-            $jsHtml .= $block . PHP_EOL;
-
-        return $jsHtml;
-    }
-
-    public function isValidUrl($url): bool
-    {
-
-        $regex  = "((https?|ftp)\:\/\/)?"; // SCHEME
-        $regex .= "([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?"; // User and Pass
-        $regex .= "([a-z0-9-.]*)\.([a-z]{2,3})"; // Host or IP
-        $regex .= "(\:[0-9]{2,5})?"; // Port
-        $regex .= "(\/([a-z0-9+\$_-]\.?)+)*\/?"; // Path
-        $regex .= "(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?"; // GET Query
-        $regex .= "(#[a-z_.-][a-z0-9+\$_.-]*)?"; // Anchor
-
-        return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
-    }
-
-    public function addResourceFile($files, $location = "head"): bool
-    {
-        if (is_array($files)) {
-
-            $ret = true;
-            foreach ($files as $file)
-                $ret &= $this->addResourceFile($file, $location);
-
-            return $ret;
-        }
-
-        if ($this->isJavascriptFile($files)) $this->addJavascriptFile($files, $location);
-        elseif ($this->isStylesheetFile($files)) $this->addStylesheetFile($files);
-        else throw new Exception("Unknown resource file provided: $files");
-
-        return true;
-    }
-
-    public function isJavascriptFile(string $url): bool
-    {
-        $url = explode("?", $url)[0];
-        return str_ends_with($url, "js");
-    }
-
-    public function isStylesheetFile(string $url): bool
-    {
-        return str_ends_with($url, "css");
-    }
-
-    public function addJavascript(string $javascript, $location = "body")
-    {
-        if ($this->isValidUrl($javascript))
-            return $this->addJavascriptFile($javascript, $location);
-
-        return $this->addJavascriptCode($javascript, $location);
-    }
-
-    public function addJavascriptFile(string $files, $location = "body")
-    {
-        if (!$files) return $this;
-
-        if (!is_array($files)) $files = [$files];
-        foreach($files as $file) {
-
-            $file = $this->packages->getUrl($file);
-
-            if (!$this->isJavascriptFile($file)) throw new Exception("File $file is not a valid javascript file extension");
-            if (!isset($this->jsFile[$location])) $this->jsFile[$location] = [];
-
-            // Add file to admin context (if necessary)
-            if ($this->adminContextProvider) {
-                $adminContext = $this->adminContextProvider->getContext();
-                if ($adminContext) {
-
-                    if ($location == "head") $adminContext->getAssets()->addHtmlContentToHead("<script src=\"$file\"></script>" . PHP_EOL);
-                    else $adminContext->getAssets()->addHtmlContentToBody("<script src=\"$file\"></script>" . PHP_EOL);
-                }
-            }
-
-            if (is_array($file)) $this->jsFile[$location] = $this->jsFile[$location] + $file;
-            else $this->jsFile[$location][] = $file;
-        }
-
-        return $this;
-    }
-    public function addJavascriptCode(string $block, $location = "body")
-    {
-        if (!isset($this->jsBlock[$location])) $this->jsBlock[$location] = [];
-        $this->jsBlock[$location][] = $block . PHP_EOL;
-
-        // Add file to admin context (if necessary)
-        if ($this->adminContextProvider) {
-
-            $adminContext = $this->adminContextProvider->getContext();
-            if ($adminContext) {
-
-                if ($location == "head") $adminContext->getAssets()->addHtmlContentToHead(end($this->jsBlock[$location]));
-                else $adminContext->getAssets()->addHtmlContentToBody(end($this->jsBlock[$location]));
-            }
-        }
-
-        return $this;
+        return BaseService::$twig->getGlobals()[$name] ?? null;
     }
 
     public function setParameterTwig(string $name, $value)
@@ -260,11 +61,123 @@ trait BaseTwigTrait {
         return BaseService::$twig->addGlobal($name, $value);
     }
 
-    public function issetTwig(string $name)
+    public function appendParameterTwig($name, $value)
     {
         if (!isset(BaseService::$twig))
             throw new Exception("No twig found in BaseService. Did you overloaded BaseService::__construct ?");
 
-        return in_array($name, BaseService::$twig->getGlobals());
+        $parameter = BaseService::$twig->getGlobals()[$name] ?? null;
+        if(is_string($parameter)) BaseService::$twig->addGlobal($name, $parameter.$value);
+        if( is_array($parameter)) BaseService::$twig->addGlobal($name, array_merge($parameter,$value));
+        throw new Exception("Unknown merging method for \"$name\"");
+    }
+
+    /**
+     * Handling resource files
+     */
+    public function isValidUrl($url): bool
+    {
+        $regex  = "((https?|ftp)\:\/\/)?"; // SCHEME
+        $regex .= "([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?"; // User and Pass
+        $regex .= "([a-z0-9-.]*)\.([a-z]{2,3})"; // Host or IP
+        $regex .= "(\:[0-9]{2,5})?"; // Port
+        $regex .= "(([a-z0-9+\$_-]\.?)+)*\/?"; // Path
+        $regex .= "(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?"; // GET Query
+        $regex .= "(#[a-z_.-][a-z0-9+\$_.-]*)?"; // Anchor
+
+        return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
+    }
+
+    private $htmlContent = [];
+
+    public function renderHtmlContent(string $location)
+    {
+        $htmlContent = $this->getHtmlContent($location);
+        if(!empty($htmlContent)) 
+            $this->removeHtmlContent($location);
+
+        return $htmlContent;
+    }
+
+    public function getHtmlContent(string $location)
+    {
+        return trim(implode(PHP_EOL,array_unique($this->htmlContent[$location] ?? [])));
+    }
+
+    public function removeHtmlContent(string $location)
+    {
+        if(array_key_exists($location, $this->htmlContent))
+            unset($this->htmlContent[$location]);
+
+        return $this;
+    }
+
+    public function addHtmlContent(string $location, string $contentOrArrayOrFile, array $options = [])
+    {
+        if(empty($contentOrArrayOrFile)) return $this;
+
+        if(is_array($contentOrArrayOrFile)) {
+
+            foreach($contentOrArrayOrFile as $content)
+                $this->addHtmlContent($location, $content, $options);
+
+            return $this;
+        }
+
+        $relationship = $this->getFileRelationship($contentOrArrayOrFile);
+        if(!$relationship) {
+
+            $content = $contentOrArrayOrFile;
+        
+        } else {
+
+            // Compute options
+            $relationship = $options["rel"] ?? $relationship;
+            unset($options["rel"]);
+
+            $attributes = "";
+            foreach($options as $attribute => $value)
+                $attributes .= " ".trim($attribute)."='".$value."'";
+
+            // Convert into html tag
+            switch($relationship) {
+
+                case "javascript":
+                    $content = "<script src='".$contentOrArrayOrFile."' ".trim($attributes)."></script>";
+                    break;
+
+                default:
+                    $content = "<link rel='".$relationship."' href='".$contentOrArrayOrFile."' ".trim($attributes).">";
+                    break;
+            }
+        }
+
+        if(!array_key_exists($location, $this->htmlContent))
+            $this->htmlContent[$location] = [];
+
+        $this->htmlContent[$location][] = $content;
+
+        return $this;
+    }
+
+    public function getFileRelationship(string $file)
+    {
+        $extension = pathinfo(parse_url($file, PHP_URL_PATH), PATHINFO_EXTENSION);
+        if(empty($extension)) return null;
+        
+        switch($extension)
+        {
+            case "ico": 
+                return "icon";
+            
+            case "css": 
+                return "stylesheet";
+
+            case "js": 
+                return "javascript";
+
+            default:
+                return "preload";
+        }
     }
 }

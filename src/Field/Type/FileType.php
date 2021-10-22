@@ -148,8 +148,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['dropzone'] = ($options["dropzone"] !== null);
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
-            if($options["dropzone-js"]) $this->baseService->addJavascriptFile($options["dropzone-js"]);
-            if($options["dropzone-css"]) $this->baseService->addStylesheetFile($options["dropzone-css"]);
+            if($options["dropzone-js"]) $this->baseService->addHtmlContent("javascripts", $options["dropzone-js"]);
+            if($options["dropzone-css"]) $this->baseService->addHtmlContent("stylesheets", $options["dropzone-css"]);
 
             $editor = $view->vars["id"]."_dropzone";
             $action = (!empty($options["action"]) ? $options["action"] : ".");
@@ -180,7 +180,7 @@ class FileType extends AbstractType implements DataMapperInterface
             // Default initialializer
             
             //$this->baseService->addJavascriptFile("bundles/base/form-type-dropzone.js");
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body",
                 "<script>
                     Dropzone.autoDiscover = false;
 
@@ -263,9 +263,9 @@ class FileType extends AbstractType implements DataMapperInterface
 
             if($options["sortable"]) {
 
-                if($options["sortable-js"]) $this->baseService->addJavascriptFile($options["sortable-js"]);
+                if($options["sortable-js"]) $this->baseService->addHtmlContent("javascripts", $options["sortable-js"]);
 
-                $this->baseService->addJavascriptCode(
+                $this->baseService->addHtmlContent("javascripts:body", 
                 "<script>
                     var ".$editor."_sortable = new Sortable(document.getElementById('".$view->vars["id"]."_editor'), {
                         draggable: '.dz-preview'
@@ -275,7 +275,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
         } else {
 
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
                 "<script>
                     $('#".$view->vars["id"]."_deleteBtn').on('click', function() {
                         $('#".$view->vars["id"]."_raw').val('');

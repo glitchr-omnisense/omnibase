@@ -70,7 +70,7 @@ class AvatarType extends AbstractType
         $view->vars["thumbnail"] = $options["thumbnail"];
         if($options["cropper"]) {
             
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
                 "<script>
 
                 $('#".$view->vars["id"]."_file').on('change', function() {
@@ -83,7 +83,7 @@ class AvatarType extends AbstractType
                 
         } else {
 
-            $this->baseService->addJavascriptCode(
+            $this->baseService->addHtmlContent("javascripts:body", 
                 "<script>
 
                 $('#".$view->vars["id"]."_raw').on('change', function() {
@@ -96,7 +96,7 @@ class AvatarType extends AbstractType
 
         }
 
-        $this->baseService->addJavascriptCode(
+        $this->baseService->addHtmlContent("javascripts:body", 
             "<script>
 
             $('#".$view->vars["id"]."_deleteBtn2').on('click', function() {

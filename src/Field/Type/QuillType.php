@@ -27,8 +27,8 @@ class QuillType extends AbstractType
         $resolver->setDefaults([
             'highlight-js'  => $this->baseService->getParameterBag("base.vendor.highlight.js"),
             'highlight-css' => $this->baseService->getParameterBag("base.vendor.highlight.css"),
-            'quill-js'    => $this->baseService->getParameterBag("base.vendor.quill.js"),
-            'quill-css'   => $this->baseService->getParameterBag("base.vendor.quill.css"),
+            'quill-js'      => $this->baseService->getParameterBag("base.vendor.quill.js"),
+            'quill-css'     => $this->baseService->getParameterBag("base.vendor.quill.css"),
             'empty_data', null,
 
             'theme' => $this->baseService->getParameterBag("base.vendor.quill.theme"),
@@ -88,11 +88,11 @@ class QuillType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         // Import highlight
-        $this->baseService->addJavascriptFile($options["highlight-js"]);
-        $this->baseService->addStylesheetFile($options["highlight-css"]);
+        $this->baseService->addHtmlContent("javascripts", $options["highlight-js"]);
+        $this->baseService->addHtmlContent("stylesheets", $options["highlight-css"]);
 
         // Import quill
-        $this->baseService->addJavascriptFile($options["quill-js"]);
+        $this->baseService->addHtmlContent("javascripts", $options["quill-js"]);
 
         $theme = $options["theme"];
         $themeCssFile = dirname($options["quill-css"]) . "/quill." . $theme . ".css";
@@ -101,7 +101,7 @@ class QuillType extends AbstractType
             $theme = $themeArray[1];
             $themeCssFile = $themeArray[0];
         }
-        $this->baseService->addStylesheetFile($themeCssFile);
+        $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
         $modules = $options["modules"] ?? [];
         
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
@@ -109,7 +109,7 @@ class QuillType extends AbstractType
 
         //
         // Default quill initialializer
-        $this->baseService->addJavascriptCode(
+        $this->baseService->addHtmlContent("javascripts:body",
         "<script>
             var ".$editor." = new Quill('#".$editor."', {
                 theme: '".$theme. "',
