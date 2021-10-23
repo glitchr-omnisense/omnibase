@@ -7,7 +7,7 @@ use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
-use Base\Repository\ThreadRepository;
+use Base\Repository\Sitemap\WidgetAttachmentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,7 +27,7 @@ use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
 
 /**
- * @ORM\Entity(repositoryClass=WidgetRepository::class)
+ * @ORM\Entity(repositoryClass=WidgetAttachmentRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
