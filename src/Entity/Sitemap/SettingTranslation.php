@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity;
+namespace Base\Entity\Sitemap;
 
 use App\Entity\User;
 use App\Entity\Thread\Tag;

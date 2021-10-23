@@ -74,7 +74,6 @@ class Uploader extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $this->filesystem = $this->getFilesystem($data["storage"] ?? null);
         $this->public     = (!empty($data["public"] ?? null) ? $data["public"] : null);
         $this->pool       = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
 
@@ -102,6 +101,11 @@ class Uploader extends AbstractAnnotation
     public function getPool()
     {
         return $this->pool;
+    }
+
+    public function getStorageFilesystem()
+    {
+        return parent::getFilesystem($this->storage);
     }
 
     public function getPath($entity, ?string $uuid = null): string
@@ -140,7 +144,7 @@ class Uploader extends AbstractAnnotation
             foreach($field as $uuid) {
 
                 $path = $that->getPath($entity, $uuid);
-                if(!$that->filesystem->fileExists($path)) $pathList[] = null;
+                if(!$that->getStorageFilesystem()->fileExists($path)) $pathList[] = null;
                 else $pathList[] = rtrim($that->public . $path, ".");
             }
 
@@ -151,7 +155,7 @@ class Uploader extends AbstractAnnotation
             $uuid = $field;
                 
             $path = $that->getPath($entity, $uuid);
-            if(!$that->filesystem->fileExists($path)) 
+            if(!$that->getStorageFilesystem()->fileExists($path)) 
                 return null;
 
             return rtrim($that->public . $path, ".");
@@ -172,7 +176,7 @@ class Uploader extends AbstractAnnotation
 
         $that       = self::getAnnotation($entity, $mapping);
         $config     = $that->config;
-        $filesystem = $that->filesystem;
+        $filesystem = $that->getStorageFilesystem();
         $adapter    = $that->getAdapter($filesystem);
         $pathPrefixer = $that->getPathPrefixer($that->storage);
 
@@ -209,7 +213,7 @@ class Uploader extends AbstractAnnotation
 
     protected function readFile(string $location, ?FilesystemOperator $filesystem = null): ?string
     {
-        $filesystem = $filesystem ?? $this->filesystem;
+        $filesystem = $filesystem ?? $this->getStorageFilesystem();
         if(!$filesystem->fileExists($location))
             return null;
 
@@ -222,7 +226,7 @@ class Uploader extends AbstractAnnotation
 
     protected function uploadFile(string $location, string $contents, ?FilesystemOperator $filesystem = null, array $config = [])
     {
-        $filesystem = $filesystem ?? $this->filesystem;
+        $filesystem = $filesystem ?? $this->getStorageFilesystem();
         if ($filesystem->fileExists($location))
             return false;
 
@@ -278,7 +282,7 @@ class Uploader extends AbstractAnnotation
             $path = $this->getPath($entity);
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
-            if ($this->uploadFile($path, $contents, $this->filesystem))
+            if ($this->uploadFile($path, $contents, $this->getStorageFilesystem()))
                 $fileList[] = ($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
         }
 
@@ -304,7 +308,7 @@ class Uploader extends AbstractAnnotation
 
     protected function deleteFile(string $location, ?FilesystemOperator $filesystem = null)
     {
-        $filesystem = $filesystem ?? $this->filesystem;
+        $filesystem = $filesystem ?? $this->getStorageFilesystem();
         if (!$filesystem->fileExists($location))
             return false;
 
@@ -334,7 +338,7 @@ class Uploader extends AbstractAnnotation
             if($file instanceof File) $path = $file->getRealPath();
             else $path = $this->getPath($entity, $file);
 
-            $this->deleteFile($path, $this->filesystem);
+            $this->deleteFile($path, $this->getStorageFilesystem());
         }
     }
 

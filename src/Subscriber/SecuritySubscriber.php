@@ -23,6 +23,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
+use Base\Enum\UserRole;
 use Base\Repository\User\NotificationRepository;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -187,7 +188,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $request = $event->getRequest();
         if (!($user = $event->getTargetUser()))
-            return; // Useful ? x(
+            return;
+
+        // More..
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -209,13 +212,21 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $notification->send("warning");
             });
 
-        } else if (! $user->isApproved()) {
+        } else {
+            
+            // Auto approve if administrator at login
+            if ($this->authorizationChecker->isGranted(UserRole::ADMIN))
+                $user->approve();
+ 
+            // If not approved force redirection
+            if (! $user->isApproved()) {
 
-            $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
+                $this->baseService->redirectToRoute($event, "base_profile", $exceptionList, function() {
 
-                $notification = new Notification("notifications.login.pending");
-                $notification->send("warning");
-            });
+                    $notification = new Notification("notifications.login.pending");
+                    $notification->send("warning");
+                });
+            }
         }
 
         if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
@@ -223,6 +234,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification = new Notification("notifications.impersonator", [$user]);
             $notification->send("warning");
         }
+
+        $this->baseService->getDoctrine()->getManager()->flush();
     }
 
     public function onLoginFailure(LoginFailureEvent $event)

@@ -11,7 +11,7 @@ login:
     full: "Authentication force requise pour cette action."
     social: Salut ! Tu t'es bien connecté à ton compte {0}
 
-    pending: "Ton compte compte est en attente de vérification par un administrateur"
+    pending: "Ton compte est en attente de vérification par un administrateur"
     disabled: "Ce compte est actuellement désactivé. Un email d'activation vient d'être envoyé à son adresse"
     banned: "Ce compte a été banni."
     failed: "Les identifiants sont incorrects"

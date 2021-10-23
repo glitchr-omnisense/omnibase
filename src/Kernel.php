@@ -27,7 +27,7 @@ class Kernel extends HttpCache
 
         // Set default time to UTC everywhere
         date_default_timezone_set($timezone ?? "UTC");
- 
+
         // Override doctrine datetime types
         Type::overrideType('date', UTCDateTimeType::class);
         Type::overrideType('datetime', UTCDateTimeType::class);
