@@ -18,7 +18,7 @@ final class ImpersonateField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath("@Base/crud/field/impersonate.html.twig")
+            ->setTemplatePath("@EasyAdmin/crud/field/impersonate.html.twig")
             ->setFormType(TextType::class);
     }
 }

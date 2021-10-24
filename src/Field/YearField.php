@@ -19,7 +19,7 @@ final class YearField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/integer')
-            ->setTemplatePath('@Base/crud/field/year.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/year.html.twig')
             ->setFormType(IntegerType::class)
             ->addCssClass('field-integer');
     }

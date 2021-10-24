@@ -20,7 +20,7 @@ final class LinkIdField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/id')
-            ->setTemplatePath('@Base/crud/field/linkId.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/linkId.html.twig')
             ->setFormType(TextType::class)
             ->addCssClass('field-id')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null);

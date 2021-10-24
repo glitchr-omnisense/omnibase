@@ -23,6 +23,6 @@ final class StateField implements FieldInterface, SelectFieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(StateType::class)
-            ->setTemplatePath('@Base/crud/field/select.html.twig');
+            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
     }
 }

@@ -20,11 +20,6 @@ use Base\Database\Repository\ServiceEntityRepository;
 class ThreadRepository extends ServiceEntityRepository
 {
     use EntityHierarchyTrait;
-    
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
-    {
-        parent::__construct($registry, $entityClass ?? Thread::class);
-    }
 
     public function countForChildrenIn($thread)
     {

@@ -18,7 +18,7 @@ final class ColorField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@Base/crud/field/color.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/color.html.twig')
             ->setFormType(ColorType::class);
     }
 }

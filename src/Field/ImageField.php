@@ -25,7 +25,7 @@ final class ImageField implements FieldInterface
             ->setFormType(ImageType::class)
             ->addCssClass('field-file')
             ->addCssClass('file-widget')
-            ->setTemplatePath('@Base/crud/field/file.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("data_class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar");

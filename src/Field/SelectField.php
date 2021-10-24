@@ -26,7 +26,7 @@ final class SelectField implements FieldInterface, SelectFieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(SelectType::class)
-            ->setTemplatePath('@Base/crud/field/select.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
             ->addCssClass('field-select');
     }
 }

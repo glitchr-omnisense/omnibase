@@ -63,6 +63,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     protected array $criteria = [];
     protected array $options  = [];
 
+    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
+    {
+        $className = preg_replace(
+            ['/\\\\Repository\\\\/', '/Repository$/'],
+            ["\\\\Entity\\\\", ""], 
+            static::class
+        );
+        
+        parent::__construct($registry, $entityClass ?? $className);
+    }
+
     protected function validateDate($date, $format = 'Y-m-d H:i:s') {
 
         $d = \DateTime::createFromFormat($format, $date);

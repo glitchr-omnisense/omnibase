@@ -64,14 +64,6 @@ trait BaseSymfonyTrait
 
     public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
 
-    public function getSettings(string $key = "")
-    {
-        if (empty($key))
-            return $this->baseSettings()->all();
-
-        return $this->baseSettings->get($key);
-    }
-
     public function getParameterBag(string $key = "", array $bag = null)
     {
         // NB: Container::getParameter() pick into Container::parameterBag
@@ -189,56 +181,14 @@ trait BaseSymfonyTrait
         return $this->rstack->getCurrentRequest();
     }
 
+    public function isMaintenance() { return file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }
 
-    public function isMaintenance() { return file_exists($this->getParameterBag("base.maintenance.lockpath")); }
+    public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
+    public function execution_time() { return $this->getExecutionTime(); }
 
-    public function getDuration(): float { return round(microtime(true) - self::$startTime, 2); }
-
-    public function duration() { return $this->getDuration(); }
-    public function age() { return $this->getAge(); }
-    public function birthdate() { $this->getBirthdate(); }
-    public function protocol() { return $this->getProtocol(); }
-    public function domain(int $level = 0) { return $this->getDomain($level); }
-    public function www() { return $this->getWebsite(); }
-    public function url($url, $packages = null) { return $this->getUrl($url, $packages); }
-    public function assets() { return $this->getAssets(); }
-    public function vendor() { return $this->getVendor(); }
-
-    public function getUrl($url, $packages = null) { return $this->packages->getUrl($url, $packages); }
-    public function getBirthdate():string { return ($this->getParameterBag('base.birthdate') < 0) ? date("Y") : $this->getParameterBag('base.birthdate'); }
-    public function getProtocol(): string { return ($this->getParameterBag('base.use_https') ? "https" : "http"); }
-    public function getDomain(int $level = 0)  : string 
-    {
-        $domain = $this->getParameterBag("base.domain");
-        while($level-- > 0)
-            $domain = preg_replace("/^(\w+)./i", "", $domain);
-
-        return $domain;
-    }
-    public function getAge():string
-    {
-        $birthdate = $this->getBirthdate();
-        return (date("Y") == $birthdate) ? date("Y") : date("$birthdate-Y");
-    }
-
-    public function getWebsite()    { return $this->getProtocol() . "://" . $this->getDomain(); }
-    public function getAssets()     { return $this->getWebsite()."/assets"; }
-    public function getVendor()     { return $this->getWebsite()."/assets/vendor"; }
-    public function getServerName() { return $_SERVER["SERVER_NAME"] ?? $this->getDomain(); }
-    public function getSubdomain()
-    {
-        $serverName = $this->getServerName();
-        $domain     = $this->getDomain();
-
-        if( ($subdomain = preg_replace("/.".$domain."$/", "", $serverName)) ) {
-
-            if($serverName == $subdomain) return "";
-            return $subdomain;
-        }
-
-        return "";
-    }
+    public function getSettings(?string $name = null) { return (!$name ? BaseService::$settings : BaseService::$settings->get($name)); }
+    public function settings(?string $name = null) { return $this->getSettings($name); }
 }

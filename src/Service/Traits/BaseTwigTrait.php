@@ -112,7 +112,7 @@ trait BaseTwigTrait {
         return $this;
     }
 
-    public function addHtmlContent(string $location, string $contentOrArrayOrFile, array $options = [])
+    public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = [])
     {
         if(empty($contentOrArrayOrFile)) return $this;
 

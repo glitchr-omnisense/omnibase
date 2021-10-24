@@ -14,37 +14,5 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class PenaltyRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
-    {
-        parent::__construct($registry, $entityClass ?? Penalty::class);
-    }
-
-    // /**
-    //  * @return Penalty[] Returns an array of Penalty objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('p.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Penalty
-    {
-        return $this->createQueryBuilder('p')
-            ->andWhere('p.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
+    
 }

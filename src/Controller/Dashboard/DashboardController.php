@@ -63,16 +63,6 @@ class DashboardController extends AbstractDashboardController
         $this->gaService = $gaService;
     }
 
-   /**
-     * @Route("/dashboard/google/analytics", name="base_dashboard_ga")
-     */
-    public function GoogleAnalytics(): Response
-    {
-        return $this->render('dashboard/google/analytics.html.twig', [
-            "ga" => $this->gaService->getBasics()
-        ]);
-    }
-
     /**
      * Link to this controller to start the "connect" process
      *
@@ -81,17 +71,31 @@ class DashboardController extends AbstractDashboardController
     public function index(): Response
     {
         return $this->render('dashboard/index.html.twig', [
-            "content_title" => $this->translator->trans2("Dashboard: home page"),
-            "content_header" => $this->translator->trans2("Welcome to this administration page.")
+            "content_header" => $this->translator->trans2("Welcome to the administration page."),
+            "content_widgets" => $this->configureWidgetItems()
+        ]);
+    }
+
+    /**
+     * Link to this controller to start the "connect" process
+     *
+     * @Route("/dashboard/settings", name="base_dashboard_settings")
+     */
+    public function settings(): Response
+    {
+        return $this->render('dashboard/settings.html.twig', [
+            "content_title" => $this->translator->trans2("Dashboard: Settings"),
+            "content_header" => $this->translator->trans2("Welcome to the setting page.")
         ]);
     }
 
     public function configureDashboard(): Dashboard
     {
-        $logo = $this->baseService->getParameterBag("base.logo");
+        $logo  = $this->baseService->getSettings("app.settings.logo") ?? "/bundles/base/logo.svg";
+        $title = $this->baseService->getSettings("app.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')
-            ->setTitle('<img src="'.$logo.'" alt="Dashboard">')
+            ->setTitle('<img src="'.$logo.'" alt="'.$title.'">')
             ->disableUrlSignatures();
     }
 
@@ -106,6 +110,7 @@ class DashboardController extends AbstractDashboardController
         $menu   = [];
         $menu[] = MenuItem::section('MENU');
         $menu[] = MenuItem::linktoUrl('Home', 'fa fa-home', $this->baseService->getPath("base_dashboard"));
+        $menu[] = MenuItem::linktoUrl('Settings', 'fa fa-tools', $this->baseService->getPath("base_dashboard_settings"));
         $menu[] = MenuItem::linktoUrl('Back to website', 'fa fa-door-open', "/");
 
         $menu[] = MenuItem::section('MEMBERSHIP');
@@ -133,8 +138,6 @@ class DashboardController extends AbstractDashboardController
         $menu[] = MenuItem::linkToCrud('All users', 'fa-fw fa fa-tags', User::class);
         $menu[] = MenuItem::linkToCrud('Add user', 'fa-fw fa fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
             ->setAction('new');
-
-
 
         if (isset($this->gaService) && $this->gaService->isEnabled()) {
 
@@ -207,19 +210,18 @@ class DashboardController extends AbstractDashboardController
         $widget[] = WidgetItem::linkToCrud('Penalties',     'fa-fw fa fa-bomb',                 UserPenalty::class);
         $widget[] = WidgetItem::linkToCrud('Logs',          'fa-fw fa fa-info-circle',          UserLog::class);
 
+        // if ($this->gaService->isEnabled()) {
 
-        if ($this->gaService->isEnabled()) {
+        //     $ga = $this->gaService->getBasics();
 
-            $ga = $this->gaService->getBasics();
-
-            $menu[] = MenuItem::section('STATISTICS');
-            $menu[] = MenuItem::linkToUrl($ga["users"] . ' visit(s)', 'fas fa-user', "");
-            $menu[] = MenuItem::linkToUrl($ga["users_1day"] . ' visit(s) in one day', 'fas fa-user-clock', "");
-            $menu[] = MenuItem::linkToUrl($ga["views"] . ' view(s)', 'far fa-eye', "");
-            $menu[] = MenuItem::linkToUrl($ga["views_1day"] . ' view(s) in one day', 'fas fa-eye', "");
-            $menu[] = MenuItem::linkToUrl($ga["sessions"] . ' sessions(s)', 'fas fa-stopwatch', "");
-            $menu[] = MenuItem::linkToUrl($ga["bounces_1day"] . ' bounce(s) in one day', 'fas fa-meteor', "");
-        }
+        //     $menu[] = MenuItem::section('STATISTICS');
+        //     $menu[] = MenuItem::linkToUrl($ga["users"] . ' visit(s)', 'fas fa-user', "");
+        //     $menu[] = MenuItem::linkToUrl($ga["users_1day"] . ' visit(s) in one day', 'fas fa-user-clock', "");
+        //     $menu[] = MenuItem::linkToUrl($ga["views"] . ' view(s)', 'far fa-eye', "");
+        //     $menu[] = MenuItem::linkToUrl($ga["views_1day"] . ' view(s) in one day', 'fas fa-eye', "");
+        //     $menu[] = MenuItem::linkToUrl($ga["sessions"] . ' sessions(s)', 'fas fa-stopwatch', "");
+        //     $menu[] = MenuItem::linkToUrl($ga["bounces_1day"] . ' bounce(s) in one day', 'fas fa-meteor', "");
+        // }
 
         return $widget;
     }
@@ -229,9 +231,11 @@ class DashboardController extends AbstractDashboardController
         // Usually it's better to call the parent method because that gives you a
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
-        return parent::configureUserMenu($user)
+        
+        $avatar = ($user->getAvatarFile() ? $user->getAvatar() : null);
 
-            // you can use any type of menu item, except submenus
+        return parent::configureUserMenu($user)
+            ->setAvatarUrl($avatar)
             ->addMenuItems([
                 MenuItem::linkToUrl('My Profile', 'fa fa-id-card', $this->baseService->getPath("base_profile")),
                 MenuItem::linkToUrl('My Settings', 'fa fa-user-cog', $this->baseService->getPath("base_settings"))

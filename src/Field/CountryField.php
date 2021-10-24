@@ -21,7 +21,7 @@ final class CountryField implements FieldInterface, SelectFieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/country')
             ->setFormType(CountryType::class)
-            ->setTemplatePath('@Base/crud/field/country.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/country.html.twig')
             ->addCssClass('field-country');
     }
 }

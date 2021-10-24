@@ -14,37 +14,5 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class GroupRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
-    {
-        parent::__construct($registry, $entityClass ?? Group::class);
-    }
-
-    // /**
-    //  * @return Group[] Returns an array of Group objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('g.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Group
-    {
-        return $this->createQueryBuilder('g')
-            ->andWhere('g.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
+    
 }

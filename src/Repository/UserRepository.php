@@ -22,12 +22,6 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
     public function loadUserByUsername(string $email) { return $this->loadUserByIdentifier($email); }
     // TODO-END
 
-
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
-    {
-        parent::__construct($registry, $entityClass ?? User::class);
-    }
-
     public function findByRoles(string $role)
     {
         $qb = $this->_em->createQueryBuilder();

@@ -16,8 +16,5 @@ use Base\Database\Repository\ServiceEntityRepository;
  */
 class MentionRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
-    {
-        parent::__construct($registry, $entityClass ?? Mention::class);
-    }
+    
 }

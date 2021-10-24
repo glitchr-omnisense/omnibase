@@ -52,7 +52,7 @@ final class DateTimePickerField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/datetime')
-            ->setTemplatePath('@Base/crud/field/datetime.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/datetime.html.twig')
             ->setFormType(DateTimePickerType::class)
             ->addCssClass('field-datetime')
             // the proper default values of these options are set on the Crud class

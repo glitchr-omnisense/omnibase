@@ -93,7 +93,6 @@ final class BaseService implements RuntimeExtensionInterface
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         CsrfTokenManagerInterface $csrfTokenManager,
-        Packages $packages, 
         BaseSettings $settings)
     {
         BaseController::$foundBaseService = true;
@@ -112,14 +111,13 @@ final class BaseService implements RuntimeExtensionInterface
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
         $this->rstack           = $this->container->get("request_stack");
-        $this->packages         = $packages;
         $this->setLocaleProvider($localeProvider);
 
         $this->setTwig($twig);
         $this->setDoctrine($doctrine);
         $this->setEntityManager($doctrine->getManager());
         $this->setRouter($this->container->get("router"));
-
+        
         // Additional services related to user class
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
@@ -127,7 +125,8 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setEnvironment($this->kernel->getEnvironment());
         $this->setUserProperty($this->getParameterBag("base.user.property"));
         $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
-
+        $this->setSettings($settings);
+        
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->rstack);
     }

@@ -23,7 +23,7 @@ final class FontAwesomeField implements FieldInterface, SelectFieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(FontAwesomeType::class)
-            ->setTemplatePath('@Base/crud/field/fontAwesome.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/fontAwesome.html.twig')
             ->setTextAlign(TextAlign::CENTER);
     }
 }

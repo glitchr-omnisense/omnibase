@@ -20,6 +20,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslationInterface;
 use Base\Traits\BaseTrait;
@@ -37,19 +38,17 @@ class SettingTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text")
+     * @Uploader(storage="local.storage", public="/storage", size="1024K")
+     * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      */
     protected $value;
 
-    public function getValue(): ?string
-    {
-        return $this->value;
-    }
-
-    public function setValue(?string $value): self
+    public function getValue() { return Uploader::getPublicPath($this, "value") ?? $this->value; }
+    public function getValueFile() { return Uploader::getFile($this, "value"); }
+    public function setValue($value)
     {
         $this->value = $value;
-
         return $this;
     }
 }

@@ -37,7 +37,7 @@ final class RelationField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/association')
-            ->setTemplatePath("@Base/crud/field/relation.html.twig")
+            ->setTemplatePath("@EasyAdmin/crud/field/relation.html.twig")
             ->setFormType(RelationType::class)
             ->addCssClass('field-association')
             ->setCustomOption(self::OPTION_SHOWFIRST, false)

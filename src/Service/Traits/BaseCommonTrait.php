@@ -3,6 +3,7 @@
 namespace Base\Service\Traits;
 
 use Base\Service\BaseService;
+use Base\Service\BaseSettings;
 use Base\Service\LocaleProviderInterface;
 use Base\Twig\BaseTwigExtension;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -72,4 +73,11 @@ trait BaseCommonTrait {
      */
     public static $twig;
     public static function setTwig(Environment $twig) { self::$twig = $twig; }
+
+    /**
+     * @var BaseSettings
+     */
+    
+    public static $settings;
+    public static function setSettings(BaseSettings $settings) { self::$settings = $settings; }
 }

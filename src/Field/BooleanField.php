@@ -26,7 +26,7 @@ final class BooleanField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/boolean')
-            ->setTemplatePath('@Base/crud/field/boolean.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/boolean.html.twig')
             ->setFormType(CheckboxType::class)
             ->addCssClass('field-boolean')
             ->setCustomOption(self::OPTION_RENDER_AS_SWITCH, true)

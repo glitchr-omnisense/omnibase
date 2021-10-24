@@ -19,7 +19,7 @@ class TranslatableField implements FieldInterface
             ->setLabel(false)
             ->hideOnIndex()
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@Base/crud/field/translatable.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
             ->setFormType(TranslatableType::class);
     }
 

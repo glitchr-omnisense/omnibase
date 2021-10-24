@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-
+use Base\Repository\Sitemap\SettingRepository;
 use Base\Repository\ThreadRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -20,6 +20,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
@@ -37,8 +38,8 @@ use Base\Database\Traits\TranslatableTrait;
 class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
-    public function getValue()  : ?string { return $this->translate()->getValue();   }
-    public function setValue(?string $value) {
+    public function getValue(): string { return $this->translate()->getValue();   }
+    public function setValue(string $value) {
         $this->translate()->setValue($value);  
         return $this; 
     }
@@ -49,27 +50,36 @@ class Setting implements TranslatableInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+    public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="string", length=255)
      */
     protected $name;
-
-    public function __construct(string $name, ?string $value = null)
-    {
-        $this->setName($name);
-        $this->setValue($value);
-    }
-
-    public function __toString() { return $this->getValue(); }
-
-    public function getId(): ?int { return $this->id; }
 
     public function getName(): string { return $this->name; }
     public function setName(string $name)
     {
         $this->name = $name;
         return $this;
-    } 
+    }
 
+    /**
+     * @ORM\Column(type="text")
+     */
+    protected $comment;
+    public function getComment(): string { return $this->comment; }
+    public function setComment(string $comment)
+    {
+        $this->comment = $comment;
+        return $this;
+    }
+    
+    public function __construct(string $name, string $value)
+    {
+        $this->setName($name);
+        $this->setValue($value);
+    }
+
+    public function __toString() { return $this->getValue(); }
 }

@@ -42,7 +42,9 @@
         </service>
 
         <service id="Base\Service\BaseSettings" public="true">
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <tag name="twig.runtime" />
+            <argument type="service" id="App\Repository\Sitemap\SettingRepository" />
+            <argument type="service" id="assets.packages" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -58,7 +60,6 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="assets.packages" />
             <argument type="service" id="base.settings" />
         </service>
 

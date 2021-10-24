@@ -15,8 +15,5 @@ use Base\Database\Repository\ServiceEntityRepository;
  */
 class TagRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
-    {
-        parent::__construct($registry, $entityClass ?? Tag::class);
-    }
+    
 }

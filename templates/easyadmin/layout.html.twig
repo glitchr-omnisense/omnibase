@@ -351,11 +351,12 @@
                 <div class="responsive-header">
                     {% block responsive_header %}
                         
-                                <div class="user-avatar">
-                        <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
-                            <i class="fa fa-2x fa-bars"></i>
-                        </button>
-</div>
+                        <div class="user-avatar">
+                            <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
+                                <i class="fa fa-2x fa-bars"></i>
+                            </button>
+                        </div>
+
                         <div id="responsive-header-logo" class="text-truncate">
                             {% block responsive_header_logo %}
                                 <div class="responsive-logo">
@@ -500,7 +501,55 @@
                                 {% endblock content_header_wrapper %}
 
                                 <section id="main" class="content-body">
-                                    {% block main %}{% endblock %}
+                                {% block main %}
+                                    {% if content_header is defined and content_header is not null %}
+                                        <div class="content-panel">
+                                            <div class="content-panel-body with-background without-header without-footer">
+                                                {{ content_header }}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    {% if content_widgets is defined and content_widgets|length > 0 %}
+                                    <div class="row mx-0">
+                                        {% set content_widget_closure = false %}
+                                        {% for content_widget in content_widgets  %}
+
+                                            {% if content_widget.getAsDto().getType() == "section" %}
+
+                                                {% if content_widget_closure %}
+                                                        </ul>
+                                                    </fieldset>
+                                                    </div>
+                                                </div>
+
+                                                {% endif %}
+
+                                            {% set content_widget_closure = true %}
+                                            {% set col = content_widget.getWidth() %}
+
+                                                <div class="col-md-{{ 2*col }} p-0">
+                                                <div class="content-panel m-md-1 with-background without-header without-footer"
+                                                    style="height:90%; padding:0.8em 0.6em 0.6em 0.6em;">
+
+                                                <fieldset style="height: 100%; margin:0; padding:0.5em 0 1.5em 0.5em;">
+                                                    <legend>{{content_widget.getAsDto().getLabel()}}</legend>
+
+
+                                                <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{col}};">
+
+                                            {% else %}
+                                                <li>
+                                                    <a href="{{ content_widget.generateUrl() }}">
+                                                        <i class="{{ content_widget.getAsDto().getIcon() }}"></i>
+                                                        {{ content_widget.getAsDto().getLabel() }}
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                {% endblock %}
                                 </section>
 
                                 {% block content_footer_wrapper %}
