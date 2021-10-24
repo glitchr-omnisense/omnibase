@@ -63,52 +63,13 @@ class AvatarType extends AbstractType
         //
         $view->vars['avatar']        = $view->vars['files'][0] ?? null;
         $view->vars['files'] = [];
-         
+
         if(!($view->vars["accept"] ?? false) ) 
              $view->vars["accept"] = "image/*";
 
         $view->vars["thumbnail"] = $options["thumbnail"];
-        if($options["cropper"]) {
-            
-            $this->baseService->addHtmlContent("javascripts:body", 
-                "<script>
+        $view->vars["cropper"] = ($options["cropper"] !== null);
 
-                $('#".$view->vars["id"]."_file').on('change', function() {
-
-                    if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn2').css('display', 'flex');
-                    else $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
-                });
-
-                </script>");
-                
-        } else {
-
-            $this->baseService->addHtmlContent("javascripts:body", 
-                "<script>
-
-                $('#".$view->vars["id"]."_raw').on('change', function() {
-
-                    if( $('#".$view->vars["id"]."_raw').val() !== '') $('#".$view->vars["id"]."_deleteBtn2').css('display', 'flex');
-                    else $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
-                });
-
-                </script>");
-
-        }
-
-        $this->baseService->addHtmlContent("javascripts:body", 
-            "<script>
-
-            $('#".$view->vars["id"]."_deleteBtn2').on('click', function() {
-                $('#".$view->vars["id"]."_raw').val('');
-                $('#".$view->vars["id"]."_deleteBtn').click();
-            });
-
-            $('#".$view->vars["id"]."_deleteBtn').on('click', function() {
-                $('#".$view->vars["id"]."_raw').val('');
-                $('#".$view->vars["id"]."_deleteBtn2').css('display', 'none');
-            });
-
-            </script>");
+        $this->baseService->addHtmlContent("javascripts:body", "/bundles/base/form-type-avatar.js");
     }
 }

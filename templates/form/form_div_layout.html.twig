@@ -89,13 +89,13 @@
 
 {%- block avatar_widget -%}
 
-{# {% set attr = attr|merge({
-    'data-token': '',
-    'data-sortable': '',
-    'data-editor': form.vars.id + "_editor"
-}) %} #}
+{% set attr = attr|merge({
+    'data-avatar-field'   : form.vars.id,
+    'data-avatar-cropper' : form.vars.cropper,
+}) %}
 
-<div class="avatarupload">
+<div class="avatarupload" {{ block('attributes') }}>
+
     {{ form_widget(form, { attr: form.vars.attr }) }}
 
     {% if allow_delete %}
@@ -107,7 +107,14 @@
 {%- endblock -%}
 
 {%- block imageupload_widget -%}
-<div class="imageupload">
+{% set attr = attr|merge({
+    'data-image-field'         : form.vars.id,
+    'data-image-cropper'       : form.vars.cropper,
+    'data-image-thumbnail'     : form.vars.thumbnail,
+    'data-image-ajaxPost'      : form.vars.ajaxPost,
+}) %}
+
+<div class="imageupload" {{ block('attributes') }}>
 
     {% if not multiple %}
         <figure>
@@ -150,8 +157,12 @@
 {%- endblock -%}
 
 {%- block fileupload_widget -%}
+{% set attr = attr|merge({
+    'data-file-sortable'      : form.vars.sortable,
+    'data-file-ajaxPost'      : form.vars.ajaxPost,
+}) %}
 
-<div class="fileupload">
+<div class="fileupload" data-file-field="{{form.vars.id}}" data-file-dropzone="{{form.vars.dropzone}}">
     <div class="field">
     {% if multiple and dropzone %}
 
