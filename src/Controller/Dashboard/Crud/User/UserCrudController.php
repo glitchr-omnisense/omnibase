@@ -4,6 +4,7 @@ namespace Base\Controller\Dashboard\Crud\User;
 use Base\Service\BaseService;
 
 use Base\Entity\User;
+use Base\Field\AvatarField;
 use Base\Field\Type\RoleType;
 
 use Base\Field\PasswordField;
@@ -73,6 +74,8 @@ class UserCrudController extends AbstractCrudController
         yield LinkIdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
+
+        yield AvatarField::new('avatar')->allowDelete();
 
         if ($this->isGranted('ROLE_SUPERADMIN')) yield ImpersonateField::new('username');
         else yield TextField::new('username');

@@ -115,11 +115,8 @@ class Uploader extends AbstractAnnotation
         $pool     = $this->pool;
         $uuid     = $uuid ?? Uuid::v4();
 
-        if($uuid && !preg_match('/^[a-f0-9\-]{36}$/i', $uuid)) {
-
-            if($this->keepNotFound) return null;
-            throw new InvalidUuidException("Invalid UUID exception: ".$uuid);
-        }
+        if($uuid && !preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
+            return null;
 
         $namespaceDir = "";
         if($entity) {
@@ -215,6 +212,10 @@ class Uploader extends AbstractAnnotation
 
             // Special case for local adapter, if not found.. it requires a temp file..
             $path = $that->getPath($entity, $uuidOrFile);
+            if(!$path) {
+                $fileList[] = null;
+                continue;
+            }
 
             if($adapter instanceof LocalFilesystemAdapter) {
 

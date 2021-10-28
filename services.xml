@@ -421,6 +421,10 @@
             <argument type="service" id="translator" />
         </service>
 
+        <service id="Base\Field\Configurator\AvatarConfigurator">
+            <tag name="ea.field_configurator" />
+        </service>
+
         <service id="Base\Field\Configurator\TranslatableConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.locale_provider" />

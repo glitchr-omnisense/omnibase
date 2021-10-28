@@ -123,7 +123,8 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options["multiple"] && $propertyType != "array")
                 throw new InvalidArgumentException("Property ".$form->getName()." is \"$propertyType\", please disable 'multiple' option or turn property type into an 'array'");
 
-            $files = Uploader::getFile($entity, $form->getName())->getPath();
+            $file = Uploader::getFile($entity, $form->getName());
+            $files = ($file ? $file->getPath() : null);
         }
 
         if(!is_array($files)) $files = ($files ? [$files] : []);
