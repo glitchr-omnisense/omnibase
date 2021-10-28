@@ -1,13 +1,13 @@
 <?php
 
-namespace Base\Entity\Sitemap;
+namespace Base\Entity\Sitemap\Widget;
 
 use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
-use Base\Repository\ThreadRepository;
+use Base\Repository\Sitemap\HyperlinkRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -25,43 +25,16 @@ use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
 use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
+use Base\Entity\Sitemap\Widget;
 
 /**
- * @ORM\Entity(repositoryClass=WidgetRepository::class)
+ * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ *     @DiscriminatorEntry( value = "hyperlink" )
  */
 
-class Page implements TranslatableInterface
+class Hyperlink extends Widget
 {
-    use TranslatableTrait;
-    public function getTitle()  : ?string { return $this->translate()->getTitle();   }
-    public function setTitle(?string $title) {
-        $this->translate()->setTitle($title);  
-        return $this; 
-    }
-
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-
-    public function __construct(?string $title = null)
-    {
-        $this->setTitle($title);
-    }
-
-    public function __toString()
-    {
-        return $this->getTitle() ?? $this->getSlug() ?? get_class($this);
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 }

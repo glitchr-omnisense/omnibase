@@ -20,6 +20,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
@@ -34,8 +35,28 @@ use Base\Database\Traits\TranslatableTrait;
  *     @DiscriminatorEntry( value = "abstract" )
  */
 
-class Widget
-{
+class Widget implements TranslatableInterface
+{   
+    use TranslatableTrait;
+    public function getTitle()  : ?string { return $this->translate()->getTitle()  ; }
+    public function getExcerpt(): ?string { return $this->translate()->getExcerpt(); }
+    public function getContent(): ?string { return $this->translate()->getContent(); }
+    
+    public function setTitle(?string $title) {
+        $this->translate()->setTitle($title);  
+        return $this; 
+    }
+
+    public function setExcerpt(?string $excerpt) { 
+        $this->translate()->setExcerpt($excerpt); 
+        return $this; 
+    }
+
+    public function setContent(?string $content) { 
+        $this->translate()->setContent($content); 
+        return $this; 
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -51,54 +72,23 @@ class Widget
     protected $uuid;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
+     * @Slugify(reference="translations.title")
      */
-    protected $title;
+    protected $slug;
 
     /**
-     * @ORM\Column(type="array")
+     * @ORM\Column(type="text", nullable=true)
+     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/*"})
+     * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      */
-    protected $attributes;
+    protected $thumbnail;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=WidgetAdapter::class, inversedBy="widgets")
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
-    protected $adapter;
-
-    public function __construct(?string $title = null, WidgetAdapter $adapter)
+    public function getThumbnail()     { return Uploader::getPublicPath($this, "thumbnail"); }
+    public function getThumbnailFile() { return Uploader::getFile($this, "thumbnail"); }
+    public function setThumbnail($thumbnail)
     {
-        $this->setTitle($title);
-    }
-
-    public function __toString()
-    {
-        return $this->getTitle();
-    }
-
-    public static function whoAmI(): string
-    {
-        $array = explode('\\', get_called_class());
-        return lcfirst(end($array));
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function getUuid()
-    {
-        return $this->uuid;
-    }
-
-    public function getTitle(): string
-    {
-        return $this->title;
-    }
-
-    public function getAttributes(): array
-    {
-        return $this->attributes;
+        $this->thumbnail = $thumbnail;
+        return $this;
     }
 }

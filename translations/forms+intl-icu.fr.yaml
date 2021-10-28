@@ -43,3 +43,6 @@ crud:
         published: "Publié"
         draft: "Brouillon"
         secret: "Privé"
+
+field:
+    file: "La taille de fichier maximale autorisée est de {0}."

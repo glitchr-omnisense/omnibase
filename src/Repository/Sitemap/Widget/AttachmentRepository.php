@@ -9,6 +9,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Base\Repository\Traits\EntityHierarchyTrait;
 
 use Base\Database\Repository\ServiceEntityRepository;
+use Base\Repository\Sitemap\WidgetRepository;
 
 /**
  * @method Thread|null find($id, $lockMode = null, $lockVersion = null)
@@ -17,7 +18,7 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method Thread[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
  */
 
-class WidgetAttachmentRepository extends ServiceEntityRepository
+class AttachmentRepository extends WidgetRepository
 {
 
 }

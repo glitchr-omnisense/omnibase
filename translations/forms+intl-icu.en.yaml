@@ -42,3 +42,6 @@ crud:
         published: "Published"
         draft: "Draft"
         secret: "Private"
+
+field:
+    file: "The maximum file size allowed is {0}."

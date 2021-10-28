@@ -20,6 +20,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslationInterface;
 use Base\Traits\BaseTrait;
@@ -41,11 +42,7 @@ class ThreadTranslation implements TranslationInterface
      */
     protected $title;
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
+    public function getTitle(): ?string { return $this->title; }
     public function setTitle(?string $title): self
     {
         $this->title = $title;
@@ -58,11 +55,7 @@ class ThreadTranslation implements TranslationInterface
      */
     protected $excerpt;
 
-    public function getExcerpt(): ?string
-    {
-        return $this->excerpt;
-    }
-
+    public function getExcerpt(): ?string { return $this->excerpt; }
     public function setExcerpt(?string $excerpt): self
     {
         $this->excerpt = $excerpt;
@@ -75,11 +68,7 @@ class ThreadTranslation implements TranslationInterface
      */
     protected $content;
 
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
+    public function getContent(): ?string { return $this->content; }
     public function setContent(?string $content): self
     {
         $this->content = $content;

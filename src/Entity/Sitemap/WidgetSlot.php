@@ -1,13 +1,14 @@
 <?php
 
-namespace Base\Entity\Sitemap\Widget;
+namespace Base\Entity\Sitemap;
 
 use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
+use Base\Entity\Sitemap\Widget;
 
-use Base\Repository\Sitemap\WidgetAttachmentRepository;
+use Base\Repository\ThreadRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,6 +21,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
@@ -27,22 +29,15 @@ use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
 
 /**
- * @ORM\Entity(repositoryClass=WidgetAttachmentRepository::class)
+ * @ORM\Entity(repositoryClass=WidgetRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
 
-class WidgetAttachment implements TranslatableInterface
-{
-    use TranslatableTrait;
-    public function getTitle()  : ?string { return $this->translate()->getTitle();   }
-    public function setTitle(?string $title) {
-        $this->translate()->setTitle($title);  
-        return $this; 
-    }
-
+class WidgetSlot
+{ 
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -50,18 +45,40 @@ class WidgetAttachment implements TranslatableInterface
      */
     protected $id;
 
-    public function __construct(?string $title = null)
+    /**
+     *
+     * @ORM\Column(type="string", unique=true)
+     * @GenerateUuid(version=4)
+     */
+    protected $uuid;
+
+    /**
+     * @ORM\Column(type="string", length=255, unique=true)
+     */
+    protected $name;
+    
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $attributes;
+    public function getAttributes(): array { return $this->attributes; }
+    public function setAttributes(array $attributes): self
     {
-        $this->setTitle($title);
+        $this->attributes = $attributes;
+
+        return $this;
     }
 
-    public function __toString()
+    /**
+     * @ORM\ManyToOne(targetEntity=Widget::class)
+     */
+    protected $widget;
+    public function getWidget(): ?Widget { return $this->widget; }
+    public function setWidget(?Widget $widget): self
     {
-        return $this->getTitle() ?? get_class($this);
+        $this->widget = $widget;
+
+        return $this;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
 }

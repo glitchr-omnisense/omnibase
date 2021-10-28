@@ -186,8 +186,9 @@
 
     {% endif %}
     </div>
-    {% if max_filesize %}
-    <div class="form-text text-muted">The maximum file size allowed is {{max_filesize|filesize}}.</div>
+
+    {% if form.vars.max_filesize %}
+    <div class="form-filesize form-text text-muted">{{"forms.field.file"|trans2([form.vars.max_filesize|filesize])}}</div>
     {% endif %}
     {% if form.vars.value and multiple %}
     <div class="form-text text-muted">{{form.vars.data|length}} file(s) found.</div>

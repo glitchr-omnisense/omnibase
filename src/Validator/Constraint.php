@@ -33,4 +33,25 @@ class Constraint extends \Symfony\Component\Validator\Constraint
     {
         return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $input))));
     }
+
+    public function int2size(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+        $factor = (int) floor(log($bytes) / log(1024));
+
+        return ((int) ($bytes / (1024 ** $factor))).@$units[$factor];
+    }
+
+    public function size2int(string $size): int
+    {
+        $size = trim(str_replace(" ", "", $size), "B");
+        if(!preg_match('/^([0-9]*)(.*)$/', $size, $matches))
+            throw new \Exception("Failed to parse file size provided \"".$size."\"");
+
+        $size = $matches[1];
+        $units = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+        $factor = array_search($matches[2] ?? '', $units);
+
+        return (int) ($size * (1024 ** $factor));
+    }
 }

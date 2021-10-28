@@ -145,7 +145,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["ajaxPost"]       = null;
         $view->vars['multiple']       = $options['multiple'];
         $view->vars['allow_delete']   = $options['allow_delete'];
-        $view->vars['max_filesize']   = $options['max_filesize'];
+        $view->vars['max_filesize']   = $options['max_filesize'] ?? Uploader::getMaxSize($options["data_class"] ?? $entity, $form->getName());
 
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 

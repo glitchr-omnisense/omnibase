@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Controller\Dashboard\Crud\Sitemap;
+namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
-use Base\Entity\Sitemap\Page;
+use Base\Entity\Sitemap\Widget\Hyperlink;
 use Base\Service\BaseService;
 
 use Base\Entity\User;
@@ -29,16 +29,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
-class PageCrudController extends AbstractCrudController
+class HyperlinkCrudController extends AbstractCrudController
 {
     public static function getEntityFqcn(): string
     {
-        return Page::class;
+        return Hyperlink::class;
     }
 
     public function createEntity(string $entityFqcn)
     {
-        return new Page();
+        return new Hyperlink();
     }
 
     public function configureCrud(Crud $crud): Crud

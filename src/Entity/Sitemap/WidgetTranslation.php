@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity\Sitemap\Widget;
+namespace Base\Entity\Sitemap;
 
 use App\Entity\User;
 use App\Entity\Thread\Tag;
@@ -20,6 +20,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslationInterface;
 use Base\Traits\BaseTrait;
@@ -32,7 +33,7 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
  * @ORM\Entity()
  */
 
-class WidgetAttachmentTranslation implements TranslationInterface
+class WidgetTranslation implements TranslationInterface
 {
     use TranslationTrait;
 
@@ -41,11 +42,7 @@ class WidgetAttachmentTranslation implements TranslationInterface
      */
     protected $title;
 
-    public function getTitle(): ?string
-    {
-        return $this->title;
-    }
-
+    public function getTitle(): ?string { return $this->title; }
     public function setTitle(?string $title): self
     {
         $this->title = $title;
@@ -58,28 +55,20 @@ class WidgetAttachmentTranslation implements TranslationInterface
      */
     protected $excerpt;
 
-    public function getExcerpt(): ?string
-    {
-        return $this->excerpt;
-    }
-
+    public function getExcerpt(): ?string { return $this->excerpt; }
     public function setExcerpt(?string $excerpt): self
     {
         $this->excerpt = $excerpt;
 
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="text", nullable=true)
      */
     protected $content;
 
-    public function getContent(): ?string
-    {
-        return $this->content;
-    }
-
+    public function getContent(): ?string { return $this->content; }
     public function setContent(?string $content): self
     {
         $this->content = $content;

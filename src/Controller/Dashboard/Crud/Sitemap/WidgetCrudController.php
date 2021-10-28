@@ -44,7 +44,7 @@ class WidgetCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setPageTitle('index', 'User Management')
+            ->setPageTitle('index', 'Widget Management')
             ->setDefaultSort(['id' => 'DESC'])
             ->setFormOptions(
                 ['validation_groups' => ['new']], // Crud::PAGE_NEW
@@ -70,19 +70,6 @@ class WidgetCrudController extends AbstractCrudController
 
         yield LinkIdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield TextField::new('name');
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield TranslatableField::new('value')->hideOnIndex();
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        if (!$this->isGranted('ROLE_SUPERADMIN')) yield TextField::new('comment')->hideOnForm();
-        else yield TextField::new('comment');
-        foreach ( ($callbacks["comment"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 

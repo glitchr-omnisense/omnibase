@@ -58,7 +58,7 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function filesize($bytes): string
     {
-        $size = ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+        $size = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
         $factor = (int) floor(log($bytes) / log(1024));
 
         return (int) ($bytes / (1024 ** $factor)).@$size[$factor];

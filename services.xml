@@ -399,6 +399,13 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
+        <service id="Base\Controller\WidgetController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType">
             <tag name="form.type" />
         </service>
@@ -443,6 +450,10 @@
             <tag name="ea.field_configurator" />
         </service>
 
+        <service id="Base\Field\Configurator\EntityConfigurator">
+            <tag name="ea.field_configurator" />
+        </service>
+
         <service id="Base\Field\Configurator\CountryConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="assets.packages" />
@@ -464,12 +475,12 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="translator" />
         </service>
-<!--        <service id="Base\Field\Configurator\DropzoneConfigurator">
+        <service id="Base\Field\Configurator\EntityConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="translator" />
-        </service>-->
+        </service>
 
         
         <service id="Base\Controller\Dashboard\DashboardController">
@@ -555,14 +566,21 @@
                 <argument type="service" id="service_container" />
             </call>
         </service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController">
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\AttachmentCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
         </service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\PageCrudController">
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\HyperlinkCrudController">
+            <tag name="ea.crud_controller" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">

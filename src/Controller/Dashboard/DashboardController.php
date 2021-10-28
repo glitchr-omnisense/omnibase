@@ -16,9 +16,11 @@ use Base\Field\Type\RoleType;
 
 use Base\Config\WidgetItem;
 use Base\Entity\Sitemap\Menu;
-use Base\Entity\Sitemap\Page;
+use Base\Entity\Sitemap\Widget\Page;
 use Base\Entity\Sitemap\Setting;
 use Base\Entity\Sitemap\Widget;
+use Base\Entity\Sitemap\Widget\Attachment;
+use Base\Entity\Sitemap\Widget\Hyperlink;
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
@@ -261,25 +263,13 @@ class DashboardController extends AbstractDashboardController
         $widget[] = WidgetItem::linkToCrud('Penalties',     'fa-fw fa fa-bomb',                 UserPenalty::class);
         $widget[] = WidgetItem::linkToCrud('Logs',          'fa-fw fa fa-info-circle',          UserLog::class);
 
-        $widget[] = WidgetItem::section('SITEMAP', null, 1);
-        $widget[] = WidgetItem::linkToCrud('Menu',     'fa-fw fa fa-compass',  Menu::class);
+        $widget[] = WidgetItem::section('SITEMAP', null, 2);
         $widget[] = WidgetItem::linkToCrud('Pages',    'fa-fw fa fa-file-alt', Page::class);
-        $widget[] = WidgetItem::linkToCrud('Widgets',  'fa-fw fa fa-pager',    Widget::class);
+        $widget[] = WidgetItem::linkToCrud('Hyperlinks',    'fa-fw fa fa-link', Hyperlink::class);
+        $widget[] = WidgetItem::linkToCrud('Attachments',    'fa-fw fa fa-paperclip', Attachment::class);
+        $widget[] = WidgetItem::linkToCrud('Menu',     'fa-fw fa fa-compass',  Menu::class);
         if ($this->isGranted('ROLE_SUPERADMIN'))
             $widget[] = WidgetItem::linkToCrud('Settings', 'fa-fw fa fa-tools',    Setting::class);
-        
-        // if ($this->gaService->isEnabled()) {
-
-        //     $ga = $this->gaService->getBasics();
-
-        //     $menu[] = MenuItem::section('STATISTICS');
-        //     $menu[] = MenuItem::linkToUrl($ga["users"] . ' visit(s)', 'fas fa-user', "");
-        //     $menu[] = MenuItem::linkToUrl($ga["users_1day"] . ' visit(s) in one day', 'fas fa-user-clock', "");
-        //     $menu[] = MenuItem::linkToUrl($ga["views"] . ' view(s)', 'far fa-eye', "");
-        //     $menu[] = MenuItem::linkToUrl($ga["views_1day"] . ' view(s) in one day', 'fas fa-eye', "");
-        //     $menu[] = MenuItem::linkToUrl($ga["sessions"] . ' sessions(s)', 'fas fa-stopwatch', "");
-        //     $menu[] = MenuItem::linkToUrl($ga["bounces_1day"] . ' bounce(s) in one day', 'fas fa-meteor', "");
-        // }
 
         return $widget;
     }

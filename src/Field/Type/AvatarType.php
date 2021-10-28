@@ -61,8 +61,8 @@ class AvatarType extends AbstractType
         // - cropper: <id>_cropper   = cropper
         // - cropper: <id>_thumbnail = thumbnail
         //
-        $view->vars['avatar']        = $view->vars['files'][0] ?? null;
-        $view->vars['files'] = [];
+        $view->vars['avatar'] = $view->vars['files'][0] ?? null;
+        $view->vars['files']  = [];
 
         if(!($view->vars["accept"] ?? false) ) 
              $view->vars["accept"] = "image/*";

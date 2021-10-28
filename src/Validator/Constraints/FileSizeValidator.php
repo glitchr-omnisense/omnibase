@@ -22,12 +22,13 @@ class FileSizeValidator extends ConstraintValidator
         if (!$entry instanceof UploadedFile)
             return;
 
+        dump($entry->getSize(), $constraint->getMaxSize());
         if ($entry->getSize() > $constraint->getMaxSize()) {
 
             // the argument must be a string or an object implementing __toString()
             $this->context->buildViolation($constraint->message)
-            ->setParameter('{0}', $constraint->getMaxSizeStr())
-            ->setParameter('{1}', $constraint->getSizeStr($entry->getSize()))
+            ->setParameter('{0}', $constraint->int2size($constraint->getMaxSize()))
+            ->setParameter('{1}', $constraint->int2size($entry->getSize()))
             ->setTranslationDomain('validators')
             ->addViolation();
         }

@@ -184,6 +184,13 @@ class Uploader extends AbstractAnnotation
         return $that->mimeTypes;
     }
 
+    public static function getMaxSize($entity, $mapping): int
+    {
+        $that = self::getAnnotation($entity, $mapping);
+        if(!$that) return UploadedFile::getMaxFilesize();
+        return $that->maxSize;
+    }
+
     protected static $tmpHashTable = [];
     public static function getFile($entity, string $mapping)
     {
