@@ -39,8 +39,8 @@ trait BaseCommonTrait {
      */
     public static $twigExtension = null;
 
-    public static function setTranslator(?TranslatorInterface $translator) { 
-        self::$translator = $translator; 
+    public static function setTranslator(?TranslatorInterface $translator) {
+        self::$translator = $translator;
         self::$twigExtension = new BaseTwigExtension($translator);
     }
 

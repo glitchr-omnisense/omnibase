@@ -35,7 +35,7 @@
             {% set country = form_locale|country %}
             <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
                 <label {% if form_child.vars['required'] %}class="required"{% endif %}>
-                    <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags'~ country~'.png')}}" alt="{{ form_locale }}">
+                    <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('/bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                 </label>
             </button>
         </li>
@@ -162,7 +162,7 @@
     'data-file-ajaxPost'      : form.vars.ajaxPost,
 }) %}
 
-<div class="fileupload" data-file-field="{{form.vars.id}}" data-file-dropzone="{{form.vars.dropzone}}">
+<div class="fileupload" data-file-field="{{ id }}" data-file-dropzone="{{form.vars.dropzone}}">
     <div class="field">
     {% if multiple and dropzone %}
 
@@ -174,18 +174,9 @@
         {% set placeholder = '' %}
         {% set title = '' %}
         {% set filesLabel = 'files'|trans %}
-        
-        {% if files %}
-            {% if multiple %}
-                {% set placeholder = files|length ~ ' ' ~ filesLabel %}
-            {% else %}
-                {% set placeholder = (files|first).filename %}
-                {% set title = (files|first).mTime|date %}
-            {% endif %}
-        {% endif %}
 
         {{ form_widget(form.file, { attr: form.file.vars.attr, value: form.vars.value }) }}
-        {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept, placeholder: placeholder, title: title, 'data-files-label': filesLabel }) }) }}
+        {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept }) }) }}
 
         {% if allow_delete %}
         <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">

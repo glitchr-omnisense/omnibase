@@ -20,6 +20,22 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 trait BaseNotificationTrait
 {
+    public function getMail()
+    {
+        $name = $this->getSettings("base.settings.mail_name") ?? null;
+        if (!$name) {
+
+            $domain = explode(".", $this->getSettings()->getDomain());
+            array_pop($domain);
+
+            $name = implode(".", $domain);
+        }
+
+        // Mail is not defined in messages, because it is defined in services.yaml
+        $mail = $this->getSettings("base.settings.mail") ?? $this->getParameterBag('base.mail');
+        return $name . " <" . $mail . ">";
+    }
+
     /**
      * @var NotifierInterface
      */
@@ -74,18 +90,4 @@ trait BaseNotificationTrait
         return BaseService::$notifierOptions;
     }
 
-    public function getMail()
-    {
-        $name = $this->getTranslator()->trans("mail") ?? null;
-        if (!$name) {
-
-            $domain = explode(".", $this->getDomain());
-            array_pop($domain);
-
-            $name = implode(".", $domain);
-        }
-
-        // Mail is not defined in messages, because it is defined in services.yaml
-        return $name . " <" . $this->getParameterBag('base.mail') . ">";
-    }
 }

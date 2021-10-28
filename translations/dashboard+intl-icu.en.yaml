@@ -37,3 +37,8 @@ bounces_1day: "{0, plural,
 homepage:
   title: "Dashboard: Homepage"
   text: "Welcome to the dashboard, this page is meant for administration support"
+
+settings:
+  title: "Dashboard: Settings"
+  text: "Welcome to the dashboard, this page is meant for modifying settings"
+  success: "You settings have been successfully modified."

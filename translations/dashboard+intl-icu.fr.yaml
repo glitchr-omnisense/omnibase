@@ -31,5 +31,9 @@ bounces_1day: "{0, plural,
 
 homepage:
   title: "Dashboard: Page d'accueil"
-  text: "Bienvenue sur le dashboard, cette page vous permet d'administrer votre site web"
+  text: "Bienvenue sur le dashboard, cette page permet d'administrer le site web"
   
+settings:
+  title: "Dashboard: Configuration"
+  text: "Bienvenue dans le dashboard, cette page permet d'administrer les paramètres du site."
+  success: "Les paramètres du site ont correctement été modifiés."

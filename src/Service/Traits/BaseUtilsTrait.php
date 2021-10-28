@@ -7,8 +7,9 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 trait BaseUtilsTrait
 {
-    public static function isAssoc(array $arr)
+    public static function isAssoc(?array $arr)
     {
+        if(!$arr) return (gettype($arr) == "array");
         return array_keys($arr) !== range(0, count($arr) - 1);
     }
 

@@ -31,13 +31,19 @@ class MaintenanceController extends AbstractController
         if ($f) {
 
             $downtime = trim(fgets($f, 4096));
-            $downtime = ($downtime) ? strtotime($downtime) : 0;
 
             if(!feof($f)) $uptime = trim(fgets($f, 4096));
-            $uptime = ($uptime) ? strtotime($uptime) : 0;
 
             fclose($f);
+
+        } else {
+
+            $downtime = $this->baseService->getSettings("base.settings.maintenance_downtime");
+            $uptime   = $this->baseService->getSettings("base.settings.maintenance_uptime");
         }
+
+        $downtime = ($downtime) ? strtotime($downtime) : 0;
+        $uptime = ($uptime) ? strtotime($uptime) : 0;
 
         $remainingTime = $uptime - time();
         if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;

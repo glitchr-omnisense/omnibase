@@ -471,7 +471,7 @@
                     </aside>
 
                     <div class="content-wrapper">
-                        {% block content %}
+                        {% block content_wrapper %}
                         
                             <article class="content">
                             
@@ -549,6 +549,16 @@
                                         {% endfor %}
                                     </div>
                                     {% endif %}
+
+                                    {% set content = block('content') is defined ? block('content') : '' %}
+                                    {% if content is not empty %}
+                                    <div class="content-panel">
+                                        <div class="content-panel-body with-background without-header without-footer">
+                                            {{ content|raw }}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+
                                 {% endblock %}
                                 </section>
 
@@ -561,7 +571,7 @@
                                     {% endif %}
                                 {% endblock %}
                             </article>
-                        {% endblock content %}
+                        {% endblock %}
 
                         <div id="content-resizer-handler" class="resizer-handler resizer-handler-right"></div>
                     </div>

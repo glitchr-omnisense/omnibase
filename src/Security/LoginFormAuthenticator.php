@@ -69,21 +69,21 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): PassportInterface
     {
-        $identifier = $request->get('login')["username"] ?? "";
-        $password   = $request->get('login')["password"] ?? "";
+        $identifier = $request->get('login')["username"] ?? $request->get("username") ?? "";
+        $password   = $request->get('login')["password"] ?? $request->get("password") ?? "";
         $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 
         $badges   = [];
-        if( array_key_exists("_remember_me", $request->get('login')) ) {
+        if( array_key_exists("_remember_me", $request->get('login') ?? []) ) {
             $badges[] = new RememberMeBadge();
             if($request->get('login')["_remember_me"]) end($badges)->enable();
         }
 
-        if( array_key_exists("_csrf_token", $request->get('login')) )
+        if( array_key_exists("_csrf_token", $request->get('login') ?? []) )
             $badges[] = new CsrfTokenBadge("login", $request->get('login')["_csrf_token"]);
-        if( array_key_exists("password", $request->get('login')) )
+        if( array_key_exists("password", $request->get('login') ?? []) )
             $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
-        if( array_key_exists("_captcha", $request->get('login')) && class_exists(CaptchaBadge::class) )
+        if( array_key_exists("_captcha", $request->get('login') ?? []) && class_exists(CaptchaBadge::class) )
             $badges[] = new CaptchaBadge("_captcha", $request->get('login')["_captcha"]);
 
         return new Passport(
@@ -105,7 +105,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $targetPath = $request->request->get("_target_path") ?? null;
         if ($targetPath) {
 
-            if($this->baseService->getPathName($targetPath) != self::LOGOUT_ROUTE)
+            if($this->baseService->getRoute($targetPath) != self::LOGOUT_ROUTE)
                 return new RedirectResponse($targetPath);
         }
 

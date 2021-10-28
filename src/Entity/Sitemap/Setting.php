@@ -38,8 +38,9 @@ use Base\Database\Traits\TranslatableTrait;
 class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
-    public function getValue(): string { return $this->translate()->getValue();   }
-    public function setValue(string $value) {
+    public function getValue(): ?string { return $this->translate()->getValue();   }
+    public function setValue(?string $value) {
+
         $this->translate()->setValue($value);  
         return $this; 
     }
@@ -53,7 +54,7 @@ class Setting implements TranslatableInterface
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
     protected $name;
 
@@ -65,7 +66,7 @@ class Setting implements TranslatableInterface
     }
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="text", nullable=true)
      */
     protected $comment;
     public function getComment(): string { return $this->comment; }
@@ -75,11 +76,11 @@ class Setting implements TranslatableInterface
         return $this;
     }
     
-    public function __construct(string $name, string $value)
+    public function __construct(string $name, $value)
     {
         $this->setName($name);
         $this->setValue($value);
     }
 
-    public function __toString() { return $this->getValue(); }
+    public function __toString() { return $this->getValue() ?? ""; }
 }

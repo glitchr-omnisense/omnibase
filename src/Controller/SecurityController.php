@@ -59,12 +59,12 @@ class SecurityController extends AbstractController
 
             $lastUsername = $authenticationUtils->getLastUsername();
 
-            $logo = $this->baseService->getParameterBag("base.logo");
+            $logo = $this->baseService->getSettings("base.settings.logo");
             return $this->render('@EasyAdmin/page/login.html.twig', [
                 'last_username' => $lastUsername,
                 'translation_domain' => 'admin',
                 'csrf_token_intention' => 'authenticate',
-                'target_path' => $this->baseService->getPath('base_dashboard'),
+                'target_path' => $this->baseService->getUrl('base_dashboard'),
                 'username_label' => 'Your username',
                 'password_label' => 'Your password',
                 'sign_in_label' => 'Log in',
@@ -82,9 +82,10 @@ class SecurityController extends AbstractController
                     $request->getSession()->get('_security.main.target_path') ??
                     $request->getSession()->get('_security.account.target_path') ??
                     $request->headers->get('referer') ?? null;
-                $targetPath = (basename($targetPath) ? $this->baseService->getPathName("/".basename($targetPath)) : null) ?? null;
+
+                $targetPath = (basename($targetPath) ? $this->baseService->getRoute("/".basename($targetPath)) : null) ?? null;
                 if ($targetPath && $targetPath != LoginFormAuthenticator::LOGIN_ROUTE && $targetPath != LoginFormAuthenticator::LOGOUT_ROUTE)
-                    return $this->redirectToRoute($targetPath);
+                    return $this->redirect($targetPath);
 
                 return $this->redirectToRoute("base_profile");
             }

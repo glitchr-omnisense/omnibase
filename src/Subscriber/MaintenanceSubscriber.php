@@ -56,7 +56,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     public function onRequestEvent(RequestEvent $event)
     {
         // Exception triggered
-        if( empty($this->getCurrentPath($event)) )
+        if( empty($this->getCurrentRoute($event)) )
             return;
 
         // Avoid symfony profiler ajax request to go through this..
@@ -66,14 +66,14 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         // Check if lock file is found or not..
         if(!$this->baseService->isMaintenance()) {
 
-            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentPath($event)))
-                $this->baseService->redirectToRoute($event, $this->homepageRoute);
-                
+            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event)))
+                $this->baseService->redirectToRoute($this->homepageRoute, [], $event);
+
             return;
         }
 
         if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_SUPERADMIN")) {
-            
+
             $notification = new Notification("notifications.maintenance.banner");
             $notification->send("warning");
             return;
@@ -83,17 +83,16 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         $this->baseService->Logout();
 
         // Apply redirection to maintenance page
-        
-        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentPath($event));
+        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event));
         foreach($this->exceptionRoute as $exception)
-            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentPath($event));
+            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentRoute($event));
 
         if (!$isException)
-            $this->baseService->redirectToRoute($event, $this->maintenanceRoute);
+            $this->baseService->redirectToRoute($this->maintenanceRoute, [], $event);
 
         // Stopping page execution
         $event->stopPropagation();
     }
 
-    public function getCurrentPath($event) { return $event->getRequest()->get('_route'); }
+    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
 }

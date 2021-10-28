@@ -91,12 +91,17 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function getEntityFromData($classname, $data)
     {
-        $entity = self::getSerializer()->deserialize(json_encode($data), $classname, 'json');
-        foreach ($data as $property => $data) {
+        $fieldNames          = self::getClassMetadata($classname)->getFieldNames();
 
-            if(self::hasField($entity, $property))
-                self::setFieldValue($entity, $property, $data);
-        }
+        $fields  = array_intersect_key($data, array_flip($fieldNames));
+        $associations = array_diff_key($data, array_flip($fieldNames));
+
+        $entity = self::getSerializer()->deserialize(json_encode($fieldNames), $classname, 'json');
+        foreach ($fields as $property => $data)
+            self::setFieldValue($entity, $property, $data);
+
+        foreach($associations as $property => $data)
+            self::setFieldValue($entity, $property, $data);
 
         return $entity;
     }
@@ -131,8 +136,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function hasField($entity, string $property) { return property_exists($entity, $property); }
     public static function getTypeOfField($entity, string $property)
     {
-        if(!$entity) return null;
-        
+        if(!$entity || !is_object($entity)) return null;
+
         $classMetadata = self::getClassMetadata(get_class($entity));
         if( ($dot = strpos($property, ".")) > 0 ) {
         

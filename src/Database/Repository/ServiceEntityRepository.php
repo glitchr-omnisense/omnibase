@@ -63,15 +63,19 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     protected array $criteria = [];
     protected array $options  = [];
 
-    public function __construct(ManagerRegistry $registry, ?string $entityClass = null)
+    public static function getFqdnEntityName()
     {
-        $className = preg_replace(
+        return preg_replace(
             ['/\\\\Repository\\\\/', '/Repository$/'],
             ["\\\\Entity\\\\", ""], 
             static::class
         );
+    }
+
+    public function __construct(ManagerRegistry $registry, ?string $entityName = null)
+    {
         
-        parent::__construct($registry, $entityClass ?? $className);
+        parent::__construct($registry, $entityName ?? $this->getFqdnEntityName());
     }
 
     protected function validateDate($date, $format = 'Y-m-d H:i:s') {
@@ -128,7 +132,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     }
 
     public function flush() { return $this->getEntityManager()->flush(); }
-    
+    public function persist($entity) {
+
+        $entityName = self::getFqdnEntityName();
+        if(!is_object($entity) || (!$entity instanceof $entityName && !is_subclass_of($entity, $entityName))) {
+            $class = (is_object($entity) ? get_class($entity) : "null");
+            throw new \Exception("Repository \"".static::class."\" is expected \"".$entityName."\" entity, you passed \"".$class."\"");
+        }
+
+        $this->getEntityManager()->persist($entity);
+    }
+
     protected function stripByFront($method, $by, $option)
     {
         $method = substr($method, strlen($option), strlen($method));

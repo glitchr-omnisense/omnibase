@@ -75,7 +75,7 @@ class Menu implements TranslatableInterface
      */
     protected $createdAt;
 
-    public function __construct(?string $title = null, ?string $slug = null, WidgetAdapter $adapter)
+    public function __construct(?string $title = null, ?string $slug = null, WidgetAdapter $adapter = null)
     {
         $this->setTitle($title);
         $this->setSlug($slug);

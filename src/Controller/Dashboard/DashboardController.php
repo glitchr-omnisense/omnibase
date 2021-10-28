@@ -15,7 +15,15 @@ use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
 
 use Base\Config\WidgetItem;
+use Base\Entity\Sitemap\Menu;
+use Base\Entity\Sitemap\Page;
+use Base\Entity\Sitemap\Setting;
+use Base\Entity\Sitemap\Widget;
+use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
+use Base\Field\Type\DateTimePickerType;
+use Base\Field\Type\ImageType;
+use Base\Form\Type\Sitemap\SettingType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -31,6 +39,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Google\Analytics\Service\GaService;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -44,8 +54,8 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 class DashboardController extends AbstractDashboardController
 {
     protected $baseService;
-    protected $adminUrlGenerator;
     protected $authenticationUtils;
+    protected $adminUrlGenerator;
 
     public function __construct(
         AdminUrlGenerator $adminUrlGenerator,
@@ -81,18 +91,59 @@ class DashboardController extends AbstractDashboardController
      *
      * @Route("/dashboard/settings", name="base_dashboard_settings")
      */
-    public function settings(): Response
+    public function Settings(Request $request): Response
     {
+        $form = $this->createForm(SettingType::class, null, [
+            "captcha_protection" => false,
+            "fields" => [
+                "base.settings.logo"                 => ["type" => ImageType::class],
+                "base.settings.title"                => [],
+                "base.settings.slogan"               => [],
+                "base.settings.birthdate"            => ["type" => DateTimePickerType::class],
+                "base.settings.maintenance"          => ["type" => CheckboxType::class, "required" => false],
+                "base.settings.maintenance_downtime" => ["type" => DateTimePickerType::class, "required" => false],
+                "base.settings.maintenance_uptime"   => ["type" => DateTimePickerType::class, "required" => false],
+                "base.settings.use_https"            => ["type" => CheckboxType::class, "required" => false],
+                "base.settings.domain"               => [],
+                "base.settings.mail_name"            => [],
+                "base.settings.mail"                 => ["type" => EmailType::class]
+            ]
+        ]);
+
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+
+            $settingRepository = $this->getDoctrine()->getRepository(Setting::class);
+
+            $data     = array_filter($form->getData(), fn($value) => !is_null($value));
+            $fields   = array_keys($form->getConfig()->getOption("fields"));
+
+            $settings = $this->baseService->getSettings()->getSettings($fields);
+            $settings = array_filter($settings, fn($value) => !is_null($value));
+            foreach(array_diff_key($data, $settings) as $name => $setting)
+                $settingRepository->persist($setting);
+
+            $settingRepository->flush();
+
+            $notification = new Notification("dashboard.settings.success");
+            $notification->setUser($this->getUser());
+            $notification->send("success");
+
+            return $this->baseService->refresh();
+        }
+
         return $this->render('dashboard/settings.html.twig', [
             "content_title" => $this->translator->trans2("Dashboard: Settings"),
-            "content_header" => $this->translator->trans2("Welcome to the setting page.")
+            "content_header" => $this->translator->trans2("Welcome to the setting page."),
+            "form" => $form->createView()
         ]);
     }
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings("app.settings.logo") ?? "/bundles/base/logo.svg";
-        $title = $this->baseService->getSettings("app.settings.title");
+        $logo  = $this->baseService->getSettings("base.settings.logo") ?? "/bundles/base/logo.svg";
+        $title = $this->baseService->getSettings("base.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')
             ->setTitle('<img src="'.$logo.'" alt="'.$title.'">')
@@ -108,10 +159,10 @@ class DashboardController extends AbstractDashboardController
     public function configureMenuItems(): iterable
     {
         $menu   = [];
-        $menu[] = MenuItem::section('MENU');
-        $menu[] = MenuItem::linktoUrl('Home', 'fa fa-home', $this->baseService->getPath("base_dashboard"));
-        $menu[] = MenuItem::linktoUrl('Settings', 'fa fa-tools', $this->baseService->getPath("base_dashboard_settings"));
-        $menu[] = MenuItem::linktoUrl('Back to website', 'fa fa-door-open', "/");
+        $menu[] = MenuItem::section(false);
+        $menu[] = MenuItem::linkToUrl('Home', 'fa fa-home', $this->baseService->getUrl("base_dashboard"));
+        $menu[] = MenuItem::linkToUrl('Settings', 'fa fa-tools', $this->baseService->getUrl("base_dashboard_settings"));
+        $menu[] = MenuItem::linkToUrl('Back to website', 'fa fa-door-open', "/");
 
         $menu[] = MenuItem::section('MEMBERSHIP');
         $roles = RoleType::array_flatten(RoleType::getChoices());
@@ -210,6 +261,13 @@ class DashboardController extends AbstractDashboardController
         $widget[] = WidgetItem::linkToCrud('Penalties',     'fa-fw fa fa-bomb',                 UserPenalty::class);
         $widget[] = WidgetItem::linkToCrud('Logs',          'fa-fw fa fa-info-circle',          UserLog::class);
 
+        $widget[] = WidgetItem::section('SITEMAP', null, 1);
+        $widget[] = WidgetItem::linkToCrud('Menu',     'fa-fw fa fa-compass',  Menu::class);
+        $widget[] = WidgetItem::linkToCrud('Pages',    'fa-fw fa fa-file-alt', Page::class);
+        $widget[] = WidgetItem::linkToCrud('Widgets',  'fa-fw fa fa-pager',    Widget::class);
+        if ($this->isGranted('ROLE_SUPERADMIN'))
+            $widget[] = WidgetItem::linkToCrud('Settings', 'fa-fw fa fa-tools',    Setting::class);
+        
         // if ($this->gaService->isEnabled()) {
 
         //     $ga = $this->gaService->getBasics();
@@ -231,14 +289,13 @@ class DashboardController extends AbstractDashboardController
         // Usually it's better to call the parent method because that gives you a
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
-        
         $avatar = ($user->getAvatarFile() ? $user->getAvatar() : null);
 
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)
             ->addMenuItems([
-                MenuItem::linkToUrl('My Profile', 'fa fa-id-card', $this->baseService->getPath("base_profile")),
-                MenuItem::linkToUrl('My Settings', 'fa fa-user-cog', $this->baseService->getPath("base_settings"))
+                MenuItem::linkToUrl('My Profile', 'fa fa-id-card', $this->baseService->getUrl("base_profile")),
+                MenuItem::linkToUrl('My Settings', 'fa fa-user-cog', $this->baseService->getUrl("base_settings"))
             ]);
     }
 }

@@ -113,26 +113,19 @@ class FileType extends AbstractType implements DataMapperInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        //
-        // VIEW: 
-        // - <id>_raw  = file,
-        // - <id>_file = hidden,
-        // - <id>_deleteBtn = btn "x",
-        // - <id>_deleteAvatarBtn = btn "x",
-        // - <id>_figcaption = btn "+"
-        // - dropzone: <id>_dropzone = btn "x",
-        //
-            
         $parent = $form->getParent();
         $entity = $parent->getData();
-        if($entity) {
 
+        if(!is_object($entity)) $files = $form->getData();
+        else {
+        
             $propertyType = Uploader::getTypeOfField($entity, $form->getName());
             if($options["multiple"] && $propertyType != "array")
                 throw new InvalidArgumentException("Property ".$form->getName()." is \"$propertyType\", please disable 'multiple' option or turn property type into an 'array'");
+
+            $files = Uploader::getFile($entity, $form->getName())->getPath();
         }
 
-        $files = ($entity ? Uploader::getFile($entity, $form->getName()) : null);
         if(!is_array($files)) $files = ($files ? [$files] : []);
         $view->vars['files'] = $files;
 
@@ -140,7 +133,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!$acceptedFiles && $entity) $acceptedFiles = implode(",", Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName()));
         $view->vars["accept"] = $acceptedFiles;
 
-        if($entity)
+        if(is_object($entity))
             $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $form->getName());
 
         if(is_array($view->vars['value']))
@@ -167,7 +160,7 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['max_filesize'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_filesize"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
             if($acceptedFiles           !== null) $options["dropzone"]["acceptedFiles"]  = $acceptedFiles;
-            
+
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans2("messages.dropzone.title").'</h4><p>'.$this->translator->trans2("messages.dropzone.description").'</p>';
 
@@ -204,6 +197,6 @@ class FileType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);
-        $viewData = $children['file']->getData() ?? $children['raw']->getData() ?? [];
+        $viewData = $children['raw']->getData() ?? $children['file']->getData() ?? [];
     }
 }

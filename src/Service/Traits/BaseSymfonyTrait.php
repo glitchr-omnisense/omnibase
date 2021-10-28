@@ -13,6 +13,7 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -31,11 +32,7 @@ trait BaseSymfonyTrait
     public function hasGet() { return isset($_GET); }
     public function hasSession() { return isset($_SESSION); }
 
-    public function addSession($name, $value)
-    {
-        $this->getSession()->set($name, $value);
-    }
-
+    public function addSession($name, $value) { $this->getSession()->set($name, $value); }
     public function getSession($name = null)
     {
         if(!$name) return $this->rstack->getSession();
@@ -52,7 +49,6 @@ trait BaseSymfonyTrait
     {
         return $this->formFactory->create($type, $data, $options);
     }
-
 
     public function getAvailableServices(): array
     {
@@ -119,44 +115,51 @@ trait BaseSymfonyTrait
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
     
-    public function generateUrl(string $name = "", array $opts = []) { return $this->getPath($name, $opts); }
-    public function getCurrentPath() { return $this->getPath(); }
-    public function getPath(string $name = "", array $opts = [])
+    public function getCurrentRequest(): ?Request { return $this->getCurrentRequest(); }
+    public function getRequest(): ?Request
     {
-        if (!empty($name)) {
-            try {
-                return BaseService::$router->generate( $name, $opts);
-            } catch (RouteNotFoundException $e) {
-                return null;
-            }
-        }
-
-        return ($request = $this->getRequest()) ? $request->get('route') : null;
+        if (!$this->rstack) return null;
+        return $this->rstack->getCurrentRequest();
     }
 
-    public function getCurrentPathName() { return $this->getPathName(); }
-    public function getPathName(?string $path = null)
+    public function generateUrl(string $route = "", array $opts = []): ?string { return $this->getUrl($route, $opts); }
+    public function getCurrentUrl(): ?string { return $this->getUrl(); }
+    public function getUrl(string $route = "", array $opts = []): ?string
     {
-        if(!$path) $path = $_SERVER["REQUEST_URI"] ?? null;
-	if(!$path) return null;
+        if (!empty($route)) {
 
-        try {
-            $path = parse_url($path, PHP_URL_PATH);
-            return $this->getRouter()->match($path)['_route'];
-        } catch (ResourceNotFoundException $e) {
-            return null;
+            try { return BaseService::$router->generate($route, $opts); }
+            catch (RouteNotFoundException $e) { return null; }
         }
+
+        return ( ($request = $this->getRequest()) ? $request->get('_route') : null);
     }
 
-    public function redirect(string $url, int $state = 302, $headers = null): RedirectResponse { return new RedirectResponse($url, $state, $headers); }
-    public function redirectToRoute($event, string $route, $exceptionPattern = null, $callback = null)
-    {
-        $route     = $this->getPath($route) ?? $route;
-        $routeName = $this->getPathName($route) ?? $route;
+    public function getCurrentRoute(): ?string {
+        
+        $request = $this->getRequest();
+        if(!$request) return null;
 
-        $currentRouteName = $this->getPathName();
-        if ($currentRouteName == $routeName)
-            return false;
+        return $this->getRoute($request->getRequestUri());
+    }
+
+    public function getRoute(string $url): ?string
+    {
+        if(!$url) return null;
+
+        try { return $this->getRouter()->match(parse_url($url, PHP_URL_PATH))['_route']; }
+        catch (ResourceNotFoundException $e) { return null; }
+    }
+
+    public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->getUrl($urlOrRoute, $opts), $state, $headers); }
+    public function redirectToRoute(string $route, array $opts = [], $event = null, $exceptionPattern = null, $callback = null): ?RedirectResponse
+    {
+        $url   = $this->getUrl($route, $opts) ?? $route;
+        $route = $this->getRoute($url); // Normalize and check if route exists
+        if (!$route) return null;
+
+        $currentRoute = $this->getCurrentRoute();
+        if ($route == $currentRoute) return null;
 
         if($exceptionPattern) {
 
@@ -165,23 +168,27 @@ trait BaseSymfonyTrait
 
             foreach($exceptionPattern as $pattern) {
 
-                if (preg_match($pattern, $currentRouteName))
-                    return false;
+                if (preg_match($pattern, $currentRoute))
+                    return null;
             }
         }
         
+        $response = new RedirectResponse($url);
+        if($event) $event->setResponse($response);
+
+        // Callable action if redirection happens
         if(is_callable($callback)) $callback();
-        $event->setResponse(new RedirectResponse($route));
-        return true;
+
+        return $response;
     }
 
-    public function getRequest()
-    {
-        if (!$this->rstack) return null;
-        return $this->rstack->getCurrentRequest();
+    public function refresh(?Request $request = null): RedirectResponse 
+    { 
+        $request = $request ?? $this->getRequest();
+        return $this->redirect($request->get('_route'));
     }
 
-    public function isMaintenance() { return file_exists($this->getParameterBag("base.maintenance.lockpath")); }
+    public function isMaintenance() { return $this->getSettings("base.settings.maintenance") || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }

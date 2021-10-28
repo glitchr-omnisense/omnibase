@@ -44,7 +44,9 @@
         <service id="Base\Service\BaseSettings" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="App\Repository\Sitemap\SettingRepository" />
+            <argument type="service" id="base.locale_provider" />
             <argument type="service" id="assets.packages" />
+            <argument type="service" id="cache.app" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -72,7 +74,7 @@
         <service id="Base\Twig\BaseTwigExtension" >
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
-            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.service" />
        </service>
 
         <service id="Base\Form\Extension\FormTypeBootstrapExtension" >
@@ -336,6 +338,11 @@
             <argument type="service" id="event_dispatcher" />
         </service>
 
+        <service id="Base\Form\Type\Sitemap\SettingType">
+            <tag name="form.type" />
+            <argument type="service" id="base.settings" />
+        </service>
+
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />
@@ -523,6 +530,35 @@
             </call>
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController">
+            <tag name="ea.crud_controller" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\MenuCrudController">
+            <tag name="ea.crud_controller" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\SettingCrudController">
+            <tag name="ea.crud_controller" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController">
+            <tag name="ea.crud_controller" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\PageCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">

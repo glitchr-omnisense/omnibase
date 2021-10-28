@@ -41,7 +41,7 @@ class ClassMetadataManipulator
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
         if(!BaseService::isAssoc($fields))
-            throw new \Exception("Associative array expected for 'fields' parameter");
+            throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
         $validFields = array_fill_keys($metadata->getFieldNames(), []);
@@ -142,7 +142,7 @@ class ClassMetadataManipulator
                 $nullable = ($metadata instanceof ClassMetadataInfo) && isset($metadata->discriminatorColumn['nullable']) && $metadata->discriminatorColumn['nullable'];
 
                 $fields[$assocName] = [
-                    'field_type' => EntityType::class,
+                    'type' => EntityType::class,
                     'data_class' => $class,
                     'required' => !$nullable,
                 ];
@@ -151,7 +151,7 @@ class ClassMetadataManipulator
             }
 
             $fields[$assocName] = [
-                'field_type' => CollectionType::class,
+                'type' => CollectionType::class,
                 'entry_type' => EntityType::class,
                 'entry_options' => [
                     'data_class' => $class,

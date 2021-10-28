@@ -25,13 +25,13 @@ class EntityType extends AbstractType
             $form = $event->getForm();
 
             $dataClass = $this->classMetadataManipulator->getDataClass($form);
-            
+
             $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
             foreach ($fields as $fieldName => $field) {
 
-                $fieldType = $field['field_type'] ?? null;
-                unset($field['field_type']);
-                
+                $fieldType = $field['type'] ?? null;
+                unset($field['type']);
+
                 if(array_key_exists("required", $field))
                     $field['required'] = $field['required'] & $options["required"];
 

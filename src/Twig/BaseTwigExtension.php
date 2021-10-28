@@ -26,15 +26,16 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 final class BaseTwigExtension extends AbstractExtension
 {
     protected string $projectDir;
-    public function __construct(TranslatorInterface $translator, ?ParameterBagInterface $parameterBag = null) {
+    public function __construct(TranslatorInterface $translator, ?BaseService $baseService = null) {
 
         BaseController::$foundBaseTwigExtension = true;
 
-        $this->parameterBag = $parameterBag;
+        $this->baseService = $baseService;
         $this->translator = $translator;
         $this->intlExtension = new IntlExtension();
 
-        $this->projectDir = dirname(__FILE__, 6); // Might be computed in a way that doesn't rely on file position..
+        if($this->baseService)
+            $this->projectDir = $this->baseService->getProjectDir();
     }
 
     public function getFilters()
@@ -162,19 +163,19 @@ final class BaseTwigExtension extends AbstractExtension
     public function url(string $url): string
     {
         $url = trim($url);
-        
+
         $parseUrl = parse_url($url);
         if(!array_key_exists("schema", $parseUrl)) {
-            
-            $https = $_SERVER['HTTPS'] ?? ($this->parameterBag->get("base.use_https") ? $this->parameterBag->get("base.use_https") : true);
-            $serverName = $_SERVER['SERVER_NAME'] ?? ($this->parameterBag->has("base.domain") ? $this->parameterBag->get("base.domain") : "localhost");
+
+            $https = $_SERVER['HTTPS'] ?? ($this->baseService->getSettings("base.settings.use_https") ? $this->baseService->getSettings("base.settings.use_https") : true);
+            $serverName = $_SERVER['SERVER_NAME'] ?? ($this->baseService->getSettings("base.settings.domain") ? $this->baseService->getSettings("base.settings.domain") : "localhost");
 
             if(str_starts_with($url, "http://") || str_starts_with($url, "https://")) $domain = "";
             else $domain = ($https ? "https://" : "http://") . $serverName;
 
             if (!empty($domain)) $join = (str_starts_with($url, "/")) ? "" : "/";
             else $join = "";
-            
+
             $url = $domain . $join . $url;
         }
 

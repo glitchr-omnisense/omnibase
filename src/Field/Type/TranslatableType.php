@@ -118,7 +118,7 @@ class TranslatableType extends AbstractType
             $unavailableRequiredLocales = array_diff($options['required_locales'], $options['available_locales']);
             if(!empty($unavailableRequiredLocales))
                 throw new MissingLocaleException("The locale(s) \"".implode(",", $unavailableRequiredLocales)."\" are missing, but required by FormType \"".$form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType()).")");
-            
+
             $dataLocale = $event->getData()->getKeys();
             $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
             foreach ($locales as $key => $locale) {
