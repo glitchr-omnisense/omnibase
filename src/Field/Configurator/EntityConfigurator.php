@@ -59,24 +59,7 @@ final class EntityConfigurator implements FieldConfiguratorInterface
 
     private function formatCollection(FieldDto $field, AdminContext $context)
     {
-        $doctrineMetadata = $field->getDoctrineMetadata();
-        if ($field->getCustomOption(EntityField::OPTION_RENDER_FORMAT) == "count" || 
-           ('array' !== $doctrineMetadata->get('type') && !$field->getValue() instanceof PersistentCollection)) {
-            return $this->countNumElements($field->getValue());
-        }
-
-        $collectionItemsAsText = [];
-        foreach ($field->getValue() ?? [] as $item) {
-            if (!\is_string($item) && !(\is_object($item) && method_exists($item, '__toString'))) {
-                return $this->countNumElements($field->getValue());
-            }
-
-            $collectionItemsAsText[] = (string) $item;
-        }
-
-        $isDetailAction = Action::DETAIL === $context->getCrud()->getCurrentAction();
-
-        return u(', ')->join($collectionItemsAsText)->truncate($isDetailAction ? 512 : 32, '…')->toString();
+        return $this->countNumElements($field->getValue());
     }
 
     private function countNumElements($collection): int

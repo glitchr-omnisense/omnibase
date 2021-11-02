@@ -43,7 +43,8 @@ class DateTimePickerType extends AbstractType
             // This format is replacing the shitty HTML5_FORMAT :-)
             "format" => "yyyy-MM-dd HH:mm:ss",
             "html5"  => false,
-            "widget" => "single_text"
+            "widget" => "single_text",
+            "required" => false
         ]);
     }
 

@@ -32,10 +32,27 @@ final class SlugType extends AbstractType
         ;
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options): void
+    public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $targetPath = explode(".", $options["target"]);
         $view->vars['target'] = $targetPath;
+
+        // Check if child exists
+        $target = $form->getParent();
+        foreach($targetPath as $path) {
+
+            if(!$target->has($path))
+                throw new \Exception("Child \"$path\" doesn't exists in \"".$options["target"]."\".");
+
+            $target = $target->get($path);
+            $targetType = $target->getConfig()->getType()->getInnerType();
+
+            if($targetType instanceof TranslatableType) {
+                $availableLocales = array_keys($target->all());
+                $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
+                $target = $target->get($locale);
+            }
+        }
 
         $this->baseService->addHtmlContent("javascripts:body", "/bundles/base/form-type-slug.js");
     }

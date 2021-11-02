@@ -1,0 +1,11 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+<span class="badge badge-secondary">
+    {% if field is iterable %}
+        {{ field.formattedValue|length }}
+    {% else %}
+        {{ field.formattedValue|default("0") }}
+    {% endif %}
+</span>

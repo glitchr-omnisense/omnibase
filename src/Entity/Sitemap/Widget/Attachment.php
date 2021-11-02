@@ -7,7 +7,7 @@ use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
-use Base\Repository\Sitemap\AttachmentRepository;
+use Base\Repository\Sitemap\Widget\AttachmentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

@@ -66,11 +66,17 @@ class UploaderEntitiesCommand extends Command
         $this->showOrphans   = $input->getOption('show-orphans');
         $this->deleteOrphans = $input->getOption('delete-orphans');
 
-        $this->entity = "App\\Entity\\".$this->entity;
-        $annotations = $this->getUploaderAnnotations($this->entity);
-        if(!$annotations)
-            $output->section()->write("<warning>Uploader annotation not found for \"$this->entity\"</warning>");
+        $this->appEntities = "App\\Entity\\".$this->entity;
+        $appAnnotations = $this->getUploaderAnnotations($this->appEntities);
+        if(!$appAnnotations)
+            $output->section()->write("<warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
 
+        $this->baseEntities = "Base\\Entity\\".$this->entity;
+        $baseAnnotations = $this->getUploaderAnnotations($this->baseEntities);
+        if(!$baseAnnotations)
+            $output->section()->write("<warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
+
+        $annotations = array_merge($appAnnotations, $baseAnnotations);
         foreach($annotations as $class => $_) {
 
             foreach($_ as $field => $annotation) {

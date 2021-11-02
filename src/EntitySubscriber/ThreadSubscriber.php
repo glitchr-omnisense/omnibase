@@ -5,6 +5,7 @@ namespace Base\EntitySubscriber;
 use Base\Entity\Thread;
 use Base\EntityEvent\ThreadEvent;
 use Base\Entity\Thread as EntityThread;
+use Base\Enum\ThreadState;
 use Base\Service\BaseService;
 use Base\Form\Type\RoleType;
 

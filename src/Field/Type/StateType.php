@@ -49,6 +49,9 @@ class StateType extends AbstractType implements SelectTypeInterface
         $resolver->setDefaults([
             'choices' => self::getChoices(),
             'choice_icons' => self::getIcons(),
+            'choice_attr' => function (?string $entry) {
+                return $entry ? ['data-icon' => self::getIcons()[$entry]] : [];
+            },
             'empty_data'   => ThreadState::DRAFT,
             'invalid_message' => function (Options $options, $previousValue) {
                 return ($options['legacy_error_messages'] ?? true)

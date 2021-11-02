@@ -243,10 +243,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
             throw new Exception("A getter $getter is expected to identify users.");
 
         $str = $this->$getter();
-        if(!is_string($str))
+        if($str && !is_string($str))
             throw new Exception("Returned value from getter $getter is expected to be a string, currently : \"".gettype($str)."\"");
 
-        return $str;
+        return $str ?? "";
     }
 
     public function getId(): ?int { return $this->id; }

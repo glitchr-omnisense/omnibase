@@ -162,7 +162,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         $this->baseService->getDoctrine()->getManager()->flush();
-//        $this->baseService->redirectToRoute("base_profile", [], $event);
+        $this->baseService->redirectToRoute("base_profile", [], $event);
     }
 
     public function onApproval(UserEvent $event)

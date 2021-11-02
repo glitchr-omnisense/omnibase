@@ -135,7 +135,7 @@ trait SelectConfiguratorTrait
             else {
 
                 $icon = $icons[$value] ?? "";
-                $newChoiceGenerator[trim($icon." ".$key)] = $value;
+                $newChoiceGenerator[trim(/*$icon." ".*/$key)] = $value; // To be reviewed and improved later.. icon is now added in SelectType
             }
         }
 

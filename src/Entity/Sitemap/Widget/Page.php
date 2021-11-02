@@ -26,7 +26,7 @@ use Base\Traits\BaseTrait;
 use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Sitemap\Widget;
-use Base\Repository\Sitemap\PageRepository;
+use Base\Repository\Sitemap\Widget\PageRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)

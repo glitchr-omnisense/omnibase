@@ -98,17 +98,17 @@ class DashboardController extends AbstractDashboardController
         $form = $this->createForm(SettingType::class, null, [
             "captcha_protection" => false,
             "fields" => [
-                "base.settings.logo"                 => ["type" => ImageType::class],
+                "base.settings.logo"                 => ["class" => ImageType::class],
                 "base.settings.title"                => [],
                 "base.settings.slogan"               => [],
-                "base.settings.birthdate"            => ["type" => DateTimePickerType::class],
-                "base.settings.maintenance"          => ["type" => CheckboxType::class, "required" => false],
-                "base.settings.maintenance_downtime" => ["type" => DateTimePickerType::class, "required" => false],
-                "base.settings.maintenance_uptime"   => ["type" => DateTimePickerType::class, "required" => false],
-                "base.settings.use_https"            => ["type" => CheckboxType::class, "required" => false],
+                "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
+                "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
+                "base.settings.maintenance_downtime" => ["class" => DateTimePickerType::class, "required" => false],
+                "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
+                "base.settings.use_https"            => ["class" => CheckboxType::class, "required" => false],
                 "base.settings.domain"               => [],
                 "base.settings.mail_name"            => [],
-                "base.settings.mail"                 => ["type" => EmailType::class]
+                "base.settings.mail"                 => ["class" => EmailType::class]
             ]
         ]);
 
@@ -155,7 +155,11 @@ class DashboardController extends AbstractDashboardController
     public function configureCrud(): Crud
     {
         return Crud::new()
-            ->setPaginatorPageSize(30);
+            ->setPaginatorPageSize(30)
+            ->setFormOptions(
+                ['validation_groups' => ['new']],
+                ['validation_groups' => ['edit']]
+            );
     }
 
     public function configureMenuItems(): iterable

@@ -22,7 +22,6 @@ class FileSizeValidator extends ConstraintValidator
         if (!$entry instanceof UploadedFile)
             return;
 
-        dump($entry->getSize(), $constraint->getMaxSize());
         if ($entry->getSize() > $constraint->getMaxSize()) {
 
             // the argument must be a string or an object implementing __toString()

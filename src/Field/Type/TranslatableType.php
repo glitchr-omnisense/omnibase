@@ -23,14 +23,44 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TranslatableType extends AbstractType
 {
-    protected $defaultLocale = null;
     protected $fallbackLocales = [];
+
+    protected $localeProvider = null;
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->localeProvider = $localeProvider;
     }
 
+    public function getDefaultLocale()
+    {
+        return $this->localeProvider->getDefaultLocale();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'label' => false,
+            
+            'locale'            => $this->localeProvider->getLocale(),
+            'locale_options'    => [],
+            
+            'single_locale'     => false,
+            'default_locale'    => $this->localeProvider->getDefaultLocale(),
+            'required_locales'  =>  [],
+            'available_locales' => $this->localeProvider->getAvailableLocales(),
+
+            'by_reference' => false,
+            'empty_data' => fn(FormInterface $form) => new ArrayCollection,
+            
+            'fields' => [],
+            'excluded_fields' => []
+        ]);
+    }
+    
     public function getFields(FormInterface $form, array $options): array
     {
         $translatableClass = $this->getTranslationDataClass($form);
@@ -85,8 +115,12 @@ class TranslatableType extends AbstractType
     {
         $translatableClass = $form->getConfig()->getDataClass();
         $translatableClass = is_subclass_of($form->getConfig()->getDataClass(), TranslatableInterface::class) ? $form->getConfig()->getDataClass() : null;
-
+        
+        $formInit = $form;
         while($translatableClass === null) {
+
+            if($form->getParent() === null) 
+                throw new \Exception("No \"data_class\" found in FormType \"".$formInit->getName()."\" (".get_class($formInit->getConfig()->getType()->getInnerType()).")  or any of its parents");
 
             $translatableClass = $form->getParent()->getConfig()->getDataClass();
             $form = $form->getParent();
@@ -97,7 +131,7 @@ class TranslatableType extends AbstractType
 
         if(!is_subclass_of($translatableClass, TranslatableInterface::class))
             throw new \Exception("Translatable interface not implemented in \"".$translatableClass."\"");
-
+    
         return $translatableClass::getTranslationEntityClass(true, false); //, false);
     }
 
@@ -111,15 +145,15 @@ class TranslatableType extends AbstractType
             }
 
             $options = $form->getConfig()->getOptions();
-            $fields = $this->getFields($form, $options);
 
+            $fields = $this->getFields($form, $options);
             $translationClass = $this->getTranslationDataClass($form);
-           
+
             $unavailableRequiredLocales = array_diff($options['required_locales'], $options['available_locales']);
             if(!empty($unavailableRequiredLocales))
                 throw new MissingLocaleException("The locale(s) \"".implode(",", $unavailableRequiredLocales)."\" are missing, but required by FormType \"".$form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType()).")");
 
-            $dataLocale = $event->getData()->getKeys();
+            $dataLocale = ($event->getData() ? $event->getData()->getKeys() : [$options["locale"]]);
             $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
             foreach ($locales as $key => $locale) {
 
@@ -133,7 +167,6 @@ class TranslatableType extends AbstractType
                 }
 
                 $required = \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
-
                 $form->add($locale, EntityType::class, [
                     'data_class' => $translationClass,
                     'required' => $required,
@@ -167,31 +200,6 @@ class TranslatableType extends AbstractType
     
         $view->vars["default_locale"]    = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $resolver->setDefaults([
-            'label' => false,
-            
-            'locale'            => $this->localeProvider->getLocale(),
-            'locale_options'    => [],
-            
-            'single_locale'     => false,
-            'default_locale'    => $this->localeProvider->getDefaultLocale(),
-            'required_locales'  =>  [],
-            'available_locales' => $this->localeProvider->getAvailableLocales(),
-
-            'by_reference' => false,
-            'empty_data' => fn(FormInterface $form) => new ArrayCollection,
-            
-            'fields' => [],
-            'excluded_fields' => []
-
-        ]);
     }
 
     /**

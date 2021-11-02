@@ -4,7 +4,11 @@ namespace Base\Form\Type\Sitemap;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Sitemap\Setting;
+use Base\Entity\Sitemap\SettingTranslation;
+use Base\Field\Type\AvatarType;
 use Base\Field\Type\DateTimePickerType;
+use Base\Field\Type\FileType;
+use Base\Field\Type\ImageType;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -84,10 +88,10 @@ class SettingType extends AbstractType implements DataMapperInterface
                 if(in_array($field, $options["excluded_fields"]))
                     continue;
 
-                // Detect field type
-                $type = $options["fields"][$field]["type"] ?? TextType::class;
-                if(array_key_exists("type", $options["fields"][$field]))
-                    unset($options["fields"][$field]["type"]);
+                // Detect field form type class
+                $class = $options["fields"][$field]["class"] ?? TextType::class;
+                if(array_key_exists("class", $options["fields"][$field]))
+                    unset($options["fields"][$field]["class"]);
 
                 // Set field options
                 $fieldOptions = $options["fields"][$field];
@@ -99,16 +103,26 @@ class SettingType extends AbstractType implements DataMapperInterface
                     $fieldOptions["label"] = ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
                 }
 
-                $form->add($formattedField, $type, $fieldOptions);
+                if(!array_key_exists("label", $fieldOptions)) {
+                    $label = explode("-", $formattedField);
+                    $fieldOptions["label"] = ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
+                }
+
+                if($class == FileType::class || $class == ImageType::class || $class == AvatarType::class) {
+                    $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxSize(SettingTranslation::class, "value");
+                    $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
+                }
+
+                $form->add($formattedField, $class, $fieldOptions);
                 $value = $setting;
                 
-                switch($type) { 
+                switch($class) {
+
                     case DateTimePickerType::class:
                         $form->get($formattedField)->setData(($value ? new \DateTime($value) : null));
                         break;
 
                     case CheckboxType::class:
-
                         $bool = !empty($value) && $value != "0";
                         $form->get($formattedField)->setData($bool ? true : false);
                         break;
@@ -135,13 +149,13 @@ class SettingType extends AbstractType implements DataMapperInterface
         foreach($newViewData as $field => $value)
         {
             if($field == "valid") continue;
-            
+
             if(!$newViewData[$field] instanceof Setting)
                 $newViewData[$field] = $this->baseSettings->getSettings($field) ?? new Setting($field, "");
 
             $formattedField = str_replace(".", "-", $field);
             $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
-            
+
             $this->baseSettings->removeCache($field);
         }
 

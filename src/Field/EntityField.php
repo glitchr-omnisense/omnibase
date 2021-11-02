@@ -13,7 +13,7 @@ final class EntityField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_RENDER_FORMAT  = "renderFormat";
+    public const OPTION_RENDER_FORMAT   = "renderFormat";
 
     public const OPTION_DROPZONE = 'dropzone';
     public const OPTION_DROPZONE_LABEL = 'dropzone_label';
@@ -23,6 +23,8 @@ final class EntityField implements FieldInterface
     public const OPTION_ENTRY_IS_COMPLEX = 'entryIsComplex';
     public const OPTION_ENTRY_TYPE = 'entryType';
     public const OPTION_SHOW_ENTRY_LABEL = 'showEntryLabel';
+
+    public const OPTION_AUTOLOAD = "autoload";
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -41,7 +43,8 @@ final class EntityField implements FieldInterface
             ->setCustomOption(self::OPTION_ALLOW_DELETE, true)
             ->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, null)
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
-            ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false);
+            ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
     }
 
     public function allowDelete(bool $allowDelete = true): self
@@ -54,6 +57,11 @@ final class EntityField implements FieldInterface
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
         return $this;
+    }
+
+    public function autoload($autoload = true): self
+    {
+        $this->setFormTypeOption(self::OPTION_AUTOLOAD, $autoload);
     }
 
     public function renderAsDropzone(string $uploaderProperty, ?string $labelProperty = null): self

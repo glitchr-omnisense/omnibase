@@ -47,64 +47,98 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         if(!$options["bootstrap"]) return;
+        if($form->getParent()) return;
 
-        $formChildren = $form->all();
-        foreach($view->children as $key => $viewChild) {
+        $this->browseView( $view, $form, $options);
+    }
 
-            if(!array_key_exists($key, $formChildren))
-                continue; // (e.g. happends for CSRF _token)
+    public function browseView(FormView $view, FormInterface $form, array $options)
+    {
+        foreach($view->children as $field => $childView) {
 
-            $this->finishView($viewChild, $formChildren[$key], $options);
-        }
+            if (!$form->has($field))
+                continue;
+                
+            $childForm = $form->get($field);
+            $childOptions = $childForm->getConfig()->getOptions();
 
-        if(count($view->children) == 0) {
+            $type = explode("\\", get_class($childForm->getConfig()->getType()->getInnerType()));
+            $attr = $childView->vars["attr"];
+            $label = (array_key_exists("label", $childView->vars) && $childView->vars["label"] != null)
+                    ? $childView->vars["label"]
+                    : ucfirst($childView->vars["name"]);
 
-            $attr = $view->vars["attr"];
-
-            // Transfer label to placeholder attribute
-            $label = (array_key_exists("label", $view->vars) && $view->vars["label"] != null)
-                    ? $view->vars["label"]
-                    : ucfirst($view->vars["name"]);
-
-            // Add the most relevant class attribute to the <label> and <input> tags
-            $type = explode("\\", get_class($form->getConfig()->getType()->getInnerType()));
             switch(end($type)) {
 
                 case "CheckboxType":
-                    self::addAttribute("class", "form-check-input", $view);
-                    self::addLabelAttribute("class", "form-check-label", $view);
+                    $this->addAttribute($childView, "class", "form-switch form-switch-lg form-check-input");
+                    $this->addRowAttribute($childView, "class", "form-switch form-switch-lg form-check");
+                    $this->addLabelAttribute($childView, "class", "form-check-label");
                     break;
 
                 case "SubmitType":
-                    self::addAttribute("class", "btn btn-primary", $view);
-                    self::addLabelAttribute("class", "btn btn-primary", $view);
+                    $this->addAttribute($childView, "class", "btn btn-primary");
+                    $this->addLabelAttribute($childView, "class", "btn btn-primary");
                     break;
     
                 case "HiddenType":
                     break;
 
                 default:
-                    self::addAttribute("class", "form-control", $view);
-                    if(!$options["bootstrap_label"]) $view->vars["label"] = false;
+                    $this->addAttribute($childView, "class", "form-control");
+                    $this->addRowAttribute($childView, "class", "form-group");
+                    
+                    if(!$options["bootstrap_label"]) $childView->vars["label"] = false;
             }
 
             if(!array_key_exists("placeholder", $attr) || $attr["placeholder"] == null) {
-                if(!$options["bootstrap_label"]) $view->vars["attr"]["placeholder"] = $label;
+                if(!$options["bootstrap_label"]) $childView->vars["attr"]["placeholder"] = $label;
             }
 
+            $this->browseView($childView, $childForm, $childOptions);
         }
     }
-
-    public static function addAttribute($name, $value, FormView $view)
+    
+    public function addAttribute(FormView $view, $name, $value)
     {
-        if (array_key_exists($name, $view->vars["attr"])) $view->vars["attr"][$name] .= " " . $value;
-        else $view->vars["attr"][$name] = $value;
+        if (!array_key_exists($name, $view->vars["attr"]))
+            return $view->vars["attr"][$name] = $value;
+
+        $classList  = explode(" ", trim($view->vars["attr"][$name], " "));
+        foreach(explode(" ", $value) as $class)
+            $classList[] = $class;
+
+        $view->vars["attr"][$name] = implode(" ", array_unique($classList));
+        return $view->vars["attr"][$name];
     }
 
-    public static function addLabelAttribute($name, $value, FormView $view)
+    public function addRowAttribute(FormView $view, $name, $value)
     {
-        $view->vars["label_attr"] = $view->vars["label_attr"] ?? [];
-        if (array_key_exists($name, $view->vars["label_attr"])) $view->vars["label_attr"][$name] .= " " . $value;
-        else $view->vars["label_attr"][$name] = $value;
+        if (!array_key_exists($name, $view->vars["row_attr"]))
+            return $view->vars["row_attr"][$name] = $value;
+
+        $classList  = explode(" ", trim($view->vars["row_attr"][$name], " "));
+        foreach(explode(" ", $value) as $class)
+            $classList[] = $class;
+
+        $view->vars["row_attr"][$name] = implode(" ", array_unique($classList));
+        return $view->vars["row_attr"][$name];
+    }
+
+    public function addLabelAttribute(FormView $view, $name, $value)
+    {
+        if (!array_key_exists("label_attr", $view->vars))
+            $view->vars["label_attr"] = [];
+
+        if (!array_key_exists($name, $view->vars["label_attr"]))
+            return $view->vars["label_attr"][$name] = $value;
+
+        $classList  = explode(" ", trim($view->vars["label_attr"][$name], " "));
+        foreach(explode(" ", $value) as $class)
+            $classList[] = $class;
+
+    
+        $view->vars["label_attr"][$name] = implode(" ", array_unique($classList));
+        return $view->vars["label_attr"][$name];
     }
 }

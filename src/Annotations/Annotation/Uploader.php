@@ -188,6 +188,7 @@ class Uploader extends AbstractAnnotation
     {
         $that = self::getAnnotation($entity, $mapping);
         if(!$that) return UploadedFile::getMaxFilesize();
+
         return $that->maxSize;
     }
 
@@ -300,7 +301,7 @@ class Uploader extends AbstractAnnotation
 
             if (!$file instanceof File) continue;
 
-            // Check size restriction
+            //Check size restriction
             if ($file->getSize() > $this->maxSize) 
                 throw new InvalidSizeException("Invalid filesize exception in property \"$property\" in ".get_class($entity).".");
 
@@ -309,8 +310,9 @@ class Uploader extends AbstractAnnotation
             foreach($this->mimeTypes as $mimeType)
                 $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
 
+            $expectedMimeTypes = implode(", ", $this->mimeTypes);
             if(!$compatibleMimeType) 
-                throw new InvalidMimeTypeException("Invalid MIME type exception for property \"$property\" in ".get_class($entity).".");
+                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for property \"$property\" in ".get_class($entity)." (expected: \"".$expectedMimeTypes."\").");
 
             // Upload files
             $pathPrefixer = $this->getPathPrefixer($this->storage);
@@ -399,7 +401,6 @@ class Uploader extends AbstractAnnotation
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        dump($property);
         $oldEntity = $this->getOldEntity($entity);
 
         try {
@@ -410,6 +411,15 @@ class Uploader extends AbstractAnnotation
         } catch(Exception $e) {
 
             $this->deleteFiles($oldEntity, $entity, $property);
+
+            if(!$this->keepNotFound)
+                self::setFieldValue($entity, $property, null);
+            else {
+                $old = self::getFieldValue($oldEntity, $property);
+                self::setFieldValue($entity, $property, $old);
+            }
+
+            throw $e;
         }
     }
 

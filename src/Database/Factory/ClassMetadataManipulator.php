@@ -2,14 +2,24 @@
 
 namespace Base\Database\Factory;
 
+use Base\Database\Types\SetType;
+use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\EntityType;
+use Base\Field\Type\RelationType;
+use Base\Field\Type\RoleType;
+use Base\Field\Type\SelectType;
+use Base\Field\Type\SlugType;
+use Base\Field\Type\TranslatableType;
 use Base\Service\BaseService;
+use Doctrine\DBAL\Types\TextType;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormInterface;
 
 class ClassMetadataManipulator
@@ -44,9 +54,38 @@ class ClassMetadataManipulator
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
-        $validFields = array_fill_keys($metadata->getFieldNames(), []);
+        $validFields = array_merge($fields, array_fill_keys($metadata->getFieldNames(), []));
+
         if (!empty($associationNames = $metadata->getAssociationNames()))
             $validFields += $this->getAssociationMapping($metadata, $associationNames);
+        
+        // Auto detect some fields..
+        foreach($validFields as $fieldName => $field) {
+
+            if($fieldName == "id") 
+                $validFields[$fieldName] = ["type" => HiddenType::class];
+            if($fieldName == "uuid") 
+                $validFields[$fieldName] = ["type" => HiddenType::class];
+            if($fieldName == "translations")
+                $validFields[$fieldName] = ["type" => TranslatableType::class];
+            if($metadata->getTypeOfField($fieldName) == "datetime")
+                $validFields[$fieldName] = ["type" => DateTimePickerType::class];
+            if($metadata->getTypeOfField($fieldName) == "array")
+                $validFields[$fieldName] = ["type" => SelectType::class];
+
+            // Detect ENUM/SET TYPE..
+            // $isSetType = false; // Detect if SetType
+            // $typeOfField = $metadata->getTypeOfField($fieldName);
+            // if($typeOfField && Type::hasType($typeOfField)) {
+            //     $isSetType = is_subclass_of(Type::getType($typeOfField), SetType::class);
+            // }
+        }
+        
+        foreach($fields as $fieldName => $field) {
+
+            if(is_array($fields[$fieldName]) && !empty($fields[$fieldName]))
+                $validFields[$fieldName] = $fields[$fieldName];
+        }
 
         $validFields = $this->filteringFields($validFields, $excludedFields);
         if (empty($fields)) return $validFields;
@@ -145,26 +184,29 @@ class ClassMetadataManipulator
                     'type' => EntityType::class,
                     'data_class' => $class,
                     'required' => !$nullable,
+                    'allow_recursive' => false
                 ];
 
                 continue;
             }
 
             $fields[$assocName] = [
+
                 'type' => CollectionType::class,
                 'entry_type' => EntityType::class,
                 'entry_options' => [
-                    'data_class' => $class,
+                    'data_class' => $class
                 ],
                 'allow_add' => true,
                 'by_reference' => false,
+                'allow_recursive' => false
             ];
         }
 
         return $fields;
     }
 
-    public function getDataClass(FormInterface $form): string
+    public function getDataClass(FormInterface $form): ?string
     {
         // Simple case, data_class from current form (with ORM Proxy management)
         if (null !== $dataClass = $form->getConfig()->getDataClass()) {

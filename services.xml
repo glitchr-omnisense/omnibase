@@ -417,7 +417,14 @@
             <argument type="service" id="base.service" />
             <argument type="service" id="security.csrf.token_manager" />
         </service>
+        <service id="Base\Field\Type\CollectionType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+        </service>
 
+        <service id="Base\Field\Configurator\CollectionConfigurator">
+            <tag name="ea.field_configurator" />
+        </service>
 
         <service id="Base\Field\Configurator\DateTimePickerConfigurator">
             <tag name="ea.field_configurator" />
