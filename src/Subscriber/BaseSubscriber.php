@@ -31,8 +31,8 @@ class BaseSubscriber implements EventSubscriberInterface
     {
         BaseController::$foundBaseSubscriber = true;
 
-        $this->baseService->addHtmlContent("javascripts", "/bundles/base/app.js");
-        $this->baseService->addHtmlContent("stylesheets", "/bundles/base/app.css");
+        $this->baseService->addHtmlContent("javascripts", "bundles/base/app.js");
+        $this->baseService->addHtmlContent("stylesheets", "bundles/base/app.css");
     }
 
     private function allowRender(ResponseEvent $event)
