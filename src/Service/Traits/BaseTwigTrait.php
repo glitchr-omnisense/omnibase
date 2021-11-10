@@ -88,6 +88,15 @@ trait BaseTwigTrait {
         return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
     }
 
+    public function getAsset(string $path): string
+    {
+        $path = trim($path);
+        if(!str_starts_with($path, "/"))
+            $path = $this->rstack->getCurrentRequest()->getBasePath()."/".$path;
+
+        return $path;
+    }
+
     private $htmlContent = [];
 
     public function renderHtmlContent(string $location)

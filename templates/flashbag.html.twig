@@ -27,11 +27,11 @@
                                 {% endfor %}
 
                             {% else %}
-                                <span class="message">{{ flash|trans2|raw }}</span>
+                                {{ flash|trans2|raw }}
                             {% endif %}
 
                         {% else %}
-                            <span class="message">{{ flash|trans2|raw }}</span>
+                            {{ flash|trans2|raw }}
                         {% endif %}
                         <button type="button" class="btn-close alert-{{label}}" aria-label="Close" onclick="this.closest('article').style.display='none'"></button>
                     </div>
