@@ -22,7 +22,7 @@ trait BaseTwigTrait {
 
         $globals = BaseService::$twig->getGlobals();
         if(!$name) return $globals;
-        
+
         return (array_key_exists($name, $globals)) ? $globals[$name] : null;
     }
 
@@ -88,9 +88,14 @@ trait BaseTwigTrait {
         return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
     }
 
-    public function getAsset(string $path): string
+    public function getAsset(string $url): string
     {
-        $path = trim($path);
+        $url = trim($url);
+        $parseUrl = parse_url($url);
+        if($parseUrl["scheme"] ?? false)
+            return $url;
+
+        $path = $parseUrl["path"];
         if(!str_starts_with($path, "/"))
             $path = $this->rstack->getCurrentRequest()->getBasePath()."/".$path;
 

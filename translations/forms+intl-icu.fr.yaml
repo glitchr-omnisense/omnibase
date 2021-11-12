@@ -14,7 +14,7 @@ logout:
     title: "Se déconnecter"
 
 login:
-    title: "Bonjour !"
+    title: "Connexion"
     submit: "Se connecter"
     identifier: "Pseudonyme / Email"
     password: "Mot de passe"
