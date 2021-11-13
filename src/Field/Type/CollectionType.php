@@ -106,7 +106,7 @@ class CollectionType extends AbstractType
             array_splice($view->vars['prototype']->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "/bundles/base/form-type-collection.js");
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-collection.js");
     }
 
     /**

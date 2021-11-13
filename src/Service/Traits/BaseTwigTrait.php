@@ -157,11 +157,11 @@ trait BaseTwigTrait {
             switch($relationship) {
 
                 case "javascript":
-                    $content = "<script src='".$contentOrArrayOrFile."' ".trim($attributes)."></script>";
+                    $content = "<script src='".$this->getAsset($contentOrArrayOrFile)."' ".trim($attributes)."></script>";
                     break;
 
                 default:
-                    $content = "<link rel='".$relationship."' href='".$contentOrArrayOrFile."' ".trim($attributes).">";
+                    $content = "<link rel='".$relationship."' href='".$this->getAsset($contentOrArrayOrFile)."' ".trim($attributes).">";
                     break;
             }
         }

@@ -144,11 +144,11 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings("base.settings.logo") ?? "/bundles/base/logo.svg";
+        $logo  = $this->baseService->getSettings("base.settings.logo") ?? "bundles/base/logo.svg";
         $title = $this->baseService->getSettings("base.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')
-            ->setTitle('<img src="'.$logo.'" alt="'.$title.'">')
+            ->setTitle('<img src="'.$this->baseService->getAsset($logo).'" alt="'.$title.'">')
             ->disableUrlSignatures();
     }
 

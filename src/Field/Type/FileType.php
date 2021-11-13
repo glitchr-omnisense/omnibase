@@ -169,7 +169,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $view->vars["ajaxPost"]     = "/ux/dropzone/" . $token;
+            $view->vars["ajaxPost"]     = $this->baseService->getAsset("/ux/dropzone/" . $token);
             $options["dropzone"]["url"] = $view->vars["ajaxPost"];
 
             $view->vars["dropzone"] = json_encode($options["dropzone"]);
@@ -178,7 +178,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $this->baseService->addHtmlContent("javascripts", $options["sortable-js"]);
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "/bundles/base/form-type-file.js");
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void

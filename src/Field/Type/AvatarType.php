@@ -36,7 +36,7 @@ class AvatarType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'   => "/bundles/base/user.svg",
+            'thumbnail'   => "bundles/base/user.svg",
             'cropper'     => null
         ]);
     }
@@ -70,6 +70,6 @@ class AvatarType extends AbstractType
         $view->vars["thumbnail"] = $options["thumbnail"];
         $view->vars["cropper"] = ($options["cropper"] !== null);
 
-        $this->baseService->addHtmlContent("javascripts:body", "/bundles/base/form-type-avatar.js");
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-avatar.js");
     }
 }

@@ -46,7 +46,7 @@
             {% set country = form_locale|country %}
             <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
                 <label {% if form_child.vars['required'] %}class="required"{% endif %}>
-                    <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('/bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
+                    <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                 </label>
             </button>
         </li>
