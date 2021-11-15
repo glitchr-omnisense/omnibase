@@ -25,7 +25,7 @@ class ImageType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'   => "/bundles/base/images.svg",
+            'thumbnail'   => "bundles/base/images.svg",
 
             'cropper'     => null,
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.js"),
@@ -59,7 +59,7 @@ class ImageType extends AbstractType
         if(!($view->vars["accept"] ?? false) ) 
              $view->vars["accept"] = "image/*";
 
-        $view->vars["thumbnail"] = $options["thumbnail"];
+        $view->vars["thumbnail"] = $this->baseService->getAsset($options["thumbnail"]);
 
         $view->vars["cropper"] = null;
         $view->vars["ajaxPost"] = null;
@@ -74,9 +74,9 @@ class ImageType extends AbstractType
             if(!array_key_exists('aspectRatio', $options["cropper"])) $options["cropper"]['aspectRatio'] = 1;
 
             $view->vars["cropper"]  = json_encode($options["dropzone"]);
-            $view->vars["ajaxPost"] = "/ux/dropzone/".$token;
+            $view->vars["ajaxPost"] = $this->baseService->getAsset("ux/dropzone/".$token);
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "/bundles/base/form-type-image.js");
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");
     }
 }

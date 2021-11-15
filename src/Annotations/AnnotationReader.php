@@ -28,6 +28,7 @@ use ReflectionProperty;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\ParameterBag;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
@@ -47,7 +48,12 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, LazyFactory $lazyFactory)
+    public function __construct(
+        EntityManager $entityManager, 
+        ParameterBagInterface $parameterBag, 
+        CacheInterface $cache,
+        LazyFactory $lazyFactory, 
+        RequestStack $requestStack)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -81,6 +87,23 @@ class AnnotationReader
 
         // Lazy factory for flysystem
         $this->lazyFactory = $lazyFactory;
+
+        // Lazy factory for flysystem
+        $this->requestStack = $requestStack;
+    }
+
+    public function getAsset(string $url): string
+    {
+        $url = trim($url);
+        $parseUrl = parse_url($url);
+        if($parseUrl["scheme"] ?? false)
+            return $url;
+
+        $path = $parseUrl["path"];
+        if(!str_starts_with($path, "/"))
+            $path = $this->requestStack->getCurrentRequest()->getBasePath()."/".$path;
+
+        return $path;
     }
 
     public function getProjectDir()

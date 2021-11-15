@@ -1,7 +1,7 @@
 {% extends 'layout.html.twig' %}
 
 {% block content %}
-	<article class="half text-center">
+	<article class="half text-center wrapper">
 		<h1>{{ 'controllers.exception.title'|trans2 }}</h1><br/>
 		<h3>{{ exception.getCode() }} {{ exception.getMessage() }}</h3>
 

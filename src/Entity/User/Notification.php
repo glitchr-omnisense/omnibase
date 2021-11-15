@@ -134,7 +134,6 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
             $this->setContent("<div class='title'>".$location."</div><div class='message'>".$message.'</div>');
 
-
         } else {
 
             $this->setContent($this->getTwigExtension()->trans2($content, $parameters) ?? "");

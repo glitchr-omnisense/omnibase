@@ -29,6 +29,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getEntityManager() { return AnnotationReader::getInstance()->getEntityManager(); }
     public static function getClassMetadata($className): ?ClassMetadata { return self::getEntityManager()->getClassMetadata($className); }
     public static function getRepository($className) { return AnnotationReader::getInstance()->getRepository($className); }
+    public static function getAsset($url) { return AnnotationReader::getInstance()->getAsset($url); }
 
     public static function getAnnotation($entity, string $mapping)
     {

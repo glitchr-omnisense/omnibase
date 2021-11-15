@@ -75,7 +75,7 @@ class Uploader extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $this->public       = (!empty($data["public"] ?? null) ? $data["public"] : null);
+        $this->public       = (!empty($data["public"] ?? null) ? ltrim($data["public"],"/") : null);
         $this->pool         = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
 
         $this->storage      = $data["storage"] ?? null;
@@ -156,7 +156,7 @@ class Uploader extends AbstractAnnotation
                 $path = $that->getPath($entity, $uuidOrFile);
                 if(!$path) $pathList[] = null;
                 else if(!$that->getStorageFilesystem()->fileExists($path)) $pathList[] = null;
-                else $pathList[] = rtrim($that->public . $path, ".");
+                else $pathList[] = rtrim($that->getAsset($that->public) . $path, ".");
             }
 
             return $pathList;
@@ -173,7 +173,7 @@ class Uploader extends AbstractAnnotation
             if(!$that->getStorageFilesystem()->fileExists($path)) 
                 return null;
 
-            return rtrim($that->public . $path, ".");
+            return rtrim($that->getAsset($that->public) . $path, ".");
         }
     }
 
