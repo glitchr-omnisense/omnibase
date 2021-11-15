@@ -124,15 +124,15 @@ trait BaseSymfonyTrait
 
     public function generateUrl(string $route = "", array $opts = []): ?string { return $this->getUrl($route, $opts); }
     public function getCurrentUrl(): ?string { return $this->getUrl(); }
-    public function getUrl(string $route = "", array $opts = []): ?string
+    public function getUrl(?string $route = "", array $opts = []): ?string
     {
         if (!empty($route)) {
 
             try { return BaseService::$router->generate($route, $opts); }
-            catch (RouteNotFoundException $e) { return null; }
+            catch (RouteNotFoundException $e) { return $route; }
         }
 
-        return ( ($request = $this->getRequest()) ? $request->get('_route') : null);
+        return ( ($request = $this->getRequest()) ? BaseService::$router->generate($request->get('_route')) : null);
     }
 
     public function getCurrentRoute(): ?string {
@@ -143,11 +143,16 @@ trait BaseSymfonyTrait
         return $this->getRoute($request->getRequestUri());
     }
 
-    public function getRoute(string $url): ?string
+    public function getRoute(?string $url): ?string
     {
         if(!$url) return null;
 
-        try { return $this->getRouter()->match(parse_url($url, PHP_URL_PATH))['_route']; }
+        $baseDir = $this->getAsset("/");
+        $path = parse_url($url, PHP_URL_PATH);
+        if (strpos($path, $baseDir) === 0)
+            $path = substr($path, strlen($baseDir));
+        
+        try { return $this->getRouter()->match($path)['_route']; }
         catch (ResourceNotFoundException $e) { return null; }
     }
 

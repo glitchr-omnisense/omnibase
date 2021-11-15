@@ -95,8 +95,9 @@ trait BaseTwigTrait {
         if($parseUrl["scheme"] ?? false)
             return $url;
 
-        $path = $parseUrl["path"];
-        if(!str_starts_with($path, "/"))
+        $path = trim($parseUrl["path"]);
+        if($path == "/") return $this->rstack->getCurrentRequest()->getBasePath();
+        else if(!str_starts_with($path, "/"))
             $path = $this->rstack->getCurrentRequest()->getBasePath()."/".$path;
 
         return $path;

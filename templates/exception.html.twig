@@ -9,7 +9,7 @@
 		<p>{{ 'controllers.exception.description'|trans2([base.getMail()])|raw }}</p>
 		{% endif %}
 
-		{% set referer = app.request.server.get('http-referer')|default('/') %}
+		{% set referer = app.request.server.get('http-referer')|default(asset('')) %}
 		<p>{{ 'controllers.exception.return'|trans2([referer])|raw }}<p>
 	</article>
 {% endblock %}

@@ -33,6 +33,7 @@ use App\Repository\UserRepository;
 use Base\Annotations\Annotation\Hashify;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
 class SecurityController extends AbstractController
@@ -72,36 +73,40 @@ class SecurityController extends AbstractController
             ]);
         }
 
+        // Last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
         // Redirect to the right page when access denied
         if ( ($user = $this->getUser()) && $user->isPersistent() ) {
 
             if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
 
-                // Redirect to previous page
-                $targetPath =
-                    $request->getSession()->get('_security.main.target_path') ??
-                    $request->getSession()->get('_security.account.target_path') ??
-                    $request->headers->get('referer') ?? null;
+                // Check if target path provided via $_POST..
+                $targetPath = 
+                    $this->baseService->getRoute($request->request->get("_target_path")) ??
+                    $this->baseService->getRoute($request->getSession()->get('_security.main.target_path')) ?? 
+                    $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
 
-                $targetPath = (basename($targetPath) ? $this->baseService->getRoute("/".basename($targetPath)) : null) ?? null;
-                if ($targetPath && $targetPath != LoginFormAuthenticator::LOGIN_ROUTE && $targetPath != LoginFormAuthenticator::LOGOUT_ROUTE)
-                    return $this->redirect($targetPath);
+                $request->getSession()->set('_security.main.target_path', null);
+                $request->getSession()->set('_security.account.target_path', null);
+                
+                if ($targetPath &&
+                    $targetPath != LoginFormAuthenticator::LOGOUT_ROUTE &&
+                    $targetPath != LoginFormAuthenticator::LOGIN_ROUTE )
+                    return $this->redirectToRoute($targetPath);
 
-                return $this->redirectToRoute("base_profile");
+                return $this->redirectToRoute($request->isMethod('POST') ? "base_settings" : $this->baseService->getRoute("/"));
             }
 
             $notification = new Notification("notifications.login.partial");
             $notification->send("info");
         }
 
-        // Last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
-
         // Generate form
         $user = new User();
         $form = $this->createForm(LoginType::class, $user, ["username" => $lastUsername]);
         $form->handleRequest($request);
-
+        
         // Remove expired tokens
         $user->removeExpiredTokens();
 

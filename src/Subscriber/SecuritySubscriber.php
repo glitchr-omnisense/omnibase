@@ -106,7 +106,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             UserEvent::REGISTER => ['onRegistration'],
             UserEvent::APPROVAL => ['onApproval'],
             UserEvent::VERIFIED => ['onVerification'],
-            UserEvent::ENABLED => ['onEnabling'],
+            UserEvent::ENABLED  => ['onEnabling'],
             UserEvent::DISABLED => ['onDisabling']
         ];
     }
@@ -144,7 +144,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if($token && $token->getUser() != $user) return; // Only notify when user requests itself
 
         if ($user->isVerified()) { // Social account connection
-                
+
             $notification = new Notification("notifications.verifyEmail.success");
             $notification->send("success");
 
@@ -169,9 +169,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $user = $event->getUser();
         $user->approve();
-        
+
         $adminApprovalToken = $user->getValidToken("admin-approval");
-        if ($adminApprovalToken) { 
+        if ($adminApprovalToken) {
 
             $adminApprovalToken->revoke();
 
@@ -260,7 +260,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         // Notify user about the authentication method
         if ($user = $event->getUser()) {
-        
+
             if (!$user->isPersistent()) {
 
                 $notification = new Notification("notifications.login.social", [$user]);
@@ -277,7 +277,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 $notification = new Notification($title, [$user]);
                 $notification->send("success");
-
             }
         }
     }

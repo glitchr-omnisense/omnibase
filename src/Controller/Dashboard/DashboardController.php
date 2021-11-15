@@ -43,7 +43,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Twig\Environment;
@@ -82,6 +81,7 @@ class DashboardController extends AbstractDashboardController
      */
     public function index(): Response
     {
+        exit(1);
         return $this->render('dashboard/index.html.twig', [
             "content_header" => $this->translator->trans2("Welcome to the administration page."),
             "content_widgets" => $this->configureWidgetItems()

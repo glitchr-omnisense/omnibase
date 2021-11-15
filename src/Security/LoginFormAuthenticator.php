@@ -87,7 +87,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
             $badges[] = new CaptchaBadge("_captcha", $request->get('login')["_captcha"]);
 
         return new Passport(
-            new UserBadge($identifier), 
+            new UserBadge($identifier),
             new PasswordCredentials($password), $badges);
     }
 
@@ -102,16 +102,17 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         }
 
         // Check if target path provided via $_POST..
-        $targetPath = $this->baseService->getRoute($request->request->get("_target_path")) ?? null;
-        if ($targetPath && $targetPath != self::LOGOUT_ROUTE)
-                return new RedirectResponse($this->router->generate($targetPath));
+        $targetPath = 
+            $this->baseService->getRoute($request->request->get("_target_path")) ??
+            $this->baseService->getRoute($request->getSession()->get('_security.main.target_path')) ?? 
+            $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
 
-        // Generic redirection rule
-        return new RedirectResponse(
-                    $request->getSession()->get('_security.main.target_path') ??
-                    $request->getSession()->get('_security.account.target_path') ??
-                    $request->headers->get('referer') ?? "/"
-        );
+        if ($targetPath &&
+            $targetPath != LoginFormAuthenticator::LOGOUT_ROUTE &&
+            $targetPath != LoginFormAuthenticator::LOGIN_ROUTE )
+            return $this->baseService->redirectToRoute($targetPath);
+
+        return $this->baseService->redirectToRoute($this->baseService->getRoute("/"));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
