@@ -21,6 +21,6 @@ class FileMimeType extends Constraint
     {
         parent::__construct($options ?? [], $groups, $payload);
 
-        $this->type = $options["type"] ?? ["application/octet-stream"];
+        $this->type = $options["type"] ?? [];
     }
 }

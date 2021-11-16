@@ -6,12 +6,15 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Entity\User;
 use Base\Field\Transformer\StringToFileTransformer;
 use Base\Service\BaseService;
+use Base\Validator\Constraints\FileMimeType;
+use Base\Validator\Constraints\FileSize;
 use InvalidArgumentException;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FileUploadError;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -22,6 +25,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class FileType extends AbstractType implements DataMapperInterface
 {
@@ -36,12 +40,12 @@ class FileType extends AbstractType implements DataMapperInterface
     protected $baseService;
     protected $translator;
 
-    public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager)
+    public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager, ValidatorInterface $validator)
     {
         $this->baseService = $baseService;
         $this->translator  = $baseService->getTwigExtension();
-
         $this->csrfTokenManager = $csrfTokenManager;
+        $this->validator = $validator;
     }
 
     /**
@@ -72,6 +76,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'max_filesize' => null,
             'max_files'    => null,
             'mime_types'   => null,
+            "data_mapping" => null
         ]);
 
         $resolver->setAllowedTypes("dropzone", ['null', 'array']);
@@ -84,8 +89,21 @@ class FileType extends AbstractType implements DataMapperInterface
         $multiple    = $options["multiple"];
 
         $builder->add('file', HiddenType::class);
+        $entity = $builder->getData();
+
+        $maxFilesize   = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $builder->getName());
+        if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
+            $maxFilesize = min($maxFilesize, $options["max_filesize"]);
+
         if(!$isDropzone || !$multiple)
-            $builder->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, ["multiple" => $multiple]);
+            $builder->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+                "multiple" => $multiple,
+                "constraints" => [
+                    new FileSize(["max" => $maxFilesize]),
+                    new FileMimeType(["type" => $options["mime_types"]])
+                ]
+        ]);
+
         if($allowDelete)
             $builder->add('delete', CheckboxType::class, ['required' => false]);
 
@@ -103,11 +121,11 @@ class FileType extends AbstractType implements DataMapperInterface
                 $data = !empty($data) ? array_map(fn ($fname) => (file_exists($fname) ? new UploadedFile($fname, $fname) : basename($fname)), $data): [];
                 if(!$options["multiple"]) $data = $data[0] ?? null;
             }
-
+        
             if(empty($data)) $data = null;
             $event->setData($data);
         });
-        
+
         $builder->setDataMapper($this);
     }
 
@@ -130,12 +148,17 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!is_array($files)) $files = ($files ? [$files] : []);
         $view->vars['files'] = $files;
 
-        $acceptedFiles = ($options["mime_types"] ? implode(",", $options["mime_types"]) : null);
-        if(!$acceptedFiles && $entity) $acceptedFiles = implode(",", Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName()));
+        $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $form->getName());
+        if(array_key_exists('max_filesize', $options))
+            $view->vars['max_filesize'] = min($view->vars['max_filesize'], $options["max_filesize"]);
+
+        $acceptedFiles = ($options["mime_types"] ? $options["mime_types"] : []);
+        if(!$acceptedFiles && $entity) $acceptedFiles = Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName());
         $view->vars["accept"] = $acceptedFiles;
 
+        $view->vars["value"] = $options["empty_data"] ?? null;
         if(is_object($entity))
-            $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $form->getName());
+            $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
 
         if(is_array($view->vars['value']))
             $view->vars["value"] = implode("|", $view->vars["value"]);
@@ -145,8 +168,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["ajaxPost"]       = null;
         $view->vars['multiple']       = $options['multiple'];
         $view->vars['allow_delete']   = $options['allow_delete'];
-        $view->vars['max_filesize']   = $options['max_filesize'] ?? Uploader::getMaxSize($options["data_class"] ?? $entity, $form->getName());
 
+       
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
             if($options["dropzone-js"]) $this->baseService->addHtmlContent("javascripts", $options["dropzone-js"]);

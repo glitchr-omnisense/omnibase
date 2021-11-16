@@ -22,7 +22,7 @@
 
 {%- block form_errors -%}
 {% if errors|length > 0 %}
-<ul>
+<ul class="form-errors">
     {% for error in errors %}
     <li>{{ error.message|trans2(error.getMessageParameters()|merge({'label':error.origin.name})) }}</li>
     {% endfor %}
@@ -218,7 +218,7 @@
         {% set filesLabel = 'files'|trans %}
 
         {{ form_widget(form.file, { attr: form.file.vars.attr, value: form.vars.value }) }}
-        {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept }) }) }}
+        {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept|join(',') }) }) }}
 
         {% if allow_delete %}
         <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
@@ -230,14 +230,21 @@
     </div>
 
     {% if form.vars.max_filesize %}
-    <div class="form-filesize form-text text-muted">{{"forms.field.file"|trans2([form.vars.max_filesize|filesize])}}</div>
+    <div class="form-filesize form-text text-muted">{{"forms.field.maxfile"|trans2([form.vars.max_filesize|filesize])}}</div>
     {% endif %}
+    
+    {% set exts = form.vars.accept|extension %}
+    {% if exts is not empty %}
+        <div class="form-filesize form-text text-muted">{{"forms.field.mimetype"|trans2([exts|length, exts|join(', ')|upper])}}</div>
+    {% endif %}
+
+    <div class="form-errors form-text text-muted">{{ form_errors(form.raw) }}</div>
+
     {% if form.vars.value and multiple %}
     <div class="form-text text-muted">{{form.vars.data|length}} file(s) found.</div>
     {% endif %}
 </div>
 
-{{ form_errors(form.raw) }}
 {%- endblock -%}
 
 {%- block entity_row -%}

@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Annotations\Annotation\Uploader;
 use Base\Field\AvatarField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -18,6 +19,9 @@ final class AvatarConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
+        $field->setFormTypeOption("max_filesize", Uploader::getMaxFilesize($entityDto->getInstance(), $field->getProperty()));
+        $field->setFormTypeOption("mime_types", Uploader::getMimeTypes($entityDto->getInstance(), $field->getProperty()));
+
         if ($field->getFormattedValue() === null)
             $field->setFormattedValue("");
     }

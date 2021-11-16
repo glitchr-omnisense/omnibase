@@ -29,7 +29,9 @@ class ImageType extends AbstractType
 
             'cropper'     => null,
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.js"),
-            'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.css")
+            'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.css"),
+            
+            'mime_types'  => ["image/*"]
         ]);
 
         $resolver->setAllowedTypes("cropper", ['null', 'array']);

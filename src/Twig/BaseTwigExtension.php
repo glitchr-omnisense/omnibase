@@ -22,6 +22,7 @@ use Twig\TwigFilter;
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Mime\MimeTypes;
 
 final class BaseTwigExtension extends AbstractExtension
 {
@@ -34,6 +35,8 @@ final class BaseTwigExtension extends AbstractExtension
         $this->translator = $translator;
         $this->intlExtension = new IntlExtension();
 
+        $this->mimeTypes = new MimeTypes();
+        
         if($this->baseService)
             $this->projectDir = $this->baseService->getProjectDir();
     }
@@ -43,6 +46,8 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFilter('time',          [$this, 'time']),
             new TwigFilter('url',           [$this, 'url']),
+            new TwigFilter('mimetype',      [$this, 'mimetype']),
+            new TwigFilter('extension',     [$this, 'extension']),
             new TwigFilter('stringify',     [$this, 'stringify']),
             new TwigFilter('trans2',        [$this, 'trans2']),
             new TwigFilter('highlight',     [$this, 'highlight']),
@@ -55,6 +60,31 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('lessThan',      [$this, 'lessThan'],    ['needs_environment' => true]),
             new TwigFilter('greaterThan',   [$this, 'greaterThan'], ['needs_environment' => true])
         ];
+    }
+
+    public function extension($mimetypeOrArray)
+    {
+        if(!$mimetypeOrArray) return [];
+        if(is_array($mimetypeOrArray)) {
+
+            $extensions = [];
+            $extensionList = array_map(function($mimetype) { return $this->extension($mimetype); }, $mimetypeOrArray);        
+            foreach ( $extensionList as $extension )
+                $extensions = array_merge($extensions,$extension);
+
+            return array_unique($extensions);
+        }
+
+        return $this->mimeTypes->getExtensions($mimetypeOrArray);
+    }
+
+    public function mimetype($fileOrArray) {
+
+        if(!$fileOrArray) return null;
+        if(is_array($fileOrArray))
+            return array_map(function($file) { return $this->mimetype($file); }, $fileOrArray);
+
+        return $this->mimeTypes->guessMimeType($fileOrArray);
     }
 
     public function filesize($bytes): string

@@ -100,7 +100,7 @@
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
             <tag name="form.type_extension" />
             <argument type="service" id="Base\Service\SpamChecker" />
-            <argument type="service" id="request_stack" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
         </service>
         <service id="Base\Form\Extension\FormTypeCsrfExtension" >
             <tag name="form.type_extension" />
@@ -424,6 +424,7 @@
             <tag name="form.type" />
             <argument type="service" id="base.service" />
             <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="validator" />
         </service>
         <service id="Base\Field\Type\CollectionType">
             <tag name="form.type" />

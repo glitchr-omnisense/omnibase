@@ -18,6 +18,7 @@ use Base\Model\SpamProtectionInterface;
 use Base\Service\BaseService;
 use Base\Service\SpamChecker;
 use Base\Validator\Constraints\Spam;
+use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use Symfony\Component\Form\AbstractTypeExtension;
 use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
@@ -40,12 +41,10 @@ class FormTypeSpamExtension extends AbstractTypeExtension
 {
     private $defaultEnabled;
 
-    public function __construct(SpamChecker $spamChecker, RequestStack $requestStack, bool $defaultEnabled = true)
+    public function __construct(SpamChecker $spamChecker, AdminContextProvider $adminContextProvider, bool $defaultEnabled = true)
     {
         $this->spamChecker      = $spamChecker;
-        $this->requestStack     = $requestStack;
-        $this->easyadminContext = $requestStack->getCurrentRequest()->get("easyadmin_context");
-
+        $this->easyadminContext = $adminContextProvider->getContext();
         $this->defaultEnabled   = $defaultEnabled;
     }
 

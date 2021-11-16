@@ -28,7 +28,7 @@ class FileMimeTypeValidator extends ConstraintValidator
             return end($type);
         }, $mimeTypes);
 
-        $compatibleMimeType = false;
+        $compatibleMimeType = empty($mimeTypes);
         foreach ($mimeTypes as $mimeType)
             $compatibleMimeType |= preg_match("/" . str_replace("/", "\/", $mimeType) . "/", $entry->getMimeType());
 

@@ -184,12 +184,11 @@ class Uploader extends AbstractAnnotation
         return $that->mimeTypes;
     }
 
-    public static function getMaxSize($entity, $mapping): int
+    public static function getMaxFilesize($entity, $mapping): int
     {
         $that = self::getAnnotation($entity, $mapping);
         if(!$that) return UploadedFile::getMaxFilesize();
-
-        return $that->maxSize;
+        return min($that->maxSize ?: \PHP_INT_MAX, UploadedFile::getMaxFilesize());
     }
 
     protected static $tmpHashTable = [];
@@ -393,7 +392,7 @@ class Uploader extends AbstractAnnotation
             $this->uploadFiles($entity, null, $property);
 
         } catch(Exception $e) {
-
+            
             if(!$this->keepNotFound)
                 self::setFieldValue($entity, $property, null);
         }
@@ -411,15 +410,12 @@ class Uploader extends AbstractAnnotation
         } catch(Exception $e) {
 
             $this->deleteFiles($oldEntity, $entity, $property);
-
             if(!$this->keepNotFound)
                 self::setFieldValue($entity, $property, null);
             else {
                 $old = self::getFieldValue($oldEntity, $property);
                 self::setFieldValue($entity, $property, $old);
             }
-
-            throw $e;
         }
     }
 

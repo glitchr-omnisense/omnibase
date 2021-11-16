@@ -109,13 +109,14 @@ class SettingType extends AbstractType implements DataMapperInterface
                 }
 
                 if($class == FileType::class || $class == ImageType::class || $class == AvatarType::class) {
-                    $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxSize(SettingTranslation::class, "value");
+                    $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
                     $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
+                    $fieldOptions["empty_data"]   = $setting;
                 }
 
                 $form->add($formattedField, $class, $fieldOptions);
                 $value = $setting;
-                
+
                 switch($class) {
 
                     case DateTimePickerType::class:
@@ -136,7 +137,8 @@ class SettingType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void { }
+    public function mapDataToForms($viewData, \Traversable $forms): void {}
+
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);

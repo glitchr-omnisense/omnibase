@@ -45,4 +45,9 @@ crud:
         secret: "Privé"
 
 field:
-    file: "La taille de fichier maximale autorisée est de {0}."
+    maxfile: "La taille de fichier maximale autorisée est de {0}."
+    mimetype: "{0, plural,
+            =0 {}
+            =1 {Seulement les fichiers {1} sont autorisés }
+            other {Extensions autorisées : {1}}
+          }"
