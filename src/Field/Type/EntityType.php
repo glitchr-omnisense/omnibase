@@ -118,7 +118,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     'allow_add' => $options["allow_add"],
                     'allow_delete' => $options["allow_delete"],
                     'by_reference' => false,
-                    'required' => false
+                    'required' => $options["required"]
                 ]);
 
             } else {
@@ -153,7 +153,7 @@ class EntityType extends AbstractType implements DataMapperInterface
         if (null === $parentData) {
             return;
         }
-
+        
         $data = $parentData;
         if ($data instanceof PersistentCollection)
             $data = $data->toArray();

@@ -43,6 +43,7 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFilter('time',          [$this, 'time']),
             new TwigFilter('url',           [$this, 'url']),
+            new TwigFilter('stringify',     [$this, 'stringify']),
             new TwigFilter('trans2',        [$this, 'trans2']),
             new TwigFilter('highlight',     [$this, 'highlight']),
             new TwigFilter('flatten_array', [$this, 'flattenArray']),
@@ -279,5 +280,43 @@ final class BaseTwigExtension extends AbstractExtension
             return $domain.'.'.$id;
 
         return trim($trans);
+    }
+
+
+    public function stringify($value): string
+    {
+        if (null === $value) {
+            return '';
+        }
+
+        if (\is_string($value)) {
+            return $value;
+        }
+
+        if (is_numeric($value)) {
+            return (string) $value;
+        }
+
+        if (\is_bool($value)) {
+            return $value ? 'true' : 'false';
+        }
+
+        if (\is_array($value)) {
+            return sprintf('Array (%d items)', \count($value));
+        }
+
+        if (\is_object($value)) {
+            if (method_exists($value, '__toString')) {
+                return (string) $value;
+            }
+
+            if (method_exists($value, 'getId')) {
+                return sprintf('%s #%s', \get_class($value), $value->getId());
+            }
+
+            return sprintf('%s #%s', \get_class($value), substr(md5(spl_object_hash($value)), 0, 7));
+        }
+
+        return '';
     }
 }

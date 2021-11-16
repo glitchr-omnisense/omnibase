@@ -1,6 +1,26 @@
 {% use "@Twig/Form/form_div_layout.html.twig" %}
 
-{% block form_errors %}
+{% block form_row -%}
+
+    {% set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) %}
+    {%- if help is not empty -%}
+        {% set attr = attr|merge({'aria-describedby': id ~"_help"}) %}
+    {%- endif -%}
+
+    {%- set widget_attr = {attr: attr} -%}
+
+    {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) -%}
+
+    <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        {{- form_label(form) -}}
+        {{- form_errors(form) -}}
+        {{- form_widget(form, widget_attr) -}}
+        {{- form_help(form) -}}
+    </div>
+
+{%- endblock form_row -%}
+
+{%- block form_errors -%}
 {% if errors|length > 0 %}
 <ul>
     {% for error in errors %}
@@ -8,27 +28,35 @@
     {% endfor %}
 </ul>
 {% endif %}
-{% endblock form_errors %}
+{%- endblock form_errors -%}
 
-{% block quill_widget %}
+{%- block quill_widget -%}
 <input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %} />
 <div id="{{ id }}_editor" {{ block('attributes') }}>
     {{ value | raw }}
 </div>
-{% endblock quill_widget %}
+{%- endblock quill_widget -%}
 
-{% block select2_widget %}
-{# {% set attr = form.vars.attr|merge({
-    'data-select2-field' : select2,
-}) %} #} {# I couldn't inject callback this way.. Have to find another way#}
-{{ form_widget(form, { attr: attr }) }}
+{%- block select2_widget -%}
+
+    {# I couldn't inject select2-callback this way.. Have to find another way #}
+    {# {% set attr = form.vars.attr|merge({
+        'data-select2-field' : select2,
+    }) %} #} 
+    
+    {{ form_widget(form) }}
+
 {% endblock select2_widget %}
 
-{% block translatable_row %}
-    {{ form_widget(form) }}
-{% endblock %}
+{%- block translatable_row -%}
 
-{% block translatable_widget %}
+    {% set row_attr = row_attr|merge({'class': 'form-group form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) %}
+    <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+    {{ form_widget(form) }}
+    </div>
+{%- endblock -%}
+
+{%- block translatable_widget -%}
 
 {% if form.children|length == 1 and single_locale %}
 
@@ -65,9 +93,9 @@
     {% endfor %}
     </div>
 {% endif %}
-{% endblock translatable_widget %}
+{%- endblock translatable_widget -%}
 
-{% block slug_widget %}
+{%- block slug_widget -%}
 
 {# Search for target inside form based on parent including translation #}
 {% set form = form.parent %}
@@ -98,9 +126,10 @@
         </button>
     </div>
 </div>
-{% endblock %}
 
-{% block avatar_widget %}
+{%- endblock -%}
+
+{%- block avatar_widget -%}
 
 {% set attr = attr|merge({
     'data-avatar-field'   : form.vars.id,
@@ -117,9 +146,9 @@
     </div>
     {% endif %}
 </div>
-{% endblock %}
+{%- endblock -%}
 
-{% block imageupload_widget %}
+{%- block imageupload_widget -%}
 {% set attr = attr|merge({
     'data-image-field'         : form.vars.id,
     'data-image-cropper'       : form.vars.cropper,
@@ -167,9 +196,9 @@
     {{ form_widget(form, { attr: form.vars.attr }) }}
 
 </div>
-{% endblock %}
+{%- endblock -%}
 
-{% block fileupload_widget %}
+{%- block fileupload_widget -%}
 {% set attr = attr|merge({
     'data-file-sortable'      : form.vars.sortable,
     'data-file-ajaxPost'      : form.vars.ajaxPost,
@@ -209,13 +238,15 @@
 </div>
 
 {{ form_errors(form.raw) }}
-{% endblock %}
+{%- endblock -%}
 
-{% block entity_row %}
+{%- block entity_row -%}
     {% if form.parent.parent is null and multiple %}
     
         {% if form.children.vars.prototype is defined and not form.children.vars.prototype.rendered %}
-            {% set attr = attr|merge({ 'data-prototype': form_row(form.children.vars.prototype)}) %}
+
+            {% set prototype_row = form_row(form.children.vars.prototype, {attr:{"class": "form-control"}}) %}
+            {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
         {% endif %}
         
         {% set attr = attr|merge({
@@ -225,19 +256,18 @@
             'data-num-items': form.children is empty ? 0 : max(form.children|keys),
             'data-form-type-name-placeholder': form.children.vars.prototype is defined ? form.children.vars.prototype.vars.name : '',
         }) %}
-        {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-group')%}
 
+        {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
         <div {{ block('widget_attributes') }}>
             {{ form_label(form)}}
             {{ form_widget(form.children) }}
         </div>
     {% else %}
-
-        {{ form_row(form) }}
+        {{ block('form_row') }}
     {% endif %}
-{% endblock %}
+{%- endblock -%}
 
-{% block collection2_row %}
+{%- block collection2_row -%}
 
     {% if prototype is defined and not prototype.rendered %}
         {% set row_attr = row_attr|merge({ 'data-prototype': form_row(prototype) }) %}
@@ -251,11 +281,11 @@
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
     }) %}
 
-    {{ block('form_row') }}
+    {{ form_row(form, {row_attr: row_attr}) }}
 
-{% endblock collection2_row %}
+{%- endblock collection2_row -%}
 
-{% block collection2_widget %}
+{%- block collection2_widget -%}
 
     {# the "is iterable" check is needed because if an object implements __toString() and
                returns an empty string, "is empty" returns true even if it's not a collection #}
@@ -263,7 +293,8 @@
         {% if isEmptyCollection %}
             {{ block('collection2_empty') }}
         {% else %}
-            {{ form_widget(form, {attr: {"class": "form-collection-items"}}) }}
+            {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) %}
+            {{ form_widget(form, {attr: attr}) }}
         {% endif %}
 
     {% if isEmptyCollection or form.vars.prototype is defined %}
@@ -276,13 +307,13 @@
             {{ 'EasyAdminBundle.action.add_new_item'|trans2 }}
         </button>
     {% endif %}
-{% endblock collection2_widget %}
+{%- endblock collection2_widget -%}
 
-{% block collection2_entry_row %}
-    {{ form_widget(form) }}
-{% endblock collection2_entry_row %}
+{%- block collection2_entry_row -%}
+    form_widget(form)
+{%- endblock collection2_entry_row -%}
 
-{% block collection2_entry_widget %}
+{%- block collection2_entry_widget -%}
 
     {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
     {% set delete_item_button %}
@@ -292,7 +323,7 @@
         </button>
     {% endset %}
 
-    <div class="form-collection-item">
+    <div class="accordion form-collection-item">
 
         <div class="accordion-item">
             <h2 class="accordion-header">
@@ -307,14 +338,15 @@
             </h2>
             <div id="{{ id }}-contents" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    {{ form_widget(form, {attr: {class: "form-control"}}) }}
+                    {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-group') %}
+                    {{ form_widget(form, {attr:attr}) }}
                 </div>
             </div>
         </div>
 
     </div>
-{% endblock collection2_entry_widget %}
+{%- endblock collection2_entry_widget -%}
 
-{% block collection2_empty %}
+{%- block collection2_empty -%}
     <div class="empty collection-empty"></div>
-{% endblock collection2_empty %}
+{%- endblock collection2_empty -%}

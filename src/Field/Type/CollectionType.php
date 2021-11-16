@@ -43,6 +43,7 @@ class CollectionType extends AbstractType
             }
 
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
+            
             $builder->setAttribute('prototype', $prototype->getForm());
         }
 
@@ -95,6 +96,7 @@ class CollectionType extends AbstractType
 
         /** @var FormInterface $prototype */
         if ($prototype = $form->getConfig()->getAttribute('prototype')) {
+
             if ($view->vars['prototype']->vars['multipart']) {
                 $view->vars['multipart'] = true;
             }
@@ -125,7 +127,7 @@ class CollectionType extends AbstractType
             'allow_delete' => false,
             'prototype' => true,
             'prototype_data' => null,
-            'prototype_name' => '__name__',
+            'prototype_name' => '__prototype__',
             'entry_type' => TextType::class,
             'entry_options' => [],
             'delete_empty' => false,

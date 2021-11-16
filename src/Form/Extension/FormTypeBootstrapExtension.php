@@ -47,7 +47,6 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         if(!$options["bootstrap"]) return;
-        if($form->getParent()) return;
 
         $this->browseView( $view, $form, $options);
     }
@@ -87,7 +86,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
                 default:
                     $this->addAttribute($childView, "class", "form-control");
                     $this->addRowAttribute($childView, "class", "form-group");
-                    
+
                     if(!$options["bootstrap_label"]) $childView->vars["label"] = false;
             }
 
