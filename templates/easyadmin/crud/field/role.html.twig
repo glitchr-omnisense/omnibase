@@ -6,22 +6,22 @@
 
     {% for fieldKey,fieldValue in field.value %}
 
-    {% if fieldValue != "ROLE_USER" and field.value|length != 1 %}
-    <span class="badge badge-secondary">
-        {% if field.formattedValue[fieldKey] is iterable and field.formattedValue[fieldKey]|length > 1 %}
-            <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[fieldKey][0] }}">
-                {{field.formattedValue[fieldKey][1] | raw}}
-            </div>
-        {% else %}
-            {{ field.formattedValue[fieldKey] }}
+        {% if fieldValue != "ROLE_USER" %}
+        <span class="badge badge-secondary">
+        
+            {% if field.formattedValue[fieldKey] is iterable and field.formattedValue[fieldKey]|length > 1 %}
+                <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[fieldKey][0] }}">
+                    {{field.formattedValue[fieldKey][1] | raw}}
+                </div>
+            {% else %}
+                {{ field.formattedValue[fieldKey] }}
+            {% endif %}
+        </span>
         {% endif %}
-    </span>
-    {% endif %}
 
     {% endfor %}
 
 {% else %}
-
         <span class="badge badge-secondary">
         
             {% if field.formattedValue is iterable and field.formattedValue|length > 1 %}
