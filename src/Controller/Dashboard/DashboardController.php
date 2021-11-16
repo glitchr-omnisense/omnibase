@@ -81,7 +81,6 @@ class DashboardController extends AbstractDashboardController
      */
     public function index(): Response
     {
-        exit(1);
         return $this->render('dashboard/index.html.twig', [
             "content_header" => $this->translator->trans2("Welcome to the administration page."),
             "content_widgets" => $this->configureWidgetItems()
@@ -99,6 +98,7 @@ class DashboardController extends AbstractDashboardController
             "captcha_protection" => false,
             "fields" => [
                 "base.settings.logo"                 => ["class" => ImageType::class],
+                "base.settings.logo_backoffice"      => ["class" => ImageType::class],
                 "base.settings.title"                => [],
                 "base.settings.slogan"               => [],
                 "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
@@ -144,7 +144,7 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings("base.settings.logo") ?? "bundles/base/logo.svg";
+        $logo  = $this->baseService->getSettings("base.settings.logo_backoffice") ?? "bundles/base/logo.svg";
         $title = $this->baseService->getSettings("base.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')
