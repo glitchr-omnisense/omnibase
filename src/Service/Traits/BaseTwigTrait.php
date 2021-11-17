@@ -96,7 +96,8 @@ trait BaseTwigTrait {
             return $url;
 
         $request = $this->rstack->getCurrentRequest();
-        $baseDir = $request ? $request->getBasePath() : "";
+        $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
+
         $path = trim($parseUrl["path"]);
         if($path == "/") return $baseDir;
         else if(!str_starts_with($path, "/"))

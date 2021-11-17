@@ -43,6 +43,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Twig\Environment;
@@ -94,6 +95,7 @@ class DashboardController extends AbstractDashboardController
      */
     public function Settings(Request $request): Response
     {
+        dump($_SERVER);
         $form = $this->createForm(SettingType::class, null, [
             "captcha_protection" => false,
             "fields" => [
@@ -105,9 +107,18 @@ class DashboardController extends AbstractDashboardController
                 "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
                 "base.settings.maintenance_downtime" => ["class" => DateTimePickerType::class, "required" => false],
                 "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
-                "base.settings.use_https"            => ["class" => CheckboxType::class, "required" => false],
-                "base.settings.domain"               => [],
-                "base.settings.base_dir"             => [],
+                "base.settings.use_https"            => [
+                    "class" => HiddenType::class, 
+                    "data" => strtolower($_SERVER['REQUEST_SCHEME'])
+                ],
+                "base.settings.domain"               => [
+                    "class" => HiddenType::class, 
+                    "data" => strtolower($_SERVER['HTTP_HOST'])
+                ],
+                "base.settings.base_dir"             => [
+                    "class" => HiddenType::class, 
+                    "data" => $this->baseService->getAsset("/")
+                ],
                 "base.settings.mail_name"            => [],
                 "base.settings.mail"                 => ["class" => EmailType::class]
             ]
