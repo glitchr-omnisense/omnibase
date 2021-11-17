@@ -100,7 +100,7 @@
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
             <tag name="form.type_extension" />
             <argument type="service" id="Base\Service\SpamChecker" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
+            <argument type="service" id="base.service" />
         </service>
         <service id="Base\Form\Extension\FormTypeCsrfExtension" >
             <tag name="form.type_extension" />

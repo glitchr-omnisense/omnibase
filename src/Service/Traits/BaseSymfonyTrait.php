@@ -14,6 +14,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
@@ -197,6 +198,25 @@ trait BaseSymfonyTrait
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }
+
+    public function isEasyAdmin($request = null)
+    {
+        if(!$request) $request = $this->getRequest();
+        if($request instanceof RequestStack)
+            $request = $request->getCurrentRequest();
+        else if(!$request instanceof Request)
+            throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
+
+        $controller = explode("::", $request->attributes->get("_controller"))[0];
+
+        $parents = [];
+        $parent = $controller;
+        while(( $parent = get_parent_class($parent) ))
+            $parents[] = $parent;
+
+        $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
+        return !empty($eaParents);
+    }
 
     public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
     public function execution_time() { return $this->getExecutionTime(); }

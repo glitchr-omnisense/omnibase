@@ -41,11 +41,11 @@ class FormTypeSpamExtension extends AbstractTypeExtension
 {
     private $defaultEnabled;
 
-    public function __construct(SpamChecker $spamChecker, AdminContextProvider $adminContextProvider, bool $defaultEnabled = true)
+    public function __construct(SpamChecker $spamChecker, BaseService $baseService, bool $defaultEnabled = true)
     {
         $this->spamChecker      = $spamChecker;
-        $this->easyadminContext = $adminContextProvider->getContext();
         $this->defaultEnabled   = $defaultEnabled;
+        $this->baseService      = $baseService; 
     }
 
     /**
@@ -62,7 +62,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'spam_protection' => $this->defaultEnabled && ($this->easyadminContext === null)
+            'spam_protection' => ($this->defaultEnabled && !$this->baseService->isEasyAdmin())
         ]);
     }
 

@@ -16,6 +16,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FileUploadError;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
@@ -121,7 +122,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $data = !empty($data) ? array_map(fn ($fname) => (file_exists($fname) ? new UploadedFile($fname, $fname) : basename($fname)), $data): [];
                 if(!$options["multiple"]) $data = $data[0] ?? null;
             }
-        
+
             if(empty($data)) $data = null;
             $event->setData($data);
         });
