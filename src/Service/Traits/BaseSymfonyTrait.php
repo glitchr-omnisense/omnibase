@@ -180,7 +180,7 @@ trait BaseSymfonyTrait
         }
         
         $response = new RedirectResponse($url);
-        if($event) $event->setResponse($response);
+        if($event && method_exists($event, "setResponse")) $event->setResponse($response);
 
         // Callable action if redirection happens
         if(is_callable($callback)) $callback();

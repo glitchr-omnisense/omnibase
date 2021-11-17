@@ -53,7 +53,7 @@ use DateTimeZone;
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * @ORM\DiscriminatorColumn( name = "class", type = "integer" )
+ * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})

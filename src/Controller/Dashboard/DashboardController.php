@@ -107,6 +107,7 @@ class DashboardController extends AbstractDashboardController
                 "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
                 "base.settings.use_https"            => ["class" => CheckboxType::class, "required" => false],
                 "base.settings.domain"               => [],
+                "base.settings.base_dir"             => [],
                 "base.settings.mail_name"            => [],
                 "base.settings.mail"                 => ["class" => EmailType::class]
             ]
@@ -144,7 +145,10 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings("base.settings.logo_backoffice") ?? "bundles/base/logo.svg";
+        $logo  = $this->baseService->getSettings("base.settings.logo_backoffice");
+        if(!$logo) $logo = $this->baseService->getSettings("base.settings.logo");
+        if(!$logo) $logo = "bundles/base/logo.svg";
+    
         $title = $this->baseService->getSettings("base.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')

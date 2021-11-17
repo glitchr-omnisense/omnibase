@@ -95,10 +95,12 @@ trait BaseTwigTrait {
         if($parseUrl["scheme"] ?? false)
             return $url;
 
+        $request = $this->rstack->getCurrentRequest();
+        $baseDir = $request ? $request->getBasePath() : "";
         $path = trim($parseUrl["path"]);
-        if($path == "/") return $this->rstack->getCurrentRequest()->getBasePath();
+        if($path == "/") return $baseDir;
         else if(!str_starts_with($path, "/"))
-            $path = $this->rstack->getCurrentRequest()->getBasePath()."/".$path;
+            $path = $baseDir."/".$path;
 
         return $path;
     }
