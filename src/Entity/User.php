@@ -103,7 +103,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @var string The hashed password
-     * @ORM\Column(type="string")
+     * @ORM\Column(type="string", nullable=true)
+     * @Assert\NotBlank(groups={"new", "edit"}, allowNull=true)
      * @Hashify(reference="plainPassword", algorithm="auto")
      */
     protected $password;

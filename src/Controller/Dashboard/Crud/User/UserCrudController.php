@@ -71,15 +71,17 @@ class UserCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield LinkIdField::new('id')->hideOnForm();
+        if ($this->isGranted('ROLE_SUPERADMIN')) yield ImpersonateField::new("id")->hideOnForm();
+        else yield LinkIdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield AvatarField::new('avatar')->allowDelete();
+        foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
+            yield $yield;
 
-        if ($this->isGranted('ROLE_SUPERADMIN')) yield ImpersonateField::new('username');
-        else yield TextField::new('username');
-        foreach ( ($callbacks["username"] ?? $defaultCallback)() as $yield)
+        yield EmailField::new('email');
+        foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield RoleField::new('roles')->allowMultipleChoices();
@@ -92,10 +94,6 @@ class UserCrudController extends AbstractCrudController
 
         yield TextField::new('secret')->onlyOnForms();
         foreach ( ($callbacks["secret"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield EmailField::new('email')->hideOnIndex();
-        foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
             yield $yield;
     
         yield BooleanField::new("isVerified")->onlyOnIndex()->withConfirmation();
@@ -122,7 +120,6 @@ class UserCrudController extends AbstractCrudController
      public function configureFilters(Filters $filters): Filters
     {
         return $filters
-            ->add('username')
             ->add('firstname')
             ->add('lastname')
             ->add('roles')

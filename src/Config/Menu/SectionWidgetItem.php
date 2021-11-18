@@ -20,6 +20,12 @@ final class SectionWidgetItem implements MenuItemInterface
         return $this->width;
     }
 
+    public function setWidth(int $width): self
+    {
+        $this->width = $width;
+        return $this;
+    }
+
     public function __construct(?string $label, ?string $icon, int $width = 1)
     {
         $this->width = $width;

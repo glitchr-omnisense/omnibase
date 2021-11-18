@@ -11,10 +11,11 @@ use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
 
 use App\Controller\Dashboard\Crud\User\UserCrudController;
+use Base\Config\Menu\SectionWidgetItem;
+use Base\Config\WidgetItem;
 use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
 
-use Base\Config\WidgetItem;
 use Base\Entity\Sitemap\Menu;
 use Base\Entity\Sitemap\Widget\Page;
 use Base\Entity\Sitemap\Setting;
@@ -38,6 +39,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Google\Analytics\Service\GaService;
@@ -53,12 +55,16 @@ use Symfony\UX\Chartjs\Model\Chart;
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
+use Base\Traits\DashboardTrait;
+
 class DashboardController extends AbstractDashboardController
 {
+    use DashboardTrait;
+
     protected $baseService;
     protected $authenticationUtils;
     protected $adminUrlGenerator;
-
+    
     public function __construct(
         AdminUrlGenerator $adminUrlGenerator,
         AdminContextProvider $adminContextProvider,
@@ -95,7 +101,6 @@ class DashboardController extends AbstractDashboardController
      */
     public function Settings(Request $request): Response
     {
-        dump($_SERVER);
         $form = $this->createForm(SettingType::class, null, [
             "captcha_protection" => false,
             "fields" => [
@@ -267,30 +272,30 @@ class DashboardController extends AbstractDashboardController
                 fn (Action $action) => $action->setIcon('fa fa-fw fa-edit'));
 
     }
-
-    public function configureWidgetItems($widget = [])
+    
+    public function configureWidgetItems(array $widgets = [])
     {
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);
 
-        $widget[] = WidgetItem::section('MEMBERSHIP', null, 2);
-        $widget[] = WidgetItem::linkToCrud('Users',         'fa-fw fa fa-user',                 User::class);
-        $widget[] = WidgetItem::linkToCrud('Groups',        'fa-fw fa fa-users',                UserGroup::class);
-        $widget[] = WidgetItem::linkToCrud('Notifications', 'fa-fw fa fa-bell',                 UserNotification::class);
-        $widget[] = WidgetItem::linkToCrud('Tokens',        'fa-fw fa fa-drumstick-bite',       UserToken::class);
-        $widget[] = WidgetItem::linkToCrud('Permissions',   'fa-fw fa fa-exclamation-triangle', UserPermission::class);
-        $widget[] = WidgetItem::linkToCrud('Penalties',     'fa-fw fa fa-bomb',                 UserPenalty::class);
-        $widget[] = WidgetItem::linkToCrud('Logs',          'fa-fw fa fa-info-circle',          UserLog::class);
+        $widgets[] = WidgetItem::section('MEMBERSHIP', null, 2);
+        $widgets[] = WidgetItem::linkToCrud('Users',         'fa-fw fa fa-user',                 User::class);
+        $widgets[] = WidgetItem::linkToCrud('Groups',        'fa-fw fa fa-users',                UserGroup::class);
+        $widgets[] = WidgetItem::linkToCrud('Notifications', 'fa-fw fa fa-bell',                 UserNotification::class);
+        $widgets[] = WidgetItem::linkToCrud('Tokens',        'fa-fw fa fa-drumstick-bite',       UserToken::class);
+        $widgets[] = WidgetItem::linkToCrud('Permissions',   'fa-fw fa fa-exclamation-triangle', UserPermission::class);
+        $widgets[] = WidgetItem::linkToCrud('Penalties',     'fa-fw fa fa-bomb',                 UserPenalty::class);
+        $widgets[] = WidgetItem::linkToCrud('Logs',          'fa-fw fa fa-info-circle',          UserLog::class);
 
-        $widget[] = WidgetItem::section('SITEMAP', null, 2);
-        $widget[] = WidgetItem::linkToCrud('Pages',    'fa-fw fa fa-file-alt', Page::class);
-        $widget[] = WidgetItem::linkToCrud('Hyperlinks',    'fa-fw fa fa-link', Hyperlink::class);
-        $widget[] = WidgetItem::linkToCrud('Attachments',    'fa-fw fa fa-paperclip', Attachment::class);
-        $widget[] = WidgetItem::linkToCrud('Menu',     'fa-fw fa fa-compass',  Menu::class);
+        $widgets[] = WidgetItem::section('SITEMAP', null, 2);
+        $widgets[] = WidgetItem::linkToCrud('Pages',    'fa-fw fa fa-file-alt', Page::class);
+        $widgets[] = WidgetItem::linkToCrud('Hyperlinks',    'fa-fw fa fa-link', Hyperlink::class);
+        $widgets[] = WidgetItem::linkToCrud('Attachments',    'fa-fw fa fa-paperclip', Attachment::class);
+        $widgets[] = WidgetItem::linkToCrud('Menu',     'fa-fw fa fa-compass',  Menu::class);
         if ($this->isGranted('ROLE_SUPERADMIN'))
-            $widget[] = WidgetItem::linkToCrud('Settings', 'fa-fw fa fa-tools',    Setting::class);
+            $widgets[] = WidgetItem::linkToCrud('Settings', 'fa-fw fa fa-tools',    Setting::class);
 
-        return $widget;
+        return $widgets;
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu

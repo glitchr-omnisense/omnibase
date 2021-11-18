@@ -81,8 +81,25 @@ class Thread implements TranslatableInterface
     protected $parent;
 
     /**
+     * @ORM\Column(type="integer")
+     */
+    protected $priority;
+
+    public function getPriority(): ?int
+    {
+        return $this->priority;
+    }
+
+    public function setPriority(?int $priority): self
+    {
+        $this->priority = $priority;
+
+        return $this;
+    }
+
+    /**
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
-     * @ORM\OrderBy({"createdAt" = "ASC"})
+     * @ORM\OrderBy({"priority" = "DESC", "createdAt" = "ASC"})
      */
     protected $children;
 

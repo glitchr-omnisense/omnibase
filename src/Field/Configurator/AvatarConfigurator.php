@@ -4,6 +4,7 @@ namespace Base\Field\Configurator;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Field\AvatarField;
+use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
