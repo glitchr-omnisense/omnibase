@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Dashboard\Crud\User;
+namespace Base\Controller\Dashboard\Crud;
 use Base\Service\BaseService;
 
 use Base\Entity\User;
@@ -74,10 +74,6 @@ class UserCrudController extends AbstractCrudController
         if ($this->isGranted('ROLE_SUPERADMIN')) yield ImpersonateField::new("id")->hideOnForm();
         else yield LinkIdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield AvatarField::new('avatar')->allowDelete();
-        foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield EmailField::new('email');

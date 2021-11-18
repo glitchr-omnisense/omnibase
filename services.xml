@@ -518,7 +518,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
         </service>
 
-        <service id="Base\Controller\Dashboard\Crud\User\UserCrudController">
+        <service id="Base\Controller\Dashboard\Crud\UserCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">

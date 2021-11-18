@@ -10,7 +10,7 @@ use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
 
-use App\Controller\Dashboard\Crud\User\UserCrudController;
+use App\Controller\Dashboard\Crud\UserCrudController;
 use Base\Config\Menu\SectionWidgetItem;
 use Base\Config\WidgetItem;
 use Base\Service\BaseService;
