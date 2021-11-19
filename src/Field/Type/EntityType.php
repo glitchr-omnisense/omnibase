@@ -79,11 +79,17 @@ class EntityType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function finishView(FormView $view, FormInterface $form, array $options)
     {
+        $view->vars["required"] = $options["required"];
         $view->vars["multiple"] = $options["multiple"];
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"] = $options["allow_add"];
+
+        // foreach($view as $childView){
+
+        //     $childView->vars["required"]
+        // }
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -92,7 +98,6 @@ class EntityType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
 
             $form = $event->getForm();
-            
             // Combine allow_recursive with parent if already found in child
             foreach($options["fields"] as $fieldName => $fieldOptions) {
 
@@ -137,12 +142,13 @@ class EntityType extends AbstractType implements DataMapperInterface
                     if(array_key_exists("required", $field))
                         $field['required'] = $field['required'] & $options["required"];
 
-                    dump($fieldName." => ".$field['required']);
                     $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
                     unset($field['allow_recursive']);
                     
-                    if($fieldRecursive)
+                    if($fieldRecursive) {
+                        dump($fieldName, $fieldType, $field);
                         $form->add($fieldName, $fieldType, $field);
+                    }
                 }
             }
         });
@@ -159,15 +165,14 @@ class EntityType extends AbstractType implements DataMapperInterface
         if ($data instanceof PersistentCollection)
             $data = $data->toArray();
 
-        $form = current(iterator_to_array($forms));
-
         if(is_object($entity = $data)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-            $data = $classMetadata->getFieldValue($entity, $form->getName());
-        }
 
-        $form->setData($data);
+            $childForms = iterator_to_array($forms);
+            foreach($childForms as $fieldName => $childForm)
+                $childForm->setData($classMetadata->getFieldValue($entity, $fieldName));
+        }
     }
 
     public function mapFormsToData(\Traversable $forms, &$parentData): void

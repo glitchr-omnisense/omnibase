@@ -108,7 +108,6 @@ class TranslatableType extends AbstractType
             }
         }
 
-        dump($fields);
         return $fields;
     }
 
@@ -162,12 +161,12 @@ class TranslatableType extends AbstractType
                     continue;
 
                 $defaultLocale = $options["default_locale"];
-                if($options["single_locale"] && \count($dataLocale) == 1) {
-                    $defaultLocale = $dataLocale[0];
-                    $locale = $dataLocale[0];
-                }
+                if($options["single_locale"] && \count($dataLocale) == 1)
+                    $defaultLocale = $locale = $dataLocale[0];
 
-                $required = \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
+                $required  = \in_array($locale, $options['required_locales'], true);
+                $required |= $locale == $defaultLocale;
+
                 $form->add($locale, EntityType::class, [
                     'data_class' => $translationClass,
                     'required' => $required,
