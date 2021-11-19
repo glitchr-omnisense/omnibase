@@ -54,9 +54,7 @@ class StateType extends AbstractType implements SelectTypeInterface
             },
             'empty_data'   => ThreadState::DRAFT,
             'invalid_message' => function (Options $options, $previousValue) {
-                return ($options['legacy_error_messages'] ?? true)
-                    ? $previousValue
-                    : 'Please select a status.';
+                    return 'Please select a status.';
             }
         ]);
     }

@@ -42,9 +42,7 @@ class GenderType extends AbstractType implements SelectTypeInterface
             'choice_icons' => self::getIcons(),
             'empty_data'   => "genderless",
             'invalid_message' => function (Options $options, $previousValue) {
-                return ($options['legacy_error_messages'] ?? true)
-                    ? $previousValue
-                    : 'Please select a gender.';
+                    return 'Please select a gender.';
             }
         ]);
     }

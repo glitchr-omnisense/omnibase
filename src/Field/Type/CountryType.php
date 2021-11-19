@@ -83,9 +83,7 @@ class CountryType extends AbstractType implements SelectTypeInterface
             'alpha3' => false,
             'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->baseService->getUrl("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }",
             'invalid_message' => function (Options $options, $previousValue) {
-                return ($options['legacy_error_messages'] ?? true)
-                    ? $previousValue
-                    : 'Please select a valid country.';
+                return 'Please select a valid country.';
             }
         ]);
 

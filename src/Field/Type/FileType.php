@@ -77,7 +77,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'max_filesize' => null,
             'max_files'    => null,
             'mime_types'   => null,
-            "data_mapping" => null
+            "data_mapping" => null,
         ]);
 
         $resolver->setAllowedTypes("dropzone", ['null', 'array']);
@@ -149,7 +149,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!is_array($files)) $files = ($files ? [$files] : []);
         $view->vars['files'] = $files;
 
-        $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $form->getName());
+        $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
         if(array_key_exists('max_filesize', $options))
             $view->vars['max_filesize'] = min($view->vars['max_filesize'], $options["max_filesize"]);
 
@@ -157,10 +157,9 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!$acceptedFiles && $entity) $acceptedFiles = Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName());
         $view->vars["accept"] = $acceptedFiles;
 
-        $view->vars["value"] = $options["empty_data"] ?? null;
-        
+        $view->vars["value"] = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         if(($options["data_class"] ?? false) || is_object($entity))
-            $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
+            $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
 
         if(is_array($view->vars['value']))
             $view->vars["value"] = implode("|", $view->vars["value"]);

@@ -81,15 +81,10 @@ class EntityType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["required"] = $options["required"];
+        // $view->vars["required"] = $options["required"];
         $view->vars["multiple"] = $options["multiple"];
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"] = $options["allow_add"];
-
-        // foreach($view as $childView){
-
-        //     $childView->vars["required"]
-        // }
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -98,6 +93,7 @@ class EntityType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
 
             $form = $event->getForm();
+
             // Combine allow_recursive with parent if already found in child
             foreach($options["fields"] as $fieldName => $fieldOptions) {
 
@@ -119,11 +115,13 @@ class EntityType extends AbstractType implements DataMapperInterface
                         'multiple' => false,
                         'label' => false
                     ]),
+
                     "data_class" => null,
                     'allow_add' => $options["allow_add"],
                     'allow_delete' => $options["allow_delete"],
                     'by_reference' => false,
-                    'required' => $options["required"]
+                    'required' => $options["required"],
+                    'form2' => false
                 ]);
 
             } else {
@@ -145,10 +143,8 @@ class EntityType extends AbstractType implements DataMapperInterface
                     $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
                     unset($field['allow_recursive']);
                     
-                    if($fieldRecursive) {
-                        dump($fieldName, $fieldType, $field);
+                    if ($fieldRecursive)
                         $form->add($fieldName, $fieldType, $field);
-                    }
                 }
             }
         });
@@ -162,10 +158,12 @@ class EntityType extends AbstractType implements DataMapperInterface
         }
         
         $data = $parentData;
-        if ($data instanceof PersistentCollection)
-            $data = $data->toArray();
+        if ($data instanceof PersistentCollection) {
 
-        if(is_object($entity = $data)) {
+            $form = current(iterator_to_array($forms));
+            $form->setData($data->toArray());
+
+        } else if(is_object($entity = $data)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
 

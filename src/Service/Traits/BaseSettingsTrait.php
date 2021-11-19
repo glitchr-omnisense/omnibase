@@ -65,52 +65,6 @@ trait BaseSettingsTrait
 
         return $this->get($name, $locale) !== null;
     }
-
-    public function getHelp(string $name, ?string $locale = null)
-    {
-        $helpName = $name.":help";
-        if(!$locale)
-            $locale = $this->localeProvider->getLocale($locale);
-
-        if(!$this->settingRepository)
-            $this->settingRepository = $this->entityManager->getRepository(Setting::class);
-
-        $item = $this->cache->getItem($helpName);
-        if (array_key_exists($locale, $item->get() ?? []))
-            return $item->get()[$locale];
-
-        $this->settings[$name] = $this->getSettings($name);
-        if(!$this->settings[$name]) 
-            return null;
-
-        $value  = $this->settings[$name]->translate($locale)->getHelp();
-        $this->applyCache($helpName, $locale, $value);
-
-        return $value;
-    }
-
-    public function getLabel(string $name, ?string $locale = null)
-    {
-        $labelName = $name.":label";
-        if(!$locale)
-            $locale = $this->localeProvider->getLocale($locale);
-
-        if(!$this->settingRepository)
-            $this->settingRepository = $this->entityManager->getRepository(Setting::class);
-
-        $item = $this->cache->getItem($labelName);
-        if (array_key_exists($locale, $item->get() ?? []))
-            return $item->get()[$locale];
-
-        $this->settings[$name] = $this->getSettings($name);
-        if(!$this->settings[$name]) 
-            return null;
-
-        $value  = $this->settings[$name]->translate($locale)->getLabel();
-        $this->applyCache($labelName, $locale, $value);
-
-        return $value;
-    }
     
     public function get(string $name, ?string $locale = null)
     {
@@ -157,8 +111,6 @@ trait BaseSettingsTrait
             $this->settingRepository = $this->entityManager->getRepository(Setting::class);
 
         $this->removeCache($name);
-        $this->removeCache($name.":label");
-        $this->removeCache($name.":help");
 
         $this->settings[$name] = $this->settingRepository->findOneByName($name);
         if($this->settings[$name])

@@ -35,7 +35,7 @@ class CollectionType extends AbstractType
         if ($options['allow_add'] && $options['prototype']) {
             $prototypeOptions = array_replace([
                 'required' => $options['required'],
-                'label' => $options['prototype_name'].'label__',
+                'label' => $options['prototype_name'].'__label__',
             ], $options['entry_options']);
 
             if (null !== $options['prototype_data']) {
@@ -43,19 +43,16 @@ class CollectionType extends AbstractType
             }
 
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
-            
             $builder->setAttribute('prototype', $prototype->getForm());
         }
 
-        $resizeListener = new ResizeFormListener(
+        $builder->addEventSubscriber(new ResizeFormListener(
             $options['entry_type'],
             $options['entry_options'],
             $options['allow_add'],
             $options['allow_delete'],
             $options['delete_empty']
-        );
-
-        $builder->addEventSubscriber($resizeListener);
+        ));
     }
 
     /**
@@ -66,6 +63,7 @@ class CollectionType extends AbstractType
         $view->vars = array_replace($view->vars, [
             'allow_add' => $options['allow_add'],
             'allow_delete' => $options['allow_delete'],
+            'required' => $options['required'],
         ]);
 
         if ($form->getConfig()->hasAttribute('prototype')) {
@@ -118,7 +116,6 @@ class CollectionType extends AbstractType
     {
         $entryOptionsNormalizer = function (Options $options, $value) {
             $value['block_name'] = 'entry';
-
             return $value;
         };
 
@@ -132,9 +129,7 @@ class CollectionType extends AbstractType
             'entry_options' => [],
             'delete_empty' => false,
             'invalid_message' => function (Options $options, $previousValue) {
-                return ($options['legacy_error_messages'] ?? true)
-                    ? $previousValue
-                    : 'The collection is invalid.';
+               return 'The collection is invalid.';
             },
         ]);
 

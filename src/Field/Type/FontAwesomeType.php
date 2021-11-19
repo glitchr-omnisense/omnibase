@@ -57,9 +57,7 @@ class FontAwesomeType extends AbstractType implements SelectTypeInterface
             },
 
             'invalid_message' => function (Options $options, $previousValue) {
-                return ($options['legacy_error_messages'] ?? true)
-                    ? $previousValue
-                    : 'Please select a icon.';
+                    return 'Please select a icon.';
             }
         ]);
     }

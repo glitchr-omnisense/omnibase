@@ -173,7 +173,8 @@ class Thread implements TranslatableInterface
         $this->setTitle($title);
 
         $this->slug = $slug;
-
+        $this->priority = 0;
+        
         $this->setState(ThreadState::DRAFT);
     }
 

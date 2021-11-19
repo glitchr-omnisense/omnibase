@@ -56,9 +56,7 @@ class RoleType extends AbstractType implements SelectTypeInterface
             },
             'empty_data'   => UserRole::USER,
             'invalid_message' => function (Options $options, $previousValue) {
-                return ($options['legacy_error_messages'] ?? true)
-                    ? $previousValue
-                    : 'Please select a role.';
+                    return 'Please select a role.';
             }
         ]);
     }

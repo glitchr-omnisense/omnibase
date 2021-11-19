@@ -115,7 +115,7 @@ class DashboardController extends AbstractDashboardController
                 "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
                 "base.settings.use_https"            => [
                     "class" => HiddenType::class, 
-                    "data" => strtolower($_SERVER['REQUEST_SCHEME'])
+                    "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"
                 ],
                 "base.settings.domain"               => [
                     "class" => HiddenType::class, 
