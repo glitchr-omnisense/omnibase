@@ -20,6 +20,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Uploader;
 use Base\Enum\ThreadState;
 use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
@@ -29,12 +30,23 @@ use Base\Entity\Sitemap\Widget;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "attachment" )
+ * @DiscriminatorEntry( value = "attachment" )
  */
 
 class Attachment extends Widget
 {
+    /**
+     * @ORM\Column(type="text")
+     * @Uploader(storage="local.storage", public="/storage", size="4096K")
+     * @AssertBase\FileSize(max="4096K", groups={"new", "edit"})
+     */
+    protected $file;
+
+    public function getPath() { return Uploader::getPublicPath($this, "file"); }
+    public function getFile() { return Uploader::getFile($this, "file"); }
+    public function setFile($file)
+    {
+        $this->file = $file;
+        return $this;
+    }
 }

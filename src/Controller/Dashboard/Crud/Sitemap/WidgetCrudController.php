@@ -2,6 +2,7 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap;
 
+use Base\Entity\Sitemap\Widget\Attachment;
 use Base\Entity\Sitemap\Widget;
 use Base\Service\BaseService;
 
@@ -38,13 +39,13 @@ class WidgetCrudController extends AbstractCrudController
 
     public function createEntity(string $entityFqcn)
     {
-        return new Widget("","");
+        return new Widget();
     }
 
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setPageTitle('index', 'Widget Management')
+            ->setPageTitle('index', 'Widgets Management')
             ->setDefaultSort(['id' => 'DESC'])
             ->setFormOptions(
                 ['validation_groups' => ['new']], // Crud::PAGE_NEW
@@ -59,8 +60,6 @@ class WidgetCrudController extends AbstractCrudController
         ->add(Crud::PAGE_NEW,  Action::INDEX)
         ->add(Crud::PAGE_EDIT, Action::INDEX)
 
-        ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
         ->setPermission(Action::EDIT, 'ROLE_ADMIN');
     }
 
@@ -73,7 +72,7 @@ class WidgetCrudController extends AbstractCrudController
             yield $yield;
     }
 
-     public function configureFilters(Filters $filters): Filters
+    public function configureFilters(Filters $filters): Filters
     {
         return $filters;
     }

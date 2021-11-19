@@ -137,6 +137,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     if(array_key_exists("required", $field))
                         $field['required'] = $field['required'] & $options["required"];
 
+                    dump($fieldName." => ".$field['required']);
                     $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
                     unset($field['allow_recursive']);
                     

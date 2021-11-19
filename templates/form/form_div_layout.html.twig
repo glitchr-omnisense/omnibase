@@ -1,34 +1,33 @@
 {% use "@Twig/Form/form_div_layout.html.twig" %}
 
-{% block form_row -%}
+{# Overloaded form template.. #}
 
-    {% set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) %}
-    {%- if help is not empty -%}
-        {% set attr = attr|merge({'aria-describedby': id ~"_help"}) %}
-    {%- endif -%}
+{%- block form2_label  -%}{{- form_label(form)  -}}{%- endblock -%}
+{%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
+{%- block form2_errors -%}{{- form_errors(form) -}}{%- endblock -%}
+{%- block form2_help   -%}
+    {% if help is not empty %}
+    <span class="data-help">
+        <i class="far fa-question-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
+    </span>
+    {% endif %}
+{%- endblock -%}
 
-    {%- set widget_attr = {attr: attr} -%}
+{% block form2_row -%}
 
-    {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) -%}
-
+    {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%} #}
+    {# {%- set widget_attr = {attr: attr} -%} #}
+    {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
-        {{- form_label(form) -}}
+        <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
         {{- form_errors(form) -}}
-        {{- form_widget(form, widget_attr) -}}
-        {{- form_help(form) -}}
+        {{- form_widget(form) -}}
     </div>
+{%- endblock form2_row -%}
 
-{%- endblock form_row -%}
 
-{%- block form_errors -%}
-{% if errors|length > 0 %}
-<ul class="form-errors">
-    {% for error in errors %}
-    <li>{{ error.message|trans2(error.getMessageParameters()|merge({'label':error.origin.name})) }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-{%- endblock form_errors -%}
+
+{# All custom FormType widgets are below.. #}
 
 {%- block quill_widget -%}
 <input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %} />
@@ -49,8 +48,7 @@
 {% endblock select2_widget %}
 
 {%- block translatable_row -%}
-
-    {% set row_attr = row_attr|merge({'class': 'form-group form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) %}
+    {% set row_attr = row_attr|merge({'class': 'form-group form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
     <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
     {{ form_widget(form) }}
     </div>
@@ -88,6 +86,7 @@
         <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
             {% for row in formChild %}
             {{ form_row(row) }}<br/>
+            {{dump(row)}}
             {% endfor %}
         </div>
     {% endfor %}
@@ -153,7 +152,7 @@
     'data-image-field'         : form.vars.id,
     'data-image-cropper'       : form.vars.cropper,
     'data-image-thumbnail'     : form.vars.thumbnail,
-    'data-image-ajaxPost'      : form.vars.ajaxPost,
+    'data-image-ajax'      : form.vars.ajax,
 }) %}
 
 <div class="imageupload" {{ block('attributes') }}>
@@ -201,7 +200,7 @@
 {%- block fileupload_widget -%}
 {% set attr = attr|merge({
     'data-file-sortable'      : form.vars.sortable,
-    'data-file-ajaxPost'      : form.vars.ajaxPost,
+    'data-file-ajax'      : form.vars.ajax,
 }) %}
 
 <div class="fileupload" data-file-field="{{ id }}" data-file-dropzone="{{form.vars.dropzone}}">
@@ -219,7 +218,7 @@
 
         {{ form_widget(form.file, { attr: form.file.vars.attr, value: form.vars.value }) }}
         {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept|join(',') }) }) }}
-
+    
         {% if allow_delete %}
         <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
             <span style="cursor:pointer;">&#x2715;</span>
@@ -229,6 +228,10 @@
     {% endif %}
     </div>
 
+    {% if multiple %}
+    <div class="form-text text-muted">{{ files|length }} file(s) found.</div>
+    {% endif %}
+    
     {% if form.vars.max_filesize %}
     <div class="form-filesize form-text text-muted">{{"forms.field.maxfile"|trans2([form.vars.max_filesize|filesize])}}</div>
     {% endif %}
@@ -240,9 +243,6 @@
 
     <div class="form-errors form-text text-muted">{{ form_errors(form.raw) }}</div>
 
-    {% if form.vars.value and multiple %}
-    <div class="form-text text-muted">{{form.vars.data|length}} file(s) found.</div>
-    {% endif %}
 </div>
 
 {%- endblock -%}
@@ -300,7 +300,7 @@
         {% if isEmptyCollection %}
             {{ block('collection2_empty') }}
         {% else %}
-            {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '') ~ (errors|length > 0 ? ' error' : '')} ) %}
+            {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
             {{ form_widget(form, {attr: attr}) }}
         {% endif %}
 

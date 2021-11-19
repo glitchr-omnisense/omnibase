@@ -1,8 +1,9 @@
 <?php
 
-namespace Base\Controller\Dashboard\Crud\Sitemap;
+namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
-use Base\Entity\Sitemap\Menu;
+use Base\Entity\Sitemap\Menu\Widget;
+use Base\Entity\Sitemap\Widget\Menu;
 use Base\Service\BaseService;
 
 use Base\Entity\User;

@@ -75,12 +75,6 @@ class Thread implements TranslatableInterface
     protected $uuid;
 
     /**
-     * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
-     * @ORM\JoinColumn(onDelete="SET NULL")
-     */
-    protected $parent;
-
-    /**
      * @ORM\Column(type="integer")
      */
     protected $priority;
@@ -96,6 +90,12 @@ class Thread implements TranslatableInterface
 
         return $this;
     }
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     */
+    protected $parent;
 
     /**
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))

@@ -8,7 +8,6 @@ use Doctrine\Persistence\Event\ManagerEventArgs;
 use Doctrine\Persistence\ManagerRegistry;
 use Base\Repository\Traits\EntityHierarchyTrait;
 
-use Base\Database\Repository\ServiceEntityRepository;
 use Base\Repository\Sitemap\WidgetRepository;
 
 /**

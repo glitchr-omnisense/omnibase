@@ -26,7 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
-class SettingType extends AbstractType implements DataMapperInterface
+class WidgetListType extends AbstractType implements DataMapperInterface
 {
     public function __construct(BaseSettings $baseSettings)
     {

@@ -29,12 +29,30 @@ use Base\Entity\Sitemap\Widget;
 
 /**
  * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "hyperlink" )
+ * @DiscriminatorEntry( value = "hyperlink" )
  */
 
-class Hyperlink extends Widget
-{
+class Hyperlink extends Widget implements TranslatableInterface
+{   
+    use TranslatableTrait;
+
+    public function getLabel(): ?string { return $this->translate()->getLabel(); }
+    public function setLabel(?string $excerpt) { 
+        $this->translate()->setLabel($excerpt); 
+        return $this; 
+    }
+
+    /**
+     * @ORM\Column(type="text")
+     * @Assert\Url
+     */
+    protected $url;
+
+    public function getUrl() { return $this->url; }
+    public function setUrl($url)
+    {
+        $this->url = $url;
+        return $this;
+    }
+
 }

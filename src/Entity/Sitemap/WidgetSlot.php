@@ -7,6 +7,7 @@ use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use Base\Entity\Sitemap\Widget;
+use Base\Repository\Sitemap\WidgetSlotRepository;
 
 use Base\Repository\ThreadRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -29,13 +30,8 @@ use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
 
 /**
- * @ORM\Entity(repositoryClass=WidgetRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ * @ORM\Entity(repositoryClass=WidgetSlotRepository::class)
  */
-
 class WidgetSlot
 { 
     /**
@@ -51,12 +47,26 @@ class WidgetSlot
      * @GenerateUuid(version=4)
      */
     protected $uuid;
+    public function getUuid(): string { return $this->uuid; }
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
     protected $name;
-    
+    public function getName(): string { return $this->name; }
+    public function setName(string $name): self
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function __construct(string $name = "", ?Widget $widget = null)
+    {
+        $this->setName($name);
+        $this->setWidget($widget);
+    }
+
     /**
      * @ORM\Column(type="array")
      */
@@ -66,6 +76,17 @@ class WidgetSlot
     {
         $this->attributes = $attributes;
 
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $help;
+    public function getHelp(): string { return $this->help; }
+    public function setHelp(string $help)
+    {
+        $this->help = $help;
         return $this;
     }
 
@@ -80,5 +101,4 @@ class WidgetSlot
 
         return $this;
     }
-
 }

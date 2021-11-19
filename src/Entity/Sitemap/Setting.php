@@ -38,10 +38,21 @@ use Base\Database\Traits\TranslatableTrait;
 class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
+    public function getLabel(): ?string { return $this->translate()->getLabel();   }
+    public function setLabel(?string $label) {
+        $this->translate()->setLabel($label);  
+        return $this;
+    }
+    
     public function getValue(): ?string { return $this->translate()->getValue();   }
     public function setValue(?string $value) {
-
         $this->translate()->setValue($value);  
+        return $this; 
+    }
+
+    public function getHelp(): ?string { return $this->translate()->getHelp();   }
+    public function setHelp(?string $help) {
+        $this->translate()->setHelp($help);  
         return $this; 
     }
     
@@ -62,17 +73,6 @@ class Setting implements TranslatableInterface
     public function setName(string $name)
     {
         $this->name = $name;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $comment;
-    public function getComment(): string { return $this->comment; }
-    public function setComment(string $comment)
-    {
-        $this->comment = $comment;
         return $this;
     }
     

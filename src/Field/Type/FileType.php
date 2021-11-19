@@ -134,7 +134,7 @@ class FileType extends AbstractType implements DataMapperInterface
     {
         $parent = $form->getParent();
         $entity = $parent->getData();
-
+        
         if(!is_object($entity)) $files = $form->getData();
         else {
         
@@ -158,19 +158,19 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["accept"] = $acceptedFiles;
 
         $view->vars["value"] = $options["empty_data"] ?? null;
-        if(is_object($entity))
+        
+        if(($options["data_class"] ?? false) || is_object($entity))
             $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
 
         if(is_array($view->vars['value']))
             $view->vars["value"] = implode("|", $view->vars["value"]);
 
-        $view->vars["sortable"]       = null;
-        $view->vars['dropzone']       = null;
-        $view->vars["ajaxPost"]       = null;
-        $view->vars['multiple']       = $options['multiple'];
-        $view->vars['allow_delete']   = $options['allow_delete'];
+        $view->vars["sortable"]     = null;
+        $view->vars['dropzone']     = null;
+        $view->vars["ajax"]         = null;
+        $view->vars['multiple']     = $options['multiple'];
+        $view->vars['allow_delete'] = $options['allow_delete'];
 
-       
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
             if($options["dropzone-js"]) $this->baseService->addHtmlContent("javascripts", $options["dropzone-js"]);
@@ -184,7 +184,7 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['allow_delete'] !== null) $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
             if($options['max_filesize'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_filesize"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
-            if($acceptedFiles           !== null) $options["dropzone"]["acceptedFiles"]  = $acceptedFiles;
+            if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = $acceptedFiles;
 
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans2("messages.dropzone.title").'</h4><p>'.$this->translator->trans2("messages.dropzone.description").'</p>';
@@ -193,8 +193,8 @@ class FileType extends AbstractType implements DataMapperInterface
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $view->vars["ajaxPost"]     = $this->baseService->getAsset("/ux/dropzone/" . $token);
-            $options["dropzone"]["url"] = $view->vars["ajaxPost"];
+            $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
+            $options["dropzone"]["url"] = $view->vars["ajax"];
 
             $view->vars["dropzone"] = json_encode($options["dropzone"]);
             $view->vars["sortable"] = json_encode($options["sortable"]);

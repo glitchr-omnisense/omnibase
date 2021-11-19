@@ -78,13 +78,10 @@ class SettingCrudController extends AbstractCrudController
             yield $yield;
 
         yield TranslatableField::new()->hideOnIndex()
-        ->setFields(["value" => ["required" => true]]);
+            ->setExcludedFields("value")
+            ->setFields(["label" => ["required" => true]])
+            ->showOnIndex("help");
         foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        if (!$this->isGranted('ROLE_SUPERADMIN')) yield TextField::new('comment')->hideOnForm();
-        else yield TextField::new('comment');
-        foreach ( ($callbacks["comment"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 

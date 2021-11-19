@@ -64,7 +64,7 @@ class ImageType extends AbstractType
         $view->vars["thumbnail"] = $this->baseService->getAsset($options["thumbnail"]);
 
         $view->vars["cropper"] = null;
-        $view->vars["ajaxPost"] = null;
+        $view->vars["ajax"] = null;
         if(is_array($options["cropper"])) {
 
             $this->baseService->addHtmlContent("javascripts", $options["cropper-js"]);
@@ -76,7 +76,7 @@ class ImageType extends AbstractType
             if(!array_key_exists('aspectRatio', $options["cropper"])) $options["cropper"]['aspectRatio'] = 1;
 
             $view->vars["cropper"]  = json_encode($options["dropzone"]);
-            $view->vars["ajaxPost"] = $this->baseService->getAsset("ux/dropzone/".$token);
+            $view->vars["ajax"] = $this->baseService->getAsset("ux/dropzone/".$token);
         }
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");

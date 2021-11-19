@@ -132,7 +132,9 @@ trait DashboardTrait {
         [$offset, $length] = $this->getSectionWidgetItemOffsetAndLength($widgets, $sectionOrPositionOrLabel);
         [$_, $sectionWidgetItem, $widgetItems, $_] = $this->extractSectionWidgetItem($widgets, $offset, $length);
 
-        if(!$sectionWidgetItem) return $widgets;
+        if(!$sectionWidgetItem) 
+            throw new \Exception("Section widget \"". $item."\" not found.");
+
         if ($position < 0) $position = $length-1; 
 
         array_splice($widgetItems, $position, 0, $itemOrArray);

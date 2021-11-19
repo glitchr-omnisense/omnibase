@@ -30,10 +30,7 @@ use Base\Repository\Sitemap\Widget\PageRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "page" )
+ * @DiscriminatorEntry( value = "page" )
  */
 
 class Page extends Widget

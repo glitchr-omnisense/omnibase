@@ -17,8 +17,8 @@ abstract class SetType extends Type
     public function getPermittedValues() { 
 
         $refl = new \ReflectionClass(get_called_class());
-        $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
-        
+        $permittedValues = array_values($refl->getConstants());
+
         if(!$permittedValues)
             throw new \Exception("Set type \"".get_called_class()."\" is empty");
 

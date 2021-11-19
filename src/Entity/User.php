@@ -33,7 +33,7 @@ use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\Annotation\Hashify;
-use Base\Enum\UserRole;
+use App\Enum\UserRole;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use DateTime;

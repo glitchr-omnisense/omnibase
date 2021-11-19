@@ -16,17 +16,18 @@ use Base\Config\WidgetItem;
 use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
 
-use Base\Entity\Sitemap\Menu;
+use Base\Entity\Sitemap\Widget\Menu;
 use Base\Entity\Sitemap\Widget\Page;
 use Base\Entity\Sitemap\Setting;
 use Base\Entity\Sitemap\Widget;
 use Base\Entity\Sitemap\Widget\Attachment;
 use Base\Entity\Sitemap\Widget\Hyperlink;
+use Base\Entity\Sitemap\WidgetSlot;
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
-use Base\Form\Type\Sitemap\SettingType;
+use Base\Form\Type\Sitemap\SettingListType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -99,11 +100,11 @@ class DashboardController extends AbstractDashboardController
      *
      * @Route("/dashboard/settings", name="base_dashboard_settings")
      */
-    public function Settings(Request $request): Response
+    public function Settings(Request $request, array $fields = []): Response
     {
-        $form = $this->createForm(SettingType::class, null, [
+        $form = $this->createForm(SettingListType::class, null, [
             "captcha_protection" => false,
-            "fields" => [
+            "fields" => array_merge([
                 "base.settings.logo"                 => ["class" => ImageType::class],
                 "base.settings.logo_backoffice"      => ["class" => ImageType::class],
                 "base.settings.title"                => [],
@@ -126,7 +127,7 @@ class DashboardController extends AbstractDashboardController
                 ],
                 "base.settings.mail_name"            => [],
                 "base.settings.mail"                 => ["class" => EmailType::class]
-            ]
+            ], $fields)
         ]);
 
         $form->handleRequest($request);
@@ -159,6 +160,73 @@ class DashboardController extends AbstractDashboardController
         ]);
     }
 
+    /**
+     * Link to this controller to start the "connect" process
+     *
+     * @Route("/dashboard/widgets", name="base_dashboard_widgets")
+     */
+    public function Widgets(Request $request): Response
+    {
+        // $form = $this->createForm(SettingListType::class, null, [
+        //     "captcha_protection" => false,
+        //     "fields" => [
+        //         "base.settings.logo"                 => ["class" => ImageType::class],
+        //         "base.settings.logo_backoffice"      => ["class" => ImageType::class],
+        //         "base.settings.title"                => [],
+        //         "base.settings.slogan"               => [],
+        //         "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
+        //         "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
+        //         "base.settings.maintenance_downtime" => ["class" => DateTimePickerType::class, "required" => false],
+        //         "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
+        //         "base.settings.use_https"            => [
+        //             "class" => HiddenType::class, 
+        //             "data" => strtolower($_SERVER['REQUEST_SCHEME'])
+        //         ],
+        //         "base.settings.domain"               => [
+        //             "class" => HiddenType::class, 
+        //             "data" => strtolower($_SERVER['HTTP_HOST'])
+        //         ],
+        //         "base.settings.base_dir"             => [
+        //             "class" => HiddenType::class, 
+        //             "data" => $this->baseService->getAsset("/")
+        //         ],
+        //         "base.settings.mail_name"            => [],
+        //         "base.settings.mail"                 => ["class" => EmailType::class]
+        //     ]
+        // ]);
+
+        // $form->handleRequest($request);
+
+        // if($form->isSubmitted() && $form->isValid()){
+
+        //     $settingRepository = $this->getDoctrine()->getRepository(Setting::class);
+
+        //     $data     = array_filter($form->getData(), fn($value) => !is_null($value));
+        //     $fields   = array_keys($form->getConfig()->getOption("fields"));
+
+        //     $settings = $this->baseService->getSettings()->getSettings($fields);
+        //     $settings = array_filter($settings, fn($value) => !is_null($value));
+        //     foreach(array_diff_key($data, $settings) as $name => $setting)
+        //         $settingRepository->persist($setting);
+
+        //     $settingRepository->flush();
+
+        //     $notification = new Notification("dashboard.settings.success");
+        //     $notification->setUser($this->getUser());
+        //     $notification->send("success");
+
+        //     return $this->baseService->refresh();
+        // }
+
+        // return $this->render('dashboard/settings.html.twig', [
+        //     "content_title" => $this->translator->trans2("Dashboard: Settings"),
+        //     "content_header" => $this->translator->trans2("Welcome to the setting page."),
+        //     "form" => $form->createView()
+        // ]);
+
+        return null;
+    }
+
     public function configureDashboard(): Dashboard
     {
         $logo  = $this->baseService->getSettings("base.settings.logo_backoffice");
@@ -186,35 +254,39 @@ class DashboardController extends AbstractDashboardController
     {
         $menu   = [];
         $menu[] = MenuItem::section(false);
-        $menu[] = MenuItem::linkToUrl('Home', 'fa fa-home', $this->baseService->getUrl("base_dashboard"));
-        $menu[] = MenuItem::linkToUrl('Settings', 'fa fa-tools', $this->baseService->getUrl("base_dashboard_settings"));
-        $menu[] = MenuItem::linkToUrl('Back to website', 'fa fa-door-open', "/");
+        $menu[] = MenuItem::linkToUrl('Home', 'fas fa-fw fa-home', $this->baseService->getUrl("base_dashboard"));
+        $menu[] = MenuItem::linkToUrl('Settings', 'fas fa-fw fa-tools', $this->baseService->getUrl("base_dashboard_settings"));
+        $menu[] = MenuItem::linkToUrl('Widgets', 'fas fa-fw fa-th-large', $this->baseService->getUrl("base_dashboard_widgets"));
+        $menu[] = MenuItem::linkToUrl('Back to website', 'fas fa-fw fa-door-open', "/");
 
-        $menu[] = MenuItem::section('MEMBERSHIP');
-        $roles = RoleType::array_flatten(RoleType::getChoices());
+        if ($this->isGranted('ROLE_SUPERADMIN')) {
 
-        foreach ($roles as $label => $role) {
+            $menu[] = MenuItem::section('MEMBERSHIP');
+            $roles = RoleType::array_flatten(RoleType::getChoices());
 
-            if ($role == UserRole::USER) continue;
-            $value = $label;
-            $icon  = RoleType::getAltIcons()[$role] ?? "fa fa-fw";
+            foreach ($roles as $label => $role) {
 
-            $url = $this->adminUrlGenerator
-                ->unsetAll()
-                ->setController(UserCrudController::class)
-                ->setAction(Action::INDEX)
-                ->set("role", $role)
-                ->set("filters[roles][comparison]", "like")
-                ->set("filters[roles][value]", $role)
-                ->set("menuIndex", count($menu))
-                ->generateUrl();
+                if ($role == UserRole::USER) continue;
+                $value = $label;
+                $icon  = RoleType::getAltIcons()[$role] ?? "fas fa-fw";
 
-            $menu[] = MenuItem::linkToUrl($value, $icon, $url);
+                $url = $this->adminUrlGenerator
+                    ->unsetAll()
+                    ->setController(UserCrudController::class)
+                    ->setAction(Action::INDEX)
+                    ->set("role", $role)
+                    ->set("filters[roles][comparison]", "like")
+                    ->set("filters[roles][value]", $role)
+                    ->set("menuIndex", count($menu))
+                    ->generateUrl();
+
+                $menu[] = MenuItem::linkToUrl($value, $icon, $url);
+            }
+
+            $menu[] = MenuItem::linkToCrud('All users', 'fa-fw fas fa-fw fa-tags', User::class);
+            $menu[] = MenuItem::linkToCrud('Add user', 'fa-fw fas fa-fw fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
+                ->setAction('new');
         }
-
-        $menu[] = MenuItem::linkToCrud('All users', 'fa-fw fa fa-tags', User::class);
-        $menu[] = MenuItem::linkToCrud('Add user', 'fa-fw fa fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
-            ->setAction('new');
 
         if (isset($this->gaService) && $this->gaService->isEnabled()) {
 
@@ -250,26 +322,26 @@ class DashboardController extends AbstractDashboardController
     {
         return parent::configureActions()
             ->update(Crud::PAGE_INDEX, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-pencil-alt'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
             ->update(Crud::PAGE_INDEX, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-trash-alt'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
 
             ->update(Crud::PAGE_DETAIL, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-pencil-alt'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
             ->update(Crud::PAGE_DETAIL, Action::INDEX,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-home'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-home'))
             ->update(Crud::PAGE_DETAIL, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-trash-alt'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
 
             ->update(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-save'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-save'))
             ->update(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-edit'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
 
             ->update(Crud::PAGE_NEW, Action::SAVE_AND_RETURN,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-edit'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
             ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
-                fn (Action $action) => $action->setIcon('fa fa-fw fa-edit'));
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'));
 
     }
     
@@ -278,22 +350,39 @@ class DashboardController extends AbstractDashboardController
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);
 
-        $widgets[] = WidgetItem::section('MEMBERSHIP', null, 2);
-        $widgets[] = WidgetItem::linkToCrud('Users',         'fa-fw fa fa-user',                 User::class);
-        $widgets[] = WidgetItem::linkToCrud('Groups',        'fa-fw fa fa-users',                UserGroup::class);
-        $widgets[] = WidgetItem::linkToCrud('Notifications', 'fa-fw fa fa-bell',                 UserNotification::class);
-        $widgets[] = WidgetItem::linkToCrud('Tokens',        'fa-fw fa fa-drumstick-bite',       UserToken::class);
-        $widgets[] = WidgetItem::linkToCrud('Permissions',   'fa-fw fa fa-exclamation-triangle', UserPermission::class);
-        $widgets[] = WidgetItem::linkToCrud('Penalties',     'fa-fw fa fa-bomb',                 UserPenalty::class);
-        $widgets[] = WidgetItem::linkToCrud('Logs',          'fa-fw fa fa-info-circle',          UserLog::class);
+        if ($this->isGranted('ROLE_SUPERADMIN')) {
 
-        $widgets[] = WidgetItem::section('SITEMAP', null, 2);
-        $widgets[] = WidgetItem::linkToCrud('Pages',    'fa-fw fa fa-file-alt', Page::class);
-        $widgets[] = WidgetItem::linkToCrud('Hyperlinks',    'fa-fw fa fa-link', Hyperlink::class);
-        $widgets[] = WidgetItem::linkToCrud('Attachments',    'fa-fw fa fa-paperclip', Attachment::class);
-        $widgets[] = WidgetItem::linkToCrud('Menu',     'fa-fw fa fa-compass',  Menu::class);
-        if ($this->isGranted('ROLE_SUPERADMIN'))
-            $widgets[] = WidgetItem::linkToCrud('Settings', 'fa-fw fa fa-tools',    Setting::class);
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
+            $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
+                WidgetItem::linkToCrud('Users',         'fa-fw fas fa-fw fa-user',                 User::class),
+                WidgetItem::linkToCrud('Groups',        'fa-fw fas fa-fw fa-users',                UserGroup::class),
+                WidgetItem::linkToCrud('Notifications', 'fa-fw fas fa-fw fa-bell',                 UserNotification::class),
+                WidgetItem::linkToCrud('Tokens',        'fa-fw fas fa-fw fa-drumstick-bite',       UserToken::class),
+                WidgetItem::linkToCrud('Permissions',   'fa-fw fas fa-fw fa-exclamation-triangle', UserPermission::class),
+                WidgetItem::linkToCrud('Penalties',     'fa-fw fas fa-fw fa-bomb',                 UserPenalty::class),
+                WidgetItem::linkToCrud('Logs',          'fa-fw fas fa-fw fa-info-circle',          UserLog::class)
+            ]);
+        }
+
+        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('SITEMAP', null, 1));
+        $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+            WidgetItem::linkToCrud('Pages',       'fa-fw fas fa-fw fa-file-alt', Page::class),
+            WidgetItem::linkToCrud('Hyperlinks',  'fa-fw fas fa-fw fa-link', Hyperlink::class),
+            WidgetItem::linkToCrud('Attachments', 'fa-fw fas fa-fw fa-paperclip', Attachment::class),
+            WidgetItem::linkToCrud('Menu',        'fa-fw fas fa-fw fa-compass',  Menu::class)
+        ]);
+
+        if ($this->isGranted('ROLE_SUPERADMIN')) {
+
+            $section = $this->getSectionWidgetItem($widgets, "SITEMAP");
+            if($section) $section->setWidth(2);
+
+            $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+                WidgetItem::linkToCrud('Settings',     'fa-fw fas fa-fw fa-tools',    Setting::class),
+                WidgetItem::linkToCrud('Widget Slots', 'fa-fw fas fa-fw fa-th-large', WidgetSlot::class),
+                WidgetItem::linkToCrud('Widgets',      'fa-fw fas fa-fw fa-square',   Widget::class),
+            ]);
+        }
 
         return $widgets;
     }
@@ -308,8 +397,8 @@ class DashboardController extends AbstractDashboardController
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)
             ->addMenuItems([
-                MenuItem::linkToUrl('My Profile', 'fa fa-id-card', $this->baseService->getUrl("base_profile")),
-                MenuItem::linkToUrl('My Settings', 'fa fa-user-cog', $this->baseService->getUrl("base_settings"))
+                MenuItem::linkToUrl('My Profile', 'fas fa-fw fa-id-card', $this->baseService->getUrl("base_profile")),
+                MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("base_settings"))
             ]);
     }
 }

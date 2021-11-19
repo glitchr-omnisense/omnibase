@@ -108,6 +108,7 @@ class TranslatableType extends AbstractType
             }
         }
 
+        dump($fields);
         return $fields;
     }
 
