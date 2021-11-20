@@ -29,12 +29,7 @@ use Base\Database\Traits\TranslatableTrait;
 
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
- * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
  */
-
 class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
@@ -43,12 +38,6 @@ class Setting implements TranslatableInterface
         $this->translate()->setLabel($label);  
         return $this;
     }
-    
-    public function getValue(): ?string { return $this->translate()->getValue();   }
-    public function setValue(?string $value) {
-        $this->translate()->setValue($value);  
-        return $this; 
-    }
 
     public function getHelp(): ?string { return $this->translate()->getHelp();   }
     public function setHelp(?string $help) {
@@ -56,6 +45,19 @@ class Setting implements TranslatableInterface
         return $this; 
     }
     
+    public function getValue() { return $this->translate()->getValue(); }
+    public function setValue($value) {
+        $this->translate()->setValue($value);  
+        return $this; 
+    }
+
+    public function getOneOrNullValue()
+    {
+        $value = $this->getValue();
+        if(is_array($value)) return $value[0] ?? null;
+        return $value;
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -75,7 +77,7 @@ class Setting implements TranslatableInterface
         $this->name = $name;
         return $this;
     }
-    
+
     public function __construct(string $name, $value)
     {
         $this->setName($name);

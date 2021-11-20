@@ -307,7 +307,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
             $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
             if(!$metadata->discriminatorMap) {
-
                 $metadata->discriminatorMap = array_filter(array_map(function($class) {
 
                     return (is_subclass_of($class, TranslatableInterface::class, true)) 
@@ -315,20 +314,23 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                         : null;
 
                 }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
+            }
 
+            $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
+            $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
+            if($metadata->discriminatorMap) {
+                
                 if(!in_array($metadata->getName(), $metadata->discriminatorMap)) 
                     throw new MissingDiscriminatorMapException(
                         "Discriminator map missing for \"".$metadata->getName().
                         "\". Did you forgot to implement \"".TranslatableInterface::class.
                         "\" in \"".$metadata->getName()::getTranslatableEntityClass()."\".");
+            
+                $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()] ?? null;
+                if(!$metadata->discriminatorValue) 
+                    throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
             }
-
-            $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
-            $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
-            $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()] ?? null;
-
-            if(!$metadata->discriminatorValue) 
-                throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
+            
 
         } 
 
