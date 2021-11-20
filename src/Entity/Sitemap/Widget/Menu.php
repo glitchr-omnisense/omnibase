@@ -26,6 +26,7 @@ use Base\Traits\BaseTrait;
 use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Sitemap\Widget;
+use Base\Repository\Sitemap\Widget\MenuRepository;
 
 /**
  * @ORM\Entity(repositoryClass=MenuRepository::class)

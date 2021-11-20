@@ -64,19 +64,15 @@ class ImageType extends AbstractType
         $view->vars["thumbnail"] = $this->baseService->getAsset($options["thumbnail"]);
 
         $view->vars["cropper"] = null;
-        $view->vars["ajax"] = null;
         if(is_array($options["cropper"])) {
 
             $this->baseService->addHtmlContent("javascripts", $options["cropper-js"]);
             $this->baseService->addHtmlContent("stylesheets", $options["cropper-css"]);
 
-            $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-
             if(!array_key_exists('viewMode', $options["cropper"])) $options["cropper"]['viewMode'] = 2;
             if(!array_key_exists('aspectRatio', $options["cropper"])) $options["cropper"]['aspectRatio'] = 1;
 
             $view->vars["cropper"]  = json_encode($options["dropzone"]);
-            $view->vars["ajax"] = $this->baseService->getAsset("ux/dropzone/".$token);
         }
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");

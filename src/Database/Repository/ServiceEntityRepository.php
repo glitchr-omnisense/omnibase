@@ -41,6 +41,12 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public const OPTION_OVER          = "IsOver";
     public const OPTION_NOT_OVER      = "IsNotOver";
 
+    // String related options
+    public const OPTION_STARTING_WITH = "StartingWith";
+    public const OPTION_ENDING_WITH   = "EndingWith";
+    public const OPTION_NOT_STARTING_WITH = "NotStartingWith";
+    public const OPTION_NOT_ENDING_WITH   = "NotEndingWith";
+
     // Custom options
     public const OPTION_INSENSITIVE   = "Insensitive";
     public const OPTION_WITH_ROUTE    = "WithRoute";
@@ -182,8 +188,8 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         // - 4: offset
         
         // Definition of the returned values
-        $newMethod = null;
-        $newArguments = [];
+        $magicFn = null;
+        $magicArgs = [];
 
         // TODO: Safety check in dev mode only (maybe..)
         foreach($this->getClassMetadata()->getFieldNames() as $field) {
@@ -192,6 +198,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 str_contains($field, self::OPTION_MODEL      )   ||
                 str_contains($field, self::OPTION_PARTIAL    )   ||
                 str_contains($field, self::OPTION_INSENSITIVE)   ||
+                str_contains($field, self::OPTION_STARTING_WITH) ||
+                str_contains($field, self::OPTION_ENDING_WITH)   ||
+                str_contains($field, self::OPTION_NOT_STARTING_WITH) ||
+                str_contains($field, self::OPTION_NOT_ENDING_WITH)   ||
 
                 str_contains($field, self::OPTION_LOWER)         ||
                 str_contains($field, self::OPTION_GREATER)       ||
@@ -260,19 +270,20 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         // Extract method name and extra parameters
         if (preg_match('/^(find(?:One|Last)?By)(.*)/', $method, $matches)) {
 
-            $newMethod = "__".$matches[1] ?? "";
+            $magicFn = "__".$matches[1] ?? "";
+            $method  = 
             $byNames   = $matches[2] ?? "";
-            
+
         } else if (preg_match('/^(distinctCount|count)(?:For([^By]*))?(?:By){0,1}(.*)/', $method, $matches)) {
             
-            $newMethod = "__".$matches[1] ?? "";
+            $magicFn = "__".$matches[1] ?? "";
             $byNames   = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
 
         } else if (preg_match('/^(lengthOf)([^By]+)(?:By){0,1}(.*)/', $method, $matches)) {
             
-            $newMethod = "__".$matches[1] ?? "";
+            $magicFn = "__".$matches[1] ?? "";
             $byNames   = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
@@ -305,7 +316,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $methodBak = $method;
         $operator = self::OPTION_EQUAL; // Default case (e.g. "findBy" alone)
 
-        foreach($byNames as $by) {
+        foreach($byNames as $id => $by) {
 
             $oldBy = null;
 
@@ -324,7 +335,16 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     $option = self::OPTION_INSENSITIVE;
                     
                 else if ( str_ends_with($by, self::OPTION_WITH_ROUTE) )
-                $option = self::OPTION_WITH_ROUTE;
+                    $option = self::OPTION_WITH_ROUTE;
+
+                else if ( str_ends_with($by, self::OPTION_STARTING_WITH) )
+                    $option = self::OPTION_STARTING_WITH;
+                else if ( str_ends_with($by, self::OPTION_ENDING_WITH) )
+                    $option = self::OPTION_ENDING_WITH;
+                else if ( str_ends_with($by, self::OPTION_NOT_STARTING_WITH) )
+                    $option = self::OPTION_NOT_STARTING_WITH;
+                else if ( str_ends_with($by, self::OPTION_NOT_ENDING_WITH) )
+                    $option = self::OPTION_NOT_ENDING_WITH;
                 
                 else if ( str_ends_with($by, self::OPTION_LOWER_EQUAL) )
                     $option = self::OPTION_LOWER_EQUAL;
@@ -367,12 +387,21 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         list($method, $by) = $this->stripByEnd($method, $by, self::OPTION_WITH_ROUTE);
                         break;
 
+                    // String related
+                    case self::OPTION_STARTING_WITH:
+                    case self::OPTION_ENDING_WITH:
+                    case self::OPTION_NOT_STARTING_WITH:
+                    case self::OPTION_NOT_ENDING_WITH:
+                    
+                    // Datetime related
                     case self::OPTION_YOUNGER:
                     case self::OPTION_YOUNGER_EQUAL:
                     case self::OPTION_OLDER:
                     case self::OPTION_OLDER_EQUAL:
                     case self::OPTION_OVER:
                     case self::OPTION_NOT_OVER:
+                    
+                    // Number related
                     case self::OPTION_LOWER:
                     case self::OPTION_LOWER_EQUAL:
                     case self::OPTION_GREATER:
@@ -384,6 +413,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         break;
                 }
             }
+
+            if(empty($by))
+                throw new Exception("Malformed magic method. \"$methodBak\" cannot be parsed.. unknown name for parameter #".($id+1));
 
             // First check if WithRoute special argument is found..
             // This argument will retrieve the value of the corresponding route parameter
@@ -480,12 +512,12 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         // Index definition:
         // "criteria"  = argument #0, after removal of head parameters
-        foreach($arguments as $i => $arg) $newArguments[$i] = $arg;
+        foreach($arguments as $i => $arg) $magicArgs[$i] = $arg;
 
-        $newArguments[0] = array_merge($newArguments[0] ?? [], $this->criteria ?? []);
+        $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []);
 
         // Shaped return
-        return [$newMethod, $newArguments];
+        return [$magicFn, $magicArgs];
     }
 
     protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
@@ -493,25 +525,31 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $fieldName = $this->getAlias($field[0]);
         $fieldID   = implode("_", $field);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
-
+        
         $isPartial     = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
         $isInsensitive = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
         $tableOperator =
-            // Datetime related option
-            ($this->findCustomOption ($fieldRoot, self::OPTION_OVER)          ? self::OPTION_OVER :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_OVER)      ? self::OPTION_NOT_OVER :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_OLDER)         ? self::OPTION_OLDER :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_OLDER_EQUAL)   ? self::OPTION_OLDER_EQUAL :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER)       ? self::OPTION_YOUNGER :
+            // Datetime related options
+            ($this->findCustomOption ($fieldRoot, self::OPTION_OVER)          ? self::OPTION_OVER          :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_OVER)      ? self::OPTION_NOT_OVER      :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_OLDER)         ? self::OPTION_OLDER         :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_OLDER_EQUAL)   ? self::OPTION_OLDER_EQUAL   :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER)       ? self::OPTION_YOUNGER       :
             ($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER_EQUAL) ? self::OPTION_YOUNGER_EQUAL :
 
-            // Standard options
-            ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER)       ? self::OPTION_GREATER :
+            // String related options
+            ($this->findCustomOption ($fieldRoot, self::OPTION_STARTING_WITH)     ? self::OPTION_STARTING_WITH :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_ENDING_WITH)       ? self::OPTION_ENDING_WITH   :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_STARTING_WITH) ? self::OPTION_NOT_STARTING_WITH :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_ENDING_WITH)   ? self::OPTION_NOT_ENDING_WITH   :
+
+            // Number related options
+            ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER)       ? self::OPTION_GREATER       :
             ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER_EQUAL) ? self::OPTION_GREATER_EQUAL :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL : 
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL : self::OPTION_EQUAL
-        )))))))))));
+            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER         :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   : 
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL     : self::OPTION_EQUAL
+        )))))))))))))));
 
         if(is_array($tableOperator))
             throw new Exception("Too many operator requested for \"$fieldName\": ".implode(",", $tableOperator));
@@ -528,15 +566,31 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         }
 
         // Time related operation
-        $datetimeRequired = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
-        if($datetimeRequired && is_string($fieldValue)) {
+        if(is_string($fieldValue)) {
 
-            if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
-            else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
-            else if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
+            $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
-                $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
-                $fieldValue = (new \DateTime("now"))->modify($subtract);
+            $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
+            if($datetimeRequested) {
+
+                if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
+                else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
+                else if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
+
+                    $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
+                    $fieldValue = (new \DateTime("now"))->modify($subtract);
+                }
+            }
+
+            $regexRequested = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
+            if($regexRequested) {
+
+                    if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
+                else if($tableOperator == self::OPTION_ENDING_WITH      ) $fieldValue = "%".$fieldValue;
+                else if($tableOperator == self::OPTION_NOT_STARTING_WITH) $fieldValue = $fieldValue."%";
+                else if($tableOperator == self::OPTION_NOT_ENDING_WITH  ) $fieldValue = "%".$fieldValue;
+
+                $fieldValue = ($isInsensitive ? strtolower($fieldValue) : $fieldValue);
             }
         }
 
@@ -554,8 +608,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $expr = [];
             foreach ($fieldValue as $entryID => $entry) {
 
-                $qb->setParameter($fieldID, ($isInsensitive ? strtolower($entry) : $entry));
-
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
                 $expr[] = $qb->expr()->$fnExpr($tableColumn, ":$fieldID");
             }
@@ -571,8 +623,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
             return "${tableColumn} ${tableOperator} (:${fieldID})";
             
-        } else {
+        } else if($regexRequested) {
+        
+                 if($tableOperator == self::OPTION_STARTING_WITH) $tableOperator = "like";
+            else if($tableOperator == self::OPTION_ENDING_WITH)   $tableOperator = "like";
+            else if($tableOperator == self::OPTION_NOT_STARTING_WITH)  $tableOperator = "notLike";
+            else if($tableOperator == self::OPTION_NOT_ENDING_WITH)    $tableOperator = "notLike";
 
+            return $qb->expr()->$tableOperator($tableColumn, ":$fieldID");
+
+        } else {
+            
                  if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
             else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
             else if($tableOperator == self::OPTION_GREATER)       $tableOperator = ">";

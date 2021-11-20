@@ -36,7 +36,12 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         // Add base service to the default variables
         $this->twig->addGlobal("base", $baseService);
+        // $this->twig->addGlobal("base.settings", $baseService->getSettings()->get("base.settings"));
+        // $this->twig->addGlobal("app.settings",  $baseService->getSettings()->get("app.settings"));
 
+        // dump($baseService->getSettings()->get("base.settings"));
+        // dump($baseService->getSettings()->get("app.settings"));
+        
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%}

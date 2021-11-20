@@ -56,7 +56,6 @@
 
 {%- block translatable_widget -%}
 
-{# {{ dump(form) }} #}
 {% if form.children|length == 1 and single_locale %}
 
     {% for row in form.children %}
@@ -86,7 +85,6 @@
         {% set lang    = form_locale|lang %}
         {% set country = form_locale|country %}
         <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
-            {{ dump(formChild) }}
             {% for row in formChild %}
                 {{ form_row(row) }}<br/>
             {% endfor %}
@@ -200,8 +198,9 @@
 {%- endblock -%}
 
 {%- block fileupload_widget -%}
+
 {% set attr = attr|merge({
-    'data-file-sortable'      : form.vars.sortable,
+    'data-file-sortable'  : form.vars.sortable,
     'data-file-ajax'      : form.vars.ajax,
 }) %}
 

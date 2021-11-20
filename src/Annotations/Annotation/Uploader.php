@@ -277,33 +277,37 @@ class Uploader extends AbstractAnnotation
     protected function uploadFiles($entity, $oldEntity, ?string $property = null)
     {
         $new = self::getFieldValue($entity, $property);
+        $newList = is_array($new) ? $new : [$new];
+        
         $old = self::getFieldValue($oldEntity, $property);
+        $oldList = is_array($old) ? $old : [$old];
 
-        if(!is_array($new)) $new = [$new];
-        if(!is_array($old)) $old = [$old];
-        if($new == $old) return true;
+        if($newList == $oldList) return true;
 
         // Nothing to upload, empty field..
-        if ($new == null) {
+        if ($newList == null) {
 
             $this->setFieldValue($entity, $property, null);
             return true;
         }
 
         // Field value can be an array or just a single path
-        $fileList = array_intersect($new,$old);
-        foreach (array_diff($new,$old) as $index => $file) {
+        $fileList = array_intersect($newList, $oldList);
+        foreach (array_diff($newList, $oldList) as $index => $file) {
 
+            //
             // In case of string casting, and UploadedFile might be returned as a string..
             if (is_string($file) && file_exists($file))
                 $file = new File($file);
 
             if (!$file instanceof File) continue;
 
+            //
             //Check size restriction
             if ($file->getSize() > $this->maxSize) 
                 throw new InvalidSizeException("Invalid filesize exception in property \"$property\" in ".get_class($entity).".");
 
+            //
             // Check mime restriction
             $compatibleMimeType = empty($this->mimeTypes);
             foreach($this->mimeTypes as $mimeType)
@@ -313,9 +317,10 @@ class Uploader extends AbstractAnnotation
             if(!$compatibleMimeType) 
                 throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for property \"$property\" in ".get_class($entity)." (expected: \"".$expectedMimeTypes."\").");
 
+            //
             // Upload files
+            $path         = $this->getPath($entity);
             $pathPrefixer = $this->getPathPrefixer($this->storage);
-            $path = $this->getPath($entity);
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
             if ($this->uploadFile($path, $contents, $this->getStorageFilesystem()))
@@ -324,17 +329,16 @@ class Uploader extends AbstractAnnotation
 
         if (!empty($fileList)) {
 
-            $value = array_map("basename", $fileList);
-            $isArray = $this->getTypeOfField($entity, $property) == "array";
-            if(!$isArray) {
+            $basenameList = array_map("basename", $fileList);
+            if(!is_array($new)) {
 
-                if(is_array($value) && count($value) > 1)
+                if(count($basenameList) > 1)
                     throw new UploaderAmbiguityException("Too many files for \"$property\", column must be an \"array\"");
 
-                $value = array_pop($value); 
+                $basenameList = array_pop($basenameList); 
             }
 
-            $this->setFieldValue($entity, $property, $value);
+            $this->setFieldValue($entity, $property, $basenameList);
             return true;
         }
 
@@ -387,11 +391,8 @@ class Uploader extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        try {
-
-            $this->uploadFiles($entity, null, $property);
-
-        } catch(Exception $e) {
+        try { $this->uploadFiles($entity, null, $property); } 
+        catch(Exception $e) {
             
             if(!$this->keepNotFound)
                 self::setFieldValue($entity, $property, null);

@@ -108,6 +108,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if($allowDelete)
             $builder->add('delete', CheckboxType::class, ['required' => false]);
 
+        // Process the uploaded file on submission
         $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($options) {
 
             $data = $event->getData();
@@ -138,12 +139,12 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!is_object($entity)) $files = $form->getData();
         else {
         
-            $propertyType = Uploader::getTypeOfField($entity, $form->getName());
-            if($options["multiple"] && $propertyType != "array")
-                throw new InvalidArgumentException("Property ".$form->getName()." is \"$propertyType\", please disable 'multiple' option or turn property type into an 'array'");
-
             $file = Uploader::getFile($entity, $form->getName());
             $files = ($file ? $file->getPath() : null);
+
+            $propertyType = Uploader::getTypeOfField($entity, $form->getName());
+            if($options["multiple"] && $propertyType != "array")
+                $view->vars['max_files']     = 1;
         }
 
         if(!is_array($files)) $files = ($files ? [$files] : []);
@@ -194,7 +195,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
             $options["dropzone"]["url"] = $view->vars["ajax"];
-
+            
             $view->vars["dropzone"] = json_encode($options["dropzone"]);
             $view->vars["sortable"] = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])
@@ -221,6 +222,9 @@ class FileType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);
-        $viewData = $children['raw']->getData() ?? $children['file']->getData() ?? [];
+
+        $rawData  = $children['raw']->getData() ?? null;
+        $processedData = $children['file']->getData() ?? null;
+        $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
     }
 }
