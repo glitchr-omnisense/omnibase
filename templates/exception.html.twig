@@ -1,12 +1,12 @@
 {% extends 'layout.html.twig' %}
-
 {% block content %}
 	<article class="half text-center wrapper">
 		<h1>{{ 'controllers.exception.title'|trans2 }}</h1><br/>
 		<h3>{{ exception.getCode() }} {{ exception.getMessage() }}</h3>
 
-		{% if not exception.isKnown() %}
-		<p>{{ 'controllers.exception.description'|trans2([base.getMail()])|raw }}</p>
+		{% set transCode = "exception." ~ exception.code %}
+		{% if transCode | trans([], "controllers") != transCode %}
+		<p>{{ 'controllers.exception.description'|trans2([base.mail()])|raw }}</p>
 		{% endif %}
 
 		{% set referer = app.request.server.get('http-referer')|default(asset('')) %}

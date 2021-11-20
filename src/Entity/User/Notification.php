@@ -13,13 +13,13 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Base\Service\BaseService;
 use Base\Twig\BaseTwigExtension;
+
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;
 use Symfony\Component\Notifier\Notifier;
 use Symfony\Component\Notifier\NotifierInterface;
 
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Notifier\Bridge\Discord\DiscordOptions;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
@@ -38,6 +38,8 @@ use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Traits\BaseTrait;
+use Throwable;
+use Exception;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -127,8 +129,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
             $this->setContent("<div class='title'>".$location."</div><div class='message'>".$message.'</div>');
 
-        } else if ($content instanceof FlattenException) {
-            
+        } else if ($content instanceof FlattenException || $content instanceof Throwable) {
+
             $location = str_replace($this->getProjectDir(),'.', $content->getFile()) . ":" . $content->getLine();
             $message = $content->getMessage();
 
