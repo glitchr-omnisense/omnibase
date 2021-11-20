@@ -4,8 +4,8 @@
 		<h1>{{ 'controllers.exception.title'|trans2 }}</h1><br/>
 		<h3>{{ exception.getCode() }} {{ exception.getMessage() }}</h3>
 
-		{% set transCode = "exception." ~ exception.code %}
-		{% if transCode | trans([], "controllers") != transCode %}
+		{% set transCode = "controllers.exception." ~ exception.code %}
+		{% if (transCode|trans2) != transCode %}
 		<p>{{ 'controllers.exception.description'|trans2([base.mail()])|raw }}</p>
 		{% endif %}
 

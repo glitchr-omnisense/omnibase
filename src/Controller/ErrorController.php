@@ -32,7 +32,7 @@ class ErrorController extends AbstractController
 
         $notification = new Notification($exception);
         if ($this->baseService->isDevelopment()) $notification->send("danger");
-        if ($this->baseService->isDevelopment()) dump($exception->getMessage());
+        if ($this->baseService->isDevelopment()) dump($exception);
 
         return $response;
     }
