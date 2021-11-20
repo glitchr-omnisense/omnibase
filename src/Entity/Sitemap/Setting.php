@@ -31,7 +31,8 @@ use Countable;
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
  */
-class Setting implements TranslatableInterface
+
+final class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
     public function getLabel(): ?string { return $this->translate()->getLabel();   }

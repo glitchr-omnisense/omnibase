@@ -33,7 +33,7 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
  * @ORM\Entity()
  */
 
-class SettingTranslation implements TranslationInterface
+final class SettingTranslation implements TranslationInterface
 {
     use TranslationTrait;
 
