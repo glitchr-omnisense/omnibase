@@ -181,7 +181,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
             
             return self::getFieldValue($entity, $property);
         }
-        
+
         if ($classMetadata->hasField($property))
             return $classMetadata->getFieldValue($entity, $property);
 

@@ -194,7 +194,7 @@ trait BaseSymfonyTrait
         return $this->redirect($request->get('_route'));
     }
 
-    public function isMaintenance() { return $this->getSettings("base.settings.maintenance") || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
+    public function isMaintenance() { return $this->getSettings()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }
@@ -221,6 +221,6 @@ trait BaseSymfonyTrait
     public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
     public function execution_time() { return $this->getExecutionTime(); }
 
-    public function getSettings(?string $name = null) { return (!$name ? BaseService::$settings : BaseService::$settings->get($name)); }
-    public function settings(?string $name = null) { return $this->getSettings($name); }
+    public function getSettings() { return BaseService::$settings; }
+    public function settings() { return $this->getSettings(); }
 }

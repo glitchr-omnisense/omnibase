@@ -28,6 +28,7 @@ use Base\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Sitemap\SettingListType;
+use Base\Service\BaseSettings;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -106,14 +107,14 @@ class DashboardController extends AbstractDashboardController
             "captcha_protection" => false,
             "fields" => array_merge([
                 "base.settings.logo"                 => ["class" => ImageType::class],
-                "base.settings.logo_backoffice"      => ["class" => ImageType::class],
+                "base.settings.logo.backoffice"      => ["class" => ImageType::class],
                 "base.settings.title"                => [],
                 "base.settings.slogan"               => [],
                 "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
                 "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
-                "base.settings.maintenance_downtime" => ["class" => DateTimePickerType::class, "required" => false],
-                "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
-                "base.settings.use_https"            => [
+                "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
+                "base.settings.maintenance.uptime"   => ["class" => DateTimePickerType::class, "required" => false],
+                "base.settings.domain.https"            => [
                     "class" => HiddenType::class, 
                     "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"
                 ],
@@ -121,12 +122,12 @@ class DashboardController extends AbstractDashboardController
                     "class" => HiddenType::class, 
                     "data" => strtolower($_SERVER['HTTP_HOST'])
                 ],
-                "base.settings.base_dir"             => [
+                "base.settings.domain.base_dir"             => [
                     "class" => HiddenType::class, 
                     "data" => $this->baseService->getAsset("/")
                 ],
-                "base.settings.mail_name"            => [],
-                "base.settings.mail"                 => ["class" => EmailType::class]
+                "base.settings.mail"                 => ["class" => EmailType::class],
+                "base.settings.mail.name"            => []
             ], $fields)
         ]);
 
@@ -139,7 +140,7 @@ class DashboardController extends AbstractDashboardController
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
-            $settings = $this->baseService->getSettings()->getSettings($fields);
+            $settings = $this->baseService->getSettings()->get($fields);
             $settings = array_filter($settings, fn($value) => !is_null($value));
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $settingRepository->persist($setting);
@@ -171,7 +172,7 @@ class DashboardController extends AbstractDashboardController
         //     "captcha_protection" => false,
         //     "fields" => [
         //         "base.settings.logo"                 => ["class" => ImageType::class],
-        //         "base.settings.logo_backoffice"      => ["class" => ImageType::class],
+        //         "base.settings.logo.backoffice"      => ["class" => ImageType::class],
         //         "base.settings.title"                => [],
         //         "base.settings.slogan"               => [],
         //         "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
@@ -229,11 +230,11 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings("base.settings.logo_backoffice");
-        if(!$logo) $logo = $this->baseService->getSettings("base.settings.logo");
+        $logo  = $this->baseService->getSettings()->get("base.settings.logo.backoffice");
+        if(!$logo) $logo = $this->baseService->getSettings()->get("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
     
-        $title = $this->baseService->getSettings("base.settings.title");
+        $title = $this->baseService->getSettings()->get("base.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')
             ->setTitle('<img src="'.$this->baseService->getAsset($logo).'" alt="'.$title.'">')

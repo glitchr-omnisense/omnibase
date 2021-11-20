@@ -82,15 +82,14 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 $this->baseSettings->remove($field);
 
-                $data[$formattedField]      = $this->baseSettings->getSettings($field, $options["locale"]);
+                $settings[$formattedField]      = $this->baseSettings->getScalar($field, $options["locale"]);
             }
 
-            foreach($data as $formattedField => $setting) {
+            foreach($settings as $formattedField => $setting) {
 
                 $settingLabel = ($setting ? $setting->getLabel() : null);
                 $settingHelp  = ($setting ? $setting->getHelp()  : null);
                 $settingValue = ($setting ? $setting->getValue() : null);
-                // dump($settingValue);
 
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
@@ -122,7 +121,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     $fieldOptions["help"] = $settingHelp ?? "";
 
                 $form->add($formattedField, $class, $fieldOptions);
-                
+
                 switch($class) {
 
                     case DateTimePickerType::class:
@@ -159,10 +158,12 @@ class SettingListType extends AbstractType implements DataMapperInterface
             if($field == "valid") continue;
 
             if(!$newViewData[$field] instanceof Setting)
-                $newViewData[$field] = $this->baseSettings->getSettings($field) ?? new Setting($field, "");
+                $newViewData[$field] = $this->baseSettings->getScalar($field) ?? new Setting($field, "");
 
             $formattedField = str_replace(".", "-", $field);
             $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
+
+            dump($children[$formattedField]->getViewData());
 
             $this->baseSettings->removeCache($field);
         }
