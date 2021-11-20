@@ -60,15 +60,15 @@ class SettingTranslation implements TranslationInterface
     }
     
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="array")
      * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      * @Uploader(storage="local.storage", public="/storage", size="1024K", keepNotFound=true)
      */
     protected $value;
 
-    public function getValue(): ?string     { return Uploader::getPublicPath($this, "value") ?? $this->value; }
+    public function getValue()     { return Uploader::getPublicPath($this, "value") ?? $this->value; }
     public function getValueFile() { return Uploader::getFile($this, "value"); }
-    public function setValue(?string $value)
+    public function setValue($value)
     {
         $this->value = $value;
         return $this;

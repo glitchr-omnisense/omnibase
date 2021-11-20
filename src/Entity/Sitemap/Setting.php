@@ -26,6 +26,7 @@ use Base\Database\TranslatableInterface;
 use Base\Traits\BaseTrait;
 use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
+use Countable;
 
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
