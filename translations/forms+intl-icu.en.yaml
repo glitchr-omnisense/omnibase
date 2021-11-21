@@ -44,9 +44,17 @@ crud:
         secret: "Private"
 
 field:
-    maxfile: "The maximum file size allowed is {0}."
-    mimetype: "{0, plural,
+    maxFile: "The maximum file size allowed is {0}."
+    mimeType: "{0, plural,
             =0 {}
             =1 {Only {1} files are allowed }
             other {Allowed extensions are : {1}}
           }"
+    fileCounter: 
+        none: "No files found."
+        singular: "{0} file found."
+        plural: "{0} files found."
+    fileCounterMax:
+        none: "You cannot add any more files."
+        singular: "You can still add {0} file."
+        plural: "You can still add {0} files."

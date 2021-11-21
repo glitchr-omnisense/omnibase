@@ -135,7 +135,7 @@ class FileType extends AbstractType implements DataMapperInterface
     {
         $parent = $form->getParent();
         $entity = $parent->getData();
-        
+
         if(!is_object($entity)) $files = $form->getData();
         else {
         
@@ -150,10 +150,12 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!is_array($files)) $files = ($files ? [$files] : []);
         $view->vars['files'] = $files;
 
+        $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
         $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
         if(array_key_exists('max_filesize', $options))
             $view->vars['max_filesize'] = min($view->vars['max_filesize'], $options["max_filesize"]);
 
+            
         $acceptedFiles = ($options["mime_types"] ? $options["mime_types"] : []);
         if(!$acceptedFiles && $entity) $acceptedFiles = Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName());
         $view->vars["accept"] = $acceptedFiles;
@@ -225,6 +227,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $rawData  = $children['raw']->getData() ?? null;
         $processedData = $children['file']->getData() ?? null;
+
         $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
     }
 }

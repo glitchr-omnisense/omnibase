@@ -200,8 +200,15 @@
 {%- block fileupload_widget -%}
 
 {% set attr = attr|merge({
-    'data-file-sortable'  : form.vars.sortable,
-    'data-file-ajax'      : form.vars.ajax,
+    'data-file-sortable'              : form.vars.sortable,
+    'data-file-ajax'                  : form.vars.ajax,
+    'data-file-max-files'             : form.vars.max_files,
+    'data-file-counter[none]'         : "forms.field.fileCounter.none"       | trans2(["{0}"]),
+    'data-file-counter[singular]'     : "forms.field.fileCounter.singular"   | trans2(["{0}"]),
+    'data-file-counter[plural]'       : "forms.field.fileCounter.plural"     | trans2(["{0}"]),
+    'data-file-counter-max[none]'     : "forms.field.fileCounterMax.none"    | trans2(["{0}"]),
+    'data-file-counter-max[singular]' : "forms.field.fileCounterMax.singular"| trans2(["{0}"]),
+    'data-file-counter-max[plural]'   : "forms.field.fileCounterMax.plural"  | trans2(["{0}"])
 }) %}
 
 <div class="fileupload" data-file-field="{{ id }}" data-file-dropzone="{{form.vars.dropzone}}">
@@ -229,20 +236,20 @@
     {% endif %}
     </div>
 
-    {% if multiple %}
-    <div class="form-text text-muted">{{ files|length }} file(s) found.</div>
-    {% endif %}
-    
     {% if form.vars.max_filesize %}
-    <div class="form-filesize form-text text-muted">{{"forms.field.maxfile"|trans2([form.vars.max_filesize|filesize])}}</div>
+    <div class="form-filesize form-text text-muted">{{"forms.field.maxFile"|trans2([form.vars.max_filesize|filesize])}}</div>
     {% endif %}
     
     {% set exts = form.vars.accept|extension %}
     {% if exts is not empty %}
-        <div class="form-filesize form-text text-muted">{{"forms.field.mimetype"|trans2([exts|length, exts|join(', ')|upper])}}</div>
+    <div class="form-filesize form-text text-muted">{{"forms.field.mimeType"|trans2([exts|length, exts|join(', ')|upper])}}</div>
     {% endif %}
 
     <div class="form-errors form-text text-muted">{{ form_errors(form.raw) }}</div>
+
+    {% if multiple %}
+    <div id="{{id}}_metadata" class="form-text text-muted"></div>
+    {% endif %}
 
 </div>
 
@@ -252,7 +259,6 @@
     {% if form.parent.parent is null and multiple %}
     
         {% if form.children.vars.prototype is defined and not form.children.vars.prototype.rendered %}
-
             {% set prototype_row = form_row(form.children.vars.prototype, {attr:{"class": "form-control"}}) %}
             {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
         {% endif %}

@@ -103,32 +103,34 @@ class DashboardController extends AbstractDashboardController
      */
     public function Settings(Request $request, array $fields = []): Response
     {
+        $fields = array_merge([
+                    "base.settings.logo"                 => ["class" => ImageType::class],
+                    "base.settings.logo.backoffice"      => ["class" => ImageType::class],
+                    "base.settings.title"                => [],
+                    "base.settings.slogan"               => [],
+                    "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
+                    "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
+                    "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
+                    "base.settings.maintenance.uptime"   => ["class" => DateTimePickerType::class, "required" => false],
+                    "base.settings.domain.https"            => [
+                        "class" => HiddenType::class, 
+                        "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"
+                    ],
+                    "base.settings.domain"               => [
+                        "class" => HiddenType::class, 
+                        "data" => strtolower($_SERVER['HTTP_HOST'])
+                    ],
+                    "base.settings.domain.base_dir"             => [
+                        "class" => HiddenType::class, 
+                        "data" => $this->baseService->getAsset("/")
+                    ],
+                    "base.settings.mail"                 => ["class" => EmailType::class],
+                    "base.settings.mail.name"            => []
+                ], $fields);
+
         $form = $this->createForm(SettingListType::class, null, [
             "captcha_protection" => false,
-            "fields" => array_merge([
-                "base.settings.logo"                 => ["class" => ImageType::class],
-                "base.settings.logo.backoffice"      => ["class" => ImageType::class],
-                "base.settings.title"                => [],
-                "base.settings.slogan"               => [],
-                "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
-                "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
-                "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
-                "base.settings.maintenance.uptime"   => ["class" => DateTimePickerType::class, "required" => false],
-                "base.settings.domain.https"            => [
-                    "class" => HiddenType::class, 
-                    "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"
-                ],
-                "base.settings.domain"               => [
-                    "class" => HiddenType::class, 
-                    "data" => strtolower($_SERVER['HTTP_HOST'])
-                ],
-                "base.settings.domain.base_dir"             => [
-                    "class" => HiddenType::class, 
-                    "data" => $this->baseService->getAsset("/")
-                ],
-                "base.settings.mail"                 => ["class" => EmailType::class],
-                "base.settings.mail.name"            => []
-            ], $fields)
+            "fields" => $fields
         ]);
 
         $form->handleRequest($request);
@@ -136,12 +138,13 @@ class DashboardController extends AbstractDashboardController
         if($form->isSubmitted() && $form->isValid()){
 
             $settingRepository = $this->getDoctrine()->getRepository(Setting::class);
-
+            
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
-
+            
             $settings = $this->baseService->getSettings()->get($fields);
             $settings = array_filter($settings, fn($value) => !is_null($value));
+            
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $settingRepository->persist($setting);
 

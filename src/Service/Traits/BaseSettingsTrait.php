@@ -70,6 +70,7 @@ trait BaseSettingsTrait
     
     public function getRaw($name, ?string $locale = null)
     {
+        if(!$name) return []; // Empty name is always returning empty data..
         if(!$locale)
             $locale = $this->localeProvider->getLocale($locale);
 
@@ -111,7 +112,7 @@ trait BaseSettingsTrait
         return $this->getRaw($name, $locale)["_self"] ?? null;
     }
 
-    public function getScalar($name, ?string $locale = null)
+    public function getScalar($name, ?string $locale = null): ?string
     {
         if(!$locale)
             $locale = $this->localeProvider->getLocale($locale);
@@ -255,9 +256,9 @@ trait BaseSettingsTrait
     public function removeCache(string $name)
     {
         foreach(array_reverse(explode(".", $name)) as $last) {
-        
+
             $this->cache->delete($name);
-            $name = substr($name, 0, strlen($name) - strlen($last));
+            $name = substr($name, 0, strlen($name) - strlen($last) - 1);
         }
 
         return $this;
