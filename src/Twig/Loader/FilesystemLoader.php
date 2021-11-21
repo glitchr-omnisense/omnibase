@@ -1,23 +1,16 @@
 <?php
 
-/*
- * This file is part of Twig.
- *
- * (c) Fabien Potencier
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Base\Twig\Loader;
 
 use Twig\Error\LoaderError;
+use Twig\Loader\ChainLoader;
 use Twig\Environment;
 use Twig\Source;
 
 use Base\Service\BaseService;
+use Base\Twig\AppVariable;
+
 use Exception;
-use Twig\Loader\ChainLoader;
 
 /**
  * Loads template from the filesystem.
@@ -30,15 +23,14 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct(BaseService $baseService, Environment $twig)
+    public function __construct(Environment $twig, AppVariable $appVariable, BaseService $baseService)
     {
         $this->twig = $twig;
 
         // Add base service to the default variables
         $this->twig->addGlobal("base", $baseService);
-        $this->twig->addGlobal("base.settings", $baseService->getSettings()->get("base.settings"));
-        $this->twig->addGlobal("app.settings",  $baseService->getSettings()->get("app.settings"));
-
+        $this->twig->addGlobal("app" , $appVariable);
+        
         // Setup custom loader, to prevent the known issues of the default symfony TwigLoader
         // 1/ Cannot override <form_div_layout class="html twig">
         // 2/ Infinite loop when using {%use%}

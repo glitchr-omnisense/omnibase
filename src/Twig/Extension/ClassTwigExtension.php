@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Twig;
+namespace Base\Twig\Extension;
 
 use Base\Service\BaseService;
 use Base\Controller\BaseController;

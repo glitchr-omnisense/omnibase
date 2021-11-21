@@ -82,7 +82,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 $this->baseSettings->remove($field);
 
-                $settings[$formattedField]      = $this->baseSettings->getRawScalar($field, $options["locale"]);
+                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
             }
 
             foreach($settings as $formattedField => $setting) {

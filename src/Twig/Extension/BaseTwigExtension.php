@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Twig;
+namespace Base\Twig\Extension;
 
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
@@ -49,6 +49,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('mimetype',      [$this, 'mimetype']),
             new TwigFilter('extension',     [$this, 'extension']),
             new TwigFilter('stringify',     [$this, 'stringify']),
+            new TwigFilter('shorten',       [$this, 'shorten']),
             new TwigFilter('trans2',        [$this, 'trans2']),
             new TwigFilter('highlight',     [$this, 'highlight']),
             new TwigFilter('flatten_array', [$this, 'flattenArray']),
@@ -60,6 +61,16 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('lessThan',      [$this, 'lessThan'],    ['needs_environment' => true]),
             new TwigFilter('greaterThan',   [$this, 'greaterThan'], ['needs_environment' => true])
         ];
+    }
+
+    public function shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
+    {
+        $nChr = strlen($str);
+
+        if($nChr > $length + strlen($separator))
+            return substr($str, 0, $length/2) . $separator . substr($str, $nChr-$length/2, $length/2+1);
+
+        return $str;
     }
 
     public function extension($mimetypeOrArray)

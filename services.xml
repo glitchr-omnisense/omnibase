@@ -20,11 +20,6 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Twig\FormTwigExtension" >
-            <tag name="twig.extension" />
-            <argument type="service" id="base.form.proxy" />
-       </service>
-
         <service id="Base\Controller\BaseController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
@@ -77,16 +72,6 @@
             <argument type="service" id="App\Repository\Sitemap\WidgetSlotRepository" />
         </service>
 
-        <service id="Base\Twig\BaseTwigExtension" >
-            <tag name="twig.extension" />
-            <argument type="service" id="translator" />
-            <argument type="service" id="base.service" />
-       </service>
-
-        <service id="Base\Twig\WidgetTwigExtension" >
-            <tag name="twig.extension" />
-            <argument type="service" id="base.widget_provider" />
-       </service>
         <service id="Base\Form\Extension\FormTypeFlowExtension" >
             <tag name="form.type_extension" />
         </service>
@@ -96,13 +81,6 @@
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
             <tag name="form.type_extension" />
             <argument type="service" id="Base\Service\SpamChecker" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Form\Extension\FormTypeCsrfExtension" >
-            <tag name="form.type_extension" />
-        </service>
-        <service id="Base\Form\Extension\FormTypeBaseExtension" >
-            <tag name="form.type_extension" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -211,11 +189,11 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Twig\ClassTwigExtension" >
+        <service id="Base\Twig\Extension\ClassTwigExtension" >
             <tag name="twig.extension" />
        </service>
 
-        <service id="Base\Twig\PaginatorTwigExtension" >
+        <service id="Base\Twig\Extension\PaginatorTwigExtension" >
             <tag name="twig.extension" />
             <argument type="service" id="twig" />
             <argument type="service" id="base.service" />
@@ -258,11 +236,41 @@
 
         <service id="Base\Twig\Loader\FilesystemLoader">
             <tag name="twig.loader" />
-            <argument type="service" id="base.service" />
             <argument type="service" id="twig" />
+            <argument type="service" id="base.twig.app_variable" />
+            <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="base.settings" />
+        </service>
 
+        <service id="Base\Twig\Extension\FormTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="base.form.proxy" />
+       </service>
+
+        <service id="Base\Twig\Extension\BaseTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="base.service" />
+       </service>
+
+        <service id="Base\Twig\Extension\WidgetTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="base.widget_provider" />
+       </service>
+
+        <service id="Base\Form\Extension\FormTypeCsrfExtension" >
+            <tag name="form.type_extension" />
+        </service>
+        <service id="Base\Form\Extension\FormTypeBaseExtension" >
+            <tag name="form.type_extension" />
+            <argument type="service" id="base.service" />
+        </service>
+        
         <!--
 
             Validation constraints
@@ -503,7 +511,6 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="translator" />
         </service>
-
         
         <service id="Base\Controller\Dashboard\DashboardController">
             <tag name="controller.service_arguments" />
@@ -515,13 +522,6 @@
             <argument type="service" id="base.service" />
             <argument type="service" id="security.authentication_utils" />
             <argument type="service" id="ga.service" on-invalid="null" />
-        </service>
-
-        <service id="Base\Subscriber\DashboardSubscriber">
-            <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
         </service>
 
         <service id="Base\Controller\Dashboard\Crud\UserCrudController">

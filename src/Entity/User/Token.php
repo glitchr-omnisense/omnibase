@@ -9,7 +9,7 @@ use Doctrine\Common\Collections\Collection;
 
 use App\Repository\User\TokenRepository;
 use Base\Service\BaseService;
-use Base\Twig\BaseTwigExtension;
+use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Hashids\Hashids;

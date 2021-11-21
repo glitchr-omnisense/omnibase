@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Service\BaseService;
-use Base\Twig\BaseTwigExtension;
+use Base\Twig\Extension\BaseTwigExtension;
 
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Translation\Translator;

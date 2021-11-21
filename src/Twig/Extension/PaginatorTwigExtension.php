@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Twig;
+namespace Base\Twig\Extension;
 
 use Base\Form\FormProxy;
 use Base\Model\PaginationInterface;

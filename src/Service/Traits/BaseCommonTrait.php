@@ -5,7 +5,7 @@ namespace Base\Service\Traits;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Base\Service\LocaleProviderInterface;
-use Base\Twig\BaseTwigExtension;
+use Base\Twig\Extension\BaseTwigExtension;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;
 
