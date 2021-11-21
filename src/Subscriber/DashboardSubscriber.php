@@ -42,37 +42,37 @@ class DashboardSubscriber implements EventSubscriberInterface
 
     public function onKernelException(ExceptionEvent $exception)
     {
-        // Check if exception happened in EasyAdmin (avoid warning outside EA)
-        if(!$this->adminContextProvider) return;
-        if(!$this->adminContextProvider->getContext()) return;
+        // // Check if exception happened in EasyAdmin (avoid warning outside EA)
+        // if(!$this->adminContextProvider) return;
+        // if(!$this->adminContextProvider->getContext()) return;
 
-        // Get back exception & send flash message
-        $notification = new Notification($exception);
-        if (!empty($notification->getContent())) {
+        // // Get back exception & send flash message
+        // $notification = new Notification($exception);
+        // if (!empty($notification->getContent())) {
 
-            if ($this->baseService->isDevelopment()) dump($exception);
-            if ($this->baseService->isDevelopment()) $notification->send("danger");
-        }
+        //     if ($this->baseService->isDevelopment()) dump($exception);
+        //     if ($this->baseService->isDevelopment()) $notification->send("danger");
+        // }
 
-        // Get back crud information
-        $crud       = $this->adminContextProvider->getContext()->getCrud();
-        if(!$crud) return;
+        // // Get back crud information
+        // $crud       = $this->adminContextProvider->getContext()->getCrud();
+        // if(!$crud) return;
 
-        $controller = $crud->getControllerFqcn();
-        $action     = $crud->getCurrentPage();
+        // $controller = $crud->getControllerFqcn();
+        // $action     = $crud->getCurrentPage();
 
-        // Avoid infinite redirection
-        // - If exception happened in "index", redirect to dashboard
-        // - If exception happened in an other section, redirect to index page first
-        // - If exception happened after submitting a form, just redirect to the initial page
-        $url = $this->adminUrlGenerator->unsetAll();
-        switch($action) {
+        // // Avoid infinite redirection
+        // // - If exception happened in "index", redirect to dashboard
+        // // - If exception happened in an other section, redirect to index page first
+        // // - If exception happened after submitting a form, just redirect to the initial page
+        // $url = $this->adminUrlGenerator->unsetAll();
+        // switch($action) {
 
-            case "index": break;
-            default:
-                $url = $url->setController($controller);
-        }
+        //     case "index": break;
+        //     default:
+        //         $url = $url->setController($controller);
+        // }
 
-        $exception->setResponse(new RedirectResponse($url));
+        // $exception->setResponse(new RedirectResponse($url));
     }
 }

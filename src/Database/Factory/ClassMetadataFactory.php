@@ -330,8 +330,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 if(!$metadata->discriminatorValue) 
                     throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
             }
-            
-
         } 
 
         if (

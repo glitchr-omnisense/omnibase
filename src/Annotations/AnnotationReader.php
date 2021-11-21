@@ -99,9 +99,13 @@ class AnnotationReader
         if($parseUrl["scheme"] ?? false)
             return $url;
 
-        $path = $parseUrl["path"];
-        if(!str_starts_with($path, "/"))
-            $path = $this->requestStack->getCurrentRequest()->getBasePath()."/".$path;
+        $request = $this->requestStack->getCurrentRequest();
+        $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
+
+        $path = trim($parseUrl["path"]);
+        if($path == "/") return $baseDir;
+        else if(!str_starts_with($path, "/"))
+            $path = $baseDir."/".$path;
 
         return $path;
     }

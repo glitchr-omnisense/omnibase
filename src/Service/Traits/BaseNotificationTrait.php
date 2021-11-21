@@ -22,7 +22,7 @@ trait BaseNotificationTrait
 {
     public function getMail()
     {
-        $name = $this->getSettings("base.settings.mail.name") ?? null;
+        $name = $this->getSettings()->mail_name() ?? null;
         if (!$name) {
 
             $domain = explode(".", $this->getSettings()->domain());
@@ -32,7 +32,7 @@ trait BaseNotificationTrait
         }
 
         // Mail is not defined in messages, because it is defined in services.yaml
-        $mail = $this->getSettings()->get("base.settings.mail") ?? $this->getParameterBag('base.mail');
+        $mail = $this->getSettings()->mail() ?? $this->getParameterBag('base.mail');
         return $name . " <" . $mail . ">";
     }
 

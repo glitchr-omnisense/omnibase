@@ -1,15 +1,20 @@
 {% extends 'layout.html.twig' %}
 {% block content %}
-	<article class="half text-center wrapper">
-		<h1>{{ 'controllers.exception.title'|trans2 }}</h1><br/>
-		<h3>{{ exception.getCode() }} {{ exception.getMessage() }}</h3>
+	<div class="exception half text-center wrapper">
 
-		{% set transCode = "controllers.exception." ~ exception.code %}
+		{% set transCode = "controllers.exception." ~ exception.statusCode %}
 		{% if (transCode|trans2) != transCode %}
-		<p>{{ 'controllers.exception.description'|trans2([base.mail()])|raw }}</p>
+			<h1 class="exception-title">{{ exception.statusCode }} {{ transCode|trans2 }}</h1>
+			<h3>{{ 'controllers.exception.title'|trans2 }}</h3>
+			<p class="exception-message">{{ 'controllers.exception.description'|trans2([base.mail()])|raw }}</p>
+		{% else %}
+			{% set code = ((exception.statusCode != 0) ? exception.statusCode : null)|default(500) %}
+			<h1 class="exception-title">{{ code }} {{"controllers.exception.unknown"|trans2}}</h1>
+			<h3>{{ 'controllers.exception.title'|trans2 }}</h3>
+			<p class="exception-message">{{ exception.getMessage() }}</p>
 		{% endif %}
 
 		{% set referer = app.request.server.get('http-referer')|default(asset('')) %}
-		<p>{{ 'controllers.exception.return'|trans2([referer])|raw }}<p>
-	</article>
+		<p class="exception-referer">{{ 'controllers.exception.return'|trans2([referer])|raw }}<p>
+	</div>
 {% endblock %}

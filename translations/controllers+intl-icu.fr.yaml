@@ -4,7 +4,7 @@ exception:
            Tu peux nous envoyer un email <a href=\"mailto:{0}\">ici</a> pour essayer de décrire ce qu'il s'est passé."
     return: "Retourner à la page d'<a href=\"{0}\">accueil</a>."
 
-    unknown: "Inconnue"
+    unknown: "Erreur Inconnue"
     400: "Accès Interdit"
     401: "Non Authentifié"
     402: "Paiement Requis"

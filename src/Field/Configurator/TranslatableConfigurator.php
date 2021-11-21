@@ -51,7 +51,7 @@ final class TranslatableConfigurator implements FieldConfiguratorInterface
                     if (!$entity) $entity = $childField->get($this->localeProvider->getDefaultLocale());
 
                     $formattedValue = ($entity ? $childField->getTypeClass()->getFieldValue($entity, $fieldName) : null);
-                    $field->setFormattedValue(BaseService::shortenStr($formattedValue, 15));
+                    $field->setFormattedValue($formattedValue);
                 }
             }
         }

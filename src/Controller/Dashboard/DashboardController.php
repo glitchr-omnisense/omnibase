@@ -230,11 +230,11 @@ class DashboardController extends AbstractDashboardController
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings()->get("base.settings.logo.backoffice");
-        if(!$logo) $logo = $this->baseService->getSettings()->get("base.settings.logo");
+        $logo  = $this->baseService->getSettings()->getScalar("base.settings.logo.backoffice");
+        if(!$logo) $logo = $this->baseService->getSettings()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
     
-        $title = $this->baseService->getSettings()->get("base.settings.title");
+        $title = $this->baseService->getSettings()->getScalar("base.settings.title");
         return Dashboard::new()
             ->setTranslationDomain('dashboard')
             ->setTitle('<img src="'.$this->baseService->getAsset($logo).'" alt="'.$title.'">')

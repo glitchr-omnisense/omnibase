@@ -82,7 +82,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 $this->baseSettings->remove($field);
 
-                $settings[$formattedField]      = $this->baseSettings->getScalar($field, $options["locale"]);
+                $settings[$formattedField]      = $this->baseSettings->getRawScalar($field, $options["locale"]);
             }
 
             foreach($settings as $formattedField => $setting) {
@@ -158,12 +158,10 @@ class SettingListType extends AbstractType implements DataMapperInterface
             if($field == "valid") continue;
 
             if(!$newViewData[$field] instanceof Setting)
-                $newViewData[$field] = $this->baseSettings->getScalar($field) ?? new Setting($field, "");
+                $newViewData[$field] = $this->baseSettings->getRawScalar($field) ?? new Setting($field, "");
 
             $formattedField = str_replace(".", "-", $field);
             $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
-
-            dump($children[$formattedField]->getViewData());
 
             $this->baseSettings->removeCache($field);
         }

@@ -5,7 +5,7 @@ exception:
           We will fix it as soon as possible. Sorry for any inconvenience caused."
     return: "Return to the <a href=\"{0}\">home page</a>."
 
-    unknown: "Unknown"
+    unknown: "Unknown Error"
     400: "Bad Request"
     401: "Not Authorized"
     402: "Payment Required"
