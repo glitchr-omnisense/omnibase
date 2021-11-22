@@ -72,13 +72,6 @@ class ClassMetadataManipulator
                 $validFields[$fieldName] = ["type" => DateTimePickerType::class];
             if($metadata->getTypeOfField($fieldName) == "array")
                 $validFields[$fieldName] = ["type" => SelectType::class];
-
-            // Detect ENUM/SET TYPE..
-            // $isSetType = false; // Detect if SetType
-            // $typeOfField = $metadata->getTypeOfField($fieldName);
-            // if($typeOfField && Type::hasType($typeOfField)) {
-            //     $isSetType = is_subclass_of(Type::getType($typeOfField), SetType::class);
-            // }
         }
         
         foreach($fields as $fieldName => $field) {

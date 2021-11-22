@@ -68,7 +68,6 @@ class FileType extends AbstractType implements DataMapperInterface
             'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.css"),
 
             'allow_delete' => true,
-            'required'     => false,
             'multiple'     => false,
 
             'sortable'     => true,
@@ -155,7 +154,6 @@ class FileType extends AbstractType implements DataMapperInterface
         if(array_key_exists('max_filesize', $options))
             $view->vars['max_filesize'] = min($view->vars['max_filesize'], $options["max_filesize"]);
 
-            
         $acceptedFiles = ($options["mime_types"] ? $options["mime_types"] : []);
         if(!$acceptedFiles && $entity) $acceptedFiles = Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName());
         $view->vars["accept"] = $acceptedFiles;

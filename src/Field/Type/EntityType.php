@@ -35,6 +35,14 @@ class EntityType extends AbstractType implements DataMapperInterface
         return self::$entitySerializer;
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    public function getBlockPrefix()
+    {
+        return 'entity2';
+    }
+
     public function setFieldValue($entity, string $property, $value)
     {
         $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
@@ -62,7 +70,6 @@ class EntityType extends AbstractType implements DataMapperInterface
             "multiple" => false,
             'allow_add' => false,
             'allow_delete' => false,
-
             'select2' => false,
             'dropzone' => false
         ]);
@@ -76,6 +83,11 @@ class EntityType extends AbstractType implements DataMapperInterface
                 throw new \RuntimeException("Unexpected \"data_class\" option detected combined with \"multiple\" option.. This is not allowed in \"".get_called_class()."\"");
 
             return $value;
+        });
+
+        $resolver->setNormalizer('required', function (Options $options, $value) {
+            if($options["multiple"]) return true;
+            else return $value;
         });
     }
 
@@ -120,31 +132,36 @@ class EntityType extends AbstractType implements DataMapperInterface
                     'allow_add' => $options["allow_add"],
                     'allow_delete' => $options["allow_delete"],
                     'by_reference' => false,
-                    'required' => $options["required"],
-                    'form2' => false
                 ]);
 
             } else {
 
                 $dataClass = $this->classMetadataManipulator->getDataClass($form);
-
+                $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
+        
                 $fields = $options["fields"];
-                if(empty($fields) || $options["autoload"])
+                if($options["autoload"])
                     $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
- 
+
                 foreach ($fields as $fieldName => $field) {
+
+                    // Fields to be excluded (in case autoload is disabled)
+                    if(in_array($fieldName, $options["excluded_fields"]))
+                        continue;
 
                     $fieldType = $field['type'] ?? (!empty($field['data']) ? HiddenType::class : null);
                     unset($field['type']);
 
-                    if(array_key_exists("required", $field))
-                        $field['required'] = $field['required'] & $options["required"];
-
+                    $isNullable = $classMetadata->getFieldMapping($fieldName)["nullable"] ?? false;
+                    if(!array_key_exists("required", $field) && $isNullable)
+                        $field['required'] = false;
+                    
                     $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
                     unset($field['allow_recursive']);
-                    
-                    if ($fieldRecursive)
+
+                    if ($fieldRecursive){
                         $form->add($fieldName, $fieldType, $field);
+                    }
                 }
             }
         });
@@ -156,7 +173,7 @@ class EntityType extends AbstractType implements DataMapperInterface
         if (null === $parentData) {
             return;
         }
-        
+
         $data = $parentData;
         if ($data instanceof PersistentCollection) {
 
@@ -181,9 +198,9 @@ class EntityType extends AbstractType implements DataMapperInterface
         $dataClass = $form->getConfig()->getOption("data_class");
 
         $data = [];
-        foreach($childForms as $fieldName => $childForm) {
+
+        foreach($childForms as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
-        }
 
         if($dataClass) {
 
@@ -209,8 +226,9 @@ class EntityType extends AbstractType implements DataMapperInterface
             $fieldName = $parentData->getMapping()["fieldName"];
             $isOwningSide = $parentData->getMapping()["isOwningSide"];
 
-            if($child = $data[$fieldName]) {
+            if(array_key_exists($fieldName, $data)) {
 
+                $child = $data[$fieldName];
                 if(!$isOwningSide) {
                     foreach($parentData as $entry)
                         $this->setFieldValue($entry, $mappedBy, null);

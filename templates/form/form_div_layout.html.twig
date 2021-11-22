@@ -15,9 +15,9 @@
 
 {% block form2_row -%}
 
-    {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%} #}
-    {# {%- set widget_attr = {attr: attr} -%} #}
-    {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {%- set widget_attr = {attr: attr} -%}
+    {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%} #}
     <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
         <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
         {{- form_errors(form) -}}
@@ -255,27 +255,39 @@
 
 {%- endblock -%}
 
-{%- block entity_row -%}
+{%- block entity2_label -%}
+    {% if form.vars.multiple %}
+        {{ form_label(form, null, {'required': false}) }}
+    {% else %}
+        {{ form_label(form, null, {'required': form.vars.required}) }}
+    {% endif %}
+{%- endblock -%}
+
+{%- block entity2_row -%}
     {% if form.parent.parent is null and multiple %}
     
         {% if form.children.vars.prototype is defined and not form.children.vars.prototype.rendered %}
             {% set prototype_row = form_row(form.children.vars.prototype, {attr:{"class": "form-control"}}) %}
             {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
         {% endif %}
-        
+
         {% set attr = attr|merge({
             'data-collection-field': 'true',
             'data-allow-add': form.children.vars.allow_add ? 'true' : 'false',
             'data-allow-delete': form.children.vars.allow_delete ? 'true' : 'false',
             'data-num-items': form.children is empty ? 0 : max(form.children|keys),
             'data-form-type-name-placeholder': form.children.vars.prototype is defined ? form.children.vars.prototype.vars.name : '',
+            'data-empty-collection': block('collection2_empty') 
         }) %}
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
+        {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+
+        {{ form_label(form)}}
         <div {{ block('widget_attributes') }}>
-            {{ form_label(form)}}
             {{ form_widget(form.children) }}
         </div>
+
     {% else %}
         {{ block('form_row') }}
     {% endif %}
@@ -284,37 +296,46 @@
 {%- block collection2_row -%}
 
     {% if prototype is defined and not prototype.rendered %}
-        {% set row_attr = row_attr|merge({ 'data-prototype': form_row(prototype) }) %}
+        {% set prototype_row = form_row(prototype, {attr:{"class": "form-control"}}) %}
+        {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
     {% endif %}
 
-    {% set row_attr = row_attr|merge({
+    {% set attr = attr|merge({
         'data-collection-field': 'true',
         'data-allow-add': allow_add ? 'true' : 'false',
         'data-allow-delete': allow_delete ? 'true' : 'false',
         'data-num-items': form.children is empty ? 0 : max(form.children|keys),
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
+        'data-empty-collection': block('collection2_empty')
     }) %}
-
-    {{ form_row(form, {row_attr: row_attr}) }}
-
+    
+    {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
+    {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    
+    {{ form_label(form)}}
+    <div {{ block('widget_attributes') }}>
+        {{ form_widget(form) }}
+    </div>
+    
 {%- endblock collection2_row -%}
+
+{%- block collection2_label -%}
+    {{ form_label(form, null, {'required': false}) }}
+{%- endblock -%}
 
 {%- block collection2_widget -%}
 
     {# the "is iterable" check is needed because if an object implements __toString() and
                returns an empty string, "is empty" returns true even if it's not a collection #}
+
     {% set isEmptyCollection = value is null or (value is iterable and value is empty) %}
-        {% if isEmptyCollection %}
-            {{ block('collection2_empty') }}
-        {% else %}
-            {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
-            {{ form_widget(form, {attr: attr}) }}
-        {% endif %}
-
-    {% if isEmptyCollection or form.vars.prototype is defined %}
-        {% set attr = attr|merge({'data-empty-collection': block('collection2_empty') }) %}
+    {% if  isEmptyCollection %}
+        {{ block('collection2_empty') }}
+    {% else %}
+        {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
+        {{ form_widget(form, {attr: attr}) }}
     {% endif %}
-
+    
     {% if allow_add|default(false) %}
         <button type="button" class="btn btn-link form-collection-add-button">
             <i class="fa fa-plus pr-1"></i>
@@ -328,7 +349,6 @@
 {%- endblock collection2_entry_row -%}
 
 {%- block collection2_entry_widget -%}
-
     {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
     {% set delete_item_button %}
         <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
@@ -352,7 +372,7 @@
             </h2>
             <div id="{{ id }}-contents" class="accordion-collapse collapse">
                 <div class="accordion-body">
-                    {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-group') %}
+                    {# {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-group') %} #}
                     {{ form_widget(form, {attr:attr}) }}
                 </div>
             </div>

@@ -152,7 +152,9 @@
             {
                 padding: 0 !important;
             }
+            
 
+            .responsive-menu { padding:1.25em; }
             .logo, .responsive-logo {
                 
                 border-radius:50% !important;
@@ -225,8 +227,6 @@
                 margin-right: auto;
                 object-fit:cover;
                 display: block;
-                
-                padding: 1.25em;
             }
             
             .content-panel-body.without-footer, .content-panel-footer
@@ -260,6 +260,14 @@
                 padding-right:1em;
                 background: var(--fieldset-bg);
                 border: var(--border-width) var(--border-style) var(--border-color);
+                border-radius: 1em;
+            }
+
+            .responsive-header .user-menu-wrapper 
+            {
+                padding-right:1em;
+                background: transparent;
+                border: 0;
                 border-radius: 1em;
             }
 
@@ -316,17 +324,6 @@
         {% endblock flash_messages %}
 
         {% set user_menu_avatar %}
-            {# {% if null == ea.userMenu.avatarUrl %}
-                <span class="user-avatar">
-                    <span class="fa-stack">
-                    
-                        <i class="user-avatar-icon-background fas fa-square fa-stack-2x"></i>
-                        <i class="user-avatar-icon-foreground {{ ea.user is not null ? 'fa fa-user' : 'fas fa-user-slash' }} fa-stack-1x fa-inverse"></i>
-                    </span>
-                </span>
-            {% else %}
-                <img class="user-avatar" src="{{ ea.userMenu.avatarUrl }}" />
-            {% endif %} #}
             {% if null == ea.userMenu.avatarUrl %}
                 <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
             {% else %}
@@ -373,7 +370,7 @@
                 <div class="responsive-header">
                     {% block responsive_header %}
                         
-                        <div class="user-avatar">
+                        <div class="responsive-menu">
                             <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
                                 <i class="fa fa-2x fa-bars"></i>
                             </button>

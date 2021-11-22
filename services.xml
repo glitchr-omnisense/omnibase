@@ -384,6 +384,7 @@
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Field\Type\EntityType">

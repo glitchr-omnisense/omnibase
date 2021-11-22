@@ -26,10 +26,11 @@ class TranslatableType extends AbstractType
     protected $fallbackLocales = [];
 
     protected $localeProvider = null;
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, BaseService $baseService)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->localeProvider = $localeProvider;
+        $this->baseService = $baseService;
     }
 
     public function getDefaultLocale()
@@ -151,7 +152,9 @@ class TranslatableType extends AbstractType
 
             $unavailableRequiredLocales = array_diff($options['required_locales'], $options['available_locales']);
             if(!empty($unavailableRequiredLocales))
-                throw new MissingLocaleException("The locale(s) \"".implode(",", $unavailableRequiredLocales)."\" are missing, but required by FormType \"".$form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType()).")");
+                throw new MissingLocaleException(
+                    "The locale(s) \"".implode(",", $unavailableRequiredLocales)."\" are missing, but required by FormType \"".
+                    $form->getName()."\" (".get_class($form->getConfig()->getType()->getInnerType())."). Available locales are: ".implode(",", $options["available_locales"]));
 
             $dataLocale = ($event->getData() ? $event->getData()->getKeys() : [$options["locale"]]);
             $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
@@ -165,13 +168,13 @@ class TranslatableType extends AbstractType
                     $defaultLocale = $locale = $dataLocale[0];
 
                 $required  = \in_array($locale, $options['required_locales'], true);
-                $required |= $locale == $defaultLocale;
+                $required |= ($locale == $defaultLocale);
 
                 $form->add($locale, EntityType::class, [
                     'data_class' => $translationClass,
                     'required' => $required,
                     'fields' => $fields[$locale],
-                    'excluded_fields' => $options['excluded_fields'],
+                    'excluded_fields' => $options['excluded_fields']
                 ]);
             }
         });
@@ -200,6 +203,8 @@ class TranslatableType extends AbstractType
     
         $view->vars["default_locale"]    = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];
+
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-translatable.js");
     }
 
     /**

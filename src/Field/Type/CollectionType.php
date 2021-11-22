@@ -30,17 +30,54 @@ class CollectionType extends AbstractType
     /**
      * {@inheritdoc}
      */
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver->setDefaults([
+            'form2' => false,
+            'allow_add' => false,
+            'allow_delete' => false,
+            'collection_required' => true,
+            'prototype' => true,
+            'prototype_data' => null,
+            'prototype_name' => '__prototype__',
+            'entry_type' => TextType::class,
+            'entry_options' => [],
+            'entry_required' => null,
+            'delete_empty' => false,
+            'invalid_message' => function (Options $options, $previousValue) {
+               return 'The collection is invalid.';
+            },
+        ]);
+
+        $resolver->setNormalizer('entry_options', function (Options $options, $value) {
+            $value['block_name'] = 'entry';
+            return $value;
+        });
+
+        $resolver->setNormalizer('required', function (Options $options, $value) {
+            // Collection is always submitted regardless of its options..
+            // It returns at least an empty array..
+            // NB: Child fields "required" options are deduced from parents.
+            //     Collection is not supposed to knows about child requirements
+            return true;
+        });
+
+        $resolver->setAllowedTypes('delete_empty', ['bool', 'callable']);
+    }
+    
+    /**
+     * {@inheritdoc}
+     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         if ($options['allow_add'] && $options['prototype']) {
-            $prototypeOptions = array_replace([
-                'required' => $options['required'],
-                'label' => $options['prototype_name'].'__label__',
-            ], $options['entry_options']);
 
-            if (null !== $options['prototype_data']) {
+            $prototypeOptions = $options['entry_options'];
+            if (null !== $options['prototype_data'])
                 $prototypeOptions['data'] = $options['prototype_data'];
-            }
+
+            if (null !== $options['entry_required'])
+                $prototypeOptions['required'] = $options['entry_required'];
 
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
             $builder->setAttribute('prototype', $prototype->getForm());
@@ -60,11 +97,8 @@ class CollectionType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars = array_replace($view->vars, [
-            'allow_add' => $options['allow_add'],
-            'allow_delete' => $options['allow_delete'],
-            'required' => $options['required'],
-        ]);
+        $view->vars['allow_add'] = $options['allow_add'] ?? $view->vars['allow_add'];
+        $view->vars['allow_delete'] = $options['allow_delete'] ?? $view->vars['allow_delete'];
 
         if ($form->getConfig()->hasAttribute('prototype')) {
             $prototype = $form->getConfig()->getAttribute('prototype');
@@ -95,7 +129,8 @@ class CollectionType extends AbstractType
         /** @var FormInterface $prototype */
         if ($prototype = $form->getConfig()->getAttribute('prototype')) {
 
-            if ($view->vars['prototype']->vars['multipart']) {
+            $prototypeView = $view->vars['prototype'];
+            if ($prototypeView->vars['multipart']) {
                 $view->vars['multipart'] = true;
             }
 
@@ -103,37 +138,9 @@ class CollectionType extends AbstractType
                 --$prefixOffset;
             }
 
-            array_splice($view->vars['prototype']->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
+            array_splice($prototypeView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
         }
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-collection.js");
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function configureOptions(OptionsResolver $resolver)
-    {
-        $entryOptionsNormalizer = function (Options $options, $value) {
-            $value['block_name'] = 'entry';
-            return $value;
-        };
-
-        $resolver->setDefaults([
-            'allow_add' => false,
-            'allow_delete' => false,
-            'prototype' => true,
-            'prototype_data' => null,
-            'prototype_name' => '__prototype__',
-            'entry_type' => TextType::class,
-            'entry_options' => [],
-            'delete_empty' => false,
-            'invalid_message' => function (Options $options, $previousValue) {
-               return 'The collection is invalid.';
-            },
-        ]);
-
-        $resolver->setNormalizer('entry_options', $entryOptionsNormalizer);
-        $resolver->setAllowedTypes('delete_empty', ['bool', 'callable']);
     }
 }

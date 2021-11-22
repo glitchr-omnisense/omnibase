@@ -565,12 +565,13 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $qb = $this->innerJoin($qb, $fieldName);
         }
 
-        // Time related operation
+        $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
+        $regexRequested = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
+            
         if(is_string($fieldValue)) {
 
             $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
-            $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
             if($datetimeRequested) {
 
                 if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
@@ -582,7 +583,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 }
             }
 
-            $regexRequested = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
             if($regexRequested) {
 
                     if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
