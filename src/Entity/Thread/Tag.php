@@ -24,18 +24,6 @@ use Base\Traits\ColumnAliasTrait;
 class Tag implements TranslatableInterface
 {
     use TranslatableTrait;
-    public function getName()  : ?string { return $this->translate()->getName(); }
-    public function getDescription(): ?string { return $this->translate()->getDescription(); }
-    
-    public function setName(?string $name) {
-        $this->translate()->setName($name);  
-        return $this; 
-    }
-
-    public function setDescription(?string $content) { 
-        $this->translate()->setDescription($content); 
-        return $this; 
-    }
 
     /**
      * @ORM\Id

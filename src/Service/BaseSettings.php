@@ -28,6 +28,7 @@ class BaseSettings
     public function mail_name  (?string $locale = null) : ?string { return $this->getScalar("base.settings.mail.name", $locale); }
     public function protocol   (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.https", $locale)) ? "https" : "http"; }
     public function maintenance(?string $locale = null) : bool    { return filter_var($this->getScalar("base.settings.maintenance", $locale)); }
+    public function url($url, $packages = null) { return $this->packages->getUrl($url, $packages); }
     public function domain     (int $level = 0, ?string $locale = null) : ?string
     {
         $domain = $this->getScalar("base.settings.domain",       $locale);

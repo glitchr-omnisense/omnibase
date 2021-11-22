@@ -198,6 +198,18 @@ trait BaseSymfonyTrait
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isDebug() { return $this->kernel->isDebug(); }
+    public function isProfiler($request = null)
+    {
+        if(!$request) $request = $this->getRequest();
+        if($request instanceof RequestStack)
+            $request = $request->getCurrentRequest();
+        else if(!$request instanceof Request)
+            throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
+
+        $route = $request->get('_route');
+
+        return $route == "_wdt" || $route == "_profiler";
+    }
 
     public function isEasyAdmin($request = null)
     {

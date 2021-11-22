@@ -35,24 +35,6 @@ use Countable;
 final class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
-    public function getLabel(): ?string { return $this->translate()->getLabel();   }
-    public function setLabel(?string $label) {
-        $this->translate()->setLabel($label);  
-        return $this;
-    }
-
-    public function getHelp(): ?string { return $this->translate()->getHelp();   }
-    public function setHelp(?string $help) {
-        $this->translate()->setHelp($help);  
-        return $this; 
-    }
-    
-    public function getValue() { return $this->translate()->getValue(); }
-    public function setValue($value) {
-        $this->translate()->setValue($value);  
-        return $this; 
-    }
-
     public function getOneOrNullValue()
     {
         $value = $this->getValue();

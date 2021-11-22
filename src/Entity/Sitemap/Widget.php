@@ -39,25 +39,7 @@ use Base\Repository\Sitemap\WidgetRepository;
 class Widget implements TranslatableInterface
 {   
     use TranslatableTrait;
-    public function getTitle()  : ?string { return $this->translate()->getTitle()  ; }
-    public function getExcerpt(): ?string { return $this->translate()->getExcerpt(); }
-    public function getContent(): ?string { return $this->translate()->getContent(); }
     
-    public function setTitle(?string $title) {
-        $this->translate()->setTitle($title);  
-        return $this; 
-    }
-
-    public function setExcerpt(?string $excerpt) { 
-        $this->translate()->setExcerpt($excerpt); 
-        return $this; 
-    }
-
-    public function setContent(?string $content) { 
-        $this->translate()->setContent($content); 
-        return $this; 
-    }
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

@@ -179,6 +179,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     protected function parseMethod($method, $arguments)
     {
+
         // Head parameters (depends on the method name) + default ones
         // Default parameters:
         // - 0: criteria
@@ -570,8 +571,6 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             
         if(is_string($fieldValue)) {
 
-            $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
-
             if($datetimeRequested) {
 
                 if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
@@ -584,6 +583,8 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             }
 
             if($regexRequested) {
+
+                $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
                     if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
                 else if($tableOperator == self::OPTION_ENDING_WITH      ) $fieldValue = "%".$fieldValue;
