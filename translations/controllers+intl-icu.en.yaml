@@ -44,14 +44,6 @@ maintenance:
               }"
     progress: "Progression {0}%"
 
-policy:
-    title: "Privacy Policy"
-    desc: "To Do"
-
-terms:
-    title: "Terms of Use"
-    desc: "To Do"
-
 register:
     validation_required: This account requires to be verified
 

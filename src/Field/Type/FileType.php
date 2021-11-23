@@ -97,6 +97,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
         if(!$isDropzone || !$multiple)
             $builder->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+                "required" => false,
                 "multiple" => $multiple,
                 "constraints" => [
                     new FileSize(["max" => $maxFilesize]),

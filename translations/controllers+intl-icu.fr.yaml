@@ -42,14 +42,6 @@ maintenance:
               }"
     progress: "Progression {0}%"
 
-policy:
-    title: "Politique de Protection des Données Personnelles"
-    desc: "À Rédiger"
-
-terms:
-    title: "Conditions Générales d'Utilisation"
-    desc: "À Rédiger"
-
 search:
   content: "Rechercher dans le contenu"
   excerpt: "Rechercher dans l'extrait"
