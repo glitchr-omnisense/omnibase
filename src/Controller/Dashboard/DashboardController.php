@@ -28,6 +28,7 @@ use Base\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Sitemap\SettingListType;
+use Base\Form\Type\Sitemap\WidgetListType;
 use Base\Service\BaseSettings;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -104,35 +105,22 @@ class DashboardController extends AbstractDashboardController
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_merge([
-                    "base.settings.logo"                 => ["class" => ImageType::class],
-                    "base.settings.logo.backoffice"      => ["class" => ImageType::class],
-                    "base.settings.title"                => [],
-                    "base.settings.slogan"               => [],
-                    "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
-                    "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
-                    "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
-                    "base.settings.maintenance.uptime"   => ["class" => DateTimePickerType::class, "required" => false],
-                    "base.settings.domain.https"            => [
-                        "class" => HiddenType::class, 
-                        "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"
-                    ],
-                    "base.settings.domain"               => [
-                        "class" => HiddenType::class, 
-                        "data" => strtolower($_SERVER['HTTP_HOST'])
-                    ],
-                    "base.settings.domain.base_dir"             => [
-                        "class" => HiddenType::class, 
-                        "data" => $this->baseService->getAsset("/")
-                    ],
-                    "base.settings.mail"                 => ["class" => EmailType::class],
-                    "base.settings.mail.name"            => []
-                ], $fields);
+            "base.settings.logo"                 => ["class" => ImageType::class],
+            "base.settings.logo.backoffice"      => ["class" => ImageType::class],
+            "base.settings.title"                => [],
+            "base.settings.slogan"               => [],
+            "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
+            "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
+            "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
+            "base.settings.maintenance.uptime"   => ["class" => DateTimePickerType::class, "required" => false],
+            "base.settings.domain.https"         => ["class" => HiddenType::class, "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
+            "base.settings.domain"               => ["class" => HiddenType::class, "data" => strtolower($_SERVER['HTTP_HOST'])],
+            "base.settings.domain.base_dir"      => ["class" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
+            "base.settings.mail"                 => ["class" => EmailType::class],
+            "base.settings.mail.name"            => []
+        ], $fields);
 
-        $form = $this->createForm(SettingListType::class, null, [
-            "captcha_protection" => false,
-            "fields" => $fields
-        ]);
-
+        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
@@ -169,66 +157,17 @@ class DashboardController extends AbstractDashboardController
      *
      * @Route("/dashboard/widgets", name="base_dashboard_widgets")
      */
-    public function Widgets(Request $request): Response
+    public function Widgets(Request $request, array $fields = []): Response
     {
-        // $form = $this->createForm(SettingListType::class, null, [
-        //     "captcha_protection" => false,
-        //     "fields" => [
-        //         "base.settings.logo"                 => ["class" => ImageType::class],
-        //         "base.settings.logo.backoffice"      => ["class" => ImageType::class],
-        //         "base.settings.title"                => [],
-        //         "base.settings.slogan"               => [],
-        //         "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
-        //         "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
-        //         "base.settings.maintenance_downtime" => ["class" => DateTimePickerType::class, "required" => false],
-        //         "base.settings.maintenance_uptime"   => ["class" => DateTimePickerType::class, "required" => false],
-        //         "base.settings.use_https"            => [
-        //             "class" => HiddenType::class, 
-        //             "data" => strtolower($_SERVER['REQUEST_SCHEME'])
-        //         ],
-        //         "base.settings.domain"               => [
-        //             "class" => HiddenType::class, 
-        //             "data" => strtolower($_SERVER['HTTP_HOST'])
-        //         ],
-        //         "base.settings.base_dir"             => [
-        //             "class" => HiddenType::class, 
-        //             "data" => $this->baseService->getAsset("/")
-        //         ],
-        //         "base.settings.mail_name"            => [],
-        //         "base.settings.mail"                 => ["class" => EmailType::class]
-        //     ]
-        // ]);
+        $form = $this->createForm(WidgetListType::class, null, ["fields" => $fields]);
 
-        // $form->handleRequest($request);
+        dump($form);
 
-        // if($form->isSubmitted() && $form->isValid()){
-
-        //     $settingRepository = $this->getDoctrine()->getRepository(Setting::class);
-
-        //     $data     = array_filter($form->getData(), fn($value) => !is_null($value));
-        //     $fields   = array_keys($form->getConfig()->getOption("fields"));
-
-        //     $settings = $this->baseService->getSettings()->getSettings($fields);
-        //     $settings = array_filter($settings, fn($value) => !is_null($value));
-        //     foreach(array_diff_key($data, $settings) as $name => $setting)
-        //         $settingRepository->persist($setting);
-
-        //     $settingRepository->flush();
-
-        //     $notification = new Notification("dashboard.settings.success");
-        //     $notification->setUser($this->getUser());
-        //     $notification->send("success");
-
-        //     return $this->baseService->refresh();
-        // }
-
-        // return $this->render('dashboard/settings.html.twig', [
-        //     "content_title" => $this->translator->trans2("Dashboard: Settings"),
-        //     "content_header" => $this->translator->trans2("Welcome to the setting page."),
-        //     "form" => $form->createView()
-        // ]);
-
-        return null;
+        return $this->render('dashboard/widgets.html.twig', [
+            "content_title" => $this->translator->trans2("Dashboard: Widgets"),
+            "content_header" => $this->translator->trans2("Welcome to the widget page."),
+            "form" => $form->createView()
+        ]);
     }
 
     public function configureDashboard(): Dashboard

@@ -21,7 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 
 
-class FormTypeBaseExtension extends AbstractTypeExtension
+class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
     protected $defaultEnabled;
     public function __construct(BaseService $baseService)
@@ -40,7 +40,6 @@ class FormTypeBaseExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'form2' => $this->baseService->getParameterBag("base.twig.use_form2"),
             'bootstrap' => $this->baseService->getParameterBag("base.twig.use_bootstrap"),
             'bootstrap_label' => true
         ]);
@@ -61,21 +60,10 @@ class FormTypeBaseExtension extends AbstractTypeExtension
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
 
-            if($options["form2"]) $this->applyForm2($childView, $childForm, $options);
             if($options["bootstrap"]) $this->applyBootstrap($childView, $childForm, $options);
 
             $this->browseView($childView, $childForm, $childOptions);
         }
-    }
-
-    public function applyForm2(FormView $view, FormInterface $form, array $options)
-    {
-        // Add to all form custom base style.. 
-        // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-        
-        if (array_search("form" , $view->vars['block_prefixes']) !== false && 
-            array_search("form2", $view->vars['block_prefixes']) === false)
-            array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
     }
 
     public function applyBootstrap(FormView $view, FormInterface $form, array $options)

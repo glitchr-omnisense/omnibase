@@ -22,26 +22,22 @@ class WidgetProvider implements WidgetProviderInterface
 {
     public const SEPARATOR = "-";
 
-    /**
-     * @var TranslatorInterface
-     */
-    protected $translator = null;
     
-    public function __construct(TranslatorInterface $translator, WidgetRepository $widgetRepository, WidgetSlotRepository $widgetSlotRepository)
+    public function __construct(WidgetRepository $widgetRepository, WidgetSlotRepository $widgetSlotRepository)
     {
-        $this->translator   = $translator;
         $this->widgetRepository = $widgetRepository;
         $this->widgetSlotRepository = $widgetSlotRepository;
     }
 
-    public function get(string $slug): ?Widget
+    public function get(string $slug): ?Widget { return $this->getWidget($slug); }
+    public function getWidget(string $slug): ?Widget
     {
         return $this->widgetRepository->findOneBySlug($slug);
     }
 
-    public function getSlot(string $name): ?WidgetSlot
+    public function getSlot(string $name): ?WidgetSlot { return $this->getWidgetSlot($name); }
+    public function getWidgetSlot(string $name): ?WidgetSlot
     {
         return $this->widgetSlotRepository->findOneByName($name);
     }
-
 }

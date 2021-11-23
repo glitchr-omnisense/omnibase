@@ -77,11 +77,19 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
             $formattedFields = $this->getFormattedData($options["fields"]);
             foreach($formattedFields as $formattedField => $fieldOptions) {
+
                 $field = str_replace("-", ".", $formattedField);
-                $data[$formattedField] = $this->baseSettings->get($field, $options["locale"]);
+
+                $this->baseSettings->remove($field);
+
+                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
             }
 
-            foreach($data as $formattedField => $setting) {
+            foreach($settings as $formattedField => $setting) {
+
+                $settingLabel = ($setting ? $setting->getLabel() : null);
+                $settingHelp  = ($setting ? $setting->getHelp()  : null);
+                $settingValue = ($setting ? $setting->getValue() : null);
 
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
@@ -100,36 +108,33 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 // Set default label
                 if(!array_key_exists("label", $fieldOptions)) {
                     $label = explode("-", $formattedField);
-                    $fieldOptions["label"] = ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
-                }
-
-                if(!array_key_exists("label", $fieldOptions)) {
-                    $label = explode("-", $formattedField);
-                    $fieldOptions["label"] = ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
+                    $fieldOptions["label"] = $settingLabel ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
                 }
 
                 if($class == FileType::class || $class == ImageType::class || $class == AvatarType::class) {
                     $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
                     $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
-                    $fieldOptions["empty_data"]   = $setting;
+                    $fieldOptions["empty_data"]   = $settingValue ?? "";
                 }
 
+                if(!array_key_exists("help", $fieldOptions))
+                    $fieldOptions["help"] = $settingHelp ?? "";
+
                 $form->add($formattedField, $class, $fieldOptions);
-                $value = $setting;
 
                 switch($class) {
 
                     case DateTimePickerType::class:
-                        $form->get($formattedField)->setData(($value ? new \DateTime($value) : null));
+                        $form->get($formattedField)->setData(($settingValue ? new \DateTime($settingValue) : null));
                         break;
 
                     case CheckboxType::class:
-                        $bool = !empty($value) && $value != "0";
+                        $bool = !empty($settingValue) && $settingValue != "0";
                         $form->get($formattedField)->setData($bool ? true : false);
                         break;
 
                     default:
-                        $form->get($formattedField)->setData($value);
+                        $form->get($formattedField)->setData($settingValue);
                 }
             }
 
@@ -141,6 +146,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
+        dump("OK");
         $children = iterator_to_array($forms);
 
         $newViewData = [];
@@ -148,12 +154,13 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $newViewData[$name] = $child->getData();
 
         $newViewData = $this->getFormattedData($newViewData, "-", ".");
-        foreach($newViewData as $field => $value)
-        {
+        dump($newViewData);
+        foreach($newViewData as $field => $value) {
+            dump($value, $field);
             if($field == "valid") continue;
 
             if(!$newViewData[$field] instanceof Setting)
-                $newViewData[$field] = $this->baseSettings->getSettings($field) ?? new Setting($field, "");
+                $newViewData[$field] = $this->baseSettings->getRawScalar($field) ?? new Setting($field, "");
 
             $formattedField = str_replace(".", "-", $field);
             $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
