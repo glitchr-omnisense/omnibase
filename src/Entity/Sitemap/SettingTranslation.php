@@ -13,8 +13,7 @@ use Base\Database\Traits\TranslationTrait;
 /**
  * @ORM\Entity()
  */
-
-final class SettingTranslation implements TranslationInterface
+class SettingTranslation implements TranslationInterface
 {
     use TranslationTrait;
 

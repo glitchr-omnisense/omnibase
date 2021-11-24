@@ -12,8 +12,7 @@ use Base\Repository\Sitemap\SettingRepository;
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
  */
-
-final class Setting implements TranslatableInterface
+class Setting implements TranslatableInterface
 {
     use TranslatableTrait;
     public function getOneOrNullValue()
