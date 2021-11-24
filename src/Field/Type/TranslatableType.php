@@ -64,15 +64,15 @@ class TranslatableType extends AbstractType
     
     public function getFields(FormInterface $form, array $options): array
     {
-        $translatableClass = $this->getTranslationDataClass($form);
-        $rawFields = $this->classMetadataManipulator->getFields($translatableClass, $options["fields"], $options["excluded_fields"]);
+        $translationClass = $this->getTranslationDataClass($form);
+        $rawFields = $this->classMetadataManipulator->getFields($translationClass, $options["fields"], $options["excluded_fields"]);
 
-        $metadata = $this->classMetadataManipulator->getClassMetadata($translatableClass);
+        $metadata = $this->classMetadataManipulator->getClassMetadata($translationClass);
         $excludedFields = $options["excluded_fields"] ?? [];
         foreach($excludedFields as $field) {
 
             if(!$metadata->hasField($field) && !$metadata->hasAssociation($field))
-                throw new \Exception("Field \"".$field."\" requested for exclusion doesn't exist in \"".$form->getName()."\"");
+                throw new \Exception("Field \"".$field."\" requested for exclusion doesn't exist in \"".$translationClass."\"");
         }
 
         $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
@@ -81,7 +81,7 @@ class TranslatableType extends AbstractType
 
         foreach ($rawFields as $fieldName => $fieldConfig) {
 
-            $fieldConfig["required"] = $fieldConfig["required"] ?? false;
+            //$fieldConfig["required"] = $fieldConfig["required"] ?? false;
 
             // Simplest case: General options for all locales
             if (!isset($fieldConfig['locale_options'])) {
@@ -89,7 +89,7 @@ class TranslatableType extends AbstractType
                 foreach ($options['available_locales'] as $locale) {
 
                     $fields[$locale][$fieldName] = $fieldConfig;
-                    $fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
+                    //$fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
                 }
 
                 continue;
@@ -105,7 +105,7 @@ class TranslatableType extends AbstractType
                 if (!isset($localeFieldOptions['display']) || (true === $localeFieldOptions['display']))
                     $fields[$locale][$fieldName] = $localeFieldOptions + $fieldConfig;
 
-                $fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
+                //$fields[$locale][$fieldName]["required"] &= \in_array($locale, $options['required_locales'], true) || $locale == $defaultLocale;
             }
         }
 
@@ -148,6 +148,7 @@ class TranslatableType extends AbstractType
             $options = $form->getConfig()->getOptions();
 
             $fields = $this->getFields($form, $options);
+
             $translationClass = $this->getTranslationDataClass($form);
 
             $unavailableRequiredLocales = array_diff($options['required_locales'], $options['available_locales']);
@@ -163,19 +164,20 @@ class TranslatableType extends AbstractType
                 if (!isset($fields[$locale]))
                     continue;
 
+                $entityOptions = [
+                    'fields' => $fields[$locale],
+                    'data_class' => $translationClass,
+                    'excluded_fields' => $options['excluded_fields']
+                ];
+    
                 $defaultLocale = $options["default_locale"];
                 if($options["single_locale"] && \count($dataLocale) == 1)
                     $defaultLocale = $locale = $dataLocale[0];
 
-                $required  = \in_array($locale, $options['required_locales'], true);
-                $required |= ($locale == $defaultLocale);
-
-                $form->add($locale, EntityType::class, [
-                    'data_class' => $translationClass,
-                    'required' => $required,
-                    'fields' => $fields[$locale],
-                    'excluded_fields' => $options['excluded_fields']
-                ]);
+                if($locale != $defaultLocale && !in_array($locale, $options['required_locales'], true))
+                   $entityOptions["required"] = false;
+                
+                $form->add($locale, EntityType::class, $entityOptions);
             }
         });
 

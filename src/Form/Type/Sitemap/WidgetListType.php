@@ -5,10 +5,13 @@ namespace Base\Form\Type\Sitemap;
 use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Sitemap\Setting;
 use Base\Entity\Sitemap\SettingTranslation;
+use Base\Entity\Sitemap\Widget;
 use Base\Field\Type\AvatarType;
 use Base\Field\Type\DateTimePickerType;
+use Base\Field\Type\EntityType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
+use Base\Field\Type\SelectType;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -97,7 +100,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                     continue;
 
                 // Detect field form type class
-                $class = $options["fields"][$field]["class"] ?? TextType::class;
+                $class = $options["fields"][$field]["class"] ?? EntityType::class;
                 if(array_key_exists("class", $options["fields"][$field]))
                     unset($options["fields"][$field]["class"]);
 
@@ -120,22 +123,10 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 if(!array_key_exists("help", $fieldOptions))
                     $fieldOptions["help"] = $settingHelp ?? "";
 
+                $fieldOptions["select2"] = true;
+                $fieldOptions["multiple"] = false;
+                $fieldOptions["data_class"] = Widget::class;
                 $form->add($formattedField, $class, $fieldOptions);
-
-                switch($class) {
-
-                    case DateTimePickerType::class:
-                        $form->get($formattedField)->setData(($settingValue ? new \DateTime($settingValue) : null));
-                        break;
-
-                    case CheckboxType::class:
-                        $bool = !empty($settingValue) && $settingValue != "0";
-                        $form->get($formattedField)->setData($bool ? true : false);
-                        break;
-
-                    default:
-                        $form->get($formattedField)->setData($settingValue);
-                }
             }
 
             $form->add('valid', SubmitType::class);
@@ -146,7 +137,6 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        dump("OK");
         $children = iterator_to_array($forms);
 
         $newViewData = [];

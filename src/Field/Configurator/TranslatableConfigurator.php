@@ -28,12 +28,8 @@ final class TranslatableConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        // Configure required option at FormType level..
-        $options = $field->getFormTypeOptions();
-        if (array_key_exists("required", $options))
-            unset($options["required"]);
-
-        $field->setFormTypeOptions($options);
+        $required = $field->getCustomOption("required");
+        $field->setFormTypeOption("required", $required);
 
         // Show formatted value
         if( ($fieldName = $field->getCustomOption("show_field")) ) {

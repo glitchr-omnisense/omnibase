@@ -19,3 +19,7 @@ file:
 notBlank:
    property: "This field is blank."
    class: "All fields are blank."
+
+widget_slot:
+   name:
+      unique: "This widget slot naming is already used"

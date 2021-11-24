@@ -10,6 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Exception;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
+const __TRANSLATION_SUFFIX__ = 'Translation';
 trait TranslatableTrait
 {
     private static $translationClass;
@@ -26,19 +27,19 @@ trait TranslatableTrait
 
         if($withInheritance) {
 
-            self::$translationClass = $class . 'Translation';
+            self::$translationClass = $class . __TRANSLATION_SUFFIX__;
             while(!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
 
                 if(!get_parent_class($class)) throw new Exception("No translation entity found for ".$class);
 
                 $class = get_parent_class($class);
-                self::$translationClass = $class . 'Translation';
+                self::$translationClass = $class . __TRANSLATION_SUFFIX__;
             }
 
             return self::$translationClass;
         }
 
-        $translationClass = $class . 'Translation';
+        $translationClass = $class . __TRANSLATION_SUFFIX__;
         if(!class_exists($translationClass) || !is_subclass_of($translationClass, TranslationInterface::class))
             return null;
 

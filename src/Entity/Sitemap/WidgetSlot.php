@@ -2,44 +2,33 @@
 
 namespace Base\Entity\Sitemap;
 
-use App\Entity\User;
-use App\Entity\Thread\Tag;
-use App\Entity\Thread\Like;
-use App\Entity\Thread\Mention;
-use Base\Entity\Sitemap\Widget;
-use Base\Repository\Sitemap\WidgetSlotRepository;
 
-use Base\Repository\ThreadRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-
-use Symfony\Component\Validator\Constraints as Assert;
-use Base\Validator\Constraints as AssertBase;
-
-use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
-use Base\Annotations\Annotation\Timestamp;
-use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\EntityHierarchy;
-use Base\Annotations\Annotation\Uploader;
-use Base\Enum\ThreadState;
 use Base\Database\TranslatableInterface;
-use Base\Traits\BaseTrait;
-use Base\Traits\EntityHierarchyTrait;
 use Base\Database\Traits\TranslatableTrait;
 
+use Base\Entity\Sitemap\Widget;
+
+use Base\Validator\Constraints as AssertBase;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\Sitemap\WidgetSlotRepository;
 /**
  * @ORM\Entity(repositoryClass=WidgetSlotRepository::class)
+ *
+ * @AssertBase\UniqueEntity(fields={"name"}, groups={"new", "edit"})
  */
-class WidgetSlot
-{ 
+class WidgetSlot implements TranslatableInterface
+{   
+    use TranslatableTrait;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     protected $id;
+    public function getId(): ?int { return $this->id; }
 
     /**
      *
@@ -76,17 +65,6 @@ class WidgetSlot
     {
         $this->attributes = $attributes;
 
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $help;
-    public function getHelp(): string { return $this->help; }
-    public function setHelp(string $help)
-    {
-        $this->help = $help;
         return $this;
     }
 

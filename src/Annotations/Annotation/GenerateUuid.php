@@ -84,8 +84,15 @@ class GenerateUuid extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    {
+        if ($this->getFieldValue($entity, $property) === null)
+            $this->setFieldValue($entity, $property, $this->getUuid($entity));
+    }
+
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $this->setFieldValue($entity, $property, $this->getUuid($entity));
+        if ($this->getFieldValue($entity, $property) === null)
+            $this->setFieldValue($entity, $property, $this->getUuid($entity));
     }
 }

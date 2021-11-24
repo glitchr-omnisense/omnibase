@@ -19,3 +19,7 @@ file:
 notBlank:
    property: "Ce champ ne peut pas être vide."
    class: "Tous les champs du formulaire sont vides."
+
+widget_slot:
+   name:
+      unique: "Le nom porté par ce widget est déjà utilisé"

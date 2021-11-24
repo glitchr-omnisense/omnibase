@@ -114,7 +114,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                         = $options["fields"][$fieldName]["allow_recursive"] & $options["allow_recursive"];
                 }
             }
-
+            
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
@@ -138,29 +138,35 @@ class EntityType extends AbstractType implements DataMapperInterface
 
                 $dataClass = $this->classMetadataManipulator->getDataClass($form);
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-        
-                $fields = $options["fields"];
-                if($options["autoload"])
-                    $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
 
-                foreach ($fields as $fieldName => $field) {
+                if($options["select2"]) {
 
-                    // Fields to be excluded (in case autoload is disabled)
-                    if(in_array($fieldName, $options["excluded_fields"]))
-                        continue;
+                    dump("SELECT2");
 
-                    $fieldType = $field['type'] ?? (!empty($field['data']) ? HiddenType::class : null);
-                    unset($field['type']);
+                } else {
 
-                    $isNullable = $classMetadata->getFieldMapping($fieldName)["nullable"] ?? false;
-                    if(!array_key_exists("required", $field) && $isNullable)
-                        $field['required'] = false;
-                    
-                    $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
-                    unset($field['allow_recursive']);
+                    $fields = $options["fields"];
+                    if($options["autoload"])
+                        $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
 
-                    if ($fieldRecursive){
-                        $form->add($fieldName, $fieldType, $field);
+                    foreach ($fields as $fieldName => $field) {
+
+                        // Fields to be excluded (in case autoload is disabled)
+                        if(in_array($fieldName, $options["excluded_fields"]))
+                            continue;
+
+                        $fieldType = $field['type'] ?? (!empty($field['data']) ? HiddenType::class : null);
+                        unset($field['type']);
+
+                        $isNullable = $classMetadata->getFieldMapping($fieldName)["nullable"] ?? false;
+                        if(!array_key_exists("required", $field) && $isNullable)
+                            $field['required'] = false;
+                        
+                        $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
+                        unset($field['allow_recursive']);
+
+                        if ($fieldRecursive)
+                            $form->add($fieldName, $fieldType, $field);
                     }
                 }
             }

@@ -35,14 +35,26 @@ class Breadcrumb implements BreadcrumbInterface
     }
 
     public function getOptions(): array { return $this->options; }
+    public function addOptions(array $options)
+    {
+        foreach($options as $key=> $option)
+            $this->addOption($key, $option);
+    }
+
     public function setOptions(array $options)
     {
         $this->options = $options;
         return $this;
     }
-    public function setOption(string $name, $value)
+    public function addOption(string $name, $value)
     {
         $this->options[$name] = $value;
+        return $this;
+    }
+    public function removeOption(string $name)
+    {
+        if(array_key_exists($name, $this->options))
+            unset($this->options[$name]);
         return $this;
     }
 

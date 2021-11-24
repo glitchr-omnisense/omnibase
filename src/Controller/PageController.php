@@ -20,7 +20,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Cache\CacheInterface;
 
-class WidgetController extends AbstractController
+class PageController extends AbstractController
 {
     /**
      * Controller example

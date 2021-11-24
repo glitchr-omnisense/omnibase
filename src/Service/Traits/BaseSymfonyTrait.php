@@ -219,7 +219,9 @@ trait BaseSymfonyTrait
         else if(!$request instanceof Request)
             throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
 
-        $controller = explode("::", $request->attributes->get("_controller"))[0];
+        $controllerAttribute = $request->attributes->get("_controller");
+        $array = is_array($controllerAttribute) ? $controllerAttribute : explode("::", $request->attributes->get("_controller"));
+        $controller = explode("::", $array[0]);
 
         $parents = [];
         $parent = $controller;

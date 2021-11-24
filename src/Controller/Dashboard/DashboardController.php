@@ -159,9 +159,10 @@ class DashboardController extends AbstractDashboardController
      */
     public function Widgets(Request $request, array $fields = []): Response
     {
-        $form = $this->createForm(WidgetListType::class, null, ["fields" => $fields]);
+        $widgetRepository = $this->getDoctrine()->getRepository(Widget::class);
+        $data = $widgetRepository->findAll();
 
-        dump($form);
+        $form = $this->createForm(WidgetListType::class, $data, ["fields" => $fields]);
 
         return $this->render('dashboard/widgets.html.twig', [
             "content_title" => $this->translator->trans2("Dashboard: Widgets"),

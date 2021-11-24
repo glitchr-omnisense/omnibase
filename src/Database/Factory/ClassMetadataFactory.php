@@ -34,6 +34,8 @@ use Doctrine\Persistence\Mapping\ReflectionService;
 use ReflectionClass;
 use ReflectionException;
 
+use const Base\Database\Traits\__TRANSLATION_SUFFIX__;
+
 use function array_map;
 use function class_exists;
 use function count;
@@ -304,6 +306,11 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
         if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
+
+            if(!str_ends_with($metadata->getName(), __TRANSLATION_SUFFIX__))
+                throw new \Exception("Invalid class name for \"".$metadata->getName()."\"");
+
+        } else if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
 
             $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
             if(!$metadata->discriminatorMap) {

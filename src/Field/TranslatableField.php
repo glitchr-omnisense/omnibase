@@ -20,6 +20,7 @@ class TranslatableField implements FieldInterface
             ->hideOnIndex()
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
+            ->setCustomOption("required", true)
             ->setFormType(TranslatableType::class);
     }
 
@@ -37,6 +38,12 @@ class TranslatableField implements FieldInterface
         $displayedOn->set(Crud::PAGE_INDEX, Crud::PAGE_INDEX);
         $this->dto->setDisplayedOn($displayedOn);
 
+        return $this;
+    }
+
+    public function setRequired(bool $required = true)
+    {
+        $this->setCustomOption("required", $required);
         return $this;
     }
 
