@@ -99,38 +99,33 @@
                 margin-top:2.5em !important;
             }
             .user-menu-wrapper .user-details .user-name { margin-left: 15px; }
-            .user-avatar, .image-avatar {
+
+            .user-avatar, .thumbnail-avatar { border-radius:50% !important; }
+            .thumbnail-image { border-radius:5% !important; }
+            .img-fluid
+            {
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            }
+
+            .datagrid tr:hover .ea-lightbox-thumbnail img { border-color:transparent !important; }
+            .datagrid .ea-lightbox-thumbnail img {
+                max-height: 105%;
+                max-width: unset;
+                padding: 0;
+            }
+
+            .user-avatar, .thumbnail-avatar, .thumbnail-image {
+
                 overflow:hidden;
-                border-radius:50% !important;
                 box-shadow: 0 0 0 2px var(--white),0 0 4px 1px var(--gray-600) !important;
-                
                 margin: 10px !important;
                 
                 max-height: 50px !important;
                 height: 50px !important;
                 max-width: 50px !important;
                 width: 50px !important;
-
-                padding:4px;
-            }
-
-
-            .image-avatar img, .image-avatar img:hover {
-                border: 0 !important;
-                background-color:transparent !important;
-                padding:0 !important;
-
-                margin-left:-4px;
-                margin-top:-4px;
-                width: inherit;
-                height: inherit;
-                object-fit: contain;
-            }
-
-            .image-avatar i, .image-avatar i:hover {
-
-                margin-left: -5px !important;
-                margin-top: 0px !important;
 
             }
 

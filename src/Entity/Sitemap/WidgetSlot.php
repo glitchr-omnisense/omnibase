@@ -56,17 +56,17 @@ class WidgetSlot implements TranslatableInterface
         $this->setWidget($widget);
     }
 
-    /**
-     * @ORM\Column(type="array")
-     */
-    protected $attributes;
-    public function getAttributes(): array { return $this->attributes; }
-    public function setAttributes(array $attributes): self
-    {
-        $this->attributes = $attributes;
+    // /**
+    //  * @ORM\Column(type="array")
+    //  */
+    // protected $attributes;
+    // public function getAttributes(): array { return $this->attributes; }
+    // public function setAttributes(array $attributes): self
+    // {
+    //     $this->attributes = $attributes;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     /**
      * @ORM\ManyToOne(targetEntity=Widget::class)

@@ -45,7 +45,7 @@ class MenuCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setPageTitle('index', 'User Management')
+            ->setPageTitle('index', 'Menu Management')
             ->setDefaultSort(['id' => 'DESC'])
             ->setFormOptions(
                 ['validation_groups' => ['new']], // Crud::PAGE_NEW
@@ -60,8 +60,8 @@ class MenuCrudController extends AbstractCrudController
         ->add(Crud::PAGE_NEW,  Action::INDEX)
         ->add(Crud::PAGE_EDIT, Action::INDEX)
 
-        ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
+        ->setPermission(Action::NEW, 'ROLE_ADMIN')
+        ->setPermission(Action::DELETE, 'ROLE_ADMIN')
         ->setPermission(Action::EDIT, 'ROLE_ADMIN');
     }
 
@@ -79,11 +79,6 @@ class MenuCrudController extends AbstractCrudController
 
         yield TranslatableField::new('value')->hideOnIndex();
         foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        if (!$this->isGranted('ROLE_SUPERADMIN')) yield TextField::new('comment')->hideOnForm();
-        else yield TextField::new('comment');
-        foreach ( ($callbacks["comment"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 

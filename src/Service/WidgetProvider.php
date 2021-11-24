@@ -20,9 +20,6 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WidgetProvider implements WidgetProviderInterface
 {
-    public const SEPARATOR = "-";
-
-    
     public function __construct(WidgetRepository $widgetRepository, WidgetSlotRepository $widgetSlotRepository)
     {
         $this->widgetRepository = $widgetRepository;

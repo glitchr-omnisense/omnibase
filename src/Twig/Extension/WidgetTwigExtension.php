@@ -46,6 +46,8 @@ final class WidgetTwigExtension extends AbstractExtension
         if(!$widgetSlot) return "";
 
         $widget = $widgetSlot->getWidget();
+        if(!$widget) return "";
+
         $widgetOptions["class"]      = $widgetOptions["class"]      ?? $widget->getOptions()["class"]      ?? null;
         $widgetOptions["class_item"] = $widgetOptions["class_item"] ?? $widget->getOptions()["class_item"] ?? null;
 

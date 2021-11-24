@@ -5,10 +5,7 @@ namespace Base\Entity;
 use Base\Exception\MissingLocaleException;
 
 use App\Entity\Thread\Like;
-use App\Entity\Thread\Tag;
 use App\Entity\Thread\Mention;
-
-use App\Repository\UserRepository;
 
 use App\Entity\User\Log;
 use App\Entity\User\Token;
@@ -17,7 +14,6 @@ use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
 use App\Entity\User\Notification;
 
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -34,21 +30,16 @@ use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\Annotation\Hashify;
 use App\Enum\UserRole;
-use Base\Service\BaseService;
-use Base\Service\LocaleProvider;
-use DateTime;
-use Exception;
-use Symfony\Component\HttpFoundation\File\File;
-use Symfony\Component\Notifier\Channel\ChannelPolicy;
-use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
-use Symfony\Component\Notifier\NotifierInterface;
-use Symfony\Component\Notifier\Recipient\Recipient;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Base\Service\LocaleProvider;
+use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 use Base\Traits\BaseTrait;
-use DateTimeZone;
+use Exception;
+
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -66,150 +57,33 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getUsername() { return $this->getUserIdentifier(); }
     public function getSalt() { return null; }
     // TODO-END
-    
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
 
-    /**
-     * @ORM\Column(name="secret", type="string", nullable=true)
-     */
-    protected $secret;
+    public static $property = "email";
+    public function getUserIdentifier(): string { return $this->email; }
 
-    /**
-     * @ORM\Column(type="string", length=255, unique=true)
-     * @Assert\Email(groups={"new", "edit"})
-     */
-    protected $email;
-
-    /**
-     * @ORM\Column(type="string", length=16)
-     * @Assert\Locale(canonicalize = true)
-     */
-    protected $locale;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $timezone;
-
-    /**
-     * @var string Plain password should be empty unless you want to change it
-     */
-    protected $plainPassword;
-
-    /**
-     * @var string The hashed password
-     * @ORM\Column(type="string", nullable=true)
-     * @Assert\NotBlank(groups={"new", "edit"}, allowNull=true)
-     * @Hashify(reference="plainPassword", algorithm="auto")
-     */
-    protected $password;
-
-    /**
-     * @ORM\Column(type="user_role")
-     * @Assert\NotBlank(groups={"new", "edit"})
-     */
-    protected $roles;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $logs;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="members", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $groups;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $permissions;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $penalties;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Notification::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $notifications;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $tokens;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors", orphanRemoval=true, cascade={"remove"})
-     */
-    protected $threads;
-
-    /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $followedThreads;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="target", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $mentions;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="author", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $authoredMentions;
-
-    /**
-     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $likes;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isApproved;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isVerified;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isEnabled;
-
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on={"create", "update"})
-     */
-    protected $updatedAt;
-
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
-     */
-    protected $createdAt;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/*"})
-     * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
-     */
-    protected $avatar;
-
-    public function getAvatar() { return Uploader::getPublicPath($this, "avatar"); }
-    public function getAvatarFile() { return Uploader::getFile($this, "avatar"); }
-    public function setAvatar($avatar)
+    public function getRecipient(): Recipient
     {
-        $this->avatar = $avatar;
-        return $this;
+        $email = $this->getEmail();
+        if (method_exists(User::class, "getUsername") && !empty($this->getUsername()))
+            $email = $this->getUsername() . " <".$email.">";
+
+        if (method_exists(User::class, "getPhone") && !empty($this->getPhone()))
+            return new Recipient($email, $this->getPhone());
+
+        return new Recipient($email);
+    }
+
+    public function __toString()
+    {
+        $getter = "get" . ucfirst(self::$property);
+        if(!method_exists(get_called_class(), $getter))
+            throw new Exception("A getter $getter is expected to identify users.");
+
+        $str = $this->$getter();
+        if($str && !is_string($str))
+            throw new Exception("Returned value from getter $getter is expected to be a string, currently : \"".gettype($str)."\"");
+
+        return $str ?? $this->getUserIdentifier() ?? "";
     }
 
     public function __construct()
@@ -228,33 +102,14 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
         $this->threads = new ArrayCollection();
         $this->followedThreads = new ArrayCollection();
+
         $this->mentions = new ArrayCollection();
         $this->authoredMentions = new ArrayCollection();
+
         $this->likes = new ArrayCollection();
 
         $this->setTimezone();
         $this->setLocale();
-    }
-
-    public static $property = "email";
-    public function __toString()
-    {
-        $getter = "get" . ucfirst(self::$property);
-        if(!method_exists(get_called_class(), $getter))
-            throw new Exception("A getter $getter is expected to identify users.");
-
-        $str = $this->$getter();
-        if($str && !is_string($str))
-            throw new Exception("Returned value from getter $getter is expected to be a string, currently : \"".gettype($str)."\"");
-
-        return $str ?? "";
-    }
-
-    public function getId(): ?int { return $this->id; }
-    public function setId($id): self
-    {
-        $this->id = $id;
-        return $this;
     }
 
     public function sameAs($other): bool { return ($other->getId() == $this->getId()); }
@@ -269,6 +124,89 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $cookie[$key] ?? null;
     }
 
+    public static function getBrowser(): ?string { return $_SERVER['HTTP_USER_AGENT'] ?? null; }
+    public static function getIp(): ?string
+    {
+        $keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
+        foreach ($keys as $k) {
+            if (!empty($_SERVER[$k]) && filter_var($_SERVER[$k], FILTER_VALIDATE_IP))
+                return $_SERVER[$k];
+        }
+        return null;
+    }
+
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    protected $id;
+
+    public function getId(): ?int { return $this->id; }
+    public function setId($id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(name="secret", type="string", nullable=true)
+     */
+    protected $secret;
+
+    const TOTP_LENGTH  = 6;
+    const TOTP_TIMEOUT = 30;
+
+    public function getSecret() { return $this->secret; }
+    public function isTotpAuthenticationEnabled(): bool { return $this->secret ? true : false; }
+    public function getTotpAuthenticationUsername(): string { return $this->getUserIdentifier(); }
+
+    public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
+    {
+        if($this->secret == null) return null;
+        return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
+    }
+    
+    public function setSecret($secret): self
+    {
+        $this->secret = $secret;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\Email(groups={"new", "edit"})
+     */
+    protected $email;
+
+    public function getEmail(): ?string { return $this->email; }
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/*"})
+     * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
+     */
+    protected $avatar;
+    public function getAvatar() { return Uploader::getPublicPath($this, "avatar"); }
+    public function getAvatarFile() { return Uploader::getFile($this, "avatar"); }
+    public function setAvatar($avatar)
+    {
+        $this->avatar = $avatar;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=16)
+     * @Assert\Locale(canonicalize = true)
+     */
+    protected $locale;
+
     public function getLocale(): string { return $this->locale; }
     public function setLocale(?string $locale = null): self
     {
@@ -281,6 +219,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $timezone;
+
     public function getTimezone(): string { return $this->timezone; }
     public function setTimezone(string $timezone = null): self
     {
@@ -291,45 +234,46 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public static function getIp(): ?string
+    /**
+     * @var string Plain password should be empty unless you want to change it
+     */
+    protected $plainPassword;
+    public function getPlainPassword(): ?string { return $this->plainPassword; }
+    public function setPlainPassword(string $password): void
     {
-        $keys = array('HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR');
-        foreach ($keys as $k) {
-            if (!empty($_SERVER[$k]) && filter_var($_SERVER[$k], FILTER_VALIDATE_IP))
-                return $_SERVER[$k];
-        }
-        return null;
+        $this->plainPassword = $password;
+        $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
     }
-
-    public static function getBrowser(): ?string
+    public function eraseCredentials() { $this->plainPassword = null; }
+    public function erasePlainPassword()
     {
-        return $_SERVER['HTTP_USER_AGENT'] ?? null;
-    }
-
-    public function isBanned() {
-        return false;
-    }
-
-    public function setSecret($secret): self
-    {
-        $this->secret = $secret;
+        $this->plainPassword = null;
         return $this;
     }
-    public function getSecret() { return $this->secret; }
-    public function isTotpAuthenticationEnabled(): bool { return $this->secret ? true : false; }
-    public function getTotpAuthenticationUsername(): string { return $this->getUserIdentifier(); }
-
-    const TOTP_LENGTH  = 6;
-    const TOTP_TIMEOUT = 30;
-    public function getTotpAuthenticationConfiguration(): ?TotpConfigurationInterface
+    
+    /**
+     * @var string The hashed password
+     * @ORM\Column(type="string", nullable=true)
+     * @Assert\NotBlank(groups={"new", "edit"}, allowNull=true)
+     * @Hashify(reference="plainPassword", algorithm="auto")
+     */
+    protected $password;
+    public function getPassword(): ?string { return (string) $this->password; }
+    public function setPassword(string $password): self
     {
-        if($this->secret == null) return null;
-        return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
+        $this->password = $password;
+
+        return $this;
     }
 
     /**
-     * @see UserInterface
+     * @ORM\Column(type="user_role")
+     * @Assert\NotBlank(groups={"new", "edit"})
      */
+    protected $roles;
+
+    public function isSocialAccount(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
+    public function isPersistent(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
     public function getRoles(): array { 
         
         if(empty($roles))
@@ -367,117 +311,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     //     return $this;
     // }
 
-    public function isSocialAccount(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
-
-    public function isPersistent(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
-
     /**
-     * @see UserInterface
+     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getPassword(): ?string { return (string) $this->password; }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * @see UserInterface
-     */
-    public function eraseCredentials() { $this->plainPassword = null; }
-
-    public function getUserIdentifier(): string { return $this->email; }
-
-    public function erasePlainPassword()
-    {
-        $this->plainPassword = null;
-
-        return $this;
-    }
-
-    public function getPlainPassword(): ?string { return $this->plainPassword; }
-
-    public function setPlainPassword(string $password): void
-    {
-        $this->plainPassword = $password;
-        $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
-    }
-
-    public function getEmail(): ?string { return $this->email; }
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-
-        return $this;
-    }
-
-    public function isApproved(): bool { return $this->isApproved; }
-
-    public function setIsApproved(bool $isApproved = true): self
-    {
-        $this->isApproved = $isApproved;
-        return $this;
-    }
-
-    public function approve(bool $isApproved = true): self { return $this->setIsApproved($isApproved); }
-
-    public function isVerified(): bool { return $this->isVerified; }
-    public function setIsVerified(bool $isVerified = true): self
-    {
-        $this->isVerified = $isVerified;
-        return $this;
-    }
-
-    public function verify(bool $isVerified = true): self { return $this->setIsVerified($isVerified); }
-    
-    public function isDisabled(): ?bool { return !$this->isEnabled(); }
-    public function isEnabled (): ?bool { return  $this->isEnabled; }
-    public function disable(bool $isDisabled = true): self { return $this->setIsDisabled($isDisabled); }
-    public function enable(bool $isEnabled = true): self { return $this->setIsEnabled($isEnabled); }
-    public function setIsDisabled(bool $isDisabled = true): self {   return $this->setIsEnabled(!$isDisabled); }
-    public function setIsEnabled(bool $isEnabled = true): self
-    {
-        $this->isEnabled = $isEnabled;
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
-    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
-
-    /**
-     * @return array|Group[]
-     */
-    public function getGroups(): array
-    {
-        return $this->groups;
-    }
-
-    public function addGroup(Group $group): self
-    {
-        if (!$this->groups->contains($group)) {
-            $this->groups[] = $group;
-        }
-
-        return $this;
-    }
-
-    public function removeGroup(Group $group): self
-    {
-        $this->groups->removeElement($group);
-
-        return $this;
-    }
-
-    /**
-     * @return array|Log[]
-     */
-    public function getLogs(): array
-    {
-        return $this->logs;
-    }
-
+    protected $logs;
+    public function getLogs(): Collection { return $this->logs; }
     public function addLog(Log $log): self
     {
         if (!$this->logs->contains($log)) {
@@ -501,13 +339,32 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Permission[]
+     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="members", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getPermissions(): Collection
+    protected $groups;
+    public function getGroups(): Collection { return $this->groups; }
+    public function addGroup(Group $group): self
     {
-        return $this->permissions;
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+        }
+
+        return $this;
     }
 
+    public function removeGroup(Group $group): self
+    {
+        $this->groups->removeElement($group);
+
+        return $this;
+    }
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Permission::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
+     */
+    protected $permissions;
+
+    public function getPermissions(): Collection { return $this->permissions; }
     public function addPermission(Permission $permission): self
     {
         if (!$this->permissions->contains($permission)) {
@@ -520,18 +377,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function removePermission(Permission $permission): self
     {
         $this->permissions->removeElement($permission);
-
         return $this;
     }
 
     /**
-     * @return array|Penalty[]
+     * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getPenalties(): array
-    {
-        return $this->penalties;
-    }
+    protected $penalties;
+    public function isBanned() { return false; } // TO IMPLEMENT..
 
+    public function getPenalties(): array { return $this->penalties; }
     public function addPenalty(Penalty $penalty): self
     {
         if (!$this->penalties->contains($penalty)) {
@@ -549,13 +404,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Notification[]
+     * @ORM\OneToMany(targetEntity=Notification::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getNotifications()
-    {
-        return $this->notifications;
-    }
-
+    protected $notifications;
+    public function getNotifications() { return $this->notifications; }
     public function addNotification(Notification $notification): self
     {
         if (!$this->notifications->contains($notification)) {
@@ -578,12 +430,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Token[]
+     * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
+    protected $tokens;
+
     public const ALL_TOKENS     = "ALL_TOKENS";
     public const VALID_TOKENS   = "VALID_TOKENS";
     public const EXPIRED_TOKENS = "EXPIRED_TOKENS";
 
+    public function getExpiredTokens(): ?array { return $this->getTokens(self::EXPIRED_TOKENS); }
+    public function getValidTokens(): ?array { return $this->getTokens(self::VALID_TOKENS); }
     public function getTokens($type = self::ALL_TOKENS): ?array
     {
         $tokens = [];
@@ -606,16 +462,18 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $tokens;
     }
 
-    public function getExpiredTokens(): ?array
+    public function removeExpiredTokens(): self
     {
-        return $this->getTokens(self::EXPIRED_TOKENS);
-    }
+        $expiredTokens = $this->getExpiredTokens();
+        foreach ($expiredTokens as $token) {
+            $this->removeToken($token);
+        }
 
-    public function getValidTokens(): ?array
-    {
-        return $this->getTokens(self::VALID_TOKENS);
+        return $this;
     }
-
+    
+    public function getExpiredToken(string $name): ?Token { return $this->getToken($name, self::EXPIRED_TOKENS); }
+    public function getValidToken(string $name): ?Token { return $this->getToken($name, self::VALID_TOKENS); }
     public function getToken(string $name, $type = self::ALL_TOKENS): ?Token
     {
         $tokens = $this->getTokens($type);
@@ -647,38 +505,13 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function getExpiredToken(string $name): ?Token
-    {
-        return $this->getToken($name, self::EXPIRED_TOKENS);
-    }
-
-    public function getValidToken(string $name): ?Token
-    {
-        return $this->getToken($name, self::VALID_TOKENS);
-    }
-
-    public function removeExpiredTokens(): self
-    {
-        $expiredTokens = $this->getExpiredTokens();
-        foreach ($expiredTokens as $token) {
-            $this->removeToken($token);
-        }
-
-        return $this;
-    }
-
     /**
-     * @return Collection|Thread[]
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors", orphanRemoval=true, cascade={"remove"})
      */
-    public function getAuthoredThreads(): Collection
-    {
-        return $this->getThreads();
-    }
-    public function getThreads(): Collection
-    {
-        return $this->threads;
-    }
+    protected $threads;
 
+    public function getAuthoredThreads(): Collection { return $this->getThreads(); }
+    public function getThreads(): Collection { return $this->threads; }
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {
@@ -699,13 +532,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Thread[]
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getFollowedThreads(): ArrayCollection
-    {
-        return $this->followedThreads;
-    }
-
+    protected $followedThreads;
+    public function getFollowedThreads(): ArrayCollection { return $this->followedThreads; }
     public function addFollowedThread(Thread $followedThread): self
     {
         if (!$this->followedThreads->contains($followedThread)) {
@@ -726,13 +556,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Mention[]
+     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="target", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getMentions(): array
-    {
-        return $this->mentions;
-    }
-
+    protected $mentions;
+    public function getMentions(): array { return $this->mentions; }
     public function addMention(Mention $mention): self
     {
         if (!$this->mentions->contains($mention)) {
@@ -756,8 +583,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Mention[]
+     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="author", orphanRemoval=true, cascade={"persist", "remove"})
      */
+    protected $authoredMentions;
     public function getAuthoredMentions(): ArrayCollection
     {
         return $this->authoredMentions;
@@ -786,13 +614,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @return array|Like[]
+     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    public function getLikes(): Collection
-    {
-        return $this->likes;
-    }
-
+    protected $likes;
+    public function getLikes(): Collection { return $this->likes; }
     public function addLike(Like $like): self
     {
         if (!$this->likes->contains($like)) {
@@ -815,15 +640,56 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function getRecipient(): Recipient
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $isApproved;
+    public function isApproved(): bool { return $this->isApproved; }
+    public function approve(bool $isApproved = true): self { return $this->setIsApproved($isApproved); }
+    public function setIsApproved(bool $isApproved = true): self
     {
-        $email = $this->getEmail();
-        if (method_exists(User::class, "getUsername") && !empty($this->getUsername()))
-            $email = $this->getUsername() . " <".$email.">";
-
-        if (method_exists(User::class, "getPhone") && !empty($this->getPhone()))
-            return new Recipient($email, $this->getPhone());
-
-        return new Recipient($email);
+        $this->isApproved = $isApproved;
+        return $this;
     }
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $isVerified;
+    public function isVerified(): bool { return $this->isVerified; }
+    public function verify(bool $isVerified = true): self { return $this->setIsVerified($isVerified); }
+    public function setIsVerified(bool $isVerified = true): self
+    {
+        $this->isVerified = $isVerified;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $isEnabled;
+    public function isDisabled(): ?bool { return !$this->isEnabled(); }
+    public function isEnabled (): ?bool { return  $this->isEnabled; }
+    public function disable(bool $isDisabled = true): self { return $this->setIsDisabled($isDisabled); }
+    public function enable(bool $isEnabled = true): self { return $this->setIsEnabled($isEnabled); }
+    public function setIsDisabled(bool $isDisabled = true): self {   return $this->setIsEnabled(!$isDisabled); }
+    public function setIsEnabled(bool $isEnabled = true): self
+    {
+        $this->isEnabled = $isEnabled;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @Timestamp(on={"create", "update"})
+     */
+    protected $updatedAt;
+    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @Timestamp(on="create")
+     */
+    protected $createdAt;
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
 }

@@ -63,10 +63,11 @@ class FormTypeExtension extends AbstractTypeExtension
 
                 // Add to all form custom base style.. 
                 // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-                
-                if (array_search("form" , $view->vars['block_prefixes']) !== false && 
-                array_search("form2", $view->vars['block_prefixes']) === false)
-                array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
+                if (array_search("form" , $childView->vars['block_prefixes']) !== false && 
+                    array_search("form2", $childView->vars['block_prefixes']) === false)
+                {
+                    array_splice($childView->vars['block_prefixes'], 1, 0, ["form2"]);
+                }
             }
             
             $this->browseView($childView, $childForm, $childOptions);

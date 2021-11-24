@@ -10,19 +10,15 @@ use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\Security\RegistrationType;
 use App\Form\Type\Security\LoginType;
-use App\Form\Type\Security\ChangePasswordType;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 use Symfony\Component\Notifier\NotifierInterface;
@@ -30,11 +26,8 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Base\Entity\User\Token;
 use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
-use Base\Annotations\Annotation\Hashify;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
 
 class SecurityController extends AbstractController
 {

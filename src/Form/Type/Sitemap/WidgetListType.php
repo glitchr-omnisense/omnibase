@@ -7,33 +7,26 @@ use Base\Entity\Sitemap\Setting;
 use Base\Entity\Sitemap\SettingTranslation;
 use Base\Entity\Sitemap\Widget;
 use Base\Field\Type\AvatarType;
-use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\EntityType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
-use Base\Field\Type\SelectType;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
+use Base\Service\WidgetProviderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 
 class WidgetListType extends AbstractType implements DataMapperInterface
 {
-    public function __construct(BaseSettings $baseSettings)
+    public function __construct(WidgetProviderInterface $widgetProvider)
     {
-        $this->baseSettings = $baseSettings;
+        $this->widgetProvider = $widgetProvider;
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -54,14 +47,9 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
 
-        } else if( is_subclass_of($data, BaseSettings::class)) {
+        } else if( is_subclass_of($data, Widget::class)) {
 
-            foreach($data->all() as $setting)
-                $newData[str_replace($from, $to, $setting->getName())] = $setting->getValue();
-
-        } else if( is_subclass_of($data, Setting::class)) {
-
-            $newData[str_replace($from, $to, $data->getName())] = $data->getValue();
+            $newData[str_replace($from, $to, $data->getName())] = $data->getName();
 
         } else {
 
@@ -82,17 +70,14 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-
-                $this->baseSettings->remove($field);
-
-                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
+                $widgetSlots[$formattedField] = $this->widgetProvider->getWidgetSlot($field);
             }
 
-            foreach($settings as $formattedField => $setting) {
+            foreach($widgetSlots as $formattedField => $slot) {
 
-                $settingLabel = ($setting ? $setting->getLabel() : null);
-                $settingHelp  = ($setting ? $setting->getHelp()  : null);
-                $settingValue = ($setting ? $setting->getValue() : null);
+                $slotLabel = ($slot ? $slot->getLabel() : null);
+                $slotHelp  = ($slot ? $slot->getHelp()  : null);
+                $slotValue = ($slot ? $slot->getName() : null);
 
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
@@ -111,21 +96,22 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 // Set default label
                 if(!array_key_exists("label", $fieldOptions)) {
                     $label = explode("-", $formattedField);
-                    $fieldOptions["label"] = $settingLabel ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
+                    $fieldOptions["label"] = $slotLabel ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
                 }
 
                 if($class == FileType::class || $class == ImageType::class || $class == AvatarType::class) {
                     $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
                     $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
-                    $fieldOptions["empty_data"]   = $settingValue ?? "";
+                    $fieldOptions["empty_data"]   = $slotName ?? "";
                 }
 
                 if(!array_key_exists("help", $fieldOptions))
-                    $fieldOptions["help"] = $settingHelp ?? "";
+                    $fieldOptions["help"] = $slotHelp ?? "";
 
                 $fieldOptions["select2"] = true;
                 $fieldOptions["multiple"] = false;
                 $fieldOptions["data_class"] = Widget::class;
+                
                 $form->add($formattedField, $class, $fieldOptions);
             }
 
@@ -149,13 +135,9 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             dump($value, $field);
             if($field == "valid") continue;
 
-            if(!$newViewData[$field] instanceof Setting)
-                $newViewData[$field] = $this->baseSettings->getRawScalar($field) ?? new Setting($field, "");
-
-            $formattedField = str_replace(".", "-", $field);
-            $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
-
-            $this->baseSettings->removeCache($field);
+            // $formattedField = str_replace(".", "-", $field);
+            // $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
+            dump($value);
         }
 
         $viewData = $newViewData;

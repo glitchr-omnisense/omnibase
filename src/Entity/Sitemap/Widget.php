@@ -2,18 +2,17 @@
 
 namespace Base\Entity\Sitemap;
 
-use Doctrine\ORM\Mapping as ORM;
-
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
-use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 
+use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetRepository;
+
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
  * @ORM\InheritanceType( "JOINED" )
@@ -32,6 +31,7 @@ class Widget implements TranslatableInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
+    public function getId(): ?int { return $this->id; }
 
     /**
      *
@@ -39,12 +39,7 @@ class Widget implements TranslatableInterface
      * @GenerateUuid(version=4)
      */
     protected $uuid;
-
-    /**
-     * @ORM\Column(type="string", length=255, unique=true)
-     * @Slugify(reference="translations.title")
-     */
-    protected $slug;
+    public function getUuid() { return $this->uuid; }
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -52,7 +47,6 @@ class Widget implements TranslatableInterface
      * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      */
     protected $thumbnail;
-
     public function getThumbnail()     { return Uploader::getPublicPath($this, "thumbnail"); }
     public function getThumbnailFile() { return Uploader::getFile($this, "thumbnail"); }
     public function setThumbnail($thumbnail)

@@ -47,7 +47,7 @@ class WidgetSlotCrudController extends AbstractCrudController
 
         ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
         ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::EDIT, 'ROLE_ADMIN');
+        ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN');
     }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
@@ -62,7 +62,8 @@ class WidgetSlotCrudController extends AbstractCrudController
         foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new()->hideOnIndex()->setRequired(false)->showOnIndex("help");
+        yield TranslatableField::new("label")->setRequired(false);
+        yield TranslatableField::new("help")->setRequired(false);
         foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

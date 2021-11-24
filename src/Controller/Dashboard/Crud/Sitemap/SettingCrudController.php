@@ -61,7 +61,7 @@ class SettingCrudController extends AbstractCrudController
 
         ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
         ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::EDIT, 'ROLE_ADMIN');
+        ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN');
     }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
@@ -76,10 +76,8 @@ class SettingCrudController extends AbstractCrudController
         foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new()->hideOnIndex()
-            ->hideOnIndex()->setRequired(false)
-            ->setExcludedFields("value")
-            ->showOnIndex("help");
+        yield TranslatableField::new("label");
+        yield TranslatableField::new("help")->setRequired(false)->setExcludedFields("value");
         foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

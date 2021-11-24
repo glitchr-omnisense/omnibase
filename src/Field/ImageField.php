@@ -28,7 +28,7 @@ final class ImageField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("data_class", null)
-            ->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar");
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, "image");
     }
 
     public function allowDelete(bool $allowDelete = true): self

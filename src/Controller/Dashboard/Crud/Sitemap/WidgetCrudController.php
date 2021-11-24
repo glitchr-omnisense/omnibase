@@ -14,6 +14,7 @@ use Base\Field\ImpersonateField;
 use Base\Field\LinkIdField;
 use Base\Field\RoleField;
 use Base\Field\BooleanField;
+use Base\Field\SlugField;
 use Base\Field\TranslatableField;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -60,7 +61,9 @@ class WidgetCrudController extends AbstractCrudController
         ->add(Crud::PAGE_NEW,  Action::INDEX)
         ->add(Crud::PAGE_EDIT, Action::INDEX)
 
-        ->setPermission(Action::EDIT, 'ROLE_ADMIN');
+        ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
+        ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
+        ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN');
     }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
@@ -69,6 +72,14 @@ class WidgetCrudController extends AbstractCrudController
 
         yield LinkIdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+
+        yield SlugField::new('slug')->setTargetFieldName("translations.title");
+        foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+    
+        yield TranslatableField::new("title");
+        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 

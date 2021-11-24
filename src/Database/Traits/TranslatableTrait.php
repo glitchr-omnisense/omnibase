@@ -132,22 +132,24 @@ trait TranslatableTrait
         // Proxy getter method for current locale
         $defaultLocale = BaseService::getLocaleProvider()->getDefaultLocale();
         $entityTranslation = $this->translate();
+
+	$value = null;
         if(method_exists($entityTranslation, $methodOrProperty))
             $value = $entityTranslation->{$methodOrProperty}(...$arguments);
         else if(method_exists($entityTranslation, "get".ucfirst($methodOrProperty)))
             $value = $entityTranslation->{"get".ucfirst($methodOrProperty)}(...$arguments);
-        else if ($accessor->isReadable($entityTranslation, $methodOrProperty)) 
+        else if ($accessor->isReadable($entityTranslation, $methodOrProperty))
             $value = $accessor->getValue($entityTranslation, $methodOrProperty);
 
         // If current locale is empty.. then try to access value from default locale
         // (unless is was already the default locale)
         if ($value !== null) return $value;
-        
+
         //
-        // Proxy getter method for default locale 
+        // Proxy getter method for default locale
         if ($entityTranslation->getLocale() == $defaultLocale) return $value;
         else {
-            
+
             $entityTranslation = $this->translate($defaultLocale);
             if(method_exists($entityTranslation, $methodOrProperty))
                 return $entityTranslation->{$methodOrProperty}(...$arguments);
@@ -161,7 +163,7 @@ trait TranslatableTrait
         // Parent fallback for magic __call
         if(method_exists(get_parent_class(),"__call")) 
             return parent::__call($methodOrProperty, $arguments);
-        
+
         //
         // Failed to find a valid accessor
         throw new \BadMethodCallException("Method (or property accessor) \"$methodOrProperty\" not found in ". $this->getTranslationEntityClass());

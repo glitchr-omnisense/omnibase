@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
@@ -17,8 +18,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class TranslatableConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(LocaleProviderInterface $localeProvider)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
     {
+        $this->classMetadataManipulator = $classMetadataManipulator;
         $this->localeProvider = $localeProvider;
     }
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -33,7 +35,12 @@ final class TranslatableConfigurator implements FieldConfiguratorInterface
 
         // Show formatted value
         if( ($fieldName = $field->getCustomOption("show_field")) ) {
-
+            
+            $translationEntity = $entityDto->getPropertyMetadata("translations")->get("targetEntity");
+            $translationClassMetadata = $this->classMetadataManipulator->getClassMetadata($translationEntity);
+            if(!$translationClassMetadata->hasField($fieldName)) 
+                throw new \Exception("Field \"$fieldName\" not found in \"".$translationClassMetadata->getName()."\".");
+            
             $field->setLabel(ucfirst($fieldName));
             $field->setFormattedValue("-");
 

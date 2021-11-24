@@ -3,31 +3,18 @@
 namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
 use Base\Entity\Sitemap\Widget\Page;
-use Base\Service\BaseService;
-
-use Base\Entity\User;
-use Base\Field\Type\RoleType;
-
-use Base\Field\PasswordField;
-use Base\Field\ImpersonateField;
-use Base\Field\LinkIdField;
-use Base\Field\RoleField;
-use Base\Field\BooleanField;
+use Base\Field\AvatarField;
+use Base\Field\ImageField;
 use Base\Field\TranslatableField;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Base\Field\LinkIdField;
+use Base\Field\SlugField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class PageCrudController extends AbstractCrudController
 {
@@ -44,7 +31,7 @@ class PageCrudController extends AbstractCrudController
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
-            ->setPageTitle('index', 'User Management')
+            ->setPageTitle('index', 'Page management')
             ->setDefaultSort(['id' => 'DESC'])
             ->setFormOptions(
                 ['validation_groups' => ['new']], // Crud::PAGE_NEW
@@ -59,8 +46,8 @@ class PageCrudController extends AbstractCrudController
         ->add(Crud::PAGE_NEW,  Action::INDEX)
         ->add(Crud::PAGE_EDIT, Action::INDEX)
 
-        ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
+        ->setPermission(Action::NEW, 'ROLE_ADMIN')
+        ->setPermission(Action::DELETE, 'ROLE_ADMIN')
         ->setPermission(Action::EDIT, 'ROLE_ADMIN');
     }
 
@@ -72,17 +59,12 @@ class PageCrudController extends AbstractCrudController
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TextField::new('name');
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        yield ImageField::new('thumbnail');
 
-        yield TranslatableField::new('value')->hideOnIndex();
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        if (!$this->isGranted('ROLE_SUPERADMIN')) yield TextField::new('comment')->hideOnForm();
-        else yield TextField::new('comment');
-        foreach ( ($callbacks["comment"] ?? $defaultCallback)() as $yield)
+        yield SlugField::new('slug')->setTargetFieldName("translations.title");
+
+        yield TranslatableField::new('title');
+        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 

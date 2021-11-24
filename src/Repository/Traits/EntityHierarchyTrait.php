@@ -2,7 +2,7 @@
 
 namespace Base\Repository\Traits;
 
-trait EntityHierarchyTrait 
+trait EntityHierarchyTrait
 {
     public function getHierarchy($id = -1, ?string $separator = null)
     {
@@ -24,9 +24,9 @@ trait EntityHierarchyTrait
             throw new \Exception("Missing @EntityHierarchy for class \"" . get_class($this) . "\"");
 
         $separator = $separator ?? $this->getClassMetadata()->entityHierarchySeparator ?? "/";
-        return (is_array($this->getClassMetadata()->entityHierarchy) ? 
-        
-            $this->getClassMetadata()->entityHierarchy : 
+        return (is_array($this->getClassMetadata()->entityHierarchy) ?
+
+            $this->getClassMetadata()->entityHierarchy :
             explode($separator, $this->getClassMetadata()->entityHierarchy)
         );
     }

@@ -12,12 +12,11 @@ class TranslatableField implements FieldInterface
 {
     use FieldTrait;
 
-    public static function new(string $propertyName = "translations", ?string $label = null): self
+    public static function new(string $propertyName = null, ?string $label = null): self
     {
         return (new self())
-            ->setProperty($propertyName)
-            ->setLabel(false)
-            ->hideOnIndex()
+            ->setProperty("translations")
+            ->hideOnIndex()->showOnIndex($propertyName) // Hide if no property, or show if property provided
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
             ->setCustomOption("required", true)
@@ -30,13 +29,16 @@ class TranslatableField implements FieldInterface
         return $this;
     }
 
-    public function showOnIndex(string $field): self
+    public function showOnIndex(?string $field): self
     {
-        $this->setCustomOption("show_field", $field);
-        
-        $displayedOn = $this->dto->getDisplayedOn();
-        $displayedOn->set(Crud::PAGE_INDEX, Crud::PAGE_INDEX);
-        $this->dto->setDisplayedOn($displayedOn);
+        if($field) {
+
+            $this->setCustomOption("show_field", $field);
+            
+            $displayedOn = $this->dto->getDisplayedOn();
+            $displayedOn->set(Crud::PAGE_INDEX, Crud::PAGE_INDEX);
+            $this->dto->setDisplayedOn($displayedOn);
+        }
 
         return $this;
     }

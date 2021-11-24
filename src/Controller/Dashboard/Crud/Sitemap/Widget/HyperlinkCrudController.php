@@ -28,6 +28,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 
 class HyperlinkCrudController extends AbstractCrudController
 {
@@ -72,17 +73,10 @@ class HyperlinkCrudController extends AbstractCrudController
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TextField::new('name');
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        yield UrlField::new('url');
 
-        yield TranslatableField::new('value')->hideOnIndex();
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        if (!$this->isGranted('ROLE_SUPERADMIN')) yield TextField::new('comment')->hideOnForm();
-        else yield TextField::new('comment');
-        foreach ( ($callbacks["comment"] ?? $defaultCallback)() as $yield)
+        yield TranslatableField::new('title');
+        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 
