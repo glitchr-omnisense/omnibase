@@ -82,6 +82,7 @@ class AnnotationReader
         $this->cachePool['methodAnnotations']   = $this->cache->getItem($cacheName . ".methodAnnotations");
         $this->cachePool['propertyAnnotations'] = $this->cache->getItem($cacheName . ".propertyAnnotations");
 
+    
         // Get entity manager for later use
         $this->entityManager = $entityManager;
 
@@ -92,6 +93,7 @@ class AnnotationReader
         $this->requestStack = $requestStack;
     }
 
+    public function isCli() { return (php_sapi_name() == "cli"); }
     public function getAsset(string $url): string
     {
         $url = trim($url);
@@ -401,7 +403,7 @@ class AnnotationReader
             $this->getChildrenAnnotations($ancestor, $annotationNames, $targets)
         );
 
-        $this->cache->save($this->cachePool['familyAnnotations']->set($annotations));
+        if(!$this->isCli()) $this->cache->save($this->cachePool['familyAnnotations']->set($annotations));
         return $annotations[$ancestor] ?? [];
     }
 
@@ -460,7 +462,7 @@ class AnnotationReader
                 $annotations[$reflClass->name][] = $annotation;
             }
  
-            $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
+            if(!$this->isCli()) $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
@@ -526,7 +528,7 @@ class AnnotationReader
                 }
             }
 
-            $this->cache->save($this->cachePool['methodAnnotations']->set($annotations));
+            if(!$this->isCli()) $this->cache->save($this->cachePool['methodAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
@@ -594,7 +596,7 @@ class AnnotationReader
                 }
             }
 
-            $this->cache->save($this->cachePool['propertyAnnotations']->set($annotations));
+            if(!$this->isCli()) $this->cache->save($this->cachePool['propertyAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class

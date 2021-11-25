@@ -36,7 +36,7 @@
             <argument type="service" id="App\Repository\Sitemap\SettingRepository" />
             <argument type="service" id="base.locale_provider" />
             <argument type="service" id="assets.packages" />
-            <argument type="service" id="cache.app" />
+            <argument type="service" id="cache.adapter" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -218,7 +218,7 @@
         <service id="Base\Annotations\AnnotationReader" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="cache.app" />
+            <argument type="service" id="cache.adapter" />
             <argument type="service" id="flysystem.adapter.lazy.factory" />
             <argument type="service" id="request_stack" />
         </service>
@@ -436,7 +436,7 @@
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-            <argument type="service" id="cache.app" />
+            <argument type="service" id="cache.adapter" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
