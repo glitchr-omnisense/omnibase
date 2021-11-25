@@ -32,7 +32,7 @@ class ErrorController extends AbstractController
         try { 
         
             if ($this->baseService->isDevelopment()) return $this->rescue($exception);
-            return $this->render("@Base/exception.html.twig", ['exception' => $exception]);
+            return $this->render("@Base/exception.html.twig", ['exception' => FlattenException::createFromThrowable($exception)]);
         
         } catch(Exception $fatalException) {
 

@@ -54,7 +54,8 @@ trait BaseNotificationTrait
         BaseService::$notifierOptions = $options;
 
         // Address support only once..
-        BaseService::$notifier->addAdminRecipient(new Recipient($this->getMail()));
+        if( ($mail = $this->getMail()) )
+            BaseService::$notifier->addAdminRecipient(new Recipient($mail));
 
         // Add additional admin users.
         foreach ($this->getAdminUsers() as $adminUser)
