@@ -34,7 +34,7 @@ class Tag implements TranslatableInterface
 
     /**
      * @ORM\Column(length=255, unique=true)
-     * @Slugify(reference="name")
+     * @Slugify(reference="translations.name")
      */
     protected $slug;
 

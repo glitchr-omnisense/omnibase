@@ -69,7 +69,7 @@ final class BaseService implements RuntimeExtensionInterface
     /**
      * @var RequestStack
      */
-    private $rstack;
+    private $requestStack;
 
     /**
      * @var AdminContextProvider
@@ -111,7 +111,7 @@ final class BaseService implements RuntimeExtensionInterface
         // Symfony basic services
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
-        $this->rstack           = $this->container->get("request_stack");
+        $this->requestStack           = $this->container->get("request_stack");
         $this->setLocaleProvider($localeProvider);
 
         $this->setTwig($twig);
@@ -128,7 +128,7 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
         
         // Specific EA provider
-        $this->adminContextProvider = new AdminContextProvider($this->rstack);
+        $this->adminContextProvider = new AdminContextProvider($this->requestStack);
     }
     
     /*

@@ -310,8 +310,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
             if(!str_ends_with($metadata->getName(), __TRANSLATION_SUFFIX__))
                 throw new \Exception("Invalid class name for \"".$metadata->getName()."\"");
 
-        } else if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
-
             $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
             if(!$metadata->discriminatorMap) {
                 $metadata->discriminatorMap = array_filter(array_map(function($class) {
