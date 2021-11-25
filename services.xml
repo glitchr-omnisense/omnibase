@@ -436,7 +436,7 @@
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-            <argument type="service" id="app.cache.apcu" />
+            <argument type="service" id="cache.app" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
