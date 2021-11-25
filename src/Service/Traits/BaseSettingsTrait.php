@@ -130,7 +130,7 @@ trait BaseSettingsTrait
             return ($cacheValues !== null ? $cacheValues["_self"] ?? null : null);
 
         $array = $this->getRawScalar($name, $locale);
-        return ($array ? $array->translate($locale)->getValue() ?? null : "");
+       	return ($array ? $array->translate($locale)->getValue() ?? null : "");
     }
 
     public function get($name, ?string $locale = null): array
@@ -151,9 +151,9 @@ trait BaseSettingsTrait
             return $cacheValues;
 
         $values = $this->getRaw($name, $locale) ?? [];
-        return BaseService::array_map_recursive(function($value) use ($locale) {
-                    return ($value instanceof Setting ? $value->translate($locale)->getValue() : $value);
-                }, $values);
+       	return BaseService::array_map_recursive(function($value) use ($locale) {
+               	    return ($value instanceof Setting ? $value->translate($locale)->getValue() : $value);
+               	}, $values);
     }
 
     

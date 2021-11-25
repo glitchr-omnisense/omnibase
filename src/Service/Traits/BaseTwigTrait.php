@@ -95,7 +95,7 @@ trait BaseTwigTrait {
         if($parseUrl["scheme"] ?? false)
             return $url;
 
-        $request = $this->rstack->getCurrentRequest();
+        $request = $this->requestStack->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
 
         $path = trim($parseUrl["path"]);

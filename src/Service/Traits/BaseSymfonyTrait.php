@@ -36,14 +36,14 @@ trait BaseSymfonyTrait
     public function addSession($name, $value) { $this->getSession()->set($name, $value); }
     public function getSession($name = null)
     {
-        if(!$name) return $this->rstack->getSession();
+        if(!$name) return $this->requestStack->getSession();
 
-        return ($this->rstack && $this->rstack->getSession()->has($name)) ? $this->rstack->getSession()->get($name) : null;
+        return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->get($name) : null;
     }
 
     public function removeSession($name)
     {
-        return ($this->rstack && $this->rstack->getSession()->has($name)) ? $this->rstack->getSession()->remove($name) : null;
+        return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->remove($name) : null;
     }
 
     public function createForm($type, $data = null, array $options = []): FormInterface
@@ -119,8 +119,8 @@ trait BaseSymfonyTrait
     public function getCurrentRequest(): ?Request { return $this->getCurrentRequest(); }
     public function getRequest(): ?Request
     {
-        if (!$this->rstack) return null;
-        return $this->rstack->getCurrentRequest();
+        if (!$this->requestStack) return null;
+        return $this->requestStack->getCurrentRequest();
     }
 
     public function generateUrl(string $route = "", array $opts = []): ?string { return $this->getUrl($route, $opts); }
@@ -197,6 +197,8 @@ trait BaseSymfonyTrait
     public function isMaintenance() { return $this->getSettings()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isProduction() { return $this->kernel->getEnvironment() == "prod"; }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
+
+    public function isCli() { return (php_sapi_name() == "cli"); }
     public function isDebug() { return $this->kernel->isDebug(); }
     public function isProfiler($request = null)
     {

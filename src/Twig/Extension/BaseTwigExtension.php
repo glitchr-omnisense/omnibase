@@ -47,6 +47,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('time',          [$this, 'time']),
             new TwigFilter('url',           [$this, 'url']),
             new TwigFilter('mimetype',      [$this, 'mimetype']),
+            new TwigFilter('synopsis',      [$this, 'synopsis']),
             new TwigFilter('extension',     [$this, 'extension']),
             new TwigFilter('stringify',     [$this, 'stringify']),
             new TwigFilter('shorten',       [$this, 'shorten']),
@@ -62,6 +63,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('greaterThan',   [$this, 'greaterThan'], ['needs_environment' => true])
         ];
     }
+
+    public function synopsis($class) { return BaseService::getSynopsis($class); }
 
     public function shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
     {
