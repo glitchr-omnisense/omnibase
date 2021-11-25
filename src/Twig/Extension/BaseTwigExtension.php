@@ -212,8 +212,8 @@ final class BaseTwigExtension extends AbstractExtension
         $parseUrl = parse_url($url);
         if(!array_key_exists("schema", $parseUrl)) {
 
-            $https = $_SERVER['HTTPS'] ?? ($this->baseService->getSettings("base.settings.use_https") ? $this->baseService->getSettings("base.settings.use_https") : true);
-            $serverName = $_SERVER['SERVER_NAME'] ?? ($this->baseService->getSettings("base.settings.domain") ? $this->baseService->getSettings("base.settings.domain") : "localhost");
+            $https = $_SERVER['HTTPS'] ?? $this->baseService->getSettings()->getScalar("base.settings.use_https") ?? true;
+            $serverName = $_SERVER['SERVER_NAME'] ?? $this->baseService->getSettings()->getScalar("base.settings.domain") ?? "localhost";
 
             if(str_starts_with($url, "http://") || str_starts_with($url, "https://")) $domain = "";
             else $domain = ($https ? "https://" : "http://") . $serverName;

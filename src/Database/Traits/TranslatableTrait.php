@@ -133,7 +133,7 @@ trait TranslatableTrait
         $defaultLocale = BaseService::getLocaleProvider()->getDefaultLocale();
         $entityTranslation = $this->translate();
 
-	$value = null;
+        $value = null;
         if(method_exists($entityTranslation, $methodOrProperty))
             $value = $entityTranslation->{$methodOrProperty}(...$arguments);
         else if(method_exists($entityTranslation, "get".ucfirst($methodOrProperty)))

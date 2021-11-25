@@ -189,7 +189,7 @@ trait BaseSymfonyTrait
     }
 
     public function refresh(?Request $request = null): RedirectResponse 
-    { 
+    {
         $request = $request ?? $this->getRequest();
         return $this->redirect($request->get('_route'));
     }
@@ -223,7 +223,7 @@ trait BaseSymfonyTrait
 
         $controllerAttribute = $request->attributes->get("_controller");
         $array = is_array($controllerAttribute) ? $controllerAttribute : explode("::", $request->attributes->get("_controller"));
-        $controller = explode("::", $array[0]);
+        $controller = explode("::", $array[0])[0];
 
         $parents = [];
         $parent = $controller;

@@ -163,13 +163,13 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getFieldValue($entity, string $property)
     {
         if(!$entity) return null;
-        
+
         $classMetadata = self::getClassMetadata(get_class($entity));
         if( ($dot = strpos($property, ".")) > 0 ) {
-        
+
             $field    = trim(substr($property, 0, $dot));
             $property = trim(substr($property,    $dot+1));
-            
+
             if(!$classMetadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
 
@@ -178,7 +178,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
                 $entity = $entity->first();
             else if(is_array($entity))
                 $entity = current($entity) ?? null;
-            
+
             return self::getFieldValue($entity, $property);
         }
 
