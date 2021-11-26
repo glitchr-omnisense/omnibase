@@ -25,6 +25,7 @@
         "php": ">=7.2.5",
         "symfony/framework-bundle": "^4.0|^5.0",
         "symfony/monolog-bundle": "^3.1",
+        "symfony/mailer": "^5.0",
         
         "scheb/2fa": "^5.0",
         "scheb/2fa-email": "^5.0",
