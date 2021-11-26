@@ -15,7 +15,7 @@ class SpamChecker
     private $client;
     private $endpoint;
 
-    public function __construct(RequestStack $requestStack,  HttpClientInterface $client, BaseService $baseService)
+    public function __construct(RequestStack $requestStack, HttpClientInterface $client, BaseService $baseService)
     {
         $this->requestStack = $requestStack;
         $this->client = $client;
@@ -77,7 +77,7 @@ class SpamChecker
 
         $request = $this->requestStack->getCurrentRequest();
         switch($api) {
-            
+
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");
 
