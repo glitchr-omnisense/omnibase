@@ -235,13 +235,13 @@ trait BaseSettingsTrait
                 );
             }
 
-            $this->cache->save($item->set($localeValues));
+            if(!$this->baseService->isCli()) $this->cache->save($item->set($localeValues));
             return true;
         }
 
         $item = $this->cache->getItem($name);
         $array = array_merge($item->get() ?? [], [$locale => $array]);
-        $this->cache->save($item->set($array));
+        if(!$this->baseService->isCli()) $this->cache->save($item->set($array));
 
         return true;
     }
