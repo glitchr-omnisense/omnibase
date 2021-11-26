@@ -18,7 +18,6 @@ use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-use Doctrine\DBAL\Driver\PDO\Exception as DoctrineException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 
 trait BaseNotificationTrait

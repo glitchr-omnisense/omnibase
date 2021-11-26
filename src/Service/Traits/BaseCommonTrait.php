@@ -2,17 +2,11 @@
 
 namespace Base\Service\Traits;
 
-use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Base\Service\LocaleProviderInterface;
 use Base\Twig\Extension\BaseTwigExtension;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;
 
-use Base\Traits\BaseTrait;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
-use Symfony\Component\Notifier\NotifierInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;

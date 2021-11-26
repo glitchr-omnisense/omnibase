@@ -3,14 +3,12 @@
 namespace Base\Service\Traits;
 
 use Base\Entity\User;
-use Base\Entity\User\Notification;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 trait BaseSecurityTrait
 {

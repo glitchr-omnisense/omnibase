@@ -3,7 +3,6 @@
 namespace Base\Service\Traits;
 
 use Doctrine\Common\Util\ClassUtils;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 trait BaseUtilsTrait
 {

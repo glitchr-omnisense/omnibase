@@ -3,7 +3,6 @@
 namespace Base\Service\Traits;
 
 use Base\Service\BaseService;
-use Base\Twig\Extension\BaseTwigExtension;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Twig\Environment;
 

@@ -2,8 +2,6 @@
 
 namespace Base\Service\Traits;
 
-use Base\Entity\Thread;
-use Base\Entity\User;
 use Base\Service\BaseService;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -15,8 +13,6 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 trait BaseSymfonyTrait
 {

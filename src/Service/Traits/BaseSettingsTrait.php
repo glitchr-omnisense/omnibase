@@ -4,17 +4,7 @@ namespace Base\Service\Traits;
 
 use Base\Entity\Sitemap\Setting;
 use Base\Service\BaseService;
-use Base\Service\LocaleProvider;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
-use Symfony\Contracts\Cache\CacheInterface;
 
-use Doctrine\DBAL\Driver\PDO\Exception as DoctrineException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 
 trait BaseSettingsTrait
