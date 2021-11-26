@@ -18,6 +18,9 @@ use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
+use Doctrine\DBAL\Driver\PDO\Exception as DoctrineException;
+use Doctrine\DBAL\Exception\TableNotFoundException;
+
 trait BaseNotificationTrait
 {
     public function getMail(): ?string
@@ -62,13 +65,15 @@ trait BaseNotificationTrait
             BaseService::$notifier->addAdminRecipient($adminUser->getRecipient());
     }
 
+    
     public function getAdminUsers()
     {
         $roles = $this->getParameterBag("base.notifier.admin_recipients");
-        if(!$roles) return null;
+        if(!$roles) return [];
 
         $userRepository = $this->getEntityManager()->getRepository(User::class);
-        return $userRepository->findByRoles($roles);
+        try { return $userRepository->findByRoles($roles); } 
+        catch(TableNotFoundException $e) { return []; }
     }
 
     public static function getNotifierOptions(?string $channel = null)

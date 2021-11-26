@@ -14,6 +14,9 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\Cache\CacheInterface;
 
+use Doctrine\DBAL\Driver\PDO\Exception as DoctrineException;
+use Doctrine\DBAL\Exception\TableNotFoundException;
+
 trait BaseSettingsTrait
 {
     protected $cacheEnabled = true; /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
@@ -86,9 +89,9 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        $this->settings[$name] = $this->settings[$name] 
-            ?? $this->settingRepository->findByInsensitiveNameStartingWith($name)->getResult();
-
+        try { $this->settings[$name] = $this->settings[$name] ?? $this->settingRepository->findByInsensitiveNameStartingWith($name)->getResult(); } 
+        catch(TableNotFoundException $e) { return []; }
+        
         $values = $this->normalize($name, $this->settings[$name]);
         $values = $this->read($name, $values); // get formatted values
         $this->applyCache($name, $locale, $values);
