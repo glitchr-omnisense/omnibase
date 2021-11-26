@@ -15,6 +15,8 @@ trait BaseSettingsTrait
     protected $settingRepository = null;
     protected $settings = [];
 
+    public function isCli() { return (php_sapi_name() == "cli"); }
+
     protected function read(string $name, array $normSettings)
     {
         $nameArray = explode(".", $name);
@@ -235,13 +237,13 @@ trait BaseSettingsTrait
                 );
             }
 
-            if(!$this->baseService->isCli()) $this->cache->save($item->set($localeValues));
+            if(!$this->isCli()) $this->cache->save($item->set($localeValues));
             return true;
         }
 
         $item = $this->cache->getItem($name);
         $array = array_merge($item->get() ?? [], [$locale => $array]);
-        if(!$this->baseService->isCli()) $this->cache->save($item->set($array));
+        if(!$this->isCli()) $this->cache->save($item->set($array));
 
         return true;
     }
