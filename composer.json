@@ -28,6 +28,15 @@
         "symfony/mailer": "^4.0|^5.0",
         "symfony/discord-notifier": "^4.0|^5.0",
 
+        "symfony/form": "^4.0|^5.0",
+        "symfony/http-client": "^4.0|^5.0",
+        "symfony/intl": "^4.0|^5.0",
+        "symfony/mailer": "^4.0|^5.0",
+        "symfony/messenger": "^4.0|^5.0",
+        "symfony/notifier": "^4.0|^5.0",
+
+        "symfony/dependency-injection": "^4.0|^5.0",
+        "symfony/discord-notifier": "^4.0|^5.0",
         "symfony/monolog-bundle": "^3.1",
 
         "twig/twig": "^3.3",
