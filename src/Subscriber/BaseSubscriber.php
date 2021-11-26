@@ -4,10 +4,10 @@ namespace Base\Subscriber;
 
 use Base\Controller\BaseController;
 use Base\Service\BaseService;
+use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class BaseSubscriber implements EventSubscriberInterface
@@ -15,18 +15,21 @@ class BaseSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
-
         $this->autoAppend = $this->baseService->getParameterBag("base.twig.autoappend");
     }
 
     public static function getSubscribedEvents()
     {
         return [
-            KernelEvents::REQUEST => ['onKernelRequest'],
+            ConsoleEvents::COMMAND => ['onConsoleCommand'],
+            KernelEvents::REQUEST  => ['onKernelRequest'],
             KernelEvents::RESPONSE => ['onKernelResponse'],
         ];
     }
 
+    // Make sure base service is called eagerly very in the early stage 
+    public function onConsoleCommand() { return null; } 
+    
     public function onKernelRequest(RequestEvent $event)
     {
         BaseController::$foundBaseSubscriber = true;

@@ -24,7 +24,8 @@ trait BaseNotificationTrait
 {
     public function getMail(): ?string
     {
-        $mail = $this->getSettings()->mail() ?? null;
+        $mail = $this->getSettings()->mail();
+        if(!$mail) $mail = $this->getParameterBag("base.notifier.technical_support");
         if(!$mail) return null;
 
         $mailName = $this->getSettings()->mail_name() ?? ucfirst(explode("@", $mail)[0]);
@@ -49,7 +50,7 @@ trait BaseNotificationTrait
     public function setNotifier(NotifierInterface $notifier, ?ChannelPolicyInterface $policy = null, array $options)
     {
         if (BaseService::$notifier) return $this;
-
+        
         // Update user notifier
         BaseService::$notifier        = $notifier;
         BaseService::$notifierPolicy  = $policy;
@@ -64,7 +65,6 @@ trait BaseNotificationTrait
             BaseService::$notifier->addAdminRecipient($adminUser->getRecipient());
     }
 
-    
     public function getAdminUsers()
     {
         $roles = $this->getParameterBag("base.notifier.admin_recipients");

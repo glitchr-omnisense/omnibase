@@ -65,7 +65,7 @@ trait BaseSymfonyTrait
 
         // Return parameter bag in case no key
         if (empty($key))
-            return $this->container->getParameterBag()->all();
+            return $this->container->getParameterBag();
 
         // Simple parameter stored
         if ($this->container->hasParameter($key))

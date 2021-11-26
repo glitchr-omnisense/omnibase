@@ -91,6 +91,13 @@ class BaseConfiguration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('notifier')->addDefaultsIfNotSet()
                     ->children()
+                        ->scalarNode('technical_support')
+                            ->info('Hardcoded technical support')
+                            ->defaultValue(null)
+                            ->end()
+                    ->end()
+
+                    ->children()
                         ->scalarNode('admin_recipients')
                             ->info('Administrators receiving notification')
                             ->defaultValue("ROLE_SUPERADMIN")

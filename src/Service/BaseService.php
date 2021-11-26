@@ -50,6 +50,8 @@ use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\Asset\PackageInterface;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Mailer\MailerInterface;
 
 /**
  * @class Base interface to be used with custom base
@@ -84,6 +86,7 @@ final class BaseService implements RuntimeExtensionInterface
     public function __construct(
         KernelInterface $kernel,
         Environment $twig,
+        RequestStack $requestStack,
         ManagerRegistry $doctrine,
         FormFactoryInterface $formFactory, 
         LocaleProviderInterface $localeProvider,
@@ -96,7 +99,7 @@ final class BaseService implements RuntimeExtensionInterface
         BaseSettings $settings)
     {
         BaseController::$foundBaseService = true;
-        
+
         $this->kernel  = $kernel;
         $this->container = $kernel->getContainer();
         
@@ -111,22 +114,23 @@ final class BaseService implements RuntimeExtensionInterface
         // Symfony basic services
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
-        $this->requestStack     = $this->container->get("request_stack");
+        $this->requestStack     = $requestStack;
         $this->setLocaleProvider($localeProvider);
 
         $this->setTwig($twig);
         $this->setDoctrine($doctrine);
         $this->setEntityManager($doctrine->getManager());
         $this->setRouter($this->container->get("router"));
-        
+
         // Additional services related to user class
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
         $this->setProjectDir($this->kernel->getProjectDir());
         $this->setEnvironment($this->kernel->getEnvironment());
         $this->setUserProperty($this->getParameterBag("base.user.property"));
+
         $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
-        
+ 
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->requestStack);
     }

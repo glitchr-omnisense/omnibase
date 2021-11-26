@@ -40,6 +40,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Throwable;
 use Exception;
+use UnexpectedValueException;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -264,15 +265,15 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function asSmsMessage(SmsRecipientInterface $recipient, string $transport = null): ?SmsMessage
     {
-        // TODO..
+        throw new UnexpectedValueException("No SMS support implemented yet.");
         return null;
     }
 
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
-        $supportAddress = User::getNotifier()->getAdminRecipients()[0] ?? [new NoRecipient()];
-        if($supportAddress instanceof NoRecipient)
-            throw new Exception("Unexpected support address found.. Administrator has been notified");
+        $notifier = User::getNotifier();
+        $adminAddress = $notifier->getAdminRecipients()[0] ?? new NoRecipient();
+        if($adminAddress instanceof NoRecipient) throw new UnexpectedValueException("No support address found.");
 
         $importance = $this->getImportance();
         $this->setImportance(""); // Remove importance from email subject
@@ -318,11 +319,11 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         $email
             ->subject($subject)
-            ->from($supportAddress->getEmail())
+            ->from($adminAddress->getEmail())
             //->html($html) // overriden by default notification template by Symfony
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
-            
+
         $this->setImportance($importance);
         return $notification;
     }

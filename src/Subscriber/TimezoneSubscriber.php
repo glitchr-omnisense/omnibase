@@ -4,15 +4,9 @@ namespace Base\Subscriber;
 
 use App\Entity\User;
 use App\Entity\User\Notification;
-use Base\Service\BaseService;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Twig\Environment;
 
 class TimezoneSubscriber implements EventSubscriberInterface
 {

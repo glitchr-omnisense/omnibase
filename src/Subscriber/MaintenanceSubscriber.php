@@ -4,12 +4,9 @@ namespace Base\Subscriber;
 use Base\Service\BaseService;
 use Base\Entity\User\Notification;
 
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class MaintenanceSubscriber implements EventSubscriberInterface
 {
@@ -39,7 +36,6 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService)
     {
     	$this->baseService = $baseService;
-        $this->lockPath = $baseService->getParameterBag("base.maintenance.lockpath");
         $this->exceptionRoute   = $baseService->getParameterBag("base.maintenance.exception");
         $this->exceptionRoute[] = "base_login";
 
@@ -55,12 +51,12 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
     public function onRequestEvent(RequestEvent $event)
     {
+        if ($this->baseService->isCli()) return;
+        if ($this->baseService->isEasyAdmin($event->getRequest())) return;
+        if ($this->baseService->isProfiler($event->getRequest())) return;
+
         // Exception triggered
         if( empty($this->getCurrentRoute($event)) )
-            return;
-
-        // Avoid symfony profiler ajax request to go through this..
-        if (preg_match('/^\/(_(wdt|profiler))/', $event->getRequest()->getRequestUri()))
             return;
 
         // Check if lock file is found or not..
