@@ -54,8 +54,8 @@
         "hwi/oauth-bundle": "^1.4",
 
         "doctrine/annotations": "^1.0",
-        "doctrine/doctrine-bundle": "^2.2",
-        "doctrine/orm": "^2.8",
+        "doctrine/doctrine-bundle": "^2.0",
+        "doctrine/orm": "^2.0",
 
         "php-http/guzzle6-adapter": "^2.0",
         "php-http/httplug-bundle": "^1.20"
