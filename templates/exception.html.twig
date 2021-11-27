@@ -6,7 +6,9 @@
 		{% if (transCode|trans2) != transCode %}
 			<h1 class="exception-title">{{ flattenException.statusCode }} {{ transCode|trans2 }}</h1>
 			<h3>{{ 'controllers.exception.title'|trans2 }}</h3>
-			<p class="exception-message">{{ 'controllers.exception.description'|trans2([base.getParameterBag("base.notifier.technical_support")])|raw }}</p>
+			<p class="exception-message">{{ 'controllers.exception.description'|trans2([
+				base.settings.mail()|default(base.getParameterBag("base.notifier.technical_support"))
+				])|raw }}</p>
 		{% else %}
 			{% set code = ((flattenException.statusCode != 0) ? flattenException.statusCode : null)|default(500) %}
 			<h1 class="exception-title">{{ code }} {{"controllers.exception.unknown"|trans2}}</h1>
