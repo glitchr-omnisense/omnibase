@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BaseSubscriber implements EventSubscriberInterface
 {
@@ -36,6 +37,9 @@ class BaseSubscriber implements EventSubscriberInterface
 
         $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));
+
+        if($this->baseService->isProfiler($event) && !$this->baseService->isDebug())
+            throw new NotFoundHttpException("Page not found.");
     }
 
     private function allowRender(ResponseEvent $event)
