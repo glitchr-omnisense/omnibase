@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Platforms;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\Deprecations\Deprecation;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnClassMetadataNotFoundEventArgs;
@@ -45,15 +46,20 @@ use function is_subclass_of;
 use function strpos;
 use function strtolower;
 
-
 /**
+ *
  * Custom class metadata factory
  * @author Marco Meyer <marco.meyerconde@gmail.com>
  *
  * The ClassMetadataFactory is used to create ClassMetadata objects that contain all the
  * metadata mapping information of a class which describes how a class should be mapped
  * to a relational database.
+ *
+ * @method ClassMetadata[] getAllMetadata()
+ * @method ClassMetadata[] getLoadedMetadata()
+ * @method ClassMetadata getMetadataFor($className)
  */
+
 class ClassMetadataFactory extends AbstractClassMetadataFactory
 {
     /** @var EntityManagerInterface|null */
@@ -72,17 +78,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     private $embeddablesActiveNesting = [];
 
     /**
-     * {@inheritDoc}
+     * @return void
      */
-    protected function loadMetadata($name)
-    {
-        $loaded = parent::loadMetadata($name);
-
-        array_map([$this, 'resolveDiscriminatorValue'], array_map([$this, 'getMetadataFor'], $loaded));
-
-        return $loaded;
-    }
-
     public function setEntityManager(EntityManagerInterface $em)
     {
         $this->em = $em;
@@ -123,7 +120,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         /** @var ClassMetadata $parent */
 
         if ($parent) {
-
             $class->setInheritanceType($parent->inheritanceType);
             $class->setDiscriminatorColumn($parent->discriminatorColumn);
             $class->setIdGeneratorType($parent->generatorType);
@@ -179,16 +175,19 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 $this->embeddablesActiveNesting[$class->name] = true;
 
                 $embeddableMetadata = $this->getMetadataFor($embeddableClass['class']);
+                
                 if ($embeddableMetadata->isEmbeddedClass) {
                     $this->addNestedEmbeddedClasses($embeddableMetadata, $class, $property);
                 }
 
                 $identifier = $embeddableMetadata->getIdentifier();
+                
                 if (! empty($identifier)) {
                     $this->inheritIdGeneratorMapping($class, $embeddableMetadata);
                 }
 
                 $class->inlineEmbeddable($property, $embeddableMetadata);
+                
                 unset($this->embeddablesActiveNesting[$class->name]);
             }
         }
@@ -198,10 +197,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 $class->setPrimaryTable($parent->table);
             }
 
-            if ($parent) {
-                $this->addInheritedIndexes($class, $parent);
-            }
-
+            $this->addInheritedIndexes($class, $parent);
+            
             if ($parent->cache) {
                 $class->cache = $parent->cache;
             }
@@ -236,6 +233,15 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         if ($this->evm->hasListeners(Events::loadClassMetadata)) {
             $eventArgs = new LoadClassMetadataEventArgs($class, $this->em);
             $this->evm->dispatchEvent(Events::loadClassMetadata, $eventArgs);
+        }
+
+        if ($class->changeTrackingPolicy === ClassMetadataInfo::CHANGETRACKING_NOTIFY) {
+            Deprecation::trigger(
+                'doctrine/orm',
+                'https://github.com/doctrine/orm/issues/8383',
+                'NOTIFY Change Tracking policy used in "%s" is deprecated, use deferred explicit instead.',
+                $class->name
+            );
         }
 
         $this->validateRuntimeMetadata($class, $parent);
@@ -278,6 +284,14 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                         throw MappingException::invalidClassInDiscriminatorMap($subClass, $class->name);
                     }
                 }
+            } else {
+                assert($parent instanceof ClassMetadataInfo); // https://github.com/doctrine/orm/issues/8746
+                if (
+                    ! $class->reflClass->isAbstract()
+                    && ! in_array($class->name, $class->discriminatorMap, true)
+                ) {
+                    throw MappingException::mappedClassNotPartOfDiscriminatorMap($class->name, $class->rootEntityName);
+                }
             }
         } elseif ($class->isMappedSuperclass && $class->name === $class->rootEntityName && (count($class->discriminatorMap) || $class->discriminatorColumn)) {
             // second condition is necessary for mapped superclasses in the middle of an inheritance hierarchy
@@ -294,80 +308,6 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     }
 
     /**
-     * Populates the discriminator value of the given metadata (if not set) by iterating over discriminator
-     * map classes and looking for a fitting one.
-     *
-     * @return void
-     *
-     * @throws MappingException
-     */
-    
-    private function resolveDiscriminatorValue(ClassMetadata $metadata)
-    {
-        //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
-        if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
-
-            if(!str_ends_with($metadata->getName(), __TRANSLATION_SUFFIX__))
-                throw new \Exception("Invalid class name for \"".$metadata->getName()."\"");
-
-            $translatableMetadata = $this->getMetadataFor($metadata->getName()::getTranslatableEntityClass());
-            if(!$metadata->discriminatorMap) {
-                $metadata->discriminatorMap = array_filter(array_map(function($class) {
-
-                    return (is_subclass_of($class, TranslatableInterface::class, true)) 
-                        ? $class::getTranslationEntityClass(false, false) 
-                        : null;
-
-                }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
-            }
-
-            $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
-            $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
-            if($metadata->discriminatorMap) {
-                
-                if(!in_array($metadata->getName(), $metadata->discriminatorMap)) 
-                    throw new MissingDiscriminatorMapException(
-                        "Discriminator map missing for \"".$metadata->getName().
-                        "\". Did you forgot to implement \"".TranslatableInterface::class.
-                        "\" in \"".$metadata->getName()::getTranslatableEntityClass()."\".");
-            
-                $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()] ?? null;
-                if(!$metadata->discriminatorValue) 
-                    throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
-            }
-        } 
-
-        if (
-            $metadata->discriminatorValue
-            || ! $metadata->discriminatorMap
-            || $metadata->isMappedSuperclass
-            || ! $metadata->reflClass
-            || $metadata->reflClass->isAbstract()
-        ) {
-            return;
-        }
-
-        // minor optimization: avoid loading related metadata when not needed
-        foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
-
-            if ($discriminatorClass === $metadata->name) {
-                $metadata->discriminatorValue = $discriminatorValue;
-                return;
-            }
-        }
-
-        // iterate over discriminator mappings and resolve actual referenced classes according to existing metadata
-        foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
-            if ($metadata->name === $this->getMetadataFor($discriminatorClass)->getName()) {
-                $metadata->discriminatorValue = $discriminatorValue;
-                return;
-            }
-        }
-
-        throw MappingException::mappedClassNotPartOfDiscriminatorMap($metadata->name, $metadata->rootEntityName);
-    }
-
-    /**
      * Adds a default discriminator map if no one is given
      *
      * If an entity is of any inheritance type and does not contain a
@@ -379,7 +319,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      *
      * @throws MappingException
      */
-    private function addDefaultDiscriminatorMap(ClassMetadata $class)
+    private function addDefaultDiscriminatorMap(ClassMetadata $class): void
     {
         $allClasses = $this->driver->getAllClassNames();
         $fqcn       = $class->getName();
@@ -387,9 +327,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
         $duplicates = [];
         foreach ($allClasses as $subClassCandidate) {
-            
             if (is_subclass_of($subClassCandidate, $fqcn)) {
-
                 $shortName = $this->getShortName($subClassCandidate);
 
                 if (isset($map[$shortName])) {
@@ -410,22 +348,25 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * Gets the lower-case short name of a class.
      *
-     * @param string $className
-     *
-     * @return string
+     * @psalm-param class-string $className
      */
-    private function getShortName($className)
+    private function getShortName(string $className): string
     {
-        // Override getShortName() on purpose..
+        // if (strpos($className, '\\') === false) {
+        //     return strtolower($className);
+        // }
+
+        // $parts = explode('\\', $className);
+
+        // return strtolower(end($parts));
+
         return $className;
     }
 
     /**
      * Adds inherited fields to the subclass mapping.
-     *
-     * @return void
      */
-    private function addInheritedFields(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedFields(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         foreach ($parentClass->fieldMappings as $mapping) {
             if (! isset($mapping['inherited']) && ! $parentClass->isMappedSuperclass) {
@@ -447,11 +388,9 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * Adds inherited association mappings to the subclass mapping.
      *
-     * @return void
-     *
      * @throws MappingException
      */
-    private function addInheritedRelations(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedRelations(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         foreach ($parentClass->associationMappings as $field => $mapping) {
             if ($parentClass->isMappedSuperclass) {
@@ -475,7 +414,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
     }
 
-    private function addInheritedEmbeddedClasses(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedEmbeddedClasses(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         foreach ($parentClass->embeddedClasses as $field => $embeddedClass) {
             if (! isset($embeddedClass['inherited']) && ! $parentClass->isMappedSuperclass) {
@@ -497,8 +436,11 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * @param ClassMetadata $parentClass Parent class to add nested embedded classes metadata to.
      * @param string        $prefix      Embedded classes' prefix to use for nested embedded classes field names.
      */
-    private function addNestedEmbeddedClasses(ClassMetadata $subClass, ClassMetadata $parentClass, $prefix)
-    {
+    private function addNestedEmbeddedClasses(
+        ClassMetadata $subClass,
+        ClassMetadata $parentClass,
+        string $prefix
+    ): void {
         foreach ($subClass->embeddedClasses as $property => $embeddableClass) {
             if (isset($embeddableClass['inherited'])) {
                 continue;
@@ -522,10 +464,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
     /**
      * Copy the table indices from the parent class superclass to the child class
-     *
-     * @return void
      */
-    private function addInheritedIndexes(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedIndexes(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         if (! $parentClass->isMappedSuperclass) {
             return;
@@ -546,10 +486,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
     /**
      * Adds inherited named queries to the subclass mapping.
-     *
-     * @return void
      */
-    private function addInheritedNamedQueries(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedNamedQueries(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         foreach ($parentClass->namedQueries as $name => $query) {
             if (! isset($subClass->namedQueries[$name])) {
@@ -565,10 +503,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
     /**
      * Adds inherited named native queries to the subclass mapping.
-     *
-     * @return void
      */
-    private function addInheritedNamedNativeQueries(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedNamedNativeQueries(ClassMetadata $subClass, ClassMetadata $parentClass): void
     {
         foreach ($parentClass->namedNativeQueries as $name => $query) {
             if (! isset($subClass->namedNativeQueries[$name])) {
@@ -587,10 +523,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
     /**
      * Adds inherited sql result set mappings to the subclass mapping.
-     *
-     * @return void
      */
-    private function addInheritedSqlResultSetMappings(ClassMetadata $subClass, ClassMetadata $parentClass)
+    private function addInheritedSqlResultSetMappings(ClassMetadata $subClass, ClassMetadata $parentClass) :void
     {
         foreach ($parentClass->sqlResultSetMappings as $name => $mapping) {
             if (! isset($subClass->sqlResultSetMappings[$name])) {
@@ -764,12 +698,10 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * Inherits the ID generator mapping from a parent class.
      */
-    private function inheritIdGeneratorMapping(ClassMetadataInfo $class, ClassMetadataInfo $parent)
+    private function inheritIdGeneratorMapping(ClassMetadataInfo $class, ClassMetadataInfo $parent): void
     {
         if ($parent->isIdGeneratorSequence()) {
             $class->setSequenceGeneratorDefinition($parent->sequenceGeneratorDefinition);
-        } elseif ($parent->isIdGeneratorTable()) {
-            $class->tableGeneratorDefinition = $parent->tableGeneratorDefinition;
         }
 
         if ($parent->generatorType) {
@@ -786,7 +718,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      */
     protected function wakeupReflection(ClassMetadataInterface $class, ReflectionService $reflService)
     {
-        /** @var ClassMetadata $class */
+        assert($class instanceof ClassMetadata);
         $class->wakeupReflection($reflService);
     }
 
@@ -795,7 +727,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      */
     protected function initializeReflection(ClassMetadataInterface $class, ReflectionService $reflService)
     {
-        /** @var ClassMetadata $class */
+        assert($class instanceof ClassMetadata);
         $class->initializeReflection($reflService);
     }
 
@@ -804,6 +736,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      */
     protected function getFqcnFromAlias($namespaceAlias, $simpleClassName)
     {
+        /** @psalm-var class-string */
         return $this->em->getConfiguration()->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
     }
 
@@ -833,5 +766,91 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
 
         return $this->targetPlatform;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function loadMetadata($name)
+    {
+        $loadedMetadata = parent::loadMetadata($name);
+
+        foreach($loadedMetadata as $key => $metadata)
+            $metadataList[] = $this->getMetadataFor($metadata);
+        foreach($metadataList as $key => $metadata)
+            $metadata = $this->resolveDiscriminatorValue($metadata);
+
+        return $loadedMetadata;
+    }
+
+    /**
+     * Populates the discriminator value of the given metadata (if not set) by iterating over discriminator
+     * map classes and looking for a fitting one.
+     *
+     * @return void
+     *
+     * @throws MappingException
+     */
+    
+    private function resolveDiscriminatorValue(ClassMetadata $metadata)
+    {
+        //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
+        if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
+
+            if(!str_ends_with($metadata->getName(), __TRANSLATION_SUFFIX__))
+                throw new \Exception("Invalid class name for \"".$metadata->getName()."\"");
+
+            $translatableClass = $metadata->getName()::getTranslatableEntityClass();
+            $translatableMetadata = $this->getMetadataFor($translatableClass);
+
+            if(!$metadata->discriminatorMap) {
+                $metadata->discriminatorMap = array_filter(array_map(function($class) {
+
+                    return (is_subclass_of($class, TranslatableInterface::class, true)) 
+                        ? $class::getTranslationEntityClass(false, false) 
+                        : null;
+
+                }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
+            }
+
+            $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
+            $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
+            if($metadata->discriminatorMap) {
+                
+                if(!in_array($metadata->getName(), $metadata->discriminatorMap)) 
+                    throw new MissingDiscriminatorMapException(
+                        "Discriminator map missing for \"".$metadata->getName().
+                        "\". Did you forgot to implement \"".TranslatableInterface::class.
+                        "\" in \"".$metadata->getName()::getTranslatableEntityClass()."\".");
+            
+                $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()] ?? null;
+                if(!$metadata->discriminatorValue) 
+                    throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
+            }
+        }
+
+        if ($metadata->discriminatorValue || ! $metadata->discriminatorMap || 
+            $metadata->isMappedSuperclass || ! $metadata->reflClass || $metadata->reflClass->isAbstract()) {
+            return;
+        }
+
+        // minor optimization: avoid loading related metadata when not needed
+        foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
+            if ($discriminatorClass === $metadata->name) {
+                $metadata->discriminatorValue = $discriminatorValue;
+                return;
+            }
+        }
+
+        // iterate over discriminator mappings and resolve actual referenced classes according to existing metadata
+        foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
+            if ($metadata->name === $this->getMetadataFor($discriminatorClass)->getName()) {
+                $metadata->discriminatorValue = $discriminatorValue;
+                return;
+            }
+        }
+
+        throw MappingException::mappedClassNotPartOfDiscriminatorMap($metadata->name, $metadata->rootEntityName);
     }
 }
