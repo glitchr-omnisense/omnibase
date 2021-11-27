@@ -13,11 +13,11 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 
 trait BaseSymfonyTrait
 {
     private static $startTime = 0;
-
     public function setStartTime()
     {
         // Provide the kernel start time as time reference
@@ -28,12 +28,10 @@ trait BaseSymfonyTrait
     public function hasPost() { return isset($_POST); }
     public function hasGet() { return isset($_GET); }
     public function hasSession() { return isset($_SESSION); }
-
     public function addSession($name, $value) { $this->getSession()->set($name, $value); }
     public function getSession($name = null)
     {
         if(!$name) return $this->requestStack->getSession();
-
         return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->get($name) : null;
     }
 
@@ -199,7 +197,9 @@ trait BaseSymfonyTrait
     public function isProfiler($request = null)
     {
         if(!$request) $request = $this->getRequest();
-        if($request instanceof RequestStack)
+        if($request instanceof KernelEvent)
+            $request = $request->getRequest();
+        else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
         else if(!$request instanceof Request)
             throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
@@ -212,7 +212,9 @@ trait BaseSymfonyTrait
     public function isEasyAdmin($request = null)
     {
         if(!$request) $request = $this->getRequest();
-        if($request instanceof RequestStack)
+        if($request instanceof KernelEvent)
+            $request = $request->getRequest();
+        else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
         else if(!$request instanceof Request)
             throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");

@@ -125,7 +125,7 @@ trait BaseSettingsTrait
             return ($cacheValues !== null ? $cacheValues["_self"] ?? null : null);
 
         $array = $this->getRawScalar($name, $locale);
-       	return ($array ? $array->translate($locale)->getValue() ?? null : "");
+       	return ($array ? $array->translate($locale)->getValue() ?? null : null);
     }
 
     public function get($name, ?string $locale = null): array

@@ -28,12 +28,12 @@ class ErrorController extends AbstractController
     }
 
     public function Main(\Throwable $exception) {
-        
-        try { 
-        
+
+        try {
+
             if ($this->baseService->isDevelopment()) return $this->rescue($exception);
-            return $this->render("@Base/exception.html.twig", ['exception' => FlattenException::createFromThrowable($exception)]);
-        
+            return $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
+
         } catch(Exception $fatalException) {
 
             throw new Exception("Twig rendering engine failed (".trim($fatalException->getMessage(), ".").") following a first exception. (see below)", 500, $exception);

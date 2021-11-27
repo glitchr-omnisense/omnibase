@@ -93,7 +93,6 @@ class BaseConfiguration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('technical_support')
                             ->info('Hardcoded technical support')
-                            ->defaultValue(null)
                             ->end()
                     ->end()
 
