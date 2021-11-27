@@ -13,6 +13,7 @@ use Base\Repository\ThreadRepository;
 use Base\Repository\User\LogRepository;
 use Base\Service\BaseService;
 use Doctrine\ORM\EntityManager;
+use League\Flysystem\FileAttributes;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputArgument;
@@ -56,13 +57,13 @@ class UploaderEntitiesCommand extends Command
         $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, ['bold']));
         $output->getFormatter()->setStyle('ln', new OutputFormatterStyle('cyan', null, ['bold']));
 
-        $this->entity      = $input->getOption('entity');
-        $this->property    = $input->getOption('property');
-        $this->uuid    = $input->getOption('uuid');
+        $this->entity        = $input->getOption('entity');
+        $this->property      = $input->getOption('property');
+        $this->uuid          = $input->getOption('uuid');
 
-        $this->showEntries  = $input->getOption('show');
+        $this->showEntries   = $input->getOption('show');
 
-        $this->orphans   = $input->getOption('orphans');
+        $this->orphans       = $input->getOption('orphans');
         $this->showOrphans   = $input->getOption('show-orphans');
         $this->deleteOrphans = $input->getOption('delete-orphans');
 
@@ -111,7 +112,9 @@ class UploaderEntitiesCommand extends Command
                     }
 
                     if ($this->deleteOrphans) {
+
                         $this->deleteOrphanFiles($annotation, $orphanFiles);   
+
                         if($orphanFiles) $output->section()->writeln("  <red>* Orphan files deleted..</red>"); 
                         else  $output->section()->writeln("  <warning>* No orphan files to be deleted..</warning>"); 
                     }
@@ -156,22 +159,24 @@ class UploaderEntitiesCommand extends Command
     {
         $classPath  = $annotation->getPath($class, "");
         $filesystem = Uploader::getFilesystem($annotation->getStorage());
-        
-        $this->fileList[$class."::".$field] = $this->fileList[$class."::".$field] 
-        ?? array_values(array_map(
-            function($f) { return "/".$f->path(); }, 
-            $filesystem->listContents($classPath)->toArray()
-        ));
+
+        $property = $class."::".$field;
+        if(!array_key_exists($property, $this->fileList))
+            $this->fileList[$property] = array_values(array_filter(
+                array_map(fn($f) => ($f instanceof FileAttributes) ? "/".$f->path() : null, 
+                $filesystem->listContents($classPath)->toArray()
+            )));
 
         if($this->uuid)
-            $this->fileList[$class."::".$field] = array_filter($this->fileList[$class."::".$field], fn($f) => basename($f) == $this->uuid);
+            $this->fileList[$property] = array_filter($this->fileList[$property], fn($f) => basename($f) == $this->uuid);
 
-        return $this->fileList[$class."::".$field];
+        return $this->fileList[$property];
     }
 
     public function getOrphanFiles(string $class, string $field, Uploader $annotation)
     {
         $fileList = $this->getFileList($class, $field, $annotation);
+        
         $classMetadata = $this->entityManager->getClassMetadata($class);
         $fileListInDatabase = array_map(function($entity) use ($classMetadata, $field, $annotation) { 
 
@@ -185,7 +190,6 @@ class UploaderEntitiesCommand extends Command
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)
     {
         $filesystem = Uploader::getFilesystem($annotation->getStorage());
-
         foreach($fileList as $file)
             $filesystem->delete($file);
 
