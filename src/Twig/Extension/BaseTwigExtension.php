@@ -4,25 +4,17 @@ namespace Base\Twig\Extension;
 
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
-use Base\Entity\User\Notification;
-use Exception;
+use Base\Exception\NotFoundResourceException;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Twig\Environment;
-use Twig\TwigFunction;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-/**
- * @author Marco Meyer <marco.meyerconde@gmail.com>
- *
- */
-
 use Twig\Extra\Intl\IntlExtension;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Mime\MimeTypes;
+use Twig\Error\LoaderError;
 
 final class BaseTwigExtension extends AbstractExtension
 {
@@ -59,8 +51,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('country',       [$this, 'country']),
             new TwigFilter('image',         [$this, 'image'],       ['needs_environment' => true, 'needs_context' => true]),
             new TwigFilter('datetime',      [$this, 'datetime'],    ['needs_environment' => true]),
-            new TwigFilter('lessThan',      [$this, 'lessThan'],    ['needs_environment' => true]),
-            new TwigFilter('greaterThan',   [$this, 'greaterThan'], ['needs_environment' => true])
+            new TwigFilter('lessThan',      [$this, 'lessThan']),
+            new TwigFilter('greaterThan',   [$this, 'greaterThan'])
         ];
     }
 
@@ -142,20 +134,21 @@ final class BaseTwigExtension extends AbstractExtension
         return "";
     }
 
-    public function image(Environment $env, array $context, $image, WrappedTemplatedEmail $email = null): string
+    public function image(Environment $env, array $context, $image): ?string
     {
-        $isEmail = array_key_exists("email", $context) && ($context["email"] instanceof WrappedTemplatedEmail);
-        if($isEmail) {
+        if( ( ($context["email"] ?? null) instanceof WrappedTemplatedEmail) ) {
 
             $email = $context["email"];
-            $path = $email->image($image);
-
-        } else {
-
-            $path = $env->getLoader()->getSourceContext($image)->getPath();
-            if (substr($path, 0, strlen($this->projectDir)) == $this->projectDir)
-                $path = substr($path, strlen($this->projectDir));
+            return $email->image($image);
         }
+
+        try { $path = $env->getLoader()->getSourceContext($image)->getPath(); }
+        catch(LoaderError $e) {  // Image not found
+            throw new NotFoundResourceException("Image \"$image\" not found.");
+        }
+
+        if (substr($path, 0, strlen($this->projectDir)) == $this->projectDir)
+            $path = substr($path, strlen($this->projectDir));
 
         return $path;
     }
@@ -166,7 +159,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
-    public function lessThan(Environment $env, $date, $diff): bool
+    public function lessThan($date, $diff): bool
     {
         if(is_string($date)) $date = new \DateTime($date);
         if($date instanceof \DateTime) $date = $date->getTimestamp();
@@ -175,12 +168,10 @@ final class BaseTwigExtension extends AbstractExtension
       
         $deltaTime = time() - $date;
 
-        // dump($deltaTime . "<". $diff . " => ". ($deltaTime < $diff));
-
         return $deltaTime < $diff;
     }
 
-    public function greaterThan(Environment $env, $date, int $diff): bool
+    public function greaterThan($date, int $diff): bool
     {
         if(is_string($date)) $date = new \DateTime($date);
         if($date instanceof \DateTime) $date = $date->getTimestamp();

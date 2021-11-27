@@ -49,7 +49,7 @@ trait BaseNotificationTrait
 
     public function setNotifier(NotifierInterface $notifier, ?ChannelPolicyInterface $policy = null, array $options)
     {
-        if (BaseService::$notifier) return $this;
+        if (BaseService::$notifier === $notifier) return $this;
         
         // Update user notifier
         BaseService::$notifier        = $notifier;

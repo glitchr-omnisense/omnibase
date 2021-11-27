@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Base\Notifier\Channel;
 
 use Symfony\Component\Notifier\Channel\ChannelInterface;
@@ -18,12 +9,11 @@ use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 final class BrowserPlusChannel implements ChannelInterface
 {
-    
-    private $stack;
+    private $requestStack;
 
-    public function __construct(RequestStack $stack)
+    public function __construct(RequestStack $requestStack)
     {
-        $this->stack = $stack;
+        $this->requestStack = $requestStack;
     }
 
     public function supports(Notification $notification, RecipientInterface $recipient): bool
@@ -33,7 +23,7 @@ final class BrowserPlusChannel implements ChannelInterface
 
     public function notify(Notification $notification, RecipientInterface $recipient, string $transportName = null): void
     {
-        if (null === $request = $this->stack->getCurrentRequest()) return;
+        if (null === $request = $this->requestStack->getCurrentRequest()) return;
         if (!$request->hasSession()) return;
 
         // Prepare variables
