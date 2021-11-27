@@ -13,6 +13,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 
 trait BaseSymfonyTrait
 {
@@ -199,7 +200,9 @@ trait BaseSymfonyTrait
     public function isProfiler($request = null)
     {
         if(!$request) $request = $this->getRequest();
-        if($request instanceof RequestStack)
+        if($request instanceof KernelEvent)
+            $request = $request->request;
+        else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
         else if(!$request instanceof Request)
             throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
@@ -212,7 +215,9 @@ trait BaseSymfonyTrait
     public function isEasyAdmin($request = null)
     {
         if(!$request) $request = $this->getRequest();
-        if($request instanceof RequestStack)
+        if($request instanceof KernelEvent)
+            $request = $request->request;
+        else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
         else if(!$request instanceof Request)
             throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
