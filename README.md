@@ -1,3 +1,3 @@
-# Base Helper
+# Base bundle 1.0
 
-Base helper used in connection with basic methods.
+This bundle is used as a bedrock for Symfony projects. It includes many additional features and pre-configured for basic projects.
