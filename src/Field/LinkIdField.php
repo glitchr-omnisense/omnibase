@@ -14,7 +14,7 @@ final class LinkIdField implements FieldInterface
 
     public const OPTION_MAX_LENGTH = 'maxLength';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName = "id", ?string $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

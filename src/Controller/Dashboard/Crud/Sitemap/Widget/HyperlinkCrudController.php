@@ -75,7 +75,7 @@ class HyperlinkCrudController extends AbstractCrudController
 
         yield UrlField::new('url');
 
-        yield TranslatableField::new('title');
+        yield TranslatableField::new()->showOnIndex('title')->setRequired(false);
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

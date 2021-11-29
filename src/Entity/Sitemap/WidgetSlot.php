@@ -2,8 +2,9 @@
 
 namespace Base\Entity\Sitemap;
 
-
+use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
+use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 
@@ -13,11 +14,17 @@ use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetSlotRepository;
+
 /**
  * @ORM\Entity(repositoryClass=WidgetSlotRepository::class)
+ * @ORM\InheritanceType( "JOINED" )
  *
  * @AssertBase\UniqueEntity(fields={"name"}, groups={"new", "edit"})
+ *
+ * @ORM\DiscriminatorColumn( name = "class", type = "string" )
+ *     @DiscriminatorEntry( value = "abstract" )
  */
+
 class WidgetSlot implements TranslatableInterface
 {   
     use TranslatableTrait;
@@ -40,6 +47,7 @@ class WidgetSlot implements TranslatableInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @Slugify(separator=".")
      */
     protected $name;
     public function getName(): string { return $this->name; }
@@ -50,23 +58,30 @@ class WidgetSlot implements TranslatableInterface
         return $this;
     }
 
+    public function __toString() { return $this->getName(); }
     public function __construct(string $name = "", ?Widget $widget = null)
     {
         $this->setName($name);
         $this->setWidget($widget);
     }
 
-    // /**
-    //  * @ORM\Column(type="array")
-    //  */
-    // protected $attributes;
-    // public function getAttributes(): array { return $this->attributes; }
-    // public function setAttributes(array $attributes): self
-    // {
-    //     $this->attributes = $attributes;
+    /**
+     * @ORM\Column(type="array")
+     * e.g. Icon, custom colors,..
+     */
+    protected $attributes;
+    public function getAttributes(): array { return $this->attributes; }
+    public function setAttributes(array $attributes): self
+    {
+        $this->attributes = $attributes;
+        return $this;
+    }
 
-    //     return $this;
-    // }
+    public function setAttribute(string $key, $value): self
+    {
+        $this->attributes[$key] = $value;
+        return $this;
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=Widget::class)
@@ -76,7 +91,6 @@ class WidgetSlot implements TranslatableInterface
     public function setWidget(?Widget $widget): self
     {
         $this->widget = $widget;
-
         return $this;
     }
 }

@@ -9,7 +9,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 
 trait BaseSettingsTrait
 {
-    protected $cacheEnabled = true; /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
+    protected $cacheEnabled = false; /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
     protected $cache = null;
 
     protected $settingRepository = null;

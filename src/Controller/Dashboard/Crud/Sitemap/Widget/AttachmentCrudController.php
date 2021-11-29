@@ -13,6 +13,8 @@ use Base\Field\ImpersonateField;
 use Base\Field\LinkIdField;
 use Base\Field\RoleField;
 use Base\Field\BooleanField;
+use Base\Field\FileField;
+use Base\Field\SlugField;
 use Base\Field\TranslatableField;
 use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -28,6 +30,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
 
 class AttachmentCrudController extends AbstractCrudController
 {
@@ -68,22 +71,20 @@ class AttachmentCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield LinkIdField::new('id')->hideOnForm();
+        yield LinkIdField::new()->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TextField::new('name');
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield TranslatableField::new('value')->hideOnIndex();
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
+        yield FileField::new('file')->setPreferredDownloadName("slug");
+        foreach ( ($callbacks["file"] ?? $defaultCallback)() as $yield)
             yield $yield;
             
-        if (!$this->isGranted('ROLE_SUPERADMIN')) yield TextField::new('comment')->hideOnForm();
-        else yield TextField::new('comment');
-        foreach ( ($callbacks["comment"] ?? $defaultCallback)() as $yield)
+        yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
+
+        yield TranslatableField::new()->showOnIndex('title');
+        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
+
     }
 
      public function configureFilters(Filters $filters): Filters

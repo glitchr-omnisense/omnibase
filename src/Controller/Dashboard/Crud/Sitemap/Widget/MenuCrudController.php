@@ -77,8 +77,8 @@ class MenuCrudController extends AbstractCrudController
         foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new('value')->hideOnIndex();
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
+        yield TranslatableField::new()->showOnIndex('title')->setRequired(false);
+        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 

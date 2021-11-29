@@ -78,7 +78,7 @@ class WidgetCrudController extends AbstractCrudController
         foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
             yield $yield;
     
-        yield TranslatableField::new("title");
+        yield TranslatableField::new()->showOnIndex("title");
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

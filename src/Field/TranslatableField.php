@@ -14,13 +14,18 @@ class TranslatableField implements FieldInterface
 
     public static function new(string $propertyName = null, ?string $label = null): self
     {
-        return (new self())
+        $field = (new self())
             ->setProperty("translations")
-            ->hideOnIndex()->showOnIndex($propertyName) // Hide if no property, or show if property provided
+            ->hideOnIndex()
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
             ->setCustomOption("required", true)
             ->setFormType(TranslatableType::class);
+
+        if($propertyName)
+            $field->setFields([$propertyName => []])->showOnIndex($propertyName);
+
+        return $field;
     }
 
     public function setFields(array $fields): self

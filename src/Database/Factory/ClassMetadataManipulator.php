@@ -43,9 +43,10 @@ class ClassMetadataManipulator
             foreach ($matches as $match) $this->globalExcludedFields[] = $parameterBag->get($match);
     }
 
-    public function getClassMetadata($class)
+    public function getClassMetadata($entity)
     {
-        return $this->entityManager->getClassMetadata($class);
+        $className = is_object($entity) ? get_class($entity) : $entity;
+        return $this->entityManager->getClassMetadata($className);
     }
 
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
@@ -54,9 +55,9 @@ class ClassMetadataManipulator
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
-        $validFields = array_merge($fields, array_fill_keys($metadata->getFieldNames(), []));
-
-        if (!empty($associationNames = $metadata->getAssociationNames()))
+        $validFields = !empty($fields) ? $fields : array_fill_keys($metadata->getFieldNames(), []);
+        
+        if (!empty($associationNames = array_intersect_key($validFields, $metadata->getAssociationNames())))
             $validFields += $this->getAssociationMapping($metadata, $associationNames);
         
         // Auto detect some fields..

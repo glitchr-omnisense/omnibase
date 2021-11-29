@@ -77,7 +77,7 @@ class SettingCrudController extends AbstractCrudController
             yield $yield;
 
         yield TranslatableField::new("label");
-        yield TranslatableField::new("help")->setRequired(false)->setExcludedFields("value");
+        yield TranslatableField::new()->showOnIndex("help")->setRequired(false)->setExcludedFields("value");
         foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

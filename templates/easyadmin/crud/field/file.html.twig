@@ -3,6 +3,7 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 
 {% set renderFormat = field.customOptions.get('renderFormat') %}
+{% set preferredDownloadName = field.customOptions.get('preferredDownloadName') %}
 {% if  renderFormat == 'image' or renderFormat == 'avatar' %}
 
     {% if field.formattedValue is not empty %}
@@ -44,6 +45,10 @@
 
 {% else %}
 
-    {{ field.formattedValue }}
-
+    {% if field.formattedValue is not empty %}
+        <a href="{{ field.formattedValue }}" download="{{ preferredDownloadName }}"><i class="fa-fw fas fa-paperclip fa-2x"></i></a>
+    {% else %}
+        <i class="fas fa-fw fa-exclamation-triangle"></i>
+        {% if field is not iterable and field.value is empty %} File not found !{% endif %}
+    {% endif %}
 {% endif %}

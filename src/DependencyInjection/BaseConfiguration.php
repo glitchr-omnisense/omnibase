@@ -46,7 +46,7 @@ class BaseConfiguration implements ConfigurationInterface
 
                 ->arrayNode('user')->addDefaultsIfNotSet()
                     ->children()
-                        ->booleanNode('validation')
+                        ->booleanNode('autoapprove')
                             ->info('Administrator check required')
                             ->defaultValue(False)
                             ->end()

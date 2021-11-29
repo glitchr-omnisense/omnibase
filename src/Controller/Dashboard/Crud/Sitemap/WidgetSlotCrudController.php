@@ -63,7 +63,7 @@ class WidgetSlotCrudController extends AbstractCrudController
             yield $yield;
 
         yield TranslatableField::new("label")->setRequired(false);
-        yield TranslatableField::new("help")->setRequired(false);
+        yield TranslatableField::new()->showOnIndex("help")->setRequired(false);
         foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

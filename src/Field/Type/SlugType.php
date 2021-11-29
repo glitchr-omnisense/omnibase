@@ -29,7 +29,9 @@ final class SlugType extends AbstractType
         $resolver
             ->setRequired(['target'])
             ->setAllowedTypes('target', ['string'])
-        ;
+            ->setDefaults([
+                "separator" => "-"
+            ]);
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
@@ -42,7 +44,7 @@ final class SlugType extends AbstractType
         foreach($targetPath as $path) {
 
             if(!$target->has($path))
-                throw new \Exception("Child \"$path\" doesn't exists in \"".$options["target"]."\".");
+                throw new \Exception("Child path \"$path\" doesn't exists in \"".get_class($target->getViewData())."\".");
 
             $target = $target->get($path);
             $targetType = $target->getConfig()->getType()->getInnerType();

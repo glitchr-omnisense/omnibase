@@ -63,7 +63,7 @@ class PageCrudController extends AbstractCrudController
 
         yield SlugField::new('slug')->setTargetFieldName("translations.title");
 
-        yield TranslatableField::new('title');
+        yield TranslatableField::new()->showOnIndex('title');
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

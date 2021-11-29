@@ -41,5 +41,14 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
+        <service id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator"    public="true">
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
+            <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\UrlSigner" />
+        </service>
+
+
     </services>
 </container>

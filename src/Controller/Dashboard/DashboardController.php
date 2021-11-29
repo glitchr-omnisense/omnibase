@@ -11,7 +11,6 @@ use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
 
 use App\Controller\Dashboard\Crud\UserCrudController;
-use Base\Config\Menu\SectionWidgetItem;
 use Base\Config\WidgetItem;
 use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
@@ -23,13 +22,13 @@ use Base\Entity\Sitemap\Widget;
 use Base\Entity\Sitemap\Widget\Attachment;
 use Base\Entity\Sitemap\Widget\Hyperlink;
 use Base\Entity\Sitemap\WidgetSlot;
+use Base\Entity\Sitemap\WidgetSlot\Social;
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Sitemap\SettingListType;
 use Base\Form\Type\Sitemap\WidgetListType;
-use Base\Service\BaseSettings;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -42,7 +41,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Google\Analytics\Service\GaService;
@@ -51,12 +49,6 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
-use Twig\Environment;
-use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
-use Symfony\UX\Chartjs\Model\Chart;
-
-use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 use Base\Traits\DashboardTrait;
 
@@ -322,6 +314,7 @@ class DashboardController extends AbstractDashboardController
             if($section) $section->setWidth(2);
 
             $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+                WidgetItem::linkToCrud('Social media', 'fas fa-share-alt',            Social::class),
                 WidgetItem::linkToCrud('Settings',     'fa-fw fas fa-fw fa-tools',    Setting::class),
                 WidgetItem::linkToCrud('Widget Slots', 'fa-fw fas fa-fw fa-th-large', WidgetSlot::class),
                 WidgetItem::linkToCrud('Widgets',      'fa-fw fas fa-fw fa-square',   Widget::class),

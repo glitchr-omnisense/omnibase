@@ -65,19 +65,17 @@ class Slugify extends AbstractAnnotation
         return $this->referenceColumn;
     }
 
-    public function getSlug($entity, ?string $defaultInput = null, string $suffix = ""): string
+    public function getSlug($entity, ?string $input = null, string $suffix = ""): string
     {
-        if (!$this->referenceColumn)
-            throw new Exception("Attribute \"reference\" missing for @Slugify in " . get_class($entity));
 
         // Check if field already set.. get field value or by default class name
         $className = explode("\\", get_class($entity));
 
-        $input = $defaultInput ?? 
-                 $this->getFieldValue($entity, $this->referenceColumn) ??
-                 end($className);
+        if (!$input && $this->referenceColumn)
+            $input = $this->getFieldValue($entity, $this->referenceColumn);
+        if (!$input) $input = end($className);
 
-        $input = $input . (!empty($suffix) ? $this->separator.$suffix : "");
+        $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
         $slug = $this->slugger->slug($input, $this->separator);
         return ($this->lowercase ? $slug->lower() : $slug);

@@ -15,6 +15,7 @@ final class FileField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_RENDER_FORMAT  = "renderFormat";
+    public const OPTION_PREFERRED_DOWNLOAD_NAME = "preferredDownloadName";
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -33,6 +34,12 @@ final class FileField implements FieldInterface
     public function allowDelete(bool $allowDelete = true): self
     {
         $this->setFormTypeOption("allow_delete", $allowDelete);
+        return $this;
+    }
+
+    public function setPreferredDownloadName(string $targetName): self
+    {
+        $this->setCustomOption(self::OPTION_PREFERRED_DOWNLOAD_NAME, $targetName);
         return $this;
     }
 

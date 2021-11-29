@@ -15,27 +15,12 @@ use Symfony\Component\Intl\Locales;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleProvider implements LocaleProviderInterface
-{
-    public const SEPARATOR = "-";
-    
-    /**
-     * @var RequestStack
-     */
+{    
     protected $requestStack = null;
-
-    /**
-     * @var ParameterBagInterface
-     */
     protected $parameterBag = null;
-
-    /**
-     * @var TranslatorInterface
-     */
     protected $translator = null;
-    
-    protected static ?string $defaultLocale   = null;    
-    protected static ?array $fallbackLocales  = null;
-    protected static ?array $availableLocales = null;
+
+    public const SEPARATOR = "-";
 
     public function __construct(RequestStack $requestStack, ParameterBagInterface $parameterBag, ?TranslatorInterface $translator)
     {
@@ -51,8 +36,58 @@ class LocaleProvider implements LocaleProviderInterface
 
     }
 
-    private static ?array $locales = null;
+    protected static $isLate = null; // Turns on when on kernel request
+    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate; }
+    public static function markAsLate(?string $location = null) 
+    {
+        $backtrace = debug_backtrace()[1] ?? null;
+        $location = ($backtrace ? $backtrace['class']."::".$backtrace['function'] : true);
+        self::$isLate = $location;
+    }
 
+    private static $locale = null;
+    public function setLocale(?string $locale = null) 
+    {
+        if(self::isLate()) {
+        
+            $method = __CLASS__."::".__FUNCTION__;
+            $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
+            throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
+        }
+
+        self::$locale = $locale;
+        return $this;
+    }
+
+    public function getLocale(?string $locale = null): ?string
+    {
+        if($locale === null) {
+
+            $currentRequest = $this->requestStack->getCurrentRequest();
+            if ($providerLocale = self::$locale) {
+                $locale = $providerLocale;
+
+            } else if ($userLocale = User::getCookie("locale")) {
+                $locale = $userLocale;
+
+            } else if (! $currentRequest instanceof Request) {
+                $locale = $this->getDefaultLocale();
+
+            } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
+                $locale = $currentLocale;
+
+            } else if ($this->translator !== null) {
+                $locale = $this->translator->getLocale();
+            }
+        }
+        
+        if(!$locale)
+            throw new MissingLocaleException("Missing locale.");
+
+        return self::normalize($locale);
+    }
+
+    private static ?array $locales = null;
     public static function getLocales() 
     { 
         if(!self::$locales) {
@@ -72,34 +107,10 @@ class LocaleProvider implements LocaleProviderInterface
 
         return self::$locales;
     }
-    
-    public static function normalize(?string $locale): ?string { return self::getLang($locale) . self::SEPARATOR . self::getCountry($locale); }
-    public static function normalizeArray(?array $locales): ?array { return array_map(fn ($l) => self::normalize($l), $locales); }
 
-    public function getLocale(?string $locale = null): ?string
-    {
-        if($locale === null) {
-
-            $currentRequest = $this->requestStack->getCurrentRequest();
-            if ($userLocale = User::getCookie("locale")) {
-                $locale = $userLocale;
-
-            } else if (! $currentRequest instanceof Request) {
-                $locale = $this->getDefaultLocale();
-
-            } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
-                $locale = $currentLocale;
-
-            } else if ($this->translator !== null) {
-                $locale = $this->translator->getLocale();
-            }
-        }
-        
-        if(!$locale)
-            throw new MissingLocaleException("Missing locale.");
-
-        return self::normalize($locale);
-    }
+    protected static ?string $defaultLocale   = null;
+    protected static ?array $fallbackLocales  = null;
+    protected static ?array $availableLocales = null;
 
     public static function setDefaultLocale(?string $defaultLocale) { self::$defaultLocale = $defaultLocale; }
     public static function getDefaultLocale(): ?string { return self::$defaultLocale; }
@@ -130,4 +141,7 @@ class LocaleProvider implements LocaleProviderInterface
 
         return $country;
     }
+
+    public static function normalize(?string $locale): ?string { return self::getLang($locale) . self::SEPARATOR . self::getCountry($locale); }
+    public static function normalizeArray(?array $locales): ?array { return array_map(fn ($l) => self::normalize($l), $locales); }
 }

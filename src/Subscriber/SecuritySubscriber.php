@@ -199,8 +199,8 @@ class SecuritySubscriber implements EventSubscriberInterface
         } else {
 
             // Auto approve if administrator at login
-            if ($this->authorizationChecker->isGranted(UserRole::ADMIN))
-                $user->approve();
+            if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
+            else if($this->baseService->getParameterBag("base.user.autoapprove"))
 
             // If not approved force redirection
             if (! $user->isApproved()) {

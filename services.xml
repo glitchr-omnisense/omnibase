@@ -485,6 +485,10 @@
         <service id="Base\Field\Configurator\ImageConfigurator">
             <tag name="ea.field_configurator" />
         </service>
+        <service id="Base\Field\Configurator\FileConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
 
         <service id="Base\Field\Configurator\TranslatableConfigurator">
             <tag name="ea.field_configurator" />
@@ -606,14 +610,23 @@
                 <argument type="service" id="service_container" />
             </call>
         </service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController">
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlotCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
         </service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlotCrudController">
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlot\SocialCrudController">
+            <tag name="ea.crud_controller" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">

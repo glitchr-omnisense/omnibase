@@ -2,11 +2,7 @@
 
 namespace Base\Repository\Sitemap;
 
-use Base\Annotations\Annotation\EntityHierarchy;
 use Base\Entity\Thread;
-use Doctrine\Persistence\Event\ManagerEventArgs;
-use Doctrine\Persistence\ManagerRegistry;
-use Base\Repository\Traits\EntityHierarchyTrait;
 
 use Base\Database\Repository\ServiceEntityRepository;
 

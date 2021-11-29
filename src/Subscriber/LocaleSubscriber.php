@@ -26,6 +26,8 @@ class LocaleSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        $this->localeProvider->markAsLate();
+        
         $locale = substr_replace($this->localeProvider->getLocale(), "_", 2, 1);
         
         $request = $event->getRequest();

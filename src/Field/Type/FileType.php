@@ -95,14 +95,15 @@ class FileType extends AbstractType implements DataMapperInterface
         if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
             $maxFilesize = min($maxFilesize, $options["max_filesize"]);
 
+        $constraints = [new FileSize(["max" => $maxFilesize])];
+        if($options["mime_types"])
+            $constraints[] = new FileMimeType(["type" => $options["mime_types"]]);
+
         if(!$isDropzone || !$multiple)
             $builder->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                 "required" => false,
                 "multiple" => $multiple,
-                "constraints" => [
-                    new FileSize(["max" => $maxFilesize]),
-                    new FileMimeType(["type" => $options["mime_types"]])
-                ]
+                "constraints" => $constraints
         ]);
 
         if($allowDelete)

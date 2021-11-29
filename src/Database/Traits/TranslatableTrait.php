@@ -7,6 +7,7 @@ use Base\Exception\MissingLocaleException;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Exception;
+use InvalidArgumentException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 const __TRANSLATION_SUFFIX__ = 'Translation';
@@ -106,87 +107,105 @@ trait TranslatableTrait
         return $translation;
     }
 
-    public function __call(string $methodOrProperty, array $arguments)
+    public function __call(string $method, array $arguments)
     {
+        $className   = get_class($this);
+        $parentClass = get_parent_class();
+        
         //
         // Call magic setter
-        if(str_starts_with($methodOrProperty, "set")) {
+        if (str_starts_with($method, "set")) {
 
-            try { return $this->__set($methodOrProperty, $arguments); }
+            $property = lcfirst(substr($method, 3));
+            try { return $this->__set($property, $arguments); }
             catch (\BadMethodCallException $e) 
             {
                 // Parent fallback setter
-                if(method_exists(get_parent_class(),"__set")) 
-                    return parent::__set($methodOrProperty, $arguments);
+                if($parentClass && method_exists($parentClass, "__set")) 
+                    return parent::__set($property, $arguments);
+
+            } catch (\InvalidArgumentException $e) { 
+
+                throw $e;
             }
         }
 
         //
         // Call magic getter
-        try { return $this->__get($methodOrProperty); }
-        catch (\BadMethodCallException $e) 
-        {
-            // Parent fallback getter
-            if(method_exists(get_parent_class(),"__get")) 
-                return parent::__get($methodOrProperty);
+        $property = null;
+        if(property_exists($className, $method))
+            $property = $method;
+        else if(str_starts_with($method, "get") && property_exists($className, lcfirst(substr($method, 3))))
+            $property = lcfirst(substr($method, 3));
+        else if(str_starts_with($method, "is" ) && property_exists($className, lcfirst(substr($method, 2))))
+            $property = lcfirst(substr($method, 2));
+
+        if($property) {
+
+            try { return $this->__get($property); }
+            catch (\BadMethodCallException $e) 
+            {
+                // Parent fallback getter
+                if($parentClass && method_exists($className, "__get")) 
+                    return parent::__get($property);
+            }
         }
 
         //
         // Parent fallback for magic __call
-        if(method_exists(get_parent_class(),"__call")) 
-            return parent::__call($methodOrProperty, $arguments);
+        if($parentClass && method_exists($parentClass,"__call")) 
+            return parent::__call($method, $arguments);
 
         //
         // Failed to find a valid accessor
-        throw new \BadMethodCallException("Method (or property accessor) \"$methodOrProperty\" not found in ". $this->getTranslationEntityClass());
+        throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 
-    public function __set($methodOrProperty, $arguments)
+    public function __set($property, $arguments)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
-
+        
         //
         // Setter method in called class
-        $entity = $this;
-        $property = lcfirst(substr($methodOrProperty, 3));
-        if(property_exists($entity, $property)) {
+        if(property_exists($this, $property)) {
 
-            if (!$accessor->isWritable($entity, $property))
-                throw new \BadMethodCallException("Property \"$methodOrProperty\" not writable in ". $this->getTranslationEntityClass());
+            if (empty($arguments))
+                throw new \InvalidArgumentException("Missing argument for setter property \"$property\" in ". get_class($this));
+            if (!$accessor->isWritable($this, $property))
+                throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($this));
 
-            $accessor->setValue($entity, $property, ...$arguments);
+            $accessor->setValue($this, $property, ...$arguments);
             return $this;
         }
 
         //
         // Proxy setter method for current locale
         $entityTranslation = $this->translate();
-        $property = lcfirst(substr($methodOrProperty, 3));
         if(property_exists($entityTranslation, $property)) {
 
+            if (empty($arguments))
+                throw new \InvalidArgumentException("Missing argument for setter property \"$property\" in ". get_class($entityTranslation));
             if (!$accessor->isWritable($entityTranslation, $property))
-                throw new \BadMethodCallException("Property \"$methodOrProperty\" not writable in ". $this->getTranslationEntityClass());
+                throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityTranslation));
 
             $accessor->setValue($entityTranslation, $property, ...$arguments);
             return $this;
         }
-
-        throw new \BadMethodCallException("Can't get a way to write the property \"$methodOrProperty\" in class \"$entity\" or its translation class \"$entityTranslation\".");
     }
     
-    public function __get($methodOrProperty)
+    public function __get($property)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
 
         //
         // Getter method in called class
         $entity = $this;
-        if(method_exists($entity, $methodOrProperty))
-            return $entity->{$methodOrProperty}();
-        else if(method_exists($entity, "get".ucfirst($methodOrProperty)))
-            return $entity->{"get".ucfirst($methodOrProperty)}();
-        else if (property_exists($entity, $methodOrProperty) && $accessor->isReadable($entity, $methodOrProperty)) 
-            return $accessor->getValue($entity, $methodOrProperty);
+        if(method_exists($entity, $property))
+            return $entity->{$property}();
+        else if (method_exists($entity, "get".ucfirst($property)))
+            return $entity->{"get".ucfirst($property)}();
+        else if (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) 
+            return $accessor->getValue($entity, $property);
 
         //
         // Proxy getter method for current locale
@@ -194,12 +213,12 @@ trait TranslatableTrait
         $entityTranslation = $this->translate();
 
         $value = null;
-        if(method_exists($entityTranslation, $methodOrProperty))
-            $value = $entityTranslation->{$methodOrProperty}();
-        else if(method_exists($entityTranslation, "get".ucfirst($methodOrProperty)))
-            $value = $entityTranslation->{"get".ucfirst($methodOrProperty)}();
-        else if (property_exists($entityTranslation, $methodOrProperty) && $accessor->isReadable($entityTranslation, $methodOrProperty))
-            $value = $accessor->getValue($entityTranslation, $methodOrProperty);
+        if(method_exists($entityTranslation, $property))
+            $value = $entityTranslation->{$property}();
+        else if (method_exists($entityTranslation, "get".ucfirst($property)))
+            $value = $entityTranslation->{"get".ucfirst($property)}();
+        else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property))
+            $value = $accessor->getValue($entityTranslation, $property);
 
         // If current locale is empty.. then try to access value from default locale
         // (unless is was already the default locale)
@@ -211,14 +230,14 @@ trait TranslatableTrait
         else {
 
             $entityTranslation = $this->translate($defaultLocale);
-            if(method_exists($entityTranslation, $methodOrProperty))
-                return $entityTranslation->{$methodOrProperty}();
-            else if(method_exists($entityTranslation, "get".ucfirst($methodOrProperty)))
-                return $entityTranslation->{"get".ucfirst($methodOrProperty)}();
-            else if (property_exists($entityTranslation, $methodOrProperty) && $accessor->isReadable($entityTranslation, $methodOrProperty)) 
-                return $accessor->getValue($entityTranslation, $methodOrProperty);
+            if(method_exists($entityTranslation, $property))
+                return $entityTranslation->{$property}();
+            else if(method_exists($entityTranslation, "get".ucfirst($property)))
+                return $entityTranslation->{"get".ucfirst($property)}();
+            else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property)) 
+                return $accessor->getValue($entityTranslation, $property);
         }
 
-        throw new \BadMethodCallException("Can't get a way to read the property \"$methodOrProperty\" in class \"$entity\" or its translation class \"$entityTranslation\".");
+        throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 }

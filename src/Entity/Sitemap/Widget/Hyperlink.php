@@ -2,16 +2,14 @@
 
 namespace Base\Entity\Sitemap\Widget;
 
-
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Sitemap\Widget;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Widget\HyperlinkRepository;
+
 /**
  * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
  * @DiscriminatorEntry( value = "hyperlink" )

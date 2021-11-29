@@ -23,7 +23,7 @@ final class AvatarConfigurator implements FieldConfiguratorInterface
         $field->setFormTypeOption("max_filesize", Uploader::getMaxFilesize($entityDto->getInstance(), $field->getProperty()));
         $field->setFormTypeOption("mime_types", Uploader::getMimeTypes($entityDto->getInstance(), $field->getProperty()));
 
-        if ($field->getFormattedValue() === null)
-            $field->setFormattedValue("");
+        $file = Uploader::getPublicPath($entityDto->getInstance(), $field->getProperty()) ?? "";
+        $field->setFormattedValue($file);
     }
 }
