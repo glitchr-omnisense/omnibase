@@ -2,10 +2,7 @@
 
 namespace Base\Service;
 
-use Symfony\Component\HttpFoundation\Response;
-
 use Base\Controller\BaseController;
-use Base\Entity\User;
 use Base\Service\Traits\BaseNotificationTrait;
 use Base\Service\Traits\BaseSecurityTrait;
 use Base\Service\Traits\BaseSymfonyTrait;
@@ -14,44 +11,26 @@ use Base\Service\Traits\BaseUtilsTrait;
 use Base\Service\Traits\BaseDoctrineTrait;
 use Base\Traits\BaseTrait;
 
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Routing\RouterInterface;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Base\Repository\UserRepository;
 use Base\Service\Traits\BaseCommonTrait;
-use Base\Service\Traits\BaseUserTrait;
-use Base\Twig\Loader\FilesystemLoader;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
-use Symfony\Component\Notifier\Channel\ChannelPolicy;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 
 use Twig\Environment; //https://symfony.com/doc/current/templating/twig_extension.html
 use Twig\Extension\RuntimeExtensionInterface;
 
-use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\NotifierInterface;
-use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
-use Symfony\Component\Asset\PackageInterface;
-use Symfony\Component\Asset\Packages;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Mailer\MailerInterface;
 
 /**
  * @class Base interface to be used with custom base

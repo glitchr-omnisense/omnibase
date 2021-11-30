@@ -169,6 +169,25 @@
                 list-style:none;
             }
 
+            .content-header-icon {
+                background-color:var(--fieldset-bg);
+                border: var(--border-width) var(--border-style) var(--border-color);
+                border-radius:100%;
+                padding:1em;
+                margin:0 0.5em;
+                height:70px;
+                width:70px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+            }
+
+            .content-header {
+                display:flex;
+                flex-direction:row;
+                justify-content:center;
+                align-items:center;
+            }
             .content-header-title .title {
                 color: var(--sidebar-logo-color);
             }
@@ -178,7 +197,7 @@
                 margin:0.25em 0em 0.25em 0 !important;
             }
             fieldset {
-                padding:1em 0em 0.5em 1em!important;
+                padding:1em 1em 0.5em 1em!important;
             }
             
             .content-panel
@@ -264,6 +283,15 @@
                 background: transparent;
                 border: 0;
                 border-radius: 1em;
+            }
+
+            .content-panel-body.without-footer, .content-panel-footer { border: none; }
+            .content-panel-footer { border: var(--border-width) var(--border-style) var(--border-color) !important; }
+
+            @media (min-width: 992px) {
+                .content-header { 
+                    background: transparent;
+                }
             }
 
         </style>
@@ -490,44 +518,66 @@
                             <article class="content">
                             
                                     {% block content_header_wrapper %}
-                                    {% set has_help_message = (ea.crud.helpMessage ?? '') is not empty %}
+                                    
+                                    {% set helpMessage = "" %}
+                                    {% if ea.crud is not null %}
+                                        {% set helpMessage = ea.crud.helpMessage %}
+                                    {% endif %}
+                                    {% if helpMessage is empty %}
+                                        {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
+                                    {% endif %}
+                                    {% set has_help_message = (helpMessage is not empty) %}
+
                                     <section class="content-header">
+                                    
                                         {% block content_header %}
-                                            <div class="content-header-title">
-                                                <h1 class="title">
-                                                    {% block content_title %}{% endblock %}
 
-                                                    {% block content_help %}
-                                                        {% if has_help_message %}
-                                                            <span class="content-header-help">
-                                                            <i class="far fa-question-circle" data-bs-toggle="tooltip" title="{{ ea.crud.helpMessage|e('html_attr') }}"></i>
-                                                        </span>
-                                                        {% endif %}
-                                                    {% endblock %}
-                                                </h1>
-                                            </div>
+                                        <div class="content-header-icon">
+                                        {% block content_icon %}
+                                        <i class="fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>
+                                        {% endblock %}
+                                        </div>
 
-                                            {% block page_actions_wrapper %}
-                                                <div class="page-actions">{% block page_actions %}{% endblock %}</div>
-                                            {% endblock %}
+                                        <div class="content-header-title">
+                                            <h1 class="title">
+                                            
+                                                {% block content_title %}{{ ea_extra.title(ea.crud.getCurrentPage() ?? null)|default("Dashboard") }}{% endblock %}
+ 
+                                                {% block content_help %}
+                                                    {% if has_help_message %}
+                                                    <span class="content-header-help">
+                                                        <i class="far fa-question-circle" data-bs-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
+                                                    </span>
+                                                    {% endif %}
+                                                {% endblock %}
+                                            </h1>
+
+                                            <span>{% block content_text %}{{ ea_extra.text(ea.crud.getCurrentPage() ?? null) }}{% endblock %}</span>
+                                        </div>
+
+                                        {% block page_actions_wrapper %}
+                                            <div class="page-actions">{% block page_actions %}{% endblock %}</div>
+                                        {% endblock %}
                                         {% endblock content_header %}
                                     </section>
                                 {% endblock content_header_wrapper %}
 
                                 <section id="main" class="content-body">
                                 {% block main %}
-                                    {% if content_header is defined and content_header is not null %}
-                                        <div class="content-panel">
-                                            <div class="content-panel-body with-background without-header without-footer">
-                                                {{ content_header }}
-                                            </div>
-                                        </div>
-                                    {% endif %}
 
-                                    {% if content_widgets is defined and content_widgets|length > 0 %}
+                                    {% set content = block('content') is defined ? block('content') : '' %}
+                                    {% if content is not empty %}
+                                    <div class="content-panel">
+                                        <div class="content-panel-body with-background without-header without-footer">
+                                            {{ content|raw }}
+                                        </div>
+                                    </div>
+                                    {% else %}
+
+                                    {% if ea_extra.widgets(ea.crud.getCurrentPage() ?? null) is defined and ea_extra.widgets(ea.crud.getCurrentPage() ?? null)|length > 0 %}
                                     <div class="row mx-0">
                                         {% set content_widget_closure = false %}
-                                        {% for content_widget in content_widgets  %}
+                                        {% for content_widget in ea_extra.widgets(ea.crud.getCurrentPage() ?? null)  %}
 
                                             {% if content_widget.getAsDto().getType() == "section" %}
 
@@ -547,16 +597,15 @@
                                                     style="height:90%; padding:0.8em 0.6em 0.6em 0.6em;">
 
                                                 <fieldset style="height: 100%; margin:0; padding:0.5em 0 1.5em 0.5em;">
-                                                    <legend>{{content_widget.getAsDto().getLabel()}}</legend>
-
-
+                                                    <legend>{{content_widget.getAsDto().getLabel()|trans }}</legend>
+                                                <hr>
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{col}};">
 
                                             {% else %}
                                                 <li>
                                                     <a href="{{ content_widget.generateUrl() }}">
-                                                        <i class="{{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        {{ content_widget.getAsDto().getLabel() }}
+                                                        <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
+                                                        {{ content_widget.getAsDto().getLabel()|trans }}
                                                     </a>
                                                 </li>
                                             {% endif %}
@@ -564,13 +613,6 @@
                                     </div>
                                     {% endif %}
 
-                                    {% set content = block('content') is defined ? block('content') : '' %}
-                                    {% if content is not empty %}
-                                    <div class="content-panel">
-                                        <div class="content-panel-body with-background without-header without-footer">
-                                            {{ content|raw }}
-                                        </div>
-                                    </div>
                                     {% endif %}
 
                                 {% endblock %}
@@ -595,6 +637,7 @@
     {% endblock wrapper_wrapper %}
 
     {% block body_javascript %}{% endblock body_javascript %}
+    <script> $(function () { $('[data-toggle="tooltip"]').tooltip() }); </script>
 
     {% block configured_body_contents %}
         {% for htmlContent in ea.assets.bodyContents ?? [] %}

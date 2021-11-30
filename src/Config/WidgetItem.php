@@ -7,7 +7,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use Base\Config\Menu\CrudWidgetItem;
 use Base\Config\Menu\SectionWidgetItem;
-
+use Base\Controller\Dashboard\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\LogoutMenuItem;
@@ -16,14 +16,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SectionMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
 
-final class WidgetItem
+class WidgetItem
 {
     public static $adminUrlGenerator;
     public static $adminContextProvider;
 
     public static function setAdminUrlGenerator(AdminUrlGenerator $adminUrlGenerator)
     {
-
         self::$adminUrlGenerator = $adminUrlGenerator;
     }
 
@@ -32,9 +31,12 @@ final class WidgetItem
         self::$adminContextProvider = $adminContextProvider;
     }
 
-    public static function linkToCrud(string $label, ?string $icon, string $entityFqcn): CrudWidgetItem
+    public static function linkToCrud(string $entityFqcn, ?string $label = null, ?string $icon = null): CrudWidgetItem
     {
-        return new CrudWidgetItem($label, $icon, $entityFqcn);
+        $crudController = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
+        $label = $label ?? $crudController::getTranslationPrefix().".plural";
+
+        return new CrudWidgetItem($label, $icon ?? $crudController::getPreferredIcon(), $entityFqcn);
     }
 
     public static function linkToDashboard(string $label, ?string $icon = null): DashboardMenuItem

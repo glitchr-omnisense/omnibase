@@ -5,8 +5,8 @@ namespace Base\Traits;
 use Base\Config\Menu\SectionWidgetItem;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 
-trait DashboardTrait {
-
+trait DashboardWidgetTrait
+{
     public function getSectionWidgetItem(array $widgets = [], $positionOrLabel = null): ?SectionWidgetItem
     {  
         $sectionOffsetAndLength = [0, null];
@@ -34,7 +34,7 @@ trait DashboardTrait {
 
     public function getSectionWidgetItemOffsetAndLength(array $widgets = [], $sectionOrPositionOrLabel = null): array
     {  
-        $sectionOffsetAndLength = [0, null];
+        $sectionOffsetAndLength = [count($widgets), null];
         if(!$sectionOrPositionOrLabel) return $sectionOffsetAndLength;
 
         $sectionFound   = false;

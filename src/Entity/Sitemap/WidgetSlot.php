@@ -47,6 +47,7 @@ class WidgetSlot implements TranslatableInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @AssertBase\NotBlank(groups={"new", "edit"})
      * @Slugify(separator=".")
      */
     protected $name;

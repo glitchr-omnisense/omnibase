@@ -34,11 +34,22 @@ bounces_1day: "{0, plural,
                 other {# bounces for today}
               }"
 
-homepage:
-  title: "Dashboard: Homepage"
-  text: "Welcome to the dashboard, this page is meant for administration support"
+# homepage:
+#   icon: "fas fa-home"
+#   title: "Dashboard: Homepage"
+#   text: "Welcome to the dashboard, this page is meant for administration support"
 
-settings:
-  title: "Dashboard: Settings"
-  text: "Welcome to the dashboard, this page is meant for modifying settings"
-  success: "You settings have been successfully modified."
+# settings:
+#   icon: "fas fa-tools"
+#   title: "Dashboard: Settings"
+#   text: "Welcome to the dashboard, this page is meant for modifying settings"
+#   success: "You settings have been successfully modified."
+
+crud:
+  user:
+    singular: "User"
+    plural: "Users"
+
+    group:
+      singular: "Group"
+      plural: "Groups"

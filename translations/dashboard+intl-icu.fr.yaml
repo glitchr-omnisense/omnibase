@@ -29,11 +29,160 @@ bounces_1day: "{0, plural,
                 other {# rebonds aujourd'hui }
               }"
 
-homepage:
-  title: "Dashboard: Page d'accueil"
-  text: "Bienvenue sur le dashboard, cette page permet d'administrer le site web"
-  
-settings:
-  title: "Dashboard: Configuration"
-  text: "Bienvenue dans le dashboard, cette page permet d'administrer les paramètres du site."
-  success: "Les paramètres du site ont correctement été modifiés."
+Home: Accueil
+Settings: Paramètres
+Widgets: Widgets
+Back to website: Retour au site
+
+MEMBERSHIP: "ESPACE MEMBRE"
+Super Administrator: Super Administrateur
+Administrator: Administrateur
+All users: "Tous les utilisateurs"
+Add user: Ajouter un utilisateur
+
+STATISTICS: STATISTIQUE
+
+crud:
+  user:
+    singular: "Utilisateur"
+    plural: "Utilisateurs"
+    # title: "User page"
+    # text: "This page is meant for user administration"
+
+    group:
+      singular: "Groupe"
+      plural: "Groupes"
+      # title: "User Edit TITLE"
+      # text: "User Edit TEXT"
+      # help: "User Edit HELP"
+    thread:
+      singular: "Fil"
+      plural: "Fils"
+      # title: "User Edit TITLE"
+      # text: "User Edit TEXT"
+      # help: "User Edit HELP"
+    permission:
+      singular: "Permission"
+      plural: "Permissions"
+    token:
+      singular: "Jeton"
+      plural: "Jetons"
+    notification:
+      singular: "Notification"
+      plural: "Notifications"
+
+    penalty:
+      singular: "Pénalité"
+      plural: "Pénalités"
+    log:
+      singular: "Historique"
+      plural: "Historiques"
+
+    merchant:
+      singular: "Marchant"
+      plural: "Marchants"
+    partner:
+      singular: "Marchant"
+      plural: "Marchants"
+    artist:
+      singular: "Artiste"
+      plural: "Artistes"
+    customer:
+      singular: "Client"
+      plural: "Clients"
+
+  thread:
+    singular: "Fil"
+    plural: "Fils"
+
+    mention:
+      singular: "Mention"
+      plural: "Mentions"
+    tag:
+      singular: "Étiquette"
+      plural: "Étiquettes"
+    like:
+      singular: "J'aime"
+      plural: "J'aime"
+
+  sitemap:
+    widget:
+      singular: "Widget"
+      plural: "Widgets"
+
+      page:
+        singular: "Page"
+        plural: "Pages"
+
+      hyperlink:
+        singular: "Lien hypertexte"
+        plural: "Liens hypertexte"
+
+      attachment:
+        singular: "Pièce jointe"
+        plural: "Pièces jointes"
+
+      menu:
+        singular: "Menu"
+        plural: "Menu"
+
+    widgetslot:
+      singular: Widget slot
+      plural: "Widget slots"
+
+      social:
+        singular: "Réseau social"
+        plural: Réseaux sociaux
+
+    setting:
+      singular: "Paramètre"
+      plural: "Paramètres"
+
+  marketplace:
+    store:
+      singular: "Magasin"
+      plural: "Magasins"
+    taxonomy:
+      singular: "Taxonomie"
+      plural: "Taxonomies"
+    cart:
+      singular: "Panier"
+      plural: "Paniers"
+
+    order:
+      order:
+        singular: "Commande"
+        plural: "Commandes"
+
+      shipment:
+        singular: "Expédition"
+        plural: "Expéditions"
+
+      payment:
+        singular: "Paiement"
+        plural: "Paiements"
+
+    product:
+      productreview:
+        singular: "Avis"
+        plural: "Avis"
+      product:
+        singular: "Produit"
+        plural: "Produits"
+
+    sales:
+      country:
+        singular: "Pays"
+        plural: "Pays"
+
+      currency:
+        singular: "Monnaie"
+        plural: "Monnaies"
+
+      promotion:
+        singular: "Promotion"
+        plural: "Promotions"
+
+      taxrate:
+        singular: "Taxe"
+        plural: "Taxes"

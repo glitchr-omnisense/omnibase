@@ -10,20 +10,26 @@ use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
 
+use App\Entity\Thread;
+use App\Entity\Thread\Like;
+use App\Entity\Thread\Mention;
+use App\Entity\Thread\Tag;
+use App\Entity\Sitemap\WidgetSlot;
+
+use App\Entity\Sitemap\Setting;
+use App\Entity\Sitemap\Widget;
+use App\Entity\User\Notification;
+use App\Entity\Sitemap\WidgetSlot\Social;
+use App\Entity\Sitemap\Widget\Attachment;
+use App\Entity\Sitemap\Widget\Hyperlink;
+use App\Entity\Sitemap\Widget\Menu;
+use App\Entity\Sitemap\Widget\Page;
+
 use App\Controller\Dashboard\Crud\UserCrudController;
 use Base\Config\WidgetItem;
 use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
 
-use Base\Entity\Sitemap\Widget\Menu;
-use Base\Entity\Sitemap\Widget\Page;
-use Base\Entity\Sitemap\Setting;
-use Base\Entity\Sitemap\Widget;
-use Base\Entity\Sitemap\Widget\Attachment;
-use Base\Entity\Sitemap\Widget\Hyperlink;
-use Base\Entity\Sitemap\WidgetSlot;
-use Base\Entity\Sitemap\WidgetSlot\Social;
-use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
@@ -36,9 +42,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use Base\Config\Extension;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -50,30 +54,46 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
-use Base\Traits\DashboardTrait;
+use Base\Traits\DashboardWidgetTrait;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
-class DashboardController extends AbstractDashboardController
+/* "abstract" (remove because of routes) */
+class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
-    use DashboardTrait;
+    use DashboardWidgetTrait;
 
     protected $baseService;
-    protected $authenticationUtils;
     protected $adminUrlGenerator;
     
+    public const TRANSLATION_DOMAIN = "dashboard";
+
     public function __construct(
-        AdminUrlGenerator $adminUrlGenerator,
+        Extension $extension, 
+        RequestStack $requestStack, 
         AdminContextProvider $adminContextProvider,
-        BaseService $baseService,
-        AuthenticationUtils $authenticationUtils,
-        ?GaService $gaService = null
-    ) {
+        AdminUrlGenerator $adminUrlGenerator, 
+        BaseService $baseService, 
+        TranslatorInterface $translator,
+        ?GaService $gaService = null) {
+
+        $this->extension = $extension;
+        $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->adminContextProvider  = $adminContextProvider;
 
         $this->baseService = $baseService;
-        $this->translator  = $baseService->getTwigExtension();
-        $this->authenticationUtils       = $authenticationUtils;
+        $this->translator = $translator;
+
         $this->gaService = $gaService;
+    }
+
+    public function getExtension() { return $this->extension; }
+    public function setExtension(Extension $extension)
+    {
+        $this->extension = $extension; 
+        return $this;
     }
 
     /**
@@ -83,10 +103,7 @@ class DashboardController extends AbstractDashboardController
      */
     public function index(): Response
     {
-        return $this->render('dashboard/index.html.twig', [
-            "content_header" => $this->translator->trans2("Welcome to the administration page."),
-            "content_widgets" => $this->configureWidgetItems()
-        ]);
+        return $this->render('dashboard/index.html.twig');
     }
 
     /**
@@ -138,8 +155,6 @@ class DashboardController extends AbstractDashboardController
         }
 
         return $this->render('dashboard/settings.html.twig', [
-            "content_title" => $this->translator->trans2("Dashboard: Settings"),
-            "content_header" => $this->translator->trans2("Welcome to the setting page."),
             "form" => $form->createView()
         ]);
     }
@@ -156,11 +171,12 @@ class DashboardController extends AbstractDashboardController
 
         $form = $this->createForm(WidgetListType::class, $data, ["fields" => $fields]);
 
-        return $this->render('dashboard/widgets.html.twig', [
-            "content_title" => $this->translator->trans2("Dashboard: Widgets"),
-            "content_header" => $this->translator->trans2("Welcome to the widget page."),
-            "form" => $form->createView()
-        ]);
+        return $this->render('dashboard/widgets.html.twig', ["form" => $form->createView()]);
+    }
+
+    public function configureExtension(Extension $extension) : Extension 
+    { 
+        return $extension; 
     }
 
     public function configureDashboard(): Dashboard
@@ -170,20 +186,19 @@ class DashboardController extends AbstractDashboardController
         if(!$logo) $logo = "bundles/base/logo.svg";
     
         $title = $this->baseService->getSettings()->getScalar("base.settings.title");
-        return Dashboard::new()
-            ->setTranslationDomain('dashboard')
+        $slogan = $this->baseService->getSettings()->getScalar("base.settings.slogan");
+        
+        $this->configureExtension($this->extension
+            ->setIcon("fas fa-home")
+            ->setTitle($title)
+            ->setText($slogan)
+            ->setWidgets($this->configureWidgetItems())
+        );
+
+        return parent::configureDashboard()
+            ->setTranslationDomain(self::TRANSLATION_DOMAIN)
             ->setTitle('<img src="'.$this->baseService->getAsset($logo).'" alt="'.$title.'">')
             ->disableUrlSignatures();
-    }
-
-    public function configureCrud(): Crud
-    {
-        return Crud::new()
-            ->setPaginatorPageSize(30)
-            ->setFormOptions(
-                ['validation_groups' => ['new']],
-                ['validation_groups' => ['edit']]
-            );
     }
 
     public function configureMenuItems(): iterable
@@ -219,8 +234,8 @@ class DashboardController extends AbstractDashboardController
                 $menu[] = MenuItem::linkToUrl($value, $icon, $url);
             }
 
-            $menu[] = MenuItem::linkToCrud('All users', 'fa-fw fas fa-fw fa-tags', User::class);
-            $menu[] = MenuItem::linkToCrud('Add user', 'fa-fw fas fa-fw fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
+            $menu[] = MenuItem::linkToCrud('All users', 'fas fa-fw fa-tags', User::class);
+            $menu[] = MenuItem::linkToCrud('Add user', 'fas fa-fw fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
                 ->setAction('new');
         }
 
@@ -229,12 +244,12 @@ class DashboardController extends AbstractDashboardController
             $ga = $this->gaService->getBasics();
 
             $gaMenu = [];
-            $gaMenu["users"]        = ["label" => $this->translator->trans2("dashboard.users", [$ga["users"]]), "icon"  => 'fas fa-user'];
-            $gaMenu["users_1day"]   = ["label" => $this->translator->trans2("dashboard.users_1day", [$ga["users_1day"]]), "icon"  => 'fas fa-user-clock'];
-            $gaMenu["views"]        = ["label" => $this->translator->trans2("dashboard.views", [$ga["views"]]), "icon"  => 'far fa-eye'];
-            $gaMenu["views_1day"]   = ["label" => $this->translator->trans2("dashboard.views_1day", [$ga["views_1day"]]) , "icon"  => 'fas fa-eye'];
-            $gaMenu["sessions"]     = ["label" => $this->translator->trans2("dashboard.sessions", [$ga["sessions"]]), "icon"  => 'fas fa-stopwatch'];
-            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans2("dashboard.bounces_1day", [$ga["bounces_1day"]]), "icon"  => 'fas fa-meteor'];
+            $gaMenu["users"]        = ["label" => $this->translator->trans("users", [$ga["users"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-user'];
+            $gaMenu["users_1day"]   = ["label" => $this->translator->trans("users_1day", [$ga["users_1day"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-user-clock'];
+            $gaMenu["views"]        = ["label" => $this->translator->trans("views", [$ga["views"]], self::TRANSLATION_DOMAIN), "icon"  => 'far fa-eye'];
+            $gaMenu["views_1day"]   = ["label" => $this->translator->trans("views_1day", [$ga["views_1day"]], self::TRANSLATION_DOMAIN) , "icon"  => 'fas fa-eye'];
+            $gaMenu["sessions"]     = ["label" => $this->translator->trans("sessions", [$ga["sessions"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-stopwatch'];
+            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans("bounces_1day", [$ga["bounces_1day"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-meteor'];
 
             $menu[] = MenuItem::section('STATISTICS');
             foreach ($gaMenu as $key => $entry) {
@@ -278,52 +293,8 @@ class DashboardController extends AbstractDashboardController
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
             ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'));
-
     }
     
-    public function configureWidgetItems(array $widgets = [])
-    {
-        WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
-        WidgetItem::setAdminContextProvider($this->adminContextProvider);
-
-        if ($this->isGranted('ROLE_SUPERADMIN')) {
-
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
-            $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
-                WidgetItem::linkToCrud('Users',         'fa-fw fas fa-fw fa-user',                 User::class),
-                WidgetItem::linkToCrud('Groups',        'fa-fw fas fa-fw fa-users',                UserGroup::class),
-                WidgetItem::linkToCrud('Notifications', 'fa-fw fas fa-fw fa-bell',                 UserNotification::class),
-                WidgetItem::linkToCrud('Tokens',        'fa-fw fas fa-fw fa-drumstick-bite',       UserToken::class),
-                WidgetItem::linkToCrud('Permissions',   'fa-fw fas fa-fw fa-exclamation-triangle', UserPermission::class),
-                WidgetItem::linkToCrud('Penalties',     'fa-fw fas fa-fw fa-bomb',                 UserPenalty::class),
-                WidgetItem::linkToCrud('Logs',          'fa-fw fas fa-fw fa-info-circle',          UserLog::class)
-            ]);
-        }
-
-        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('SITEMAP', null, 1));
-        $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
-            WidgetItem::linkToCrud('Pages',       'fa-fw fas fa-fw fa-file-alt', Page::class),
-            WidgetItem::linkToCrud('Hyperlinks',  'fa-fw fas fa-fw fa-link', Hyperlink::class),
-            WidgetItem::linkToCrud('Attachments', 'fa-fw fas fa-fw fa-paperclip', Attachment::class),
-            WidgetItem::linkToCrud('Menu',        'fa-fw fas fa-fw fa-compass',  Menu::class)
-        ]);
-
-        if ($this->isGranted('ROLE_SUPERADMIN')) {
-
-            $section = $this->getSectionWidgetItem($widgets, "SITEMAP");
-            if($section) $section->setWidth(2);
-
-            $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
-                WidgetItem::linkToCrud('Social media', 'fas fa-share-alt',            Social::class),
-                WidgetItem::linkToCrud('Settings',     'fa-fw fas fa-fw fa-tools',    Setting::class),
-                WidgetItem::linkToCrud('Widget Slots', 'fa-fw fas fa-fw fa-th-large', WidgetSlot::class),
-                WidgetItem::linkToCrud('Widgets',      'fa-fw fas fa-fw fa-square',   Widget::class),
-            ]);
-        }
-
-        return $widgets;
-    }
-
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         // Usually it's better to call the parent method because that gives you a
@@ -336,6 +307,57 @@ class DashboardController extends AbstractDashboardController
             ->addMenuItems([
                 MenuItem::linkToUrl('My Profile', 'fas fa-fw fa-id-card', $this->baseService->getUrl("base_profile")),
                 MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("base_settings"))
+            ])->setAvatarUrl($avatar);
+    }
+
+    public function configureWidgetItems(array $widgets = [])
+    {
+        WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
+        WidgetItem::setAdminContextProvider($this->adminContextProvider);
+
+        if ($this->isGranted('ROLE_SUPERADMIN')) {
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
+            $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
+                WidgetItem::linkToCrud(User::class),
+                WidgetItem::linkToCrud(UserGroup::class),
+                WidgetItem::linkToCrud(UserNotification::class),
+                WidgetItem::linkToCrud(UserToken::class),
+                WidgetItem::linkToCrud(UserPermission::class),
+                WidgetItem::linkToCrud(UserPenalty::class),
+                WidgetItem::linkToCrud(UserLog::class)
             ]);
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));
+            $widgets = $this->addWidgetItem($widgets, "THREADS", [
+                WidgetItem::linkToCrud(Thread::class),
+                WidgetItem::linkToCrud(Mention::class),
+                WidgetItem::linkToCrud(Tag::class),
+                WidgetItem::linkToCrud(Like::class),
+            ]);
+        }
+
+        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('SITEMAP', null, 1));
+        $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+            WidgetItem::linkToCrud(Page::class      ),
+            WidgetItem::linkToCrud(Hyperlink::class ),
+            WidgetItem::linkToCrud(Attachment::class),
+            WidgetItem::linkToCrud(Menu::class      )
+        ]);
+
+        if ($this->isGranted('ROLE_SUPERADMIN')) {
+
+            $section = $this->getSectionWidgetItem($widgets, "SITEMAP");
+            if($section) $section->setWidth(2);
+
+            $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+                WidgetItem::linkToCrud(Social::class    ),
+                WidgetItem::linkToCrud(Setting::class   ),
+                WidgetItem::linkToCrud(WidgetSlot::class),
+                WidgetItem::linkToCrud(Widget::class    ),
+            ]);
+        }
+
+        return $widgets;
     }
 }

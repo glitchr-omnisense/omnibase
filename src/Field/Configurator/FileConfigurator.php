@@ -28,7 +28,7 @@ final class FileConfigurator implements FieldConfiguratorInterface
     {
         $field->setFormTypeOption("max_filesize", Uploader::getMaxFilesize($entityDto->getInstance(), $field->getProperty()));
         $field->setFormTypeOption("mime_types",   Uploader::getMimeTypes($entityDto->getInstance(), $field->getProperty()));
-
+        
         $preferredDownloadName = $field->getCustomOption(FileField::OPTION_PREFERRED_DOWNLOAD_NAME);
         if($preferredDownloadName) {
         

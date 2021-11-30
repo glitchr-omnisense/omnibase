@@ -2,78 +2,45 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
-use Base\Entity\Sitemap\Widget\Attachment;
-use Base\Service\BaseService;
-
-use Base\Entity\User;
-use Base\Field\Type\RoleType;
-
-use Base\Field\PasswordField;
-use Base\Field\ImpersonateField;
-use Base\Field\LinkIdField;
-use Base\Field\RoleField;
-use Base\Field\BooleanField;
 use Base\Field\FileField;
 use Base\Field\SlugField;
 use Base\Field\TranslatableField;
-use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use Base\Controller\Dashboard\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionDto;
 
 class AttachmentCrudController extends AbstractCrudController
 {
-    public static function getEntityFqcn(): string
-    {
-        return Attachment::class;
-    }
+    public static function getPreferredIcon() { return "fas fa-paperclip"; } 
 
-    public function createEntity(string $entityFqcn)
+    public function downloadAttachment(ActionDto $actionDto)
     {
-        return new Attachment();
-    }
+        $entityManager = $this->getDoctrine()->getManagerForClass($actionDto->getEntityFqcn());
+        // foreach ($batchActionDto->getEntityIds() as $id) {
+        //     $user = $entityManager->find($batchActionDto->getEntityFqcn(), $id);
+        //     $user->approve();
+        // }
 
-    public function configureCrud(Crud $crud): Crud
-    {
-        return $crud
-            ->setPageTitle('index', 'User Management')
-            ->setDefaultSort(['id' => 'DESC'])
-            ->setFormOptions(
-                ['validation_groups' => ['new']], // Crud::PAGE_NEW
-                ['validation_groups' => ['edit']] // Crud::PAGE_EDIT
-            );
+        // $entityManager->flush();
+        dump($entityManager);
+        return null;
     }
     
     public function configureActions(Actions $actions): Actions
     {
-        return $actions
+        $downloadAction = Action::new('download', "Download", 'fas fa-fw fa-download')
+            ->linkToCrudAction("downloadAttachment");
 
-        ->add(Crud::PAGE_NEW,  Action::INDEX)
-        ->add(Crud::PAGE_EDIT, Action::INDEX)
-
-        ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN')
-        ->setPermission(Action::EDIT, 'ROLE_ADMIN');
+        return parent::configureActions($actions)->add(Crud::PAGE_INDEX, $downloadAction);
     }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
-
-        yield LinkIdField::new()->hideOnForm();
-        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
 
         yield FileField::new('file')->setPreferredDownloadName("slug");
         foreach ( ($callbacks["file"] ?? $defaultCallback)() as $yield)
@@ -85,10 +52,5 @@ class AttachmentCrudController extends AbstractCrudController
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-    }
-
-     public function configureFilters(Filters $filters): Filters
-    {
-        return $filters;
     }
 }

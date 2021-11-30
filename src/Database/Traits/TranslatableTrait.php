@@ -110,8 +110,9 @@ trait TranslatableTrait
     public function __call(string $method, array $arguments)
     {
         $className   = get_class($this);
+        $translationClassName = $this->getTranslationEntityClass();
         $parentClass = get_parent_class();
-        
+
         //
         // Call magic setter
         if (str_starts_with($method, "set")) {
@@ -131,15 +132,23 @@ trait TranslatableTrait
         }
 
         //
-        // Call magic getter
+        // Figure out is property exist 
         $property = null;
         if(property_exists($className, $method))
             $property = $method;
+        else if(property_exists($translationClassName, $method))
+            $property = $method;
         else if(str_starts_with($method, "get") && property_exists($className, lcfirst(substr($method, 3))))
+            $property = lcfirst(substr($method, 3));
+        else if(str_starts_with($method, "get") && property_exists($translationClassName, lcfirst(substr($method, 3))))
             $property = lcfirst(substr($method, 3));
         else if(str_starts_with($method, "is" ) && property_exists($className, lcfirst(substr($method, 2))))
             $property = lcfirst(substr($method, 2));
+        else if(str_starts_with($method, "is" ) && property_exists($translationClassName, lcfirst(substr($method, 2))))
+            $property = lcfirst(substr($method, 2));
 
+        //
+        // Call magic getter
         if($property) {
 
             try { return $this->__get($property); }

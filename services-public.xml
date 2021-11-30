@@ -30,5 +30,7 @@
         <service id="base.form.proxy"   alias="Base\Form\FormProxyInterface" />
         <service id="base.form.factory" alias="Base\Form\FormFactoryInterface" />
 
+        <service id="ea_extension" alias="Base\Config\Extension" />
+        
     </services>
 </container>

@@ -14,6 +14,8 @@ use Base\Repository\Sitemap\Widget\AttachmentRepository;
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
  * @DiscriminatorEntry( value = "attachment" )
+ *
+ * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
 class Attachment extends Widget
@@ -21,6 +23,7 @@ class Attachment extends Widget
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Slugify(reference="translations.title")
+     * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $slug;
     public function getSlug(): ?string { return $this->slug; }

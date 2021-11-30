@@ -15,6 +15,8 @@ final class FileField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_RENDER_FORMAT  = "renderFormat";
+
+    public const OPTION_ALLOW_DOWNLOAD = "allowDownload";
     public const OPTION_PREFERRED_DOWNLOAD_NAME = "preferredDownloadName";
 
     public static function new(string $propertyName, ?string $label = null): self
@@ -28,12 +30,19 @@ final class FileField implements FieldInterface
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
+            ->setCustomOption(self::OPTION_ALLOW_DOWNLOAD, false)
             ->setFormTypeOptionIfNotSet("data_class", null);
     }
 
     public function allowDelete(bool $allowDelete = true): self
     {
         $this->setFormTypeOption("allow_delete", $allowDelete);
+        return $this;
+    }
+
+    public function allowDownload(bool $allowDownload = true): self
+    {
+        $this->setCustomOption(self::OPTION_ALLOW_DOWNLOAD, $allowDownload);
         return $this;
     }
 

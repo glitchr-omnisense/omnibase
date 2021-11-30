@@ -54,6 +54,7 @@
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.settings" />
+            <argument type="service" id="ea_extension" />
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">
@@ -541,20 +542,79 @@
             <argument type="service" id="translator" />
         </service>
         
-        <service id="Base\Controller\Dashboard\DashboardController">
+        <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
+        <service id="Base\Controller\Dashboard\AbstractDashboardController">
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="security.authentication_utils" />
+            <argument type="service" id="translator" />
             <argument type="service" id="ga.service" on-invalid="null" />
+        </service>
+
+        <service id="Base\Controller\Dashboard\AbstractCrudController">
+            <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="Base\Controller\Dashboard\Crud\ThreadCrudController">
+            <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="Base\Controller\Dashboard\Crud\Thread\LikeCrudController">
+            <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Base\Controller\Dashboard\Crud\Thread\MentionCrudController">
+            <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="Base\Controller\Dashboard\Crud\Thread\TagCrudController">
+            <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
         </service>
 
         <service id="Base\Controller\Dashboard\Crud\UserCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -562,6 +622,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\GroupCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -569,6 +632,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\LogCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -576,6 +642,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\TokenCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -583,6 +652,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\NotificationCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -590,6 +662,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\PermissionCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -597,22 +672,30 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-        </service>
+         </service>
 
         <service id="Base\Controller\Dashboard\Crud\Sitemap\SettingCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
         </service>
-
         <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlotCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -620,14 +703,19 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlot\SocialCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
         </service>
-
         <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -635,6 +723,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\MenuCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -642,6 +733,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\AttachmentCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -649,6 +743,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\HyperlinkCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -656,6 +753,9 @@
         </service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />

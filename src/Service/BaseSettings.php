@@ -2,11 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Entity\Sitemap\Setting;
 use Base\Repository\Sitemap\SettingRepository;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ManagerRegistry;
 
 use Base\Service\Traits\BaseSettingsTrait;
 use Symfony\Component\Asset\Packages;

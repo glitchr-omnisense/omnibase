@@ -5,7 +5,6 @@ namespace Base\Traits;
 use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Twig\Extension\BaseTwigExtension;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\NotifierInterface;

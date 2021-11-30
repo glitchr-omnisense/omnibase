@@ -3,6 +3,8 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 
 {% set renderFormat = field.customOptions.get('renderFormat') %}
+{% set allowDownload = field.customOptions.get('allowDownload') %}
+
 {% set preferredDownloadName = field.customOptions.get('preferredDownloadName') %}
 {% if  renderFormat == 'image' or renderFormat == 'avatar' %}
 
@@ -33,7 +35,7 @@
 
     {% endif %}
 
-{% elseif renderFormat == 'count' %}
+{% elseif renderFormat == 'count' or field.value is iterable %}
 
     <span class="badge badge-secondary">
         {% if field is iterable %}
@@ -45,10 +47,32 @@
 
 {% else %}
 
-    {% if field.formattedValue is not empty %}
-        <a href="{{ field.formattedValue }}" download="{{ preferredDownloadName }}"><i class="fa-fw fas fa-paperclip fa-2x"></i></a>
+    <span class="badge badge-secondary">
+    {% if field.formattedValue is empty %}
+
+        {% if field.value is not empty %}
+        <div data-toggle="tooltip" data-placement="top" title="File is missing">
+            <i class="fas fa-fw fa-exclamation-triangle"></i>
+        </div>
+        {% else %}
+        <div data-toggle="tooltip" data-placement="top" title="No file">-</div>
+        {% endif %}
+
     {% else %}
-        <i class="fas fa-fw fa-exclamation-triangle"></i>
-        {% if field is not iterable and field.value is empty %} File not found !{% endif %}
+
+        {% if allowDownload %}
+        <a href="{{ field.formattedValue }}" download="{{ preferredDownloadName }}">
+            <i class="fas fa-fw fa-paperclip"></i>
+        </a>
+        {% elseif field.value is not empty %}
+        <div data-toggle="tooltip" data-placement="top" title="{{ preferredDownloadName }}">
+            <i class="fas fa-fw fa-check"></i>
+        </div>
+        {% else %}
+        <div data-toggle="tooltip" data-placement="top" title="No file">-</div>
+        {% endif %}
+
     {% endif %}
+    </span>
+
 {% endif %}

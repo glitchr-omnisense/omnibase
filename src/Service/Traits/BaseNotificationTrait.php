@@ -4,19 +4,12 @@ namespace Base\Service\Traits;
 
 use App\Entity\User;
 
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\Recipient\Recipient;
 
 use Symfony\Component\Notifier\NotifierInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
-use Base\Entity\User\Notification;
 use Base\Service\BaseService;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
 

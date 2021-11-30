@@ -32,6 +32,7 @@ class Setting implements TranslatableInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * 
      */
     protected $name;
 
