@@ -1,3 +1,19 @@
+# MENU controller
+My Settings: Mes paramètres
+My Profile: Mon profil
+
+Home: Accueil
+Settings: Paramètres
+Widgets: Widgets
+Back to website: Retour au site
+
+MEMBERSHIP: "ESPACE MEMBRE"
+Super Administrator: Super Administrateur
+Administrator: Administrateur
+All users: "Tous les utilisateurs"
+Add user: Ajouter un utilisateur
+
+STATISTICS: STATISTIQUE
 users: "{0, plural,
           =0 {aucune visite}
           =1 {# visite }
@@ -29,19 +45,7 @@ bounces_1day: "{0, plural,
                 other {# rebonds aujourd'hui }
               }"
 
-Home: Accueil
-Settings: Paramètres
-Widgets: Widgets
-Back to website: Retour au site
-
-MEMBERSHIP: "ESPACE MEMBRE"
-Super Administrator: Super Administrateur
-Administrator: Administrateur
-All users: "Tous les utilisateurs"
-Add user: Ajouter un utilisateur
-
-STATISTICS: STATISTIQUE
-
+# CRUD controllers
 crud:
   user:
     singular: "Utilisateur"
@@ -82,8 +86,8 @@ crud:
       singular: "Marchant"
       plural: "Marchants"
     partner:
-      singular: "Marchant"
-      plural: "Marchants"
+      singular: "Partenaire"
+      plural: "Partenaires"
     artist:
       singular: "Artiste"
       plural: "Artistes"
@@ -115,24 +119,24 @@ crud:
         plural: "Pages"
 
       hyperlink:
-        singular: "Lien hypertexte"
-        plural: "Liens hypertexte"
+        singular: "Lien Hypertexte"
+        plural: "Liens Hypertexte"
 
       attachment:
-        singular: "Pièce jointe"
-        plural: "Pièces jointes"
+        singular: "Pièce Jointe"
+        plural: "Pièces Jointes"
 
       menu:
         singular: "Menu"
         plural: "Menu"
 
     widgetslot:
-      singular: Widget slot
-      plural: "Widget slots"
+      singular: Widget Slot
+      plural: "Widget Slots"
 
       social:
-        singular: "Réseau social"
-        plural: Réseaux sociaux
+        singular: "Réseau Social"
+        plural: Réseaux Sociaux
 
     setting:
       singular: "Paramètre"

@@ -189,7 +189,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $slogan = $this->baseService->getSettings()->getScalar("base.settings.slogan");
         
         $this->configureExtension($this->extension
-            ->setIcon("fas fa-home")
+            ->setIcon("fas fa-laptop-house")
             ->setTitle($title)
             ->setText($slogan)
             ->setWidgets($this->configureWidgetItems())
@@ -208,7 +208,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $menu[] = MenuItem::linkToUrl('Home', 'fas fa-fw fa-home', $this->baseService->getUrl("base_dashboard"));
         $menu[] = MenuItem::linkToUrl('Settings', 'fas fa-fw fa-tools', $this->baseService->getUrl("base_dashboard_settings"));
         $menu[] = MenuItem::linkToUrl('Widgets', 'fas fa-fw fa-th-large', $this->baseService->getUrl("base_dashboard_widgets"));
-        $menu[] = MenuItem::linkToUrl('Back to website', 'fas fa-fw fa-door-open', "/");
+        $menu[] = MenuItem::linkToUrl('Back to website', 'fas fa-fw fa-door-open', $this->baseService->getAsset("/"));
 
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 

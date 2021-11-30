@@ -1,55 +1,192 @@
+# MENU controller
+# My Settings: Mes paramètres
+# My Profile: Mon profil
+
+# Home: Accueil
+# Settings: Paramètres
+# Widgets: Widgets
+# Back to website: Retour au site
+
+# MEMBERSHIP: "MEMBERSHIP"
+# Super Administrator: Super Administrateur
+# Administrator: Administrateur
+# All users: "Tous les utilisateurs"
+# Add user: Ajouter un utilisateur
+
+STATISTICS: STATISTICS
 users: "{0, plural,
           =0 {no visit}
           =1 {# visit}
           other {# visits}
         }"
-        
 users_1day: "{0, plural,
               =0 {no visit}
               =1 {# visit for today}
               other {# visits for today}
             }"
-
 views:  "{0, plural,
           =0 {no view}
           =1 {# view}
           other {# views}
         }"
-
 views_1day: "{0, plural,
               =0 {no view}
               =1 {# view for today}
               other {# views for today}
             }"
-
 sessions: "{0, plural,
             =0 {no session}
             =1 {# session}
             other {# sessions}
           }"
-
 bounces_1day: "{0, plural,
                 =0 {no bouncing}
                 =1 {# bounce for today}
                 other {# bounces for today}
               }"
 
-# homepage:
-#   icon: "fas fa-home"
-#   title: "Dashboard: Homepage"
-#   text: "Welcome to the dashboard, this page is meant for administration support"
-
-# settings:
-#   icon: "fas fa-tools"
-#   title: "Dashboard: Settings"
-#   text: "Welcome to the dashboard, this page is meant for modifying settings"
-#   success: "You settings have been successfully modified."
-
+# CRUD controllers
 crud:
   user:
     singular: "User"
     plural: "Users"
+    # title: "User page"
+    # text: "This page is meant for user administration"
 
     group:
       singular: "Group"
       plural: "Groups"
+      # title: "User Edit TITLE"
+      # text: "User Edit TEXT"
+      # help: "User Edit HELP"
+    thread:
+      singular: "Thread"
+      plural: "Threads"
+      # title: "User Edit TITLE"
+      # text: "User Edit TEXT"
+      # help: "User Edit HELP"
+    permission:
+      singular: "Permission"
+      plural: "Permissions"
+    token:
+      singular: "Token"
+      plural: "Tokens"
+    notification:
+      singular: "Notification"
+      plural: "Notifications"
+
+    penalty:
+      singular: "Penalty"
+      plural: "Penalties"
+    log:
+      singular: "Log"
+      plural: "Logs"
+
+    merchant:
+      singular: "Merchant"
+      plural: "Merchants"
+    partner:
+      singular: "Partner"
+      plural: "Partners"
+    artist:
+      singular: "Artist"
+      plural: "Artists"
+    customer:
+      singular: "Customer"
+      plural: "Customers"
+
+  thread:
+    singular: "Thread"
+    plural: "Threads"
+
+    mention:
+      singular: "Mention"
+      plural: "Mentions"
+    tag:
+      singular: "Tag"
+      plural: "Tags"
+    like:
+      singular: "Like"
+      plural: "Likes"
+
+  sitemap:
+    widget:
+      singular: "Widget"
+      plural: "Widgets"
+
+      page:
+        singular: "Page"
+        plural: "Pages"
+
+      hyperlink:
+        singular: "Hyperline"
+        plural: "Hyperlinks"
+
+      attachment:
+        singular: "Attachment"
+        plural: "Attachments"
+
+      menu:
+        singular: "Menu"
+        plural: "Menu"
+
+    widgetslot:
+      singular: Widget Slot
+      plural: "Widget Slots"
+
+      social:
+        singular: "Social Media"
+        plural: Social Media
+
+    setting:
+      singular: "Setting"
+      plural: "Settings"
+
+  marketplace:
+    store:
+      singular: "Store"
+      plural: "Stores"
+    taxonomy:
+      singular: "Taxonomy"
+      plural: "Taxonomies"
+    cart:
+      singular: "Cart"
+      plural: "Carts"
+
+    order:
+      order:
+        singular: "Order"
+        plural: "Orders"
+
+      shipment:
+        singular: "Shipment"
+        plural: "Shipments"
+
+      payment:
+        singular: "Payment"
+        plural: "Payments"
+
+    product:
+      productreview:
+        singular: "Feedback"
+        plural: "Feedbacks"
+      product:
+        singular: "Product"
+        plural: "Products"
+
+    sales:
+      country:
+        singular: "Country"
+        plural: "Countries"
+
+      currency:
+        singular: "Currency"
+        plural: "Currencies"
+
+      promotion:
+        singular: "Promotion"
+        plural: "Promotions"
+
+      taxrate:
+        singular: "Tax"
+        plural: "Taxes"

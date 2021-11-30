@@ -243,6 +243,7 @@
                 display: block;
             }
             
+            .content-panel-body.with-background,
             .content-panel-body.without-footer, .content-panel-footer
             {
                 padding: 1em !important;
@@ -285,7 +286,7 @@
                 border-radius: 1em;
             }
 
-            .content-panel-body.without-footer, .content-panel-footer { border: none; }
+            {# .content-panel-body.without-footer, .content-panel-footer { border: none; } #}
             .content-panel-footer { border: var(--border-width) var(--border-style) var(--border-color) !important; }
 
             @media (min-width: 992px) {
