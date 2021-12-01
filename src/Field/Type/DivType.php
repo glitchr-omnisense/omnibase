@@ -34,7 +34,7 @@ class DivType extends AbstractType implements DataTransformerInterface
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'div';
     }

@@ -40,12 +40,12 @@ class ImageType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'imageupload';
     }
 
-    public function getParent()
+    public function getParent() : ?string
     {
         return FileType::class;
     }

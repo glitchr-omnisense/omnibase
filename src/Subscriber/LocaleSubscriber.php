@@ -13,7 +13,7 @@ class LocaleSubscriber implements EventSubscriberInterface
     {
         $this->localeProvider = $localeProvider;
     }
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
          /* 
           * Must be set prior SecuritySubscriber and 

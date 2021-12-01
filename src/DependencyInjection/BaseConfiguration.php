@@ -9,12 +9,12 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 class BaseConfiguration implements ConfigurationInterface
 {
     private $treeBuilder;
-    public function getTreeBuilder() { return $this->treeBuilder; }
+    public function getTreeBuilder() : TreeBuilder { return $this->treeBuilder; }
 
     /**
      * @inheritdoc
      */
-    public function getConfigTreeBuilder()
+    public function getConfigTreeBuilder(): TreeBuilder
     {
         $this->treeBuilder = new TreeBuilder('base');
         $rootNode = $this->treeBuilder->getRootNode();

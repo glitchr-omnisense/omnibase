@@ -23,12 +23,12 @@ class AvatarType extends AbstractType
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'avatar';
     }
 
-    public function getParent()
+    public function getParent() : ?string
     {
         return ImageType::class;
     }

@@ -47,7 +47,7 @@ class UploaderEntitiesCommand extends Command
         $this->addOption('delete-orphans', false, InputOption::VALUE_NONE, 'Do you want to delete orphans ?');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$output instanceof ConsoleOutputInterface)
             throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');

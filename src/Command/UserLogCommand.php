@@ -43,7 +43,7 @@ class UserLogCommand extends Command
         $this->addOption('clear-all', null, InputOption::VALUE_NONE, 'Should I clear them all?');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$output instanceof ConsoleOutputInterface)
             throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');

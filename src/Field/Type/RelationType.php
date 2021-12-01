@@ -11,7 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class RelationType extends EntityType
 {
-    public function getParent()
+    public function getParent() : ?string
     {
         return SelectType::class;
     }

@@ -62,7 +62,7 @@ class StateType extends AbstractType implements SelectTypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getParent()
+    public function getParent() : ?string
     {
         return SelectType::class;
     }
@@ -70,7 +70,7 @@ class StateType extends AbstractType implements SelectTypeInterface
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'status';
     }

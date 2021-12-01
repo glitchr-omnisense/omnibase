@@ -19,7 +19,7 @@ class BaseSubscriber implements EventSubscriberInterface
         $this->autoAppend = $this->baseService->getParameterBag("base.twig.autoappend");
     }
 
-    public static function getSubscribedEvents()
+    public static function getSubscribedEvents(): array
     {
         return [
             ConsoleEvents::COMMAND => ['onConsoleCommand'],

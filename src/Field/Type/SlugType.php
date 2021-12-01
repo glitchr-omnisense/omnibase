@@ -59,7 +59,7 @@ final class SlugType extends AbstractType
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
     }
 
-    public function getParent(): string
+    public function getParent() : ?string
     {
         return TextType::class;
     }

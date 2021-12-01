@@ -38,7 +38,7 @@ class EntityType extends AbstractType implements DataMapperInterface
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'entity2';
     }

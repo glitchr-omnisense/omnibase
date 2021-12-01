@@ -30,7 +30,7 @@ class ThreadPublishableCommand extends Command
         $this->addOption('show',    null, InputOption::VALUE_NONE, 'Should I show you the publishable ?');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (!$output instanceof ConsoleOutputInterface)
             throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');

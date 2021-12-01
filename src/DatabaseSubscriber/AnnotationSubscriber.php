@@ -23,7 +23,7 @@ class AnnotationSubscriber implements EventSubscriber {
         $this->annotationReader = $annotationReader;
     }
 
-    public function getSubscribedEvents()
+    public function getSubscribedEvents(): array
     {
         return [
             Events::loadClassMetadata,
