@@ -224,8 +224,9 @@ trait BaseSymfonyTrait
         $controller = explode("::", $array[0])[0];
 
         $parents = [];
+
         $parent = $controller;
-        while(( $parent = get_parent_class($parent) ))
+        while(class_exists($parent) && ( $parent = get_parent_class($parent)))
             $parents[] = $parent;
 
         $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
