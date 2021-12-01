@@ -19,7 +19,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class LoginType extends AbstractType
 {
-    public function getBlockPrefix() { return "login"; }
+    public function getBlockPrefix() : string { return "login"; }
 
     public function configureOptions(OptionsResolver $resolver)
     {

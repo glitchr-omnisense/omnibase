@@ -13,7 +13,7 @@ abstract class EnumType extends Type
         return NamingStrategy::camelToSnakeCase(end($array));
     }
 
-    public function getName() { return self::getStaticName(); }
+    public function getName() : string { return self::getStaticName(); }
     public function getPermittedValues() { 
 
         $refl = new \ReflectionClass(get_called_class());
@@ -25,16 +25,16 @@ abstract class EnumType extends Type
         return $permittedValues;
     }
     
-    public function requiresSQLCommentHint(AbstractPlatform $platform) { return true; }
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function requiresSQLCommentHint(AbstractPlatform $platform) : bool { return true; }
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
 
         return "ENUM(".implode(", ", $permittedValues).")";
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform) { return $value; }
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform) : mixed { return $value; }
+    public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed 
     {
         if (!in_array($value, $this->getPermittedValues())) {
             throw new \InvalidArgumentException("Invalid '".$this->name."' value.");

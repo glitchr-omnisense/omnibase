@@ -53,10 +53,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 {
     use BaseTrait;
 
-    // TODO: Remove the two next methods in S6.0
-    public function getUsername() { return $this->getUserIdentifier(); }
-    public function getSalt() { return null; }
-    // TODO-END
+    // DEPRECATED: These two methods should soon be removed  in S6.0
+    public function getUsername() : string { return $this->getUserIdentifier(); }
+    public function getSalt(): ?string { return null; }
+    // DEPRECATED-END
 
     public static $property = "email";
     public function getUserIdentifier(): string { return $this->email; }

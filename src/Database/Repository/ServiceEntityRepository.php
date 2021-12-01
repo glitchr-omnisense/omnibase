@@ -163,7 +163,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return [$method, $by];
     }
 
-    public function __call($method, $arguments)
+    public function __call($method, $arguments) : mixed
     {
         // Parse method and call it
         list($method, $arguments) = $this->parseMethod($method, $arguments);

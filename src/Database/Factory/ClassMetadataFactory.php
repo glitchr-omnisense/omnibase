@@ -88,7 +88,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function initialize()
+    protected function initialize() : void
     {
         $this->driver      = $this->em->getConfiguration()->getMetadataDriverImpl();
         $this->evm         = $this->em->getEventManager();
@@ -98,11 +98,10 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function onNotFoundMetadata($className)
+    protected function onNotFoundMetadata($className) : ?ClassMetadata
     {
-        if (! $this->evm->hasListeners(Events::onClassMetadataNotFound)) {
-            return;
-        }
+        if (! $this->evm->hasListeners(Events::onClassMetadataNotFound))
+            return null;
 
         $eventArgs = new OnClassMetadataNotFoundEventArgs($className, $this->em);
 
@@ -114,7 +113,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function doLoadMetadata($class, $parent, $rootEntityFound, array $nonSuperclassParents)
+    protected function doLoadMetadata($class, $parent, $rootEntityFound, array $nonSuperclassParents) : void
     {
         /** @var ClassMetadata $class */
         /** @var ClassMetadata $parent */
@@ -302,7 +301,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function newClassMetadataInstance($className)
+    protected function newClassMetadataInstance($className) : ClassMetadata
     {
         return new ClassMetadata($className, $this->em->getConfiguration()->getNamingStrategy());
     }
@@ -716,7 +715,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function wakeupReflection(ClassMetadataInterface $class, ReflectionService $reflService)
+    protected function wakeupReflection(ClassMetadataInterface $class, ReflectionService $reflService) : void
     {
         assert($class instanceof ClassMetadata);
         $class->wakeupReflection($reflService);
@@ -725,7 +724,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function initializeReflection(ClassMetadataInterface $class, ReflectionService $reflService)
+    protected function initializeReflection(ClassMetadataInterface $class, ReflectionService $reflService) : void
     {
         assert($class instanceof ClassMetadata);
         $class->initializeReflection($reflService);
@@ -734,7 +733,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function getFqcnFromAlias($namespaceAlias, $simpleClassName)
+    protected function getFqcnFromAlias($namespaceAlias, $simpleClassName) : string
     {
         /** @psalm-var class-string */
         return $this->em->getConfiguration()->getEntityNamespace($namespaceAlias) . '\\' . $simpleClassName;
@@ -743,7 +742,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function getDriver()
+    protected function getDriver() : MappingDriver
     {
         return $this->driver;
     }
@@ -751,7 +750,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function isEntity(ClassMetadataInterface $class)
+    protected function isEntity(ClassMetadataInterface $class) : bool
     {
         return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
     }
@@ -772,7 +771,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function loadMetadata($name)
+    protected function loadMetadata($name) : array
     {
         $loadedMetadata = parent::loadMetadata($name);
 

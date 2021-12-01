@@ -26,7 +26,7 @@ trait SingletonTrait
         return self::$_instance;
     }
 
-    protected function __clone() { }
-    protected function __sleep() { }
-    protected function __wakeup() { }
+    public function __clone()  { throw new \Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected"); }
+    public function __sleep()  { throw new \Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected"); }
+    public function __wakeup() { throw new \Exception("\"". get_called_class(). "\" follows a singleton pattern. This method is protected"); }
 }

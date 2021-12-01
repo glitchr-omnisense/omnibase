@@ -58,11 +58,11 @@ abstract class ConstraintEntity extends Constraint
             self::camelToSnakeCase($constraintName);
     }
 
-    public function getRequiredOptions()
+    public function getRequiredOptions() : array
     {
         return ['fields'];
     }
-    public function getDefaultOption()
+    public function getDefaultOption() : ?string
     {
         return 'fields';
     }
@@ -70,7 +70,7 @@ abstract class ConstraintEntity extends Constraint
     /**
      * {@inheritdoc}
      */
-    public function getTargets()
+    public function getTargets() : string|array
     {
         return self::CLASS_CONSTRAINT;
     }

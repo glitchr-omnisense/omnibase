@@ -42,7 +42,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return !$this->entityManager->getMetadataFactory()->isTransient($class);
     }
 
-    public function create(string $type = 'Symfony\Component\Form\Extension\Core\Type\FormType', $data = null, array $options = [])
+    public function create(string $type = 'Symfony\Component\Form\Extension\Core\Type\FormType', $data = null, array $options = []) : FormInterface
     {
         // I recommend not using entity data..
         // NB: https://blog.martinhujer.cz/symfony-forms-with-request-objects/

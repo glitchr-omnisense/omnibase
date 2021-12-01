@@ -18,9 +18,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
 {
-    // TODO: Remove the two next methods in S6.0
-    public function loadUserByUsername(string $email) { return $this->loadUserByIdentifier($email); }
-    // TODO-END
+    // DEPRECATED: These two methods should soon be removed  in S6.0
+    public function loadUserByUsername(string $email) : ?UserInterface { return $this->loadUserByIdentifier($email); }
+    // DEPRECATED-END
 
     public function findByRoles(string $role)
     {
@@ -34,7 +34,7 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         return $qb->getQuery()->getResult();
     }
 
-    public function loadUserByIdentifier($email) {
+    public function loadUserByIdentifier($email) : ?UserInterface {
 
         return $this->getEntityManager()->createQuery(
             'SELECT u

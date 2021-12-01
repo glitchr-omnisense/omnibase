@@ -13,7 +13,7 @@ abstract class SetType extends Type
         return NamingStrategy::camelToSnakeCase(end($array));
     }
 
-    public function getName() { return self::getStaticName(); }
+    public function getName() : string { return self::getStaticName(); }
     public function getPermittedValues() { 
 
         $refl = new \ReflectionClass(get_called_class());
@@ -25,21 +25,21 @@ abstract class SetType extends Type
         return $permittedValues;
     }
     
-    public function requiresSQLCommentHint(AbstractPlatform $platform) { return true; }
+    public function requiresSQLCommentHint(AbstractPlatform $platform) : bool { return true; }
 
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
-                
         return "SET(".implode(", ", $permittedValues).")";
     }
 
-    public function convertToPHPValue($value, AbstractPlatform $platform) { 
+    public function convertToPHPValue($value, AbstractPlatform $platform) : mixed
+    { 
         $values = explode(",", $value);
         return array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
     }
     
-    public function convertToDatabaseValue($values, AbstractPlatform $platform)
+    public function convertToDatabaseValue($values, AbstractPlatform $platform) : mixed
     {
         $values = array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
         return implode(",", $values);
