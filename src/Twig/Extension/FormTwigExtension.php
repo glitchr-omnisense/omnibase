@@ -3,7 +3,6 @@
 namespace Base\Twig\Extension;
 
 use Base\Form\FormProxy;
-use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -16,7 +15,7 @@ final class FormTwigExtension extends AbstractExtension
         $this->formProxy = $formProxy;
     }
 
-    public function getFunctions()
+    public function getFunctions() : array
     {
         return [new TwigFunction('form_proxy', [$this, 'getForm'])];
     }

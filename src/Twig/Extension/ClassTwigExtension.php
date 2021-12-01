@@ -2,16 +2,8 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\BaseService;
-use Base\Controller\BaseController;
-use Base\Entity\User\Notification;
-use Exception;
-use Symfony\Contracts\Translation\TranslatorInterface;
-
-use Twig\Environment;
 use Twig\TwigFunction;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 
 /**
  * @author Marco Meyer <marco.meyerconde@gmail.com>
@@ -23,7 +15,7 @@ use Symfony\Component\DependencyInjection\Container;
 
 final class ClassTwigExtension extends AbstractExtension
 {
-    public function getFunctions()
+    public function getFunctions() : array
     {
         return [
             new TwigFunction('get_short_class', [$this, 'getShortClass']),

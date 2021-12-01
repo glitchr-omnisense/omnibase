@@ -2,13 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Form\FormProxy;
-use Base\Model\PaginationInterface;
-use Base\Service\BaseService;
 use Base\Service\Breadgrinder;
-use Base\Service\PaginatorInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -21,7 +15,7 @@ final class BreadgrinderTwigExtension extends AbstractExtension
         $this->breadgrinder = $breadgrinder;
     }
 
-    public function getFunctions()
+    public function getFunctions() : array
     {
         return [
             new TwigFunction('render_breadcrumb', [$this, 'renderBreadcrumb'], ['is_safe' => ['all']]),

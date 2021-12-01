@@ -33,7 +33,7 @@ final class BaseTwigExtension extends AbstractExtension
             $this->projectDir = $this->baseService->getProjectDir();
     }
 
-    public function getFilters()
+    public function getFilters() : array
     {
         return [
             new TwigFilter('time',          [$this, 'time']),

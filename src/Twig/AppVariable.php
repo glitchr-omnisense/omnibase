@@ -2,7 +2,6 @@
 
 namespace Base\Twig;
 
-use BadMethodCallException;
 use Base\Service\BaseSettings;
 use Base\Traits\ProxyTrait;
 

@@ -2,12 +2,8 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Form\FormProxy;
 use Base\Model\PaginationInterface;
 use Base\Service\BaseService;
-use Base\Service\PaginatorInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -20,7 +16,7 @@ final class PaginatorTwigExtension extends AbstractExtension
         $this->twig = $twig;
     }
 
-    public function getFunctions()
+    public function getFunctions() : array
     {
         return [
             new TwigFunction('paginator',                [$this, 'getSlidingControl'], ['is_safe' => ['all']]),

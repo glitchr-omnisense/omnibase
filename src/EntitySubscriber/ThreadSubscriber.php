@@ -23,7 +23,7 @@ class ThreadSubscriber implements EventSubscriber
         $this->events = [];
     }
 
-    public function getSubscribedEvents()
+    public function getSubscribedEvents() : array
     {
         return [
             Events::postUpdate,

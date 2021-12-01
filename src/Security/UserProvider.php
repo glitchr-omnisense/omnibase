@@ -13,15 +13,15 @@ use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
 {
-    // TODO: Remove the two next methods in S6.0
-    public function loadUserByUsername($response) { return $this->loadUserByIdentifier($response); }
-    // TODO-END
+    // DEPRECATED: These two methods should soon be removed  in S6.0
+    public function loadUserByUsername($response) : UserInterface { return $this->loadUserByIdentifier($response); }
+    // DEPRECATED-END
 
     /**
      * {@inheritdoc}
      */
 
-    public function loadUserByIdentifier($response)
+    public function loadUserByIdentifier($response) : UserInterface
     {
         $data = $response->getData();
 
@@ -70,7 +70,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     /**
      * Tells Symfony to use this provider for this User class.
      */
-    public function supportsClass(string $class)
+    public function supportsClass(string $class) : bool
     {
         return User::class === $class || is_subclass_of($class, User::class);
     }

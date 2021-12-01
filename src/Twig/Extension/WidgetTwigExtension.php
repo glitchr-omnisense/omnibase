@@ -2,27 +2,16 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Service\BaseService;
-use Base\Controller\BaseController;
-use Base\Entity\User\Notification;
 use Base\Service\WidgetProviderInterface;
-use Exception;
-use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Twig\Environment;
 use Twig\TwigFunction;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 
 /**
  * @author Marco Meyer <marco.meyerconde@gmail.com>
  *
  */
-
-use Twig\Extra\Intl\IntlExtension;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 final class WidgetTwigExtension extends AbstractExtension
 {
@@ -33,7 +22,7 @@ final class WidgetTwigExtension extends AbstractExtension
         $this->twig = $twig;
     }
 
-    public function getFunctions()
+    public function getFunctions() : array
     {
         return [
             new TwigFunction("render_widget", [$this, 'render_widget'], ['needs_context' => true])

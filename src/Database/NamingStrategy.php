@@ -23,7 +23,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
      */
 
     private $uniqueTableName = [];
-    public function classToTableName($classNameWithNamespace)
+    public function classToTableName($classNameWithNamespace) : string
     {
         //
         // Invariant table name if not a class
@@ -90,7 +90,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function propertyToColumnName($propertyName, $classNameWithNamespace = null)
+    public function propertyToColumnName($propertyName, $classNameWithNamespace = null) :string
     {
         return lcfirst($propertyName);
     }
@@ -98,7 +98,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $classNameWithNamespace = null, $embeddedClassName = null)
+    public function embeddedFieldToColumnName($propertyName, $embeddedColumnName, $classNameWithNamespace = null, $embeddedClassName = null) : string
     {
         return lcfirst($propertyName).'_'.lcfirst($embeddedColumnName);
     }
@@ -106,7 +106,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function referenceColumnName()
+    public function referenceColumnName() : string
     {
         return 'id';
     }
@@ -114,7 +114,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function joinColumnName($propertyName, $classNameWithNamespace = null)
+    public function joinColumnName($propertyName, $classNameWithNamespace = null) : string
     {
         return lcfirst($propertyName) . '_' . lcfirst($this->referenceColumnName());
     }
@@ -122,7 +122,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function joinTableName($sourceEntity, $targetEntity, $propertyName = null)
+    public function joinTableName($sourceEntity, $targetEntity, $propertyName = null) : string
     {
         return lcfirst($this->classToTableName($sourceEntity)) . '_' .
                lcfirst($this->classToTableName($propertyName ?? $targetEntity));
@@ -131,7 +131,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     /**
      * {@inheritdoc}
      */
-    public function joinKeyColumnName($entityName, $referencedColumnName = null)
+    public function joinKeyColumnName($entityName, $referencedColumnName = null) : string
     {
         return lcfirst($this->classToTableName($entityName)) . '_' .
                lcfirst(($referencedColumnName ?: $this->referenceColumnName()));
