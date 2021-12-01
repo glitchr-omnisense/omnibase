@@ -48,6 +48,7 @@
         "twig/inky-extra": "^3.0",
         "twig/cssinliner-extra": "^3.0",
 
+        "sensio/framework-extra-bundle": "^5.4",
 	"nelmio/security-bundle": "^2.0",
         "scheb/2fa": "^5.0",
         "scheb/2fa-email": "^5.0",
