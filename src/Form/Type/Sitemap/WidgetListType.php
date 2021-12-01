@@ -65,7 +65,8 @@ class WidgetListType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($options) {
 
             $form = $event->getForm();
-
+            $data = $event->getData();
+            dump($data);
             $formattedFields = $this->getFormattedData($options["fields"]);
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
@@ -77,7 +78,6 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
                 $slotLabel = ($slot ? $slot->getLabel() : null);
                 $slotHelp  = ($slot ? $slot->getHelp()  : null);
-                $slotValue = ($slot ? $slot->getName() : null);
 
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
@@ -112,6 +112,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 $fieldOptions["multiple"] = false;
                 $fieldOptions["data_class"] = Widget::class;
                 
+                dump($formattedField);
                 $form->add($formattedField, $class, $fieldOptions);
             }
 

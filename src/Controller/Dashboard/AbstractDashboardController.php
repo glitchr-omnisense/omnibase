@@ -15,11 +15,11 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use App\Entity\Thread\Tag;
 use App\Entity\Sitemap\WidgetSlot;
+use App\Entity\Sitemap\WidgetSlot\Hyperpattern;
 
 use App\Entity\Sitemap\Setting;
 use App\Entity\Sitemap\Widget;
 use App\Entity\User\Notification;
-use App\Entity\Sitemap\WidgetSlot\Social;
 use App\Entity\Sitemap\Widget\Attachment;
 use App\Entity\Sitemap\Widget\Hyperlink;
 use App\Entity\Sitemap\Widget\Menu;
@@ -52,7 +52,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 use Base\Traits\DashboardWidgetTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -351,7 +350,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if($section) $section->setWidth(2);
 
             $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
-                WidgetItem::linkToCrud(Social::class    ),
+                WidgetItem::linkToCrud(Hyperpattern::class    ),
                 WidgetItem::linkToCrud(Setting::class   ),
                 WidgetItem::linkToCrud(WidgetSlot::class),
                 WidgetItem::linkToCrud(Widget::class    ),

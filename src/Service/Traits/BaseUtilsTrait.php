@@ -84,7 +84,7 @@ trait BaseUtilsTrait
 
     public static function camelToSnakeCase($input)
     {
-        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));
+        return strtolower(str_replace("._", ".", preg_replace('/(?<!^)[A-Z]/', '_$0', $input)));
     }
     public static function snakeToCamelCase($input)
     {

@@ -93,7 +93,6 @@ class EntityType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        // $view->vars["required"] = $options["required"];
         $view->vars["multiple"] = $options["multiple"];
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"] = $options["allow_add"];

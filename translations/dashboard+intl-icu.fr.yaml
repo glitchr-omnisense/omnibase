@@ -82,19 +82,6 @@ crud:
       singular: "Historique"
       plural: "Historiques"
 
-    merchant:
-      singular: "Marchant"
-      plural: "Marchants"
-    partner:
-      singular: "Partenaire"
-      plural: "Partenaires"
-    artist:
-      singular: "Artiste"
-      plural: "Artistes"
-    customer:
-      singular: "Client"
-      plural: "Clients"
-
   thread:
     singular: "Fil"
     plural: "Fils"
@@ -119,74 +106,25 @@ crud:
         plural: "Pages"
 
       hyperlink:
-        singular: "Lien Hypertexte"
-        plural: "Liens Hypertexte"
+        singular: "Lien hypertexte"
+        plural: "Liens hypertexte"
 
       attachment:
-        singular: "Pièce Jointe"
-        plural: "Pièces Jointes"
+        singular: "Pièce jointe"
+        plural: "Pièces jointes"
 
       menu:
         singular: "Menu"
         plural: "Menu"
 
-    widgetslot:
-      singular: Widget Slot
-      plural: "Widget Slots"
+    widget_slot:
+      singular: Widget slot
+      plural: "Widget slots"
 
-      social:
-        singular: "Réseau Social"
-        plural: Réseaux Sociaux
+      hyperpattern:
+        singular: "Modèle de liens"
+        plural: "Modèles de liens"
 
     setting:
       singular: "Paramètre"
       plural: "Paramètres"
-
-  marketplace:
-    store:
-      singular: "Magasin"
-      plural: "Magasins"
-    taxonomy:
-      singular: "Taxonomie"
-      plural: "Taxonomies"
-    cart:
-      singular: "Panier"
-      plural: "Paniers"
-
-    order:
-      order:
-        singular: "Commande"
-        plural: "Commandes"
-
-      shipment:
-        singular: "Expédition"
-        plural: "Expéditions"
-
-      payment:
-        singular: "Paiement"
-        plural: "Paiements"
-
-    product:
-      productreview:
-        singular: "Avis"
-        plural: "Avis"
-      product:
-        singular: "Produit"
-        plural: "Produits"
-
-    sales:
-      country:
-        singular: "Pays"
-        plural: "Pays"
-
-      currency:
-        singular: "Monnaie"
-        plural: "Monnaies"
-
-      promotion:
-        singular: "Promotion"
-        plural: "Promotions"
-
-      taxrate:
-        singular: "Taxe"
-        plural: "Taxes"

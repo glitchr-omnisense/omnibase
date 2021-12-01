@@ -24,6 +24,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public static function getEntityFqcn(): string 
     {
+        if(get_called_class() == "HyperpatternCrudController") dump("HEHO !");
+
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
         $entityFqcn = preg_replace('/\\\Controller\\\Dashboard\\\Crud\\\/', "\\Entity\\", $entityFqcn);
 
@@ -33,12 +35,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $appCrudController = preg_replace("/^Base/", 'App', get_called_class());
             if (!class_exists($appCrudController)) {
 
-                self::$crudController[get_called_class()] = $appEntityFqcn;
+                self::$crudController[$appEntityFqcn] = get_called_class();
                 return $appEntityFqcn;
             }
         }
 
-        self::$crudController[get_called_class()] = $entityFqcn;
+        self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
     }
 
@@ -66,7 +68,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getTranslationPrefix()
     {
         $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', "Crud\\", self::getEntityFqcn());
-        return strtolower(str_replace("\\", ".", $entityFqcn));
+        return BaseService::camelToSnakeCase(str_replace("\\", ".", $entityFqcn));
     }
 
     public function configureActions(Actions $actions): Actions

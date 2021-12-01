@@ -5,25 +5,26 @@ namespace Base\Entity\Sitemap\WidgetSlot;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Sitemap\WidgetSlot;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Sitemap\WidgetSlot\SocialRepository;
+use Base\Repository\Sitemap\WidgetSlot\HyperpatternRepository;
 
 /**
- * @ORM\Entity(repositoryClass=SocialRepository::class)
- * @DiscriminatorEntry( value = "social" )
+ * @ORM\Entity(repositoryClass=HyperpatternRepository::class)
+ * @DiscriminatorEntry( value = "hyperpattern" )
  */
 
-class Social extends WidgetSlot
+class Hyperpattern extends WidgetSlot
 {
-    public function __construct(string $name = "unnamed", string $icon = "fas fa-share-alt", string $urlPattern = "{0}")
+    public function __construct(string $name = "website", string $icon = "fas fa-laptop", string $urlPattern = "{0}")
     {
         $this->setName($name);
         $this->setIcon($icon);
 
         $this->setUrlPattern($urlPattern);
-        $this->setAttribute("class", "widget-social");
+        $this->setAttribute("class", "widget-hyperlink");
     }
 
     /**
@@ -39,13 +40,14 @@ class Social extends WidgetSlot
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Slugify(separator=".")
      */
-    protected $socialName;
-    public function getSocialName(): string { return $this->socialName; }
-    public function setSocialName(string $socialName): self
+    protected $patternName;
+    public function getPatternName(): string { return $this->patternName; }
+    public function setPatternName(string $patternName): self
     {
-        parent::setName("app.social.".$socialName);
-        $this->socialName = $socialName;
+        parent::setName("app.hyperlink.".$patternName);
+        $this->patternName = $patternName;
 
         return $this;
     }
