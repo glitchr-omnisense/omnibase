@@ -83,7 +83,7 @@ trait SelectConfiguratorTrait
         $icons = $field->getCustomOption(SelectField::OPTION_ICONS)
                 ?? $field->getFormTypeOption("choice_icons") ?? [];
 
-        if($icons === null && method_exists($field->getFormType(), "getIcons"))
+        if($icons === [] && method_exists($field->getFormType(), "getIcons"))
             $icons = $field->getFormType()::getIcons();
 
         foreach($icons as $key => $icon) {

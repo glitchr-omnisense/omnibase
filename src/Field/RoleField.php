@@ -21,7 +21,7 @@ final class RoleField implements FieldInterface, SelectFieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(RoleType::class)
-            ->setTemplatePath('@EasyAdmin/crud/field/role.html.twig');
-//            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+            // ->setTemplatePath('@EasyAdmin/crud/field/role.html.twig');
+           ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
     }
 }
