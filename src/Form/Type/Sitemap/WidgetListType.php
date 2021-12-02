@@ -86,7 +86,8 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 $widgetOptions["multiple"] = $options["widgets"][$widget]["multiple"] ?? false;
 
                 $widgetOptions["data_class"] = null;
-                $widgetOptions["select2"] = $options["select2"] ?? [];
+                $widgetOptions["required"]   = $options["widgets"][$widget]["required"] ?? false;
+                $widgetOptions["select2"]    = $options["select2"] ?? [];
 
                 $widgetOptions["choices"] = $data ?? [];
                 $widgetOptions["choice_filter"] =  $options["widgets"][$widget]["choice_filter"] ?? null;

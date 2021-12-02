@@ -25,34 +25,13 @@ final class EntityConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        if (null !== $entryTypeFqcn = $field->getCustomOptions()->get(EntityField::OPTION_ENTRY_TYPE)) {
-            $field->setFormTypeOption('entry_type', $entryTypeFqcn);
-        }
-
-        $autocompletableFormTypes = [CountryType::class, CurrencyType::class, LanguageType::class, LocaleType::class, TimezoneType::class];
-        if (\in_array($entryTypeFqcn, $autocompletableFormTypes, true)) {
-            $field->setFormTypeOption('entry_options.attr.data-ea-widget', 'ea-autocomplete');
-        }
-
         $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(EntityField::OPTION_ALLOW_ADD));
         $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(EntityField::OPTION_ALLOW_DELETE));
-        $field->setFormTypeOptionIfNotSet('by_reference', false);
-        $field->setFormTypeOptionIfNotSet('delete_empty', true);
 
-        // TODO: check why this label (hidden by default) is not working properly
-        // (generated values are always the same for all elements)
-        $field->setFormTypeOptionIfNotSet('entry_options.label', $field->getCustomOptions()->get(EntityField::OPTION_SHOW_ENTRY_LABEL));
-
-        // collection items range from a simple <input text> to a complex multi-field form
-        // the 'entryIsComplex' setting tells if the collection item is so complex that needs a special
-        // rendering not applied to simple collection items
-        if (null === $field->getCustomOption(EntityField::OPTION_ENTRY_IS_COMPLEX)) {
-            $definesEntryType = null !== $entryTypeFqcn = $field->getCustomOption(EntityField::OPTION_ENTRY_TYPE);
-            $isSymfonyCoreFormType = null !== u($entryTypeFqcn ?? '')->indexOf('Symfony\Component\Form\Extension\Core\Type');
-            $isComplexEntry = $definesEntryType && !$isSymfonyCoreFormType;
-
-            $field->setCustomOption(EntityField::OPTION_ENTRY_IS_COMPLEX, $isComplexEntry);
-        }
+        if($field->getCustomOptions()->get(EntityField::OPTION_RENDER_FORMAT) == "select2")
+            $field->setFormTypeOptionIfNotSet('select2', true);
+        elseif($field->getCustomOptions()->get(EntityField::OPTION_RENDER_FORMAT) == "dropzone")
+            $field->setFormTypeOptionIfNotSet('dropzone', true);
 
         $field->setFormattedValue($this->formatCollection($field, $context));
     }

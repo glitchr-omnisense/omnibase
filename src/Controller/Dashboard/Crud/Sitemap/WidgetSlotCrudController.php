@@ -6,10 +6,16 @@ use Base\Field\TranslatableField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Entity\Sitemap\WidgetSlot;
 
 class WidgetSlotCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon() { return "fas fa-th-large"; } 
+
+    public function createEntity(string $entityFqcn)
+    {
+        return new WidgetSlot("");
+    }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {

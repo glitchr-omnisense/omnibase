@@ -63,14 +63,17 @@ class WidgetSlot implements TranslatableInterface
     protected $name;
     public function getName(): string 
     { 
-        if(!self::__PREFIX__) return $this->name;
-        return strpos($this->name, self::__PREFIX__) === 0 ? 
-               substr($this->name, strlen(self::__PREFIX__)) : $this->name;
+       return $this->name;
+        return strpos($this->name, get_called_class()::__PREFIX__) === 0 ? 
+               substr($this->name, strlen(get_called_class()::__PREFIX__)+1) : $this->name;
     }
 
     public function setName(string $name): self
     {
-        $this->name = self::__PREFIX__ . $name;
+        $name = strpos($name, get_called_class()::__PREFIX__) === 0 ? 
+                substr($name, strlen(get_called_class()::__PREFIX__)+1) : $name;
+        
+        $this->name = get_called_class()::__PREFIX__ .".". $name;
         return $this;
     }
 

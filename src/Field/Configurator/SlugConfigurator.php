@@ -33,9 +33,6 @@ final class SlugConfigurator implements FieldConfiguratorInterface
         if (null === $targetFieldName = $field->getCustomOption(SlugField::OPTION_TARGET_FIELD_NAME)) {
             throw new \RuntimeException(sprintf('The "%s" field must define the name of the field whose contents are used for the slug using the "setTargetFieldName()" method.', $field->getProperty()));
         }
-
-        // $field->setFormTypeOption('separator', $separator);
-        // dump($field, $entityDto);
         
         $field->setFormTypeOption('target', $targetFieldName);
         if (null !== $unlockConfirmationMessage = $field->getCustomOption(SlugField::OPTION_UNLOCK_CONFIRMATION_MESSAGE)) {

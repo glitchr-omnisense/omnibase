@@ -62,8 +62,10 @@ trait SelectConfiguratorTrait
     private function getChoices(EntityDto $entity, FieldDto $field): array
     {
         $choiceGenerator = $field->getCustomOption(SelectField::OPTION_CHOICES)
-                           ?? $field->getFormTypeOption("choices")
-                           ?? $field->getFormType()::getChoices();
+                           ?? $field->getFormTypeOption("choices");
+
+        if($choiceGenerator === null && method_exists($field->getFormType(), "getChoices"))
+            $choiceGenerator = $field->getFormType()::getChoices();
 
         if (null === $choiceGenerator) {
             return [];
@@ -79,8 +81,10 @@ trait SelectConfiguratorTrait
     private function getIcons(FieldDto $field)
     {
         $icons = $field->getCustomOption(SelectField::OPTION_ICONS)
-                ?? $field->getFormTypeOption("choice_icons")
-                ?? $field->getFormType()::getIcons() ?? [];
+                ?? $field->getFormTypeOption("choice_icons") ?? [];
+
+        if($icons === null && method_exists($field->getFormType(), "getIcons"))
+            $icons = $field->getFormType()::getIcons();
 
         foreach($icons as $key => $icon) {
 
@@ -147,6 +151,7 @@ trait SelectConfiguratorTrait
         $formattedValue = [];
 
         $generator = array_flip(SelectType::array_flatten($choiceGenerator));
+
         $formattedValue[] = $generator[$value] ?? "";
 
         if(array_key_exists($value, $icons))

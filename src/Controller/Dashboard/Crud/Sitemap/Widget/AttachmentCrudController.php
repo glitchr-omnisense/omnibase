@@ -11,23 +11,29 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 use Base\Controller\Dashboard\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionDto;
+use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
+use Symfony\Component\HttpFoundation\HeaderUtils;
+use Symfony\Component\HttpFoundation\Response;
 
 class AttachmentCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon() { return "fas fa-paperclip"; } 
 
-    public function downloadAttachment(ActionDto $actionDto)
+    public function downloadAttachment(AdminContext $context)
     {
-        $entityManager = $this->getDoctrine()->getManagerForClass($actionDto->getEntityFqcn());
-        // foreach ($batchActionDto->getEntityIds() as $id) {
-        //     $user = $entityManager->find($batchActionDto->getEntityFqcn(), $id);
-        //     $user->approve();
-        // }
+        $attachment = $context->getEntity()->getInstance();
 
-        // $entityManager->flush();
-        dump($entityManager);
-        return null;
+        $fileContent = $attachment->getFile()->getContent();
+        $response = new Response($fileContent);
+    
+        $preferredDownloadName = $attachment->getSlug();
+        if(($extension = $attachment->getFile()->guessExtension()))
+            $preferredDownloadName .= ".".$extension;
+
+        $disposition = HeaderUtils::makeDisposition(HeaderUtils::DISPOSITION_ATTACHMENT,$preferredDownloadName);
+        $response->headers->set('Content-Disposition', $disposition);
+
+        return $response;
     }
     
     public function configureActions(Actions $actions): Actions

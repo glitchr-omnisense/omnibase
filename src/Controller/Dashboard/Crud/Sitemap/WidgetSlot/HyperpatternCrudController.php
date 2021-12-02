@@ -17,26 +17,20 @@ class HyperpatternCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield TextField::new("urlPattern")->hideOnIndex();
-        foreach ( ($callbacks["urlPattern"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
         yield FontAwesomeField::new('icon');
         foreach ( ($callbacks["icon"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new("label");
+        yield TextField::new("pattern")->hideOnIndex();
 
-        yield TextField::new('name')->hideOnForm();
+        yield SlugField::new('name')->setTargetFieldName("translations.label");
         foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
             yield $yield;
-    
-        yield SlugField::new('patternName')->hideOnIndex()->setTargetFieldName("translations.label");
-        foreach ( ($callbacks["patternName"] ?? $defaultCallback)() as $yield)
-            yield $yield;
 
-        yield TextField::new('urlPattern');
-        foreach ( ($callbacks["urlPattern"] ?? $defaultCallback)() as $yield)
+        yield TranslatableField::new("label");
+
+        yield TextField::new('pattern');
+        foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 }

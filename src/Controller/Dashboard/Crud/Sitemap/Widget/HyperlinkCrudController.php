@@ -5,7 +5,10 @@ namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 use Base\Field\TranslatableField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
+use Base\Field\EntityField;
+use Base\Field\PatternField;
+use Base\Field\RelationField;
+use Base\Field\SelectField;
 
 class HyperlinkCrudController extends AbstractCrudController
 {
@@ -15,7 +18,13 @@ class HyperlinkCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield UrlField::new('url');
+        yield EntityField::new('hyperpattern');
+        foreach ( ($callbacks["hyperpattern"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+
+        yield PatternField::new('variables')->setPatternFieldName("hyperpattern");
+        foreach ( ($callbacks["variables"] ?? $defaultCallback)() as $yield)
+            yield $yield;
 
         yield TranslatableField::new()->showOnIndex('title')->setRequired(false);
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
