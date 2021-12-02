@@ -58,83 +58,83 @@ bounces_1day: "{0, plural,
 # CRUD controllers
 crud:
   user:
-    singular: "User"
-    plural: "Users"
+    singular: "user"
+    plural: "users"
     # title: "User page"
     # text: "This page is meant for user administration"
 
     group:
-      singular: "Group"
-      plural: "Groups"
+      singular: "group"
+      plural: "groups"
       # title: "User Edit TITLE"
       # text: "User Edit TEXT"
       # help: "User Edit HELP"
     thread:
-      singular: "Thread"
-      plural: "Threads"
+      singular: "thread"
+      plural: "threads"
       # title: "User Edit TITLE"
       # text: "User Edit TEXT"
       # help: "User Edit HELP"
     permission:
-      singular: "Permission"
-      plural: "Permissions"
+      singular: "permission"
+      plural: "permissions"
     token:
-      singular: "Token"
-      plural: "Tokens"
+      singular: "token"
+      plural: "tokens"
     notification:
-      singular: "Notification"
-      plural: "Notifications"
+      singular: "notification"
+      plural: "notifications"
 
     penalty:
-      singular: "Penalty"
-      plural: "Penalties"
+      singular: "penalty"
+      plural: "penalties"
     log:
-      singular: "Log"
-      plural: "Logs"
+      singular: "log"
+      plural: "logs"
 
   thread:
-    singular: "Thread"
-    plural: "Threads"
+    singular: "thread"
+    plural: "threads"
 
     mention:
-      singular: "Mention"
-      plural: "Mentions"
+      singular: "mention"
+      plural: "mentions"
     tag:
-      singular: "Tag"
-      plural: "Tags"
+      singular: "tag"
+      plural: "tags"
     like:
-      singular: "Like"
-      plural: "Likes"
+      singular: "like"
+      plural: "likes"
 
   sitemap:
     widget:
-      singular: "Widget"
-      plural: "Widgets"
+      singular: "widget"
+      plural: "widgets"
 
       page:
-        singular: "Page"
-        plural: "Pages"
+        singular: "page"
+        plural: "pages"
 
       hyperlink:
-        singular: "Hyperlink"
-        plural: "Hyperlinks"
+        singular: "hyperlink"
+        plural: "hyperlinks"
 
       attachment:
-        singular: "Attachment"
-        plural: "Attachments"
+        singular: "attachment"
+        plural: "attachments"
 
       menu:
-        singular: "Menu"
-        plural: "Menu"
+        singular: "menu"
+        plural: "menu"
 
     widget_slot:
-      singular: Widget slot
-      plural: "Widget slots"
+      singular: widget slot
+      plural: "widget slots"
 
       hyperpattern:
-        singular: "Hyperpattern"
-        plural: "Hyperpatterns"
+        singular: "hyperpattern"
+        plural: "hyperpatterns"
 
     setting:
-      singular: "Setting"
-      plural: "Settings"
+      singular: "setting"
+      plural: "settings"
