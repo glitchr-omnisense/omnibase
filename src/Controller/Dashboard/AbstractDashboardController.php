@@ -119,8 +119,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $fields = array_merge([
             "base.settings.logo"                 => ["class" => ImageType::class],
             "base.settings.logo.backoffice"      => ["class" => ImageType::class],
-            "base.settings.title"                => [],
-            "base.settings.slogan"               => [],
+            "base.settings.title"                => ["translatable" => true],
+            "base.settings.slogan"               => ["translatable" => true],
             "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
             "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
@@ -129,7 +129,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.domain"               => ["class" => HiddenType::class, "data" => strtolower($_SERVER['HTTP_HOST'])],
             "base.settings.domain.base_dir"      => ["class" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
             "base.settings.mail"                 => ["class" => EmailType::class],
-            "base.settings.mail.name"            => []
+            "base.settings.mail.name"            => ["translatable" => true]
         ], $fields);
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
