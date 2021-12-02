@@ -1,3 +1,12 @@
+# Dashboard controllers
+controllers:
+  settings:
+    success: "Les paramètres du site ont correctement été modifiés."
+    failed: "Échec de modification des paramètres."
+  widgets:
+    success: "Les widgets du site ont correctement été mis à jour."
+    failed: "Échec de la mise à jour des widgets."
+
 # MENU controller
 My Settings: Mes paramètres
 My Profile: Mon profil

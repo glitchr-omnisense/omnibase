@@ -46,7 +46,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(BaseService::isAssoc($data)) {
+        else if(BaseService::array_is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
@@ -166,6 +166,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             $this->baseSettings->removeCache($field);
         }
 
+        unset($newViewData["valid"]);
         $viewData = $newViewData;
     }
 }

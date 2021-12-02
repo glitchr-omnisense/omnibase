@@ -2,16 +2,10 @@
 
 namespace Base\Form\Type\Sitemap;
 
-use Base\Annotations\Annotation\Uploader;
-use Base\Entity\Sitemap\Setting;
-use Base\Entity\Sitemap\SettingTranslation;
 use Base\Entity\Sitemap\Widget;
-use Base\Field\Type\AvatarType;
 use Base\Field\Type\EntityType;
-use Base\Field\Type\FileType;
-use Base\Field\Type\ImageType;
+use Base\Field\Type\SelectType;
 use Base\Service\BaseService;
-use Base\Service\BaseSettings;
 use Base\Service\WidgetProviderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -32,8 +26,10 @@ class WidgetListType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'fields' => [],
-            'excluded_fields' => [],
+            'widgets' => [],
+            'sortable' => true,
+            'multiple' => false,
+            'excluded_widgets' => [],
             'locale' => null
         ]);
     }
@@ -42,7 +38,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(BaseService::isAssoc($data)) {
+        else if(BaseService::array_is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
@@ -66,54 +62,52 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-            dump($data);
-            $formattedFields = $this->getFormattedData($options["fields"]);
-            foreach($formattedFields as $formattedField => $fieldOptions) {
 
-                $field = str_replace("-", ".", $formattedField);
-                $widgetSlots[$formattedField] = $this->widgetProvider->getWidgetSlot($field);
+            $formattedWidgets = $this->getFormattedData($options["widgets"]);
+            foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
+
+                $widget = str_replace("-", ".", $formattedWidget);
+                $widgetSlots[$formattedWidget] = $this->widgetProvider->getWidgetSlot($widget);
             }
 
-            foreach($widgetSlots as $formattedField => $slot) {
+            foreach($widgetSlots as $formattedWidget => $slot) {
 
                 $slotLabel = ($slot ? $slot->getLabel() : null);
                 $slotHelp  = ($slot ? $slot->getHelp()  : null);
 
-                // Exclude requested fields
-                $field = str_replace("-", ".", $formattedField);
-                if(in_array($field, $options["excluded_fields"]))
+                // Exclude requested widgets
+                $widget = str_replace("-", ".", $formattedWidget);
+                if(in_array($widget, $options["excluded_widgets"])) 
                     continue;
 
-                // Detect field form type class
-                $class = $options["fields"][$field]["class"] ?? EntityType::class;
-                if(array_key_exists("class", $options["fields"][$field]))
-                    unset($options["fields"][$field]["class"]);
+                // Set widget options
+                $widgetOptions = $options["widgets"][$widget];
+                $widgetOptions["attr"] = $opts["attr"] ?? [];
+                $widgetOptions["multiple"] = $options["widgets"][$widget]["multiple"] ?? false;
 
-                // Set field options
-                $fieldOptions = $options["fields"][$field];
-                $fieldOptions["attr"] = $opts["attr"] ?? [];
+                $widgetOptions["data_class"] = null;
+                $widgetOptions["select2"] = $options["select2"] ?? [];
+
+                $widgetOptions["choices"] = $data ?? [];
+                $widgetOptions["choice_filter"] =  $options["widgets"][$widget]["choice_filter"] ?? null;
+                $widgetOptions["choice_filter"] = is_array($widgetOptions["choice_filter"]) ? 
+                function ($widgets) use ($widgetOptions) {
+                    if( !is_object($widgets) ) return true;
+                    return $widgets !== null && in_array(get_class($widgets), $widgetOptions["choice_filter"], true);
+                } : $widgetOptions["choice_filter"];
 
                 // Set default label
-                if(!array_key_exists("label", $fieldOptions)) {
-                    $label = explode("-", $formattedField);
-                    $fieldOptions["label"] = $slotLabel ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
+                if(!array_key_exists("label", $widgetOptions)) {
+                    $label = explode("-", $formattedWidget);
+                    $widgetOptions["label"] = $slotLabel ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
                 }
 
-                if($class == FileType::class || $class == ImageType::class || $class == AvatarType::class) {
-                    $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
-                    $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
-                    $fieldOptions["empty_data"]   = $slotName ?? "";
-                }
+                if(!array_key_exists("help", $widgetOptions))
+                    $widgetOptions["help"] = $slotHelp ?? "";
 
-                if(!array_key_exists("help", $fieldOptions))
-                    $fieldOptions["help"] = $slotHelp ?? "";
-
-                $fieldOptions["select2"] = true;
-                $fieldOptions["multiple"] = false;
-                $fieldOptions["data_class"] = Widget::class;
-                
-                dump($formattedField);
-                $form->add($formattedField, $class, $fieldOptions);
+                $widgets = $slot->getWidgets()->toArray() ?? [];
+                $form->add($formattedWidget, SelectType::class, $widgetOptions);
+                $form->get($formattedWidget)->setData($widgetOptions["multiple"] ? array_map(fn($w) => strval($w), $widgets) : strval($widgets[0] ?? null));
             }
 
             $form->add('valid', SubmitType::class);
@@ -121,7 +115,6 @@ class WidgetListType extends AbstractType implements DataMapperInterface
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void {}
-
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $children = iterator_to_array($forms);
@@ -131,16 +124,19 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $newViewData[$name] = $child->getData();
 
         $newViewData = $this->getFormattedData($newViewData, "-", ".");
-        dump($newViewData);
-        foreach($newViewData as $field => $value) {
-            dump($value, $field);
-            if($field == "valid") continue;
+        
+        foreach($newViewData as $widget => $value) {
+            
+            if($widget == "valid") continue;
 
-            // $formattedField = str_replace(".", "-", $field);
-            // $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
-            dump($value);
+            $formattedWidget = str_replace(".", "-", $widget);
+
+            $newViewData[$widget] = $children[$formattedWidget]->getData() ?? [];
+            if(!is_array($newViewData[$widget])) 
+                $newViewData[$widget] = [$newViewData[$widget]];
         }
 
+        unset($newViewData["valid"]);
         $viewData = $newViewData;
     }
 }

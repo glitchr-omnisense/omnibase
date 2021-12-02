@@ -60,6 +60,12 @@ class TranslatableField implements FieldInterface
         $this->setFormTypeOption("excluded_fields", $excludedFields);
         return $this;
     }
+    public function onlySetFields($onlyFields): self
+    {
+        if(!is_array($onlyFields)) $onlyFields = [$onlyFields];
+        $this->setFormTypeOption("only_fields", $onlyFields);
+        return $this;
+    }
 
     public function setDefaultLocale(string $defaultLocale): self
     {

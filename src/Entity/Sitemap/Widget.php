@@ -12,6 +12,7 @@ use Base\Database\Traits\TranslatableTrait;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetRepository;
+use Base\Service\BaseService;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -25,6 +26,8 @@ class Widget implements TranslatableInterface
 {   
     use TranslatableTrait;
     
+    public function __toString() { return BaseService::class_basename(get_called_class()) ." [".$this->getId()." - ".$this->getUuid()."]"; }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

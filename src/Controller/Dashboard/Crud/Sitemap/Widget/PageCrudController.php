@@ -7,6 +7,7 @@ use Base\Field\TranslatableField;
 use Base\Field\SlugField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Field\Type\QuillType;
 
 class PageCrudController extends AbstractCrudController
 {
@@ -19,7 +20,9 @@ class PageCrudController extends AbstractCrudController
         yield ImageField::new('thumbnail');
         yield SlugField::new('slug')->setTargetFieldName("translations.title");
 
-        yield TranslatableField::new()->showOnIndex('title');
+        yield TranslatableField::new()->showOnIndex('title')->setFields([
+            "content" => ["form_type" => QuillType::class],
+        ]);
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

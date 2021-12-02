@@ -1,3 +1,13 @@
+# Dashboard controllers
+controllers:
+  settings:
+    success: "Settings have been successfully modified."
+    failed: "Failed to modify settings."
+  widgets:
+    success: "Widget slots have been successfully updated."
+    failed: "Failed to update widget slots."
+
+
 # MENU controller
 # My Settings: Mes paramètres
 # My Profile: Mon profil

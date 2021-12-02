@@ -18,12 +18,13 @@ use Base\Repository\Sitemap\WidgetSlot\HyperpatternRepository;
 
 class Hyperpattern extends WidgetSlot
 {
-    public function __construct(string $name = "website", string $icon = "fas fa-laptop", string $urlPattern = "{0}")
+    protected const __PREFIX__ = "app.hyperlink";
+    public function __construct(string $name = "website", string $icon = "fas fa-laptop", string $pattern = "{0}")
     {
         $this->setName($name);
         $this->setIcon($icon);
+        $this->setPattern($pattern);
 
-        $this->setUrlPattern($urlPattern);
         $this->setAttribute("class", "widget-hyperlink");
     }
 
@@ -39,39 +40,25 @@ class Hyperpattern extends WidgetSlot
     }
 
     /**
-     * @ORM\Column(type="string", length=255)
-     * @Slugify(separator=".")
-     */
-    protected $patternName;
-    public function getPatternName(): string { return $this->patternName; }
-    public function setPatternName(string $patternName): self
-    {
-        parent::setName("app.hyperlink.".$patternName);
-        $this->patternName = $patternName;
-
-        return $this;
-    }
-
-    /**
      * @ORM\Column(type="text")
      * @Assert\Url()
      */
-    protected $urlPattern;
-    public function getUrlPattern(): string { return $this->urlPattern; }
-    public function setUrlPattern(string $urlPattern = "{0}")
+    protected $pattern;
+    public function getPattern(): string { return $this->pattern; }
+    public function setPattern(string $pattern = "{0}")
     {
-        $this->urlPattern = $urlPattern;
+        $this->pattern = $pattern;
         return $this;
     }
 
-    public function getNumberOfArguments():int { return preg_match_all('/\{[0-9]*\}/i', $this->getUrlPattern()); }
+    public function getNumberOfArguments():int { return preg_match_all('/\{[0-9]*\}/i', $this->getPattern()); }
     public function generate(...$replace): string
     {
         $search = [];
         foreach($replace as $index => $_)
             $search[] = "{".$index."}";
 
-        $subject = $this->getUrlPattern();
+        $subject = $this->getPattern();
         $url = str_replace($search, $replace, $subject);
         $url = preg_replace('\{[0-9]*\}', '', $url); // Remove missing entries
         

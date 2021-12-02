@@ -38,7 +38,7 @@ trait BaseSecurityTrait
         $token = null;
         if (!$tokenOrForm instanceof FormInterface) $token = $tokenOrForm;
         else {
-            
+
             $form = $tokenOrForm;
             if($request == null)
                 throw new Exception("Request required as FormInterface provided");

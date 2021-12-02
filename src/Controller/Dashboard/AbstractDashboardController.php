@@ -43,6 +43,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
+use Base\Entity\Sitemap\WidgetSlot as SitemapWidgetSlot;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -71,19 +72,22 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function __construct(
         Extension $extension, 
         RequestStack $requestStack, 
+        TranslatorInterface $translator,
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator, 
         BaseService $baseService, 
-        TranslatorInterface $translator,
         ?GaService $gaService = null) {
 
         $this->extension = $extension;
         $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->adminContextProvider  = $adminContextProvider;
-
-        $this->baseService = $baseService;
         $this->translator = $translator;
+
+        $this->baseService           = $baseService;
+        $this->settingRepository     = $baseService->getRepository(Setting::class);
+        $this->widgetRepository      = $baseService->getRepository(Widget::class);
+        $this->widgetSlotRepository  = $baseService->getRepository(WidgetSlot::class);
 
         $this->gaService = $gaService;
     }
@@ -132,8 +136,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
-
-            $settingRepository = $this->getDoctrine()->getRepository(Setting::class);
             
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
@@ -142,11 +144,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $settings = array_filter($settings, fn($value) => !is_null($value));
             
             foreach(array_diff_key($data, $settings) as $name => $setting)
-                $settingRepository->persist($setting);
+                $this->settingRepository->persist($setting);
 
-            $settingRepository->flush();
+            $this->settingRepository->flush();
 
-            $notification = new Notification("dashboard.settings.success");
+            $notification = new Notification("dashboard.controllers.settings.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -163,12 +165,36 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      *
      * @Route("/dashboard/widgets", name="base_dashboard_widgets")
      */
-    public function Widgets(Request $request, array $fields = []): Response
+    public function Widgets(Request $request, array $widgetSlots = []): Response
     {
-        $widgetRepository = $this->getDoctrine()->getRepository(Widget::class);
-        $data = $widgetRepository->findAll();
+        $data = $this->widgetRepository->findAll();
 
-        $form = $this->createForm(WidgetListType::class, $data, ["fields" => $fields]);
+        $form = $this->createForm(WidgetListType::class, $data, ["widgets" => $widgetSlots]);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+
+            $data = $form->getData();
+            foreach(array_keys($widgetSlots) as $name) {
+
+                $widgetSlot = $this->widgetSlotRepository->findOneByName($name);
+                if(!$widgetSlot) {
+                    $widgetSlot = new WidgetSlot($name);
+                    $this->widgetSlotRepository->persist($widgetSlot);
+                }
+
+                $widgets = $data[$name] ?? [];
+                $widgetSlot->setWidgets($widgets);
+            }
+
+            $this->widgetSlotRepository->flush();
+
+            $notification = new Notification("dashboard.controllers.widgets.success");
+            $notification->setUser($this->getUser());
+            $notification->send("success");
+
+            return $this->baseService->refresh();
+        }
 
         return $this->render('dashboard/widgets.html.twig', ["form" => $form->createView()]);
     }

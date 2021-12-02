@@ -35,8 +35,14 @@ class BaseSubscriber implements EventSubscriberInterface
     {
         BaseController::$foundBaseSubscriber = true;
 
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/vendor/jquery/jquery-ui-1.12.1.min.css"));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/vendor/jquery/jquery-ui-1.4.5.min.css"));
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));
+
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/vendor/jquery/jquery-3.5.1.js"));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/vendor/jquery/jquery-ui-1.12.1.min.js"));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/vendor/jquery/jquery-mobile-1.4.5.min.js"));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
 
         if($this->baseService->isProfiler($event) && !$this->baseService->isDebug())
             throw new NotFoundHttpException("Page not found.");

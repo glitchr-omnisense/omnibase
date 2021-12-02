@@ -9,8 +9,6 @@ use Base\Field\Type\RoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use \Symfony\Component\Validator\Constraints\Length;
-
 final class RoleField implements FieldInterface, SelectFieldInterface
 {
     use FieldTrait;
