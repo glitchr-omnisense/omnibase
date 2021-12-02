@@ -612,7 +612,7 @@
                                                     style="height:90%; padding:0.8em 0.6em 0.6em 0.6em;">
 
                                                 <fieldset style="height: 100%; margin:0; padding:0.5em 0 1.5em 0.5em;">
-                                                    <legend>{{content_widget.getAsDto().getLabel()|trans }}</legend>
+                                                    <legend>{{content_widget.getAsDto().getLabel()|trans|upper }}</legend>
                                                 <hr>
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{col}};">
 
@@ -620,7 +620,7 @@
                                                 <li>
                                                     <a href="{{ content_widget.generateUrl() }}">
                                                         <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        {{ content_widget.getAsDto().getLabel()|trans }}
+                                                        {{ content_widget.getAsDto().getLabel()|trans|capitalize }}
                                                     </a>
                                                 </li>
                                             {% endif %}

@@ -106,7 +106,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($text == $prefix.".text") $text = "";
 
         $this->extension->setIcon($this->getPreferredIcon());
-        $this->extension->setTitle($title);
+        $this->extension->setTitle(ucfirst($title));
         $this->extension->setHelp($help);
         $this->extension->setText($text);
 

@@ -61,7 +61,7 @@ class EntityType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'class' => null,
+            'data_class' => null,
             'form_type' => null,
             'autoload' => false,
             'fields' => [],
@@ -71,17 +71,6 @@ class EntityType extends AbstractType implements DataMapperInterface
             'allow_add' => false,
             'allow_delete' => false
         ]);
-
-        $resolver->setNormalizer('class', function (Options $options, $value) {
-
-            if (!$options["multiple"] && !empty($value))
-                throw new \RuntimeException(sprintf('Unexpected "class" option detected (option used by CollectionType), while "multiple" is not set in "'.get_called_class().'". Please use "data_class" in this context'));
-
-            if($options["multiple"] && $options["data_class"])
-                throw new \RuntimeException("Unexpected \"data_class\" option combined with \"multiple\" option  detected.. This is not allowed in \"".get_called_class()."\"");
-
-            return $value;
-        });
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
             if($options["multiple"]) return true;
@@ -114,8 +103,8 @@ class EntityType extends AbstractType implements DataMapperInterface
             
             if($options["multiple"]) {
 
-                $dataClass = $options["class"];
-                unset($options["class"]);
+                $dataClass = $options["data_class"];
+                unset($options["data_class"]);
 
                 $form->add($form->getName(), CollectionType::class, [
                     'entry_type' => EntityType::class,
