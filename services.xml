@@ -407,6 +407,9 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Type\ModelType">
+            <tag name="form.type" />
+        </service>
         <service id="Base\Field\Type\EntityType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />

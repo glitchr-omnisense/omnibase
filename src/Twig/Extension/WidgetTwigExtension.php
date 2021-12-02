@@ -25,20 +25,22 @@ final class WidgetTwigExtension extends AbstractExtension
     public function getFunctions() : array
     {
         return [
-            new TwigFunction("render_widget", [$this, 'render_widget'], ['needs_context' => true])
+            new TwigFunction("render_widget", [$this, 'render_widget'])
         ];
     }
 
-    function render_widget(array $context, string $slotName, array $widgetOptions = []): string
+    function render_widget(string $slotName, int $position = 0, array $widgetOptions = []): string
     {
         $widgetSlot = $this->widgetProvider->getWidgetSlot($slotName);
         if(!$widgetSlot) return "";
 
-        $widget = $widgetSlot->getWidget();
+        $widgets = $widgetSlot->getWidgets();
+        $widget  = $widgets->get($position);
         if(!$widget) return "";
 
-        $widgetOptions["class"]      = $widgetOptions["class"]      ?? $widget->getOptions()["class"]      ?? null;
-        $widgetOptions["class_item"] = $widgetOptions["class_item"] ?? $widget->getOptions()["class_item"] ?? null;
+        $widgetOptions["class"]      = $widgetOptions["class"]      ?? $widgetSlot->getAttribute("class");
+        $widgetOptions["class_item"] = $widgetOptions["class_item"] ?? $widgetSlot->getAttribute("class_item");
+        $widgetOptions["widget"] = $widget;
 
         return $this->twig->render($widget->getTemplate(), $widgetOptions);
     }

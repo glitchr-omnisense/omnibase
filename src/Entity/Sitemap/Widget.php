@@ -25,7 +25,24 @@ use Base\Service\BaseService;
 class Widget implements TranslatableInterface
 {   
     use TranslatableTrait;
-    
+
+    protected string $template = "";
+    public function getTemplate() 
+    {
+        if($this->template) return $this->template;
+
+        $defaultTemplate = BaseService::camelToSnakeCase(BaseService::class_basename(get_called_class()));
+        $defaultTemplate = "widget/".$defaultTemplate.".html.twig";
+        
+        return $defaultTemplate;
+    }
+
+    public function setTemplate(string $template)
+    {
+        $this->template = $template;
+        return $this;
+    }
+
     public function __toString() { return BaseService::class_basename(get_called_class()) ." [".$this->getId()." - ".$this->getUuid()."]"; }
 
     /**

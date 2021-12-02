@@ -79,15 +79,29 @@ class TranslatableType extends AbstractType
             $dataLocale = ($event->getData() ? $event->getData()->getKeys() : [$options["locale"]]);
             $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
             
-            if (null === $formParent = $form->getParent()) {
+            $formParent = $form->getParent();
+            $formParentDataIsEntity = $formParent !== null && $this->classMetadataManipulator->isEntity($formParent->getData());
+            if (!$formParentDataIsEntity) {
+
+                foreach ($locales as $key => $locale) {
+
+                    $fieldOptions = [
+                        'fields' => $options["fields"],
+                        'data_class' => null,
+                        'excluded_fields' => $options['excluded_fields']
+                    ];
+        
+                    $defaultLocale = $options["default_locale"];
+                    if($options["single_locale"] && \count($dataLocale) == 1)
+                        $defaultLocale = $locale = $dataLocale[0];
+
+                    if($locale != $defaultLocale && !in_array($locale, $options['required_locales'], true))
+                        $fieldOptions["required"] = false;
+
+                    $form->add($locale, ModelType::class, $fieldOptions);
+                }
                 
-                // IMPLEMENT TRANSLATABLE WITHOUT OBJECT..
-                throw new \RuntimeException('Parent form missing');
-
             } else {
-
-                if( !$this->classMetadataManipulator->isEntity($form->getParent()->getData()) )
-                    throw new \RuntimeException('Parent form data must be an entity.');
 
                 $fields = $this->getEntityFields($form, $options);
                 $translationClass = $this->getEntityTranslationDataClass($form);
@@ -108,7 +122,7 @@ class TranslatableType extends AbstractType
                         $defaultLocale = $locale = $dataLocale[0];
 
                     if($locale != $defaultLocale && !in_array($locale, $options['required_locales'], true))
-                    $entityOptions["required"] = false;
+                        $entityOptions["required"] = false;
                     
                     $form->add($locale, EntityType::class, $entityOptions);
                 }

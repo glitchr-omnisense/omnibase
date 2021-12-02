@@ -80,6 +80,7 @@ class WidgetSlot implements TranslatableInterface
      */
     protected $attributes;
     public function getAttributes(): array { return $this->attributes; }
+    public function getAttribute($name): ?string { return $this->attributes[$name] ?? null; }
     public function setAttributes(array $attributes): self
     {
         $this->attributes = $attributes;

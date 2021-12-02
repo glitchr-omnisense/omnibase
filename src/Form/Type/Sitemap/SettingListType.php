@@ -80,7 +80,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-
                 $this->baseSettings->remove($field);
 
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
@@ -129,7 +128,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     unset($fieldOptions["translatable"]);
 
                 if($isTranslatable) {
-                    $translatableFields[$formattedField] = [$class, $fieldOptions];
+                    $fieldOptions["form_type"] = $class;
+                    $translatableFields[$formattedField] = $fieldOptions;
                     continue;
                 }
 
