@@ -6,10 +6,13 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
+use Base\Entity\Sitemap\Widget\Hyperlink;
 use Base\Entity\Sitemap\WidgetSlot;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetSlot\HyperpatternRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=HyperpatternRepository::class)
@@ -19,13 +22,15 @@ use Base\Repository\Sitemap\WidgetSlot\HyperpatternRepository;
 class Hyperpattern extends WidgetSlot
 {
     protected const __PREFIX__ = "app.hyperlink";
+    public function __toString() { return $this->getPattern(); }
     public function __construct(string $name = "website", string $icon = "fas fa-laptop", string $pattern = "{0}")
     {
         $this->setName($name);
         $this->setIcon($icon);
-        $this->setPattern($pattern);
-
         $this->setAttribute("class", "widget-hyperlink");
+
+        $this->hyperlinks = new ArrayCollection();
+        $this->setPattern($pattern);
     }
 
     /**
@@ -52,7 +57,7 @@ class Hyperpattern extends WidgetSlot
     }
 
     public function getNumberOfArguments():int { return preg_match_all('/\{[0-9]*\}/i', $this->getPattern()); }
-    public function generate(...$replace): string
+    public function generateUrl(...$replace): string
     {
         $search = [];
         foreach($replace as $index => $_)
@@ -60,11 +65,42 @@ class Hyperpattern extends WidgetSlot
 
         $subject = $this->getPattern();
         $url = str_replace($search, $replace, $subject);
-        $url = preg_replace('\{[0-9]*\}', '', $url); // Remove missing entries
-        
+        return preg_replace('\{[0-9]*\}', '', $url); // Remove missing entries
+    }
+
+    public function generateHtml(...$replace): string
+    {
+        $url = $this->generateUrl($replace);
         $icon = $this->getIcon();
         $class = $this->getAttribute("class");
         
         return "<a class='".$class."' href='".$url."'><i class='".$icon."'></a>";
+    }
+
+    /**
+     * @ORM\OneToMany(targetEntity=Hyperlink::class, mappedBy="hyperpattern")
+     */
+    private $hyperlinks;
+    public function getHyperlinks(): Collection { return $this->hyperlinks; }
+    public function addHyperlink(Hyperlink $hyperlink): self
+    {
+        if (!$this->hyperlinks->contains($hyperlink)) {
+            $this->hyperlinks[] = $hyperlink;
+            $hyperlink->setPattern($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHyperlink(Hyperlink $hyperlink): self
+    {
+        if ($this->hyperlinks->removeElement($hyperlink)) {
+            // set the owning side to null (unless already changed)
+            if ($hyperlink->getPattern() === $this) {
+                $hyperlink->setPattern(null);
+            }
+        }
+
+        return $this;
     }
 }

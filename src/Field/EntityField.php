@@ -39,9 +39,8 @@ final class EntityField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/entity.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("data_class", null)
-            ->setCustomOption(self::OPTION_ALLOW_ADD, true)
-            ->setCustomOption(self::OPTION_ALLOW_DELETE, true)
-            ->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, null)
+            ->setCustomOption(self::OPTION_ALLOW_ADD, false)
+            ->setCustomOption(self::OPTION_ALLOW_DELETE, false)
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
             ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
@@ -53,15 +52,22 @@ final class EntityField implements FieldInterface
         return $this;
     }
 
+    public function autoload($autoload = true): self
+    {
+        $this->setFormTypeOption(self::OPTION_AUTOLOAD, $autoload);
+        return $this;
+    }
+
     public function renderAsList(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
         return $this;
     }
 
-    public function autoload($autoload = true): self
+    public function renderAsSelect2(): self
     {
-        $this->setFormTypeOption(self::OPTION_AUTOLOAD, $autoload);
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "select2");
+        return $this;
     }
 
     public function renderAsDropzone(string $uploaderProperty, ?string $labelProperty = null): self

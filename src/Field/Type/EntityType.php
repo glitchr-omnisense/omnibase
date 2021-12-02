@@ -68,6 +68,8 @@ class EntityType extends AbstractType implements DataMapperInterface
             'excluded_fields' => [],
             'allow_recursive' => true,
             "multiple" => false,
+            "select2" => false,
+            "dropzone" => false,
             'allow_add' => false,
             'allow_delete' => false
         ]);
@@ -112,7 +114,15 @@ class EntityType extends AbstractType implements DataMapperInterface
                 }
             }
             
-            if($options["multiple"]) {
+            if($options["select2"]) {
+
+                throw new \Exception("SELECT2 REQUIRED");
+
+            } else if($options["dropzone"]) {
+
+                throw new \Exception("DROPZONE REQUIRED");
+
+            } else if($options["multiple"]) {
 
                 $dataClass = $options["class"];
                 unset($options["class"]);
@@ -156,6 +166,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
                     unset($field['allow_recursive']);
 
+                    dump($fieldName, $fieldType, $field);
                     if ($fieldRecursive)
                         $form->add($fieldName, $fieldType, $field);
                 }

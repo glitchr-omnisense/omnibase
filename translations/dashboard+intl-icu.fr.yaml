@@ -116,7 +116,7 @@ crud:
 
       hyperlink:
         singular: "Lien hypertexte"
-        plural: "Liens hypertexte"
+        plural: "Liens hypertextes"
 
       attachment:
         singular: "Pièce jointe"
