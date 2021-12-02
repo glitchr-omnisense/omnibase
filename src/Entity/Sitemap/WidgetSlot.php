@@ -14,6 +14,8 @@ use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetSlotRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetSlotRepository::class)
@@ -28,6 +30,14 @@ use Base\Repository\Sitemap\WidgetSlotRepository;
 class WidgetSlot implements TranslatableInterface
 {   
     use TranslatableTrait;
+
+    protected const __PREFIX__ = "";
+
+    public function __toString() { return $this->getName(); }
+    public function __construct(string $name)
+    {
+        $this->setName($name);
+    }
 
     /**
      * @ORM\Id
@@ -51,19 +61,17 @@ class WidgetSlot implements TranslatableInterface
      * @Slugify(separator=".")
      */
     protected $name;
-    public function getName(): string { return $this->name; }
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
+    public function getName(): string 
+    { 
+        if(!self::__PREFIX__) return $this->name;
+        return strpos($this->name, self::__PREFIX__) === 0 ? 
+               substr($this->name, strlen(self::__PREFIX__)) : $this->name;
     }
 
-    public function __toString() { return $this->getName(); }
-    public function __construct(string $name = "", ?Widget $widget = null)
+    public function setName(string $name): self
     {
-        $this->setName($name);
-        $this->setWidget($widget);
+        $this->name = self::__PREFIX__ . $name;
+        return $this;
     }
 
     /**
@@ -72,6 +80,7 @@ class WidgetSlot implements TranslatableInterface
      */
     protected $attributes;
     public function getAttributes(): array { return $this->attributes; }
+    public function getAttribute($name): ?string { return $this->attributes[$name] ?? null; }
     public function setAttributes(array $attributes): self
     {
         $this->attributes = $attributes;
@@ -85,13 +94,25 @@ class WidgetSlot implements TranslatableInterface
     }
 
     /**
-     * @ORM\ManyToOne(targetEntity=Widget::class)
+     * @ORM\ManyToMany(targetEntity=Widget::class)
      */
-    protected $widget;
-    public function getWidget(): ?Widget { return $this->widget; }
-    public function setWidget(?Widget $widget): self
+    protected $widgets;
+    public function getWidgets(): Collection { return $this->widgets; }
+    public function addWidget(Widget $widget): self
     {
-        $this->widget = $widget;
+        if(!$this->widgets->contains($widget))
+            $this->widgets[] = $widget;
+
+        return $this;
+    }
+    public function removeWidget(Widget $widget): self
+    {
+        $this->widgets->removeElement($widget);
+        return $this;
+    }
+    public function setWidgets($widgets): self
+    {
+        $this->widgets = $widgets;
         return $this;
     }
 }

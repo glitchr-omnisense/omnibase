@@ -1,3 +1,13 @@
+# Dashboard controllers
+controllers:
+  settings:
+    success: "Settings have been successfully modified."
+    failed: "Failed to modify settings."
+  widgets:
+    success: "Widget slots have been successfully updated."
+    failed: "Failed to update widget slots."
+
+
 # MENU controller
 # My Settings: Mes paramètres
 # My Profile: Mon profil
@@ -82,19 +92,6 @@ crud:
       singular: "Log"
       plural: "Logs"
 
-    merchant:
-      singular: "Merchant"
-      plural: "Merchants"
-    partner:
-      singular: "Partner"
-      plural: "Partners"
-    artist:
-      singular: "Artist"
-      plural: "Artists"
-    customer:
-      singular: "Customer"
-      plural: "Customers"
-
   thread:
     singular: "Thread"
     plural: "Threads"
@@ -119,7 +116,7 @@ crud:
         plural: "Pages"
 
       hyperlink:
-        singular: "Hyperline"
+        singular: "Hyperlink"
         plural: "Hyperlinks"
 
       attachment:
@@ -130,63 +127,14 @@ crud:
         singular: "Menu"
         plural: "Menu"
 
-    widgetslot:
-      singular: Widget Slot
-      plural: "Widget Slots"
+    widget_slot:
+      singular: Widget slot
+      plural: "Widget slots"
 
-      social:
-        singular: "Social Media"
-        plural: Social Media
+      hyperpattern:
+        singular: "Hyperpattern"
+        plural: "Hyperpatterns"
 
     setting:
       singular: "Setting"
       plural: "Settings"
-
-  marketplace:
-    store:
-      singular: "Store"
-      plural: "Stores"
-    taxonomy:
-      singular: "Taxonomy"
-      plural: "Taxonomies"
-    cart:
-      singular: "Cart"
-      plural: "Carts"
-
-    order:
-      order:
-        singular: "Order"
-        plural: "Orders"
-
-      shipment:
-        singular: "Shipment"
-        plural: "Shipments"
-
-      payment:
-        singular: "Payment"
-        plural: "Payments"
-
-    product:
-      productreview:
-        singular: "Feedback"
-        plural: "Feedbacks"
-      product:
-        singular: "Product"
-        plural: "Products"
-
-    sales:
-      country:
-        singular: "Country"
-        plural: "Countries"
-
-      currency:
-        singular: "Currency"
-        plural: "Currencies"
-
-      promotion:
-        singular: "Promotion"
-        plural: "Promotions"
-
-      taxrate:
-        singular: "Tax"
-        plural: "Taxes"

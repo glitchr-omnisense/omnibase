@@ -71,9 +71,10 @@ class Slugify extends AbstractAnnotation
         // Check if field already set.. get field value or by default class name
         $className = explode("\\", get_class($entity));
 
-        if (!$input && $this->referenceColumn)
+        if(!$input && $this->referenceColumn) 
             $input = $this->getFieldValue($entity, $this->referenceColumn);
-        if (!$input) $input = end($className);
+        if(!$input) 
+            $input = end($className);
 
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 

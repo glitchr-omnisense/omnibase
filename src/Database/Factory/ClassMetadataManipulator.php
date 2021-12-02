@@ -34,6 +34,12 @@ class ClassMetadataManipulator
      */
     protected array $globalExcludedFields;
 
+    public function isEntity($entity) : bool
+    {
+        $class = $this->getClassMetadata($entity);
+        return $class && isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
+    }
+
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
         $this->entityManager = $entityManager;
@@ -45,21 +51,23 @@ class ClassMetadataManipulator
 
     public function getClassMetadata($entity)
     {
+        if($entity === null) return null;
+
         $className = is_object($entity) ? get_class($entity) : $entity;
         return $this->entityManager->getClassMetadata($className);
     }
 
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
-        if(!BaseService::isAssoc($fields))
+        if(!BaseService::array_is_associative($fields))
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
         $validFields = !empty($fields) ? $fields : array_fill_keys($metadata->getFieldNames(), []);
-        
+
         if (!empty($associationNames = array_intersect_key($validFields, $metadata->getAssociationNames())))
             $validFields += $this->getAssociationMapping($metadata, $associationNames);
-        
+
         // Auto detect some fields..
         foreach($validFields as $fieldName => $field) {
 

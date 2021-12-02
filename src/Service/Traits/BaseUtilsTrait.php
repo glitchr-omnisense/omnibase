@@ -6,17 +6,50 @@ use Doctrine\Common\Util\ClassUtils;
 
 trait BaseUtilsTrait
 {
-    public static function isAssoc(?array $arr)
+    public static function array_is_associative(?array $arr)
     {
         if(!$arr) return (gettype($arr) == "array");
-        return array_keys($arr) !== range(0, count($arr) - 1);
+
+        $keys = array_keys($arr);
+        foreach($keys as $key)
+            if(gettype($key) != "integer") return true;
+
+        return $keys !== range(0, count($arr) - 1);
     }
 
-    public static function isNested($a)
+    public static function class_basename($class)
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+        return basename(str_replace('\\', '/', $class));
+    }
+    
+    public static function array_is_nested($a)
     {
         $rv = array_filter($a, 'is_array');
         if (count($rv) > 0) return true;
         return false;
+    }
+
+    public static function array_replace_key($array, array|string|int $old, array|string|int $new) {
+
+        if(gettype($old) == "array" && gettype($new) == "array") {
+
+            foreach($old as $i => $_)
+                $array = self::array_replace_key($array, $old[$i], $new[$i]);
+
+            return $array;
+        
+        } else if(gettype($old) == "array" || gettype($new) == "array") {
+
+            if(gettype($new) != gettype($old))
+                throw new \Exception(__FUNCTION__."() : Argument #2 (\$new) must be of same type as argument #1 (\$old)");
+        }
+
+        $keys = array_keys($array);
+        $idx  = array_search($old, $keys);
+        
+        array_splice($keys, $idx, 1, $new);
+        return array_combine($keys, array_values($array));
     }
 
     public static function array_map_recursive($callback, $array) {
@@ -84,7 +117,7 @@ trait BaseUtilsTrait
 
     public static function camelToSnakeCase($input)
     {
-        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));
+        return strtolower(str_replace("._", ".", preg_replace('/(?<!^)[A-Z]/', '_$0', $input)));
     }
     public static function snakeToCamelCase($input)
     {

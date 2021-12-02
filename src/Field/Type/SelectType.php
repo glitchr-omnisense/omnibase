@@ -56,21 +56,27 @@ class SelectType extends AbstractType
 
                 return ChoiceList::loader($this, new IntlCallbackChoiceLoader(function () use ($options) {
 
-                    return $options["choices"];
+                    $choices = $options["choices"];
+                    if(!BaseService::array_is_associative($choices)) {
+
+                        $idx = array_map("strval", $choices);
+                        $choices = BaseService::array_replace_key($choices, array_keys($choices), $idx);
+                    }
+
+                    return $choices;
 
                 }), $options);
             },
 
-            'select2'     => true,
-            'select2-js'  => $this->baseService->getParameterBag("base.vendor.select2.js"),
-            'select2-css' => $this->baseService->getParameterBag("base.vendor.select2.css"),
-            'theme'       => $this->baseService->getParameterBag("base.vendor.select2.theme"),
+            'select2'          => [],
+            'select2-js'       => $this->baseService->getParameterBag("base.vendor.select2.js"),
+            'select2-css'      => $this->baseService->getParameterBag("base.vendor.select2.css"),
+            'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
 
             // Use 'template' in replacement of selection/result template
             'template'          => "function(option, that) { if (option.element) { var icon = $(option.element).attr('data-icon') || ''; if(icon) icon = '<i class=\"'+icon+'\"></i> '; return $('<span>'+icon+option.text + '</span>'); } return option.text; }",
             'templateSelection' => null,
             'templateResult'    => null,
-            'empty_data'        => null,
 
             // Generic parameters
             'placeholder'     => "",
@@ -79,37 +85,61 @@ class SelectType extends AbstractType
             'maximum'         => 0,
             'tags'            => false,
             'tokenSeparators' => [' ', ',', ';'],
+            'sortable' => false
         ]);
+
+        $resolver->setNormalizer('multiple', function (Options $options, $value) {
+
+            if($value && $options["data_class"])
+                throw new \RuntimeException("Unexpected \"data_class\" option combined with \"multiple\" option  detected.. This is not allowed in \"".get_called_class()."\"");
+
+            return $value;
+        });
+
     }
     
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        if($options["select2"]) {
+        if($options["select2"] !== null) {
 
             // Import select2
             $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);
             $this->baseService->addHtmlContent("stylesheets", $options["select2-css"]);
 
             // Default options
-            $selectOpts = [];
-            $selectOpts["placeholder"]     = $options["placeholder"] ?? "";
-            $selectOpts["language"]        = $options["locale"] ?? \Locale::getDefault();
-            $selectOpts["tokenSeparators"] = $options["tokenSeparators"]    ?? [" "];
-            $selectOpts["tokenSeparators"] = "['" . implode("','", $selectOpts["tokenSeparators"]) . "']";
+            $selectOpts = $options["select2"];
+            if(!array_key_exists("placeholder", $selectOpts))
+                     $selectOpts["placeholder"] = $options["placeholder"] ?? "";
 
-            $selectOpts["allowClear"]  = (array_key_exists("required"       , $options) && !$options["required"]   ) ? "true"                      : "false";
-            $selectOpts["multiple"]    = (array_key_exists("multiple"       , $options) &&  $options["multiple"]   ) ? "multiple"                  : "";
-            $selectOpts["maximum"]     = (array_key_exists("maximum"        , $options) &&  $options["maximum"] > 0) ? $options["maximum"]         : "";
-            $selectOpts["tags"]        = (array_key_exists("tags"           , $options) &&  $options["tags"]       ) ? "true"                      : "false";
+            if(!array_key_exists("language", $selectOpts))
+                     $selectOpts["language"]        = $options["locale"] ?? \Locale::getDefault();
+            if(!array_key_exists("tokenSeparators", $selectOpts)) {
+                     $selectOpts["tokenSeparators"] = $options["tokenSeparators"]    ?? [" "];
+                     $selectOpts["tokenSeparators"] = "['" . implode("','", $selectOpts["tokenSeparators"]) . "']";
+            }
+
+            if(!array_key_exists("allowClear", $selectOpts))
+                     $selectOpts["allowClear"]  = (array_key_exists("required"       , $options) && !$options["required"]   ) ? "true"                      : "false";
+            if(!array_key_exists("multiple", $selectOpts))
+                     $selectOpts["multiple"]    = (array_key_exists("multiple"       , $options) &&  $options["multiple"]   ) ? "multiple"                  : "";
+            if(!array_key_exists("maximum", $selectOpts))
+                     $selectOpts["maximum"]     = (array_key_exists("maximum"        , $options) &&  $options["maximum"] > 0) ? $options["maximum"]         : "";
+            if(!array_key_exists("tags", $selectOpts))
+                     $selectOpts["tags"]        = (array_key_exists("tags"           , $options) &&  $options["tags"]       ) ? "true"                      : "false";
 
             // /!\ NB: Template functions must be defined later on because
             // the width is determined by the size of the biggeste <option> entry
+            
+            if(!array_key_exists("template", $selectOpts))
+                     $selectOpts["template"]          = $options["template"]          ?? "";
+            if(!array_key_exists("templateResult", $selectOpts))
+                     $selectOpts["templateResult"]    = $options["templateResult"]    ?? $selectOpts["template"];
+            if(!array_key_exists("templateSelection", $selectOpts))
+                     $selectOpts["templateSelection"] = $options["templateSelection"] ?? $selectOpts["template"];
 
-            $selectOpts["template"]          = $options["template"]          ?? "";
-            $selectOpts["templateResult"]    = $options["templateResult"]    ?? $selectOpts["template"];
-            $selectOpts["templateSelection"] = $options["templateSelection"] ?? $selectOpts["template"];
+            if(!array_key_exists("theme", $selectOpts))
+                     $selectOpts["theme"] = $options["theme"];
 
-            $selectOpts["theme"] = $options["theme"];
             if($selectOpts["theme"] != "default" && $selectOpts["theme"] != "classic") {
 
                 $themeCssFile = dirname($options["select2-css"]) . "/themes/select2-" . $selectOpts["theme"] . ".css";
@@ -122,23 +152,13 @@ class SelectType extends AbstractType
                 $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
             }
 
+
             //
             // Default select2 initialializer
-            $this->baseService->addHtmlContent("javascripts:body", 
-            "<script>
-                $(\"#". $view->vars['id'] . "\").select2({
-                    theme: \"".$selectOpts["theme"]."\",
-                    templateResult: ".$selectOpts["templateResult"].",
-                    templateSelection: ".$selectOpts["templateSelection"].",
-                    placeholder: \"".$selectOpts["placeholder"]."\",
-                    multiple: \"".$selectOpts["multiple"]."\",
-                    allowClear: \"".$selectOpts["allowClear"]."\",
-                    maximumSelectionLength: \"".$selectOpts["maximum"]."\",
-                    tags: ".$selectOpts["tags"].",
-                    tokenSeparators: \"".$selectOpts["tokenSeparators"]."\",
-                    language: \"".$selectOpts["language"]."\"
-                });
-            </script>");
+            $view->vars["select2"] = json_encode($selectOpts);
+            $view->vars["select2-sortable"] = $options["sortable"];
+
+            $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
     }
 }

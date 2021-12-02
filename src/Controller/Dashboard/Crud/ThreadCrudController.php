@@ -5,13 +5,13 @@ namespace Base\Controller\Dashboard\Crud;
 use Base\Controller\Dashboard\AbstractCrudController;
 
 use Base\Enum\ThreadState;
+use Base\Field\DateTimePickerField;
 use Base\Field\ImpersonateField;
 use Base\Field\LinkIdField;
 use Base\Field\StateField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
-use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class ThreadCrudController extends AbstractCrudController
@@ -42,11 +42,15 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["state"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield DateTimeField::new('updatedAt')->onlyOnDetail();
-        foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
+        yield DateTimePickerField::new('publishedAt');
+        foreach ( ($callbacks["publishedAt"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield DateTimeField::new('createdAt')->onlyOnDetail();
+        yield DateTimePickerField::new('updatedAt')->onlyOnDetail();
+        foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+            
+        yield DateTimePickerField::new('createdAt')->onlyOnDetail();
         foreach ( ($callbacks["createdAt"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

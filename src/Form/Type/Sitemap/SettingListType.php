@@ -9,6 +9,7 @@ use Base\Field\Type\AvatarType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
+use Base\Field\Type\TranslatableType;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -46,7 +47,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(BaseService::isAssoc($data)) {
+        else if(BaseService::array_is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
@@ -79,12 +80,12 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-
                 $this->baseSettings->remove($field);
 
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
             }
 
+            $translatableFields = [];
             foreach($settings as $formattedField => $setting) {
 
                 $settingLabel = ($setting ? $setting->getLabel() : null);
@@ -120,8 +121,19 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 if(!array_key_exists("help", $fieldOptions))
                     $fieldOptions["help"] = $settingHelp ?? "";
 
-                $form->add($formattedField, $class, $fieldOptions);
+                //
+                // Check if expected to be translatable 
+                $isTranslatable = $fieldOptions["translatable"] ?? false;
+                if(array_key_exists("translatable", $fieldOptions))
+                    unset($fieldOptions["translatable"]);
 
+                if($isTranslatable) {
+                    $fieldOptions["form_type"] = $class;
+                    $translatableFields[$formattedField] = $fieldOptions;
+                    continue;
+                }
+
+                $form->add($formattedField, $class, $fieldOptions);
                 switch($class) {
 
                     case DateTimePickerType::class:
@@ -137,6 +149,9 @@ class SettingListType extends AbstractType implements DataMapperInterface
                         $form->get($formattedField)->setData($settingValue);
                 }
             }
+
+            if($translatableFields)
+                $form->add("translations", TranslatableType::class, ["fields" => $translatableFields]);
 
             $form->add('valid', SubmitType::class);
         });
@@ -156,16 +171,24 @@ class SettingListType extends AbstractType implements DataMapperInterface
         foreach($newViewData as $field => $value)
         {
             if($field == "valid") continue;
+            else if($field == "translations") {
 
-            if(!$newViewData[$field] instanceof Setting)
-                $newViewData[$field] = $this->baseSettings->getRawScalar($field) ?? new Setting($field, "");
+                dump("TRANSLATIONS !");
+                exit(1);
 
-            $formattedField = str_replace(".", "-", $field);
-            $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
+            } else {
 
-            $this->baseSettings->removeCache($field);
+                if(!$newViewData[$field] instanceof Setting)
+                    $newViewData[$field] = $this->baseSettings->getRawScalar($field) ?? new Setting($field, "");
+
+                $formattedField = str_replace(".", "-", $field);
+                $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
+
+                $this->baseSettings->removeCache($field);
+            }
         }
 
+        unset($newViewData["valid"]);
         $viewData = $newViewData;
     }
 }

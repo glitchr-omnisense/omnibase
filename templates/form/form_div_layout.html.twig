@@ -28,22 +28,41 @@
 {# All custom FormType widgets are below.. #}
 
 {%- block quill_widget -%}
-<input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %} />
-<div id="{{ id }}_editor" {{ block('attributes') }}>
-    {{ value | raw }}
-</div>
+    
+    <input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %} />
+    
+    {% set attr = attr|merge({
+        'data-quill-field': form.vars.id,
+        'data-quill-options': quill
+        }) %}
+    
+    <div id="{{ id }}_editor" {{ block('attributes') }}>
+        {{ value | raw }}
+    </div>
+
 {%- endblock quill_widget -%}
 
 {%- block select2_widget -%}
 
-    {# I couldn't inject select2-callback this way.. Have to find another way #}
-    {# {% set attr = form.vars.attr|merge({
-        'data-select2-field' : select2,
-    }) %} #} 
-    
-    {{ form_widget(form) }}
+    {% set attr = attr|merge({
+        'data-select2-field': select2,
+        'data-select2-sortable': form.vars["select2-sortable"],
+    }) %}
+
+    {{ form_widget(form, {attr: attr}) }}
 
 {% endblock select2_widget %}
+
+{%- block datetimepicker_widget -%}
+
+    {% set attr = attr|merge({
+        'data-datetimepicker-field': form.vars.id,
+        'data-datetimepicker-options': datetimepicker
+    }) %}
+
+    {{ form_widget(form, {attr: attr}) }}
+
+{% endblock datetimepicker_widget %}
 
 {%- block translatable_row -%}
     {% set row_attr = row_attr|merge({'class': 'form-group form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}

@@ -407,6 +407,9 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Type\ModelType">
+            <tag name="form.type" />
+        </service>
         <service id="Base\Field\Type\EntityType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -552,8 +555,8 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="base.service" />
             <argument type="service" id="translator" />
+            <argument type="service" id="base.service" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
@@ -691,6 +694,7 @@
                 <argument type="service" id="service_container" />
             </call>
         </service>
+        
         <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlotCrudController">
             <tag name="ea.crud_controller" />
             <argument type="service" id="ea_extension" />
@@ -701,7 +705,8 @@
                 <argument type="service" id="service_container" />
             </call>
         </service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlot\SocialCrudController">
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetSlot\HyperpatternCrudController">
             <tag name="ea.crud_controller" />
             <argument type="service" id="ea_extension" />
             <argument type="service" id="request_stack" />
@@ -711,6 +716,7 @@
                 <argument type="service" id="service_container" />
             </call>
         </service>
+
         <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController">
             <tag name="ea.crud_controller" />
             <argument type="service" id="ea_extension" />

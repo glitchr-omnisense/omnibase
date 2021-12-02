@@ -49,5 +49,5 @@ class Setting implements TranslatableInterface
         $this->setValue($value);
     }
 
-    public function __toString() { return $this->getValue() ?? ""; }
+    public function __toString() { return $this->getName() ?? ""; }
 }

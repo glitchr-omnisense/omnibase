@@ -2,7 +2,6 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap;
 
-use Base\Field\LinkIdField;
 use Base\Field\TranslatableField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
@@ -22,7 +21,7 @@ class WidgetSlotCrudController extends AbstractCrudController
 
         yield TranslatableField::new("label")->setRequired(false);
         yield TranslatableField::new()->showOnIndex("help")->setRequired(false);
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
+        foreach ( ($callbacks["help"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }
 }

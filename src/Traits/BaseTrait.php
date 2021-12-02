@@ -33,7 +33,7 @@ trait BaseTrait
     public static function getNotifier(): ?NotifierInterface { return BaseService::$notifier; }
     public static function getNotifierPolicy(): ?ChannelPolicyInterface { return BaseService::$notifierPolicy; }
 
-    public static function getRepository(): ?EntityRepository { return BaseService::$doctrine->getRepository(get_called_class()); }
+    public static function getRepository($entity): ?EntityRepository { return BaseService::$doctrine->getRepository($entity); }
     public static function getTranslator(): ?TranslatorInterface { return BaseService::$translator; }
     public static function getSlugger(): ?SluggerInterface { return BaseService::$slugger; }
 }

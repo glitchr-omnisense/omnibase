@@ -35,7 +35,6 @@ class DateTimePickerType extends AbstractType
     {
         $resolver->setDefaults([
             'moment-js'    => $this->baseService->getParameterBag("base.vendor.moment.js"),
-            'datetimepicker-format' => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
             'datetimepicker-js'    => $this->baseService->getParameterBag("base.vendor.datetimepicker.js"),
             'datetimepicker-css'   => $this->baseService->getParameterBag("base.vendor.datetimepicker.css"),
 
@@ -44,7 +43,12 @@ class DateTimePickerType extends AbstractType
             "format" => "yyyy-MM-dd HH:mm:ss",
             "html5"  => false,
             "widget" => "single_text",
-            "required" => false
+            "required" => false,
+
+            "datetimepicker" => [
+                "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
+                "sideBySide" => true
+            ]
         ]);
     }
 
@@ -71,24 +75,14 @@ class DateTimePickerType extends AbstractType
         $this->baseService->addHtmlContent("javascripts", $options["datetimepicker-js"]);
         $this->baseService->addHtmlContent("stylesheets", $options["datetimepicker-css"]);
 
-        $format = $options["datetimepicker-format"];
-        $value = $view->vars["value"];
+        //
+        // Datetime picker Options
+        $dateTimePickerOpts = $options["datetimepicker"];
+        $dateTimePickerOpts["defaultDate"] = $view->vars["value"];
+        $view->vars["datetimepicker"] = json_encode($dateTimePickerOpts);
 
         //
         // Datetime picker initialializer
-        $this->baseService->addHtmlContent("javascripts:body", 
-        "<script>
-            $(function () {
-
-                var parent = $('#" . $view->vars['id'] . "').parent();
-                $(parent).css('position', 'relative');
-
-                $('#".$view->vars['id']. "').datetimepicker({
-                    format: \"".$format. "\",
-                    defaultDate: \"$value\",
-                    sideBySide: true
-                });
-            });
-        </script>");
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-datetimepicker.js");
     }
 }

@@ -48,10 +48,10 @@ class RoleType extends AbstractType implements SelectTypeInterface
     public function configureOptions(OptionsResolver $resolver) {
 
         $resolver->setDefaults([
-            'multiple' => true,
-            'choices' => self::getChoices(),
+            'multiple'     => true,
+            'choices'      => self::getChoices(),
             'choice_icons' => self::getIcons(),
-            'choice_attr' => function (?string $entry) {
+            'choice_attr'  => function (?string $entry) {
                 return $entry ? ['data-icon' => self::getIcons()[$entry]] : [];
             },
             'empty_data'   => UserRole::USER,

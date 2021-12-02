@@ -94,6 +94,9 @@ class QuillType extends AbstractType
         // Import quill
         $this->baseService->addHtmlContent("javascripts", $options["quill-js"]);
 
+        $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
+
+        // Quill options
         $theme = $options["theme"];
         $themeCssFile = dirname($options["quill-css"]) . "/quill." . $theme . ".css";
         if (preg_match("/.*\/quill.(.*).css/", $theme, $themeArray)) {
@@ -103,28 +106,16 @@ class QuillType extends AbstractType
         }
         $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
         $modules = $options["modules"] ?? [];
-        
-        $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
-        $editor = $view->vars["id"]."_editor";
+
+        $quillOpts = [];
+        $quillOpts["theme"] = $theme;
+        $quillOpts["modules"] = $modules;
+        $quillOpts["placeholder"] = $options["placeholder"];
+
+        $view->vars["quill"] = json_encode($quillOpts);
 
         //
         // Default quill initialializer
-        $this->baseService->addHtmlContent("javascripts:body",
-        "<script>
-            var ".$editor." = new Quill('#".$editor."', {
-                theme: '".$theme. "',
-                modules: ".json_encode($modules). ",
-                placeholder: '".$options["placeholder"]."'
-            });
-
-            $editor.on('text-change', function() {
-
-                var delta = ".$editor.".getContents();
-                var html = ".$editor.".root.innerHTML;
-
-                document.getElementById('" . $view->vars["id"] . "').value = html;
-
-            });
-        </script>");
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
     }
 }

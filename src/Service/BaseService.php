@@ -32,9 +32,6 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-/**
- * @class Base interface to be used with custom base
- */
 final class BaseService implements RuntimeExtensionInterface
 {
     /**
