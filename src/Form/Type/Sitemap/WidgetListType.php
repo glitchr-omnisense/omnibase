@@ -63,6 +63,8 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
+            $widgetSlots = [];
+            
             $formattedWidgets = $this->getFormattedData($options["widgets"]);
             foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
 

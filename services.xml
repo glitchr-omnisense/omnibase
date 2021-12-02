@@ -559,9 +559,9 @@
             </call>
             <argument type="service" id="ea_extension" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
