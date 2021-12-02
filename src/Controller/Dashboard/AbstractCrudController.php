@@ -95,7 +95,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $title = $this->translator->trans($prefixWithAction.".title", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($title == $prefixWithAction.".title") $title = $this->translator->trans($prefix.".title", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($title == $prefix.".title") $title = $this->translator->trans($prefix.".plural", [], AbstractDashboardController::TRANSLATION_DOMAIN);
-        if($title == $prefix.".plural") $title = "";
+        if($title == $prefix.".plural") $title = BaseService::class_basename($this->getEntityFqcn());
 
         $help = $this->translator->trans($prefixWithAction.".help", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($help == $prefixWithAction.".help") $help = $this->translator->trans($prefix.".help", [], AbstractDashboardController::TRANSLATION_DOMAIN);
