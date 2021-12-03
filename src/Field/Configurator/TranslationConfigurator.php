@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
-use Base\Field\TranslatableField;
+use Base\Field\TranslationField;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Doctrine\ORM\PersistentCollection;
@@ -16,7 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class TranslatableConfigurator implements FieldConfiguratorInterface
+final class TranslationConfigurator implements FieldConfiguratorInterface
 {
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
     {
@@ -25,7 +25,7 @@ final class TranslatableConfigurator implements FieldConfiguratorInterface
     }
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
-        return TranslatableField::class === $field->getFieldFqcn();
+        return TranslationField::class === $field->getFieldFqcn();
     }
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void

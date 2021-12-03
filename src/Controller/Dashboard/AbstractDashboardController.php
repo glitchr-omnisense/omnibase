@@ -117,10 +117,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_merge([
-            "base.settings.logo"                 => ["class" => ImageType::class],
+            "base.settings.logo"                 => ["class" => ImageType::class,],
             "base.settings.logo.backoffice"      => ["class" => ImageType::class],
-            "base.settings.title"                => ["translatable" => true],
-            "base.settings.slogan"               => ["translatable" => true],
+            "base.settings.title"                => [],
+            "base.settings.slogan"               => [],
             "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
             "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
@@ -129,10 +129,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.domain"               => ["class" => HiddenType::class, "data" => strtolower($_SERVER['HTTP_HOST'])],
             "base.settings.domain.base_dir"      => ["class" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
             "base.settings.mail"                 => ["class" => EmailType::class],
-            "base.settings.mail.name"            => ["translatable" => true]
+            "base.settings.mail.name"            => [],
         ], $fields);
 
-        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
+        $singleLocale = array_keys($fields);
+        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.title");
+        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.slogan");
+        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.mail.name");
+        
+        $form = $this->createForm(SettingListType::class, null, [
+            "fields" => $fields,
+            "fields[single_locale]" => $singleLocale
+        ]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){

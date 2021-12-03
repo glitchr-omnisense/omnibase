@@ -2,7 +2,7 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
-use Base\Field\TranslatableField;
+use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\EntityField;
@@ -26,7 +26,7 @@ class HyperlinkCrudController extends AbstractCrudController
         foreach ( ($callbacks["variables"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new()->showOnIndex('title')->setRequired(false);
+        yield TranslationField::new()->showOnIndex('title')->setRequired(false);
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

@@ -4,7 +4,7 @@ namespace Base\Controller\Dashboard\Crud\Sitemap\WidgetSlot;
 
 use Base\Field\FontAwesomeField;
 use Base\Field\SlugField;
-use Base\Field\TranslatableField;
+use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
@@ -27,7 +27,7 @@ class HyperpatternCrudController extends AbstractCrudController
         foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new("label");
+        yield TranslationField::new("label");
 
         yield TextField::new('pattern');
         foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)

@@ -2,7 +2,7 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
-use Base\Field\TranslatableField;
+use Base\Field\TranslationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Base\Controller\Dashboard\AbstractCrudController;
@@ -19,7 +19,7 @@ class MenuCrudController extends AbstractCrudController
         foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield TranslatableField::new()->showOnIndex('title')->setRequired(false);
+        yield TranslationField::new()->showOnIndex('title')->setRequired(false);
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

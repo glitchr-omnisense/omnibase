@@ -3,19 +3,18 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -27,26 +26,12 @@ use Symfony\Component\Serializer\Serializer;
 
 class EntityType extends AbstractType implements DataMapperInterface
 {
-    protected static $entitySerializer = null;
-    public static function getSerializer()
-    {
-        if(!self::$entitySerializer)
-            self::$entitySerializer = new Serializer([new DateTimeNormalizer(), new ObjectNormalizer()], [new JsonEncoder()]);
-
-        return self::$entitySerializer;
-    }
-
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator = null;
+    
     public function getBlockPrefix(): string { return 'entity2'; }
-
-    public function setFieldValue($entity, string $property, $value)
-    {
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-        if($classMetadata->hasField($property))
-            return $classMetadata->setFieldValue($entity, $property, $value);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->setValue($entity, $property, $value);
-    }
 
     public function __construct(ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -60,27 +45,29 @@ class EntityType extends AbstractType implements DataMapperInterface
             'form_type' => null,
             'autoload' => false,
             'fields' => [],
+            'only_fields' => [],
             'excluded_fields' => [],
             'allow_recursive' => true,
+            
             "multiple" => false,
-            'allow_add' => false,
-            'allow_delete' => false
+            'inline' => false,
+            'row_inline' => false,
+
+            'allow_add' => true,
+            'allow_delete' => true
         ]);
 
-        $resolver->setNormalizer('required', function (Options $options, $value) {
-            if($options["multiple"]) return true;
-            else return $value;
-        });
-
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
-            if($options["multiple"]) return null; //if($options["multiple"]
-            return $value;
+            if($options["multiple"]) return null;
+            return $value ?? $options["class"];
         });
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars["multiple"] = $options["multiple"];
+        $view->vars["inline"] = $options["inline"];
+        $view->vars["row_inline"] = $options["row_inline"];
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"] = $options["allow_add"];
     }
@@ -109,6 +96,9 @@ class EntityType extends AbstractType implements DataMapperInterface
                 $collectionOptions = [
                     "data_class" => null,
                     'by_reference' => false,
+                    "entry_inline" => $options["inline"],
+                    "entry_row_inline" => $options["row_inline"],
+                    "entry_label" => $options["label"],
                     'entry_type' => EntityType::class,
                     'entry_options' => array_merge($options, [
                         'data_class' => $dataClass,
@@ -117,16 +107,16 @@ class EntityType extends AbstractType implements DataMapperInterface
                     ]),
                 ];
 
-                if ($options["allow_add"]) 
+                if ($options["allow_add"] !== null) 
                     $collectionOptions['allow_add'] = $options["allow_add"];
-                if ($options["allow_delete"]) 
+                if ($options["allow_delete"] !== null) 
                     $collectionOptions['allow_delete'] = $options["allow_delete"];
 
                 $form->add($form->getName(), CollectionType::class, $collectionOptions);
-
+               
             } else {
 
-                $dataClass = $this->classMetadataManipulator->getDataClass($form);
+                $dataClass = $options["class"] ?? $this->classMetadataManipulator->getDataClass($form);
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
                 
                 $fields = $options["fields"];
@@ -136,6 +126,8 @@ class EntityType extends AbstractType implements DataMapperInterface
                 foreach ($fields as $fieldName => $field) {
 
                     // Fields to be excluded (in case autoload is disabled)
+                    if($options["only_fields"] && !in_array($fieldName, $options["only_fields"]))
+                        continue;
                     if(in_array($fieldName, $options["excluded_fields"]))
                         continue;
 
@@ -156,19 +148,19 @@ class EntityType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($parentData, \Traversable $forms): void
+    public function mapDataToForms($viewData, \Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
-        if (null === $parentData) {
+        if (null === $viewData) {
             return;
         }
 
-        $data = $parentData;
+        $data = $viewData;
         if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));
-            $form->setData($data->toArray());
-
+            $form->setData($data);
+            
         } else if(is_object($entity = $data)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
@@ -179,18 +171,15 @@ class EntityType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public function mapFormsToData(\Traversable $forms, &$parentData): void
+    public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $childForms = iterator_to_array($forms);
+        $form = current(iterator_to_array($forms))->getParent();
 
-        $form = current($childForms)->getParent();
-        $dataClass = $form->getConfig()->getOption("data_class");
-
-        $data = [];
-
-        foreach($childForms as $fieldName => $childForm)
+        $data = new ArrayCollection();
+        foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
-
+    
+        $dataClass = $form->getConfig()->getOption("data_class");
         if($dataClass) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
@@ -198,38 +187,66 @@ class EntityType extends AbstractType implements DataMapperInterface
                 throw new \Exception("Entity \"$dataClass\" not found.");
             
             $fieldNames  = $classMetadata->getFieldNames();
-            $fields = array_intersect_key($data, array_flip($fieldNames));
-            $associations = array_diff_key($data, array_flip($fieldNames));
+            $fields = array_intersect_key($data->toArray(), array_flip($fieldNames));
+            $associations = array_diff_key($data->toArray(), array_flip($fieldNames));
 
-            if(!is_object($parentData) || get_class($parentData) != $dataClass)
-                $parentData = self::getSerializer()->deserialize(json_encode($fieldNames), $dataClass, 'json');
+            if(!is_object($viewData) || get_class($viewData) != $dataClass)
+                $viewData = self::getSerializer()->deserialize(json_encode($fieldNames), $dataClass, 'json');
             
             foreach ($fields as $property => $value)
-                $this->setFieldValue($parentData, $property, $value);
+                $this->setFieldValue($viewData, $property, $value);
             foreach($associations as $property => $value)
-                $this->setFieldValue($parentData, $property, $value);
+                $this->setFieldValue($viewData, $property, $value);
 
-        } else if($parentData instanceof Collection) {
+        } else if($viewData instanceof ArrayCollection) {
+  
+            foreach(iterator_to_array($forms) as $fieldName => $childForm) {
 
-            $mappedBy =  $parentData->getMapping()["mappedBy"];
-            $fieldName = $parentData->getMapping()["fieldName"];
-            $isOwningSide = $parentData->getMapping()["isOwningSide"];
+                foreach($childForm as $key => $value)
+                    $viewData[$key] = $value->getViewData();
+            }
 
-            if(array_key_exists($fieldName, $data)) {
+        } else if($viewData instanceof PersistentCollection) {
+
+            $mappedBy =  $viewData->getMapping()["mappedBy"];
+            $fieldName = $viewData->getMapping()["fieldName"];
+            $isOwningSide = $viewData->getMapping()["isOwningSide"];
+
+            if($data->containsKey($fieldName)) {
 
                 $child = $data[$fieldName];
                 if(!$isOwningSide) {
-                    foreach($parentData as $entry)
+                    foreach($viewData as $entry)
                         $this->setFieldValue($entry, $mappedBy, null);
                 }
 
-                $parentData->clear();
+                $viewData->clear();
                 foreach($child as $entry) {
 
-                    $parentData->add($entry);
-                    if(!$isOwningSide) $this->setFieldValue($entry, $mappedBy, $parentData->getOwner());
+                    $viewData->add($entry);
+                    if(!$isOwningSide) $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
         }
+    }
+
+    protected static $entitySerializer = null;
+
+    public static function getSerializer()
+    {
+        if(!self::$entitySerializer)
+            self::$entitySerializer = new Serializer([new DateTimeNormalizer(), new ObjectNormalizer()], [new JsonEncoder()]);
+
+        return self::$entitySerializer;
+    }
+
+    public function setFieldValue($entity, string $property, $value)
+    {
+        $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
+        if($classMetadata->hasField($property))
+            return $classMetadata->setFieldValue($entity, $property, $value);
+
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        return $propertyAccessor->setValue($entity, $property, $value);
     }
 }

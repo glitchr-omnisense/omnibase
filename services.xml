@@ -400,7 +400,7 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Field\Type\TranslatableType">
+        <service id="Base\Field\Type\TranslationType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.locale_provider" />
@@ -500,7 +500,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Field\Configurator\TranslatableConfigurator">
+        <service id="Base\Field\Configurator\TranslationConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.locale_provider" />

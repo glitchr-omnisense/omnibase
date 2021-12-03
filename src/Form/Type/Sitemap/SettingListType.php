@@ -9,7 +9,7 @@ use Base\Field\Type\AvatarType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
-use Base\Field\Type\TranslatableType;
+use Base\Field\Type\TranslationType;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -38,6 +38,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
     {
         $resolver->setDefaults([
             'fields' => [],
+            'fields[single_locale]' => [],
             'excluded_fields' => [],
             'locale' => null
         ]);
@@ -85,8 +86,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
             }
 
-            $translatableData = [];
             $translatableFields = [];
+            $untranslatableFields = [];
             foreach($settings as $formattedField => $setting) {
 
                 $settingLabel = ($setting ? $setting->getLabel() : null);
@@ -102,6 +103,18 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $class = $options["fields"][$field]["class"] ?? TextType::class;
                 if(array_key_exists("class", $options["fields"][$field]))
                     unset($options["fields"][$field]["class"]);
+                
+                switch($class) {
+
+                    case DateTimePickerType::class:
+                        $settingValue = $settingValue ? new \DateTime($settingValue) : null;
+                        break;
+
+                    case CheckboxType::class:
+                        $bool = !empty($settingValue) && $settingValue != "0";
+                        $settingValue = $bool ? true : false;
+                        break;
+                }
 
                 // Set field options
                 $fieldOptions = $options["fields"][$field];
@@ -123,69 +136,44 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     $fieldOptions["help"] = $settingHelp ?? "";
 
                 //
-                // Check if expected to be translatable 
-                $isTranslatable = false; //$fieldOptions["translatable"] ?? false;
-                if(array_key_exists("translatable", $fieldOptions))
-                    unset($fieldOptions["translatable"]);
+                // Check if expected to be translatable
+                $isTranslatable = !in_array($field, $options["fields[single_locale]"]);
+                if(array_key_exists("single_locale", $fieldOptions))
+                    unset($fieldOptions["single_locale"]);
 
-                // Special case: Translatable case
-                // if($isTranslatable) {
+                if($isTranslatable) {
 
-                //     $fieldOptions["form_type"] = $class;
-                //     $translatableFields[$formattedField] = $fieldOptions;
+                    $translatableFields[] = $fieldOptions;
+                    $translatableData[$formattedField] = $setting->getTranslations();
 
-                //     $translations[$formattedField] = ($setting ? $setting->getTranslations()->toArray() : null);
-                //     foreach($translations[$formattedField] as $locale => $setting) {
+                } else {
 
-                //         $settingValue = ($setting ? $setting->getValue() : null);
-                //         switch($class) {
-
-                //             case DateTimePickerType::class:
-                //                 $settingValue = $settingValue ? new \DateTime($settingValue) : null;
-                //                 break;
-
-                //             case CheckboxType::class:
-                //                 $bool = !empty($settingValue) && $settingValue != "0";
-                //                 $settingValue = $bool ? true : false;
-                //                 break;
-                //         }
-
-                //         $translatableData[$locale][$formattedField] = $settingValue;
-                //     }
-
-                //     continue;
-                // }
-
-                // Default: no translation required
-                switch($class) {
-
-                    case DateTimePickerType::class:
-                        $settingValue = $settingValue ? new \DateTime($settingValue) : null;
-                        break;
-
-                    case CheckboxType::class:
-                        $bool = !empty($settingValue) && $settingValue != "0";
-                        $settingValue = $bool ? true : false;
-                        break;
+                    $untranslatableFields[] = $fieldOptions;
+                    $untranslatableData[] = $settingValue;
                 }
+            }
 
-               // dump($class, $fieldOptions);
-                $form->add($formattedField, $class, $fieldOptions);
-                $form->get($formattedField)->setData($settingValue);
+            dump($translatableFields);
+            $form->add("translations", TranslationType::class, [
+                "translation_class" => SettingTranslation::class,
+                "fields" => $translatableFields,
+                "multiple" => true
+            ]);
+            
+            // $form->add($formattedField, $class, $fieldOptions);
+            // $form->get($formattedField)->setData($settingValue);
                 
-            }
+            // if($translatableFields) {
 
-            if($translatableFields) {
+            //     $form->add("translations", TranslationType::class, [
+            //         "fields" => $translatableFields,
+            //         "translation_class" => SettingTranslation::class,
+            //         "multiple" => true,
+            //         "parent" => $event
+            //     ]);
 
-                $form->add("translations", TranslatableType::class, [
-                    "fields" => $translatableFields,
-                    "translation_class" => SettingTranslation::class,
-                    "multiple" => true,
-                    "parent" => $event
-                ]);
-
-                $form->get("translations")->setData($translatableData);
-            }
+            //     $form->get("translations")->setData($translatableData);
+            // }
 
             $form->add('valid', SubmitType::class);
         });

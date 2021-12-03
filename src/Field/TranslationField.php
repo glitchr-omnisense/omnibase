@@ -2,13 +2,13 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\TranslatableType;
+use Base\Field\Type\TranslationType;
 use Base\Service\LocaleProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-class TranslatableField implements FieldInterface
+class TranslationField implements FieldInterface
 {
     use FieldTrait;
 
@@ -20,7 +20,7 @@ class TranslatableField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/translatable.html.twig')
             ->setCustomOption("required", true)
-            ->setFormType(TranslatableType::class);
+            ->setFormType(TranslationType::class);
 
         if($propertyName)
             $field->setFields([$propertyName => []])->showOnIndex($propertyName);

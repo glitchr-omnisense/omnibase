@@ -49,7 +49,7 @@ final class SlugType extends AbstractType
             $target = $target->get($path);
             $targetType = $target->getConfig()->getType()->getInnerType();
 
-            if($targetType instanceof TranslatableType) {
+            if($targetType instanceof TranslationType) {
                 $availableLocales = array_keys($target->all());
                 $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
                 $target = $target->get($locale);

@@ -4,7 +4,7 @@ namespace Base\Controller\Dashboard\Crud\Sitemap;
 
 use Base\Field\LinkIdField;
 use Base\Field\SlugField;
-use Base\Field\TranslatableField;
+use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 
@@ -20,7 +20,7 @@ class WidgetCrudController extends AbstractCrudController
         foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
             yield $yield;
     
-        yield TranslatableField::new()->showOnIndex("title");
+        yield TranslationField::new()->showOnIndex("title");
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

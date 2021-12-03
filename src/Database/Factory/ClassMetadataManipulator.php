@@ -9,8 +9,9 @@ use Base\Field\Type\RelationType;
 use Base\Field\Type\RoleType;
 use Base\Field\Type\SelectType;
 use Base\Field\Type\SlugType;
-use Base\Field\Type\TranslatableType;
+use Base\Field\Type\TranslationType;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\TextType;
 use Doctrine\DBAL\Types\Type;
@@ -69,7 +70,7 @@ class ClassMetadataManipulator
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
-        $validFields = !empty($fields) ? $fields : array_fill_keys($metadata->getFieldNames(), []);
+        $validFields = array_fill_keys($metadata->getFieldNames(), []);
 
         if (!empty($associationNames = array_intersect_key($validFields, $metadata->getAssociationNames())))
             $validFields += $this->getAssociationMapping($metadata, $associationNames);
@@ -82,7 +83,7 @@ class ClassMetadataManipulator
             if($fieldName == "uuid") 
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
             if($fieldName == "translations")
-                $validFields[$fieldName] = ["form_type" => TranslatableType::class];
+                $validFields[$fieldName] = ["form_type" => TranslationType::class];
             if($metadata->getTypeOfField($fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
             if($metadata->getTypeOfField($fieldName) == "array")
@@ -225,6 +226,7 @@ class ClassMetadataManipulator
             return substr($dataClass, $pos + 8);
         }
 
+        $formInit = $form;
         // Advanced case, loop parent form to get closest data_class
         while (null !== $formParent = $form->getParent()) {
             
@@ -233,9 +235,15 @@ class ClassMetadataManipulator
                 continue;
             }
 
+            if (is_subclass_of($dataClass, Collection::class)) {
+                $form = $formParent;
+                continue;
+            }
+
             return $this->getAssociationTargetClass($dataClass, $form->getName());
         }
 
-        throw new \RuntimeException('Unable to get "data_class" in form "'.$form->getName().'"');
+        // return null;
+        throw new \RuntimeException('Unable to get "data_class" in form "'.$formInit->getName().'" or any of its parents');
     }
 }

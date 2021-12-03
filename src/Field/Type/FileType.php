@@ -223,10 +223,10 @@ class FileType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $children = iterator_to_array($forms);
+        $childForm = iterator_to_array($forms);
 
-        $rawData  = $children['raw']->getData() ?? null;
-        $processedData = $children['file']->getData() ?? null;
+        $rawData  = $childForm['raw']->getData() ?? null;
+        $processedData = $childForm['file']->getData() ?? null;
 
         $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
     }

@@ -4,7 +4,7 @@ namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
 use Base\Field\FileField;
 use Base\Field\SlugField;
-use Base\Field\TranslatableField;
+use Base\Field\TranslationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -54,7 +54,7 @@ class AttachmentCrudController extends AbstractCrudController
             
         yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
 
-        yield TranslatableField::new()->showOnIndex('title');
+        yield TranslationField::new()->showOnIndex('title');
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
