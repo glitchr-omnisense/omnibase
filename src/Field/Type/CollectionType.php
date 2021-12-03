@@ -34,8 +34,8 @@ class CollectionType extends AbstractType
     {
         $resolver->setDefaults([
             'form2' => false,
-            'allow_add' => false,
-            'allow_delete' => false,
+            'allow_add' => true,
+            'allow_delete' => true,
             'collection_required' => true,
             'prototype' => true,
             'prototype_data' => null,
@@ -97,8 +97,8 @@ class CollectionType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars['allow_add'] = $options['allow_add'] ?? $view->vars['allow_add'];
-        $view->vars['allow_delete'] = $options['allow_delete'] ?? $view->vars['allow_delete'];
+        $view->vars['allow_add'] = $options['allow_add'] ?? false;
+        $view->vars['allow_delete'] = $options['allow_delete'] ?? false;
 
         if ($form->getConfig()->hasAttribute('prototype')) {
             $prototype = $form->getConfig()->getAttribute('prototype');

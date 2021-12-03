@@ -21,7 +21,7 @@ use Doctrine\Common\Collections\Collection;
  * @ORM\Entity(repositoryClass=WidgetSlotRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  *
- * @AssertBase\UniqueEntity(fields={"name"}, groups={"new", "edit"})
+ * @AssertBase\UniqueEntity(fields={"path"}, groups={"new", "edit"})
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
@@ -33,10 +33,10 @@ class WidgetSlot implements TranslatableInterface
 
     protected const __PREFIX__ = "";
 
-    public function __toString() { return $this->getName(); }
-    public function __construct(string $name)
+    public function __toString() { return $this->getPath(); }
+    public function __construct(string $path)
     {
-        $this->setName($name);
+        $this->setPath($path);
     }
 
     /**
@@ -60,20 +60,20 @@ class WidgetSlot implements TranslatableInterface
      * @AssertBase\NotBlank(groups={"new", "edit"})
      * @Slugify(separator=".")
      */
-    protected $name;
-    public function getName(): string 
+    protected $path;
+    public function getPath(): string 
     { 
-       return $this->name;
-        return strpos($this->name, get_called_class()::__PREFIX__) === 0 ? 
-               substr($this->name, strlen(get_called_class()::__PREFIX__)+1) : $this->name;
+       return $this->path;
+        return strpos($this->path, get_called_class()::__PREFIX__) === 0 ? 
+               substr($this->path, strlen(get_called_class()::__PREFIX__)+1) : $this->path;
     }
 
-    public function setName(string $name): self
+    public function setPath(string $path): self
     {
-        $name = strpos($name, get_called_class()::__PREFIX__) === 0 ? 
-                substr($name, strlen(get_called_class()::__PREFIX__)+1) : $name;
+        $path = strpos($path, get_called_class()::__PREFIX__) === 0 ? 
+                substr($path, strlen(get_called_class()::__PREFIX__)+1) : $path;
         
-        $this->name = get_called_class()::__PREFIX__ .".". $name;
+        $this->path = get_called_class()::__PREFIX__ .".". $path;
         return $this;
     }
 

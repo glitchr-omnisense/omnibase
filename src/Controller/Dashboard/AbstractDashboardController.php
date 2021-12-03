@@ -136,13 +136,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
-            
+
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
-            
+
             $settings = $this->baseService->getSettings()->get($fields);
             $settings = array_filter($settings, fn($value) => !is_null($value));
-            
+
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
@@ -175,15 +175,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if($form->isSubmitted() && $form->isValid()){
 
             $data = $form->getData();
-            foreach(array_keys($widgetSlots) as $name) {
+            foreach(array_keys($widgetSlots) as $path) {
 
-                $widgetSlot = $this->widgetSlotRepository->findOneByName($name);
+                $widgetSlot = $this->widgetSlotRepository->findOneByPath($path);
                 if(!$widgetSlot) {
-                    $widgetSlot = new WidgetSlot($name);
+                    $widgetSlot = new WidgetSlot($path);
                     $this->widgetSlotRepository->persist($widgetSlot);
                 }
 
-                $widgets = $data[$name] ?? [];
+                $widgets = $data[$path] ?? [];
                 $widgetSlot->setWidgets($widgets);
             }
 
@@ -199,9 +199,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $this->render('dashboard/widgets.html.twig', ["form" => $form->createView()]);
     }
 
-    public function configureExtension(Extension $extension) : Extension 
-    { 
-        return $extension; 
+    public function configureExtension(Extension $extension) : Extension
+    {
+        return $extension;
     }
 
     public function configureDashboard(): Dashboard
@@ -209,10 +209,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $logo  = $this->baseService->getSettings()->getScalar("base.settings.logo.backoffice");
         if(!$logo) $logo = $this->baseService->getSettings()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
-    
-        $title = $this->baseService->getSettings()->getScalar("base.settings.title");
-        $slogan = $this->baseService->getSettings()->getScalar("base.settings.slogan");
-        
+
+        $title = $this->baseService->getSettings()->getScalar("base.settings.title") ?? "";
+        $slogan = $this->baseService->getSettings()->getScalar("base.settings.slogan") ?? "";
+
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")
             ->setTitle($title)

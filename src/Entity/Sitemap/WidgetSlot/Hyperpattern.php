@@ -23,11 +23,11 @@ class Hyperpattern extends WidgetSlot
 {
     protected const __PREFIX__ = "app.hyperlink";
     public function __toString() { return $this->getPattern(); }
-    public function __construct(string $name = "website", string $icon = "fas fa-laptop", string $pattern = "{0}")
+    public function __construct(string $path = "website", string $icon = "fas fa-laptop", string $pattern = "{0}")
     {
-        $this->setName($name);
-        $this->setIcon($icon);
         $this->setAttribute("class", "widget-hyperlink");
+        $this->setPath($path);
+        $this->setIcon($icon);
 
         $this->hyperlinks = new ArrayCollection();
         $this->setPattern($pattern);

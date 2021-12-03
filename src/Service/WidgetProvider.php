@@ -25,9 +25,9 @@ class WidgetProvider implements WidgetProviderInterface
 
     protected $widgetSlots = [];
     public function getSlot(string $name): ?WidgetSlot { return $this->getWidgetSlot($name); }
-    public function getWidgetSlot(string $name): ?WidgetSlot
+    public function getWidgetSlot(string $path): ?WidgetSlot
     {
-        $widgetSlots[$name] = $widgetSlots[$name] ?? $this->widgetSlotRepository->findOneByName($name);
-        return $widgetSlots[$name];
+        $widgetSlots[$path] = $widgetSlots[$path] ?? $this->widgetSlotRepository->findOneByPath($path);
+        return $widgetSlots[$path];
     }
 }

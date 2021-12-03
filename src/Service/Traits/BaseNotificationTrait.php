@@ -64,7 +64,7 @@ trait BaseNotificationTrait
         if(!$roles) return [];
 
         $userRepository = $this->getEntityManager()->getRepository(User::class);
-        try { return $userRepository->findByRoles($roles); } 
+        try { return $userRepository->findByRoles($roles); }
         catch(TableNotFoundException $e) { return []; }
     }
 
@@ -74,7 +74,7 @@ trait BaseNotificationTrait
 
             foreach(BaseService::$notifierOptions as $option)
                 if($option["channel"] == $channel) return $option;
-            
+
             return [];
         }
 

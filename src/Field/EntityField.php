@@ -38,9 +38,7 @@ final class EntityField implements FieldInterface
             ->setFormTypeOption("multiple", true)
             ->setTemplatePath('@EasyAdmin/crud/field/entity.html.twig')
             ->setTextAlign(TextAlign::CENTER)
-            ->setFormTypeOptionIfNotSet("data_class", null)
-            ->setCustomOption(self::OPTION_ALLOW_ADD, false)
-            ->setCustomOption(self::OPTION_ALLOW_DELETE, false)
+            ->setFormTypeOptionIfNotSet("class", null)
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
             ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
@@ -67,6 +65,19 @@ final class EntityField implements FieldInterface
     public function renderAsSelect2(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "select2");
+        return $this;
+    }
+
+    public function setFields(array $fields): self
+    {
+        $this->setFormTypeOption("fields", $fields);
+        return $this;
+    }
+
+
+    public function setClass($dataClass): self
+    {
+        $this->setFormTypeOption("class", $dataClass);
         return $this;
     }
 

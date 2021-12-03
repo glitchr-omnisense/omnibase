@@ -48,10 +48,12 @@ class ModelType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             'class' => null,
             'form_type' => null,
-            'autoload' => false,
             'fields' => [],
             'excluded_fields' => [],
             'allow_recursive' => true,
+            'autoload' => true,
+            'select2' => false,
+            'dropzone' => false,
             "multiple" => false,
             'allow_add' => false,
             'allow_delete' => false
@@ -89,7 +91,7 @@ class ModelType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
 
             // Combine allow_recursive with parent if already found in child
-            foreach($options["fields"] as $fieldName => $_POST) {
+            foreach($options["fields"] as $fieldName => $_) {
 
                 if(array_key_exists("allow_recursive", $options["fields"][$fieldName])) {
                     $options["fields"][$fieldName]["allow_recursive"] 
@@ -97,6 +99,15 @@ class ModelType extends AbstractType implements DataMapperInterface
                 }
             }
 
+            if($options["select2"]) {
+
+                throw new \Exception("SELECT2 REQUIRED");
+
+            } else if($options["dropzone"]) {
+
+                throw new \Exception("DROPZONE REQUIRED");
+
+            } else 
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
@@ -123,7 +134,6 @@ class ModelType extends AbstractType implements DataMapperInterface
 
                 foreach ($fields as $fieldName => $field) {
 
-                    // Fields to be excluded (in case autoload is disabled)
                     if(in_array($fieldName, $options["excluded_fields"]))
                         continue;
 
@@ -154,17 +164,9 @@ class ModelType extends AbstractType implements DataMapperInterface
         $data = $parentData;
         if (is_array($data)) {
 
-            $form = current(iterator_to_array($forms));
-            $form->setData($data);
-
-        } else if(is_object($data)) {
-
-            throw new \Exception("Implement..", $data);
-            // $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-
-            // $childForms = iterator_to_array($forms);
-            // foreach($childForms as $fieldName => $childForm)
-            //     $childForm->setData($classMetadata->getFieldValue($entity, $fieldName));
+            $childForms = iterator_to_array($forms);
+            foreach($childForms as $fieldName => $childForm) 
+                $childForm->setData($data[$fieldName]);
         }
     }
 
@@ -177,48 +179,17 @@ class ModelType extends AbstractType implements DataMapperInterface
 
         $data = [];
 
-        foreach($childForms as $fieldName => $childForm)
-            $data[$fieldName] = $childForm->getData();
+        throw new \Exception("Implement this part using PropertyAccessor if you want to use model type..");
+        // $fieldNames  = $classMetadata->getFieldNames();
+        // $fields = array_intersect_key($data, array_flip($fieldNames));
+        // $associations = array_diff_key($data, array_flip($fieldNames));
 
-        if($dataClass) {
-
-            $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-            if(!$classMetadata)
-                throw new \Exception("Entity \"$dataClass\" not found.");
-            
-            $fieldNames  = $classMetadata->getFieldNames();
-            $fields = array_intersect_key($data, array_flip($fieldNames));
-            $associations = array_diff_key($data, array_flip($fieldNames));
-
-            if(!is_object($parentData) || get_class($parentData) != $dataClass)
-                $parentData = self::getSerializer()->deserialize(json_encode($fieldNames), $dataClass, 'json');
-            
-            foreach ($fields as $property => $value)
-                $this->setFieldValue($parentData, $property, $value);
-            foreach($associations as $property => $value)
-                $this->setFieldValue($parentData, $property, $value);
-
-        } else if($parentData instanceof ArrayCollection || $parentData instanceof PersistentCollection) {
-
-            $mappedBy =  $parentData->getMapping()["mappedBy"];
-            $fieldName = $parentData->getMapping()["fieldName"];
-            $isOwningSide = $parentData->getMapping()["isOwningSide"];
-
-            if(array_key_exists($fieldName, $data)) {
-
-                $child = $data[$fieldName];
-                if(!$isOwningSide) {
-                    foreach($parentData as $entry)
-                        $this->setFieldValue($entry, $mappedBy, null);
-                }
-
-                $parentData->clear();
-                foreach($child as $entry) {
-
-                    $parentData->add($entry);
-                    if(!$isOwningSide) $this->setFieldValue($entry, $mappedBy, $parentData->getOwner());
-                }
-            }
-        }
+        // if(!is_object($parentData) || get_class($parentData) != $dataClass)
+        //     $parentData = self::getSerializer()->deserialize(json_encode($fieldNames), $dataClass, 'json');
+        
+        // foreach ($fields as $property => $value)
+        //     $this->setFieldValue($parentData, $property, $value);
+        // foreach($associations as $property => $value)
+        //     $this->setFieldValue($parentData, $property, $value);
     }
 }

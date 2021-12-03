@@ -33,6 +33,7 @@ class QuillType extends AbstractType
 
             'theme' => $this->baseService->getParameterBag("base.vendor.quill.theme"),
             'placeholder' => "Compose an epic..",
+            'height' => "250px",
             'modules' => [
                 "syntax" => true,
                 "toolbar" => [
@@ -111,7 +112,8 @@ class QuillType extends AbstractType
         $quillOpts["theme"] = $theme;
         $quillOpts["modules"] = $modules;
         $quillOpts["placeholder"] = $options["placeholder"];
-
+        $quillOpts["height"] = $options["height"];
+        
         $view->vars["quill"] = json_encode($quillOpts);
 
         //

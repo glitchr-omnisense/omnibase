@@ -85,6 +85,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]);
             }
 
+            $translatableData = [];
             $translatableFields = [];
             foreach($settings as $formattedField => $setting) {
 
@@ -123,35 +124,68 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 //
                 // Check if expected to be translatable 
-                $isTranslatable = $fieldOptions["translatable"] ?? false;
+                $isTranslatable = false; //$fieldOptions["translatable"] ?? false;
                 if(array_key_exists("translatable", $fieldOptions))
                     unset($fieldOptions["translatable"]);
 
-                if($isTranslatable) {
-                    $fieldOptions["form_type"] = $class;
-                    $translatableFields[$formattedField] = $fieldOptions;
-                    continue;
-                }
+                // Special case: Translatable case
+                // if($isTranslatable) {
 
-                $form->add($formattedField, $class, $fieldOptions);
+                //     $fieldOptions["form_type"] = $class;
+                //     $translatableFields[$formattedField] = $fieldOptions;
+
+                //     $translations[$formattedField] = ($setting ? $setting->getTranslations()->toArray() : null);
+                //     foreach($translations[$formattedField] as $locale => $setting) {
+
+                //         $settingValue = ($setting ? $setting->getValue() : null);
+                //         switch($class) {
+
+                //             case DateTimePickerType::class:
+                //                 $settingValue = $settingValue ? new \DateTime($settingValue) : null;
+                //                 break;
+
+                //             case CheckboxType::class:
+                //                 $bool = !empty($settingValue) && $settingValue != "0";
+                //                 $settingValue = $bool ? true : false;
+                //                 break;
+                //         }
+
+                //         $translatableData[$locale][$formattedField] = $settingValue;
+                //     }
+
+                //     continue;
+                // }
+
+                // Default: no translation required
                 switch($class) {
 
                     case DateTimePickerType::class:
-                        $form->get($formattedField)->setData(($settingValue ? new \DateTime($settingValue) : null));
+                        $settingValue = $settingValue ? new \DateTime($settingValue) : null;
                         break;
 
                     case CheckboxType::class:
                         $bool = !empty($settingValue) && $settingValue != "0";
-                        $form->get($formattedField)->setData($bool ? true : false);
+                        $settingValue = $bool ? true : false;
                         break;
-
-                    default:
-                        $form->get($formattedField)->setData($settingValue);
                 }
+
+               // dump($class, $fieldOptions);
+                $form->add($formattedField, $class, $fieldOptions);
+                $form->get($formattedField)->setData($settingValue);
+                
             }
 
-            if($translatableFields)
-                $form->add("translations", TranslatableType::class, ["fields" => $translatableFields]);
+            if($translatableFields) {
+
+                $form->add("translations", TranslatableType::class, [
+                    "fields" => $translatableFields,
+                    "translation_class" => SettingTranslation::class,
+                    "multiple" => true,
+                    "parent" => $event
+                ]);
+
+                $form->get("translations")->setData($translatableData);
+            }
 
             $form->add('valid', SubmitType::class);
         });
@@ -170,12 +204,31 @@ class SettingListType extends AbstractType implements DataMapperInterface
         $newViewData = $this->getFormattedData($newViewData, "-", ".");
         foreach($newViewData as $field => $value)
         {
+            //dump($field, $value);
             if($field == "valid") continue;
             else if($field == "translations") {
 
-                dump("TRANSLATIONS !");
-                exit(1);
+                dump($newViewData);
+                foreach($value as $locale => $newChildViewData) {
 
+                    foreach($newChildViewData as $childField => $childValue) {
+
+                        if(!$newChildViewData[$childField] instanceof Setting)
+                        $newViewData[$childField] = $this->baseSettings->getRawScalar($childField) ?? new Setting($childField, "");
+    
+                        $formattedField = str_replace(".", "-", $childField);
+                        $newViewData[$childField] = $newChildViewData[$field]->setValue($childValue ?? "", $locale);
+        
+                        $this->baseSettings->removeCache($childField);
+                    }
+                }
+
+                unset($newViewData[$field]);
+                
+                dump("TRANSLATIONS !");
+                dump($newViewData);
+                exit(1);
+                
             } else {
 
                 if(!$newViewData[$field] instanceof Setting)

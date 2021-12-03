@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 use Doctrine\Common\EventManager;
+use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Platforms;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\Deprecations\Deprecation;
@@ -750,11 +751,16 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * {@inheritDoc}
      */
-    protected function isEntity(ClassMetadataInterface $class) : bool
+    public function isEntity($class) : bool
     {
-        return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
+        if ($class instanceof ClassMetadataInterface)
+            return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
+        else if (is_object($class))
+            $class = ($class instanceof Proxy) ? get_parent_class($class) : get_class($class);
+    
+        return ! $this->em->getMetadataFactory()->isTransient($class);
     }
-
+    
     /**
      * @return Platforms\AbstractPlatform
      */

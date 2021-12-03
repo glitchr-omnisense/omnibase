@@ -64,11 +64,11 @@ final class BaseService implements RuntimeExtensionInterface
         Environment $twig,
         RequestStack $requestStack,
         ManagerRegistry $doctrine,
-        FormFactoryInterface $formFactory, 
+        FormFactoryInterface $formFactory,
         LocaleProviderInterface $localeProvider,
-        NotifierInterface $notifier, 
+        NotifierInterface $notifier,
         ChannelPolicyInterface $notifierPolicy,
-        SluggerInterface $slugger, 
+        SluggerInterface $slugger,
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         CsrfTokenManagerInterface $csrfTokenManager,
@@ -78,7 +78,7 @@ final class BaseService implements RuntimeExtensionInterface
 
         $this->kernel  = $kernel;
         $this->container = $kernel->getContainer();
-        
+
         $this->setStartTime();
         $this->setSettings($settings);
 
@@ -86,7 +86,7 @@ final class BaseService implements RuntimeExtensionInterface
         // Therefore the "Security" class is just a helper here
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
-        
+
         // Symfony basic services
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
@@ -106,13 +106,13 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setUserProperty($this->getParameterBag("base.user.property"));
 
         $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
- 
+
         // Specific EA provider
         $this->adminContextProvider = new AdminContextProvider($this->requestStack);
     }
-    
+
     /*
-     * Common variables between traits 
+     * Common variables between traits
      */
     use BaseTrait;
     use BaseCommonTrait;

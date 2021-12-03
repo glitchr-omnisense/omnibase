@@ -77,39 +77,42 @@
 {% if form.children|length == 1 and single_locale %}
 
     {% for row in form.children %}
-        {{ form_widget(row) }}<br/>
+        {{ form_widget(row) }}
     {% endfor %}
 
 {% else %}
 
-    <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
-    {% for form_locale, form_child in form.children %}
-        <li class="nav-item" role="presentation">
+    {% if translations_empty is defined and translations_empty == false %}
+        <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
+
+        {% for form_locale, form_child in form.children %}
+            <li class="nav-item" role="presentation">
+
+                {% set lang    = form_locale|lang %}
+                {% set country = form_locale|country %}
+
+                <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
+                    <label {% if form_child.vars['required'] %}class="required"{% endif %}>
+                        <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
+                    </label>
+                </button>
+            </li>
+        {% endfor %}
+        </ul>
+
+        <div class="tab-content" id="{{ form.vars['id'] }}_tab">
+        {% for form_locale, formChild in form.children %}
 
             {% set lang    = form_locale|lang %}
             {% set country = form_locale|country %}
-
-            <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-                <label {% if form_child.vars['required'] %}class="required"{% endif %}>
-                    <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
-                </label>
-            </button>
-        </li>
-    {% endfor %}
-    </ul>
-
-    <div class="tab-content" id="{{ form.vars['id'] }}_tab">
-    {% for form_locale, formChild in form.children %}
-
-        {% set lang    = form_locale|lang %}
-        {% set country = form_locale|country %}
-        <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
-            {% for row in formChild %}
-                {{ form_row(row) }}<br/>
-            {% endfor %}
+            <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
+                {% for row in formChild %}
+                    {{ form_row(row) }}
+                {% endfor %}
+            </div>
+        {% endfor %}
         </div>
-    {% endfor %}
-    </div>
+    {% endif %}
 {% endif %}
 {%- endblock translatable_widget -%}
 
@@ -333,13 +336,16 @@
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
         {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
-        {{ form_label(form)}}
-        <div {{ block('widget_attributes') }}>
-            {{ form_widget(form.children) }}
+        <div class="form-group">
+            {{ form_label(form)}}
+            <div {{ block('widget_attributes') }}>
+                {{ form_widget(form.children) }}
+            </div>
         </div>
-
     {% else %}
-        {{ block('form_row') }}
+        {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
+        {%- set attr = attr|merge({'class': 'form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+        {{ form_widget(form, {attr: attr}) }}
     {% endif %}
 {%- endblock -%}
 
@@ -362,9 +368,11 @@
     {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
     {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     
-    {{ form_label(form)}}
-    <div {{ block('widget_attributes') }}>
-        {{ form_widget(form) }}
+    <div class="form-group">
+        {{ form_label(form)}}
+        <div {{ block('widget_attributes') }}>
+            {{ form_widget(form) }}
+        </div>
     </div>
     
 {%- endblock collection2_row -%}

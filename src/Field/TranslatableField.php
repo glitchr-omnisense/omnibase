@@ -66,6 +66,11 @@ class TranslatableField implements FieldInterface
         $this->setFormTypeOption("only_fields", $onlyFields);
         return $this;
     }
+    public function setTranslationClass($translationClass): self
+    {
+        $this->setFormTypeOption("translation_class", $translationClass);
+        return $this;
+    }
 
     public function setDefaultLocale(string $defaultLocale): self
     {

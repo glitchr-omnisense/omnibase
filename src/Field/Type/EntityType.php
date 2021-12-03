@@ -5,6 +5,7 @@ namespace Base\Field\Type;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -35,13 +36,7 @@ class EntityType extends AbstractType implements DataMapperInterface
         return self::$entitySerializer;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'entity2';
-    }
+    public function getBlockPrefix(): string { return 'entity2'; }
 
     public function setFieldValue($entity, string $property, $value)
     {
@@ -61,15 +56,13 @@ class EntityType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => null,
+            'class' => null,
             'form_type' => null,
             'autoload' => false,
             'fields' => [],
             'excluded_fields' => [],
             'allow_recursive' => true,
             "multiple" => false,
-            "select2" => false,
-            "dropzone" => false,
             'allow_add' => false,
             'allow_delete' => false
         ]);
@@ -77,6 +70,11 @@ class EntityType extends AbstractType implements DataMapperInterface
         $resolver->setNormalizer('required', function (Options $options, $value) {
             if($options["multiple"]) return true;
             else return $value;
+        });
+
+        $resolver->setNormalizer('data_class', function (Options $options, $value) {
+            if($options["multiple"]) return null; //if($options["multiple"]
+            return $value;
         });
     }
 
@@ -102,39 +100,35 @@ class EntityType extends AbstractType implements DataMapperInterface
                         = $options["fields"][$fieldName]["allow_recursive"] & $options["allow_recursive"];
                 }
             }
-            
-            if($options["select2"]) {
 
-                throw new \Exception("SELECT2 REQUIRED");
+            if($options["multiple"]) {
 
-            } else if($options["dropzone"]) {
+                $dataClass = $options["class"];
+                unset($options["class"]);
 
-                throw new \Exception("DROPZONE REQUIRED");
-
-            } else if($options["multiple"]) {
-
-                $dataClass = $options["data_class"];
-                unset($options["data_class"]);
-
-                $form->add($form->getName(), CollectionType::class, [
+                $collectionOptions = [
+                    "data_class" => null,
+                    'by_reference' => false,
                     'entry_type' => EntityType::class,
                     'entry_options' => array_merge($options, [
                         'data_class' => $dataClass,
                         'multiple' => false,
                         'label' => false
                     ]),
+                ];
 
-                    "data_class" => null,
-                    'allow_add' => $options["allow_add"],
-                    'allow_delete' => $options["allow_delete"],
-                    'by_reference' => false,
-                ]);
+                if ($options["allow_add"]) 
+                    $collectionOptions['allow_add'] = $options["allow_add"];
+                if ($options["allow_delete"]) 
+                    $collectionOptions['allow_delete'] = $options["allow_delete"];
+
+                $form->add($form->getName(), CollectionType::class, $collectionOptions);
 
             } else {
 
                 $dataClass = $this->classMetadataManipulator->getDataClass($form);
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-
+                
                 $fields = $options["fields"];
                 if($options["autoload"])
                     $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
@@ -155,7 +149,6 @@ class EntityType extends AbstractType implements DataMapperInterface
                     $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
                     unset($field['allow_recursive']);
 
-                    dump($fieldName, $fieldType, $field);
                     if ($fieldRecursive)
                         $form->add($fieldName, $fieldType, $field);
                 }
@@ -171,7 +164,7 @@ class EntityType extends AbstractType implements DataMapperInterface
         }
 
         $data = $parentData;
-        if ($data instanceof PersistentCollection) {
+        if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));
             $form->setData($data->toArray());
@@ -216,7 +209,7 @@ class EntityType extends AbstractType implements DataMapperInterface
             foreach($associations as $property => $value)
                 $this->setFieldValue($parentData, $property, $value);
 
-        } else if($parentData instanceof ArrayCollection || $parentData instanceof PersistentCollection) {
+        } else if($parentData instanceof Collection) {
 
             $mappedBy =  $parentData->getMapping()["mappedBy"];
             $fieldName = $parentData->getMapping()["fieldName"];

@@ -11,6 +11,7 @@ use Base\Field\Type\SelectType;
 use Base\Field\Type\SlugType;
 use Base\Field\Type\TranslatableType;
 use Base\Service\BaseService;
+use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\TextType;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,6 +22,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 
 class ClassMetadataManipulator
 {
@@ -34,12 +36,6 @@ class ClassMetadataManipulator
      */
     protected array $globalExcludedFields;
 
-    public function isEntity($entity) : bool
-    {
-        $class = $this->getClassMetadata($entity);
-        return $class && isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
-    }
-
     public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
         $this->entityManager = $entityManager;
@@ -47,6 +43,16 @@ class ClassMetadataManipulator
         $this->globalExcludedFields = [];
         if ( ($matches = preg_grep('/^base.database.excluded_fields\.[0-9]*$/', array_keys($parameterBag->all()))) )
             foreach ($matches as $match) $this->globalExcludedFields[] = $parameterBag->get($match);
+    }
+
+    public function isEntity($class) : bool
+    {
+        if ($class instanceof ClassMetadataInterface)
+            return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
+        else if (is_object($class))
+            $class = ($class instanceof Proxy) ? get_parent_class($class) : get_class($class);
+    
+        return ! $this->entityManager->getMetadataFactory()->isTransient($class);
     }
 
     public function getClassMetadata($entity)
@@ -72,15 +78,15 @@ class ClassMetadataManipulator
         foreach($validFields as $fieldName => $field) {
 
             if($fieldName == "id") 
-                $validFields[$fieldName] = ["type" => HiddenType::class];
+                $validFields[$fieldName] = ["form_type" => HiddenType::class];
             if($fieldName == "uuid") 
-                $validFields[$fieldName] = ["type" => HiddenType::class];
+                $validFields[$fieldName] = ["form_type" => HiddenType::class];
             if($fieldName == "translations")
-                $validFields[$fieldName] = ["type" => TranslatableType::class];
+                $validFields[$fieldName] = ["form_type" => TranslatableType::class];
             if($metadata->getTypeOfField($fieldName) == "datetime")
-                $validFields[$fieldName] = ["type" => DateTimePickerType::class];
+                $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
             if($metadata->getTypeOfField($fieldName) == "array")
-                $validFields[$fieldName] = ["type" => SelectType::class];
+                $validFields[$fieldName] = ["form_type" => SelectType::class];
         }
         
         foreach($fields as $fieldName => $field) {
@@ -219,7 +225,7 @@ class ClassMetadataManipulator
             return substr($dataClass, $pos + 8);
         }
 
-        // Advanced case, loop parent form to get closest fill data_class
+        // Advanced case, loop parent form to get closest data_class
         while (null !== $formParent = $form->getParent()) {
             
             if (null === $dataClass = $formParent->getConfig()->getDataClass()) {
