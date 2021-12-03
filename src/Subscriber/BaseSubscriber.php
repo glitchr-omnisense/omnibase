@@ -9,6 +9,7 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BaseSubscriber implements EventSubscriberInterface
@@ -25,6 +26,7 @@ class BaseSubscriber implements EventSubscriberInterface
             ConsoleEvents::COMMAND => ['onConsoleCommand'],
             KernelEvents::REQUEST  => ['onKernelRequest'],
             KernelEvents::RESPONSE => ['onKernelResponse'],
+            KernelEvents::EXCEPTION => ['onKernelException'],
         ];
     }
 
@@ -60,6 +62,8 @@ class BaseSubscriber implements EventSubscriberInterface
         
         return true;
     }
+
+    public function onKernelException(ExceptionEvent $e) { $e->stopPropagation(); }
 
     public function onKernelResponse(ResponseEvent $event)
     {

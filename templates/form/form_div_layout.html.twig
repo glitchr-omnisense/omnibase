@@ -77,7 +77,11 @@
 {% if form.children|length == 1 and single_locale %}
 
     {% for row in form.children %}
-        {{ form_widget(row) }}
+        {% if form.vars.row_inline == false %}
+            {{ form_widget(row) }}
+        {% else %}
+            {{ form_row(row) }}
+        {% endif %}
     {% endfor %}
 
 {% else %}
