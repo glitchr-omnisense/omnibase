@@ -14,22 +14,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CollectionType extends AbstractType
 {
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-    }
+    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
+    public function getBlockPrefix(): string { return 'collection2'; }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'collection2';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -43,7 +30,7 @@ class CollectionType extends AbstractType
             'entry_type' => TextType::class,
             'entry_inline' => false,
             'entry_row_inline' => false,
-            'entry_label' => true,
+            'entry_label' => true, // show or not entry label
             'entry_options' => [],
             'entry_required' => null,
             'delete_empty' => false,

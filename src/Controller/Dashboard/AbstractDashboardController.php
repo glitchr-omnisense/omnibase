@@ -117,18 +117,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_merge([
-            "base.settings.logo"                 => ["class" => ImageType::class,],
-            "base.settings.logo.backoffice"      => ["class" => ImageType::class],
+            "base.settings.logo"                 => ["form_type" => ImageType::class,],
+            "base.settings.logo.backoffice"      => ["form_type" => ImageType::class],
             "base.settings.title"                => [],
             "base.settings.slogan"               => [],
-            "base.settings.birthdate"            => ["class" => DateTimePickerType::class],
-            "base.settings.maintenance"          => ["class" => CheckboxType::class, "required" => false],
-            "base.settings.maintenance.downtime" => ["class" => DateTimePickerType::class, "required" => false],
-            "base.settings.maintenance.uptime"   => ["class" => DateTimePickerType::class, "required" => false],
-            "base.settings.domain.https"         => ["class" => HiddenType::class, "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
-            "base.settings.domain"               => ["class" => HiddenType::class, "data" => strtolower($_SERVER['HTTP_HOST'])],
-            "base.settings.domain.base_dir"      => ["class" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
-            "base.settings.mail"                 => ["class" => EmailType::class],
+            "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
+            "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
+            "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.maintenance.uptime"   => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.domain.https"         => ["form_type" => HiddenType::class, "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
+            "base.settings.domain"               => ["form_type" => HiddenType::class, "data" => strtolower($_SERVER['HTTP_HOST'])],
+            "base.settings.domain.base_dir"      => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
+            "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => [],
         ], $fields);
 
@@ -148,9 +148,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
-            $settings = $this->baseService->getSettings()->get($fields);
-            $settings = array_filter($settings, fn($value) => !is_null($value));
+            dump($data);
 
+            $settings = $this->baseService->getSettings()->get($fields);
+            dump($settings, $fields);
+            $settings = array_filter($settings, fn($value) => !is_null($value));
+            dump($settings);
+    
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 

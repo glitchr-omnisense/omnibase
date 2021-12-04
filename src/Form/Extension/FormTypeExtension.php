@@ -51,6 +51,8 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
+        if($options["form2"]) $this->applyForm2($view);
+
         foreach($view->children as $field => $childView) {
 
             if (!$form->has($field))
@@ -58,19 +60,20 @@ class FormTypeExtension extends AbstractTypeExtension
                 
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
+            $childOptions["form2"] = $options["form2"];
 
-            if($options["form2"]) {
-
-                // Add to all form custom base style.. 
-                // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-                if (array_search("form" , $childView->vars['block_prefixes']) !== false && 
-                    array_search("form2", $childView->vars['block_prefixes']) === false)
-                {
-                    array_splice($childView->vars['block_prefixes'], 1, 0, ["form2"]);
-                }
-            }
-            
             $this->browseView($childView, $childForm, $childOptions);
+        }
+    }
+
+    public function applyForm2($view) {
+
+        // Add to all form custom base style.. 
+        // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
+        if (array_search("form" , $view->vars['block_prefixes']) !== false && 
+            array_search("form2", $view->vars['block_prefixes']) === false)
+        {
+            array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
         }
     }
 }

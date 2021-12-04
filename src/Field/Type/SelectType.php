@@ -52,10 +52,10 @@ class SelectType extends AbstractType
                 return ChoiceList::loader($this, new IntlCallbackChoiceLoader(function () use ($options) {
 
                     $choices = $options["choices"];
-                    if(!BaseService::array_is_associative($choices)) {
+                    if(!array_is_associative($choices)) {
 
                         $idx = array_map("strval", $choices);
-                        $choices = BaseService::array_replace_key($choices, array_keys($choices), $idx);
+                        $choices = array_replace_keys($choices, array_keys($choices), $idx);
                     }
 
                     return $choices;

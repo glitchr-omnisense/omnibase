@@ -56,16 +56,11 @@ final class BaseTwigExtension extends AbstractExtension
         ];
     }
 
-    public function synopsis($class) { return BaseService::getSynopsis($class); }
+    public function synopsis($class) { return class_synopsis($class); }
 
     public function shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
     {
-        $nChr = strlen($str);
-
-        if($nChr > $length + strlen($separator))
-            return substr($str, 0, $length/2) . $separator . substr($str, $nChr-$length/2, $length/2+1);
-
-        return $str;
+          return shorten_str($str, $length, $separator);
     }
 
     public function extension($mimetypeOrArray)
@@ -74,7 +69,7 @@ final class BaseTwigExtension extends AbstractExtension
         if(is_array($mimetypeOrArray)) {
 
             $extensions = [];
-            $extensionList = array_map(function($mimetype) { return $this->extension($mimetype); }, $mimetypeOrArray);        
+            $extensionList = array_map(function($mimetype) { return $this->extension($mimetype); }, $mimetypeOrArray);
             foreach ( $extensionList as $extension )
                 $extensions = array_merge($extensions,$extension);
 
@@ -103,7 +98,7 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function flattenArray($array): ?array
     {
-        return BaseService::array_flatten($array);
+        return array_flatten($array);
     }
 
     public function lang(string $locale):     string { return substr($locale, 0, 2); }

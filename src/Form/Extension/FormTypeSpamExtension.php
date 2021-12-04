@@ -71,7 +71,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
         if (!$options["spam_protection"]) return;
         if (!$builder->getForm()->isRoot()) return;
 
-        $hasSpamInterface = BaseService::hasInterface($options["data_class"] ?? null, SpamProtectionInterface::class);
+        $hasSpamInterface = class_implements_interface($options["data_class"] ?? null, SpamProtectionInterface::class);
         if (!$hasSpamInterface ) return;
 
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {

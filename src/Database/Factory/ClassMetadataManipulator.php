@@ -66,7 +66,7 @@ class ClassMetadataManipulator
 
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
-        if(!BaseService::array_is_associative($fields))
+        if(!array_is_associative($fields))
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);

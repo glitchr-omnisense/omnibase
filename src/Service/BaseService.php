@@ -7,7 +7,6 @@ use Base\Service\Traits\BaseNotificationTrait;
 use Base\Service\Traits\BaseSecurityTrait;
 use Base\Service\Traits\BaseSymfonyTrait;
 use Base\Service\Traits\BaseTwigTrait;
-use Base\Service\Traits\BaseUtilsTrait;
 use Base\Service\Traits\BaseDoctrineTrait;
 use Base\Traits\BaseTrait;
 
@@ -136,11 +135,6 @@ final class BaseService implements RuntimeExtensionInterface
      * Doctrine related methods
      */
     use BaseDoctrineTrait;
-
-    /*
-     * Util methods
-     */
-    use BaseUtilsTrait;
 
     /*
      * Notifications & flash messages

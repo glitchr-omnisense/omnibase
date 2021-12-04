@@ -38,7 +38,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(BaseService::array_is_associative($data)) {
+        else if(array_is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
@@ -102,7 +102,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 // Set default label
                 if(!array_key_exists("label", $widgetOptions)) {
                     $label = explode("-", $formattedWidget);
-                    $widgetOptions["label"] = $slotLabel ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
+                    $widgetOptions["label"] = $slotLabel ?? ucwords(str_replace("_", " ", camel_to_snake(end($label))));
                 }
 
                 if(!array_key_exists("help", $widgetOptions))

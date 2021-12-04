@@ -27,13 +27,13 @@ class Widget implements TranslatableInterface
     use TranslatableTrait;
 
     protected string $template = "";
-    public function getTemplate() 
+    public function getTemplate()
     {
         if($this->template) return $this->template;
 
-        $defaultTemplate = BaseService::camelToSnakeCase(BaseService::class_basename(get_called_class()));
+        $defaultTemplate = camel_to_snake(class_basename(get_called_class()));
         $defaultTemplate = "widget/".$defaultTemplate.".html.twig";
-        
+
         return $defaultTemplate;
     }
 
@@ -43,7 +43,7 @@ class Widget implements TranslatableInterface
         return $this;
     }
 
-    public function __toString() { return BaseService::class_basename(get_called_class()) ." [".$this->getId()." - ".$this->getUuid()."]"; }
+    public function __toString() { return class_basename(get_called_class()) ." [".$this->getId()." - ".$this->getUuid()."]"; }
 
     /**
      * @ORM\Id

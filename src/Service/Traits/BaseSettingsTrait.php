@@ -9,7 +9,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 
 trait BaseSettingsTrait
 {
-    protected $cacheEnabled = false; /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
+    protected $cacheEnabled = true; /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
     protected $cache = null;
 
     protected $settingRepository = null;
@@ -137,7 +137,7 @@ trait BaseSettingsTrait
         
             $settings = [];
             foreach($names as $name)
-                $settings[] = $this->get($name, $locale);
+                $settings[$name] = $this->get($name, $locale);
 
             return $settings;
         }
@@ -146,7 +146,7 @@ trait BaseSettingsTrait
             return $cacheValues;
 
         $values = $this->getRaw($name, $locale) ?? [];
-       	return BaseService::array_map_recursive(function($value) use ($locale) {
+       	return array_map_recursive(function($value) use ($locale) {
                	    return ($value instanceof Setting ? $value->translate($locale)->getValue() : $value);
                	}, $values);
     }
@@ -230,7 +230,7 @@ trait BaseSettingsTrait
                 }
 
                 // Process current node
-                $localeValues[$locale] = BaseService::array_map_recursive(
+                $localeValues[$locale] = array_map_recursive(
                     function($value) use ($locale) {
                         return ($value instanceof Setting ? $value->translate($locale)->getValue() : $value);
                     }, $values

@@ -80,7 +80,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         });
 
         $resolver->setNormalizer('only_fields', function (Options $options, $fields) {
-            if(BaseService::array_is_associative($fields)) return array_keys($fields);
+            if(array_is_associative($fields)) return array_keys($fields);
             return $fields;
         });
     }
@@ -126,8 +126,9 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     $entityOptions["row_inline"] = true;
                     $entityOptions["allow_add"] = false;
                     $entityOptions["allow_delete"] = false;
+                    $entityOptions["allow_recursive"] = true;
                 }
-                
+
                 $form->add($locale, EntityType::class, $entityOptions);
             }
         });
@@ -280,10 +281,9 @@ class TranslationType extends AbstractType implements DataMapperInterface
             if(!$multiple) $form->setData($viewData[$locale] ?? null);
             else {
 
-                dump($viewData);
                 $newViewData = new ArrayCollection();
-                foreach($viewData as $data)
-                    $newViewData->add($data[$locale]);
+                foreach($viewData as $key => $data)
+                    $newViewData[$key] = $data[$locale];
 
                 $form->setData($newViewData);
             }
@@ -301,7 +301,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 
                 foreach($form->getData() as $key => $translation) {
 
-                    if($translation instanceof TranslationInterface)
+                    if(!$translation instanceof TranslationInterface)
                         throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"".get_class($translation)."\" received.");
 
                     if($viewData[$key] instanceof PersistentCollection) {

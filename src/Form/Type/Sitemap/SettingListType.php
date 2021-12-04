@@ -12,6 +12,7 @@ use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -29,10 +30,7 @@ use Symfony\Component\Form\FormEvents;
 
 class SettingListType extends AbstractType implements DataMapperInterface
 {
-    public function __construct(BaseSettings $baseSettings)
-    {
-        $this->baseSettings = $baseSettings;
-    }
+    public function __construct(BaseSettings $baseSettings) { $this->baseSettings = $baseSettings; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -48,7 +46,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(BaseService::array_is_associative($data)) {
+        else if(array_is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
@@ -86,8 +84,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]) ?? new Setting($field, "");
             }
 
-            $translatableFields = [];
-            $untranslatableFields = [];
+            $fields = [];
+            $fields["value"] = [];
             foreach($settings as $formattedField => $setting) {
 
                 // Exclude requested fields
@@ -95,36 +93,18 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 if(in_array($field, $options["excluded_fields"]))
                     continue;
 
-                // Detect field form type class
-                $class = $options["fields"][$field]["class"] ?? TextType::class;
-                if(array_key_exists("class", $options["fields"][$field]))
-                    unset($options["fields"][$field]["class"]);
-
-                $settingValue = $setting->getValue();
-
-                switch($class) {
-
-                    case DateTimePickerType::class:
-                        $settingValue = $settingValue ? new \DateTime($settingValue) : null;
-                        break;
-
-                    case CheckboxType::class:
-                        $bool = !empty($settingValue) && $settingValue != "0";
-                        $settingValue = $bool ? true : false;
-                        break;
-                }
-
                 // Set field options
                 $fieldOptions = $options["fields"][$field];
                 $fieldOptions["attr"] = $opts["attr"] ?? [];
+                $fieldOptions["form_type"] = $fieldOptions["form_type"] ?? TextType::class;
 
                 // Set default label
                 if(!array_key_exists("label", $fieldOptions)) {
                     $label = explode("-", $formattedField);
-                    $fieldOptions["label"] = $setting->getLabel() ?? ucwords(str_replace("_", " ", BaseService::camelToSnakeCase(end($label))));
+                    $fieldOptions["label"] = $setting->getLabel() ?? ucwords(str_replace("_", " ", camel_to_snake(end($label))));
                 }
 
-                if($class == FileType::class || $class == ImageType::class || $class == AvatarType::class) {
+                if ($fieldOptions["form_type"] == FileType::class || $fieldOptions["form_type"] == ImageType::class || $fieldOptions["form_type"] == AvatarType::class) {
                     $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
                     $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
                     $fieldOptions["empty_data"]   = $settingValue ?? "";
@@ -139,16 +119,27 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 if(array_key_exists("single_locale", $fieldOptions))
                     unset($fieldOptions["single_locale"]);
 
-                if($isTranslatable) {
+                $fields["value"][$formattedField] = $fieldOptions;
 
-                    $translationFields[$formattedField] = $fieldOptions;
-                    $translationData[$formattedField] = $setting->getTranslations();
+                $translations = $setting->getTranslations();
+                foreach($translations as $locale => $settingTranslation) {
 
-                } else {
+                    $settingValue = $settingTranslation->getValue();
+                    switch($fieldOptions["form_type"]) {
 
-                    $intlFields[$formattedField] = $fieldOptions;
-                    $intlData[$formattedField] = $setting->getTranslations();
+                        case DateTimePickerType::class:
+                            $settingTranslation->setValue(($settingValue ? new \DateTime($settingValue) : null));
+                            break;
+
+                        case CheckboxType::class:
+                            $bool = !empty($settingValue) && $settingValue != "0";
+                            $settingTranslation->setValue($bool ? true : false);
+                            break;
+                    }
                 }
+
+                if($isTranslatable) $translationData[$formattedField] = $translations;
+                else $intlData[$formattedField] = $translations;
             }
 
             $form->add("intl", TranslationType::class, [
@@ -156,92 +147,55 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 "single_locale" => true,
                 "translation_class" => SettingTranslation::class,
                 "only_fields" => ["value"], 
-                "fields" => [
-                    "value" => ["form_type" => TextType::class]
-                ],
+                "fields" => $fields,
             ]);
-            
             $form->get("intl")->setData($intlData);
 
             $form->add("translations", TranslationType::class, [
                 "multiple" => true,
                 "translation_class" => SettingTranslation::class,
                 "only_fields" => ["value"], 
-                "fields" => [
-                    "value" => ["form_type" => TextType::class]
-                ],
+                "fields" => $fields,
             ]);
             $form->get("translations")->setData($translationData);
-
-            // $form->add($formattedField, $class, $fieldOptions);
-            // $form->get($formattedField)->setData($settingValue);
-                
-            // if($translatableFields) {
-
-            //     $form->add("translations", TranslationType::class, [
-            //         "fields" => $translatableFields,
-            //         "translation_class" => SettingTranslation::class,
-            //         "multiple" => true,
-            //         "parent" => $event
-            //     ]);
-
-            //     $form->get("translations")->setData($translatableData);
-            // }
 
             $form->add('valid', SubmitType::class);
         });
     }
 
-    public function mapDataToForms($viewData, \Traversable $forms): void {}
+    public function mapDataToForms($viewData, \Traversable $forms): void { }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $children = iterator_to_array($forms);
-
-        $newViewData = [];
-        foreach($children as $name => $child)
-            $newViewData[$name] = $child->getData();
-
-        $newViewData = $this->getFormattedData($newViewData, "-", ".");
-        foreach($newViewData as $field => $value)
+        foreach(iterator_to_array($forms) as $formName => $form)
         {
-            //dump($field, $value);
-            if($field == "valid") continue;
-            else if($field == "translations") {
+            if($formName == "valid") continue;
+            else if($formName == "translations" || $formName == "intl") {
 
-                foreach($value as $locale => $newChildViewData) {
+                foreach($form->getData() as $formattedField => $translations) {
+                    
+                    $field = str_replace("-", ".", $formattedField);
+                    foreach($translations as $locale => $translation) {
 
-                    foreach($newChildViewData as $childField => $childValue) {
+                        $viewData[$field] = $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field, "");
+                        $viewData[$field]->setValue($translation->getValue() ?? "", $locale);
 
-                        if(!$newChildViewData[$childField] instanceof Setting)
-                        $newViewData[$childField] = $this->baseSettings->getRawScalar($childField) ?? new Setting($childField, "");
-    
-                        $formattedField = str_replace(".", "-", $childField);
-                        $newViewData[$childField] = $newChildViewData[$field]->setValue($childValue ?? "", $locale);
-        
-                        $this->baseSettings->removeCache($childField);
+                        $this->baseSettings->removeCache($formattedField);
                     }
-                }
+                 }
 
-                unset($newViewData[$field]);
-                
-                dump("TRANSLATIONS !");
-                dump($newViewData);
-                exit(1);
+                unset($viewData[$formName]);
                 
             } else {
 
-                if(!$newViewData[$field] instanceof Setting)
-                    $newViewData[$field] = $this->baseSettings->getRawScalar($field) ?? new Setting($field, "");
+                if(!$viewData[$formName] instanceof Setting)
+                    $viewData[$formName] = $this->baseSettings->getRawScalar($formName) ?? new Setting($formName, "");
 
-                $formattedField = str_replace(".", "-", $field);
-                $newViewData[$field] = $newViewData[$field]->setValue($children[$formattedField]->getViewData() ?? "");
+                $field = str_replace("-", ".", $formName);
+                $viewData[$formName] = $viewData[$formName]->setValue($form->getViewData() ?? "");
 
-                $this->baseSettings->removeCache($field);
+                $this->baseSettings->removeCache($formName);
             }
         }
-
-        unset($newViewData["valid"]);
-        $viewData = $newViewData;
     }
 }

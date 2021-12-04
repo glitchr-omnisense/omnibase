@@ -15,14 +15,14 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 {
     abstract static function getPreferredIcon();
 
-    public function __construct(Extension $extension, RequestStack $requestStack, TranslatorInterface $translator) 
-    { 
+    public function __construct(Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
+    {
         $this->requestStack = $requestStack;
         $this->extension = $extension;
         $this->translator = $translator;
     }
 
-    public static function getEntityFqcn(): string 
+    public static function getEntityFqcn(): string
     {
         if(get_called_class() == "HyperpatternCrudController") dump("HEHO !");
 
@@ -45,7 +45,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected static array $crudController = [];
-    public static function getCrudControllerFqcn($entityFqcn): ?string 
+    public static function getCrudControllerFqcn($entityFqcn): ?string
     {
         if(array_key_exists($entityFqcn, self::$crudController))
             return self::$crudController[$entityFqcn];
@@ -57,18 +57,18 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $baseCrudController = preg_replace("/^App/", 'Base', $appCrudController);
         if(str_starts_with($crudController, "Base")) {
 
-            if (class_exists($appCrudController) and !class_exists($crudController)) 
+            if (class_exists($appCrudController) and !class_exists($crudController))
                 return $appCrudController;
         }
- 
-        return class_exists($appCrudController) ? $appCrudController : 
-               (class_exists($baseCrudController)    ? $baseCrudController : null);
+
+        return  class_exists($appCrudController)  ? $appCrudController :
+               (class_exists($baseCrudController) ? $baseCrudController : null);
     }
 
     public static function getTranslationPrefix()
     {
         $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', "Crud\\", self::getEntityFqcn());
-        return BaseService::camelToSnakeCase(str_replace("\\", ".", $entityFqcn));
+        return camel_to_snake(str_replace("\\", ".", $entityFqcn));
     }
 
     public function configureActions(Actions $actions): Actions
@@ -95,12 +95,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $title = $this->translator->trans($prefixWithAction.".title", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($title == $prefixWithAction.".title") $title = $this->translator->trans($prefix.".title", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($title == $prefix.".title") $title = $this->translator->trans($prefix.".plural", [], AbstractDashboardController::TRANSLATION_DOMAIN);
-        if($title == $prefix.".plural") $title = BaseService::class_basename($this->getEntityFqcn());
+        if($title == $prefix.".plural") $title = class_basename($this->getEntityFqcn());
 
         $help = $this->translator->trans($prefixWithAction.".help", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($help == $prefixWithAction.".help") $help = $this->translator->trans($prefix.".help", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($help == $prefix.".help") $help = "";
-        
+
         $text = $this->translator->trans($prefixWithAction.".text", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($text == $prefixWithAction.".text") $text = $this->translator->trans($prefix.".text", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($text == $prefix.".text") $text = "";

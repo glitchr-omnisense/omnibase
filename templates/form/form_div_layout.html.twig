@@ -4,7 +4,13 @@
 
 {%- block form2_label  -%}{{- form_label(form)  -}}{%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
-{%- block form2_errors -%}{{- form_errors(form) -}}{%- endblock -%}
+{%- block form2_errors -%}
+{%- set row_attr = row_attr|merge({'class': 'form-errors' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+{% if errors|length %}
+    <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>{{- form_errors(form) -}}</div>
+{% endif %}
+{%- endblock -%}
+
 {%- block form2_help   -%}
     {% if help is not empty %}
     <span class="data-help">
@@ -71,12 +77,13 @@
 
 {%- block translatable_widget -%}
 
-{% set row_attr = row_attr|merge({'class': 'form-group form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
+{% set row_attr = row_attr|merge({'class': 'form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
 <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
        
 {% if form.children|length == 1 and single_locale %}
 
     {% for row in form.children %}
+    
         {% if form.vars.row_inline == false %}
             {{ form_widget(row) }}
         {% else %}
@@ -309,7 +316,8 @@
     <div class="form-filesize form-text text-muted">{{"forms.field.mimeType"|trans2([exts|length, exts|join(', ')|upper])}}</div>
     {% endif %}
 
-    <div class="form-errors form-text text-muted">{{ form_errors(form.raw) }}</div>
+    {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    {{ form_errors(form.raw, {row_attr:row_attr}) }}
 
     {% if multiple %}
     <div id="{{id}}_metadata" class="form-text text-muted"></div>
@@ -422,7 +430,6 @@
 {%- endblock collection2_widget -%}
 
 {%- block collection2_entry_row -%}
-XXX
     {{ form_row(form) }}
 {%- endblock collection2_entry_row -%}
 

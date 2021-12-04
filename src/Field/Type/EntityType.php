@@ -47,14 +47,14 @@ class EntityType extends AbstractType implements DataMapperInterface
             'fields' => [],
             'only_fields' => [],
             'excluded_fields' => [],
-            'allow_recursive' => true,
             
             "multiple" => false,
             'inline' => false,
             'row_inline' => false,
 
             'allow_add' => true,
-            'allow_delete' => true
+            'allow_delete' => true,
+            'allow_recursive' => false,
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -78,15 +78,6 @@ class EntityType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
 
             $form = $event->getForm();
-
-            // Combine allow_recursive with parent if already found in child
-            foreach($options["fields"] as $fieldName => $fieldOptions) {
-
-                if(array_key_exists("allow_recursive", $options["fields"][$fieldName])) {
-                    $options["fields"][$fieldName]["allow_recursive"] 
-                        = $options["fields"][$fieldName]["allow_recursive"] & $options["allow_recursive"];
-                }
-            }
 
             if($options["multiple"]) {
 
@@ -131,6 +122,9 @@ class EntityType extends AbstractType implements DataMapperInterface
                     if(in_array($fieldName, $options["excluded_fields"]))
                         continue;
 
+                    if($options["allow_recursive"] && array_key_exists($form->getName(), $field))
+                        $field = $field[$form->getName()];
+
                     $fieldType = $field['form_type'] ?? (!empty($field['data']) ? HiddenType::class : null);
                     unset($field['form_type']);
 
@@ -138,11 +132,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     if(!array_key_exists("required", $field) && $isNullable)
                         $field['required'] = false;
                     
-                    $fieldRecursive = $field['allow_recursive'] ?? $options["allow_recursive"];
-                    unset($field['allow_recursive']);
-
-                    if ($fieldRecursive)
-                        $form->add($fieldName, $fieldType, $field);
+                    $form->add($fieldName, $fieldType, $field);
                 }
             }
         });
@@ -160,7 +150,7 @@ class EntityType extends AbstractType implements DataMapperInterface
 
             $form = current(iterator_to_array($forms));
             $form->setData($data);
-            
+
         } else if(is_object($entity = $data)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));

@@ -3,39 +3,18 @@
 namespace Base\Form\Extension;
 
 use Base\Service\BaseService;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\Form\Extension\Core\Type\FormType;
+
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\FormBuilderInterface;
-
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\AbstractTypeExtension;
-
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-
-
 class FormTypeBootstrapExtension extends AbstractTypeExtension
 {
-    protected $defaultEnabled;
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-    }
+    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
 
-    /**
-     * {@inheritdoc}
-     */
-    public static function getExtendedTypes(): iterable
-    {
-        return [FormType::class];
-    }
+    public static function getExtendedTypes(): iterable { return [FormType::class]; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -79,7 +58,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
                 case "CheckboxType":
                     self::addAttribute($view, "class", "form-switch form-switch-lg form-check-input");
-                    self::addRowAttribute($view, "class", "form-switch form-switch-lg form-check");
+                    self::addRowAttribute($view, "class", "form-switch form-switch-lg form-group form-check");
                     self::addLabelAttribute($view, "class", "form-check-label");
                     break;
 
