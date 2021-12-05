@@ -56,11 +56,11 @@
 
             .form-group.field-collection.form-control > div:nth-last-child(-n+2) .accordion-item { border-bottom: 0px solid lightgrey; }
 
-            .form-group { padding: 1.5em 0 0 0 !important; }
+            .ea-edit-form > .form-group, .ea-new-form > .form-group  { padding: 1em 0 0 0 !important; }
             #filters { padding: .5em !important; }
             .form-translatable .tab-pane > div:first-child { padding: 0.5em 0 0 0 !important; }
-            .form-translatable .tab-pane > div { margin-bottom: 0.5em !important; }
-            .form-entity > div { margin-bottom: 0em !important; }
+            .form-translatable .tab-pane > div { margin-bottom: 1.5em !important; }
+            .form-entity > div:last-child { margin-bottom: 0em !important; }
             
             .content-top
             {
@@ -93,12 +93,10 @@
                 background-color:white;
             }
 
-            .content-wrapper {
-                padding:0;
-            }
+            .content-wrapper { padding:0; }
 
             .content-body {
-                padding: 0 var(--lg-content-padding-right) 0 var(--lg-content-padding-left);
+                padding: 0 var(--lg-content-padding-right) 5em var(--lg-content-padding-left);
             }
 
             .content-body .ea-edit-form, .content-body .ea-new-form
@@ -187,7 +185,7 @@
 
                 overflow:hidden;
                 box-shadow: 0 0 0 2px var(--white),0 0 4px 1px var(--gray-600) !important;
-                margin: 10px !important;
+                margin: 10px auto !important;
                 
                 max-height: 50px !important;
                 height: 50px !important;

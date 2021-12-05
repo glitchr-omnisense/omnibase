@@ -21,8 +21,8 @@ class WidgetSlotCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield TextField::new('name');
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
+        yield TextField::new('path');
+        foreach ( ($callbacks["path"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield TranslationField::new("label")->setRequired(false);

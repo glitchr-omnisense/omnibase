@@ -11,10 +11,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use \Symfony\Component\Validator\Constraints\Length;
 
-final class StateField implements FieldInterface, SelectFieldInterface
+final class StateField implements FieldInterface
 {
     use FieldTrait;
-    use SelectFieldTrait;
 
     public static function new(string $propertyName, ?string $label = null): self
     {

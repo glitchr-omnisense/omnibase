@@ -30,7 +30,7 @@ class CollectionType extends AbstractType
             'entry_type' => TextType::class,
             'entry_inline' => false,
             'entry_row_inline' => false,
-            'entry_label' => true, // show or not entry label
+            'entry_label' => null,
             'entry_options' => [],
             'entry_required' => null,
             'delete_empty' => false,
@@ -87,7 +87,7 @@ class CollectionType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars['entry_label'] = $options['entry_label'] ?? false;
+        $view->vars['entry_label'] = $options['entry_label'] ?? null;
         $view->vars['entry_inline'] = $options['entry_inline'] ?? false;
         $view->vars['entry_row_inline'] = $options['entry_row_inline'] ?? false;
         $view->vars['allow_add'] = $options['allow_add'] ?? false;

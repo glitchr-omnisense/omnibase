@@ -126,7 +126,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     $entityOptions["row_inline"] = true;
                     $entityOptions["allow_add"] = false;
                     $entityOptions["allow_delete"] = false;
-                    $entityOptions["allow_recursive"] = true;
+                    $entityOptions["recursive"] = true;
                 }
 
                 $form->add($locale, EntityType::class, $entityOptions);
@@ -296,10 +296,16 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
         foreach(iterator_to_array($forms) as $locale => $form) {
 
-            if(!$multiple) $viewData[$locale] = $form->getData();
-            else {
+            if(!$multiple) {
+                
+                $viewData[$locale] = $form->getData();
+                $viewData[$locale]->setLocale($locale);
+
+            } else {
                 
                 foreach($form->getData() as $key => $translation) {
+
+                    $translation->setLocale($locale);
 
                     if(!$translation instanceof TranslationInterface)
                         throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"".get_class($translation)."\" received.");
@@ -312,6 +318,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     }
 
                     if($translation) $viewData[$key][$locale] = $translation;
+                    
                 }
             }
         }

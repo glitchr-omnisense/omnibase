@@ -3,15 +3,10 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-
-use App\Repository\User\TokenRepository;
+use Base\Annotations\Annotation\Slugify;
 use Base\Service\BaseService;
-use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
+
 use Hashids\Hashids;
 
 /**
@@ -28,6 +23,7 @@ class Token
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Slugify(separator="-")
      */
     protected $name;
 
@@ -74,13 +70,14 @@ class Token
         return array_keys(get_object_vars($this));
     }
     
+    public const SEPARATOR = ";";
     public function __toString()
     {
-        return    $this->name .
-            " " . $this->get() .
-            " " . $this->getCreatedAt()->getTimestamp() .
-            " " . $this->getLifetime() .
-            " " . $this->isRevoked();
+        return $this->getName() .
+                self::SEPARATOR . $this->get() .
+                self::SEPARATOR . $this->getCreatedAt()->getTimestamp() .
+                self::SEPARATOR . $this->getLifetime() .
+                self::SEPARATOR . $this->isRevoked();
     }
 
     public function encode()
@@ -94,7 +91,7 @@ class Token
         $hex = $this->hashIds->decodeHex($hash);
         $str = hex2bin($hex);
 
-        list($name, $value, $timestamp, $dT, $isRevoked) = explode(" ", $str);
+        list($name, $value, $timestamp, $dT, $isRevoked) = explode(self::SEPARATOR, $str);
         $this->name = $name;
         $this->value = $value;
 

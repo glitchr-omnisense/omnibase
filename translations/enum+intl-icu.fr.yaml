@@ -1,0 +1,124 @@
+Base\Enum\UserRole: 
+  singular: "générique"
+  plural: "génériques"
+
+  ROLE_SUPERADMIN: 
+    singular: "super administrateur"
+    plural: "super administrateur"
+
+  ROLE_ADMIN: 
+    singular: "administrateur"
+    plural: "administrateurs"
+
+  ROLE_USER: 
+    singular: "utilisateur"
+    plural: "utilisateurs"
+
+  ROLE_SOCIAL: 
+    singular: "compte social"
+    plural: "comptes sorciaux"
+
+Base\Enum\UploadState:
+  singular: "état de téléchargement"
+  plural: "états de téléchargements"
+
+  UPLOAD_ERROR:
+    singular: "erreur inconnue"
+    plural: "erreurs inconnues"
+
+  UPLOAD_FILESIZE:
+    singular: "taille de fichier"
+    plural: "tailles de fichiers"
+
+  UPLOAD_MIMETYPE:
+    singular: "format de fichier"
+    plural: "formats de fichiers"
+
+Base\Enum\ThreadState:
+  singular: "statut"
+  plural: "statut"
+
+  PUBLISHED: 
+    singular: "publié"
+    plural: "publiés"
+  DRAFT: 
+    singular: "brouillon"
+    plural: "brouillons"
+  FUTURE: 
+    singular: "planifié"
+    plural: "planifiés"
+  SECRET: 
+    singular: "invisible"
+    plural: "invisibles"
+  
+  APPROVED: 
+    singular: "approuvé"
+    plural: "approuvés"
+  PENDING: 
+    singular: "en attente"
+    plural: "en attente"
+  REJECTED: 
+    singular: "refusé"
+    plural: "refusés"
+  DELETED: 
+    singular: "supprimé"
+    plural: "supprimés"
+    
+Base\Enum\SpamScore:
+  singular: "score"
+  plural: "scores"
+
+  NO_TEXT: 
+    singular: "texte manquant"
+    plural: "textes manquants"
+  NOT_SPAM: 
+    singular: "texte validé"
+    plural: "textes validés"
+  MAYBE_SPAM: 
+    singular: "spam potentiel"
+    plural: "spam potentiels"
+  MAYBE_SPAM: 
+    singular: "spam détecté"
+    plural: "spam détectés"
+
+Base\Enum\Gender:
+  singular: "genre"
+  plural: "genres"
+
+  MALE: 
+    singular: "homme"
+    plural: "hommes"
+  FEMALE: 
+    singular: "femme"
+    plural: "femme"
+  HYBRID: 
+    singular: "hybride"
+    plural: "hybrides"
+  GENDERLESS:
+    singular: "inconnu"
+    plural: "inconnus"
+
+Base\Enum\LogLevel:
+  singular: "degré"
+  plural: "degrés"
+
+  INFO: 
+    singular: "info"
+    plural: "infos"
+  DEBUG: 
+    singular: "debug"
+    plural: "debug"
+  WARNING: 
+    singular: "danger"
+    plural: "dangers"
+  CRITICAL:
+    singular: "critique"
+    plural: "critiques"
+
+Base\Enum\SpamApi:
+  singular: "spam"
+  plural: "spams"
+
+  AKISMET: 
+    singular: "akismet"
+    plural: "akismet"

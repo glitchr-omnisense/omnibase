@@ -1,0 +1,124 @@
+Base\Enum\UserRole: 
+  singular: "generic"
+  plural: "generics"
+
+  ROLE_SUPERADMIN: 
+    singular: "super administrator"
+    plural: "super administrator"
+
+  ROLE_ADMIN: 
+    singular: "administrator"
+    plural: "administrators"
+
+  ROLE_USER: 
+    singular: "user"
+    plural: "users"
+
+  ROLE_SOCIAL: 
+    singular: "social"
+    plural: "socials"
+
+Base\Enum\UploadState:
+  singular: "upload state"
+  plural: "upload states"
+
+  UPLOAD_ERROR:
+    singular: "unknown error"
+    plural: "unknown errors"
+
+  UPLOAD_FILESIZE:
+    singular: "file size"
+    plural: "file sizes"
+
+  UPLOAD_MIMETYPE:
+    singular: "file mimetype"
+    plural: "file mimetypes"
+
+Base\Enum\ThreadState:
+  singular: "state"
+  plural: "state"
+
+  PUBLISHED: 
+    singular: "published"
+    plural: "published"
+  DRAFT: 
+    singular: "draft"
+    plural: "drafts"
+  FUTURE: 
+    singular: "future"
+    plural: "future"
+  SECRET: 
+    singular: "secret"
+    plural: "secrets"
+  
+  APPROVED: 
+    singular: "approved"
+    plural: "approved"
+  PENDING: 
+    singular: "pending"
+    plural: "pending"
+  REJECTED: 
+    singular: "rejected"
+    plural: "rejected"
+  DELETED: 
+    singular: "deleted"
+    plural: "deleted"
+    
+Base\Enum\SpamScore:
+  singular: "score"
+  plural: "scores"
+
+  NO_TEXT: 
+    singular: "missing text"
+    plural: "missing texts"
+  NOT_SPAM: 
+    singular: "text approved"
+    plural: "texts approved"
+  MAYBE_SPAM: 
+    singular: "potential spam"
+    plural: "potential spams"
+  BLATANT_SPAM: 
+    singular: "blatant spam"
+    plural: "blatant spams"
+
+Base\Enum\Gender:
+  singular: "gender"
+  plural: "genders"
+
+  MALE: 
+    singular: "man"
+    plural: "men"
+  FEMALE: 
+    singular: "woman"
+    plural: "women"
+  HYBRID: 
+    singular: "hybrid"
+    plural: "hybrids"
+  GENDERLESS:
+    singular: "genderless"
+    plural: "genderless"
+
+Base\Enum\LogLevel:
+  singular: "log level"
+  plural: "log levels"
+
+  INFO: 
+    singular: "info"
+    plural: "info"
+  DEBUG: 
+    singular: "debug"
+    plural: "debug"
+  WARNING: 
+    singular: "warning"
+    plural: "warnings"
+  CRITICAL:
+    singular: "critical"
+    plural: "criticals"
+
+Base\Enum\SpamApi:
+  singular: "spam"
+  plural: "spams"
+
+  ASKISMET: 
+    singular: "akismet"
+    plural: "akismet"

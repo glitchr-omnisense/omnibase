@@ -159,7 +159,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
             ]);
             $form->get("translations")->setData($translationData);
 
-            $form->add('valid', SubmitType::class);
+            if(count($fields) > 0) 
+                $form->add('valid', SubmitType::class);
         });
     }
 

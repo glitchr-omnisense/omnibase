@@ -21,26 +21,19 @@ use Symfony\Component\Form\FormView;
 //https://codepen.io/peiche/pen/mRBGmR
 //https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml
 
-class FontAwesomeType extends AbstractType implements SelectTypeInterface
+class FontAwesomeType extends AbstractType
 {
-    use SelectTypeTrait;
-
     protected static $metadata;
 
-    /** @var BaseService */
+    public function getParent() : ?string { return SelectType::class; }
+    public function getBlockPrefix(): string { return 'icons'; }
+
     protected $baseService;
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
     }
-
-    public function buildView(FormView $view, FormInterface $form, array $options)
-    {
-        // Import select2
-        $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);
-        $this->baseService->addHtmlContent("stylesheets", $options["select2-css"]);
-    }
-
+    
     public function configureOptions(OptionsResolver $resolver)
     {
         if (empty(self::$metadata))
@@ -75,14 +68,6 @@ class FontAwesomeType extends AbstractType implements SelectTypeInterface
         }
 
         return $choices;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent() : ?string
-    {
-        return SelectType::class;
     }
 
     /*
@@ -164,11 +149,4 @@ class FontAwesomeType extends AbstractType implements SelectTypeInterface
         return self::$icons[$name]["unicode"];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'icons';
-    }
 }

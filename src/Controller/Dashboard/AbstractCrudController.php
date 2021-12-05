@@ -3,6 +3,7 @@
 namespace Base\Controller\Dashboard;
 
 use Base\Config\Extension;
+use Base\Field\IdField;
 use Base\Field\LinkIdField;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -125,7 +126,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         $defaultCallback = function() { return []; };
 
-        yield LinkIdField::new('id')->hideOnForm();
+        yield IdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

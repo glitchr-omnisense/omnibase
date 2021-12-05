@@ -2,22 +2,15 @@
 
 namespace Base\Controller\Dashboard\Crud;
 
-use Base\Config\CrudExtra;
-use Base\Config\DashboardExtra;
-use Base\Config\Extension;
 use Base\Controller\Dashboard\AbstractCrudController;
-use Base\Entity\User;
 use Base\Field\AvatarField;
 
 use Base\Field\PasswordField;
-use Base\Field\ImpersonateField;
-use Base\Field\LinkIdField;
 use Base\Field\RoleField;
 use Base\Field\BooleanField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;

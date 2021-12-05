@@ -3,11 +3,21 @@
 namespace Base\Database\Types;
 
 use Base\Database\NamingStrategy;
+use Base\Model\IconInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use UnexpectedValueException;
 
-abstract class SetType extends Type
+abstract class SetType extends Type implements IconInterface
 {
+    public static function getIcons(int $pos = -1, ...$arrays): array
+    {
+        return array_map(function($values) use ($pos) {
+            if(is_array($values)) return ($pos < 0 ? $values : $values[$pos] ?? end($values));
+            else return $values;
+        }, array_union(...$arrays));
+    }
+
     public static function getStaticName() { 
         $array = explode('\\', get_called_class());
         return NamingStrategy::camelToSnakeCase(end($array));
@@ -21,6 +31,9 @@ abstract class SetType extends Type
 
         if(!$permittedValues)
             throw new \Exception("Set type \"".get_called_class()."\" is empty");
+
+        if( ($missingKeys = array_key_missing(get_called_class()::getIcons(), $permittedValues)) )
+            throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
 
         return $permittedValues;
     }

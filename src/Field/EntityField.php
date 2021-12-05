@@ -14,17 +14,14 @@ final class EntityField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_RENDER_FORMAT   = "renderFormat";
-
-    public const OPTION_DROPZONE = 'dropzone';
-    public const OPTION_DROPZONE_LABEL = 'dropzone_label';
+    public const OPTION_CRUD_CONTROLLER = 'crudControllerFqcn';
 
     public const OPTION_ALLOW_ADD = 'allowAdd';
     public const OPTION_ALLOW_DELETE = 'allowDelete';
-    public const OPTION_ENTRY_IS_COMPLEX = 'entryIsComplex';
-    public const OPTION_ENTRY_TYPE = 'entryType';
-    public const OPTION_SHOW_ENTRY_LABEL = 'showEntryLabel';
 
-    public const OPTION_AUTOLOAD = "autoload";
+    public const OPTION_SHOWFIRST = 'showFirst';
+    public const OPTION_RELATED_URL = 'relatedUrl';
+    public const OPTION_DOCTRINE_ASSOCIATION_TYPE = 'associationType';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -39,9 +36,12 @@ final class EntityField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/entity.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("class", null)
-            ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
-            ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
-            ->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
+            ->setFormTypeOption("multiple", true)
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, "text")
+            ->setCustomOption(self::OPTION_SHOWFIRST, false)
+            ->setCustomOption(self::OPTION_CRUD_CONTROLLER, null)
+            ->setCustomOption(self::OPTION_RELATED_URL, null)
+            ->setCustomOption(self::OPTION_DOCTRINE_ASSOCIATION_TYPE, null);
     }
 
     public function allowDelete(bool $allowDelete = true): self
@@ -50,21 +50,21 @@ final class EntityField implements FieldInterface
         return $this;
     }
 
+    public function allowAdd(bool $allowAdd = true): self
+    {
+        $this->setFormTypeOption("allow_add", $allowAdd);
+        return $this;
+    }
+
     public function autoload($autoload = true): self
     {
-        $this->setFormTypeOption(self::OPTION_AUTOLOAD, $autoload);
+        $this->setFormTypeOption("autoload", $autoload);
         return $this;
     }
 
-    public function renderAsList(): self
+    public function renderAsCount(): self
     {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
-        return $this;
-    }
-
-    public function renderAsSelect2(): self
-    {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "select2");
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
         return $this;
     }
 
@@ -74,18 +74,9 @@ final class EntityField implements FieldInterface
         return $this;
     }
 
-
     public function setClass($dataClass): self
     {
         $this->setFormTypeOption("class", $dataClass);
-        return $this;
-    }
-
-    public function renderAsDropzone(string $uploaderProperty, ?string $labelProperty = null): self
-    {
-        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "dropzone");
-        $this->setCustomOption(self::OPTION_DROPZONE, $uploaderProperty);
-        $this->setCustomOption(self::OPTION_DROPZONE_LABEL, $labelProperty);
         return $this;
     }
 }

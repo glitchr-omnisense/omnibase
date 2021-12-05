@@ -62,7 +62,7 @@ class Thread implements TranslatableInterface
         $this->setState(ThreadState::DRAFT);
     }
 
-    public function __toString() {return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
+    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
 
     public static function whoAmI(): string
     {

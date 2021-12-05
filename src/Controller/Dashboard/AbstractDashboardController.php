@@ -30,7 +30,7 @@ use Base\Config\WidgetItem;
 use Base\Service\BaseService;
 use Base\Field\Type\RoleType;
 
-use Base\Enum\UserRole;
+use App\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Sitemap\SettingListType;
@@ -148,13 +148,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
-            dump($data);
-
             $settings = $this->baseService->getSettings()->get($fields);
-            dump($settings, $fields);
             $settings = array_filter($settings, fn($value) => !is_null($value));
-            dump($settings);
-    
+            
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
@@ -250,13 +246,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 
             $menu[] = MenuItem::section('MEMBERSHIP');
-            $roles = RoleType::array_flatten(RoleType::getChoices());
+            $roles = UserRole::getIcons();
 
             foreach ($roles as $label => $role) {
 
                 if ($role == UserRole::USER) continue;
                 $value = $label;
-                $icon  = RoleType::getAltIcons()[$role] ?? "fas fa-fw";
+                $icon  = current(RoleType::getIcons()[$role]) ?? "fas fa-fw";
 
                 $url = $this->adminUrlGenerator
                     ->unsetAll()

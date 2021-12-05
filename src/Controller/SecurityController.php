@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use App\Entity\User;
+use Base\Entity\User;
 
 use Base\Entity\User\Notification;
 use Base\Service\BaseService;
@@ -229,7 +229,7 @@ class SecurityController extends AbstractController
      * @Route("/verify-email/{token}", name="base_verifyEmail_token")
      * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
-    public function VerifyEmailResponse(Request $request): Response
+    public function VerifyEmailResponse(Request $request, string $token): Response
     {
         $user = $this->getUser();
         $user->removeExpiredTokens("verify-email");
@@ -240,24 +240,34 @@ class SecurityController extends AbstractController
             $notification->setUser($user);
             $notification->send('warning');
 
-        } else if (!($verifyEmailToken = $user->getValidToken("verify-email"))) {
-
-            $notification = new Notification("notifications.verifyEmail.invalidToken");
-            $notification->send("danger");
-
         } else {
+            
+            $verifyEmailToken = $user->getValidToken("verify-email");
+            if (!$verifyEmailToken) {
 
-            $user->setIsVerified(true);
-            $verifyEmailToken->revoke();
+                $notification = new Notification("notifications.verifyEmail.invalidToken");
+                $notification->send("danger");
+            
+            } else if($verifyEmailToken->get() == $token) {
 
-            $notification = new Notification("notifications.verifyEmail.success");
-            $notification->setUser($user);
-            $notification->send('success');
+                $user->setIsVerified(true);
+                $verifyEmailToken->revoke();
 
-            if (!$user->isApproved()) // If the account needs further validation by admin..
-                $this->AdminApprovalRequest($request);
+                $notification = new Notification("notifications.verifyEmail.success");
+                $notification->setUser($user);
+                $notification->send('success');
+
+                if (!$user->isApproved()) // If the account needs further validation by admin..
+                    $this->AdminApprovalRequest($request);
+
+            } else {
+
+                $notification = new Notification("notifications.verifyEmail.failed");
+                $notification->setUser($user);
+                $notification->send('danger');
+            }
         }
-
+        
         $this->getDoctrine()->getManager()->flush();
         return $this->redirectToRoute('base_profile');
     }

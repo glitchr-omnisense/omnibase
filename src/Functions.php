@@ -116,9 +116,9 @@ namespace {
         return false;
     }
 
-    function array_is_associative(?array $arr)
+    function array_is_associative(array $arr)
     {
-        if(!$arr) return (gettype($arr) == "array");
+        if(!$arr) return false;
 
         $keys = array_keys($arr);
         foreach($keys as $key)
@@ -176,5 +176,25 @@ namespace {
         }
 
         return $result;
+    }
+
+    function array_key_missing($keys, array $array) 
+    {
+        if(!is_array($keys)) $keys = [$keys => null];
+
+        $keys = array_keys($keys);
+        if(array_is_associative($keys))
+            throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
+
+        return array_diff($array, $keys);
+    }
+
+    function array_union(...$arrays) 
+    {
+        $union = [];
+        foreach($arrays as $array)
+            $union += $array;
+
+        return $union;
     }
 }

@@ -2,19 +2,14 @@
 
 namespace Base\Field;
 
-use Base\Field\Traits\SelectFieldInterface;
-use Base\Field\Traits\SelectFieldTrait;
 use Base\Field\Type\GenderType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use \Symfony\Component\Validator\Constraints\Length;
-
-final class GenderField implements FieldInterface, SelectFieldInterface
+final class GenderField implements FieldInterface
 {
     use FieldTrait;
-    use SelectFieldTrait;
 
     public static function new(string $propertyName, ?string $label = null): self
     {

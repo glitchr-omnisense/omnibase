@@ -2,18 +2,15 @@
 
 namespace Base\Field\Type;
 
-use Base\Field\Traits\SelectTypeInterface;
-use Base\Field\Traits\SelectTypeTrait;
+use Base\Service\BaseService;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\ChoiceList\ChoiceList;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
-
-class GenderType extends AbstractType implements SelectTypeInterface
+class GenderType extends AbstractType
 {
-    use SelectTypeTrait;
+    public function getParent() : ?string { return SelectType::class; }
+    public function getBlockPrefix(): string { return 'gender'; }
 
     public static function getChoices(): array
     {

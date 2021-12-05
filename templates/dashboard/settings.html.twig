@@ -1,4 +1,12 @@
 {% extends "@EasyAdmin/layout.html.twig" %}
 {% block content %}
-{{ form(form) }}
+
+{% if form.children|length > 1 %}
+    {{ form(form) }}
+{% else %}
+    <div class="text-center">
+    {{"dashboard.controllers.settings.empty"|trans2}}
+    </div>
+{% endif %}
+
 {% endblock %}

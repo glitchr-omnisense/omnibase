@@ -2,17 +2,16 @@
 
 namespace Base\Field;
 
-use Base\Field\Traits\SelectFieldInterface;
-use Base\Field\Traits\SelectFieldTrait;
 use Base\Field\Type\RoleType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-final class RoleField implements FieldInterface, SelectFieldInterface
+final class RoleField implements FieldInterface
 {
     use FieldTrait;
-    use SelectFieldTrait;
+
+    public const OPTION_ALLOW_MULTIPLE_CHOICES = 'allowMultipleChoices';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -21,7 +20,12 @@ final class RoleField implements FieldInterface, SelectFieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(RoleType::class)
-            // ->setTemplatePath('@EasyAdmin/crud/field/role.html.twig');
-           ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
+    }
+
+    public function allowMultipleChoices(bool $allow = true): self
+    {
+        $this->setCustomOption(self::OPTION_ALLOW_MULTIPLE_CHOICES, $allow);
+        return $this;
     }
 }

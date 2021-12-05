@@ -8,6 +8,9 @@ use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Entity\Sitemap\Widget\Hyperlink;
+use Base\Field\EntityField;
+use Base\Field\RelationField;
 
 class HyperpatternCrudController extends AbstractCrudController
 {
@@ -23,11 +26,13 @@ class HyperpatternCrudController extends AbstractCrudController
 
         yield TextField::new("pattern")->hideOnIndex();
 
-        yield SlugField::new('name')->setTargetFieldName("translations.label");
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
+        yield SlugField::new('path')->setTargetFieldName("translations.label");
+        foreach ( ($callbacks["path"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield TranslationField::new("label");
+
+        yield EntityField::new("hyperlinks")->renderAsCount()->hideOnForm();
 
         yield TextField::new('pattern');
         foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)

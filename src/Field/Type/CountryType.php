@@ -2,27 +2,24 @@
 
 namespace Base\Field\Type;
 
-use Base\Field\Traits\SelectTypeInterface;
-use Base\Field\Traits\SelectTypeTrait;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\ChoiceList\ChoiceList;
+use Base\Service\BaseService;
 use Symfony\Component\Intl\Countries;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\Form\ChoiceList\View\ChoiceView;
+use Symfony\Component\Form\AbstractType;
 
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
-
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
-
-class CountryType extends AbstractType implements SelectTypeInterface
+class CountryType extends AbstractType
 {
-    use SelectTypeTrait;
+    public function getParent() : ?string { return SelectType::class; }
+    public function getBlockPrefix(): string { return 'country'; }
+
+    protected $baseService;
+    public function __construct(BaseService $baseService)
+    {
+        $this->baseService = $baseService;
+    }
 
     private static $additionalList = [];
     private static $rejectCountryList = [ // Rejected just because missing flag.. to do later
@@ -87,21 +84,5 @@ class CountryType extends AbstractType implements SelectTypeInterface
             }
         ]);
 
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent() : ?string
-    {
-        return SelectType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'country';
     }
 }

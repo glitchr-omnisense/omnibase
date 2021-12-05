@@ -2,19 +2,18 @@
 
 namespace Base\Field\Type;
 
-use Base\Entity\User;
 use Base\Enum\UserRole;
-use Base\Field\Traits\SelectTypeInterface;
-use Base\Field\Traits\SelectTypeTrait;
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 
-class RoleType extends AbstractType implements SelectTypeInterface
+class RoleType extends AbstractType
 {
-    use SelectTypeTrait;
-    
+    public function getParent() : ?string { return SelectType::class; }
+    public function getBlockPrefix(): string { return 'role'; }
+
     public static function getChoices(): array
     {
         return [
@@ -59,21 +58,5 @@ class RoleType extends AbstractType implements SelectTypeInterface
                     return 'Please select a role.';
             }
         ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent() : ?string
-    {
-        return SelectType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'role';
     }
 }

@@ -2,17 +2,14 @@
 
 namespace Base\Field;
 
-use Base\Field\Traits\SelectFieldInterface;
-use Base\Field\Traits\SelectFieldTrait;
 use Base\Field\Type\CountryType;
-
+use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-final class CountryField implements FieldInterface, SelectFieldInterface
+final class CountryField implements FieldInterface
 {
     use FieldTrait;
-    use SelectFieldTrait;
 
     public static function new(string $propertyName, ?string $label = null): self
     {

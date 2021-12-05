@@ -113,7 +113,8 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 $form->get($formattedWidget)->setData($widgetOptions["multiple"] ? array_map(fn($w) => strval($w), $widgets) : strval($widgets[0] ?? null));
             }
 
-            $form->add('valid', SubmitType::class);
+            if(count($options["widgets"]) > 0)
+                $form->add('valid', SubmitType::class);
         });
     }
 

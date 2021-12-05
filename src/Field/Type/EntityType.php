@@ -6,6 +6,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -40,26 +41,33 @@ class EntityType extends AbstractType implements DataMapperInterface
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        parent::configureOptions($resolver);
+        
         $resolver->setDefaults([
             'class' => null,
             'form_type' => null,
-            'autoload' => false,
+            'autoload' => true,
+
             'fields' => [],
             'only_fields' => [],
             'excluded_fields' => [],
             
+            'recursive' => false,
             "multiple" => false,
             'inline' => false,
             'row_inline' => false,
 
             'allow_add' => true,
             'allow_delete' => true,
-            'allow_recursive' => false,
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
             if($options["multiple"]) return null;
-            return $value ?? $options["class"];
+            return $value ?? null;
+        });
+
+        $resolver->setNormalizer('autoload', function (Options $options, $value) {
+            return $options["fields"] ? false : $value;
         });
     }
 
@@ -89,7 +97,6 @@ class EntityType extends AbstractType implements DataMapperInterface
                     'by_reference' => false,
                     "entry_inline" => $options["inline"],
                     "entry_row_inline" => $options["row_inline"],
-                    "entry_label" => $options["label"],
                     'entry_type' => EntityType::class,
                     'entry_options' => array_merge($options, [
                         'data_class' => $dataClass,
@@ -97,17 +104,22 @@ class EntityType extends AbstractType implements DataMapperInterface
                         'label' => false
                     ]),
                 ];
-
+                
                 if ($options["allow_add"] !== null) 
                     $collectionOptions['allow_add'] = $options["allow_add"];
                 if ($options["allow_delete"] !== null) 
                     $collectionOptions['allow_delete'] = $options["allow_delete"];
 
                 $form->add($form->getName(), CollectionType::class, $collectionOptions);
-               
+
             } else {
 
                 $dataClass = $options["class"] ?? $this->classMetadataManipulator->getDataClass($form);
+                if(!$dataClass)
+                    throw new \RuntimeException(
+                        'Unable to get "class" or compute "data_class" from form "'.$form->getName().'" or any of its parents. '.
+                        'Please define "class" option in the main EntityType you defined or make sure there is a way to guess the expected output information');
+
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
                 
                 $fields = $options["fields"];
@@ -122,7 +134,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     if(in_array($fieldName, $options["excluded_fields"]))
                         continue;
 
-                    if($options["allow_recursive"] && array_key_exists($form->getName(), $field))
+                    if($options["recursive"] && array_key_exists($form->getName(), $field))
                         $field = $field[$form->getName()];
 
                     $fieldType = $field['form_type'] ?? (!empty($field['data']) ? HiddenType::class : null);

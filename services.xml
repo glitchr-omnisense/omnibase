@@ -26,6 +26,13 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Controller\SelectController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+        </service>
+
+            
+
         <service id="Base\Subscriber\BaseSubscriber">
             <tag name="kernel.event_subscriber" />            
             <argument type="service" id="base.service" />
@@ -349,7 +356,7 @@
         <service id="Base\Security\UserChecker"           >
             <argument type="service" id="base.service" />
         </service>
-        
+
         <service id="Base\Security\UserProvider"           />
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -387,6 +394,8 @@
 
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -415,12 +424,6 @@
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
-
-        <service id="Base\Field\Type\RelationType">
-            <tag name="form.type" />
-            <argument type="service" id="doctrine" />
-        </service>
-
 
         <service id="Base\Field\Type\FontAwesomeType">
             <tag name="form.type" />
@@ -476,6 +479,10 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Configurator\IdConfigurator">
+            <tag name="ea.field_configurator" />
+        </service>
+
         <service id="Base\Field\Configurator\CollectionConfigurator">
             <tag name="ea.field_configurator" />
         </service>
@@ -506,10 +513,6 @@
             <argument type="service" id="base.locale_provider" />
         </service>
 
-        <service id="Base\Field\Configurator\FontAwesomeConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
-
         <service id="Base\Field\Configurator\BooleanConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
@@ -521,36 +524,10 @@
 
         <service id="Base\Field\Configurator\EntityConfigurator">
             <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Field\Configurator\CountryConfigurator">
-            <tag name="ea.field_configurator" />
-            <argument type="service" id="assets.packages" />
-            <argument type="service" id="translator" />
-        </service>
-        <service id="Base\Field\Configurator\GenderConfigurator">
-            <tag name="ea.field_configurator" />
-            <argument type="service" id="assets.packages" />
-        </service>
-        <service id="Base\Field\Configurator\RoleConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
-        <service id="Base\Field\Configurator\StateConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
-        <service id="Base\Field\Configurator\RelationConfigurator">
-            <tag name="ea.field_configurator" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="translator" />
-        </service>
-        <service id="Base\Field\Configurator\EntityConfigurator">
-            <tag name="ea.field_configurator" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="translator" />
-        </service>
-        
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Dashboard\AbstractDashboardController">
             <tag name="controller.service_arguments" />

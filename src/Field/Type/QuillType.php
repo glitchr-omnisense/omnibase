@@ -65,14 +65,6 @@ class QuillType extends AbstractType
     /**
      * {@inheritdoc}
      */
-    public function getParent() : ?string
-    {
-        return DivType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix(): string
     {
         return 'quill';

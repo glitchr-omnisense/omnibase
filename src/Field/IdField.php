@@ -5,14 +5,13 @@ namespace Base\Field;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-/**
- * @author Javier Eguiluz <javier.eguiluz@gmail.com>
- */
-final class LinkIdField implements FieldInterface
+
+final class IdField implements FieldInterface
 {
     use FieldTrait;
 
     public const OPTION_MAX_LENGTH = 'maxLength';
+    public const OPTION_ADD_LINK = 'addLink';
 
     public static function new(string $propertyName = "id", ?string $label = null): self
     {
@@ -20,10 +19,11 @@ final class LinkIdField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/id')
-            ->setTemplatePath('@EasyAdmin/crud/field/linkId.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/id.html.twig')
             ->setFormType(TextType::class)
             ->addCssClass('field-id')
-            ->setCustomOption(self::OPTION_MAX_LENGTH, null);
+            ->setCustomOption(self::OPTION_MAX_LENGTH, null)
+            ->setCustomOption(self::OPTION_ADD_LINK, true);
     }
 
     /**
@@ -36,6 +36,17 @@ final class LinkIdField implements FieldInterface
 
         $this->setCustomOption(self::OPTION_MAX_LENGTH, $length);
 
+        return $this;
+    }
+
+    public function enableLink() 
+    {
+        $this->setCustomOption(self::OPTION_ADD_LINK, true);
+        return $this;
+    }
+    public function disableLink() 
+    {
+        $this->setCustomOption(self::OPTION_ADD_LINK, false);
         return $this;
     }
 }

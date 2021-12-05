@@ -45,7 +45,7 @@ class SpamChecker
     {
         switch($api) {
 
-            case SpamApi::ASKISMET:
+            case SpamApi::AKISMET:
                 return $this->baseService->getParameterBag("base.spam.askismet");
 
             default:
@@ -57,7 +57,7 @@ class SpamChecker
     {
         switch($api) {
 
-            case SpamApi::ASKISMET:
+            case SpamApi::AKISMET:
                 return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $this->getKey($api));
             
             default:
@@ -70,7 +70,7 @@ class SpamChecker
      *
      * @throws \RuntimeException if the call did not work
      */
-    public function getScore(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::ASKISMET): int
+    public function getScore(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {
         if(empty($candidate->getSpamText()))
             return SpamScore::NO_TEXT;
@@ -81,7 +81,7 @@ class SpamChecker
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");
 
-            case SpamApi::ASKISMET :
+            case SpamApi::AKISMET :
                 $options = [
                     'body' => array_merge($context, [
                         'is_test' => $this->baseService->isDebug(),

@@ -108,6 +108,7 @@ class WidgetSlot implements TranslatableInterface
 
         return $this;
     }
+
     public function removeWidget(Widget $widget): self
     {
         $this->widgets->removeElement($widget);

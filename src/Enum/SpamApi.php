@@ -6,5 +6,14 @@ use Base\Database\Types\EnumType;
 
 class SpamApi extends EnumType
 {
-    const ASKISMET      = "ASKISMET";
+    const AKISMET      = "AKISMET";
+    
+    public static function getIcons(int $pos = -1, ...$arrays): array
+    {
+        $arrays[] = [
+            self::AKISMET => ["fas fa-backspace"],
+        ];
+
+        return parent::getIcons($pos, ...$arrays);
+    }
 }
