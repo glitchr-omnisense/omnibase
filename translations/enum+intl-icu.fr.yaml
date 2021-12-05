@@ -77,7 +77,7 @@ Base\Enum\SpamScore:
   MAYBE_SPAM: 
     singular: "spam potentiel"
     plural: "spam potentiels"
-  MAYBE_SPAM: 
+  BLATANT_SPAM: 
     singular: "spam détecté"
     plural: "spam détectés"
 
