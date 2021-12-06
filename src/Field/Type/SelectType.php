@@ -94,6 +94,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'tokenSeparators'    => [' ', ',', ';'],
             'closeOnSelect'      => false,
             'selectOnClose'      => false,
+            'minimumResultsForSearch' => -1,
 
             // Autocomplete 
             'autocomplete'          => false,
@@ -102,6 +103,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'autocomplete-delay'    => 500,
             'autocomplete-type'     => $this->baseService->isDebug() ? "GET" : "POST",
 
+            // Sortable option
             'sortable'              => false
         ]);
 
@@ -179,7 +181,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "dataType" => "json",
                 "cache" => true,
             ];
-
+            
+            if(!array_key_exists("minimumResultsForSearch", $selectOpts))
+                     $selectOpts["minimumResultsForSearch"] = $options["minimumResultsForSearch"];
             if(!array_key_exists("closeOnSelect", $selectOpts))
                      $selectOpts["closeOnSelect"] = $options["closeOnSelect"];
             if(!array_key_exists("selectOnClose", $selectOpts))

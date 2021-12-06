@@ -49,7 +49,6 @@ class Hyperpattern extends WidgetSlot implements IconizeInterface
 
     /**
      * @ORM\Column(type="text")
-     * @Assert\Url()
      */
     protected $pattern;
     public function getPattern(): string { return $this->pattern; }
