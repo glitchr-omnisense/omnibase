@@ -43,15 +43,7 @@ class FontAwesomeType extends AbstractType
             'fontawesome-js'    => $this->baseService->getParameterBag("base.vendor.font_awesome.js"),
             'fontawesome-css'   => $this->baseService->getParameterBag("base.vendor.font_awesome.css"),
 
-            'choices' => self::getChoices(),
-            'choice_icons' => self::getIcons(),
-            'choice_attr' => function (?string $entry) {
-                return $entry ? ['data-icon' => "fa-fw " . $entry] : [];
-            },
-
-            'invalid_message' => function (Options $options, $previousValue) {
-                    return 'Please select a icon.';
-            }
+            'choices' => self::getChoices()
         ]);
     }
 

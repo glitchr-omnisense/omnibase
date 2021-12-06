@@ -2,19 +2,19 @@ user_role:
   singular: "générique"
   plural: "génériques"
 
-  ROLE_SUPERADMIN: 
+  role_superadmin: 
     singular: "super administrateur"
     plural: "super administrateur"
 
-  ROLE_ADMIN: 
+  role_admin: 
     singular: "administrateur"
     plural: "administrateurs"
 
-  ROLE_USER: 
+  role_user: 
     singular: "utilisateur"
     plural: "utilisateurs"
 
-  ROLE_SOCIAL: 
+  role_social: 
     singular: "réseau social"
     plural: "réseaux sociaux"
 
@@ -22,15 +22,15 @@ upload_state:
   singular: "état de téléchargement"
   plural: "états de téléchargements"
 
-  UPLOAD_ERROR:
+  upload_error:
     singular: "erreur inconnue"
     plural: "erreurs inconnues"
 
-  UPLOAD_FILESIZE:
+  upload_filesize:
     singular: "taille de fichier"
     plural: "tailles de fichiers"
 
-  UPLOAD_MIMETYPE:
+  upload_mimetype:
     singular: "format de fichier"
     plural: "formats de fichiers"
 
@@ -38,29 +38,29 @@ thread_state:
   singular: "statut"
   plural: "statut"
 
-  PUBLISHED: 
+  published: 
     singular: "publié"
     plural: "publiés"
-  DRAFT: 
+  draft: 
     singular: "brouillon"
     plural: "brouillons"
-  FUTURE: 
+  future: 
     singular: "planifié"
     plural: "planifiés"
-  SECRET: 
+  secret: 
     singular: "invisible"
     plural: "invisibles"
   
-  APPROVED: 
+  approved: 
     singular: "approuvé"
     plural: "approuvés"
-  PENDING: 
+  pending: 
     singular: "en attente"
     plural: "en attente"
-  REJECTED: 
+  rejected: 
     singular: "refusé"
     plural: "refusés"
-  DELETED: 
+  deleted: 
     singular: "supprimé"
     plural: "supprimés"
     
@@ -68,16 +68,16 @@ spam_score:
   singular: "score"
   plural: "scores"
 
-  NO_TEXT: 
+  no_text: 
     singular: "texte manquant"
     plural: "textes manquants"
-  NOT_SPAM: 
+  not_spam: 
     singular: "texte validé"
     plural: "textes validés"
-  MAYBE_SPAM: 
+  maybe_spam: 
     singular: "spam potentiel"
     plural: "spam potentiels"
-  BLATANT_SPAM: 
+  blatant_spam: 
     singular: "spam détecté"
     plural: "spam détectés"
 
@@ -85,16 +85,16 @@ gender:
   singular: "genre"
   plural: "genres"
 
-  MALE: 
+  male: 
     singular: "homme"
     plural: "hommes"
-  FEMALE: 
+  female: 
     singular: "femme"
     plural: "femme"
-  HYBRID: 
+  hybrid: 
     singular: "hybride"
     plural: "hybrides"
-  GENDERLESS:
+  genderless:
     singular: "inconnu"
     plural: "inconnus"
 
@@ -102,16 +102,16 @@ log_level:
   singular: "degré"
   plural: "degrés"
 
-  INFO: 
+  info: 
     singular: "info"
     plural: "infos"
-  DEBUG: 
+  debug: 
     singular: "debug"
     plural: "debug"
-  WARNING: 
+  warning: 
     singular: "danger"
     plural: "dangers"
-  CRITICAL:
+  critical:
     singular: "critique"
     plural: "critiques"
 
@@ -119,6 +119,6 @@ spam_api:
   singular: "spam"
   plural: "spams"
 
-  AKISMET: 
+  akismet: 
     singular: "akismet"
     plural: "akismet"

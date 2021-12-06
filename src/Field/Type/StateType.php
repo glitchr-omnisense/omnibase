@@ -10,68 +10,16 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class StateType extends AbstractType implements SelectTypeInterface
+class StateType extends AbstractType
 {
-    use SelectTypeTrait;
-
-    public static function getChoices(): array
-    {
-        return [
-            "Published" => ThreadState::PUBLISHED,
-            "Draft"     => ThreadState::DRAFT,
-            "Future"    => ThreadState::FUTURE,
-            "Private"   => ThreadState::SECRET,
-
-            "Approved"  => ThreadState::APPROVED,
-            "Pending"   => ThreadState::PENDING,
-            "Rejected"  => ThreadState::REJECTED,
-            "Deleted"   => ThreadState::DELETED
-        ];
-    }
-
-    public static function getIcons(): array
-    {
-        return [
-            ThreadState::PUBLISHED => "fas fa-fw fa-eye",
-            ThreadState::DRAFT     => "fas fa-fw fa-drafting-compass",
-            ThreadState::FUTURE    => "fas fa-fw fa-spinner",
-            ThreadState::SECRET    => "fas fa-fw fa-eye-slash",
-
-            ThreadState::APPROVED  => "fas fa-fw fa-check-circle",
-            ThreadState::PENDING   => "fas fa-fw fa-pause-circle",
-            ThreadState::REJECTED  => "fas fa-fw fa-times-circle",
-            ThreadState::DELETED   => "fas fa-fw fa-ban",
-        ];
-    }
+    public function getParent() : ?string { return SelectType::class; }
+    public function getBlockPrefix(): string { return 'state'; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'choices' => self::getChoices(),
-            'choice_icons' => self::getIcons(),
-            'choice_attr' => function (?string $entry) {
-                return $entry ? ['data-icon' => self::getIcons()[$entry]] : [];
-            },
-            'empty_data'   => ThreadState::DRAFT,
-            'invalid_message' => function (Options $options, $previousValue) {
-                    return 'Please select a status.';
-            }
+            'class'      => ThreadState::class,
+            'empty_data' => ThreadState::DRAFT
         ]);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent() : ?string
-    {
-        return SelectType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'status';
     }
 }

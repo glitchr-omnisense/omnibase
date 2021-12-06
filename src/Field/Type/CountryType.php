@@ -66,22 +66,13 @@ class CountryType extends AbstractType
         return array_flip(self::getNames());
     }
 
-    public static function getIcons(): array
-    {
-        return [];
-    }
-
     public function configureOptions(OptionsResolver $resolver)
     {
+        //            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->baseService->getUrl("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }"
+
         $resolver->setDefaults([
             'choices' => $this->getChoices(),
-            'choice_translation_domain' => false,
-            'choice_translation_locale' => null,
-            'alpha3' => false,
-            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->baseService->getUrl("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }",
-            'invalid_message' => function (Options $options, $previousValue) {
-                return 'Please select a valid country.';
-            }
+            'alpha3' => false
         ]);
 
     }

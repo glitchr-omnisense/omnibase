@@ -3,14 +3,8 @@
 namespace Base\Controller;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Types\EnumType;
-use Base\Database\Types\SetType;
 use Base\Field\Type\SelectType;
-use Base\Model\AutocompleteInterface;
-use Base\Model\IconizeInterface;
-use Base\Repository\Sitemap\Widget\PageRepository;
 use Base\Service\BaseService;
-use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
@@ -18,19 +12,19 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
-use Http\Discovery\Exception\NotFoundException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectController extends AbstractController
 {
-    public function __construct(EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
         $this->hashIds = new Hashids();
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->paginator = $paginator;
+        $this->translator = $translator;
         $this->baseService = $baseService;
     }
 
@@ -51,11 +45,12 @@ class SelectController extends AbstractController
      */
     public function Autocomplete(Request $request, string $hashid): Response
     {
-        $dict  = $this->decode($hashid);
-        $token = $dict["token"] ?? null;
-        $fields = $dict["fields"] ?? null;
-        $class  = $dict["class"] ?? null;
-        
+        $dict    = $this->decode($hashid);
+        $token   = $dict["token"] ?? null;
+        $fields  = $dict["fields"] ?? null;
+        $filters = $dict["filters"] ?? null;
+        $class   = $dict["class"] ?? null;
+
         $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
         
@@ -71,31 +66,48 @@ class SelectController extends AbstractController
 
                     $fields = array_fill_keys($fields, $term);
                     $entries = $repository->findByInsensitivePartialModel($fields);
+                    if($filters) $entries = array_filter($entries, function($entry) use ($filters) {
+
+                        foreach($filters as $filter)
+                            if(is_subclass_of($entry, $filter)) return true;
+
+                        return false;
+                    });
+
                     $book = $this->paginator->paginate($entries, $page);
                     $pagination = $book->getTotalPages() == $book->getPage();
 
                 } else {
 
                     $entries = $repository->findAll(); // If no field, then get them all..
+                    if($filters) $entries = array_filter($entries, function($entry) use ($filters) {
+
+                        foreach($filters as $filter)
+                            if(is_subclass_of($entry, $filter)) return true;
+
+                        return false;
+                    });
+                    
                     if($term) $entries = array_filter($entries, fn($e) => str_contains(strval($e), $term));
 
                     $pagination = false;
                 }
 
                 foreach($entries as $i => $entry)
-                    $results[] = SelectType::getFormattedValues($entry, $class);
+                    $results[] = SelectType::getFormattedValues($entry, $class, $this->translator);
 
-            } else if ($class instanceof EnumType || $class instanceof SetType) {
+            } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = SelectType::getFormattedValues($values, $class);
+                    $results[] = SelectType::getFormattedValues($value, $class, $this->translator);
             }
 
             $array = [];
             $array["pagination"] = ["more" => $pagination];
-            $array["results"] = !empty($results) ? $results : null;
-            
+            $array["results"] = !empty($results) ? $results : [];
+            $array["results"] = array_filter($array["results"], fn($r) => str_contains(strval($r["text"]), $term));
+
             return new JsonResponse($array);
         }
         

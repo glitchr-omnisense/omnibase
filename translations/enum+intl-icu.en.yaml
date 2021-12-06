@@ -2,19 +2,19 @@ user_role:
   singular: "generic"
   plural: "generics"
 
-  ROLE_SUPERADMIN: 
+  role_superadmin: 
     singular: "super administrator"
     plural: "super administrator"
 
-  ROLE_ADMIN: 
+  role_admin: 
     singular: "administrator"
     plural: "administrators"
 
-  ROLE_USER: 
+  role_user: 
     singular: "user"
     plural: "users"
 
-  ROLE_SOCIAL: 
+  role_social: 
     singular: "social account"
     plural: "social accounts"
 
@@ -22,15 +22,15 @@ upload_state:
   singular: "upload state"
   plural: "upload states"
 
-  UPLOAD_ERROR:
+  upload_error:
     singular: "unknown error"
     plural: "unknown errors"
 
-  UPLOAD_FILESIZE:
+  upload_filesize:
     singular: "file size"
     plural: "file sizes"
 
-  UPLOAD_MIMETYPE:
+  upload_mimetype:
     singular: "file mimetype"
     plural: "file mimetypes"
 
@@ -38,29 +38,29 @@ thread_state:
   singular: "state"
   plural: "state"
 
-  PUBLISHED: 
+  published: 
     singular: "published"
     plural: "published"
-  DRAFT: 
+  draft: 
     singular: "draft"
     plural: "drafts"
-  FUTURE: 
+  future: 
     singular: "future"
     plural: "future"
-  SECRET: 
+  secret: 
     singular: "secret"
     plural: "secrets"
   
-  APPROVED: 
+  approved: 
     singular: "approved"
     plural: "approved"
-  PENDING: 
+  pending: 
     singular: "pending"
     plural: "pending"
-  REJECTED: 
+  rejected: 
     singular: "rejected"
     plural: "rejected"
-  DELETED: 
+  deleted: 
     singular: "deleted"
     plural: "deleted"
     
@@ -68,16 +68,16 @@ spam_score:
   singular: "score"
   plural: "scores"
 
-  NO_TEXT: 
+  no_text: 
     singular: "missing text"
     plural: "missing texts"
-  NOT_SPAM: 
+  not_spam: 
     singular: "text approved"
     plural: "texts approved"
-  MAYBE_SPAM: 
+  maybe_spam: 
     singular: "potential spam"
     plural: "potential spams"
-  BLATANT_SPAM: 
+  blatant_spam: 
     singular: "blatant spam"
     plural: "blatant spams"
 
@@ -85,16 +85,16 @@ gender:
   singular: "gender"
   plural: "genders"
 
-  MALE: 
+  male: 
     singular: "man"
     plural: "men"
-  FEMALE: 
+  female: 
     singular: "woman"
     plural: "women"
-  HYBRID: 
+  hybrid: 
     singular: "hybrid"
     plural: "hybrids"
-  GENDERLESS:
+  genderless:
     singular: "genderless"
     plural: "genderless"
 
@@ -102,16 +102,16 @@ log_level:
   singular: "log level"
   plural: "log levels"
 
-  INFO: 
+  info: 
     singular: "info"
     plural: "info"
-  DEBUG: 
+  debug: 
     singular: "debug"
     plural: "debug"
-  WARNING: 
+  warning: 
     singular: "warning"
     plural: "warnings"
-  CRITICAL:
+  critical:
     singular: "critical"
     plural: "criticals"
 
@@ -119,6 +119,6 @@ spam_api:
   singular: "spam"
   plural: "spams"
 
-  ASKISMET: 
+  askismet: 
     singular: "akismet"
     plural: "akismet"

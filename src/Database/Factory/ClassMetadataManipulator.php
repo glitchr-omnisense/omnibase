@@ -2,6 +2,7 @@
 
 namespace Base\Database\Factory;
 
+use Base\Database\Types\EnumType;
 use Base\Database\Types\SetType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\EntityType;
@@ -54,8 +55,32 @@ class ClassMetadataManipulator
             return isset($class->isMappedSuperclass) && $class->isMappedSuperclass === false;
         else if (is_object($class))
             $class = ($class instanceof Proxy) ? get_parent_class($class) : get_class($class);
+
+        return !$this->entityManager->getMetadataFactory()->isTransient($class);
+    }
+
+    public function isEnumType($class) : bool
+    {
+        if ($class instanceof ClassMetadataInterface)
+            return isset($class->name);
+        else if (is_object($class))
+            $class = get_class($class);
     
-        return ! $this->entityManager->getMetadataFactory()->isTransient($class);
+        return is_subclass_of($class, EnumType::class);
+    }
+
+    public function isSetType($class) : bool
+    {
+        if ($class instanceof ClassMetadataInterface)
+            return isset($class->name);
+        else if (is_object($class))
+            $class = get_class($class);
+    
+        return is_subclass_of($class, SetType::class);
+    }
+
+    public function getDoctrineType(string $type) {
+        return \Doctrine\DBAL\Types\Type::getType($type);
     }
 
     public function getClassMetadata($entity)
@@ -64,6 +89,7 @@ class ClassMetadataManipulator
 
         $className = is_object($entity) ? get_class($entity) : $entity;
         $metadata  = $this->entityManager->getClassMetadata($className);
+        
         if (!$metadata)
             throw new InvalidArgumentException("Entity expected, '" . $className . "' is not an entity.");
         
@@ -94,7 +120,17 @@ class ClassMetadataManipulator
                 continue;
             }
 
-            return $this->getAssociationTargetClass($dataClass, $form->getName());
+            // Associations can help to guess the expected returned values
+            if($this->hasAssociation($dataClass, $form->getName())) 
+                return $this->getAssociationTargetClass($dataClass, $form->getName());
+            
+            // Doctrine types as well.. (e.g. EnumType or SetType)
+            $fieldType = $this->getTypeOfField($dataClass, $form->getName());
+            $doctrineType = $this->getDoctrineType($fieldType);
+            if($this->isEnumType($doctrineType) || $this->isSetType($doctrineType))
+                return get_class($doctrineType);
+
+            break;
         }
 
         return null;
@@ -246,6 +282,11 @@ class ClassMetadataManipulator
 
 
 
+
+    public function getTypeOfField(string $class, string $fieldName): string
+    {
+        return $this->getClassMetadata($class)->getTypeOfField($fieldName);
+    }
 
     public function getAssociationTargetClass(string $class, string $fieldName): string
     {

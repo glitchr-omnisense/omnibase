@@ -29,6 +29,7 @@
         <service id="Base\Controller\SelectController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -396,6 +397,7 @@
 
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
+            <argument type="service" id="translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />

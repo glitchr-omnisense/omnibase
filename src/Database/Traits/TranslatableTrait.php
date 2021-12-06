@@ -173,7 +173,7 @@ trait TranslatableTrait
     public function __set($property, $arguments)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
-        
+
         //
         // Setter method in called class
         if(property_exists($this, $property)) {
