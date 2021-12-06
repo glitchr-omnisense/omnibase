@@ -246,13 +246,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 
             $menu[] = MenuItem::section('MEMBERSHIP');
-            $roles = UserRole::getIcons();
+            $roles = UserRole::getPermittedValues();
 
-            foreach ($roles as $label => $role) {
+            foreach ($roles as $i => $role) {
 
                 if ($role == UserRole::USER) continue;
-                $value = $label;
-                $icon  = current(RoleType::getIcons()[$role]) ?? "fas fa-fw";
+
+                $label = ucfirst($this->translator->trans("user_role.".$role.".plural", [], "enum"));
+                $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
 
                 $url = $this->adminUrlGenerator
                     ->unsetAll()
@@ -264,7 +265,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     ->set("menuIndex", count($menu))
                     ->generateUrl();
 
-                $menu[] = MenuItem::linkToUrl($value, $icon, $url);
+                $menu[] = MenuItem::linkToUrl($label, $icon, $url);
             }
 
             $menu[] = MenuItem::linkToCrud('All users', 'fas fa-fw fa-tags', User::class);
@@ -343,7 +344,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ])->setAvatarUrl($avatar);
     }
 
-    public function configureWidgetItems(array $widgets = [])
+    public function configureWidgetItems(array $widgets = []) : array
     {
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);

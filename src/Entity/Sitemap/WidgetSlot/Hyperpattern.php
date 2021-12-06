@@ -8,7 +8,7 @@ use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Sitemap\Widget\Hyperlink;
 use Base\Entity\Sitemap\WidgetSlot;
-
+use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetSlot\HyperpatternRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -19,9 +19,12 @@ use Doctrine\Common\Collections\Collection;
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
 
-class Hyperpattern extends WidgetSlot
+class Hyperpattern extends WidgetSlot implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-share-alt"]; }
+
     protected const __PREFIX__ = "app.hyperlink";
+
     public function __toString() { return $this->getPattern(); }
     public function __construct(string $path = "website", string $icon = "fas fa-laptop", string $pattern = "{0}")
     {

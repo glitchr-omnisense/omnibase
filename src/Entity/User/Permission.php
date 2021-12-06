@@ -6,7 +6,7 @@ use App\Repository\User\PermissionRepository;
 
 use App\Entity\User;
 use App\Entity\User\Group;
-
+use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,8 +14,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=PermissionRepository::class)
  */
-class Permission
+class Permission implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-exclamation-triangle"]; } 
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

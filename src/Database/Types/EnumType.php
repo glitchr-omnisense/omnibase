@@ -13,7 +13,7 @@ abstract class EnumType extends Type implements IconInterface
     public static function getIcons(int $pos = -1, ...$arrays): array
     {
         return array_map(function($values) use ($pos) {
-            if(is_array($values)) return ($pos < 0 ? $values : $values[$pos] ?? end($values));
+            if(is_array($values)) return ($pos < 0 ? $values : closest($values, $pos));
             else return $values;
         }, array_union(...$arrays));
     }
@@ -24,7 +24,7 @@ abstract class EnumType extends Type implements IconInterface
     }
 
     public function getName() : string { return self::getStaticName(); }
-    public function getPermittedValues() { 
+    public static function getPermittedValues() { 
 
         $refl = new \ReflectionClass(get_called_class());
         $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));

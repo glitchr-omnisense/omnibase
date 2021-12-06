@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\User\Group;
 
 use App\Repository\User\NotificationRepository;
-
+use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -45,10 +45,12 @@ use UnexpectedValueException;
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
  */
-class Notification extends \Symfony\Component\Notifier\Notification\Notification implements SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface
+class Notification extends \Symfony\Component\Notifier\Notification\Notification implements SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
 {
     use BaseTrait;
-    
+
+    public static function __iconize(): array { return ["fas fa-bell"]; } 
+
     // Default notification
     public const IMPORTANCE_DEFAULT = "default";
 

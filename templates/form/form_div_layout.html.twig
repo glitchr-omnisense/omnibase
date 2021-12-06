@@ -55,7 +55,11 @@
         'data-select2-sortable': form.vars["select2-sortable"],
     }) %}
 
-    {{ form_widget(form, {attr: attr}) }}
+    {% if form.vars.select2 is not defined %}
+        {{ form_widget(form, {attr: attr}) }}
+    {% else %}
+        <select id="{{form.vars.id}}" {{ block('attributes') }}></select>
+    {% endif %}
 
 {% endblock select2_widget %}
 

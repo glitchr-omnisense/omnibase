@@ -6,5 +6,5 @@ use Base\Controller\Dashboard\AbstractCrudController;
 
 class LogCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-info-circle"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 }

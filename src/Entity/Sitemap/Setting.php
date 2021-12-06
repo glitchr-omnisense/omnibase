@@ -5,14 +5,14 @@ namespace Base\Entity\Sitemap;
 
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-
+use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\SettingRepository;
 
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
  */
-class Setting implements TranslatableInterface
+class Setting implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
     public function getOneOrNullValue()
@@ -22,6 +22,8 @@ class Setting implements TranslatableInterface
         return $value;
     }
 
+    public static function __iconize(): array { return ["fas fa-tools"]; }
+        
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

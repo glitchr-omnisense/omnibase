@@ -40,6 +40,7 @@ use Exception;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Base\Model\IconizeInterface;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -49,9 +50,11 @@ use App\Repository\UserRepository;
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
-class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, IconizeInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface
 {
     use BaseTrait;
+    
+    public static function __iconize():array { return ["fas fa-user"]; } 
 
     // DEPRECATED: These two methods should soon be removed  in S6.0
     public function getUsername() : string { return $this->getUserIdentifier(); }

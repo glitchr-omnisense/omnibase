@@ -9,7 +9,7 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 
 use Base\Entity\Sitemap\Widget;
-
+use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -27,9 +27,11 @@ use Doctrine\Common\Collections\Collection;
  *     @DiscriminatorEntry( value = "abstract" )
  */
 
-class WidgetSlot implements TranslatableInterface
+class WidgetSlot implements TranslatableInterface, IconizeInterface
 {   
     use TranslatableTrait;
+
+    public static function __iconize(): array { return ["fas fa-th-large"]; }
 
     protected const __PREFIX__ = "";
 

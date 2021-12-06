@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Base\Config\Menu\CrudWidgetItem;
 use Base\Config\Menu\SectionWidgetItem;
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Model\IconizeInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\LogoutMenuItem;
@@ -36,7 +37,12 @@ class WidgetItem
         $crudController = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
         $label = $label ?? $crudController::getTranslationPrefix().".plural";
 
-        return new CrudWidgetItem($label, $icon ?? $crudController::getPreferredIcon(), $entityFqcn);
+        if(!$icon) {
+            $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__iconize()[0] : null;
+            $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
+        }
+
+        return new CrudWidgetItem($label, $icon, $entityFqcn);
     }
 
     public static function linkToDashboard(string $label, ?string $icon = null): DashboardMenuItem

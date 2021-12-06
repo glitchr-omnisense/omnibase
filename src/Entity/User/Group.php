@@ -10,8 +10,7 @@ use App\Entity\User\Log;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
 use App\Entity\User\Notification;
-
-
+use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -19,8 +18,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=GroupRepository::class)
  */
-class Group
+class Group implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-users"]; } 
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

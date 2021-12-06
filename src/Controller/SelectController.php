@@ -5,7 +5,13 @@ namespace Base\Controller;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Types\EnumType;
 use Base\Database\Types\SetType;
+use Base\Field\Type\SelectType;
+use Base\Model\AutocompleteInterface;
+use Base\Model\IconizeInterface;
 use Base\Repository\Sitemap\Widget\PageRepository;
+use Base\Service\BaseService;
+use Base\Service\Paginator;
+use Base\Service\PaginatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -19,11 +25,13 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class SelectController extends AbstractController
 {
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
         $this->hashIds = new Hashids();
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->paginator = $paginator;
+        $this->baseService = $baseService;
     }
 
     public function encode(array $array) : string
@@ -39,36 +47,54 @@ class SelectController extends AbstractController
     }
     
     /**
-     * @Route("/autocomplete/{hashid}", name="widget_page")
+     * @Route("/autocomplete/{hashid}", name="base_autocomplete")
      */
-    public function Autocomplete(Request $request, string $hash): Response
+    public function Autocomplete(Request $request, string $hashid): Response
     {
-        $dict  = $this->decode($hash);
+        $dict  = $this->decode($hashid);
         $token = $dict["token"] ?? null;
+        $fields = $dict["fields"] ?? null;
         $class  = $dict["class"] ?? null;
         
-        // 'delete-item' is the same value used in the template to generate the token
-        if ($this->isCsrfTokenValid("select2", $token)) {
+        $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
+        if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
         
-            $term = $request->get("term");
+            $term = $request->get("term") ?? "";
+            $page = $request->get("page") ?? 1;
+
+            $results = [];
+            $pagination = false;
             if($this->classMetadataManipulator->isEntity($class)) {
+                
                 $repository = $this->entityManager->getRepository($class);
+                if ($fields && !empty($term)) {
+
+                    $fields = array_fill_keys($fields, $term);
+                    $entries = $repository->findByInsensitivePartialModel($fields);
+                    $book = $this->paginator->paginate($entries, $page);
+                    $pagination = $book->getTotalPages() == $book->getPage();
+
+                } else {
+
+                    $entries = $repository->findAll(); // If no field, then get them all..
+                    if($term) $entries = array_filter($entries, fn($e) => str_contains(strval($e), $term));
+
+                    $pagination = false;
+                }
+
+                foreach($entries as $i => $entry)
+                    $results[] = SelectType::getFormattedValues($entry, $class);
 
             } else if ($class instanceof EnumType || $class instanceof SetType) {
 
+                $values = $class::getPermittedValues();
+                foreach($values as $value)
+                    $results[] = SelectType::getFormattedValues($values, $class);
             }
 
             $array = [];
-            $array["pagination"] = ["more" => false];
-            $array["results"] = [
-                
-                ["id" => 1, "text" => "OPTION 1"],
-                ["id" => 2, "text" => "OPTION 2"],
-                ["id" => 3, "text" => "OPTION 3"],
-                ["id" => 4, "text" => "OPTION 4"],
-                ["id" => 5, "text" => "OPTION 5"],
-                ["id" => 6, "text" => "OPTION 6"]
-            ];
+            $array["pagination"] = ["more" => $pagination];
+            $array["results"] = !empty($results) ? $results : null;
             
             return new JsonResponse($array);
         }

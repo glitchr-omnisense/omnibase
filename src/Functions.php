@@ -95,11 +95,26 @@ namespace {
         return $randomString;
     }
 
+    function begin(object|array &$array) 
+    {
+        return $array[0] ?? null;
+    }
+
+    function closest(array $array, $position = -1)
+    {
+        return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array));
+    }
+
+    function stringeable($value) {
+        return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString');
+    }
+
     function class_implements_interface($objectOrClass, $interface)
     {
-        if(!is_string($objectOrClass) && !is_object($objectOrClass)) return false;
+        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
+        if(!class_exists($class)) return false;
 
-        $classImplements = class_implements($objectOrClass); 
+        $classImplements = class_implements($class); 
         return array_key_exists($interface, $classImplements);
     }
 

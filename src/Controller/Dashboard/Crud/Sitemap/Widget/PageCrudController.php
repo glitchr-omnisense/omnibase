@@ -11,7 +11,7 @@ use Base\Field\Type\QuillType;
 
 class PageCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-file-alt"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {

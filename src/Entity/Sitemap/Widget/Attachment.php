@@ -8,7 +8,7 @@ use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Sitemap\Widget;
-
+use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Widget\AttachmentRepository;
 /**
@@ -18,8 +18,10 @@ use Base\Repository\Sitemap\Widget\AttachmentRepository;
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
-class Attachment extends Widget
+class Attachment extends Widget implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-paperclip"]; } 
+
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Slugify(reference="translations.title")

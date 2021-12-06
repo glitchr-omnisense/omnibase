@@ -14,7 +14,7 @@ use Base\Field\RelationField;
 
 class HyperpatternCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-share-alt"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {

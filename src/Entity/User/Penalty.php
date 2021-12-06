@@ -7,7 +7,7 @@ use App\Repository\User\PenaltyRepository;
 use App\Entity\User;
 use App\Entity\User\Group;
 use App\Entity\User\Permission;
-
+use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,8 +15,10 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * @ORM\Entity(repositoryClass=PenaltyRepository::class)
  */
-class Penalty
+class Penalty implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-exclamation-triangle"]; } 
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

@@ -4,6 +4,7 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Annotations\Annotation\Slugify;
+use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -12,8 +13,10 @@ use Hashids\Hashids;
 /**
  * @ORM\Entity(repositoryClass=TokenRepository::class)
  */
-class Token
+class Token implements IconizeInterface
 {
+    public static function __iconize():array { return ["fas fa-drumstick-bite"]; } 
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

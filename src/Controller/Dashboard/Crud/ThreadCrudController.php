@@ -6,6 +6,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 
 use Base\Enum\ThreadState;
 use Base\Field\DateTimePickerField;
+use Base\Field\IdField;
 use Base\Field\ImpersonateField;
 use Base\Field\LinkIdField;
 use Base\Field\StateField;
@@ -16,7 +17,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class ThreadCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-box"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function configureActions(Actions $actions): Actions
     {
@@ -34,7 +35,7 @@ class ThreadCrudController extends AbstractCrudController
         $defaultCallback = function() { return []; };
 
         if ($this->isGranted('ROLE_SUPERADMIN')) yield ImpersonateField::new("id")->hideOnForm();
-        else yield LinkIdField::new('id')->hideOnForm();
+        else yield IdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 

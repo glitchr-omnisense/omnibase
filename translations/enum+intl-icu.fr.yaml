@@ -1,4 +1,4 @@
-Base\Enum\UserRole: 
+user_role: 
   singular: "générique"
   plural: "génériques"
 
@@ -15,10 +15,10 @@ Base\Enum\UserRole:
     plural: "utilisateurs"
 
   ROLE_SOCIAL: 
-    singular: "compte social"
-    plural: "comptes sorciaux"
+    singular: "réseau social"
+    plural: "réseaux sociaux"
 
-Base\Enum\UploadState:
+upload_state:
   singular: "état de téléchargement"
   plural: "états de téléchargements"
 
@@ -34,7 +34,7 @@ Base\Enum\UploadState:
     singular: "format de fichier"
     plural: "formats de fichiers"
 
-Base\Enum\ThreadState:
+thread_state:
   singular: "statut"
   plural: "statut"
 
@@ -64,7 +64,7 @@ Base\Enum\ThreadState:
     singular: "supprimé"
     plural: "supprimés"
     
-Base\Enum\SpamScore:
+spam_score:
   singular: "score"
   plural: "scores"
 
@@ -81,7 +81,7 @@ Base\Enum\SpamScore:
     singular: "spam détecté"
     plural: "spam détectés"
 
-Base\Enum\Gender:
+gender:
   singular: "genre"
   plural: "genres"
 
@@ -98,7 +98,7 @@ Base\Enum\Gender:
     singular: "inconnu"
     plural: "inconnus"
 
-Base\Enum\LogLevel:
+log_level:
   singular: "degré"
   plural: "degrés"
 
@@ -115,7 +115,7 @@ Base\Enum\LogLevel:
     singular: "critique"
     plural: "critiques"
 
-Base\Enum\SpamApi:
+spam_api:
   singular: "spam"
   plural: "spams"
 

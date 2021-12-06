@@ -22,7 +22,7 @@ use Base\Enum\ThreadState;
 use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-
+use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
 
@@ -38,10 +38,12 @@ use Base\Repository\ThreadRepository;
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
-class Thread implements TranslatableInterface
+class Thread implements TranslatableInterface, IconizeInterface
 {
     use BaseTrait;
     use TranslatableTrait;
+
+    public static function __iconize():array { return ["fas fa-box"]; } 
 
     public function __construct(?User $author = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {

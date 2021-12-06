@@ -6,5 +6,5 @@ use Base\Controller\Dashboard\AbstractCrudController;
 
 class TokenCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-drumstick-bite"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 }

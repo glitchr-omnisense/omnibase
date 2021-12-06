@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Entity\Sitemap\Widget;
 use Base\Entity\Sitemap\WidgetSlot\Hyperpattern;
+use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Widget\HyperlinkRepository;
 
@@ -15,8 +16,10 @@ use Base\Repository\Sitemap\Widget\HyperlinkRepository;
  * @DiscriminatorEntry( value = "hyperlink" )
  */
 
-class Hyperlink extends Widget 
+class Hyperlink extends Widget implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-link"]; } 
+   
     /**
      * @ORM\ManyToOne(targetEntity=Hyperpattern::class, inversedBy="hyperlinks")
      * @ORM\JoinColumn(nullable=false)

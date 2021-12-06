@@ -29,9 +29,11 @@
         <service id="Base\Controller\SelectController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.paginator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="base.service" />
         </service>
-
-            
 
         <service id="Base\Subscriber\BaseSubscriber">
             <tag name="kernel.event_subscriber" />            
@@ -481,6 +483,7 @@
 
         <service id="Base\Field\Configurator\IdConfigurator">
             <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
         <service id="Base\Field\Configurator\CollectionConfigurator">

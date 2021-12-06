@@ -6,5 +6,5 @@ use Base\Controller\Dashboard\AbstractCrudController;
 
 class PermissionCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-exclamation-triangle"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 }

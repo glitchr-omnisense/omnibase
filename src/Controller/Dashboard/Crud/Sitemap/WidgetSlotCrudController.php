@@ -10,7 +10,7 @@ use Base\Entity\Sitemap\WidgetSlot;
 
 class WidgetSlotCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-th-large"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function createEntity(string $entityFqcn)
     {

@@ -1,4 +1,4 @@
-Base\Enum\UserRole: 
+user_role: 
   singular: "generic"
   plural: "generics"
 
@@ -15,10 +15,10 @@ Base\Enum\UserRole:
     plural: "users"
 
   ROLE_SOCIAL: 
-    singular: "social"
-    plural: "socials"
+    singular: "social account"
+    plural: "social accounts"
 
-Base\Enum\UploadState:
+upload_state:
   singular: "upload state"
   plural: "upload states"
 
@@ -34,7 +34,7 @@ Base\Enum\UploadState:
     singular: "file mimetype"
     plural: "file mimetypes"
 
-Base\Enum\ThreadState:
+thread_state:
   singular: "state"
   plural: "state"
 
@@ -64,7 +64,7 @@ Base\Enum\ThreadState:
     singular: "deleted"
     plural: "deleted"
     
-Base\Enum\SpamScore:
+spam_score:
   singular: "score"
   plural: "scores"
 
@@ -81,7 +81,7 @@ Base\Enum\SpamScore:
     singular: "blatant spam"
     plural: "blatant spams"
 
-Base\Enum\Gender:
+gender:
   singular: "gender"
   plural: "genders"
 
@@ -98,7 +98,7 @@ Base\Enum\Gender:
     singular: "genderless"
     plural: "genderless"
 
-Base\Enum\LogLevel:
+log_level:
   singular: "log level"
   plural: "log levels"
 
@@ -115,7 +115,7 @@ Base\Enum\LogLevel:
     singular: "critical"
     plural: "criticals"
 
-Base\Enum\SpamApi:
+spam_api:
   singular: "spam"
   plural: "spams"
 

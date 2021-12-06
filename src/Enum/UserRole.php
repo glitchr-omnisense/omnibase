@@ -16,7 +16,7 @@ class UserRole extends SetType
         $arrays[] = [
             self::SUPERADMIN => ["fas fa-star", "fas fa-user-cog"],
             self::ADMIN => ["fas fa-star", "fas fa-user-check"],
-            self::USER => ["fas fa-user", "fas fa-user-tags"],
+            self::USER => ["fas fa-user", "fas fa-user-tag"],
             self::SOCIAL => ["fas fa-user-friends"],
         ];
 

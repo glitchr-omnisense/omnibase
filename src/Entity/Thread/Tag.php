@@ -4,16 +4,17 @@ namespace Base\Entity\Thread;
 
 use App\Entity\Thread;
 
-use Base\Repository\Thread\TagRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Annotations\Annotation\Slugify;
-use Doctrine\ORM\Mapping as ORM;
 use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\TranslatableInterface;
-use Base\Traits\ColumnAliasTrait;
+use Base\Model\IconizeInterface;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\Thread\TagRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TagRepository::class)
@@ -21,9 +22,11 @@ use Base\Traits\ColumnAliasTrait;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
-class Tag implements TranslatableInterface
+class Tag implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
+
+    public static function __iconize() : array { return ["fas fa-tags"]; }
 
     /**
      * @ORM\Id

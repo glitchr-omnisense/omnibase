@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AttachmentCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-paperclip"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function downloadAttachment(AdminContext $context)
     {

@@ -19,7 +19,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 
 class UserCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-user"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {

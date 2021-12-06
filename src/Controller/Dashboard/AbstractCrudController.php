@@ -5,6 +5,7 @@ namespace Base\Controller\Dashboard;
 use Base\Config\Extension;
 use Base\Field\IdField;
 use Base\Field\LinkIdField;
+use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -14,7 +15,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController
 {
-    abstract static function getPreferredIcon();
+    abstract static function getPreferredIcon(): ?string;
 
     public function __construct(Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
     {
@@ -25,8 +26,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public static function getEntityFqcn(): string
     {
-        if(get_called_class() == "HyperpatternCrudController") dump("HEHO !");
-
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
         $entityFqcn = preg_replace('/\\\Controller\\\Dashboard\\\Crud\\\/', "\\Entity\\", $entityFqcn);
 
@@ -106,7 +105,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($text == $prefixWithAction.".text") $text = $this->translator->trans($prefix.".text", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($text == $prefix.".text") $text = "";
 
-        $this->extension->setIcon($this->getPreferredIcon());
+        $icon = class_implements_interface($this->getEntityFqcn(), IconizeInterface::class) ? $this->getEntityFqcn()::__iconize()[0] : null;
+        $icon = $this->getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
+
+        $this->extension->setIcon($icon);
         $this->extension->setTitle(ucfirst($title));
         $this->extension->setHelp($help);
         $this->extension->setText($text);

@@ -4,6 +4,7 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Enum\LogLevel;
+use Base\Model\IconizeInterface;
 use Base\Repository\User\LogRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +15,9 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)
  */
-class Log
+class Log implements IconizeInterface
 {
+    public static function __iconize(): array { return ["fas fa-info-circle"]; } 
 
     /**
      * @ORM\Id

@@ -9,7 +9,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 
 class SettingCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon() { return "fas fa-tools"; } 
+    public static function getPreferredIcon(): ?string { return null; } 
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {

@@ -9,7 +9,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-
+use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetRepository;
 use Base\Service\BaseService;
@@ -22,9 +22,11 @@ use Base\Service\BaseService;
  *     @DiscriminatorEntry( value = "abstract" )
  */
 
-class Widget implements TranslatableInterface
+class Widget implements TranslatableInterface, IconizeInterface
 {   
     use TranslatableTrait;
+    
+    public static function __iconize(): array { return ["fas fa-square"]; }
 
     protected string $template = "";
     public function getTemplate()

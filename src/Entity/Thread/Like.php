@@ -9,6 +9,7 @@ use App\Repository\Thread\LikeRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Model\IconizeInterface;
 
 /**
  * @ORM\Entity(repositoryClass=LikeRepository::class)
@@ -16,8 +17,10 @@ use Base\Annotations\Annotation\DiscriminatorEntry;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
-class Like
+class Like implements IconizeInterface
 {
+    public static function __iconize() : array { return ["fas fa-thumbs-up"]; }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
