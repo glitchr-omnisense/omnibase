@@ -11,7 +11,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
-final class AvatarConfigurator implements FieldConfiguratorInterface
+class AvatarConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {

@@ -20,7 +20,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Group implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-users"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-users"]; } 
 
     /**
      * @ORM\Id

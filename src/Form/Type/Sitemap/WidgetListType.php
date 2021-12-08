@@ -38,7 +38,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(array_is_associative($data)) {
+        else if(is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;

@@ -3,7 +3,7 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% if field.value %}
 <span class="badge badge-secondary">
-    <i class="fa-fw {{field.value}}"></i>
+    {{field.value|fontAwesome({class: "fa-fw"})|default('')|raw}}
 </span>
 {% else %}
 -

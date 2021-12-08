@@ -147,7 +147,10 @@ class Uploader extends AbstractAnnotation
             if($uuidOrFile instanceof File)
                 return null;
 
-            $path = $that->getPath($entity, $uuidOrFile);
+            if(!stringeable($uuidOrFile))
+                return null;
+                
+            $path = $that->getPath($entity, strval($uuidOrFile));
             if(!$path) return null;
 
             if(!$that->getStorageFilesystem()->fileExists($path)) 
@@ -258,21 +261,35 @@ class Uploader extends AbstractAnnotation
     {
         $new = self::getFieldValue($entity, $property);
         $newList = is_array($new) ? $new : [$new];
-        
+        $newListStringable = array_filter(array_map(fn($e) => stringeable($e), $newList));
+
+        // This list contains non stringeable element. (e.g. in case of a generic use)
+        // This means that these elements are not meant to be uploaded
+        if(count($newList) != count($newListStringable))
+            return false; 
+
         $old = self::getFieldValue($oldEntity, $property);
         $oldList = is_array($old) ? $old : [$old];
+        $oldListStringable = array_filter(array_map(fn($e) => stringeable($e), $oldList));
 
+        // This list contains non stringeable element. (e.g. in case of a generic use)
+        // This means that these elements are not meant to be uploaded
+        if(count($oldList) != count($oldListStringable))
+            return false;
+
+        // No change in the list..
         if($newList == $oldList) return true;
 
         // Nothing to upload, empty field..
         if ($newList == null) {
 
-            $this->setFieldValue($entity, $property, null);
+            if(!$this->keepNotFound)
+                $this->setFieldValue($entity, $property, null);
+
             return true;
         }
 
         // Field value can be an array or just a single path
-
         $fileList = array_intersect($newList, $oldList);
         foreach (array_diff($newList, $oldList) as $index => $file) {
 

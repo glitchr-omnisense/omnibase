@@ -6,7 +6,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -181,7 +181,7 @@ class EntityType extends AbstractType implements DataMapperInterface
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
     
-        $dataClass = $form->getConfig()->getOption("data_class");
+        $dataClass = $form->getConfig()->getOption("data_class") ?? (is_object($viewData) ? get_class($viewData) : null);
         if($dataClass) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
@@ -199,14 +199,6 @@ class EntityType extends AbstractType implements DataMapperInterface
                 $this->setFieldValue($viewData, $property, $value);
             foreach($associations as $property => $value)
                 $this->setFieldValue($viewData, $property, $value);
-
-        } else if($viewData instanceof ArrayCollection) {
-  
-            foreach(iterator_to_array($forms) as $fieldName => $childForm) {
-
-                foreach($childForm as $key => $value)
-                    $viewData[$key] = $value->getViewData();
-            }
 
         } else if($viewData instanceof PersistentCollection) {
 
@@ -228,6 +220,15 @@ class EntityType extends AbstractType implements DataMapperInterface
                     $viewData->add($entry);
                     if(!$isOwningSide) $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
                 }
+            }
+
+        } else {
+
+            $viewData = new ArrayCollection();
+            foreach(iterator_to_array($forms) as $fieldName => $childForm) {
+
+                foreach($childForm as $key => $value)
+                    $viewData[$key] = $value->getViewData();
             }
         }
     }

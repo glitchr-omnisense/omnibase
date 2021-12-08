@@ -17,7 +17,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Penalty implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-exclamation-triangle"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-exclamation-triangle"]; } 
 
     /**
      * @ORM\Id

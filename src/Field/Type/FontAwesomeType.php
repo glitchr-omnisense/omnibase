@@ -21,23 +21,16 @@ use Symfony\Component\Form\FormView;
 //https://codepen.io/peiche/pen/mRBGmR
 //https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml
 
-class FontAwesomeType extends AbstractType
+class FontAwesomeType extends SelectType
 {
     protected static $metadata;
 
-    public function getParent() : ?string { return SelectType::class; }
-    public function getBlockPrefix(): string { return 'icons'; }
-
-    protected $baseService;
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-    }
-    
     public function configureOptions(OptionsResolver $resolver)
     {
         if (empty(self::$metadata))
             self::$metadata = $this->baseService->getParameterBag("base.vendor.font_awesome.metadata");
+
+        parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'fontawesome-js'    => $this->baseService->getParameterBag("base.vendor.font_awesome.js"),

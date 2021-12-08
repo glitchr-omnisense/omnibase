@@ -38,29 +38,29 @@ thread_state:
   singular: "state"
   plural: "state"
 
-  published: 
+  state_published: 
     singular: "published"
     plural: "published"
-  draft: 
+  state_draft: 
     singular: "draft"
     plural: "drafts"
-  future: 
+  state_future: 
     singular: "future"
     plural: "future"
-  secret: 
+  state_secret: 
     singular: "secret"
     plural: "secrets"
   
-  approved: 
+  state_approved: 
     singular: "approved"
     plural: "approved"
-  pending: 
+  state_pending: 
     singular: "pending"
     plural: "pending"
-  rejected: 
+  state_rejected: 
     singular: "rejected"
     plural: "rejected"
-  deleted: 
+  state_deleted: 
     singular: "deleted"
     plural: "deleted"
     

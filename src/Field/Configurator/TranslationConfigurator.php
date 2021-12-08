@@ -16,7 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class TranslationConfigurator implements FieldConfiguratorInterface
+class TranslationConfigurator implements FieldConfiguratorInterface
 {
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider)
     {

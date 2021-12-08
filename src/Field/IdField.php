@@ -12,6 +12,7 @@ final class IdField implements FieldInterface
 
     public const OPTION_MAX_LENGTH = 'maxLength';
     public const OPTION_ADD_LINK = 'addLink';
+    public const OPTION_IMPERSONATE = 'impersonate';
 
     public static function new(string $propertyName = "id", ?string $label = null): self
     {
@@ -20,9 +21,10 @@ final class IdField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/id')
             ->setTemplatePath('@EasyAdmin/crud/field/id.html.twig')
-            ->setFormType(TextType::class)
+            ->setFormType(HiddenType::class)
             ->addCssClass('field-id')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null)
+            ->setCustomOption(self::OPTION_IMPERSONATE, true)
             ->setCustomOption(self::OPTION_ADD_LINK, true);
     }
 
@@ -36,6 +38,17 @@ final class IdField implements FieldInterface
 
         $this->setCustomOption(self::OPTION_MAX_LENGTH, $length);
 
+        return $this;
+    }
+
+    public function enableImpersonation() 
+    {
+        $this->setCustomOption(self::OPTION_IMPERSONATE, true);
+        return $this;
+    }
+    public function disableImpersonation() 
+    {
+        $this->setCustomOption(self::OPTION_IMPERSONATE, false);
         return $this;
     }
 

@@ -3,11 +3,10 @@
 namespace Base\Field;
 
 use Base\Field\Type\CountryType;
-use Base\Field\Type\SelectType;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class CountryField implements FieldInterface
+class CountryField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 
@@ -18,6 +17,7 @@ final class CountryField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/country')
             ->setFormType(CountryType::class)
+            ->setChoices(CountryType::getChoices())
             ->setTemplatePath('@EasyAdmin/crud/field/country.html.twig')
             ->addCssClass('field-country');
     }

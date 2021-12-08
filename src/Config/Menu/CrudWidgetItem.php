@@ -3,6 +3,7 @@
 namespace Base\Config\Menu;
 
 use Base\Config\WidgetItem;
+use Base\Controller\Dashboard\AbstractCrudController;
 use Exception;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 

@@ -38,7 +38,7 @@ class WidgetItem
         $label = $label ?? $crudController::getTranslationPrefix().".plural";
 
         if(!$icon) {
-            $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__iconize()[0] : null;
+            $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__staticIconize()[0] : null;
             $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
         }
 

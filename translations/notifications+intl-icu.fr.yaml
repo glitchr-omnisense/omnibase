@@ -17,7 +17,7 @@ login:
     failed: "Les identifiants sont incorrects"
 
 impersonator:
-    "<b>Rappel:</b> Tu es actuellement entrain d'usurpé l'identité de <b>{0}</b> !
+    "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Retour à ton compte</a>"
 
 maintenance:

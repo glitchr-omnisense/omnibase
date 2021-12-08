@@ -17,7 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\LocaleType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
 use function Symfony\Component\String\u;
 
-final class CollectionConfigurator implements FieldConfiguratorInterface
+class CollectionConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {

@@ -1,44 +1,131 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{% set show = field.customOptions.get('show') %}
+{% set showFirst = field.customOptions.get('showFirst') %}
+{% set renderAsCount = field.customOptions.get('renderAsCount') %}
+
 {% if field.value is iterable %}
 
-    {% for fieldKey,fieldValue in field.value %}
-    <span class="badge badge-secondary">
-    
-    {% if fieldKey not in field.formattedValue|keys %}
-        ?
-    {% else %}
-        {% if field.formattedValue[fieldKey] is iterable %}
-            {% if field.formattedValue[fieldKey]|length > 1 %}
-                <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[fieldKey][0] }}">
-                    {{field.formattedValue[fieldKey][1] | raw}}
+    {% set formattedValues = field.formattedValue %}
+    {% set hasEntries = formattedValues|length > 0 %}
+
+    {% if showFirst %}
+
+        {% if hasEntries %}
+        {% set fieldValue = formattedValues|first %}
+        <span class="badge badge-secondary">
+            {% if showFirst == 1 %}
+                {{fieldValue.text|default("-")}}  
+            {% elseif showFirst == 2 %}
+                <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
+                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                 |default(fieldValue.icon|imagify)|default("") | raw}}
                 </div>
             {% else %}
-                ?
+                {{fieldValue.text|default("-")}} | 
+                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                 |default(fieldValue.icon|imagify)|default("") | raw}}
             {% endif %}
-        {% else %}
-            {{ field.formattedValue[fieldKey] }}
+        </span>
+
+        {% set formattedValues = formattedValues|slice(1) %}
         {% endif %}
+
     {% endif %}
-    
-    </span>
-    {% endfor %}
-    
+
+    {% if renderAsCount %}
+
+        {% set sign = showFirst ? "+" : "" %}
+        {%- if formattedValues|length -%}
+            {%- set names = formattedValues|map(f => "#{f.text}") -%}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ names|join(', ') }}">
+                {{sign}}{{ names|length }}
+            </span>
+        {%- elseif not hasEntries -%}
+            <span class="badge badge-secondary">0</span>
+        {%- endif -%}
+        
+    {% else %}
+
+        {%- if not hasEntries -%}
+            <span class="badge badge-secondary">-</span>
+        {% endif %}
+
+        {% for fieldKey,fieldValue in formattedValues %}
+        <span class="badge badge-secondary">
+            {% if show == 1 %}
+                {{fieldValue.text|default("-")}}  
+            {% elseif show == 2 %}
+                <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
+                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                 |default(fieldValue.icon|imagify)|default("") | raw}}
+                </div>
+            {% else %}
+                {{fieldValue.text|default("-")}} | 
+                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                 |default(fieldValue.icon|imagify)|default("") | raw}}
+            {% endif %}
+        </span>
+        {% endfor %}
+
+    {% endif %}
 
 {% else %}
 
+    {% set fieldValue = field.formattedValue %}
+    {% set hasEntries = fieldValue is not empty %}
+
+    {% if showFirst %}
+    
+        {%- if not hasEntries -%}
+            <span class="badge badge-secondary">-</span>
+        {% endif %}
+
         <span class="badge badge-secondary">
-            {% if field.formattedValue is iterable and field.formattedValue|length > 1 %}
-                    <div data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[0] }}">
-                    {{field.formattedValue[1] | raw}}
-                    </div>
+        {% if showFirst == 1 %}
+            {{fieldValue.text|default("-")}}  
+        {% elseif showFirst == 2 %}
+            <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
+            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                |default(fieldValue.icon|imagify)|default("") | raw}}
+            </div>
+        {% else %}
+            {{fieldValue.text|default("-")}} | 
+            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                |default(fieldValue.icon|imagify)|default("") | raw}}
+        {% endif %}
+        </span>
+
+    {% elseif renderAsCount %}
+
+        {%- if fieldValue is not empty -%}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">1</span>
+        {%- elseif not hasEntries -%}
+            <span class="badge badge-secondary">0</span>
+        {%- endif -%}
+        
+    {% else %}
+
+        {%- if not hasEntries -%}
+            <span class="badge badge-secondary">-</span>
+        {% endif %}
+
+        <span class="badge badge-secondary">
+            {% if show == 1 %}
+                {{fieldValue.text|default("-")}}  
+            {% elseif show == 2 %}
+                <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
+                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                |default(fieldValue.icon|imagify)|default("") | raw}}
+                </div>
             {% else %}
-                {% if field.value is null %}
-                <i class="fa fa-fw">-</i>
-                {% else %}
-                {{field.value}}
-                {% endif %}
+                {{fieldValue.text|default("-")}} | 
+                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                                |default(fieldValue.icon|imagify)|default("") | raw}}
             {% endif %}
         </span>
+    {% endif %}
+
 {% endif %}

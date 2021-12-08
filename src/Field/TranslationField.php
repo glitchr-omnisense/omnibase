@@ -22,8 +22,8 @@ class TranslationField implements FieldInterface
             ->setCustomOption("required", true)
             ->setFormType(TranslationType::class);
 
-        if($propertyName)
-            $field->setFields([$propertyName => []])->showOnIndex($propertyName);
+        if($propertyName) $field->setFields([$propertyName => []])->showOnIndex($propertyName);
+        else $field->hideOnDetail();
 
         return $field;
     }

@@ -8,11 +8,10 @@ use Base\Field\AvatarField;
 use Base\Field\PasswordField;
 use Base\Field\RoleField;
 use Base\Field\BooleanField;
-
+use Base\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
@@ -25,33 +24,43 @@ class UserCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield AvatarField::new('avatar');
-        foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-    
-        yield EmailField::new('email');
-        foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        return parent::configureFields($pageName, [
 
-        yield RoleField::new('roles')->allowMultipleChoices();
-        foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        yield PasswordField::new('plainPassword')->onlyOnForms();
-        foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-    
-        yield BooleanField::new("isVerified")->onlyOnIndex()->withConfirmation();
-        foreach ( ($callbacks["isVerified"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        yield DateTimeField::new('updatedAt')->onlyOnDetail();
-        foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+            "id" => function() use ($defaultCallback, $callbacks) {
 
-        yield DateTimeField::new('createdAt')->onlyOnDetail();
-        foreach ( ($callbacks["createdAt"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield AvatarField::new('avatar');
+                foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+            
+                yield RoleField::new('roles')->allowMultipleChoices();
+                foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+                    
+                yield EmailField::new('email');
+                foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        
+                yield PasswordField::new('plainPassword')->onlyOnForms();
+                foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+            
+                yield BooleanField::new("isVerified")->hideOnIndex()->withConfirmation();
+                foreach ( ($callbacks["isVerified"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+                
+                yield BooleanField::new("isApproved")->onlyOnIndex()->withConfirmation();
+                foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+                        
+                yield DateTimeField::new('updatedAt')->onlyOnDetail();
+                foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        
+                yield DateTimeField::new('createdAt')->onlyOnDetail();
+                foreach ( ($callbacks["createdAt"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+            }
+        ]);
     }
 
     public function configureActions(Actions $actions): Actions
@@ -66,13 +75,12 @@ class UserCrudController extends AbstractCrudController
 
     public function approveUsers(BatchActionDto $batchActionDto)
     {
-        $entityManager = $this->getDoctrine()->getManagerForClass($batchActionDto->getEntityFqcn());
         foreach ($batchActionDto->getEntityIds() as $id) {
-            $user = $entityManager->find($batchActionDto->getEntityFqcn(), $id);
+            $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
             $user->approve();
         }
 
-        $entityManager->flush();
+        $this->entityManager->flush();
 
         return $this->redirect($batchActionDto->getReferrerUrl());
     }

@@ -17,7 +17,8 @@ use Symfony\Component\Config\Definition\Exception\Exception;
  */
 class Log implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-info-circle"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-info-circle"]; } 
 
     /**
      * @ORM\Id

@@ -43,7 +43,8 @@ class Thread implements TranslatableInterface, IconizeInterface
     use BaseTrait;
     use TranslatableTrait;
 
-    public static function __iconize():array { return ["fas fa-box"]; } 
+    public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
+    public static function __staticIconize() : ?array { return ["fas fa-box"]; } 
 
     public function __construct(?User $author = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
@@ -230,7 +231,7 @@ class Thread implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="threads", cascade={"persist", "remove"})
      */
     protected $tags;
-    public function getPrimaryTag() { return $this->tags->first(); }
+    public function getPrimaryTag() { $first = $this->tags->first(); return ($first ? $first : null); }
     public function getSecondaryTags(): array { return $this->tags->slice(1); }
     public function getTags(): Collection { return $this->tags; }
     public function addTag(Tag $tag): self

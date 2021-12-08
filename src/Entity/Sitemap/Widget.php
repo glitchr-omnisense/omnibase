@@ -26,7 +26,8 @@ class Widget implements TranslatableInterface, IconizeInterface
 {   
     use TranslatableTrait;
     
-    public static function __iconize(): array { return ["fas fa-square"]; }
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-square"]; }
 
     protected string $template = "";
     public function getTemplate()

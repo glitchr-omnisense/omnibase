@@ -14,9 +14,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
-final class EntityConfigurator implements FieldConfiguratorInterface
+class EntityConfigurator implements FieldConfiguratorInterface
 {
     private $entityFactory;
     private $adminUrlGenerator;

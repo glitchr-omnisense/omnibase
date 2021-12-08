@@ -26,7 +26,8 @@ class Tag implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
-    public static function __iconize() : array { return ["fas fa-tags"]; }
+    public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-tags"]; }
 
     /**
      * @ORM\Id

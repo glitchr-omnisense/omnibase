@@ -41,6 +41,7 @@ class CollectionType extends AbstractType
 
         $resolver->setNormalizer('entry_options', function (Options $options, $value) {
             $value['block_name'] = 'entry';
+            $value["label"] = false;
             return $value;
         });
 

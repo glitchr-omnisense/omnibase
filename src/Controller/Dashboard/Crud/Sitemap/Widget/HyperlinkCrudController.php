@@ -7,12 +7,11 @@ use Base\Field\TranslationField;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\EntityField;
 use Base\Field\PatternField;
-use Base\Field\RelationField;
 use Base\Field\SelectField;
 
 class HyperlinkCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {

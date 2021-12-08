@@ -131,7 +131,7 @@ namespace {
         return false;
     }
 
-    function array_is_associative(array $arr)
+    function is_associative(array $arr): bool
     {
         if(!$arr) return false;
 
@@ -164,13 +164,35 @@ namespace {
         return array_combine($keys, array_values($array));
     }
 
-    function array_map_recursive($callback, $array) {
+    function array_map_recursive(callable $callback, array $array) :array {
 
         $func = function ($item) use (&$func, &$callback) {
             return is_array($item) ? array_map($func, $item) : call_user_func($callback, $item);
         };
 
         return array_map($func, $array);
+    }
+
+    function array_key_transforms(callable $callback, array $array, bool $checkReturnType = true): array {
+
+        $reflection = new ReflectionFunction($callback);
+        if ('array' != $reflection->getReturnType()->getName()) 
+            throw new \Exception('Callable function must have an "array" return type');
+
+        $tArray = [];
+        $counter = 0;
+        foreach($array as $key => $entry) {
+        
+            $ret = call_user_func($callback, $callback, $counter, $key, $entry);
+            if($ret == null) continue;
+            
+            list($tKey, $tEntry) = [$ret[0] ?? $key, $ret[1] ?? $entry];
+            $tArray[$tKey] = $tEntry;
+
+            $counter++;
+        }
+
+        return $tArray;
     }
 
     function array_flatten($array = null)
@@ -198,7 +220,7 @@ namespace {
         if(!is_array($keys)) $keys = [$keys => null];
 
         $keys = array_keys($keys);
-        if(array_is_associative($keys))
+        if(is_associative($keys))
             throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
 
         return array_diff($array, $keys);

@@ -252,7 +252,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                 if ($role == UserRole::USER) continue;
 
-                $label = ucfirst($this->translator->trans("user_role.".$role.".plural", [], "enum"));
+                $label = ucfirst($this->translator->trans("user_role.".strtolower($role).".plural", [], "enum"));
                 $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
 
                 $url = $this->adminUrlGenerator

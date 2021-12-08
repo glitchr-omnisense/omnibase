@@ -3,18 +3,24 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\SelectField;
-use Base\Field\Traits\SelectConfiguratorTrait;
 use Base\Field\Type\SelectType;
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Exception;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectConfigurator implements FieldConfiguratorInterface
 {
+    public function __construct(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+    }
+
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return SelectField::class === $field->getFieldFqcn();
@@ -22,36 +28,40 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        $choices = $this->getChoices($entityDto, $field);
-        $icons   = $this->getIcons($field);
-
-        $choices = $this->getFilteredChoices(
-                            $choices,
-                            $this->getFilter($field)
-                        );
-
         // Formatted value
-        $formattedValue = [];
-        if (!is_array($field->getValue()))
-            $formattedValue = $this->getFormattedValue($field->getValue(), $choices, $icons);
-        else {
+        $class = $field->getCustomOption(SelectField::OPTION_CLASS);
+
+        $values = $field->getValue();
+        $values = is_array($values) ? new ArrayCollection($values) : $values;
+
+        $formattedValues = [];
+        if (!$values instanceof Collection) {
+
+            $value = $field->getValue();
+            $field->setCustomOption(SelectField::OPTION_RENDER_AS_COUNT, false);
             
-            foreach ($field->getValue() as $key => $value)
-                $formattedValue[$key] = $this->getFormattedValue($value, $choices, $icons);
+            $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
+            $formattedValues = SelectType::getFormattedValues($field->getValue(), $dataClass, $this->translator);
+
+        } else {
+
+            foreach ($values as $key => $value) {
+
+                $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
+                $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
+            }
         }
 
-        $field->setFormattedValue($formattedValue);
+        $field->setFormattedValue(!empty($formattedValues) ? $formattedValues : null);
 
         // Set default value
         if ($field->getValue() == null)
             $field->setValue($this->getDefault($field));
+
         $field->setFormTypeOption("empty_data", $this->getDefault($field));
 
-        if (empty($choices))
-            throw new \InvalidArgumentException(sprintf('The "%s" choice field must define its possible choices using the setChoices() method.', $field->getProperty()));
-
-        $field->setFormTypeOptionIfNotSet('choices', $this->getChoicesWithIcons($choices, $icons));
-        $field->setFormTypeOptionIfNotSet('multiple', $field->getCustomOption(SelectField::OPTION_ALLOW_MULTIPLE_CHOICES));
+        $field->setFormTypeOptionIfNotSet('choice_filters', $field->getCustomOption(SelectField::OPTION_FILTER) ?? null);
+        $field->setFormTypeOptionIfNotSet('autocomplete', $field->getCustomOption(SelectField::OPTION_AUTOCOMPLETE));
         $field->setFormTypeOptionIfNotSet('placeholder', '');
 
         $fieldValue = $field->getValue();
@@ -65,108 +75,5 @@ class SelectConfigurator implements FieldConfiguratorInterface
     {
         return $field->getCustomOption(SelectField::OPTION_DEFAULT_CHOICE)
                ?? $field->getFormTypeOption("empty_data") ?? "";
-    }
-
-    private function getChoices(EntityDto $entity, FieldDto $field): array
-    {
-        $choiceGenerator = $field->getCustomOption(SelectField::OPTION_CHOICES)
-                           ?? $field->getFormTypeOption("choices");
-
-        if ($choiceGenerator === null && method_exists($field->getFormType(), "getChoices"))
-            $choiceGenerator = $field->getFormType()::getChoices();
-
-        if (null === $choiceGenerator) {
-            return [];
-        }
-
-        if (\is_array($choiceGenerator)) {
-            return $choiceGenerator;
-        }
-
-        return $choiceGenerator($entity->getInstance(), $field);
-    }
-
-    private function getIcons(FieldDto $field)
-    {
-        $icons = $field->getCustomOption(SelectField::OPTION_ICONS)
-                ?? $field->getFormTypeOption("choice_icons") ?? [];
-
-        if($icons === [] && method_exists($field->getFormType(), "getIcons"))
-            $icons = $field->getFormType()::getIcons();
-
-        foreach($icons as $key => $icon) {
-
-            if (is_object($icon) && !method_exists($icon, '__toString'))
-                throw new Exception("Extra variable must be stringable..");
-
-            if (is_string($icon)) {
-
-                if (str_contains($icon, "/")) // Replace by image
-                    $icon = "<img src=\"" . $icon . "\" loading=\"lazy\" alt=\"" . $icon . "\">";
-                else if (str_starts_with($icon, "fa"))
-                    $icon = "<i class=\"" . $icon . "\"></i>";
-            }
-
-            $icons[$key] = $icon;
-        }
-
-        return $icons;
-    }
-
-    private function getFilter(FieldDto $field)
-    {
-        return $field->getCustomOption(SelectField::OPTION_FILTER) ?? null;
-    }
-
-    function getFilteredChoices($choiceGenerator, $filter)
-    {
-        if($filter == null) return $choiceGenerator;
-
-        $newChoiceGenerator = [];
-        foreach ($choiceGenerator as $key => $value) {
-
-            if (array_is_associative($value))
-                $newChoiceGenerator[$key] = $this->getFilteredChoices($value, $filter);
-            else if (in_array($value, $filter))
-                $newChoiceGenerator[$key] = $value;
-        }
-
-        return $newChoiceGenerator;
-    }
-
-    function getChoicesWithIcons($choiceGenerator, $icons)
-    {
-        if($icons === null)
-            return $choiceGenerator;
-
-        $newChoiceGenerator = [];
-        foreach ($choiceGenerator as $key => $value) {
-
-            if (is_array($value) && array_is_associative($value)) {
-                
-                $newChoiceGenerator[$key] = $this->getChoicesWithIcons($value, $icons);
-
-            } else {
-            
-                $icon = $icons[$value] ?? "";
-                $newChoiceGenerator[trim(/*$icon." ".*/$key)] = $value; // To be reviewed and improved later.. icon is now added in SelectType
-            }
-        }
-
-        return $newChoiceGenerator;
-    }
-
-    private function getFormattedValue($value, array $choiceGenerator, array $icons)
-    {
-        $formattedValue = [];
-
-        $generator = array_flip(array_flatten($choiceGenerator));
-
-        $formattedValue[] = $generator[$value] ?? "";
-
-        if(array_key_exists($value, $icons))
-            $formattedValue[] = $icons[$value];
-
-        return $formattedValue;
     }
 }

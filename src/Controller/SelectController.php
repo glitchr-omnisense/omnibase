@@ -93,7 +93,7 @@ class SelectController extends AbstractController
                     $pagination = false;
                 }
 
-                foreach($entries as $i => $entry)
+                foreach($entries as $i => $entry) 
                     $results[] = SelectType::getFormattedValues($entry, $class, $this->translator);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {

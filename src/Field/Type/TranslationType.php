@@ -80,7 +80,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         });
 
         $resolver->setNormalizer('only_fields', function (Options $options, $fields) {
-            if(array_is_associative($fields)) return array_keys($fields);
+            if(is_associative($fields)) return array_keys($fields);
             return $fields;
         });
     }
@@ -142,16 +142,16 @@ class TranslationType extends AbstractType implements DataMapperInterface
             foreach($data as $key => $array) {
 
                 foreach ($array as $locale => $translation) {
-
+ 
                     if($array instanceof PersistentCollection) {
 
-                        if ($translation === null) $data[$key]->removeElement($translation);
+                        if (!$translation instanceof TranslationInterface) $data[$key]->removeElement($translation);
                         else if ($translation->isEmpty()) $data[$key]->removeElement($translation);
                         else $translation->setLocale($locale);
 
                     } else {
 
-                        if ($translation === null) unset($data[$key][$locale]);
+                        if (!$translation instanceof TranslationInterface) unset($data[$key][$locale]);
                         else if (empty($translation)) unset($data[$key][$locale]);
                     }
                 }
@@ -296,14 +296,19 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
         foreach(iterator_to_array($forms) as $locale => $form) {
 
+            $data = $form->getData();
             if(!$multiple) {
+
+                dump($data);
                 
-                $viewData[$locale] = $form->getData();
-                $viewData[$locale]->setLocale($locale);
+                if ($data instanceof TranslationInterface) { 
+                    $viewData[$locale] = is_array($data) && empty($data) ? null : $data;
+                    $viewData[$locale]->setLocale($locale);
+                }
 
             } else {
                 
-                foreach($form->getData() as $key => $translation) {
+                foreach($data as $key => $translation) {
 
                     $translation->setLocale($locale);
 
@@ -318,7 +323,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     }
 
                     if($translation) $viewData[$key][$locale] = $translation;
-                    
                 }
             }
         }

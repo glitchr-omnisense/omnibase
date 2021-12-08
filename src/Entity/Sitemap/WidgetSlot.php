@@ -31,7 +31,8 @@ class WidgetSlot implements TranslatableInterface, IconizeInterface
 {   
     use TranslatableTrait;
 
-    public static function __iconize(): array { return ["fas fa-th-large"]; }
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-th-large"]; }
 
     protected const __PREFIX__ = "";
 

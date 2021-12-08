@@ -10,14 +10,16 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class BaseSettings
 {
+    /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
+    private const __CACHE__ = true;
     use BaseSettingsTrait;
 
     public function __construct(SettingRepository $settingRepository, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache)
     {
         $this->settingRepository = $settingRepository;
-        $this->packages = $packages;
-        $this->cache   = $cache;
-        $this->localeProvider = $localeProvider;
+        $this->packages          = $packages;
+        $this->cache             = $cache;
+        $this->localeProvider    = $localeProvider;
     }
 
     public function mail       (?string $locale = null) : ?string { return $this->getScalar("base.settings.mail",      $locale); }

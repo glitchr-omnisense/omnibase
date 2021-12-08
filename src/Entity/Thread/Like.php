@@ -19,7 +19,8 @@ use Base\Model\IconizeInterface;
  */
 class Like implements IconizeInterface
 {
-    public static function __iconize() : array { return ["fas fa-thumbs-up"]; }
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-thumbs-up"]; }
 
     /**
      * @ORM\Id

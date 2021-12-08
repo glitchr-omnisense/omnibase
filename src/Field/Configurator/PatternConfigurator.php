@@ -11,7 +11,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Field\PatternField;
 
-final class PatternConfigurator implements FieldConfiguratorInterface
+class PatternConfigurator implements FieldConfiguratorInterface
 {
     private $translator;
 

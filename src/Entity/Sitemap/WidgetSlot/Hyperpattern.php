@@ -21,7 +21,8 @@ use Doctrine\Common\Collections\Collection;
 
 class Hyperpattern extends WidgetSlot implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-share-alt"]; }
+    public        function __iconize()       : ?array { return [$this->getIcon()]; } 
+    public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
     protected const __PREFIX__ = "app.hyperlink";
 

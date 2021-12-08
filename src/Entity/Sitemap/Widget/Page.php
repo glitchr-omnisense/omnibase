@@ -20,7 +20,8 @@ use Base\Repository\Sitemap\Widget\PageRepository;
 
 class Page extends Widget implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-file-alt"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-file-alt"]; } 
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)

@@ -49,6 +49,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('filesize',      [$this, 'filesize']),
             new TwigFilter('lang',          [$this, 'lang']),
             new TwigFilter('country',       [$this, 'country']),
+            new TwigFilter('fontAwesome',  [$this, 'fontAwesome']),
+            new TwigFilter('imagify',       [$this, 'imagify']),
             new TwigFilter('image',         [$this, 'image'],       ['needs_environment' => true, 'needs_context' => true]),
             new TwigFilter('datetime',      [$this, 'datetime'],    ['needs_environment' => true]),
             new TwigFilter('lessThan',      [$this, 'lessThan']),
@@ -57,6 +59,64 @@ final class BaseTwigExtension extends AbstractExtension
     }
 
     public function synopsis($class) { return class_synopsis($class); }
+
+    public function fontAwesome(array|null|string $icon, array $attributes = []) 
+    {
+        if(!$icon) return $icon;
+        if(is_array($icon)) {
+
+            foreach($icon as $key => $_icon)
+                $icon[$key] = $this->fontAwesome($_icon);
+
+            return $icon;
+        } 
+
+        $ids = explode(" ", $icon);
+
+        $isAwesome = false;
+        foreach($ids as $id) {
+            $isAwesome = in_array($id, ["fa", "far", "fab", "fas", "fad", "fal"]);
+            if($isAwesome) break;
+        }
+
+        if($isAwesome) {
+
+            $class = $attributes["class"] ?? "";
+            $class = trim($class." ".$icon);
+            if($attributes["class"] ?? false) unset($attributes["class"]);
+
+            $htmlAttributes = "";
+            foreach($attributes as $name => $attribute)
+                $htmlAttributes .= $name."=\"".$attribute."\" ";
+
+            return "<i ".trim($htmlAttributes)." class='".$class."'></i>";
+        }
+        
+        return null;
+    }
+
+    public function imagify(array|null|string $src, array $attributes = []) 
+    { 
+        if(!$src) return $src;
+        if(is_array($src)) {
+
+            foreach($src as $key => $_src)
+                $src[$key] = $this->fontAwesome($_src);
+
+            return $src;
+        }
+        
+        if (filter_var($src, FILTER_VALIDATE_URL) === FALSE) 
+            return null;
+
+        if($attributes["src"] ?? false) unset($attributes["src"]);
+
+        $htmlAttributes = "";
+        foreach($attributes as $name => $attribute)
+            $htmlAttributes .= $name."=\"".$attribute."\" ";
+
+        return "<img ".trim($htmlAttributes)." src='".$src."' />";
+    }
 
     public function shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
     {

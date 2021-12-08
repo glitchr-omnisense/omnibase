@@ -141,11 +141,11 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
-            $this->baseService->getDoctrine()->getManager()->flush();
+            $this->baseService->getEntityManager()->flush();
             $notification->send("email")->send("success");
         }
 
-        $this->baseService->getDoctrine()->getManager()->flush();
+        $this->baseService->getEntityManager()->flush();
         $this->baseService->redirectToRoute("base_profile", [], $event);
     }
 
@@ -165,7 +165,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("email");
         }
 
-        $this->baseService->getDoctrine()->getManager()->flush();
+        $this->baseService->getEntityManager()->flush();
     }
 
     public function onSwitchUser(SwitchUserEvent $event)
@@ -219,7 +219,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
         }
 
-        $this->baseService->getDoctrine()->getManager()->flush();
+        $this->baseService->getEntityManager()->flush();
     }
 
     public function onLoginFailure(LoginFailureEvent $event)

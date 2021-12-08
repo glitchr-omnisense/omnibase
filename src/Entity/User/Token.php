@@ -15,7 +15,8 @@ use Hashids\Hashids;
  */
 class Token implements IconizeInterface
 {
-    public static function __iconize():array { return ["fas fa-drumstick-bite"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-drumstick-bite"]; } 
 
     /**
      * @ORM\Id

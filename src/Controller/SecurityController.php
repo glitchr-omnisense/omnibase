@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Entity\User;
+use App\Entity\User;
 
 use Base\Entity\User\Notification;
 use Base\Service\BaseService;
@@ -177,8 +177,8 @@ class SecurityController extends AbstractController
             if ($user && $user->isVerified()) // Social account connection
                 $newUser->verify($user->isVerified());
 
-            $this->getDoctrine()->getManager()->persist($newUser);
-            $this->getDoctrine()->getManager()->flush();
+            $this->entityManager->persist($newUser);
+            $this->entityManager->flush();
 
             return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
         }
@@ -221,7 +221,7 @@ class SecurityController extends AbstractController
             $notification->send("success")->send("urgent");
         }
 
-        $this->getDoctrine()->getManager()->flush();
+        $this->entityManager->flush();
         return $this->redirectToRoute('base_profile');
     }
 
@@ -268,7 +268,7 @@ class SecurityController extends AbstractController
             }
         }
         
-        $this->getDoctrine()->getManager()->flush();
+        $this->entityManager->flush();
         return $this->redirectToRoute('base_profile');
     }
 
@@ -304,7 +304,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->getDoctrine()->getManager()->flush();
+        $this->entityManager->flush();
         return $this->redirectToRoute('base_profile');
     }
 
@@ -328,7 +328,7 @@ class SecurityController extends AbstractController
 
             $this->baseService->Logout();
 
-            $this->getDoctrine()->getManager()->flush();
+            $this->entityManager->flush();
             return $this->redirectToRoute('base_homepage');
         }
     }
@@ -369,7 +369,7 @@ class SecurityController extends AbstractController
 
             $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
             
-            $this->getDoctrine()->getManager()->flush();
+            $this->entityManager->flush();
             return $authenticateUser;
         }
     }
@@ -406,7 +406,7 @@ class SecurityController extends AbstractController
                 }
             }
 
-            $this->getDoctrine()->getManager()->flush();
+            $this->entityManager->flush();
             $notification->send("success");
         }
 
@@ -448,7 +448,7 @@ class SecurityController extends AbstractController
 
                 $notification = new Notification("notifications.resetPassword.success");
                
-                $this->getDoctrine()->getManager()->flush();
+                $this->entityManager->flush();
                 $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
                 $notification->send("success");
 

@@ -4,10 +4,10 @@ namespace Base\Field;
 
 use Base\Field\Type\FontAwesomeType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class FontAwesomeField implements FieldInterface
+class FontAwesomeField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 

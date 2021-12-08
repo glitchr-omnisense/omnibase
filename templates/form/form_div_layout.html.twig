@@ -31,17 +31,22 @@
     </div>
 {%- endblock form2_row -%}
 
-{# All custom FormType widgets are below.. #}
-
+{# Custom FormType widgets are below.. #}
+{%- block quill_row -%}
+<div class="form-quill">
+    {{ form_label(form) }}
+    {{ form_errors(form) }}
+    {{ form_row(form) }}
+</div>
+{%- endblock -%}
 {%- block quill_widget -%}
-    
-    <input {{ block('widget_attributes') }} name="{{ full_name }}" type="hidden" {% if value is not empty %} value="{{ value }}" {% endif %} />
-    
+
     {% set attr = attr|merge({
         'data-quill-field': form.vars.id,
-        'data-quill-options': quill
-        }) %}
-    
+       'data-quill-options': quill
+    }) %}
+
+    {{ form_widget(form) }}
     <div id="{{ id }}_editor" {{ block('attributes') }}>
         {{ value | raw }}
     </div>

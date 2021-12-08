@@ -14,7 +14,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /**
  * @author Javier Eguiluz <javier.eguiluz@gmail.com>
  */
-final class SlugConfigurator implements FieldConfiguratorInterface
+class SlugConfigurator implements FieldConfiguratorInterface
 {
     private $translator;
 

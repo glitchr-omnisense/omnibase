@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Entity\User;
 use Base\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -9,13 +10,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 use function Symfony\Component\String\u;
 
-final class IdConfigurator implements FieldConfiguratorInterface
+class IdConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator)
     {
+        $this->authorizationChecker = $authorizationChecker;
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
@@ -30,11 +34,22 @@ final class IdConfigurator implements FieldConfiguratorInterface
         if (null === $maxLength)
             $maxLength = Crud::PAGE_INDEX === $context->getCrud()->getCurrentPage() ? 7 : -1;
 
-        $value = gettype($field->getValue()) == "integer" ?  "#" : "";
-        $value = u($field->getValue())->truncate($maxLength, '…')->toString();
+        // Check access rights and context to impersonate
+        if(!$entityDto->getInstance() instanceof User || !$this->authorizationChecker->isGranted('ROLE_SUPERADMIN'))
+            $field->setCustomOption(IdField::OPTION_IMPERSONATE, false);
+
+        // Formatted data
+        $field->setValue($entityDto->getInstance());
+        $accessor = PropertyAccess::createPropertyAccessor();
+        $value = $accessor->isReadable($field->getValue(), $field->getProperty()) 
+               ? $accessor->getValue  ($field->getValue(), $field->getProperty()) : null;
+
+        $hashtag = gettype($value) == "integer" ?  "#" : "";
+        $value   = $hashtag . u($value)->truncate($maxLength, '…')->toString();
 
         $url = null;
         if( $field->getCustomOption(IdField::OPTION_ADD_LINK) ) {
+
             $url = $this->adminUrlGenerator
                 ->setAction('detail')
                 ->setEntityId($entityDto->getInstance()->getId())
@@ -42,7 +57,7 @@ final class IdConfigurator implements FieldConfiguratorInterface
         }
         
         if (-1 !== $maxLength && null !== $field->getValue()) {
-            $field->setFormattedValue( (!$url ? "<a href='".$url."'>".$value."</a>" : $value));
+            $field->setFormattedValue( ($url ? "<a href='".$url."'>".$value."</a>" : $value));
         }
     }
 }

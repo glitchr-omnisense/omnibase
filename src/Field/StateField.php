@@ -2,19 +2,18 @@
 
 namespace Base\Field;
 
-use Base\Field\Traits\SelectFieldInterface;
-use Base\Field\Traits\SelectFieldTrait;
+use Base\Enum\ThreadState;
 use Base\Field\Type\StateType;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use \Symfony\Component\Validator\Constraints\Length;
-
-final class StateField implements FieldInterface
+class StateField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_CLASS = 'class';
+    
     public static function new(string $propertyName, ?string $label = null): self
     {
         return (new self())
@@ -22,6 +21,9 @@ final class StateField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(StateType::class)
+            ->setCustomOption(self::OPTION_CLASS, ThreadState::class)
+            ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
+            ->setTextAlign(TextAlign::CENTER)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
     }
 }

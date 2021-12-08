@@ -4,9 +4,8 @@ namespace Base\Controller\Dashboard;
 
 use Base\Config\Extension;
 use Base\Field\IdField;
-use Base\Field\LinkIdField;
 use Base\Model\IconizeInterface;
-use Base\Service\BaseService;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -17,8 +16,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 {
     abstract static function getPreferredIcon(): ?string;
 
-    public function __construct(Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
+    public function __construct(EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
     {
+        $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;
         $this->extension = $extension;
         $this->translator = $translator;
@@ -105,7 +105,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($text == $prefixWithAction.".text") $text = $this->translator->trans($prefix.".text", [], AbstractDashboardController::TRANSLATION_DOMAIN);
         if($text == $prefix.".text") $text = "";
 
-        $icon = class_implements_interface($this->getEntityFqcn(), IconizeInterface::class) ? $this->getEntityFqcn()::__iconize()[0] : null;
+        $icon = class_implements_interface($this->getEntityFqcn(), IconizeInterface::class) ? $this->getEntityFqcn()::__staticIconize()[0] : null;
         $icon = $this->getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
 
         $this->extension->setIcon($icon);
@@ -127,6 +127,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        
+        foreach ( ($callbacks[""] ?? $defaultCallback)() as $yield)
+            yield $yield;
 
         yield IdField::new('id')->hideOnForm();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)

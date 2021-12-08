@@ -5,24 +5,13 @@ namespace Base\Entity\User;
 use App\Entity\User;
 use App\Entity\User\Group;
 
-use App\Repository\User\NotificationRepository;
 use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 
 use Base\Service\BaseService;
-use Base\Twig\Extension\BaseTwigExtension;
-
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
-use Symfony\Bundle\FrameworkBundle\Translation\Translator;
-use Symfony\Component\Notifier\Notifier;
-use Symfony\Component\Notifier\NotifierInterface;
-
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\Notifier\Bridge\Discord\DiscordOptions;
-use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\Message\EmailMessage;
 use Symfony\Component\Notifier\Message\ChatMessage;
 use Symfony\Component\Notifier\Message\SmsMessage;
@@ -35,12 +24,14 @@ use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Traits\BaseTrait;
 use Throwable;
 use Exception;
 use UnexpectedValueException;
+
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\User\NotificationRepository;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -49,7 +40,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 {
     use BaseTrait;
 
-    public static function __iconize(): array { return ["fas fa-bell"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-bell"]; } 
 
     // Default notification
     public const IMPORTANCE_DEFAULT = "default";

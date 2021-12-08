@@ -3,17 +3,17 @@
 namespace Base\Field\Type;
 
 use Base\Service\BaseService;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Traversable;
 
-class QuillType extends AbstractType
+class QuillType extends AbstractType implements DataMapperInterface
 {
     /** @var BaseService */
     protected $baseService;
@@ -21,6 +21,9 @@ class QuillType extends AbstractType
     {
         $this->baseService = $baseService;
     }
+
+    public function getParent() { return HiddenType::class; }
+    public function getBlockPrefix(): string { return 'quill'; }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -62,14 +65,6 @@ class QuillType extends AbstractType
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'quill';
-    }
-
     public function getFormID($view): string
     {
         $parent = $view->parent;
@@ -78,6 +73,7 @@ class QuillType extends AbstractType
 
         return $parent->vars["attr"]["id"] ?? null;
     }
+
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         // Import highlight
@@ -97,6 +93,7 @@ class QuillType extends AbstractType
             $theme = $themeArray[1];
             $themeCssFile = $themeArray[0];
         }
+        
         $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
         $modules = $options["modules"] ?? [];
 
@@ -111,5 +108,15 @@ class QuillType extends AbstractType
         //
         // Default quill initialializer
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
+    }
+
+    public function mapDataToForms($viewData, Traversable $forms)
+    {
+        dump(iterator_to_array($forms));
+    }
+
+    public function mapFormsToData(Traversable $forms, &$viewData)
+    {
+        dump(iterator_to_array($forms));
     }
 }

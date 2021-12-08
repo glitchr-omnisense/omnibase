@@ -2,9 +2,3 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 <a href="{{ app.request.uri }}&_switch_user={{ field.value }}"><i class="fa fa-fw fa-user-secret"></i></a> 
-
-{% if field.getProperty() == "id" %}
-    <a href="{{ app.request.uri }}&entityId={{field.value}}&crudAction=detail">#{{ field.value }}</a>
-{% else %}
-    {{ field.value }}
-{% endif %}

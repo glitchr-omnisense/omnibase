@@ -38,29 +38,29 @@ thread_state:
   singular: "statut"
   plural: "statut"
 
-  published: 
+  state_published: 
     singular: "publié"
     plural: "publiés"
-  draft: 
+  state_draft: 
     singular: "brouillon"
     plural: "brouillons"
-  future: 
+  state_future: 
     singular: "planifié"
     plural: "planifiés"
-  secret: 
+  state_secret: 
     singular: "invisible"
     plural: "invisibles"
   
-  approved: 
+  state_approved: 
     singular: "approuvé"
     plural: "approuvés"
-  pending: 
+  state_pending: 
     singular: "en attente"
     plural: "en attente"
-  rejected: 
+  state_rejected: 
     singular: "refusé"
     plural: "refusés"
-  deleted: 
+  state_deleted: 
     singular: "supprimé"
     plural: "supprimés"
     

@@ -12,9 +12,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TimeField;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
 
 use Base\Field\DateTimePickerField;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
-final class DateTimePickerConfigurator implements FieldConfiguratorInterface
+class DateTimePickerConfigurator implements FieldConfiguratorInterface
 {
     private $intlFormatter;
 

@@ -3,11 +3,11 @@
 namespace Base\Field;
 
 use Base\Field\Type\SelectType;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-final class SelectField implements FieldInterface
+class SelectField implements FieldInterface
 {
     use FieldTrait;
 
@@ -17,6 +17,15 @@ final class SelectField implements FieldInterface
     public const OPTION_ICONS = 'icons';
     public const OPTION_FILTER = 'filter';
     public const OPTION_DEFAULT_CHOICE = "default_choice";
+    public const OPTION_CLASS = 'class';
+
+    public const OPTION_RENDER_AS_COUNT = 'renderAsCount';
+    public const OPTION_SHOW_FIRST = 'showFirst';
+    public const OPTION_SHOW = 'show';
+    public const NO_SHOW        = 0;
+    public const SHOW_NAME_ONLY = 1;
+    public const SHOW_ICON_ONLY = 2;
+    public const SHOW_ALL       = 3;
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -26,6 +35,10 @@ final class SelectField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setFormType(SelectType::class)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
+            ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
+            ->setCustomOption(self::OPTION_SHOW_FIRST, self::NO_SHOW)
+            ->setCustomOption(self::OPTION_RENDER_AS_COUNT, true)
+            ->setTextAlign(TextAlign::RIGHT)
             ->addCssClass('field-select');
     }
 
@@ -44,8 +57,11 @@ final class SelectField implements FieldInterface
         return $this;
     }
 
-    public function setFilter(array $filter)
+    public function setFilter($filter)
     {
+        if(!$filter) $filter = [];
+        if(!is_array($filter)) $filter = [$filter];
+    
         $this->setCustomOption(self::OPTION_FILTER, $filter);
         return $this;
     }
@@ -53,6 +69,30 @@ final class SelectField implements FieldInterface
     public function setIcons(array $icons)
     {
         $this->setCustomOption(self::OPTION_ICONS, $icons);
+        return $this;
+    }
+
+    public function setClass(array $class)
+    {
+        $this->setCustomOption(self::OPTION_CLASS, $class);
+        return $this;
+    }
+
+    public function showFirst(int $show = self::SHOW_ALL)
+    {
+        $this->setCustomOption(self::OPTION_SHOW_FIRST, $show);
+        return $this;
+    }
+
+    public function show(int $show = self::SHOW_ALL)
+    {
+        $this->setCustomOption(self::OPTION_SHOW, $show);
+        return $this;
+    }
+
+    public function renderAsCount(bool $render = true)
+    {
+        $this->setCustomOption(self::OPTION_RENDER_AS_COUNT, $render);
         return $this;
     }
 

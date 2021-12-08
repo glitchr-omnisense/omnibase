@@ -46,7 +46,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
     {
         $newData = [];
         if(!$data) return [];
-        else if(array_is_associative($data)) {
+        else if(is_associative($data)) {
 
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
@@ -128,7 +128,9 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     switch($fieldOptions["form_type"]) {
 
                         case DateTimePickerType::class:
-                            $settingTranslation->setValue(($settingValue ? new \DateTime($settingValue) : null));
+                            $datetime = $settingValue instanceof \DateTime ? $settingValue : null;
+                            if(!$datetime) $datetime = $settingValue ? new \DateTime($settingValue) : null;
+                            $settingTranslation->setValue($datetime);
                             break;
 
                         case CheckboxType::class:
@@ -168,6 +170,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
+        dump("-----");
+        dump($viewData);
         foreach(iterator_to_array($forms) as $formName => $form)
         {
             if($formName == "valid") continue;
@@ -180,7 +184,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                         $viewData[$field] = $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field, "");
                         $viewData[$field]->setValue($translation->getValue() ?? "", $locale);
-
+                        
                         $this->baseSettings->removeCache($formattedField);
                     }
                  }
@@ -194,9 +198,11 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 $field = str_replace("-", ".", $formName);
                 $viewData[$formName] = $viewData[$formName]->setValue($form->getViewData() ?? "");
-
+                
                 $this->baseSettings->removeCache($formName);
             }
         }
+        dump($viewData);
+
     }
 }

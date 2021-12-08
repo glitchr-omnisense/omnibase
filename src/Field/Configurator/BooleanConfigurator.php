@@ -12,7 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
-final class BooleanConfigurator implements FieldConfiguratorInterface
+class BooleanConfigurator implements FieldConfiguratorInterface
 {
     private $adminUrlGenerator;
 

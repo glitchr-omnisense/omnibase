@@ -18,7 +18,8 @@ use Base\Repository\Sitemap\Widget\HyperlinkRepository;
 
 class Hyperlink extends Widget implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-link"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-link"]; } 
    
     /**
      * @ORM\ManyToOne(targetEntity=Hyperpattern::class, inversedBy="hyperlinks")

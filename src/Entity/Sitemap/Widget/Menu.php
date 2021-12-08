@@ -15,5 +15,6 @@ use Base\Repository\Sitemap\Widget\MenuRepository;
 
 class Menu extends Widget implements IconizeInterface
 {
-    public static function __iconize(): array { return ["fas fa-compass"]; } 
+    public        function __iconize()       : ?array { return null; } 
+    public static function __staticIconize() : ?array { return ["fas fa-compass"]; } 
 }

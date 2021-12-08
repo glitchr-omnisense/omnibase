@@ -1,0 +1,31 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{% set show = field.customOptions.get('show') %}
+
+{% set icon  = field.customOptions.get('icon')|fontAwesome({class: "fa-fw"})|default("") %}
+{% set icon2x  = field.customOptions.get('icon')|fontAwesome({class: "fa-fw fa-2x"})|default("") %}
+{% set email = field.formattedValue %}
+
+{% if icon is empty %}
+    {% set show = "email" %}
+{% endif %}
+
+{% if ea.crud.currentAction == 'detail' %}
+    {% set show = "all" %}
+{% endif %}
+
+    {% if show != "email" %}
+    <a href="mailto:{{ email }}">
+        <span class="field-email-icon" {% if show == "icon" %}data-toggle="tooltip" data-placement="top" title="{{ email }}"{% endif %}>
+            {{ icon|raw }}
+        </span>
+    </a>
+    {% endif %}
+
+    {% if show != "icon" %}
+    <a href="mailto:{{ email }}">
+        {{ email }}
+    </a>
+    {% endif %}

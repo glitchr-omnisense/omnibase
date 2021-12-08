@@ -9,7 +9,6 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 
 trait BaseSettingsTrait
 {
-    protected $cacheEnabled = true; /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
     protected $cache = null;
 
     protected $settingRepository = null;
@@ -146,12 +145,9 @@ trait BaseSettingsTrait
             return $cacheValues;
 
         $values = $this->getRaw($name, $locale) ?? [];
-       	return array_map_recursive(function($value) use ($locale) {
-               	    return ($value instanceof Setting ? $value->translate($locale)->getValue() : $value);
-               	}, $values);
+       	return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() : $v), $values);
     }
 
-    
     public function set(string $name, string $value, ?string $locale = null)
     {
         if(!$this->settingRepository)
@@ -193,27 +189,30 @@ trait BaseSettingsTrait
 
     protected function getCache(string $name, string $locale) 
     {
-        if(!$this->cache) return null;
-        if(!$this->cacheEnabled) return null;
-        
+        if(!self::__CACHE__) return null;
+        if(!$this->cache)    return null;
+        if($this->isCli())   return null;
+
         $item = $this->cache->getItem($name);
         $itemList = $item->get() ?? [];
+
         if (array_key_exists($locale, $itemList))
             return $itemList[$locale] ?? [];
 
         return null;
     }
 
-    protected function applyCache(string $name, string $locale, $array)
+    protected function applyCache(string $name, string $locale, $value)
     {
-        if(!$array) return false;
+        //if(!self::__CACHE__) return false;
+        if(!$value) return false;
         if(!$this->cache) return false;
-        if(!$this->cacheEnabled) return false;
-        
-        if(($setting = $array) instanceof Setting) 
+        if($this->isCli()) return false;
+
+        if(($setting = $value) instanceof Setting) 
             return $this->applyCache($name, $locale, $setting->translate($locale)->getValue());
 
-        if(is_array( ($values = $array) )) {
+        if(is_array( ($values = $value) )) {
 
             if(array_key_exists("_self", $values) && ($setting = $values["_self"]) instanceof Setting)
                 $values["_self"] = $setting->translate($locale)->getValue();
@@ -223,27 +222,23 @@ trait BaseSettingsTrait
             foreach($localeValues as $locale => $values) {
 
                 // Broadcast cache storage
-                foreach  ($values as $key => $value) {
+                foreach  ($values as $key => $innerValue) {
 
                     if($key == "_self") continue;
-                    $this->applyCache($name.".".$key, $locale, $value);
+                    $this->applyCache($name.".".$key, $locale, $innerValue);
                 }
 
                 // Process current node
-                $localeValues[$locale] = array_map_recursive(
-                    function($value) use ($locale) {
-                        return ($value instanceof Setting ? $value->translate($locale)->getValue() : $value);
-                    }, $values
-                );
+                $localeValues[$locale] = array_map_recursive(fn($v) => $v instanceof Setting ? $v->translate($locale)->getValue() : $v, $values);
             }
 
-            if(!$this->isCli()) $this->cache->save($item->set($localeValues));
+            $this->cache->save($item->set($localeValues));
             return true;
         }
 
         $item = $this->cache->getItem($name);
-        $array = array_merge($item->get() ?? [], [$locale => $array]);
-        if(!$this->isCli()) $this->cache->save($item->set($array));
+        $value = array_merge($item->get() ?? [], [$locale => $value]);
+        $this->cache->save($item->set($value));
 
         return true;
     }

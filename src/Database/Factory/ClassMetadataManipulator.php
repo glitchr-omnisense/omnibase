@@ -140,7 +140,7 @@ class ClassMetadataManipulator
 
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
-        if(!array_is_associative($fields))
+        if(!empty($fields) && !is_associative($fields))
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
@@ -293,11 +293,13 @@ class ClassMetadataManipulator
         return $this->getClassMetadata($class)->getAssociationTargetClass($fieldName);
     }
 
-    public function getAssociationTargetClassInversedBy(string $class, string $inversedBy): ?string
+    public function getTargetClass(string $class, string $mappedOrInversedBy): ?string
     {
         $metadata = $this->getClassMetadata($class);
-        foreach($metadata->getAssociationMappings($class) as $association => $mapping)
-            if($mapping["inversedBy"] == $inversedBy) return $mapping["targetEntity"] ?? null;
+        foreach($metadata->getAssociationMappings($class) as $association => $mapping) {
+            if($mapping["inversedBy"] == $mappedOrInversedBy || $mapping["mappedBy"] == $mappedOrInversedBy) 
+                return $mapping["targetEntity"] ?? null;
+        }
 
         return null;
     }
