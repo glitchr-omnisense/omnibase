@@ -249,7 +249,7 @@
         {% endif %}
         <section class="content">
 
-            <h1>Login page</h1>
+            <h1>{{ 'forms.login.title'|trans2 }}</h1>
             <form method="post" action="{{ action|default('') }}">
                 {% if csrf_token_intention|default(false) %}
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_token_intention) }}">
@@ -267,7 +267,7 @@
                     <input type="password" id="password" name="{{ password_parameter|default('password') }}" class="form-control" placeholder="{{ _password_label }}" required>
                 </div>
 
-                <div class="form-group field-button">
+                <div class="text-center form-group field-button">
                     <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="this.form.submit(); this.disabled=true;">{{ _sign_in_label }}</button>
                 </div>
             </form>

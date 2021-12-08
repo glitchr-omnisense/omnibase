@@ -53,15 +53,14 @@ class SecurityController extends AbstractController
 
             $lastUsername = $authenticationUtils->getLastUsername();
 
-            $logo = $this->baseService->getSettings()->get("base.settings.logo");
+            $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
             return $this->render('@EasyAdmin/page/login.html.twig', [
                 'last_username' => $lastUsername,
-                'translation_domain' => 'admin',
+                'translation_domain' => 'forms',
                 'csrf_token_intention' => 'authenticate',
                 'target_path' => $this->baseService->getUrl('base_dashboard'),
-                'username_label' => 'Your username',
-                'password_label' => 'Your password',
-                'sign_in_label' => 'Log in',
+                'username_label' => 'login.identifier',
+                'password_label' => 'login.password',
                 'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
             ]);
         }
