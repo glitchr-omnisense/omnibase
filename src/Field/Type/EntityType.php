@@ -180,9 +180,9 @@ class EntityType extends AbstractType implements DataMapperInterface
         $data = new ArrayCollection();
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
-    
+
         $dataClass = $form->getConfig()->getOption("data_class") ?? (is_object($viewData) ? get_class($viewData) : null);
-        if($dataClass) {
+        if($this->classMetadataManipulator->isEntity($dataClass)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
             if(!$classMetadata)

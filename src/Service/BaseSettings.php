@@ -39,7 +39,7 @@ class BaseSettings
     public function logo     (?string $locale = null) : ?string   { return $this->getScalar("base.settings.logo",      $locale); }
     public function title    (?string $locale = null) : ?string   { return $this->getScalar("base.settings.title",     $locale); }
     public function slogan   (?string $locale = null) : ?string   { return $this->getScalar("base.settings.slogan",    $locale); }
-    public function birthdate(?string $locale = null) : \DateTime { return new \DateTime($this->getScalar("base.settings.birthdate", $locale) ?? "now"); }
+    public function birthdate(?string $locale = null) : \DateTime { return $this->getScalar("base.settings.birthdate", $locale) ?? new \DateTime("now"); }
     public function age(?string $locale = null) : string {
 
         $birthdate = $this->birthdate($locale)->format("Y");

@@ -106,7 +106,7 @@ trait BaseSettingsTrait
         return $this->getRaw($name, $locale)["_self"] ?? null;
     }
 
-    public function getScalar($name, ?string $locale = null): ?string
+    public function getScalar($name, ?string $locale = null): string|object|null
     {
         if(!$locale)
             $locale = $this->localeProvider->getLocale($locale);
