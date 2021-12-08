@@ -38,8 +38,8 @@ class MaintenanceController extends AbstractController
 
         } else {
 
-            $downtime = $this->baseService->getSettings("base.settings.maintenance_downtime");
-            $uptime   = $this->baseService->getSettings("base.settings.maintenance_uptime");
+            $downtime = $this->baseService->getSettings()->get("base.settings.maintenance_downtime")["_self"] ?? null;
+            $uptime   = $this->baseService->getSettings()->get("base.settings.maintenance_uptime")["_self"] ?? null;
         }
 
         $downtime = ($downtime) ? strtotime($downtime) : 0;

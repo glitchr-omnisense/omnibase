@@ -140,8 +140,10 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!is_object($entity)) $files = $form->getData();
         else {
         
-            $file = Uploader::getFile($entity, $form->getName());
-            $files = ($file ? $file->getPath() : null);
+            $files = Uploader::getFile($entity, $form->getName());
+            if(!is_array($files)) $files = [$files];
+
+            $files = array_map(fn($f) => $f ? $f->getPath() : null, $files);
 
             $propertyType = Uploader::getTypeOfField($entity, $form->getName());
             if($options["multiple"] && $propertyType != "array")

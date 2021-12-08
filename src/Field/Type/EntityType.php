@@ -59,6 +59,7 @@ class EntityType extends AbstractType implements DataMapperInterface
 
             'allow_add' => true,
             'allow_delete' => true,
+            'allow_entity' => false,
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -99,9 +100,10 @@ class EntityType extends AbstractType implements DataMapperInterface
                     "entry_row_inline" => $options["row_inline"],
                     'entry_type' => EntityType::class,
                     'entry_options' => array_merge($options, [
+                        'allow_entity' => $options["allow_entity"],
                         'data_class' => $dataClass,
                         'multiple' => false,
-                        'label' => false
+                        'label' => false,
                     ]),
                 ];
                 
@@ -144,7 +146,11 @@ class EntityType extends AbstractType implements DataMapperInterface
                     if(!array_key_exists("required", $field) && $isNullable)
                         $field['required'] = false;
                     
-                    $form->add($fieldName, $fieldType, $field);
+                    $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];
+                    unset($field['allow_entity']);
+
+                    if (!$fieldEntity || !$fieldType == EntityType::class)
+                        $form->add($fieldName, $fieldType, $field);
                 }
             }
         });

@@ -53,7 +53,7 @@ class SecurityController extends AbstractController
 
             $lastUsername = $authenticationUtils->getLastUsername();
 
-            $logo = $this->baseService->getSettings("base.settings.logo");
+            $logo = $this->baseService->getSettings()->get("base.settings.logo");
             return $this->render('@EasyAdmin/page/login.html.twig', [
                 'last_username' => $lastUsername,
                 'translation_domain' => 'admin',
