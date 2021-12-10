@@ -12,8 +12,12 @@ login:
     social : "Hi ! You just got connected to thought your {0} account"
 
     pending: "Your user account requires to be moderated by an administrator"
+    disabled: "Your user account is currently disabled. An email has been sent to your address."
+    locked : "Your user account is currently locked."
     banned : "Your user account no longer exists."
     failed : "Invalid login credentials"
+
+kickout: "{0}, you have been kicked out !"
 
 impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !

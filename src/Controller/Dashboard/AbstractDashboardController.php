@@ -67,7 +67,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected $baseService;
     protected $adminUrlGenerator;
     
-    public const TRANSLATION_DOMAIN = "dashboard";
+    public const TRANSLATION_DASHBOARD = "dashboard";
+    public const TRANSLATION_ENTITY    = "entities";
 
     public function __construct(
         Extension $extension, 
@@ -82,12 +83,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->adminContextProvider  = $adminContextProvider;
+        
         $this->translator = $translator;
+        WidgetItem::$translator = $translator;
 
         $this->baseService           = $baseService;
-        $this->settingRepository     = $baseService->getRepository(Setting::class);
-        $this->widgetRepository      = $baseService->getRepository(Widget::class);
-        $this->widgetSlotRepository  = $baseService->getRepository(WidgetSlot::class);
+        $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
+        $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
+        $this->widgetSlotRepository  = $baseService->getEntityManager()->getRepository(WidgetSlot::class);
 
         $this->gaService = $gaService;
     }
@@ -112,12 +115,22 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
+     * @Route("/dashboard/ga", name="base_dashboard_ga")
+     */
+    public function GoogleAnalytics(): Response
+    {
+        return $this->render('dashboard/index.html.twig');
+    }
+
+    /**
+     * Link to this controller to start the "connect" process
+     *
      * @Route("/dashboard/settings", name="base_dashboard_settings")
      */
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_merge([
-            "base.settings.logo"                 => ["form_type" => ImageType::class,],
+            "base.settings.logo"                 => ["form_type" => ImageType::class],
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class],
             "base.settings.title"                => [],
             "base.settings.slogan"               => [],
@@ -133,6 +146,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ], $fields);
 
         $singleLocale = array_keys($fields);
+        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.logo");
         $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.title");
         $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.slogan");
         $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.mail.name");
@@ -229,7 +243,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         );
 
         return parent::configureDashboard()
-            ->setTranslationDomain(self::TRANSLATION_DOMAIN)
+            ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
             ->setTitle('<img src="'.$this->baseService->getAsset($logo).'" alt="'.$title.'">')
             ->disableUrlSignatures();
     }
@@ -278,19 +292,19 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $ga = $this->gaService->getBasics();
 
             $gaMenu = [];
-            $gaMenu["users"]        = ["label" => $this->translator->trans("users", [$ga["users"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-user'];
-            $gaMenu["users_1day"]   = ["label" => $this->translator->trans("users_1day", [$ga["users_1day"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-user-clock'];
-            $gaMenu["views"]        = ["label" => $this->translator->trans("views", [$ga["views"]], self::TRANSLATION_DOMAIN), "icon"  => 'far fa-eye'];
-            $gaMenu["views_1day"]   = ["label" => $this->translator->trans("views_1day", [$ga["views_1day"]], self::TRANSLATION_DOMAIN) , "icon"  => 'fas fa-eye'];
-            $gaMenu["sessions"]     = ["label" => $this->translator->trans("sessions", [$ga["sessions"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-stopwatch'];
-            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans("bounces_1day", [$ga["bounces_1day"]], self::TRANSLATION_DOMAIN), "icon"  => 'fas fa-meteor'];
+            $gaMenu["users"]        = ["label" => $this->translator->trans("users", [$ga["users"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-user'];
+            $gaMenu["users_1day"]   = ["label" => $this->translator->trans("users_1day", [$ga["users_1day"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-user-clock'];
+            $gaMenu["views"]        = ["label" => $this->translator->trans("views", [$ga["views"]], self::TRANSLATION_DASHBOARD), "icon"  => 'far fa-eye'];
+            $gaMenu["views_1day"]   = ["label" => $this->translator->trans("views_1day", [$ga["views_1day"]], self::TRANSLATION_DASHBOARD) , "icon"  => 'fas fa-eye'];
+            $gaMenu["sessions"]     = ["label" => $this->translator->trans("sessions", [$ga["sessions"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-stopwatch'];
+            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans("bounces_1day", [$ga["bounces_1day"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-meteor'];
 
             $menu[] = MenuItem::section('STATISTICS');
             foreach ($gaMenu as $key => $entry) {
 
                 $url = $this->adminUrlGenerator
                     ->unsetAll()
-                    ->setRoute("app_dashboard_ga")
+                    ->setRoute("base_dashboard_ga")
                     ->set("menuIndex", count($menu))
                     ->set("show", $key)
                     ->generateUrl();

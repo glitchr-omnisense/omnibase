@@ -3,26 +3,20 @@
 namespace Base\Security;
 
 use App\Entity\User;
-use Base\Annotations\Annotation\Hashify;
-use Base\Entity\User\Notification;
+
 use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
+
 use Google\ReCaptcha\Badge\CaptchaBadge;
-use Google\ReCaptcha\Service\GrService;
-use Symfony\Component\HttpFoundation\JsonResponse;
+
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
+
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge;
@@ -31,7 +25,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge
 use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
-use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
@@ -67,7 +60,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         return self::LOGIN_ROUTE === $request->attributes->get('_route') && $request->isMethod('POST');
     }
 
-    public function authenticate(Request $request): PassportInterface
+    public function authenticate(Request $request): Passport
     {
         $identifier = $request->get('login')["username"] ?? $request->get("username") ?? "";
         $password   = $request->get('login')["password"] ?? $request->get("password") ?? "";
@@ -95,8 +88,10 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     {
         // Update client information
         if( ($user = $token->getUser()) ) {
-            $user->setLocale();
+
             $user->setTimezone();
+            $user->setLocale();
+            $user->kick(0);
 
             $this->entityManager->flush();
         }
@@ -111,10 +106,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
             $this->baseService->getRoute($request->request->get("_target_path")) ??
             $this->baseService->getRoute($request->getSession()->get('_security.main.target_path')) ?? 
             $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
-
-            dump($request->request->get("_target_path"));
-            dump($request->request->get("_security.main.target_path"));
-            dump($request->request->get("_security.account.target_path"));
 
         if ($targetPath &&
             $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&

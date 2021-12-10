@@ -180,11 +180,13 @@ class UploaderEntitiesCommand extends Command
         $classMetadata = $this->entityManager->getClassMetadata($class);
         $fileListInDatabase = array_map(function($entity) use ($classMetadata, $field, $annotation) { 
 
-            return $annotation->getPath($entity, $classMetadata->getFieldValue($entity, $field));
+            $uuid = $classMetadata->getFieldValue($entity, $field);
+            if(is_array($uuid)) return array_map(fn($uuid) => $annotation->getPath($entity, $uuid), $uuid);
+            else return $annotation->getPath($entity, $uuid);
 
         }, $this->getEntries($class));
         
-        return array_values(array_diff($fileList, $fileListInDatabase));
+        return array_values(array_diff($fileList, array_flatten($fileListInDatabase)));
     }
 
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)

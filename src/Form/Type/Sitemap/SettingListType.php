@@ -79,9 +79,9 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-                $this->baseSettings->remove($field);
+                $this->baseSettings->removeCache($field);
 
-                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]) ?? new Setting($field, "");
+                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]) ?? new Setting($field);
             }
 
             $fields = [];

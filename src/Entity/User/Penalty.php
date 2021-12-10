@@ -2,15 +2,15 @@
 
 namespace Base\Entity\User;
 
-use App\Repository\User\PenaltyRepository;
 
 use App\Entity\User;
 use App\Entity\User\Group;
-use App\Entity\User\Permission;
 use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\User\PenaltyRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PenaltyRepository::class)

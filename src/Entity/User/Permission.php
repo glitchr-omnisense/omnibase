@@ -2,14 +2,14 @@
 
 namespace Base\Entity\User;
 
-use App\Repository\User\PermissionRepository;
-
 use App\Entity\User;
 use App\Entity\User\Group;
 use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\User\PermissionRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PermissionRepository::class)

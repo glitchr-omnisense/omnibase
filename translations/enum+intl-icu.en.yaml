@@ -119,6 +119,6 @@ spam_api:
   singular: "spam"
   plural: "spams"
 
-  askismet: 
+  akismet: 
     singular: "akismet"
     plural: "akismet"

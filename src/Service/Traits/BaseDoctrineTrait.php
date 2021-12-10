@@ -18,11 +18,20 @@ trait BaseDoctrineTrait
      */
     public static $entityManager;
     public static function setEntityManager(EntityManagerInterface $entityManager) { self::$entityManager = $entityManager; }
+    public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
+    {
+        if (!BaseService::$entityManager) return null;
+        if (!BaseService::$entityManager->isOpen()) {
 
-    // public function getRepository(string $className, bool $reopen = false) 
-    // { 
-    //     return $this->getEntityManager($reopen)->getRepository($className); 
-    // }
+            if(!$reopen) return null;
+            BaseService::$entityManager = BaseService::$entityManager->create(
+                BaseService::$entityManager->getConnection(), 
+                BaseService::$entityManager->getConfiguration()
+            );
+        }
+
+        return BaseService::$entityManager;
+    }
 
     public function isWithinDoctrine()
     {
@@ -59,24 +68,12 @@ trait BaseDoctrineTrait
         if(!self::$entitySerializer)
             self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
-            $data = $this->getOriginalEntityData($eventOrEntity, $reopen);
+        $data = $this->getOriginalEntityData($eventOrEntity, $reopen);
 
         if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
         else $entity = $eventOrEntity->getObject();
 
+        dump($entity);
         return self::$entitySerializer->deserialize(json_encode($data), get_class($entity), 'json');
-    }
-
-    public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
-    {
-        if (!BaseService::$entityManager) return null;
-        if (!BaseService::$entityManager->isOpen()) {
-
-            if(!$reopen) return null;
-            BaseService::$entityManager = BaseService::$entityManager->create(
-                BaseService::$entityManager->getConnection(), BaseService::$entityManager->getConfiguration());
-        }
-
-        return BaseService::$entityManager;
     }
 }

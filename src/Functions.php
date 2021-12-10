@@ -97,7 +97,8 @@ namespace {
 
     function begin(object|array &$array) 
     {
-        return $array[0] ?? null;
+        $first = array_key_first($array);
+        return $first !== null ? $array[$first] : null;
     }
 
     function closest(array $array, $position = -1)
@@ -176,16 +177,42 @@ namespace {
     function array_key_transforms(callable $callback, array $array, bool $checkReturnType = true): array {
 
         $reflection = new ReflectionFunction($callback);
-        if ('array' != $reflection->getReturnType()->getName()) 
-            throw new \Exception('Callable function must have an "array" return type');
+        if($checkReturnType) {
+
+            if (!$reflection->getReturnType() || $reflection->getReturnType()->getName() != 'array') 
+                throw new \Exception('Callable function must have an "array" return type');
+        }
 
         $tArray = [];
         $counter = 0;
         foreach($array as $key => $entry) {
         
-            $ret = call_user_func($callback, $callback, $counter, $key, $entry);
+            switch($reflection->getNumberOfParameters()) {
+                case 0:
+                    throw new InvalidArgumentException('Missing arguments in the callable function (must be between 1 and 4)');
+
+                case 1:
+                    $ret = call_user_func($callback, $key);
+                    break;
+
+                case 2:
+                    $ret = call_user_func($callback, $key, $entry);
+                    break;
+
+                case 3:
+                    $ret = call_user_func($callback, $key, $entry, $counter);
+                    break;
+
+                case 4:
+                    $ret = call_user_func($callback, $key, $entry, $counter, $callback);
+                    break;
+
+                default:
+                    throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
+            }
+
             if($ret == null) continue;
-            
+
             list($tKey, $tEntry) = [$ret[0] ?? $key, $ret[1] ?? $entry];
             $tArray[$tKey] = $tEntry;
 
@@ -233,5 +260,20 @@ namespace {
             $union += $array;
 
         return $union;
+    }
+
+    function mailparse(string $addresses): array
+    {
+        $regex = '/(?:\w*:)*\s*(?:"([^"]*)"|([^,;\/""<>]*))?\s*(?:(?:[,;\/]|<|\s+|^)([^<@\s;,]+@[^>@\s,;\/]+)>?)\s*/';
+        if (preg_match_all($regex, $addresses, $matches, PREG_SET_ORDER) > 0)
+            $matches = array_key_transforms(fn($k, $x): array => [trim($x[3]), trim($x[1] . $x[2])], $matches);
+
+        return $matches;
+    }
+
+    function array_unique_map(callable $callback, array $array, int $flags = SORT_STRING): array
+    {
+        $arrayMask = array_fill_keys(array_keys(array_unique(array_map($callback, $array), $flags)), null);
+        return array_intersect_key($array, $arrayMask);
     }
 }

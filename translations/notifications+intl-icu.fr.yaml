@@ -14,7 +14,10 @@ login:
     pending: "Ton compte est en attente de vérification par un administrateur"
     disabled: "Ce compte est actuellement désactivé. Un email d'activation vient d'être envoyé à son adresse"
     banned: "Ce compte a été banni."
+    locked: "Ce compte est verrouillé."
     failed: "Les identifiants sont incorrects"
+
+kickout: "{0}, tu as été volontairement déconnecté !"
 
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !

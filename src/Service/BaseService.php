@@ -17,8 +17,8 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Service\Traits\BaseCommonTrait;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
-use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 
 use Twig\Environment; //https://symfony.com/doc/current/templating/twig_extension.html
 use Twig\Extension\RuntimeExtensionInterface;
@@ -28,7 +28,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 final class BaseService implements RuntimeExtensionInterface
@@ -53,60 +52,70 @@ final class BaseService implements RuntimeExtensionInterface
      */
     private $adminContextProvider;
 
+
     /**
-     * @var Security
+     * @var AuthorizationCheckerInterface
      */
-    private $security;
+    private $authorizationChecker;
+    
+    /**
+     * @var TokenStorageInterface
+     */
+    private $tokenStorage;
+    
+    /**
+     * @var CsrfTokenManagerInterface
+     */
+    private $csrfTokenManager;
+    
 
     public function __construct(
         KernelInterface $kernel,
-        Environment $twig,
         RequestStack $requestStack,
-        ManagerRegistry $doctrine,
-        FormFactoryInterface $formFactory,
-        LocaleProviderInterface $localeProvider,
-        NotifierInterface $notifier,
-        ChannelPolicyInterface $notifierPolicy,
+        Environment $twig,
+
         SluggerInterface $slugger,
+        EntityManagerInterface $entityManager,
+
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         CsrfTokenManagerInterface $csrfTokenManager,
+
+        ParameterBagInterface $parameterBag,
+        NotifierInterface $notifier,
+        FormFactoryInterface $formFactory,
+        LocaleProviderInterface $localeProvider,
         BaseSettings $settings)
     {
         BaseController::$foundBaseService = true;
 
+        // Kernel and additional stopwatch
         $this->kernel  = $kernel;
-        $this->container = $kernel->getContainer();
-
         $this->setStartTime();
-        $this->setSettings($settings);
 
-        // Security service is subdivided into authorization_checker, token, ..
-        // Therefore the "Security" class is just a helper here
+        // Symfony basics
+        $this->container = $kernel->getContainer();
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
-
-        // Symfony basic services
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
         $this->requestStack     = $requestStack;
+
+        // Additional containers
+        $this->setSettings($settings);
         $this->setLocaleProvider($localeProvider);
-
         $this->setTwig($twig);
-        $this->setDoctrine($doctrine);
-        $this->setEntityManager($doctrine->getManager());
         $this->setRouter($this->container->get("router"));
-
-        // Additional services related to user class
+        $this->setParameterBag($parameterBag);
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
+        $this->setEntityManager($entityManager);
         $this->setProjectDir($this->kernel->getProjectDir());
         $this->setEnvironment($this->kernel->getEnvironment());
-        $this->setUserProperty($this->getParameterBag("base.user.property"));
+        $this->setUserIdentifier($this->getParameterBag("base.user.identifier"));
+        $this->setNotifier($notifier);
 
-        $this->setNotifier($notifier, $notifierPolicy, $this->getParameterBag("base.notifier.options"));
-
-        // Specific EA provider
+        // EA provider
         $this->adminContextProvider = new AdminContextProvider($this->requestStack);
     }
 
@@ -135,9 +144,4 @@ final class BaseService implements RuntimeExtensionInterface
      * Doctrine related methods
      */
     use BaseDoctrineTrait;
-
-    /*
-     * Notifications & flash messages
-     */
-    use BaseNotificationTrait;
 }

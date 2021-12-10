@@ -78,27 +78,41 @@ trait TranslatableTrait
         $this->getTranslations()->removeElement($translation);
     }
 
+    // translate(-1)
+    // translate(null)
+    // translate(fr)
+    // tranlsate(gb)
     public function translate(?string $locale = null)
     {
-        $locale = $locale ?? BaseService::getLocaleProvider()->getLocale();
-        if(!$locale) throw new MissingLocaleException("Missing locale information.");
-        if ($locale < 0) $locale = BaseService::getLocaleProvider()->getDefaultLocale();
+        $localeProvider = BaseService::getLocaleProvider();
+        $defaultLocale = $localeProvider->getDefaultLocale();
+        $availableLocales = $localeProvider->getAvailableLocales();
+        
+        $locale = intval($locale) < 0 ? $defaultLocale : $locale;
+        $normLocale = $localeProvider->getLocale($locale); // Locale normalizer
 
-        $translations = $this->getTranslations();
         $translationClass = self::getTranslationEntityClass(true, false);
+        $translations = $this->getTranslations();
 
-        $translation = $translations[$locale] ?? null;
+        $translation = $translations[$normLocale] ?? null;
         if(!$translation) {
 
-            $keys = $translations->getKeys();
-            $defaultKey = array_search($locale, $keys);
-            $firstKey = ( \count($keys) > 1 ) ? $keys[$defaultKey] : $keys[0] ?? null;
-            
-            $translation = $firstKey ? $translations[$firstKey] : null;
+            // No locale requested, then get the first entry you can find among the available locales
+            if($locale === null) {
+
+                // First entry is default locale
+                foreach($availableLocales as $availableLocale) {
+
+                    $translation = $translations[$availableLocale] ?? null;
+                    if($translation) break;
+                }
+            }
+
+            // Create a new locale if still not found..
             if(!$translation) {
 
                 $translation = new $translationClass;
-                $translation->setLocale($locale);
+                $translation->setLocale($normLocale);
 
                 $this->addTranslation($translation);
             }

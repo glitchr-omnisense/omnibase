@@ -2,17 +2,9 @@
 
 namespace Base\Service;
 
-use App\Entity\Thread;
-use Base\Entity\User\Notification;
-use Base\Enum\SpamApi;
 use Base\Model\Pagination;
-use Base\Model\SpamProtectionInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Paginator implements PaginatorInterface
 {

@@ -66,7 +66,7 @@ class SettingsController extends AbstractController
 
                 // if($user && $user->getIsVerified()) {
 
-                //     $newUser->setIsVerified($user->getIsVerified());
+                //     $newUser->verify($user->getIsVerified());
                 //     $this->baseService->addFlashSuccess("You've got successfully registered ! You account is already verified.");
 
                 // } else {

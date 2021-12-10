@@ -1,7 +1,7 @@
 {% extends 'email.html.twig' %}
 
 {% block subject %}
-    {{ "emails.accountWelcomeBack.subject" | trans2([user.getUsername()]) | raw }}
+    {{ "emails.accountWelcomeBack.subject" | trans2([user]) | raw }}
 {% endblock %}
 
 {% block content %}

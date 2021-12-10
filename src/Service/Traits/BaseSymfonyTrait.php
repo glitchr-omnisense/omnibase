@@ -3,6 +3,7 @@
 namespace Base\Service\Traits;
 
 use Base\Service\BaseService;
+use Base\Service\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -14,6 +15,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
+use Symfony\Component\Notifier\NotifierInterface;
 
 trait BaseSymfonyTrait
 {
@@ -25,82 +27,26 @@ trait BaseSymfonyTrait
         if (is_infinite(self::$startTime)) self::$startTime = microtime(true);
     }
 
-    public function hasPost() { return isset($_POST); }
-    public function hasGet() { return isset($_GET); }
+    public function hasPost()    { return isset($_POST); }
+    public function hasGet()     { return isset($_GET); }
     public function hasSession() { return isset($_SESSION); }
     public function addSession($name, $value) { $this->getSession()->set($name, $value); }
+    public function removeSession($name) { return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->remove($name) : null; }
     public function getSession($name = null)
     {
         if(!$name) return $this->requestStack->getSession();
         return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->get($name) : null;
     }
 
-    public function removeSession($name)
-    {
-        return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->remove($name) : null;
-    }
+    public function createForm($type, $data = null, array $options = []): FormInterface { return $this->formFactory->create($type, $data, $options); }
 
-    public function createForm($type, $data = null, array $options = []): FormInterface
-    {
-        return $this->formFactory->create($type, $data, $options);
-    }
-
+    public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
     public function getAvailableServices(): array
     {
         if (!isset($this->container))
             throw new Exception("Symfony container not found in BaseService. Did you overloaded BaseService::__construct ?");
 
         return $this->container->getServiceIds();
-    }
-
-    public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
-
-    public function getParameterBag(string $key = "", array $bag = null)
-    {
-        // NB: Container::getParameter() pick into Container::parameterBag
-        if (!isset($this->container))
-            throw new Exception("Symfony container not found in BaseService. Did you overloaded BaseService::__construct ?");
-
-        // Return parameter bag in case no key
-        if (empty($key))
-            return $this->container->getParameterBag();
-
-        // Simple parameter stored
-        if ($this->container->hasParameter($key))
-            return $this->container->getParameter($key);
-
-        // Array parameter stored
-        $array = [];
-        for ($i = 0; $this->container->hasParameter($key . "." . $i); $i++)
-            $array[] = $this->container->getParameter($key . "." . $i);
-
-        if (!empty($array)) return $array;
-
-        // Associative array stored
-        if ($bag == null) $bag = $this->container->getParameterBag()->all();
-        if (($paths = preg_grep('/' . $key . '\.[0-9]*\.[.*]*/', array_keys($bag)))) {
-
-            foreach ($paths as $path)
-                $this->setParameterBag($array, $path, $bag[$path]);
-
-            foreach (explode(".", $key) as $key)
-                $array = &$array[$key];
-
-            return $array;
-        }
-
-        return null;
-    }
-
-    function setParameterBag(&$arr, $path, $value, $separator = '.')
-    {
-        $keys = explode($separator, $path);
-
-        foreach ($keys as $key) {
-            $arr = &$arr[$key];
-        }
-
-        $arr = $value;
     }
 
     public function getProfiler() { return $this->kernel->getContainer()->get('profiler'); }
@@ -116,6 +62,8 @@ trait BaseSymfonyTrait
         if (!$this->requestStack) return null;
         return $this->requestStack->getCurrentRequest();
     }
+
+    public function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
 
     public function generateUrl(string $route = "", array $opts = []): ?string { return $this->getUrl($route, $opts); }
     public function getCurrentUrl(): ?string { return $this->getUrl(); }
@@ -191,7 +139,7 @@ trait BaseSymfonyTrait
     public function isMaintenance() { return $this->getSettings()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
     public function isProduction()  { return $this->kernel->getEnvironment() != "dev"; }
-    
+
     public function isCli() { return (php_sapi_name() == "cli"); }
     public function isDebug() { return $this->kernel->isDebug(); }
     public function isProfiler($request = null)

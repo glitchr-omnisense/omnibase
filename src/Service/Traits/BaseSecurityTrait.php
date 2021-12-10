@@ -12,9 +12,9 @@ use Symfony\Component\Security\Csrf\CsrfToken;
 
 trait BaseSecurityTrait
 {
-    public function setUserProperty(string $userProperty)
+    public function setUserIdentifier(string $userIdentifier)
     {
-        User::$property = $userProperty;
+        User::$identifier = $userIdentifier;
         return $this;
     }
 

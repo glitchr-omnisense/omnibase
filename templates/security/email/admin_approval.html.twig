@@ -6,7 +6,7 @@
 
 {% block content %}
     {{ "emails.adminApproval.content"|trans2([
-        user.getUsername(), 
+        user, 
         user.getId()
     ])|raw }}
 {% endblock %}

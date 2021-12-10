@@ -3,6 +3,7 @@
 namespace Base\Security;
 
 use App\Entity\User;
+use App\Enum\UserRole;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -10,6 +11,7 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
 {
@@ -28,12 +30,21 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
         $user = new User();
         $user->setId(0);
         $user->setRoles([UserRole::SOCIAL]);
-        $user->setIsVerified($data["verified_email"]);
         $user->setEmail($data["email"]);
 
-        if(method_exists(User::class, "setUsername" )) $user->setUsername("Google");
-        if(method_exists(User::class, "setFirstname")) $user->setFirstname($data["given_name"]);
-        if(method_exists(User::class, "setLastname" )) $user->setLastname($data["family_name"]);
+        $user->verify($data["verified_email"]);
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+        if ($accessor->isWritable($this, "username")) 
+            $accessor->setValue($this, "username", "Google");
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+        if ($accessor->isWritable($this, "username")) 
+            $accessor->setValue($this, "username", $data["family_name"]);
+
+        $accessor = PropertyAccess::createPropertyAccessor();
+        if ($accessor->isWritable($this, "firstname")) 
+            $accessor->setValue($this, "firstname", $data["given_name"]);
 
         return $user;
     }

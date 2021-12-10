@@ -35,7 +35,6 @@ class Setting implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
-     * 
      */
     protected $name;
 
@@ -46,10 +45,12 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    public function __construct(string $name, $value)
+    public function __construct(string $name, $value = null, $locale = null)
     {
         $this->setName($name);
-        $this->setValue($value);
+
+        if($value !== null)
+            $this->translate($locale)->setValue($value);
     }
 
     public function __toString() { return $this->getName() ?? ""; }

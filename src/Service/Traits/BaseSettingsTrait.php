@@ -15,6 +15,14 @@ trait BaseSettingsTrait
     protected $settings = [];
 
     public function isCli() { return (php_sapi_name() == "cli"); }
+    protected function isCacheEnabled() 
+    {
+        if(!self::__CACHE__) return false;
+        if(!$this->cache)    return false;
+        if($this->isCli())   return false;
+
+        return true;
+    }
 
     protected function read(string $name, array $normSettings)
     {
@@ -32,6 +40,7 @@ trait BaseSettingsTrait
 
         return $normSettings;
     }
+
     protected function normalize(string $name, array $settings) {
 
         $values = [];
@@ -68,9 +77,6 @@ trait BaseSettingsTrait
         if(!$locale)
             $locale = $this->localeProvider->getLocale($locale);
 
-        if(!$this->settingRepository)
-            $this->settingRepository = $this->entityManager->getRepository(Setting::class);
-
         if(is_array($names = $name)) {
             
             $settings = [];
@@ -82,7 +88,7 @@ trait BaseSettingsTrait
 
         try { $this->settings[$name] = $this->settings[$name] ?? $this->settingRepository->findByInsensitiveNameStartingWith($name)->getResult(); } 
         catch(TableNotFoundException $e) { return []; }
-        
+
         $values = $this->normalize($name, $this->settings[$name]);
         $values = $this->read($name, $values); // get formatted values
         $this->applyCache($name, $locale, $values);
@@ -148,50 +154,50 @@ trait BaseSettingsTrait
        	return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() : $v), $values);
     }
 
-    public function set(string $name, string $value, ?string $locale = null)
+    public function set(string $name, $value, ?string $locale = null)
     {
-        if(!$this->settingRepository)
-            $this->settingRepository = $this->entityManager->getRepository(Setting::class);
-
+        $locale = $this->localeProvider->getLocale($locale);
         $this->removeCache($name);
 
-        $setting = $this->getRaw($name)["_self"] ?? null;
-        if($setting instanceof Setting) {
-
-            $setting->translate($locale)->setValue($value);
-            $this->settingRepository->flush();
+        $setting = $this->getRaw($name, $locale)["_self"];
+        if(!$setting instanceof Setting) {
+        
+            $setting = new Setting($name);
+            $this->entityManager->persist($setting);
         }
+
+        $setting->translate($locale)->setValue($value);
+        $this->entityManager->flush();
+        
+        $this->removeCache($name);
+        if($value = $this->get($name, $locale)) 
+            $this->applyCache($name, $locale, $value);
 
         return $this;
     }
 
     public function has(string $name, ?string $locale = null)
     {
-        if(!$this->settingRepository)
-            $this->settingRepository = $this->entityManager->getRepository(Setting::class);
-
         return $this->get($name, $locale) !== null;
     }
     
     public function remove(string $name)
     {
-        if(!$this->settingRepository)
-            $this->settingRepository = $this->entityManager->getRepository(Setting::class);
-
         $this->removeCache($name);
 
-        $this->settings[$name] = $this->settingRepository->findOneByInsensitiveName($name);
-        if($this->settings[$name] instanceof Setting)
-            unset($this->settings[$name]);
+        $this->settings[$name] = $this->settings[$name] ?? $this->settingRepository->findOneByInsensitiveName($name);
+        if($this->settings[$name] instanceof Setting) {
+
+            $this->entityManager->remove($this->settings[$name]);
+            $this->entityManager->flush();    
+        }
 
         return $this;
     }
 
     protected function getCache(string $name, string $locale) 
     {
-        if(!self::__CACHE__) return null;
-        if(!$this->cache)    return null;
-        if($this->isCli())   return null;
+        if(!$this->isCacheEnabled()) return null;
 
         $item = $this->cache->getItem($name);
         $itemList = $item->get() ?? [];
@@ -202,12 +208,10 @@ trait BaseSettingsTrait
         return null;
     }
 
-    protected function applyCache(string $name, string $locale, $value)
+    protected function applyCache(string $name, ?string $locale, $value)
     {
-        //if(!self::__CACHE__) return false;
         if(!$value) return false;
-        if(!$this->cache) return false;
-        if($this->isCli()) return false;
+        if(!$this->isCacheEnabled()) return false;
 
         if(($setting = $value) instanceof Setting) 
             return $this->applyCache($name, $locale, $setting->translate($locale)->getValue());
@@ -245,6 +249,7 @@ trait BaseSettingsTrait
     
     public function removeCache(string $name)
     {
+        unset($this->settings[$name]);
         foreach(array_reverse(explode(".", $name)) as $last) {
 
             $this->cache->delete($name);

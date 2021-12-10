@@ -65,9 +65,33 @@ class Slugify extends AbstractAnnotation
         return $this->referenceColumn;
     }
 
-    public function getSlug($entity, ?string $input = null, string $suffix = ""): string
+    public function getInvalidSlugs($event, $entity, $property) 
     {
+        $uow = $event->getEntityManager()->getUnitOfWork();
 
+        $candidateEntities = [];
+        foreach ($uow->getScheduledEntityInsertions() as $entity2)
+            $candidateEntities[] = $entity2;
+        foreach ($uow->getScheduledEntityUpdates() as $entity2)
+            $candidateEntities[] = $entity2;
+
+        $classMetadata = $this->getClassMetadata(get_class($entity));
+        $propertyClassOrigin = $classMetadata->getFieldMapping($property)["declared"] ?? null;
+
+        $invalidSlugs = [];
+        foreach ($candidateEntities as $entity2) {
+
+            if($entity === $entity2) continue;
+            if(!is_subclass_of($entity2, $propertyClassOrigin)) continue;
+
+            $invalidSlugs[] = $this->getFieldValue($entity2, $property);
+        }
+
+        return $invalidSlugs;
+    }
+    
+    public function slug($entity, ?string $input = null, string $suffix = ""): string
+    {
         // Check if field already set.. get field value or by default class name
         $className = explode("\\", get_class($entity));
 
@@ -82,12 +106,14 @@ class Slugify extends AbstractAnnotation
         return ($this->lowercase ? $slug->lower() : $slug);
     }
     
-    public function getUniqueSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): string
+    public function getSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): string
     {
         $repository  = $this->getPropertyOwnerRepository($entity, $property);
-        $defaultSlug = $this->getSlug($entity, $defaultInput);
+        $defaultSlug = $this->slug($entity, $defaultInput);
 
         $slug = $defaultSlug;
+        if(!$this->unique) return $slug;
+        
         for($i = 1; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
 
@@ -102,7 +128,7 @@ class Slugify extends AbstractAnnotation
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $defaultInput = $this->getFieldValue($entity, $property);
-        $slug = $this->getUniqueSlug($entity, $property, $defaultInput);
+        $slug = $this->getSlug($entity, $property, $defaultInput);
         $this->setFieldValue($entity, $property, $slug);
     }
 
@@ -129,7 +155,7 @@ class Slugify extends AbstractAnnotation
         }
 
         $defaultInput = $this->getFieldValue($entity, $property);
-        $slug = $this->getUniqueSlug($entity, $property, $defaultInput, $invalidSlugs);
+        $slug = $this->getSlug($entity, $property, $defaultInput, $invalidSlugs);
         $this->setFieldValue($entity, $property, $slug);
 
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);

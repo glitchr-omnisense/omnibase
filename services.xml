@@ -20,6 +20,9 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
+        <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
+        <service id="Base\Service\ParameterBag" parent="parameter_bag" public="true" />
+
         <service id="Base\Controller\BaseController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
@@ -43,26 +46,40 @@
 
         <service id="Base\Service\BaseSettings" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="App\Repository\Sitemap\SettingRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.locale_provider" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
         </service>
 
+        <service id="Base\Notifier\Notifier" public="true" parent="parameter_bag">
+            <argument type="service" id="parameter_bag" />
+        </service>
+
+        <service id="Base\Notifier\NotifierInterface" alias="Base\Notifier\Notifier"/>
+        <service id="Base\Notifier\Notifier" public="true">
+            <argument type="service" id="notifier" />
+            <argument type="service" id="notifier.channel_policy" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="cache.adapter" />
+            <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="base.settings" />
+        </service>
+
         <service id="Base\Service\BaseService" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="kernel" />
-            <argument type="service" id="twig" />
             <argument type="service" id="request_stack" />
-            <argument type="service" id="doctrine" />
-            <argument type="service" id="base.form.factory" />
-            <argument type="service" id="base.locale_provider" />
-            <argument type="service" id="notifier" />
-            <argument type="service" id="notifier.channel_policy" />
+            <argument type="service" id="twig" />
             <argument type="service" id="slugger" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="base.notifier" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.locale_provider" />
             <argument type="service" id="base.settings" />
             <argument type="service" id="ea_extension" />
         </service>
@@ -103,6 +120,7 @@
         <!--
             Commands
         -->
+
         <service id="Base\Command\MappingCommand">
             <tag name="console.command" />
         </service>
@@ -144,9 +162,10 @@
         <service id="Base\Controller\SecurityController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="base.service" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="App\Repository\User\TokenRepository" />
+            <argument type="service" id="base.service" />
         </service>
         <service id="Base\Controller\MaintenanceController">
             <tag name="controller.service_arguments" />
@@ -372,6 +391,7 @@
         NB: SecuritySubscriber is now defined in BaseExtension.php due to security.event_dispatcher. -->
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.untracked_token_storage" />
             <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
@@ -381,9 +401,9 @@
 
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="doctrine.event_subscriber" />
-            <argument type="service" id="base.service" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Form\Type\Sitemap\SettingListType">

@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Base\Config\Menu\CrudWidgetItem;
 use Base\Config\Menu\SectionWidgetItem;
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Dashboard\AbstractDashboardController;
 use Base\Model\IconizeInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;
@@ -16,12 +17,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\RouteMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SectionMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WidgetItem
 {
     public static $adminUrlGenerator;
     public static $adminContextProvider;
-
+    public static $translator;
+    
     public static function setAdminUrlGenerator(AdminUrlGenerator $adminUrlGenerator)
     {
         self::$adminUrlGenerator = $adminUrlGenerator;
@@ -35,7 +38,12 @@ class WidgetItem
     public static function linkToCrud(string $entityFqcn, ?string $label = null, ?string $icon = null): CrudWidgetItem
     {
         $crudController = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
-        $label = $label ?? $crudController::getTranslationPrefix().".plural";
+        $crudTranslationPrefix = $crudController::getCrudTranslationPrefix();
+        $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
+
+        $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
+        if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        if($label == $entityTranslationPrefix.".plural") $label = class_basename($entityFqcn);
 
         if(!$icon) {
             $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__staticIconize()[0] : null;

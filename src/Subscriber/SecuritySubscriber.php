@@ -20,9 +20,11 @@ use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
@@ -54,6 +56,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     private $dispatchers = [];
 
     public function __construct(
+        EntityManagerInterface $entityManager,
         AuthorizationChecker $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         ServiceLocator $dispatcherLocator,
@@ -63,6 +66,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
+        $this->entityManager = $entityManager;
         $this->baseService = $baseService;
     
         foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
@@ -77,21 +81,22 @@ class SecuritySubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::TERMINATE => [['onKernelTerminate']],
-            KernelEvents::EXCEPTION => [['onKernelException', -1024]],
+            SwitchUserEvent::class => ['onSwitchUser'],
+            RequestEvent::class    => ['onKernelRequest', 1],
+            ResponseEvent::class   => ['onKernelResponse'],
+            TerminateEvent::class  => ['onKernelTerminate'],
+            ExceptionEvent::class  => ['onKernelException', -1024],
 
             LoginSuccessEvent::class => ['onLoginSuccess'],
             LoginFailureEvent::class => ['onLoginFailure'],
             LogoutEvent::class       => ['onLogout'],
 
-            SwitchUserEvent::class => ['onSwitchUser'],
-            RequestEvent::class    => [['onKernelRequest']],
-
             UserEvent::REGISTER => ['onRegistration'],
             UserEvent::APPROVAL => ['onApproval'],
             UserEvent::VERIFIED => ['onVerification'],
             UserEvent::ENABLED  => ['onEnabling'],
-            UserEvent::DISABLED => ['onDisabling']
+            UserEvent::DISABLED => ['onDisabling'],
+            UserEvent::KICKED   => ['onKickout']
         ];
     }
 
@@ -125,6 +130,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $token = $this->tokenStorage->getToken();
         $user = $event->getUser();
+        
         if($token && $token->getUser() != $user) return; // Only notify when user requests itself
 
         if ($user->isVerified()) { // Social account connection
@@ -168,20 +174,25 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->baseService->getEntityManager()->flush();
     }
 
-    public function onSwitchUser(SwitchUserEvent $event)
-    {
-        $request = $event->getRequest();
-        if (!($user = $event->getTargetUser()))
-            return;
-
-        // More..
-    }
+    public function onSwitchUser(SwitchUserEvent $event) { }
 
     public function onKernelRequest(RequestEvent $event)
     {
         //Notify user about the authentication method
         if(!($token = $this->tokenStorage->getToken()) ) return;
         if(!($user = $token->getUser())) return;
+
+        if( $user->isDisabled() ) $user->kick();
+        if( $user->isKicked() ) {
+
+            $notification = new Notification("notifications.kickout", [$user]);
+            $notification->setUser($user);
+            $notification->send("warning");
+            $user->kick(0);
+
+            $this->baseService->redirectToRoute("base_logoutRequest");
+            return $event->stopPropagation();
+        }
 
         $exceptionList = [
             "/^(app|base)_(verifyEmail(_token)*)$/",
@@ -190,11 +201,18 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         if (! $user->isVerified()) {
 
-            $this->baseService->redirectToRoute("base_profile", [], $event, $exceptionList, function() {
+            $callbackFn = function () use ($user) {
 
-                $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getUrl("base_verifyEmail")]);
-                $notification->send("warning");
-            });
+                $verifyEmailToken = $user->getToken("verify-email");
+                if(!$verifyEmailToken || !$verifyEmailToken->hasVeto()) {
+
+                    $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getUrl("base_verifyEmail")]);
+                    $notification->send("warning");
+                }
+            };
+
+            if($this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
+            else $this->baseService->redirectToRoute("base_profile", [], $event, $exceptionList, $callbackFn);
 
         } else {
 
@@ -222,6 +240,19 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->baseService->getEntityManager()->flush();
     }
 
+    public function onKernelResponse(ResponseEvent $event)
+    {
+        //Notify user about the authentication method
+        if(!($token = $this->tokenStorage->getToken()) ) return;
+        if(!($user = $token->getUser())) return;
+
+        if ( !($user->isActive()) ) {
+    
+            $user->poke(new \DateTime("now"));
+            $this->entityManager->flush();
+        }
+    }
+    
     public function onLoginFailure(LoginFailureEvent $event)
     {
         $message = "notifications.login.failed";

@@ -59,83 +59,10 @@ bounces_1day: "{0, plural,
 # CRUD controllers
 crud:
   user:
-    singular: "utilisateur"
-    plural: "utilisateurs"
     # title: "User page"
     # text: "This page is meant for user administration"
 
     group:
-      singular: "groupe"
-      plural: "groupes"
       # title: "User Edit TITLE"
       # text: "User Edit TEXT"
       # help: "User Edit HELP"
-    thread:
-      singular: "fil"
-      plural: "fils"
-      # title: "User Edit TITLE"
-      # text: "User Edit TEXT"
-      # help: "User Edit HELP"
-    permission:
-      singular: "permission"
-      plural: "permissions"
-    token:
-      singular: "jeton"
-      plural: "jetons"
-    notification:
-      singular: "notification"
-      plural: "notifications"
-
-    penalty:
-      singular: "pénalité"
-      plural: "pénalités"
-    log:
-      singular: "historique"
-      plural: "historiques"
-
-  thread:
-    singular: "fil"
-    plural: "fils"
-
-    mention:
-      singular: "mention"
-      plural: "mentions"
-    tag:
-      singular: "étiquette"
-      plural: "étiquettes"
-    like:
-      singular: "j'aime"
-      plural: "j'aime"
-
-  sitemap:
-    widget:
-      singular: "widget"
-      plural: "widgets"
-
-      page:
-        singular: "page"
-        plural: "pages"
-
-      hyperlink:
-        singular: "lien hypertexte"
-        plural: "liens hypertextes"
-
-      attachment:
-        singular: "pièce jointe"
-        plural: "pièces jointes"
-
-      menu:
-        singular: "menu"
-        plural: "menu"
-
-    widget_slot:
-      singular: widget slot
-      plural: "widget slots"
-
-      hyperpattern:
-        singular: "modèle de liens"
-        plural: "modèles de liens"
-
-    setting:
-      singular: "paramètre"
-      plural: "paramètres"

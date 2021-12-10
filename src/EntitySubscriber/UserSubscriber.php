@@ -13,8 +13,7 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\PreUpdateEventArgs;
 
 use Exception;
-use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcher;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
@@ -27,7 +26,7 @@ class UserSubscriber implements EventSubscriber
     private $tokenStorage;
 
     protected array $events;
-    public function __construct(BaseService $baseService, TokenStorageInterface $tokenStorage, $dispatcher){
+    public function __construct(TokenStorageInterface $tokenStorage, EventDispatcherInterface $dispatcher, BaseService $baseService, ){
 
         $this->dispatcher   = $dispatcher;
         $this->baseService  = $baseService;
@@ -37,7 +36,8 @@ class UserSubscriber implements EventSubscriber
 
     public function getSubscribedEvents() : array
     {
-        return [
+        return
+        [
             Events::postUpdate,
             Events::preUpdate,
             Events::postPersist,
@@ -98,6 +98,18 @@ class UserSubscriber implements EventSubscriber
 
         if($user->isDisabled() && !$oldUser->isDisabled())
             $this->addEvent($user, UserEvent::DISABLED);
+
+        if($user->isKicked() && !$oldUser->isKicked())
+            $this->addEvent($user, UserEvent::KICKED);
+
+        if($user->isLocked() && !$oldUser->isLocked())
+            $this->addEvent($user, UserEvent::LOCKED);
+        
+        if($user->isBanned() && !$oldUser->isBanned())
+            $this->addEvent($user, UserEvent::BANNED);
+
+        if(!$user->isGhost() && $oldUser->isGhost())
+            $this->addEvent($user, UserEvent::GHOST);
     }
 
     public function postPersist(LifecycleEventArgs $event): void

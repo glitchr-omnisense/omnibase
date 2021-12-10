@@ -28,16 +28,18 @@ use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
+use Doctrine\ORM\EntityManager;
 
 class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(BaseService $baseService, UserRepository $userRepository, TokenRepository $tokenRepository)
+    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService)
     {
         $this->baseService = $baseService;
         $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -98,7 +100,7 @@ class SecurityController extends AbstractController
         $user = new User();
         $form = $this->createForm(LoginType::class, $user, ["username" => $lastUsername]);
         $form->handleRequest($request);
-        
+
         // Remove expired tokens
         $user->removeExpiredTokens();
 
@@ -204,20 +206,24 @@ class SecurityController extends AbstractController
             $notification = new Notification("notifications.verifyEmail.already");
             $notification->send("success");
 
-        } else if ( ($verifyEmailToken = $user->getValidToken("verify-email")) ) {
-
-            $notification = new Notification("notifications.verifyEmail.resend", [$verifyEmailToken->getRemainingTimeStr()]);
-            $notification->send("danger");
-
         } else {
+            
+            $verifyEmailToken = $user->getToken("verify-email");
+            if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-            $verifyEmailToken = new Token("verify-email", 24*3600);
-            $verifyEmailToken->setUser($user);
+                $notification = new Notification("notifications.verifyEmail.resend", [$verifyEmailToken->getDeadtimeStr()]);
+                $notification->send("danger");
+            
+            } else {
 
-            $notification = new Notification('notifications.verifyEmail.check');
-            $notification->setUser($user);
-            $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
-            $notification->send("success")->send("urgent");
+                $verifyEmailToken = new Token("verify-email", 24*3600);
+                $verifyEmailToken->setUser($user);
+
+                $notification = new Notification('notifications.verifyEmail.check');
+                $notification->setUser($user);
+                $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
+                $notification->send("success")->send("urgent");
+            }
         }
 
         $this->entityManager->flush();
@@ -240,16 +246,17 @@ class SecurityController extends AbstractController
             $notification->send('warning');
 
         } else {
-            
+
             $verifyEmailToken = $user->getValidToken("verify-email");
-            if (!$verifyEmailToken) {
+            if (!$verifyEmailToken || $verifyEmailToken->get() != $token) {
 
                 $notification = new Notification("notifications.verifyEmail.invalidToken");
+                $notification->setUser($user);
                 $notification->send("danger");
-            
-            } else if($verifyEmailToken->get() == $token) {
 
-                $user->setIsVerified(true);
+            } else {
+
+                $user->verify(true);
                 $verifyEmailToken->revoke();
 
                 $notification = new Notification("notifications.verifyEmail.success");
@@ -258,15 +265,9 @@ class SecurityController extends AbstractController
 
                 if (!$user->isApproved()) // If the account needs further validation by admin..
                     $this->AdminApprovalRequest($request);
-
-            } else {
-
-                $notification = new Notification("notifications.verifyEmail.failed");
-                $notification->setUser($user);
-                $notification->send('danger');
             }
         }
-        
+
         $this->entityManager->flush();
         return $this->redirectToRoute('base_profile');
     }

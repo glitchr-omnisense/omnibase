@@ -32,15 +32,17 @@ use Base\Annotations\Annotation\Hashify;
 use App\Enum\UserRole;
 
 use Base\Service\LocaleProvider;
-use Symfony\Component\Notifier\Recipient\Recipient;
+use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Base\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
 use Exception;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Base\Model\IconizeInterface;
+use Base\Enum\UserState;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -54,7 +56,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
 {
     use BaseTrait;
     
-    public        function __iconize()      : ?array { return array_map(fn($r) => UserRole::getIcons(0)[$r], $this->getRoles()); }
+    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcons(0)[$r], $this->getRoles()); }
     public static function __staticIconize() : ?array { return ["fas fa-user"]; } 
 
     // DEPRECATED: These two methods should soon be removed  in S6.0
@@ -62,40 +64,31 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     public function getSalt(): ?string { return null; }
     // DEPRECATED-END
 
-    public static $property = "email";
-    public function getUserIdentifier(): string { return $this->email; }
+    public const __ACTIVE_TIME__ = 60; /* time before next request */
+    public const __ONLINE_TIME__ = 60; /* time before next request */
+    private const __DEFAULT_IDENTIFIER__ = "email";
+    public static $identifier = self::__DEFAULT_IDENTIFIER__;
 
-    public function getRecipient(): Recipient
-    {
-        $email = $this->getEmail();
-        if (method_exists(User::class, "getUsername") && !empty($this->getUsername()))
-            $email = $this->getUsername() . " <".$email.">";
+    public function getUserIdentifier(): string 
+    { 
+        $identifier = null;
 
-        if (method_exists(User::class, "getPhone") && !empty($this->getPhone()))
-            return new Recipient($email, $this->getPhone());
+        $accessor = PropertyAccess::createPropertyAccessor();
+        if ($accessor->isReadable($this, self::$identifier)) 
+            $identifier = $accessor->getValue($this, self::$identifier);
 
-        return new Recipient($email);
+        if ($accessor->isReadable($this, self::__DEFAULT_IDENTIFIER__) && !$identifier) 
+            $identifier = $accessor->getValue($this, self::$identifier);
+
+        return $identifier; 
     }
-
-    public function __toString()
-    {
-        $getter = "get" . ucfirst(self::$property);
-        if(!method_exists(get_called_class(), $getter))
-            throw new Exception("A getter $getter is expected to identify users.");
-
-        $str = $this->$getter();
-        if($str && !is_string($str))
-            throw new Exception("Returned value from getter $getter is expected to be a string, currently : \"".gettype($str)."\"");
-
-        return $str ?? $this->getUserIdentifier() ?? "";
-    }
+    public function __toString() { return $this->getUserIdentifier(); }
+    public function equals($other): bool { return ($other->getId() == $this->getId()); }
 
     public function __construct()
     {
-        $this->roles = [UserRole::USER];
-        $this->isApproved = false;
-        $this->isVerified = false;
-        $this->isEnabled  = true;
+        $this->roles  = [UserRole::USER];
+        $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();
         $this->logs = new ArrayCollection();
@@ -116,7 +109,13 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
         $this->setLocale();
     }
 
-    public function sameAs($other): bool { return ($other->getId() == $this->getId()); }
+    public function getRecipient(): Recipient
+    {
+        $email = $this->getUserIdentifier() . " <".$this->getEmail().">";
+        $locale = $this->getLocale();
+
+        return new Recipient($email, '', $locale);
+    }
 
     public static function getCookie(string $key = null)
     {
@@ -276,8 +275,8 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
      */
     protected $roles;
 
-    public function isSocialAccount(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
-    public function isPersistent(): bool { return (!$this->isSocialAccount() || $this->id > 0); }
+    public function isSocial(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
+    public function isPersistent(): bool { return (!$this->isSocial() || $this->id > 0); }
     public function getRoles(): array { 
         
         if(empty($roles))
@@ -303,7 +302,6 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     // {
     //     if (!in_array($role, $this->roles))
     //         $this->roles[] = $role;
-
     //     return $this;
     // }
 
@@ -388,8 +386,6 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
      * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $penalties;
-    public function isBanned() { return false; } // TO IMPLEMENT..
-
     public function getPenalties(): array { return $this->penalties; }
     public function addPenalty(Penalty $penalty): self
     {
@@ -414,7 +410,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     public function getNotifications() { return $this->notifications; }
     public function addNotification(Notification $notification): self
     {
-        if (!$this->notifications->contains($notification)) {
+        if(!$this->notifications->contains($notification)) {
             $this->notifications[] = $notification;
         }
 
@@ -490,8 +486,23 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     public function addToken(Token $token): self
     {
         if (!$this->tokens->contains($token)) {
+
+            $this->removeTokenByName($token->getName());
+
             $this->tokens[] = $token;
             $token->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeTokenByName(?string $name): self
+    {
+        $tokens = $this->getTokens();
+        foreach ($tokens as $token) {
+
+            if ($token->getName() == $name) 
+                $this->removeToken($token);
         }
 
         return $this;
@@ -644,51 +655,102 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
         return $this;
     }
 
+
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="user_state")
      */
-    protected $isApproved;
-    public function isApproved(): bool { return $this->isApproved; }
-    public function approve(bool $isApproved = true): self { return $this->setIsApproved($isApproved); }
-    public function setIsApproved(bool $isApproved = true): self
+    protected $states;
+    public function getStates(): array { return $this->states; }
+    public function setStates(array $states): self
     {
-        $this->isApproved = $isApproved;
+        $this->states = array_unique($states);
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isVerified;
-    public function isVerified(): bool { return $this->isVerified; }
-    public function verify(bool $isVerified = true): self { return $this->setIsVerified($isVerified); }
-    public function setIsVerified(bool $isVerified = true): self
-    {
-        $this->isVerified = $isVerified;
+    public function isNewcomer(): bool { return in_array(UserState::NEWCOMER, $this->states); }
+    public function newcomer(bool $newState = true): self 
+    { 
+        $state = $this->isNewcomer();
+        if($newState && !$state) $this->states[] = UserState::NEWCOMER;
+        else if (!$newState && $state) unset($this->state[UserState::NEWCOMER]);
+
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isEnabled;
-    public function isDisabled(): ?bool { return !$this->isEnabled(); }
-    public function isEnabled (): ?bool { return  $this->isEnabled; }
-    public function disable(bool $isDisabled = true): self { return $this->setIsDisabled($isDisabled); }
-    public function enable(bool $isEnabled = true): self { return $this->setIsEnabled($isEnabled); }
-    public function setIsDisabled(bool $isDisabled = true): self {   return $this->setIsEnabled(!$isDisabled); }
-    public function setIsEnabled(bool $isEnabled = true): self
-    {
-        $this->isEnabled = $isEnabled;
+    public function isApproved(): bool { return in_array(UserState::APPROVED, $this->states); }
+    public function approve(bool $newState = true): self 
+    { 
+        $state = $this->isApproved();
+        if($newState && !$state) $this->states[] = UserState::APPROVED;
+        else if (!$newState && $state) unset($this->state[UserState::APPROVED]);
+
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on={"create", "update"})
-     */
-    protected $updatedAt;
-    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
+    public function isVerified(): bool { return in_array(UserState::VERIFIED, $this->states); }
+    public function verify(bool $newState = true): self
+    { 
+        $state = $this->isVerified();
+        if($newState && !$state) $this->states[] = UserState::VERIFIED;
+        else if (!$newState && $state) unset($this->state[UserState::VERIFIED]);
+
+        return $this;
+    }
+
+    public function isDisabled(): bool { return !$this->isEnabled(); }
+    public function isEnabled(): bool { return in_array(UserState::ENABLED, $this->states); }
+    public function disable(bool $newState = true): self { return $this->enable(!$newState); }
+    public function enable(bool $newState = true): self
+    { 
+        $state = $this->isEnabled();
+        if($newState && !$state) $this->states[] = UserState::ENABLED;
+        else if (!$newState && $state) unset($this->state[UserState::ENABLED]);
+
+        return $this;
+    }
+
+    public function isLocked(): bool { return in_array(UserState::LOCKED, $this->states); }
+    public function unlock(bool $newState = true): self { return $this->lock(!$newState); }
+    public function lock(bool $newState = true): self
+    { 
+        $state = $this->isLocked();
+        if($newState && !$state) $this->states[] = UserState::LOCKED;
+        else if (!$newState && $state) unset($this->state[UserState::LOCKED]);
+
+        return $this;
+    }
+
+    public function isBanned() { return in_array(UserState::BANNED, $this->states); } // TO IMPLEMENT..
+    public function unban(bool $newState = true): self { return $this->unban(!$newState); }
+    public function ban(bool $newState = true): self
+    { 
+        $state = $this->isBanned();
+        if($newState && !$state) $this->states[] = UserState::BANNED;
+        else if (!$newState && $state) unset($this->state[UserState::BANNED]);
+
+        return $this;
+    }
+
+    public function isKicked() { return in_array(UserState::KICKED, $this->states); } // TO IMPLEMENT..
+    public function unkick(bool $newState = true): self { return $this->unkick(!$newState); }
+    public function kick(bool $newState = true): self
+    {
+        $state = $this->isKicked();
+        if($newState && !$state) $this->states[] = UserState::KICKED;
+        else if (!$newState && $state) unset($this->state[UserState::KICKED]);
+
+        return $this;
+    }
+
+    public function isGhost() { return in_array(UserState::GHOST, $this->states); } // TO IMPLEMENT..
+    public function ghost(bool $newState = true): self
+    { 
+        $state = $this->isGhost();
+        if($newState && !$state) $this->states[] = UserState::GHOST;
+        else if (!$newState && $state) unset($this->state[UserState::GHOST]);
+
+        return $this;
+    }
 
     /**
      * @ORM\Column(type="datetime")
@@ -696,4 +758,25 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
      */
     protected $createdAt;
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     * @Timestamp(on={"create", "update"})
+     */
+    protected $updatedAt;
+    public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $activeAt;
+    public function getActiveAt(): ?\DateTimeInterface { return $this->activeAt; }
+    public function poke(?\DateTimeInterface $activeAt): self
+    {
+        $this->activeAt = $activeAt;
+        return $this;
+    }
+
+    public function isActive(): bool { return ($this->getActiveAt() && $this->getActiveAt() < new \DateTime(self::__ACTIVE_TIME__.' seconds ago')); }
+    public function isOnline(): bool { return ($this->getActiveAt() && $this->getActiveAt() < new \DateTime(self::__ONLINE_TIME__.' seconds ago')); }
 }

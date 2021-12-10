@@ -283,27 +283,29 @@ class Uploader extends AbstractAnnotation
         // Nothing to upload, empty field..
         if ($newList == null) {
 
-            if(!$this->keepNotFound)
-                $this->setFieldValue($entity, $property, null);
-
+            $this->setFieldValue($entity, $property, null);
             return true;
         }
 
         // Field value can be an array or just a single path
-        $fileList = array_intersect($newList, $oldList);
-        foreach (array_diff($newList, $oldList) as $index => $file) {
+        $fileList = array_values(array_intersect($newList, $oldList));
+        foreach (array_diff($newList, $oldList) as $index => $entry) {
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..
-            if (is_string($file) && file_exists($file))
-                $file = new File($file);
-
-            if (!$file instanceof File) continue;
-
+            $file = is_string($entry) && file_exists($entry) ? new File($entry) : $entry;
+            if (!$file instanceof File) {
+                
+                if($this->keepNotFound) 
+                    $fileList[] = $entry;
+         
+                continue;
+            }
+            
             //
-            //Check size restriction
-            if ($file->getSize() > $this->maxSize) 
-                throw new InvalidSizeException("Invalid filesize exception in property \"$property\" in ".get_class($entity).".");
+            // Check size restriction
+            if ($file->getSize() > $this->maxSize) continue;
+            // throw new InvalidSizeException("Invalid filesize exception in property \"$property\" in ".get_class($entity).".");
 
             //
             // Check mime restriction
@@ -311,9 +313,8 @@ class Uploader extends AbstractAnnotation
             foreach($this->mimeTypes as $mimeType)
                 $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
 
-            $expectedMimeTypes = implode(", ", $this->mimeTypes);
-            if(!$compatibleMimeType) 
-                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for property \"$property\" in ".get_class($entity)." (expected: \"".$expectedMimeTypes."\").");
+            if(!$compatibleMimeType) continue;
+            // throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for property \"$property\" in ".get_class($entity)." (expected: \"".implode(", ", $this->mimeTypes)."\").");
 
             //
             // Upload files
@@ -322,35 +323,17 @@ class Uploader extends AbstractAnnotation
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
             if ($this->uploadFile($path, $contents, $this->getStorageFilesystem()))
-                $fileList[] = ($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
+                $fileList[] = basename($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
         }
 
-        if (!empty($fileList)) {
-
-            $basenameList = array_map("basename", $fileList);
-            if(!is_array($new)) {
-
-                if(count($basenameList) > 1)
-                    throw new UploaderAmbiguityException("Too many files for \"$property\", column must be an \"array\"");
-
-                $basenameList = array_pop($basenameList); 
-            }
-
-            $this->setFieldValue($entity, $property, $basenameList);
-            return true;
-        }
-
-        if(!$this->keepNotFound)
-            $this->setFieldValue($entity, $property, null);
-        
+        $this->setFieldValue($entity, $property, !is_array($new) ? $fileList[0] ?? null : $fileList);
         return true;
     }
 
     protected function deleteFile(string $location, ?FilesystemOperator $filesystem = null)
     {
         $filesystem = $filesystem ?? $this->getStorageFilesystem();
-        if (!$filesystem->fileExists($location))
-            return false;
+        if (!$filesystem->fileExists($location)) return false;
 
         try {
         
@@ -366,12 +349,26 @@ class Uploader extends AbstractAnnotation
     protected function deleteFiles($entity, $oldEntity, string $property)
     {
         $new = self::getFieldValue($entity, $property);
-        $old = self::getFieldValue($oldEntity, $property);
-        if(!$old) return;
+        $newList = is_array($new) ? $new : [$new];
+        $newListStringable = array_filter(array_map(fn($e) => stringeable($e), $newList));
 
-        if(!is_array($new)) $new = [$new];
-        if(!is_array($old)) $old = [$old];
-        foreach (array_diff($old,$new) as $file) {
+        // This list contains non stringeable element. (e.g. in case of a generic use)
+        // This means that these elements are not meant to be uploaded
+        if(count($newList) != count($newListStringable))
+            return false; 
+
+        $old = self::getFieldValue($oldEntity, $property);
+        $oldList = is_array($old) ? $old : [$old];
+        $oldListStringable = array_filter(array_map(fn($e) => stringeable($e), $oldList));
+
+        // This list contains non stringeable element. (e.g. in case of a generic use)
+        // This means that these elements are not meant to be uploaded
+        if(count($oldList) != count($oldListStringable))
+            return false;
+
+        if(!$oldList) return;
+
+        foreach (array_diff($oldListStringable,$newListStringable) as $file) {
 
             if(!$file) continue;
 
@@ -391,9 +388,9 @@ class Uploader extends AbstractAnnotation
     {
         try { $this->uploadFiles($entity, null, $property); } 
         catch(Exception $e) {
-            
-            if(!$this->keepNotFound)
-                self::setFieldValue($entity, $property, null);
+
+            $this->deleteFiles([], $entity, $property);
+            self::setFieldValue($entity, $property, null);
         }
     }
 
@@ -409,12 +406,8 @@ class Uploader extends AbstractAnnotation
         } catch(Exception $e) {
 
             $this->deleteFiles($oldEntity, $entity, $property);
-            if(!$this->keepNotFound)
-                self::setFieldValue($entity, $property, null);
-            else {
-                $old = self::getFieldValue($oldEntity, $property);
-                self::setFieldValue($entity, $property, $old);
-            }
+            $old = self::getFieldValue($oldEntity, $property);
+            self::setFieldValue($entity, $property, $old);
         }
     }
 

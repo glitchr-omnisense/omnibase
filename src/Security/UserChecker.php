@@ -30,7 +30,7 @@ class UserChecker implements UserCheckerInterface
     {
         if (!$user instanceof User) return;
 
-        if($user->isDisabled()) {
+        if ($user->isDisabled()) {
 
             if( ($welcomeBackToken = $user->getValidToken("welcome-back")) ) {
 
@@ -58,11 +58,12 @@ class UserChecker implements UserCheckerInterface
                 $this->baseService->getEntityManager()->flush();
                 throw new CustomUserMessageAccountStatusException("notifications.login.disabled", ["importance" => "warning"]);
             }
-
         }
 
         if ($user->isBanned())
             throw new CustomUserMessageAccountStatusException("notifications.login.banned", ["importance" => "danger"]);
+        if ($user->isLocked())
+            throw new CustomUserMessageAccountStatusException("notifications.login.locked", ["importance" => "danger"]);
 
     }
 }

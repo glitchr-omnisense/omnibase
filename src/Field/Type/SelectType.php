@@ -256,7 +256,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             if ($options["class"]) {
 
                 $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-                $formattedData = array_key_transforms(function ($callback, $i, $key, $value) use (&$options) : array { 
+                $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use (&$options) : array { 
 
                     // Recursive categories
                     if(is_array($value) && is_associative($value))
@@ -285,8 +285,8 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $missingData = $classRepository->findById($missingData)->getResult();
                 }
 
-                $formattedData += array_key_transforms(function ($callback, $i, $key, $value) use (&$options) : array { 
-
+                $formattedData += array_key_transforms(function ($key, $value, $i, $callback) use (&$options) : array { 
+                    
                     // Recursive categories
                     if(is_array($value) && is_associative($value))
                         return [$i, array_key_transforms($callback, $value)];
@@ -302,7 +302,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 //
                 // Compute in choice list format
-                $choices = array_filter(array_key_transforms(function($callback, $i, $key, $value) use($formattedData,$options) : ?array {
+                $choices = array_filter(array_key_transforms(function($key, $value) use($formattedData) : ?array {
 
                     $id    = $value;
                     $label = $formattedData[$id] ?? null;
@@ -438,7 +438,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Format preselected values
             $selectedData  = [];
             $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-            $formattedData = array_key_transforms(function ($callback, $i, $key, $value) use ($dataset, &$options, &$selectedData) : array { 
+            $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use ($dataset, &$options, &$selectedData) : array { 
 
                 // Recursive categories
                 if(is_array($value) && is_associative($value))

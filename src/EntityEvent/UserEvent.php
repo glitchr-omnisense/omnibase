@@ -16,6 +16,11 @@ class UserEvent extends Event
     public const APPROVAL = 'user.approval';
     public const DISABLED = 'user.disabled';
     public const ENABLED  = 'user.enabled' ;
+    public const KICKED   = 'user.kickout' ;
+    public const LOCKED   = 'user.locked'  ;
+    public const NEWCOMER = 'user.newcomer';
+    public const GHOST    = 'user.ghost'   ;
+    public const BANNED   = 'user.banned'  ;
 
     protected $user;
 

@@ -22,7 +22,7 @@ class QuillType extends AbstractType implements DataMapperInterface
         $this->baseService = $baseService;
     }
 
-    public function getParent() { return HiddenType::class; }
+    public function getParent(): ?string { return HiddenType::class; }
     public function getBlockPrefix(): string { return 'quill'; }
 
     public function configureOptions(OptionsResolver $resolver)

@@ -1,8 +1,75 @@
+user:
+  singular: "user"
+  plural: "users"
+
+  group:
+    singular: "group"
+    plural: "groups"
+
+  thread:
+    singular: "thread"
+    plural: "threads"
+    
+  permission:
+    singular: "permission"
+    plural: "permissions"
+  token:
+    singular: "token"
+    plural: "tokens"
+  notification:
+    singular: "notification"
+    plural: "notifications"
+
+  penalty:
+    singular: "penalty"
+    plural: "penalties"
+  log:
+    singular: "log"
+    plural: "logs"
+
 thread:
-  in: "{0} in \"{1}\""
-  more: "See more.."
-  readingTime: "{0, plural,
-                     =0 {less than a minute}
-                     =1 {# minute read}
-                     other {# minutes read}
-                  }"
+  singular: "thread"
+  plural: "threads"
+
+  mention:
+    singular: "mention"
+    plural: "mentions"
+  tag:
+    singular: "tag"
+    plural: "tags"
+  like:
+    singular: "like"
+    plural: "likes"
+
+sitemap:
+  widget:
+    singular: "widget"
+    plural: "widgets"
+
+    page:
+      singular: "page"
+      plural: "pages"
+
+    hyperlink:
+      singular: "hyperlink"
+      plural: "hyperlinks"
+
+    attachment:
+      singular: "attachment"
+      plural: "attachments"
+
+    menu:
+      singular: "menu"
+      plural: "menu"
+
+  widget_slot:
+    singular: widget slot
+    plural: "widget slots"
+
+    hyperpattern:
+      singular: "hyperpattern"
+      plural: "hyperpatterns"
+
+  setting:
+    singular: "setting"
+    plural: "settings"

@@ -5,12 +5,12 @@ namespace Base\Entity\User;
 use App\Entity\User;
 use Base\Enum\LogLevel;
 use Base\Model\IconizeInterface;
-use Base\Repository\User\LogRepository;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-
 use Symfony\Component\Config\Definition\Exception\Exception;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\User\LogRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)

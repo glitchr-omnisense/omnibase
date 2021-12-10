@@ -18,10 +18,8 @@
 
 {% block footer_text %}
 
-    {% if token.getExpiry() is not null %}
-        {{ "emails.verifyEmail.expiry" | trans2([
-            token.getLifetime()|time
-        ]) | raw }}
+    {% if token.getLifetime() > 0 and token.getLifetime() < 3600*24*7 %}
+        {{ "emails.verifyEmail.expiry" | trans2([token.getLifetime()|time]) | raw }}
     {% endif %}
 
 {% endblock %}

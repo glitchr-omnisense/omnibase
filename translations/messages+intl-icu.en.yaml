@@ -45,8 +45,8 @@ base:
             }"
     hours: "{0, plural,
             =0 { }
-            =1 {# year }
-            other {# years }
+            =1 {# hour }
+            other {# hours }
             }"
     minutes: "{0, plural,
                 =0 { }

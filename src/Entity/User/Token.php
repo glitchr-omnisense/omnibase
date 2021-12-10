@@ -6,9 +6,11 @@ use App\Entity\User;
 use Base\Annotations\Annotation\Slugify;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
-use Doctrine\ORM\Mapping as ORM;
 
 use Hashids\Hashids;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\User\TokenRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TokenRepository::class)
@@ -18,71 +20,30 @@ class Token implements IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-drumstick-bite"]; } 
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Slugify(separator="-")
-     */
-    protected $name;
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $value;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tokens")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    protected $user;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    protected $createdAt;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    protected $expireAt;
-
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    protected $isRevoked;
-
-    public function __construct(string $name, $dT = null)
+    public const SEPARATOR = ";";
+    public const DEADTIME = 3*60; /* time before next request */
+    public function __construct(string $name, ?int $expiry = null, ?int $deadtime = self::DEADTIME)
     {
         $this->name = $name;
         $this->isRevoked = false;
         $this->expireAt = null;
+        $this->allowAt = null;
 
         $this->hashIds = new Hashids();
-        $this->generate($dT);
+        $this->generate($expiry, $deadtime);
     }
 
-    public function __sleep()
-    {
-        $this->translator = null;
-
-        return array_keys(get_object_vars($this));
-    }
-    
-    public const SEPARATOR = ";";
+    public function __sleep() { return array_keys(get_object_vars($this)); }
     public function __toString()
     {
         return $this->getName() .
                 self::SEPARATOR . $this->get() .
                 self::SEPARATOR . $this->getCreatedAt()->getTimestamp() .
                 self::SEPARATOR . $this->getLifetime() .
+                self::SEPARATOR . $this->getDeadtime() .
                 self::SEPARATOR . $this->isRevoked();
     }
+
 
     public function encode()
     {
@@ -95,7 +56,7 @@ class Token implements IconizeInterface
         $hex = $this->hashIds->decodeHex($hash);
         $str = hex2bin($hex);
 
-        list($name, $value, $timestamp, $dT, $isRevoked) = explode(self::SEPARATOR, $str);
+        list($name, $value, $timestamp, $expiry, $deadtime, $isRevoked) = explode(self::SEPARATOR, $str);
         $this->name = $name;
         $this->value = $value;
 
@@ -105,11 +66,19 @@ class Token implements IconizeInterface
         $this->setCreatedAt($createdAt);
 
         // Expiry date calculation
-        if($dT < 0) $dT = null;
-        if($dT) {
-            $expiry = clone $createdAt;
-            $expiry->modify(is_numeric($dT) ? "+ ".floor($dT)." seconds" : $dT);
-            $this->setExpiry($expiry);
+        if($expiry < 0) $expiry = null;
+        if($expiry) {
+            $expireAt = clone $createdAt;
+            $expireAt->modify(is_numeric($expiry) ? "+ ".floor($expiry)." seconds" : $expiry);
+            $this->setExpiry($expireAt);
+        }
+
+        // Deadtime date calculation (before next request)
+        if($deadtime < 0) $deadtime = null;
+        if($deadtime) {
+            $allowAt = clone $createdAt;
+            $allowAt->modify(is_numeric($deadtime) ? "+ ".floor($deadtime)." seconds" : $deadtime);
+            $this->setExpiry($allowAt);
         }
 
         $this->isRevoked = $isRevoked;
@@ -117,39 +86,55 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    public function get(): ?string
-    {
-        return $this->value;
-    }
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    protected $id;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getId(): ?int { return $this->id; }
 
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Slugify(separator="-", unique=false)
+     */
+    protected $name;
 
+    public function getName(): ?string { return $this->name; }
     public function setName(string $name): self
     {
         $this->name = $name;
-
         return $this;
     }
+    
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $value;
 
-    public function generate($dT = null): self
+    public function get(): ?string { return $this->getValue(); }
+    public function getValue(): ?string { return $this->value; }
+    public function generate(?int $expiry = null, ?int $deadtime = null): self
     {
         // Creation date
         $now = new \DateTime("now");
         $this->setCreatedAt($now);
 
         // Expiry date calculation
-        if($dT) {
-            $expiry = clone $now;
-            $expiry->modify(is_numeric($dT) ? "+ ".floor($dT)." seconds" : $dT);
-            $this->setExpiry($expiry);
+        if($expiry) {
+
+            $expireAt = clone $now;
+            $expireAt->modify(is_numeric($expiry) ? "+ ".floor($expiry)." seconds" : $expiry);
+            $this->setExpiry($expireAt);
+        }
+
+        // Rate date calculation
+        if($deadtime) {
+
+            $allowAt = clone $now;
+            $allowAt->modify(is_numeric($deadtime) ? "+ ".floor($deadtime)." seconds" : $deadtime);
+            $this->setDeadtime($allowAt);
         }
 
         // Generate token value
@@ -158,26 +143,30 @@ class Token implements IconizeInterface
         return $this;
     }
 
-    public function revoke($isRevoked = true): self { return $this->setIsRevoked($isRevoked); }
-    public function isRevoked(): bool { return $this->isRevoked; }
-    public function setIsRevoked($isRevoked = true): self
-    {
-        $this->isRevoked = $isRevoked;
-        if($isRevoked) $this->getUser()->removeToken($this);
-        else $this->getUser()->addToken($this);
-
-        return $this;
-    }
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tokens")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    protected $user;
 
     public function getUser(): ?User { return $this->user; }
     public function setUser(?User $user): self
     {
-        $this->user = $user;
-        if($this->user)
-		$this->user->addToken($this);
+        if ($this->user && $this->user != $user)
+            $this->user->removeToken($this);
 
+        if ($user)
+		    $user->addToken($this);
+
+        $this->user = $user;
         return $this;
     }
+
+
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $createdAt;
 
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
     public function setCreatedAt(\DateTimeInterface $createdAt): self
@@ -186,6 +175,11 @@ class Token implements IconizeInterface
 
         return $this;
     }
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $expireAt;
 
     public function getExpireAt(): ?\DateTimeInterface { return $this->expireAt; }
     public function setExpireAt(\DateTimeInterface $expireAt): self
@@ -209,4 +203,47 @@ class Token implements IconizeInterface
     public function getLifetime():int { return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp()); }
     public function getRemainingTime():int { return $this->expireAt->getTimestamp() - time(); }
     public function getRemainingTimeStr(): string { return BaseService::getTwigExtension()->time($this->getRemainingTime()); }
+
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     */
+    protected $allowAt;
+
+    public function getAllowAt(): ?\DateTimeInterface { return $this->allowAt; }
+    public function setAllowAt(\DateTimeInterface $allowAt): self
+    {
+        if(!$this->getCreatedAt())
+            $this->setCreatedAt(new \DateTime("now"));
+
+        if ($allowAt < $this->getCreatedAt())
+            $allowAt = $this->createdAt;
+
+        $this->allowAt = $allowAt;
+        return $this;
+    }
+
+    public function hasVeto():bool { return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt()); }
+    public function getDeadtime():int { return $this->allowAt->getTimestamp() - time(); }
+    public function getDeadtimeStr(): string { return BaseService::getTwigExtension()->time($this->getRemainingTime()); }
+    public function setDeadtime(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
+    public function hasDeadtime():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $isRevoked;
+
+    public function revoke(): self { return $this->markAsRevoked(); }
+    public function isRevoked(): bool { return $this->isRevoked; }
+    public function markAsRevoked(): self
+    {
+        $this->isRevoked = true;
+        
+        if(($user = $this->getUser())) 
+            $user->removeToken($this);
+
+        return $this;
+    }
+
 }

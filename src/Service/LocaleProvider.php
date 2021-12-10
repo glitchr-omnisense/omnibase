@@ -4,13 +4,9 @@ namespace Base\Service;
 
 use App\Entity\User;
 use Base\Exception\MissingLocaleException;
-use Symfony\Component\DependencyInjection\Exception\InvalidArgumentException;
-use Symfony\Component\DependencyInjection\Exception\ParameterNotFoundException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Intl\Countries;
-use Symfony\Component\Intl\Locale;
 use Symfony\Component\Intl\Locales;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -37,7 +33,7 @@ class LocaleProvider implements LocaleProviderInterface
     }
 
     protected static $isLate = null; // Turns on when on kernel request
-    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate; }
+    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate ?? false; }
     public static function markAsLate(?string $location = null) 
     {
         $backtrace = debug_backtrace()[1] ?? null;

@@ -3,8 +3,6 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use App\Entity\User\Group;
-
 use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -20,18 +18,20 @@ use Symfony\Component\Notifier\Notification\EmailNotificationInterface;
 use Symfony\Component\Notifier\Notification\SmsNotificationInterface;
 
 use Symfony\Component\Notifier\Recipient\NoRecipient;
-use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
-use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 
 use Base\Traits\BaseTrait;
 use Throwable;
 use Exception;
 use UnexpectedValueException;
+use Base\Service\LocaleProvider;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
+use Base\Notifier\Recipient\LocaleRecipientInterface;
+use Symfony\Component\Notifier\Recipient\RecipientInterface;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
@@ -59,46 +59,194 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
      */
     protected $id;
 
+    public function getId(): ?int { return $this->id; }
+
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="notifications")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $user;
 
+    public function getUser() { return $this->user; }
+    
+    public function setUser(?User $user): self
+    {
+        if ($this->user) {
+            $this->user->removeNotification($this);
+            $this->removeContextKey("user");
+        }
+
+        if(($this->user = $user) ) {
+            $this->user->addNotification($this);
+            $this->addContextKey("user", $this->user);
+        }
+
+        return $this;
+    }
+
     /**
      * @ORM\Column(type="json")
      */
     protected $channels = [];
+
+    public function getChannels(?RecipientInterface $recipient = null): array { return $this->channels; }
+    public function setChannels(array $channels): self
+    {
+        $this->channels = array_unique($channels);
+        return $this;
+    }
 
     /**
      * @ORM\Column(type="string", length=255)
      */
     protected $importance;
 
+    public function getImportance(): string { return $this->importance; }
+    public function setImportance(?string $importance): self {
+        $this->importance = $importance; 
+        return $this;
+    }
+
     /**
      * @ORM\Column(type="string", length=255)
      */
     protected $subject;
+
+    public function getSubject(): string { return $this->subject; }
+    public function setSubject(string $subject): self
+    {
+        $this->subject = $subject;
+        return $this;
+    }
 
     /**
      * @ORM\Column(type="string", length=255)
      */
     protected $content;
 
+    public function getContent(): string { return $this->content; }
+    public function setContent(string $content): self
+    {
+        $this->content = trim($content);
+
+        return $this;
+    }
+
     /**
      * @ORM\Column(type="boolean")
      */
     protected $isRead = false;
+    public function getIsRead(): bool { return $this->isRead; }
+    public function setIsRead(bool $isRead): self
+    {
+        $this->isRead = $isRead;
+        return $this;
+    }
+
+    public function markAsRead(bool $isRead) { return $this->setIsRead($isRead); }
+    public function markAsReadIfNeeded(array $channels = [])
+    {
+        $options = [];
+        foreach(BaseService::getNotifier()->getOptions() as $option)
+            $options[$option["channel"]] = $option;
+
+        foreach($this->channels as $channel) {
+
+            if(array_key_exists($channel, $options) && !$this->getIsRead())
+                $this->markAsRead($options[$channel]["markAsRead"]);
+        }
+    }
 
     /**
      * @ORM\Column(type="datetime", nullable="true")
      */
     protected $sentAt = null;
-
+    public function getSentAt(): ?\DateTimeInterface { return $this->sentAt; }
+    public function setSentAt(?\DateTimeInterface $sentAt): self
+    {
+        $this->sentAt = $sentAt;
+        return $this;
+    }
+    
     /**
      * @ORM\Column(type="text")
      */
     protected string $backtrace = ""; // Internal use only (code line might be changing..)
+    public function getBacktrace(): string { return $this->backtrace; }
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected bool $markAsAdmin = false; 
+
+    public function isMarkAsAdmin() { return $this->markAsAdmin; }
+    public function markAsAdmin(bool $markAsAdmin = true)
+    {
+        $this->markAsAdmin = $markAsAdmin;
+        return $this;
+    }
+
+    /**
+     * @var array
+     */
+    protected array $context = [];
+    public function getContext(array $additionalContext = [])
+    {
+        if($additionalContext) return array_merge($additionalContext, $this->context);
+        return $this->context;
+    }
+
+    public function addContextKey(string $key, $value = null): self { return $this->addContext([$key => $value]); }
+    public function addContext(array $context = []): self 
+    {
+        if(empty($context)) return $this;
+        return $this->setContext(array_merge($this->context, $context));
+    }
+    public function setContext(array $context): self
+    {
+        if(array_key_exists("subject", $context)) $this->setSubject($context["subject"]);
+        if(array_key_exists("content", $context)) $this->setContent($context["content"]);
+        
+        $this->context = $context;
+
+        return $this;
+    }
+
+    public function removeContextKey(string $key): self
+    {
+        if($key == "subject") $this->setSubject("");
+        if(array_key_exists($key, $this->context))
+            unset($this->context[$key]);
+
+        return $this;
+    }
+
+    /* Handle custom emails */
+    protected string $htmlTemplate = "";
+    public function getHtmlTemplate() { return $this->htmlTemplate; }
+    public function setHtmlTemplate(?string $htmlTemplate, array $context = [])
+    {
+        $this->htmlTemplate = $htmlTemplate;
+
+        if(!empty($context))
+            $this->addContext($context);
+
+        return $this;
+    }
+
+    public function getExcerpt() { return  $this->context["excerpt"] ?? ""; }
+    public function setExcerpt(string $excerpt)
+    {
+        $this->context["excerpt"] = $excerpt;
+        return $this;
+    }
+
+    public function getFooter() { return $this->context["footer_text"] ?? ""; }
+    public function setFooter(string $footer)
+    {
+        $this->context["footer_text"] = $footer;
+        return $this;
+    }
 
     public function __construct($content = null, array $parameters = array())
     {
@@ -137,155 +285,79 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
     }
 
+    public function send(string $importance, ...$recipients) 
+    { 
+        $this->setImportance($importance);
+
+        $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
+        User::getNotifier()->sendUsers($this, ...$recipients); 
+
+        return $this;
+    }
     
-    /**
-     * Entity related methods
-     */
-    public function getId(): ?int { return $this->id; }
-    public function getIsRead(): bool { return $this->isRead; }
-    public function setIsRead(bool $isRead): self
+    public function sendBy(array $channels,  ...$recipients) 
     {
-        $this->isRead = $isRead;
-        return $this;
-    }
+        if(!$this->getImportance())
+            $this->setImportance(Notification::IMPORTANCE_DEFAULT);
 
-    public function getSentAt(?string $channel = null)
-    {
-        if (!$channel) return $this->sentAt;
-        return $this->sentAt[$channel];
-    }
-
-    public function getSubject(): string { return $this->subject; }
-    public function setSubject(string $subject): self
-    {
-        $this->subject = $subject;
-        return $this;
-    }
-
-    public function getContent(): string { return $this->content; }
-    public function setContent(string $content): self
-    {
-        $this->content = trim($content);
-
-        return $this;
-    }
-
-    public function getExcerpt() { return  $this->context["excerpt"] ?? ""; }
-    public function setExcerpt(string $excerpt)
-    {
-        $this->context["excerpt"] = $excerpt;
-        return $this;
-    }
-
-    public function getFooter() { return $this->context["footer_text"] ?? ""; }
-    public function setFooter(string $footer)
-    {
-        $this->context["footer_text"] = $footer;
-        return $this;
-    }
-
-    public function getImportance(): string { return $this->importance; }
-    public function setImportance(?string $importance): self {
-        $this->importance = $importance; 
-        return $this;
-    }
-
-    /* Inherited methods from Symfony */
-    public function getUser() { return $this->user; }
-    
-    public function setUser(?User $user): self
-    {
-        if($this->user) {
-            $this->user->removeNotification($this);
-            $this->removeContextKey("user");
-        }
-
-        $this->user = $user;
-        if($this->user)
-		$this->user->addNotification($this);
-
-        $this->addContextKey("user", $this->user);
-        return $this;
-    }
-
-    /* Handle custom emails */
-    protected string $htmlTemplate = "";
-    public function getHtmlTemplate() { return $this->htmlTemplate; }
-    public function setHtmlTemplate(?string $htmlTemplate, array $context = [])
-    {
-        $this->htmlTemplate = $htmlTemplate;
-
-        if(!empty($context))
-            $this->addContext($context);
-
-        return $this;
-    }
-
-    /**
-     * @var array
-     */
-    protected array $context = [];
-    public function getContext(array $additionalContext = [])
-    {
-        if($additionalContext) return array_merge($additionalContext, $this->context);
-        return $this->context;
-    }
-
-    public function addContext(array $context = []): self 
-    {
-        if(empty($context)) return $this;
-        return $this->setContext(array_merge($this->context, $context));
-    }
-    public function addContextKey(string $key, $value = null): self { return $this->addContext([$key => $value]); }
-    public function setContext(array $context): self
-    {
-        if(array_key_exists("subject", $context)) $this->setSubject($context["subject"]);
-        if(array_key_exists("content", $context)) $this->setContent($context["content"]);
+        $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
+        User::getNotifier()->sendUsersBy($channels, $this, ...$recipients);
         
-        $this->context = $context;
-
         return $this;
     }
 
-    public function removeContextKey(string $key): self
-    {
-        if(array_key_exists($key, $this->context))
-            unset($this->context[$key]);
-
-        if($key == "subject") $this->setSubject("");
-
+    public function sendAdmins(string $importance) 
+    { 
+        $this->setImportance($importance);
+        User::getNotifier()->sendAdmins($this); 
+        
         return $this;
     }
 
     public function asSmsMessage(SmsRecipientInterface $recipient, string $transport = null): ?SmsMessage
     {
-        throw new UnexpectedValueException("No SMS support implemented yet.");
+        //throw new UnexpectedValueException("No SMS support implemented yet.");
         return null;
     }
 
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
         $notifier = User::getNotifier();
+        
+        /**
+         * @var EmailRecipientInterface
+         */
         $adminAddress = $notifier->getAdminRecipients()[0] ?? new NoRecipient();
         if($adminAddress instanceof NoRecipient) throw new UnexpectedValueException("No support address found.");
 
         $importance = $this->getImportance();
         $this->setImportance(""); // Remove importance from email subject
     
-        if($this->isAdminChannels()) {
+        if($this->isMarkAsAdmin()) {
             
             $subject = "Fwd: " . $this->getSubject();
-            
-            $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
+            $user = $this->user ?? "User \"".User::getIp()."\"";
             $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
+            $from    = $adminAddress->getEmail();
+
+        } else if($this->user && $this->user->getRecipient() != $recipient) {
+
+            $subject = "Fwd: [TEST] Sent by \"".$this->user."\": " . $this->getSubject();
+            $content = $this->getContent();
+            $from = $this->user->getRecipient()->getEmail();
 
         } else {
 
             $subject = $this->getSubject();
             $content = $this->getContent();
+            $from    = $adminAddress->getEmail();
         }
 
         $notification = EmailMessage::fromNotification($this, $recipient, $transport);
+        
+        /**
+         * @var TemplatedEmail
+         */
         $email = $notification->getMessage(); // Embed image inside email (cid:/)
         $context = $this->getContext([
             "importance" => $importance,
@@ -313,8 +385,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         $email
             ->subject($subject)
-            ->from($adminAddress->getEmail())
-            //->html($html) // overriden by default notification template by Symfony
+            ->from($from)
+            //->html($html) // DO NOT USE: Overridden by the default Symfony notification template
             ->htmlTemplate($this->htmlTemplate)
             ->context($context);
 
@@ -327,248 +399,31 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $chatMessage = ChatMessage::fromNotification($this, $recipient, $transport);
 
         $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
-        if($this->isAdminChannels()) {
+        if($this->isMarkAsAdmin()) {
             
+            $user = $this->user ?? "User \"" . User::getIp() . "\"";
             $subject = "Fwd: " . $this->getSubject();
             $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
 
+        } else if($this->user && $this->user->getRecipient() != $recipient) {
+
+            $user = $recipient;
+            $subject = "Fwd: [TEST:".$recipient."] " . $this->getSubject();
+            $content = $this->getContent();
+
         } else {
 
+            $user = $this->user ?? "User \"" . User::getIp() . "\"";
             $subject = $this->getSubject();
             $content = $this->getContent();
         }
 
-        $username = ($this->user ? $this->user->getUsername() : "User \"" . User::getIp() . "\"");
         switch ($transport) {
             case 'discord':
-                $chatMessage->options(new DiscordOptions(["username" => $username]));
+                $chatMessage->options(new DiscordOptions(["username" => $user]));
         }
 
         $chatMessage->subject("[" . $subject. "] " . $content);
         return $chatMessage;
-    }
-
-    public function getDefaultChannels()
-    {
-        return User::getNotifierPolicy()->getChannels($this->importance);
-    }
-
-    public function getChannels(?RecipientInterface $recipient = null): array
-    {
-        return $this->channels;
-    }
-
-    public function setChannels(array $channels): self
-    {
-        $this->channels = array_unique($channels);
-        return $this;
-    }
-
-    /**
-     * @var bool
-     */
-    protected bool $adminChannels = false; 
-    
-    // I don't like parent::markAsPublic, 
-    // because it just erase a few context variable..
-    public function isAdminChannels() { return $this->adminChannels; }
-    public function setAdminChannels(bool $adminChannels)
-    {
-        $this->adminChannels = $adminChannels;
-        return $this;
-    }
-
-    public function getUserChannels(RecipientInterface $recipient): array
-    {
-        $channels = [];
-        foreach($this->getDefaultChannels() as $channel) {
-
-            // Replace email by email+ for user..
-            // Users should not receive the default admin email sent by Symfony notifier
-            if (str_starts_with($channel, "email")) $channel = "email+";
-
-            // If no recipient, only browser notification is allowed to be sent.
-            if($recipient instanceof NoRecipient && !str_starts_with($channel, "browser"))
-                continue;
-
-            // If recipient implement SMS interface, check if sms is allowed and phone number available
-            else if(str_starts_with($channel, "sms")) {
-
-                if($recipient instanceof SmsRecipientInterface && empty($recipient->getPhone()))
-                    continue;
-            }
-
-            // If recipient implement Email interface, check if email is available
-            else if(str_starts_with($channel, "email")) {
-
-                if($recipient instanceof EmailRecipientInterface && empty($recipient->getEmail()))
-                    continue;
-            }
-
-            // Only admin can receive chat message..
-            else if(str_starts_with($channel, "chat/"))
-                continue;
-
-            $channels[] = $channel;
-        }
-
-        return array_unique($channels);
-    }
-
-    public function getAdminChannels(RecipientInterface $recipient): array
-    {
-        $channels = [];
-        foreach ($this->getDefaultChannels() as $channel) {
-
-            // Replace email by email+ for user..
-            // Users should not receive the default admin email sent by Symfony notifier
-            if (str_starts_with($channel, "email"  )) $channel = "email";
-
-            // I suppose admin should receive notification by email when user is browser notified.
-            else if (str_starts_with($channel, "browser")) $channel = "email";
-
-            // If no recipient, only browser notification is allowed to be sent.
-            else if ($recipient instanceof NoRecipient) continue;
-
-            // If recipient implement SMS interface, check if sms is allowed and phone number available
-            else if (str_starts_with($channel, "sms")) {
-
-                if($recipient instanceof SmsRecipientInterface && empty($recipient->getPhone()) )
-                    continue;
-            }
-
-            // If recipient implement Email interface, check if email is available
-            else if (str_starts_with($channel, "email")) {
-
-                if( $recipient instanceof EmailRecipientInterface && empty($recipient->getEmail()) )
-                    continue;
-            }
-
-            else if (str_starts_with($channel, "chat/")) {
-
-                $firstAdminRecipient = User::getNotifier()->getAdminRecipients()[0] ?? null;
-                if($recipient != $firstAdminRecipient) continue;
-            }
-
-            $channels[] = $channel;
-        }
-
-        return array_unique($channels);
-    }
-
-    public function send(string $importance, array $recipients = [] /* additional recipients */)
-    {
-        // Set importance of the notification
-        $this->setImportance($importance);
-        $this->setAdminChannels(false);
-
-        $channelBak = $this->getChannels();
-        $this->setChannels([]);
-
-        // Determine recipient information
-        $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
-        foreach ($recipients as $recipient) {
-
-            // Set selected channels, if any
-            $channels    = $this->getUserChannels($recipient);
-            if (empty($channels)) 
-                throw new Exception("No valid channel for the notification \"".$this->backtrace."\" sent with \"".$importance."\"");
-
-            $channelBak = array_merge($channelBak, $channels);
-            $this->setChannels($channels);
-            $this->markAsReadIfNeeded($channels);
-
-            // Submit notification
-            BaseService::getNotifier()->send($this, $recipient);
-
-        }
-
-        $this->sentAt = new \DateTime("now");
-
-        $this->setChannels($channelBak);
-
-        return $this;
-    }
-
-    public function markAsRead(bool $isRead) { return $this->setIsRead($isRead); }
-    public function markAsReadIfNeeded(array $channels = [])
-    {
-        $options = [];
-        foreach(BaseService::getNotifierOptions() as $option)
-            $options[$option["channel"]] = $option;
-
-        foreach($this->channels as $channel) {
-
-            if(array_key_exists($channel, $options) && !$this->getIsRead())
-                $this->markAsRead($options[$channel]["markAsRead"]);
-        }
-    }
-
-    public function sendBy(array $channels, array $recipients = [] /* additional recipients */)
-    {
-        // Set importance of the notification
-        $this->setImportance(self::IMPORTANCE_DEFAULT);
-        $this->setAdminChannels(false);
-
-        $channelBak = $this->getChannels();
-        $this->setChannels([]);
-
-        // NB: Main recipient is put last, therefore the channel set are matching
-        $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
-        foreach ($recipients as $recipient) {
-
-            // Check if valid recipient instance
-            if ( $recipient instanceof NoRecipient) continue;
-            if (!$recipient instanceof Recipient  ) continue;
-
-            // Determine channels
-            $channels   = array_intersect($channels, $this->getUserChannels($recipient));
-            $channelBak = array_merge($channelBak, $channels);
-
-            if (empty($channels)) continue;
-            $this->setChannels($channels);
-
-            // Send notification
-            User::getNotifier()->send($this, $recipient);
-        }
-
-        $this->setChannels($channelBak);
-
-        $this->sentAt = new \DateTime("now");
-        return $this;
-    }
-
-    public function sendAdmins(string $importance)
-    {
-        // Set importance of the notification
-        $this->setImportance($importance ?? $this->getImportance());
-        $this->setAdminChannels(true);
-
-        // Reset channels and keep here them for later use
-        $channelBak = $this->getChannels();
-        $this->setChannels([]);
-
-        // Back up channels and importance variables..
-        // to be restored at the end of the method
-        $recipients = User::getNotifier()->getAdminRecipients() ?? [new NoRecipient()];
-        foreach($recipients as $recipient) {
-
-            // Check if valid recipient instance
-            if ($recipient instanceof NoRecipient) continue;
-            if (!$recipient instanceof Recipient) continue;
-
-            // Set selected channels, if any
-            $channels    = $this->getAdminChannels($recipient);
-            if (empty($channels)) return $this;
-            $this->setChannels($channels);
-
-            // Send notification
-            User::getNotifier()->send($this, $recipient);
-        }
-
-        // Put back channels
-        $this->setAdminChannels(false);
-        $this->setChannels($channelBak);
-        return $this;
     }
 }

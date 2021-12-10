@@ -2,21 +2,26 @@
 
 namespace Base\Service;
 
-use Base\Repository\Sitemap\SettingRepository;
-
+use Base\Entity\Sitemap\Setting;
 use Base\Service\Traits\BaseSettingsTrait;
 use Symfony\Component\Asset\Packages;
 use Symfony\Contracts\Cache\CacheInterface;
 
+use Doctrine\ORM\EntityManager;
+
+use DateTime;
+
 class BaseSettings
 {
     /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
-    private const __CACHE__ = true;
+    private const __CACHE__ = false;
     use BaseSettingsTrait;
 
-    public function __construct(SettingRepository $settingRepository, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache)
+    public function __construct(EntityManager $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache)
     {
-        $this->settingRepository = $settingRepository;
+        $this->entityManager     = $entityManager;
+        $this->settingRepository = $entityManager->getRepository(Setting::class);
+
         $this->packages          = $packages;
         $this->cache             = $cache;
         $this->localeProvider    = $localeProvider;
@@ -39,7 +44,12 @@ class BaseSettings
     public function logo     (?string $locale = null) : ?string   { return $this->getScalar("base.settings.logo",      $locale); }
     public function title    (?string $locale = null) : ?string   { return $this->getScalar("base.settings.title",     $locale); }
     public function slogan   (?string $locale = null) : ?string   { return $this->getScalar("base.settings.slogan",    $locale); }
-    public function birthdate(?string $locale = null) : \DateTime { return $this->getScalar("base.settings.birthdate", $locale) ?? new \DateTime("now"); }
+    public function birthdate(?string $locale = null) : DateTime 
+    { 
+        $birthdate = $this->getScalar("base.settings.birthdate", $locale);
+        return $birthdate instanceof DateTime ? $birthdate : new DateTime($birthdate);
+    }
+
     public function age(?string $locale = null) : string {
 
         $birthdate = $this->birthdate($locale)->format("Y");
