@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Locales;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleProvider implements LocaleProviderInterface
 {    

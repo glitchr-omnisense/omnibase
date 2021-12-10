@@ -14,8 +14,13 @@
     {% if showFirst %}
 
         {% if hasEntries %}
-        {% set fieldValue = formattedValues|first %}
+        
+        {% set formattedValue = formattedValues|first %}
+        {% set fieldValue = formattedValue|first %}
+        {% set fieldLink = fieldValue != formattedValue|last ? formattedValue|last : null %}
+
         <span class="badge badge-secondary">
+            {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
             {% if showFirst == 1 %}
                 {{fieldValue.text|default("-")}}  
             {% elseif showFirst == 2 %}
@@ -28,6 +33,7 @@
                 {{fieldValue.icon|fontAwesome({class:"fa-fw"})
                                  |default(fieldValue.icon|imagify)|default("") | raw}}
             {% endif %}
+            {% if fieldLink is not null %}</a>{% endif %}
         </span>
 
         {% set formattedValues = formattedValues|slice(1) %}
@@ -53,8 +59,13 @@
             <span class="badge badge-secondary">-</span>
         {% endif %}
 
-        {% for fieldKey,fieldValue in formattedValues %}
+        {% for fieldKey,formattedValue in formattedValues %}
+
+        {% set fieldValue = formattedValue|first %}
+        {% set fieldLink = fieldValue != formattedValue|last ? formattedValue|last : null %}
+
         <span class="badge badge-secondary">
+            {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
             {% if show == 1 %}
                 {{fieldValue.text|default("-")}}  
             {% elseif show == 2 %}
@@ -67,6 +78,7 @@
                 {{fieldValue.icon|fontAwesome({class:"fa-fw"})
                                  |default(fieldValue.icon|imagify)|default("") | raw}}
             {% endif %}
+            {% if fieldLink is not null %}</a>{% endif %}
         </span>
         {% endfor %}
 
@@ -74,7 +86,8 @@
 
 {% else %}
 
-    {% set fieldValue = field.formattedValue %}
+    {% set fieldValue = field.formattedValue|first %}
+    {% set fieldLink  = fieldValue != field.formattedValue|last ? field.formattedValue|last : null %}
     {% set hasEntries = fieldValue is not empty %}
 
     {% if showFirst %}
@@ -84,6 +97,7 @@
         {% endif %}
 
         <span class="badge badge-secondary">
+        {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if showFirst == 1 %}
             {{fieldValue.text|default("-")}}  
         {% elseif showFirst == 2 %}
@@ -96,6 +110,7 @@
             {{fieldValue.icon|fontAwesome({class:"fa-fw"})
                                 |default(fieldValue.icon|imagify)|default("") | raw}}
         {% endif %}
+        {% if fieldLink is not null %}</a>{% endif %}
         </span>
 
     {% elseif renderAsCount %}
@@ -113,18 +128,20 @@
         {% endif %}
 
         <span class="badge badge-secondary">
-            {% if show == 1 %}
-                {{fieldValue.text|default("-")}}  
-            {% elseif show == 2 %}
-                <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
-                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(fieldValue.icon|imagify)|default("") | raw}}
-                </div>
-            {% else %}
-                {{fieldValue.text|default("-")}} | 
-                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(fieldValue.icon|imagify)|default("") | raw}}
-            {% endif %}
+        {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+        {% if show == 1 %}
+            {{fieldValue.text|default("-")}}  
+        {% elseif show == 2 %}
+            <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
+            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                            |default(fieldValue.icon|imagify)|default("") | raw}}
+            </div>
+        {% else %}
+            {{fieldValue.text|default("-")}} | 
+            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
+                            |default(fieldValue.icon|imagify)|default("") | raw}}
+        {% endif %}
+        {% if fieldLink is not null %}</a>{% endif %}
         </span>
     {% endif %}
 

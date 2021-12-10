@@ -66,24 +66,25 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     protected $baseService;
     protected $adminUrlGenerator;
-    
+
     public const TRANSLATION_DASHBOARD = "dashboard";
     public const TRANSLATION_ENTITY    = "entities";
+    public const TRANSLATION_ENUM      = "enums";
 
     public function __construct(
-        Extension $extension, 
-        RequestStack $requestStack, 
+        Extension $extension,
+        RequestStack $requestStack,
         TranslatorInterface $translator,
         AdminContextProvider $adminContextProvider,
-        AdminUrlGenerator $adminUrlGenerator, 
-        BaseService $baseService, 
+        AdminUrlGenerator $adminUrlGenerator,
+        BaseService $baseService,
         ?GaService $gaService = null) {
 
         $this->extension = $extension;
         $this->requestStack = $requestStack;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->adminContextProvider  = $adminContextProvider;
-        
+
         $this->translator = $translator;
         WidgetItem::$translator = $translator;
 
@@ -98,7 +99,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function getExtension() { return $this->extension; }
     public function setExtension(Extension $extension)
     {
-        $this->extension = $extension; 
+        $this->extension = $extension;
         return $this;
     }
 
@@ -248,6 +249,31 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->disableUrlSignatures();
     }
 
+    public function addRoles(array &$menu, array $roles)
+    {
+        foreach ($roles as $i => $role) {
+
+            if ($role == UserRole::USER) continue;
+
+            $label = ucfirst($this->translator->trans("user_role.".strtolower($role).".plural", [], self::TRANSLATION_ENUM));
+            $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
+
+            $url = $this->adminUrlGenerator
+                ->unsetAll()
+                ->setController(UserCrudController::class)
+                ->setAction(Action::INDEX)
+                ->set("role", $role)
+                ->set("filters[roles][comparison]", "like")
+                ->set("filters[roles][value]", $role)
+                ->set("menuIndex", count($menu))
+                ->generateUrl();
+
+            $menu[] = MenuItem::linkToUrl($label, $icon, $url);
+        }
+
+        return $menu;
+    }
+
     public function configureMenuItems(): iterable
     {
         $menu   = [];
@@ -257,36 +283,19 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $menu[] = MenuItem::linkToUrl('Widgets', 'fas fa-fw fa-th-large', $this->baseService->getUrl("base_dashboard_widgets"));
         $menu[] = MenuItem::linkToUrl('Back to website', 'fas fa-fw fa-door-open', $this->baseService->getAsset("/"));
 
+        $menu[] = MenuItem::section('BUSINESS CARD');
+        if(UserRole::class != \Base\Enum\UserRole::class)
+            $menu   = $this->addRoles($menu, array_diff(UserRole::getPermittedValues(), \Base\Enum\UserRole::getPermittedValues()));
+
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 
             $menu[] = MenuItem::section('MEMBERSHIP');
-            $roles = UserRole::getPermittedValues();
-
-            foreach ($roles as $i => $role) {
-
-                if ($role == UserRole::USER) continue;
-
-                $label = ucfirst($this->translator->trans("user_role.".strtolower($role).".plural", [], "enum"));
-                $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
-
-                $url = $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setController(UserCrudController::class)
-                    ->setAction(Action::INDEX)
-                    ->set("role", $role)
-                    ->set("filters[roles][comparison]", "like")
-                    ->set("filters[roles][value]", $role)
-                    ->set("menuIndex", count($menu))
-                    ->generateUrl();
-
-                $menu[] = MenuItem::linkToUrl($label, $icon, $url);
-            }
-
+            $menu   = $this->addRoles($menu, \Base\Enum\UserRole::getPermittedValues());
             $menu[] = MenuItem::linkToCrud('All users', 'fas fa-fw fa-tags', User::class);
             $menu[] = MenuItem::linkToCrud('Add user', 'fas fa-fw fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
                 ->setAction('new');
         }
-
+    
         if (isset($this->gaService) && $this->gaService->isEnabled()) {
 
             $ga = $this->gaService->getBasics();

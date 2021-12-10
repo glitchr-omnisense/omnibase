@@ -3,10 +3,11 @@
 namespace Base\Subscriber;
 
 use Base\Service\LocaleProviderInterface;
-use Base\Service\TranslatorInterface;
+
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {

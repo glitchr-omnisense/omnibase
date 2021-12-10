@@ -11,14 +11,16 @@ use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(TranslatorInterface $translator)
+    public function __construct(TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->translator = $translator;
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool

@@ -65,8 +65,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                (class_exists($baseCrudController) ? $baseCrudController : null);
     }
 
-    public static function getCrudTranslationPrefix() { return self::getTranslationPrefix("Crud\\"); }
-    public static function getEntityTranslationPrefix() { return self::getTranslationPrefix(); }
+    public static function getCrudTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".self::getTranslationPrefix("Crud\\"); }
+    public static function getEntityTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_ENTITY.".".self::getTranslationPrefix(); }
     public static function getTranslationPrefix(?string $prefix = "")
     {
         $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", self::getEntityFqcn());
@@ -90,12 +90,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureCrud(Crud $crud): Crud
     {
-        
-        $action = $this->requestStack->getCurrentRequest()->query->get("crudAction") ?? "";
-        $crudTranslationPrefix = "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".$this->getCrudTranslationPrefix();
-        $crudTranslationPrefixWithAction = $crudTranslationPrefix . ($action ? "." . $action : "");
+        $entityTranslationPrefix = $this->getEntityTranslationPrefix();
+        $crudTranslationPrefix = $this->getCrudTranslationPrefix();
 
-        $entityTranslationPrefix = "@".AbstractDashboardController::TRANSLATION_ENTITY.".".$this->getEntityTranslationPrefix();
+        $action = $this->requestStack->getCurrentRequest()->query->get("crudAction") ?? "";
+        $crudTranslationPrefixWithAction = $crudTranslationPrefix . ($action ? "." . $action : "");
 
         $title = $this->translator->trans($crudTranslationPrefixWithAction.".title");
         if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title");

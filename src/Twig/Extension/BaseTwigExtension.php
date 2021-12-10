@@ -5,8 +5,6 @@ namespace Base\Twig\Extension;
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
 use Base\Exception\NotFoundResourceException;
-use Base\Service\LocaleProviderInterface;
-use Base\Service\TranslatorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
@@ -17,6 +15,7 @@ use Twig\TwigFilter;
 
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Error\LoaderError;
 use Twig\TwigFunction;
 

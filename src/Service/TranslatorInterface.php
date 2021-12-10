@@ -6,5 +6,5 @@ interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorI
 {
     public function setLocale(string $locale);
     public function time(int $time): string;
-    public function trans(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true);
+    public function trans(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string;
 }

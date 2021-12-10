@@ -504,7 +504,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $id = $entry;
             $html = null;
 
-            $text = ($translator ? $translator->trans(camel_to_snake($className.".".strtolower($entry).".singular"), [], "enum") : $entry);
+            $text = ($translator ? $translator->trans(camel_to_snake($className.".".strtolower($entry).".singular"), [], "@enums") : $entry);
             $icons = [$class::getIcons(0)[$entry]];
 
         } else if(is_object($entry) && $class !== null) {
@@ -516,7 +516,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $html = $entry->autocomplete() ?? null;
             
             $className = class_basename(get_class($entry));
-            if($translator) $className = $translator->trans(camel_to_snake($className.".singular"), [], "entities");
+            if($translator) $className = $translator->trans(camel_to_snake($className.".singular"), [], "@entities");
 
             $text = stringeable($entry) ? strval($entry) : $className + "#".$entry->getId();
 

@@ -180,7 +180,7 @@ namespace {
         if($checkReturnType) {
 
             if (!$reflection->getReturnType() || $reflection->getReturnType()->getName() != 'array') 
-                throw new \Exception('Callable function must have an "array" return type');
+                throw new \Exception('Callable function must use "array" return type');
         }
 
         $tArray = [];
@@ -211,7 +211,10 @@ namespace {
                     throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
             }
 
-            if($ret == null) continue;
+            if($ret == null) {
+                $tArray[$key] = $entry[$key];
+                continue;
+            }
 
             list($tKey, $tEntry) = [$ret[0] ?? $key, $ret[1] ?? $entry];
             $tArray[$tKey] = $tEntry;

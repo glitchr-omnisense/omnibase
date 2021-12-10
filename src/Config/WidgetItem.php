@@ -37,12 +37,12 @@ class WidgetItem
 
     public static function linkToCrud(string $entityFqcn, ?string $label = null, ?string $icon = null): CrudWidgetItem
     {
-        $crudController = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
-        $crudTranslationPrefix = $crudController::getCrudTranslationPrefix();
+        $crudController          = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
+        $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-        $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
-        if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural");
+        if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural");
         if($label == $entityTranslationPrefix.".plural") $label = class_basename($entityFqcn);
 
         if(!$icon) {
