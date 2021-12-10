@@ -63,7 +63,7 @@
         "doctrine/annotations": "^1.0",
         "doctrine/doctrine-bundle": "^2.0",
         "doctrine/orm": "^2.0",
-        "doctrine/dbal": "^3.0",
+        "doctrine/dbal": "^3.2",
 
         "php-http/guzzle6-adapter": "^2.0",
         "php-http/httplug-bundle": "^1.20"
