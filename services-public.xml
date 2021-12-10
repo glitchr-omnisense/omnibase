@@ -9,6 +9,10 @@
         <service id="base.service" alias="Base\Service\BaseService" />
         <service id="base.settings" alias="Base\Service\BaseSettings" />
 
+        <service id="base.translator" alias="Base\Service\Translator" />
+        <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
+        <service id="twig.extension.base" alias="Base\Twig\Extension\BaseTwigExtension" />
+
         <service id="base.notifier" alias="Base\Notifier\Notifier" />
         <service id="Base\Notifier\NotifierInterface" alias="base.notifier"/>
 

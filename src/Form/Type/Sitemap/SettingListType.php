@@ -10,20 +10,14 @@ use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
-use Base\Service\BaseService;
 use Base\Service\BaseSettings;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -144,6 +138,14 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 else $intlData[$formattedField] = $translations;
             }
 
+            $form->add("translations", TranslationType::class, [
+                "multiple" => true,
+                "translation_class" => SettingTranslation::class,
+                "only_fields" => ["value"], 
+                "fields" => $fields,
+            ]);
+            $form->get("translations")->setData($translationData);
+
             $form->add("intl", TranslationType::class, [
                 "multiple" => true,
                 "single_locale" => true,
@@ -152,14 +154,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 "fields" => $fields,
             ]);
             $form->get("intl")->setData($intlData);
-
-            $form->add("translations", TranslationType::class, [
-                "multiple" => true,
-                "translation_class" => SettingTranslation::class,
-                "only_fields" => ["value"], 
-                "fields" => $fields,
-            ]);
-            $form->get("translations")->setData($translationData);
 
             if(count($fields) > 0) 
                 $form->add('valid', SubmitType::class);
@@ -170,8 +164,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        dump("-----");
-        dump($viewData);
         foreach(iterator_to_array($forms) as $formName => $form)
         {
             if($formName == "valid") continue;
@@ -185,7 +177,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                         $viewData[$field] = $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field, "");
                         $viewData[$field]->setValue($translation->getValue() ?? "", $locale);
                         
-                        $this->baseSettings->removeCache($formattedField);
+                        $this->baseSettings->removeCache($field);
                     }
                  }
 
@@ -199,10 +191,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $field = str_replace("-", ".", $formName);
                 $viewData[$formName] = $viewData[$formName]->setValue($form->getViewData() ?? "");
                 
-                $this->baseSettings->removeCache($formName);
+                $this->baseSettings->removeCache($field);
             }
         }
-        dump($viewData);
-
     }
 }

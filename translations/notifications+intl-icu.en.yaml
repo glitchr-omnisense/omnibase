@@ -17,7 +17,7 @@ login:
     banned : "Your user account no longer exists."
     failed : "Invalid login credentials"
 
-kickout: "{0}, you have been kicked out !"
+kickout: "Sorry {0}, but you have been kicked out !"
 
 impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !
@@ -54,6 +54,7 @@ verifyEmail:
     pending: "Your email address has to be verified. <a class='badge bg-warning badge-warning' href=\"{0}\">Click here</a> to receive a new request"
     check:   "Please confirm your account by checking your email."
     already: "Your account has already been verified !"
+    alreadySent: "Please verify your account, you should have received an email !<br>Next possible submission in {0}"
     resend:  "A confirmation email has already been sent ! Please wait {0} before next submission."
     success: "Congratulations ! You've got successfully registered !"
 

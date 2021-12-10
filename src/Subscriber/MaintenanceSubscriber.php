@@ -69,7 +69,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
         if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_SUPERADMIN")) {
 
-            $notification = new Notification("notifications.maintenance.banner");
+            $notification = new Notification("maintenance.banner");
             $notification->send("warning");
             return;
         }

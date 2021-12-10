@@ -1,15 +1,15 @@
 {% extends 'email.html.twig' %}
 
 {% block subject %}
-    {{ "emails.accountGoodbye.subject" | trans2([user]) | raw }}
+    {{ "@emails.accountGoodbye.subject" | trans([user]) | raw }}
 {% endblock %}
 
 {% block content %}
-    {{ "emails.accountGoodbye.content" | trans2 | raw }}
+    {{ "@emails.accountGoodbye.content" | trans | raw }}
 {% endblock %}
 
 {% block action_text %}
-    {{ "emails.accountGoodbye.action_text" | trans2 | raw }}
+    {{ "@emails.accountGoodbye.action_text" | trans | raw }}
 {% endblock %}
 
 {% block action_url %}

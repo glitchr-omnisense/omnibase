@@ -2,7 +2,7 @@
 <span class="paginator rewind">{{ paginator_rewind(pagination, path, path_parameters, rewind) }} </span>
 
 <span class="paginator first">
-{% for link in paginator_firstOnes(pagination, path, path_parameters, "messages.paginator.page") %}
+{% for link in paginator_firstOnes(pagination, path, path_parameters, "@messages.paginator.page") %}
 {{ link|raw }}{% if not loop.last %}, {% endif %}
 {% endfor %}</span>
 
@@ -23,7 +23,7 @@
 {% endif %}
 
 <span class="paginator last">
-{% for link in paginator_lastOnes(pagination, path, path_parameters, "messages.paginator.page") %}
+{% for link in paginator_lastOnes(pagination, path, path_parameters, "@messages.paginator.page") %}
 {{ link|raw }}{% if not loop.last %}, {% endif %}
 {% endfor %}</span>
 

@@ -299,15 +299,13 @@ class TranslationType extends AbstractType implements DataMapperInterface
             $data = $form->getData();
             if(!$multiple) {
 
-                dump($data);
-                
                 if ($data instanceof TranslationInterface) { 
                     $viewData[$locale] = is_array($data) && empty($data) ? null : $data;
                     $viewData[$locale]->setLocale($locale);
                 }
 
             } else {
-                
+
                 foreach($data as $key => $translation) {
 
                     $translation->setLocale($locale);

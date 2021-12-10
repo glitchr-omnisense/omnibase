@@ -8,7 +8,6 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Locales;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleProvider implements LocaleProviderInterface
 {    
@@ -17,71 +16,6 @@ class LocaleProvider implements LocaleProviderInterface
     protected $translator = null;
 
     public const SEPARATOR = "-";
-
-    public function __construct(RequestStack $requestStack, ParameterBagInterface $parameterBag, ?TranslatorInterface $translator)
-    {
-        $this->requestStack = $requestStack;
-        $this->parameterBag = $parameterBag;
-        $this->translator   = $translator;
-
-        if(! $parameterBag->has("kernel.default_locale")) 
-            throw new MissingLocaleException("Missing default locale.");
-
-        self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($parameterBag->get("kernel.default_locale"));
-        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalizeArray($this->translator->getFallbackLocales());
-
-    }
-
-    protected static $isLate = null; // Turns on when on kernel request
-    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate ?? false; }
-    public static function markAsLate(?string $location = null) 
-    {
-        $backtrace = debug_backtrace()[1] ?? null;
-        $location = ($backtrace ? $backtrace['class']."::".$backtrace['function'] : true);
-        self::$isLate = $location;
-    }
-
-    private static $locale = null;
-    public function setLocale(?string $locale = null) 
-    {
-        if(self::isLate()) {
-        
-            $method = __CLASS__."::".__FUNCTION__;
-            $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
-            throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
-        }
-
-        self::$locale = $locale;
-        return $this;
-    }
-
-    public function getLocale(?string $locale = null): ?string
-    {
-        if($locale === null) {
-
-            $currentRequest = $this->requestStack->getCurrentRequest();
-            if ($providerLocale = self::$locale) {
-                $locale = $providerLocale;
-
-            } else if ($userLocale = User::getCookie("locale")) {
-                $locale = $userLocale;
-
-            } else if (! $currentRequest instanceof Request) {
-                $locale = $this->getDefaultLocale();
-
-            } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
-                $locale = $currentLocale;
-
-            } else if ($this->translator !== null) {
-                $locale = $this->translator->getLocale();
-            }
-        }
-        
-        if(!$locale)
-            throw new MissingLocaleException("Missing locale.");
-
-        return self::normalize($locale);
-    }
 
     private static ?array $locales = null;
     public static function getLocales() 
@@ -104,11 +38,73 @@ class LocaleProvider implements LocaleProviderInterface
         return self::$locales;
     }
 
+    public function __construct(RequestStack $requestStack, ParameterBagInterface $parameterBag, TranslatorInterface $translator)
+    {
+        $this->requestStack = $requestStack;
+        $this->parameterBag = $parameterBag;
+        $this->translator   = $translator;
+
+        self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($parameterBag->get("kernel.default_locale"));
+        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalizeArray($this->translator->getFallbackLocales());
+    }
+
+    protected static $isLate = null; // Turns on when on kernel request
+    public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate ?? false; }
+    public static function markAsLate(?string $location = null) 
+    {
+        $backtrace = debug_backtrace()[1] ?? null;
+        $location = ($backtrace ? $backtrace['class']."::".$backtrace['function'] : true);
+        self::$isLate = $location;
+    }
+
+    protected $locale = null;
+    public function setLocale(?string $locale = null) 
+    {
+        if(self::isLate()) {
+        
+            $method = __CLASS__."::".__FUNCTION__;
+            $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
+            throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
+        }
+
+        $this->locale = $locale;
+        $this->translator->setLocale($this->locale);
+        return $this;
+    }
+
+    public function getLocale(?string $locale = null): ?string
+    {
+        if($locale === null) {
+
+            $currentRequest = $this->requestStack->getCurrentRequest();
+            if ($providerLocale = $this->locale) {
+                $locale = $providerLocale;
+
+            } else if ($userLocale = User::getCookie("locale")) {
+                $locale = $userLocale;
+
+            } else if (! $currentRequest instanceof Request) {
+                $locale = $this->getDefaultLocale();
+
+            } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
+                $locale = $currentLocale;
+
+            } else if ($this->translator !== null) {
+                $locale = $this->translator->getLocale();
+            }
+        }
+        
+        if(!$locale)
+            throw new MissingLocaleException("Missing locale.");
+
+        return self::normalize($locale);
+    }
+
     protected static ?string $defaultLocale   = null;
     protected static ?array $fallbackLocales  = null;
     protected static ?array $availableLocales = null;
 
-    public static function setDefaultLocale(?string $defaultLocale) { self::$defaultLocale = $defaultLocale; }
+    public function setDefaultLocale(?string $defaultLocale) { self::$defaultLocale = $defaultLocale; }
     public static function getDefaultLocale(): ?string { return self::$defaultLocale; }
     public static function getFallbackLocales(): array { return self::$fallbackLocales; }
     public static function getAvailableLocales(): array 

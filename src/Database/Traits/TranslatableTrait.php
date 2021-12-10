@@ -78,10 +78,6 @@ trait TranslatableTrait
         $this->getTranslations()->removeElement($translation);
     }
 
-    // translate(-1)
-    // translate(null)
-    // translate(fr)
-    // tranlsate(gb)
     public function translate(?string $locale = null)
     {
         $localeProvider = BaseService::getLocaleProvider();
@@ -95,6 +91,9 @@ trait TranslatableTrait
         $translations = $this->getTranslations();
 
         $translation = $translations[$normLocale] ?? null;
+        /*dump("name: ".$this->name."; translate: ".$normLocale);
+        if($this->name == "base.settings.domain" && $normLocale == "fr-FR")
+             dump(debug_backtrace());*/
         if(!$translation) {
 
             // No locale requested, then get the first entry you can find among the available locales

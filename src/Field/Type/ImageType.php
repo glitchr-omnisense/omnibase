@@ -17,8 +17,6 @@ class ImageType extends AbstractType
     public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->baseService = $baseService;
-        $this->translator  = $baseService->getTwigExtension();
-
         $this->csrfTokenManager = $csrfTokenManager;
     }
 
@@ -30,13 +28,13 @@ class ImageType extends AbstractType
             'cropper'     => null,
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.js"),
             'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.css"),
-            
+
             'mime_types'  => ["image/*"]
         ]);
 
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
     }
-    
+
     /**
      * {@inheritdoc}
      */

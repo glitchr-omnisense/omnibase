@@ -18,8 +18,6 @@ class AvatarType extends AbstractType
     public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->baseService = $baseService;
-        $this->translator  = $baseService->getTwigExtension();
-
         $this->csrfTokenManager = $csrfTokenManager;
     }
 

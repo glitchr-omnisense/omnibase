@@ -4,6 +4,7 @@ namespace Base\Subscriber;
 
 use Base\Controller\BaseController;
 use Base\Service\BaseService;
+use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -30,9 +31,9 @@ class BaseSubscriber implements EventSubscriberInterface
         ];
     }
 
-    // Make sure base service is called eagerly very in the early stage 
-    public function onConsoleCommand() { return null; } 
-    
+    // Make sure base service is called eagerly in the very early stage 
+    public function onConsoleCommand() { return null; }
+
     public function onKernelRequest(RequestEvent $event)
     {
         BaseController::$foundBaseSubscriber = true;

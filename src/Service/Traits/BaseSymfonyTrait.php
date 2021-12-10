@@ -4,6 +4,7 @@ namespace Base\Service\Traits;
 
 use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
+use Base\Twig\Extension\BaseTwigExtension;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -40,14 +41,7 @@ trait BaseSymfonyTrait
 
     public function createForm($type, $data = null, array $options = []): FormInterface { return $this->formFactory->create($type, $data, $options); }
 
-    public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
-    public function getAvailableServices(): array
-    {
-        if (!isset($this->container))
-            throw new Exception("Symfony container not found in BaseService. Did you overloaded BaseService::__construct ?");
-
-        return $this->container->getServiceIds();
-    }
+    public function getLocale(?string $locale = null) { return BaseService::getLocaleProvider()->getLocale($locale); }
 
     public function getProfiler() { return $this->kernel->getContainer()->get('profiler'); }
     public function getProfile($response = null)
@@ -56,12 +50,12 @@ trait BaseSymfonyTrait
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
     
-    public function getCurrentRequest(): ?Request { return $this->getCurrentRequest(); }
-    public function getRequest(): ?Request
-    {
-        if (!$this->requestStack) return null;
-        return $this->requestStack->getCurrentRequest();
-    }
+    public function getRequest(): ?Request { return $this->getCurrentRequest(); }
+    public function getCurrentRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
+
+    public function getParameter(string $name): array|bool|string|int|float|null { return $this->kernel->getContainer()->getParameter($name); }
+    public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
+    public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
     public function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
 

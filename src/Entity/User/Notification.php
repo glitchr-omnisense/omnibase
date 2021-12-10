@@ -248,7 +248,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         return $this;
     }
 
-    public function __construct($content = null, array $parameters = array())
+    public function __construct($content = null, array $parameters = array(), string $domain = "@notifications", ?string $locale = null)
     {
         $backtrace = debug_backtrace()[0];
         $this->backtrace = $backtrace["file"].":".$backtrace["line"];
@@ -281,7 +281,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         } else {
 
-            $this->setContent($this->getTwigExtension()->trans2($content, $parameters) ?? "");
+            $this->setContent($this->getTwigExtension()->trans($content, $parameters, $domain, $locale) ?? "");
         }
     }
 

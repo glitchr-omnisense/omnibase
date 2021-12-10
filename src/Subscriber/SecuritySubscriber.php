@@ -105,7 +105,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $user = $event->getUser();
         if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
-        $notification = new Notification("notifications.accountWelcomeBack.success", [$user]);
+        $notification = new Notification("accountWelcomeBack.success", [$user]);
         $notification->setUser($user);
 
         if($this->tokenStorage->getToken()->getUser() == $user)
@@ -117,7 +117,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $user = $event->getUser();
         if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
-        $notification = new Notification("notifications.accountGoodbye.success", [$user]);
+        $notification = new Notification("accountGoodbye.success", [$user]);
         $notification->setUser($user);
         $notification->setHtmlTemplate("@Base/security/email/account_goodbye.html.twig");
 
@@ -135,7 +135,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         if ($user->isVerified()) { // Social account connection
 
-            $notification = new Notification("notifications.verifyEmail.success");
+            $notification = new Notification("verifyEmail.success");
             $notification->send("success");
 
         } else {
@@ -143,7 +143,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $verifyEmailToken = new Token('verify-email', 3600);
             $user->addToken($verifyEmailToken);
 
-            $notification = new Notification('notifications.verifyEmail.check');
+            $notification = new Notification('verifyEmail.check');
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
@@ -158,14 +158,13 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onApproval(UserEvent $event)
     {
         $user = $event->getUser();
-        $user->approve();
-
+        
         $adminApprovalToken = $user->getValidToken("admin-approval");
         if ($adminApprovalToken) {
 
             $adminApprovalToken->revoke();
 
-            $notification = new Notification("notifications.adminApproval.approval");
+            $notification = new Notification("adminApproval.approval");
             $notification->setUser($user);
             $notification->setHtmlTemplate("@Base/security/email/admin_approval_confirm.html.twig");
             $notification->send("email");
@@ -182,15 +181,16 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!($token = $this->tokenStorage->getToken()) ) return;
         if(!($user = $token->getUser())) return;
 
-        if( $user->isDisabled() ) $user->kick();
-        if( $user->isKicked() ) {
+        if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
 
-            $notification = new Notification("notifications.kickout", [$user]);
-            $notification->setUser($user);
+        if( $user->isDisabled() || $user->isDirty() ) $user->kick();
+        if( $user->isKicked()   ) {
+
+            $notification = new Notification("kickout", [$user]);
             $notification->send("warning");
             $user->kick(0);
 
-            $this->baseService->redirectToRoute("base_logoutRequest");
+            $event->setResponse($this->baseService->redirectToRoute("base_logoutRequest"));
             return $event->stopPropagation();
         }
 
@@ -204,9 +204,14 @@ class SecuritySubscriber implements EventSubscriberInterface
             $callbackFn = function () use ($user) {
 
                 $verifyEmailToken = $user->getToken("verify-email");
-                if(!$verifyEmailToken || !$verifyEmailToken->hasVeto()) {
+                if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-                    $notification = new Notification("notifications.verifyEmail.pending", [$this->baseService->getUrl("base_verifyEmail")]);
+                    $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getDeadtimeStr()]);
+                    $notification->send("info");
+
+                } else {
+
+                    $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("base_verifyEmail")]);
                     $notification->send("warning");
                 }
             };
@@ -215,26 +220,24 @@ class SecuritySubscriber implements EventSubscriberInterface
             else $this->baseService->redirectToRoute("base_profile", [], $event, $exceptionList, $callbackFn);
 
         } else {
-
-            // Auto approve if administrator at login
+            
+            
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
-            else if($this->baseService->getParameterBag("base.user.autoapprove"))
+            else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
 
-            // If not approved force redirection
             if (! $user->isApproved()) {
 
                 $this->baseService->redirectToRoute("base_profile", [], $event, $exceptionList, function() {
 
-                    $notification = new Notification("notifications.login.pending");
+                    $notification = new Notification("login.pending");
                     $notification->send("warning");
                 });
+
+            } else if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
+
+                $notification = new Notification("impersonator", [$user]);
+                $notification->send("warning");
             }
-        }
-
-        if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
-
-            $notification = new Notification("notifications.impersonator", [$user]);
-            $notification->send("warning");
         }
 
         $this->baseService->getEntityManager()->flush();
@@ -255,7 +258,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     
     public function onLoginFailure(LoginFailureEvent $event)
     {
-        $message = "notifications.login.failed";
+        $message = "@notifications.login.failed";
         $importance = "danger";
         $data = [];
 
@@ -278,17 +281,17 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             if (!$user->isPersistent()) {
 
-                $notification = new Notification("notifications.login.social", [$user]);
+                $notification = new Notification("login.social", [$user]);
                 $notification->send("success");
 
             } else if($user->isVerified()) {
 
                 if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY'))
-                    $title = "notifications.login.success.normal";
+                    $title = "@notifications.login.success.normal";
                 else if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED'))
-                    $title = "notifications.login.success.back";
+                    $title = "@notifications.login.success.back";
                 else
-                    $title = "notifications.login.success.alien";
+                    $title = "@notifications.login.success.alien";
 
                 $notification = new Notification($title, [$user]);
                 $notification->send("success");

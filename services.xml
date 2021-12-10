@@ -32,7 +32,7 @@
         <service id="Base\Controller\SelectController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -52,10 +52,6 @@
             <argument type="service" id="cache.adapter" />
         </service>
 
-        <service id="Base\Notifier\Notifier" public="true" parent="parameter_bag">
-            <argument type="service" id="parameter_bag" />
-        </service>
-
         <service id="Base\Notifier\NotifierInterface" alias="Base\Notifier\Notifier"/>
         <service id="Base\Notifier\Notifier" public="true">
             <argument type="service" id="notifier" />
@@ -63,6 +59,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="cache.adapter" />
             <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="base.locale_provider" />
             <argument type="service" id="base.settings" />
         </service>
 
@@ -71,6 +68,7 @@
             <argument type="service" id="kernel" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="twig" />
+            <argument type="service" id="twig.extension.base" />
             <argument type="service" id="slugger" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.authorization_checker" />
@@ -87,7 +85,7 @@
         <service id="Base\Service\LocaleProvider" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
         </service>
 
         <service id="Base\Service\Paginator" public="true">
@@ -192,6 +190,7 @@
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="translator" />
         </service>
 
         <service id="Base\Subscriber\MaintenanceSubscriber">
@@ -267,16 +266,20 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Service\TranslatorInterface" alias="Base\Service\Translator"/>
+        <service id="Base\Service\Translator" parent="translator" decorates="translator" public="true" />
+
         <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
             <argument type="service" id="base.settings" />
         </service>
 
-        <service id="Base\Twig\Extension\BaseTwigExtension" >
+        <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
-            <argument type="service" id="translator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="base.translator" />
+            <argument type="service" id="twig.extension.routing" />
+            <argument type="service" id="twig.extension.assets" />
        </service>
 
         <service id="Base\Twig\Extension\ClassTwigExtension" >
@@ -314,10 +317,10 @@
             <argument type="service" id="base.breadgrinder" />
        </service>
 
-        <service id="Base\Twig\Extension\PaginatorTwigExtension" >
+        <service id="Base\Twig\Extension\PaginatorTwigExtension">
             <tag name="twig.extension" />
             <argument type="service" id="twig" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="base.translator" />
        </service>
 
         <!--
@@ -376,7 +379,8 @@
         </service>
 
         <service id="Base\Security\UserChecker"           >
-            <argument type="service" id="base.service" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="twig.extension.base" />
         </service>
 
         <service id="Base\Security\UserProvider"           />
@@ -395,7 +399,7 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.untracked_token_storage" />
             <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -440,7 +444,7 @@
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />
@@ -448,14 +452,14 @@
 
         <service id="Base\Field\Type\FontAwesomeType">
             <tag name="form.type" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />
         </service>
         <service id="Base\Field\Type\CountryType">
             <tag name="form.type" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />
@@ -531,7 +535,7 @@
 
         <service id="Base\Field\Configurator\SlugConfigurator">
             <tag name="ea.field_configurator" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
         </service>
 
         <service id="Base\Field\Configurator\AvatarConfigurator">
@@ -564,7 +568,7 @@
 
         <service id="Base\Field\Configurator\SelectConfigurator">
             <tag name="ea.field_configurator" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
         </service>
         <service id="Base\Field\Configurator\RoleConfigurator"        parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\StateConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
@@ -579,7 +583,7 @@
             </call>
             <argument type="service" id="ea_extension" />
             <argument type="service" id="request_stack" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.service" />
@@ -593,7 +597,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="ea_extension" />
             <argument type="service" id="request_stack" />
-            <argument type="service" id="translator" />
+            <argument type="service" id="base.translator" />
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />

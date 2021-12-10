@@ -3,15 +3,17 @@
 namespace Base\Subscriber;
 
 use Base\Service\LocaleProviderInterface;
+use Base\Service\TranslatorInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    public function __construct(LocaleProviderInterface $localeProvider)
+    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator)
     {
         $this->localeProvider = $localeProvider;
+        $this->translator     = $translator;
     }
     public static function getSubscribedEvents(): array
     {
@@ -21,7 +23,9 @@ class LocaleSubscriber implements EventSubscriberInterface
           *
           * CLI: php bin/console debug:event kernel.request
           */
-        return [KernelEvents::REQUEST => ['onKernelRequest', 128]];
+        return [
+            KernelEvents::REQUEST => ['onKernelRequest', 128],
+        ];
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -29,8 +33,8 @@ class LocaleSubscriber implements EventSubscriberInterface
         $this->localeProvider->markAsLate();
 
         $locale = substr_replace($this->localeProvider->getLocale(), "_", 2, 1);
-        
-        $request = $event->getRequest();
-        $request->setLocale($locale);
+        $this->translator->setLocale($locale);
+
+        $event->getRequest()->setLocale($locale);
     }
 }

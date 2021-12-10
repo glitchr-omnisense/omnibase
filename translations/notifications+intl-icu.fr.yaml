@@ -2,7 +2,7 @@ invalidTimezone: "Fuseau horaire \"{0}\" invalide. Les temps sont affichés en U
 
 login:
     success:
-        normal: Bonjour {0} ! Tu es à présent connecté.
+        normal: Bravo {0}, tu es à présent connecté.
         alien: "Bienvenue visiteur venu d'ailleurs ! Pense à t'inscrire :)"
         back: "Re-bonjour {0} !"
 
@@ -17,7 +17,7 @@ login:
     locked: "Ce compte est verrouillé."
     failed: "Les identifiants sont incorrects"
 
-kickout: "{0}, tu as été volontairement déconnecté !"
+kickout: "Désolé {0}, mais tu as été volontairement déconnecté.."
 
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !
@@ -54,6 +54,7 @@ verifyEmail:
     success: "Ton adresse mail a bien été vérifiée, bravo !"
     check:   "Un email vient de t'être envoyé. Merci de confirmer ton adresse en cliquant sur le lien."
     already: "Ton compte est déjà validé!"
+    alreadySent: "Merci de vérifier ton compte, tu devrais avoir reçu un e-mail pour cela !<br/>Prochaine demande possible dans {0}."
     resend:  "Un email de confirmation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
     invalidToken: "Jeton invalide. Nous ne pouvons pas confirmer ton adresse. Merci de renvoyer une demande."
 

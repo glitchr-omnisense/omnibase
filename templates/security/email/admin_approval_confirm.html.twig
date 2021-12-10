@@ -1,17 +1,17 @@
 {% extends 'email.html.twig' %}
 
 {% block subject %}
-    {{ "emails.adminApprovalConfirm.subject"|trans2|raw }}
+    {{ "@emails.adminApprovalConfirm.subject"|trans|raw }}
 {% endblock %}
 
 {% block content %}
-    {{ "emails.adminApprovalConfirm.content"|trans2([
+    {{ "@emails.adminApprovalConfirm.content"|trans([
         user.getUsername()
     ])|raw }}
 {% endblock %}
 
 {% block action_text %}
-    {{ "emails.adminApprovalConfirm.action_text"|trans2}}
+    {{ "@emails.adminApprovalConfirm.action_text"|trans}}
 {% endblock %}
 
 {% block action_url %}

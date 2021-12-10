@@ -5,8 +5,11 @@ namespace Base\Twig\Extension;
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
 use Base\Exception\NotFoundResourceException;
+use Base\Service\LocaleProviderInterface;
+use Base\Service\TranslatorInterface;
+use Symfony\Bridge\Twig\Extension\AssetExtension;
+use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -15,41 +18,74 @@ use Twig\TwigFilter;
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Twig\Error\LoaderError;
+use Twig\TwigFunction;
 
 final class BaseTwigExtension extends AbstractExtension
 {
+    /**
+     * @var AssertExtension
+     */
+    protected $assertExtension;
+
+    /**
+     * @var RoutingExtension
+     */
+    protected $routingExtension;
+
+    /**
+     * @var TranslatorInterface
+     */
+    protected $translator;
+
+    /**
+     * @var string
+     */
     protected string $projectDir;
-    public function __construct(TranslatorInterface $translator, ?BaseService $baseService = null) {
+
+    public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, AssetExtension $assetExtension) {
 
         BaseController::$foundBaseTwigExtension = true;
 
-        $this->baseService = $baseService;
-        $this->translator = $translator;
-        $this->intlExtension = new IntlExtension();
+        $this->translator       = $translator;
+        $this->routingExtension = $routingExtension;
+        $this->assetExtension   = $assetExtension;
+        $this->intlExtension    = new IntlExtension();
+        $this->mimeTypes        = new MimeTypes();
+    }
 
-        $this->mimeTypes = new MimeTypes();
-        
-        if($this->baseService)
-            $this->projectDir = $this->baseService->getProjectDir();
+    public function setBase(BaseService $baseService) 
+    {
+        $this->baseService = $baseService;
+        $this->projectDir = $this->baseService->getProjectDir();
+
+        return $this;
+    }
+
+    public function getFunctions(): array
+    {
+        return [
+            new TwigFunction("path",  [$this, "path"]),
+            new TwigFunction('asset', [$this, 'asset'])
+        ];
     }
 
     public function getFilters() : array
     {
         return [
-            new TwigFilter('time',          [$this, 'time']),
+            new TwigFilter('trans',         [$this, 'trans']),
             new TwigFilter('url',           [$this, 'url']),
+            new TwigFilter('time',          [$this, 'time']),
             new TwigFilter('mimetype',      [$this, 'mimetype']),
             new TwigFilter('synopsis',      [$this, 'synopsis']),
             new TwigFilter('extension',     [$this, 'extension']),
             new TwigFilter('stringify',     [$this, 'stringify']),
             new TwigFilter('shorten',       [$this, 'shorten']),
-            new TwigFilter('trans2',        [$this, 'trans2']),
             new TwigFilter('highlight',     [$this, 'highlight']),
             new TwigFilter('flatten_array', [$this, 'flattenArray']),
             new TwigFilter('filesize',      [$this, 'filesize']),
             new TwigFilter('lang',          [$this, 'lang']),
             new TwigFilter('country',       [$this, 'country']),
-            new TwigFilter('fontAwesome',  [$this, 'fontAwesome']),
+            new TwigFilter('fontAwesome',   [$this, 'fontAwesome']),
             new TwigFilter('imagify',       [$this, 'imagify']),
             new TwigFilter('image',         [$this, 'image'],       ['needs_environment' => true, 'needs_context' => true]),
             new TwigFilter('datetime',      [$this, 'datetime'],    ['needs_environment' => true]),
@@ -156,38 +192,10 @@ final class BaseTwigExtension extends AbstractExtension
         return (int) ($bytes / (1024 ** $factor)).@$size[$factor];
     }
 
-    public function flattenArray($array): ?array
-    {
-        return array_flatten($array);
-    }
-
-    public function lang(string $locale):     string { return substr($locale, 0, 2); }
-    public function country(string $locale):  string { return substr($locale, 3, 2); }
-    public function time(int $remainingTime): string
-    {
-        if($remainingTime > 0) {
-        
-            $seconds       = fmod  ($remainingTime, 60);
-            $remainingTime = intdiv($remainingTime, 60);
-            $minutes       = fmod  ($remainingTime, 60);
-            $remainingTime = intdiv($remainingTime, 60);
-            $hours         = fmod  ($remainingTime, 24);
-            $remainingTime = intdiv($remainingTime, 24);
-            $days          = fmod  ($remainingTime, 30);
-            $remainingTime = intdiv($remainingTime, 30);
-            $months        = fmod  ($remainingTime, 12);
-            $years         = intdiv($remainingTime, 12);
-
-            return trim($this->trans2("messages.base.years",   [$years])  ." ".
-                        $this->trans2("messages.base.months",  [$months]) ." ".
-                        $this->trans2("messages.base.days",    [$days])   ." ".
-                        $this->trans2("messages.base.hours",   [$hours])  ." ".
-                        $this->trans2("messages.base.minutes", [$minutes])." ".
-                        $this->trans2("messages.base.seconds", [$seconds]));
-        }
-
-        return "";
-    }
+    public function flattenArray($array): ?array { return array_flatten($array); }
+    public function lang(string $locale):    string { return substr($locale, 0, 2); }
+    public function country(string $locale): string { return substr($locale, 3, 2); }
+    public function time(int $time):         string { return $this->translator->time($time); }
 
     public function image(Environment $env, array $context, $image): ?string
     {
@@ -212,6 +220,48 @@ final class BaseTwigExtension extends AbstractExtension
     {
         if(is_string($date)) return $date;
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    public function url(string $url): string
+    {
+        $url = trim($url);
+        $parseUrl = parse_url($url);
+
+        if(!array_key_exists("schema", $parseUrl)) {
+
+            $path = $url;
+
+            $https      = $_SERVER['HTTPS']       ?? $this->baseService->getSettings()->protocol();
+            $serverName = $_SERVER['SERVER_NAME'] ?? $this->baseService->getSettings()->domain();
+            $baseDir    = $_SERVER['BASE']    ?? $this->baseService->getSettings()->base_dir();
+            $baseDir    = "/".trim($baseDir, "/");
+
+            if(str_starts_with($path, "http://") || str_starts_with($path, "https://")) $domain = "";
+            else $domain = ($https ? "https://" : "http://") . $serverName;
+
+            if (!empty($domain)) $join = str_starts_with($path, "/") ? "" : $baseDir;
+            else $join = "";
+
+            $url = $domain . $join . $path;
+        }
+
+        return $url;
+    }
+
+    public function path(string $name, array $parameters = [], bool $relative = false): string
+    {
+        $baseDir = null;
+        if($this->baseService->isCli()) {
+            $baseDir    = $_SERVER['BASE']    ?? $this->baseService->getSettings()->base_dir();
+            $baseDir    = "/".trim($baseDir, "/");
+        }
+
+        return $baseDir . $this->routingExtension->getPath($name, $parameters, $relative);
+    }
+
+    public function asset(string $path, string $packageName = null): string
+    {
+        return $this->assetExtension->getAssetUrl($path, $packageName);
     }
 
     public function lessThan($date, $diff): bool
@@ -249,28 +299,6 @@ final class BaseTwigExtension extends AbstractExtension
             $maxLength = $space_position;
 
         return substr_replace($string, $replacement, $maxLength)."..";
-    }
-
-    public function url(string $url): string
-    {
-        $url = trim($url);
-
-        $parseUrl = parse_url($url);
-        if(!array_key_exists("schema", $parseUrl)) {
-
-            $https = $_SERVER['HTTPS'] ?? $this->baseService->getSettings()->getScalar("base.settings.use_https") ?? true;
-            $serverName = $_SERVER['SERVER_NAME'] ?? $this->baseService->getSettings()->getScalar("base.settings.domain") ?? "localhost";
-
-            if(str_starts_with($url, "http://") || str_starts_with($url, "https://")) $domain = "";
-            else $domain = ($https ? "https://" : "http://") . $serverName;
-
-            if (!empty($domain)) $join = (str_starts_with($url, "/")) ? "" : "/";
-            else $join = "";
-
-            $url = $domain . $join . $url;
-        }
-
-        return $url;
     }
 
     public function highlight(?string $content, $pattern, $gate = 5)
@@ -330,48 +358,10 @@ final class BaseTwigExtension extends AbstractExtension
         return ( empty($highlightContent) ? null : $highlightContent );
     }
 
-    public const DOT_STRUCTURE = "\{*[ ]*[a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+[ ]*\}*";
-    public function trans2(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, $recursive = true)
+    public function trans(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, $recursive = true)
     {
-        if($id === null) return null;
-
-        $domain = $domain ?? null; // Default domain fallback
-        if (preg_match("/^".self::DOT_STRUCTURE."$/", $id)) {
-
-            $array  = explode(".", $id);
-            if ($domain == null) {
-                $domain = array_shift($array);
-                $id     = implode(".", $array);
-            }
-
-        } else if($recursive) { // Check if recursive dot structure
-
-            $count = 0;
-            $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans2($id, $parameters, $domain, $locale, false); };
-            $ret = preg_replace_callback("/^".self::DOT_STRUCTURE."/", $fn, $id, -1, $count);
-
-            return $ret; // If no replacement go to default fallback
-        }
-
-        // Replace parameter between brackets
-        foreach ($parameters as $key => $element) {
-
-            $addBrackets  = is_string($key) && ($key[0] != '{' || $key[strlen($key) - 1] != '}');
-            $addBrackets |= is_numeric($key);
-
-            $parameters[($addBrackets) ? "{" . ((string) $key) . "}" : $key] = $element; //htmlspecialchars($element);
-            if ($addBrackets) unset($parameters[$key]);
-        }
-        
-        // Call for translation with custom parameters        
-        $domain = $domain ?? "messages";
-        $trans = $this->translator->trans($id, $parameters, $domain, $locale);
-        if ($trans == $id && preg_match("/^".self::DOT_STRUCTURE."$/", $id))
-            return $domain.'.'.$id;
-
-        return trim($trans);
+        return $this->translator->trans($id, $parameters, $domain, $locale, $recursive);
     }
-
 
     public function stringify($value): string
     {

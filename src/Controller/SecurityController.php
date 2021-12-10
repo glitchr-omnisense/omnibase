@@ -51,7 +51,7 @@ class SecurityController extends AbstractController
         if($this->baseService->isMaintenance()) {
 
             if ( ($user = $this->getUser()) && $user->isPersistent() )
-            return $this->redirectToRoute("base_dashboard");
+                return $this->redirectToRoute("base_dashboard");
 
             $lastUsername = $authenticationUtils->getLastUsername();
 
@@ -76,23 +76,26 @@ class SecurityController extends AbstractController
             if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
 
                 // Check if target path provided via $_POST..
-                $targetPath = 
-                    $this->baseService->getRoute($request->request->get("_target_path")) ??
-                    $this->baseService->getRoute($request->getSession()->get('_security.main.target_path')) ?? 
-                    $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
+                $targetPath = $request->request->get("_target_path");
+                if(!$targetPath) $targetPath = $request->getSession()->get('_security.main.target_path');
+                if(!$targetPath) $targetPath = $request->getSession()->get('_security.account.target_path');
+
+                $targetRoute = $this->baseService->getRoute($request->request->get("_target_path"));
+                if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.main.target_path'));
+                if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
 
                 $request->getSession()->set('_security.main.target_path', null);
                 $request->getSession()->set('_security.account.target_path', null);
                 
                 if ($targetPath &&
-                    $targetPath != LoginFormAuthenticator::LOGOUT_ROUTE &&
-                    $targetPath != LoginFormAuthenticator::LOGIN_ROUTE )
-                    return $this->redirectToRoute($targetPath);
+                    $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
+                    $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )
+                    return $this->baseService->redirect($targetPath);
 
                 return $this->redirectToRoute($request->isMethod('POST') ? "base_settings" : $this->baseService->getRoute("/"));
             }
 
-            $notification = new Notification("notifications.login.partial");
+            $notification = new Notification("login.partial");
             $notification->send("info");
         }
 
@@ -110,6 +113,7 @@ class SecurityController extends AbstractController
         ]);
     }
 
+
     /**
      * @Route("/logout", name="base_logout")
      */
@@ -122,14 +126,20 @@ class SecurityController extends AbstractController
         // Check if the session is found.. meaning, the user just logged out
         if($user = $this->baseService->removeSession("_user")) {
 
-            $message = "";
-            if (method_exists(User::class, "getUsername")) {
-                $username = $user->getUsername();
-                $message = "Bye bye $username !";
-            }
+            $message = "Bye bye $user !";
 
-            $notification = new Notification("notifications.logout.success", [$message]);
-            $notification->send("success");
+            if( $user->isKicked()   ) {
+    
+                $notification = new Notification("kickout", [$user]);
+                $notification->setUser(!$user->isDirty() ? $user : null);
+                $notification->send("warning");
+                $user->kick(0);
+
+            } else {
+
+                $notification = new Notification("logout.success", [$message]);
+                $notification->send("info");
+            }
 
             // Remove expired tokens
             $user->removeExpiredTokens();
@@ -173,7 +183,6 @@ class SecurityController extends AbstractController
         // Registration form registered
         if ($form->isSubmitted() && $form->isValid()) {
 
-        
             $newUser->setPlainPassword($form->get('plainPassword')->getData());
             if ($user && $user->isVerified()) // Social account connection
                 $newUser->verify($user->isVerified());
@@ -203,15 +212,15 @@ class SecurityController extends AbstractController
         $user = $this->getUser();
         if ($user->isVerified()) {
 
-            $notification = new Notification("notifications.verifyEmail.already");
-            $notification->send("success");
+            $notification = new Notification("verifyEmail.already");
+            $notification->send("info");
 
         } else {
             
             $verifyEmailToken = $user->getToken("verify-email");
             if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-                $notification = new Notification("notifications.verifyEmail.resend", [$verifyEmailToken->getDeadtimeStr()]);
+                $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getDeadtimeStr()]);
                 $notification->send("danger");
             
             } else {
@@ -219,7 +228,7 @@ class SecurityController extends AbstractController
                 $verifyEmailToken = new Token("verify-email", 24*3600);
                 $verifyEmailToken->setUser($user);
 
-                $notification = new Notification('notifications.verifyEmail.check');
+                $notification = new Notification('verifyEmail.check');
                 $notification->setUser($user);
                 $notification->setHtmlTemplate("@Base/security/email/verify_email.html.twig", ["token" => $verifyEmailToken]);
                 $notification->send("success")->send("urgent");
@@ -241,16 +250,16 @@ class SecurityController extends AbstractController
             
         if ($user->isVerified()) {
 
-            $notification = new Notification('notifications.verifyEmail.already');
+            $notification = new Notification('verifyEmail.already');
             $notification->setUser($user);
-            $notification->send('warning');
+            $notification->send('info');
 
         } else {
 
             $verifyEmailToken = $user->getValidToken("verify-email");
             if (!$verifyEmailToken || $verifyEmailToken->get() != $token) {
 
-                $notification = new Notification("notifications.verifyEmail.invalidToken");
+                $notification = new Notification("verifyEmail.invalidToken");
                 $notification->setUser($user);
                 $notification->send("danger");
 
@@ -259,7 +268,7 @@ class SecurityController extends AbstractController
                 $user->verify(true);
                 $verifyEmailToken->revoke();
 
-                $notification = new Notification("notifications.verifyEmail.success");
+                $notification = new Notification("verifyEmail.success");
                 $notification->setUser($user);
                 $notification->send('success');
 
@@ -282,14 +291,14 @@ class SecurityController extends AbstractController
 
         if(!$user->isVerified()) {
 
-            $notification = new Notification("notifications.adminApproval.verifyFirst");  
+            $notification = new Notification("adminApproval.verifyFirst");  
             $notification->send("warning");
 
         } else if (!$user->isApproved()) {
 
             if ( ($adminApprovalToken = $user->getValidToken("admin-approval")) ) { 
 
-                $notification = new Notification("notifications.adminApproval.alreadySent");  
+                $notification = new Notification("adminApproval.alreadySent");  
                 $notification->send("warning");
 
             } else {
@@ -297,7 +306,7 @@ class SecurityController extends AbstractController
                 $adminApprovalToken = new Token("admin-approval");
                 $adminApprovalToken->setUser($user);
             
-                $notification = new Notification("notifications.adminApproval.required");
+                $notification = new Notification("adminApproval.required");
                 $notification->setUser($user);
                 $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["token" => $adminApprovalToken]);
                 $notification->sendAdmins("low")->send("success");
@@ -317,7 +326,7 @@ class SecurityController extends AbstractController
 
         if($user->isDisabled()) {
 
-            $notification = new Notification("notifications.accountGoodbye.already");  
+            $notification = new Notification("accountGoodbye.already");  
             $notification->send("warning");
 
             return $this->redirectToRoute('base_homepage');
@@ -348,7 +357,7 @@ class SecurityController extends AbstractController
             if ($welcomeBackToken)
                 $welcomeBackToken->revoke();
             
-            $notification = new Notification("notifications.accountWelcomeBack.invalidToken");  
+            $notification = new Notification("accountWelcomeBack.invalidToken");  
             $notification->send("danger");
             
             return $this->redirectToRoute('base_homepage');
@@ -357,7 +366,7 @@ class SecurityController extends AbstractController
 
             $welcomeBackToken->revoke();
             
-            $notification = new Notification("notifications.accountWelcomeBack.already");  
+            $notification = new Notification("accountWelcomeBack.already");  
             $notification->send("warning");
 
             return $this->redirectToRoute('base_homepage');
@@ -389,7 +398,7 @@ class SecurityController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $notification = new Notification("notifications.resetPassword.confirmation");
+            $notification = new Notification("resetPassword.confirmation");
 
             $email = $username = $form->get('email')->getData();
             if( ($user = $this->userRepository->findOneByUsernameOrEmail($email, $username)) ) {
@@ -428,7 +437,7 @@ class SecurityController extends AbstractController
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {
 
-            $notification = new Notification("notifications.resetPassword.invalidToken");
+            $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
             return $this->redirectToRoute('base_homepage');
@@ -446,7 +455,7 @@ class SecurityController extends AbstractController
                 $resetPasswordToken->revoke();
                 $user->setPlainPassword($form->get('plainPassword')->getData());
 
-                $notification = new Notification("notifications.resetPassword.success");
+                $notification = new Notification("resetPassword.success");
                
                 $this->entityManager->flush();
                 $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);

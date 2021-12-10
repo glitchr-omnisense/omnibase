@@ -17,12 +17,12 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
     {
         parent::__construct($email, $phone);
 
-        if(!$locale) 
+        if(!$locale)
             $locale = LocaleProvider::getDefaultLocale();
 
         $this->locale = $locale;
     }
-    
+
     /**
      * @return $this
      */

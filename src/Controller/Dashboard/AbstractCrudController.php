@@ -92,23 +92,23 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         
         $action = $this->requestStack->getCurrentRequest()->query->get("crudAction") ?? "";
-        $crudTranslationPrefix = $this->getCrudTranslationPrefix();
+        $crudTranslationPrefix = "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".$this->getCrudTranslationPrefix();
         $crudTranslationPrefixWithAction = $crudTranslationPrefix . ($action ? "." . $action : "");
 
-        $entityTranslationPrefix = $this->getEntityTranslationPrefix();
+        $entityTranslationPrefix = "@".AbstractDashboardController::TRANSLATION_ENTITY.".".$this->getEntityTranslationPrefix();
 
-        $title = $this->translator->trans($crudTranslationPrefixWithAction.".title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
-        if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
-        if($title == $crudTranslationPrefix.".title") $title = $this->translator->trans($crudTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
-        if($title == $crudTranslationPrefix.".plural") $title = $this->translator->trans($entityTranslationPrefix.".title", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        $title = $this->translator->trans($crudTranslationPrefixWithAction.".title");
+        if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title");
+        if($title == $crudTranslationPrefix.".title") $title = $this->translator->trans($crudTranslationPrefix.".plural");
+        if($title == $crudTranslationPrefix.".plural") $title = $this->translator->trans($entityTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
         if($title == $entityTranslationPrefix.".plural") $title = class_basename($this->getEntityFqcn());
 
-        $help = $this->translator->trans($crudTranslationPrefixWithAction.".help", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
-        if($help == $crudTranslationPrefixWithAction.".help") $help = $this->translator->trans($crudTranslationPrefix.".help", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
+        $help = $this->translator->trans($crudTranslationPrefixWithAction.".help");
+        if($help == $crudTranslationPrefixWithAction.".help") $help = $this->translator->trans($crudTranslationPrefix.".help");
         if($help == $crudTranslationPrefix.".help") $help = "";
 
-        $text = $this->translator->trans($crudTranslationPrefixWithAction.".text", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
-        if($text == $crudTranslationPrefixWithAction.".text") $text = $this->translator->trans($crudTranslationPrefix.".text", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
+        $text = $this->translator->trans($crudTranslationPrefixWithAction.".text");
+        if($text == $crudTranslationPrefixWithAction.".text") $text = $this->translator->trans($crudTranslationPrefix.".text");
         if($text == $crudTranslationPrefix.".text") $text = "";
 
         $icon = class_implements_interface($this->getEntityFqcn(), IconizeInterface::class) ? $this->getEntityFqcn()::__staticIconize()[0] : null;

@@ -1,1 +1,2 @@
 "Invalid CSRF token.": "Invalid CSRF token provided. Please try to resubmit the form."
+"Invalid credentials.": "Invalid credentials. Please try again with correct login information."

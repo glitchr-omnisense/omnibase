@@ -74,8 +74,8 @@ trait BaseSettingsTrait
     public function getRaw($name, ?string $locale = null)
     {
         if(!$name) return []; // Empty name is always returning empty data..
-        if(!$locale)
-            $locale = $this->localeProvider->getLocale($locale);
+
+        $cacheLocale = $this->localeProvider->getLocale($locale);
 
         if(is_array($names = $name)) {
             
@@ -91,15 +91,12 @@ trait BaseSettingsTrait
 
         $values = $this->normalize($name, $this->settings[$name]);
         $values = $this->read($name, $values); // get formatted values
-        $this->applyCache($name, $locale, $values);
+        $this->applyCache($name, $cacheLocale, $values);
         return $values;
     }
     
     public function getRawScalar($name, ?string $locale = null)
     {
-        if(!$locale)
-            $locale = $this->localeProvider->getLocale($locale);
-
         if(is_array($names = $name)) {
             
             $settings = [];
@@ -114,8 +111,7 @@ trait BaseSettingsTrait
 
     public function getScalar($name, ?string $locale = null): string|object|null
     {
-        if(!$locale)
-            $locale = $this->localeProvider->getLocale($locale);
+        $cacheLocale = $this->localeProvider->getLocale($locale);
 
         if(is_array($names = $name)) {
             
@@ -126,7 +122,7 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        if(($cacheValues = $this->getCache($name, $locale)))
+        if(($cacheValues = $this->getCache($name, $cacheLocale)))
             return ($cacheValues !== null ? $cacheValues["_self"] ?? null : null);
 
         $array = $this->getRawScalar($name, $locale);
@@ -135,8 +131,7 @@ trait BaseSettingsTrait
 
     public function get($name, ?string $locale = null): array
     {
-        if(!$locale)
-            $locale = $this->localeProvider->getLocale($locale);
+        $cacheLocale = $this->localeProvider->getLocale($locale);
 
         if(is_array($names = $name)) {
         
@@ -147,7 +142,7 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        if(($cacheValues = $this->getCache($name, $locale)))
+        if(($cacheValues = $this->getCache($name, $cacheLocale)))
             return $cacheValues;
 
         $values = $this->getRaw($name, $locale) ?? [];
@@ -156,7 +151,7 @@ trait BaseSettingsTrait
 
     public function set(string $name, $value, ?string $locale = null)
     {
-        $locale = $this->localeProvider->getLocale($locale);
+        $cacheLocale = $this->localeProvider->getLocale($locale);
         $this->removeCache($name);
 
         $setting = $this->getRaw($name, $locale)["_self"];
@@ -171,7 +166,7 @@ trait BaseSettingsTrait
         
         $this->removeCache($name);
         if($value = $this->get($name, $locale)) 
-            $this->applyCache($name, $locale, $value);
+            $this->applyCache($name, $cacheLocale, $value);
 
         return $this;
     }
@@ -251,7 +246,7 @@ trait BaseSettingsTrait
     {
         unset($this->settings[$name]);
         foreach(array_reverse(explode(".", $name)) as $last) {
-
+            
             $this->cache->delete($name);
             $name = substr($name, 0, strlen($name) - strlen($last) - 1);
         }

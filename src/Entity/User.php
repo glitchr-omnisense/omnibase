@@ -43,6 +43,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Base\Enum\UserState;
+use Doctrine\ORM\PersistentCollection;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -84,6 +85,28 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     }
     public function __toString() { return $this->getUserIdentifier(); }
     public function equals($other): bool { return ($other->getId() == $this->getId()); }
+
+    // The purpose of this method is to detect is user is dirty
+    // It means: not in the database anymore, but user session still active..
+    public function isDirty() {
+
+        $persistentCollection = ($this->getLogs() instanceof PersistentCollection ? (array) $this->getLogs() : null);
+        if($persistentCollection === null) return true;
+        
+        $dirtyCollection = [
+            "\x00Doctrine\ORM\PersistentCollection\x00snapshot" => [],
+            "\x00Doctrine\ORM\PersistentCollection\x00owner" => null,
+            "\x00Doctrine\ORM\PersistentCollection\x00association" => null,
+            "\x00Doctrine\ORM\PersistentCollection\x00em" => null,
+            "\x00Doctrine\ORM\PersistentCollection\x00backRefFieldName" => null,
+            "\x00Doctrine\ORM\PersistentCollection\x00typeClass" => null,
+            "\x00Doctrine\ORM\PersistentCollection\x00isDirty" => false,
+            "\x00*\x00initialized" => false
+        ];
+
+        if(array_intersect_key($persistentCollection, $dirtyCollection) === $dirtyCollection) return true;
+        return false;
+    }
 
     public function __construct()
     {

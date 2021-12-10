@@ -3,7 +3,7 @@
    be used in a EasyAdmin Dashboard controller, where 'ea' is defined
    or from any other Symfony controller, where 'ea' is not defined #}
 {% extends ea is defined ? ea.templatePath('layout') : '@EasyAdmin/page/login_minimal.html.twig' %}
-{% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? 'messages') %}
+{% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
 
 {% block body_class 'page-login' %}
 {% block page_title %}{{ page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '') }}{% endblock %}
@@ -244,12 +244,12 @@
 
         {% if error|default(false) %}
             <div class="w-100 alert alert-danger">
-                {{ error.messageKey|trans(error.messageData, 'security') }}
+                {{ error.messageKey|trans(error.messageData, '@security') }}
             </div>
         {% endif %}
         <section class="content">
 
-            <h1>{{ 'forms.login.title'|trans2 }}</h1>
+            <h1>{{ '@forms.login.title'|trans }}</h1>
             <form method="post" action="{{ action|default('') }}">
                 {% if csrf_token_intention|default(false) %}
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_token_intention) }}">

@@ -1,25 +1,25 @@
 {% extends 'email.html.twig' %}
 
 {% block subject %}
-    {{ "emails.verifyEmail.subject"|trans2|raw }}
+    {{ '@emails.verifyEmail.subject'|trans|raw }}
 {% endblock %}
 
 {% block content %}
-    {{ "emails.verifyEmail.content"|trans2|raw }}
+    {{ '@emails.verifyEmail.content'|trans|raw }}
 {% endblock %}
 
 {% block action_text %}
-    {{ "emails.verifyEmail.action_text"|trans2 | raw }}
+    {{ '@emails.verifyEmail.action_text'|trans | raw }}
 {% endblock %}
 
 {% block action_url %}
-    {{ path("base_verifyEmail_token", {"token": token.get()}) }}
+    {{ path('base_verifyEmail_token', {'token': token.get()}) }}
 {% endblock %}
 
 {% block footer_text %}
 
     {% if token.getLifetime() > 0 and token.getLifetime() < 3600*24*7 %}
-        {{ "emails.verifyEmail.expiry" | trans2([token.getLifetime()|time]) | raw }}
+        {{ '@emails.verifyEmail.expiry' | trans([token.getLifetime()|time]) | raw }}
     {% endif %}
 
 {% endblock %}

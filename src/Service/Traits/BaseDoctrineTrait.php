@@ -73,7 +73,6 @@ trait BaseDoctrineTrait
         if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
         else $entity = $eventOrEntity->getObject();
 
-        dump($entity);
         return self::$entitySerializer->deserialize(json_encode($data), get_class($entity), 'json');
     }
 }

@@ -44,7 +44,7 @@ class FileType extends AbstractType implements DataMapperInterface
     public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager, ValidatorInterface $validator)
     {
         $this->baseService = $baseService;
-        $this->translator  = $baseService->getTwigExtension();
+        $this->translator  = $baseService->getTranslator();
         $this->csrfTokenManager = $csrfTokenManager;
         $this->validator = $validator;
     }
@@ -191,7 +191,7 @@ class FileType extends AbstractType implements DataMapperInterface
             if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = $acceptedFiles;
 
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
-                ?? '<h4>'.$this->translator->trans2("messages.dropzone.title").'</h4><p>'.$this->translator->trans2("messages.dropzone.description").'</p>';
+                ?? '<h4>'.$this->translator->trans("messages.dropzone.title").'</h4><p>'.$this->translator->trans("messages.dropzone.description").'</p>';
 
             if(array_key_exists("maxFiles", $options["dropzone"]) && !empty($view->vars["value"]))
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
@@ -199,7 +199,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
             $options["dropzone"]["url"] = $view->vars["ajax"];
-            
+
             $view->vars["dropzone"] = json_encode($options["dropzone"]);
             $view->vars["sortable"] = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])

@@ -9,6 +9,7 @@ use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
 use Base\Service\BaseSettings;
 use Base\Service\LocaleProvider;
+use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
@@ -114,7 +115,7 @@ class Notifier implements NotifierInterface
         return $this;
     }
 
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, BaseSettings $baseSettings)
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
     {
         $this->notifier      = $notifier;
         $this->policy        = $policy;
@@ -126,8 +127,9 @@ class Notifier implements NotifierInterface
         $this->testRecipients     = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
         $this->technicalRecipient = new Recipient($parameterBag->get("base.notifier.technical_support"));
 
-        $this->entityManager = $entityManager;
-        $this->baseSettings  = $baseSettings;
+        $this->entityManager  = $entityManager;
+        $this->baseSettings   = $baseSettings;
+        $this->localeProvider = $localeProvider;
 
         // Address support only once..
         $adminRecipients = [];
@@ -246,13 +248,12 @@ class Notifier implements NotifierInterface
             $notification->setChannels($channels);
             $notification->markAsReadIfNeeded($channels);
 
-            // Send notification
-            $locale = $recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null;
-            $defaultLocale = User::getLocaleProvider()->getDefaultLocale();
-            $currentLocale = User::getLocaleProvider()->getLocale();
-            LocaleProvider::setDefaultLocale($locale ?? $currentLocale);
+            // Send notification with proper locale
+            $defaultLocale = $this->localeProvider->getDefaultLocale();
+            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
+            $this->localeProvider->setDefaultLocale($locale);
             $this->notifier->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
-            LocaleProvider::setDefaultLocale($defaultLocale);
+            $this->localeProvider->setDefaultLocale($defaultLocale);
         }
 
         $notification->setChannels($prevChannels);
@@ -283,13 +284,12 @@ class Notifier implements NotifierInterface
             if (empty($channels)) continue;
             $notification->setChannels($channels);
 
-            // Send notification
-            $locale = $recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null;
-            $defaultLocale = User::getLocaleProvider()->getDefaultLocale();
-            $currentLocale = User::getLocaleProvider()->getLocale();
-            LocaleProvider::setDefaultLocale($locale ?? $currentLocale);
-            $this->notifier->send($this->notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
-            LocaleProvider::setDefaultLocale($defaultLocale);
+            // Send notification with proper locale
+            $defaultLocale = $this->localeProvider->getDefaultLocale();
+            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
+            $this->localeProvider->setDefaultLocale($locale);
+            $this->notifier->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
+            $this->localeProvider->setDefaultLocale($defaultLocale);
         }
 
         $notification->setChannels($prevChannels);
@@ -317,13 +317,12 @@ class Notifier implements NotifierInterface
             if (empty($channels)) return $this;
             $notification->setChannels($channels);
 
-            // Send notification
-            $locale = $recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null;
-            $defaultLocale = User::getLocaleProvider()->getDefaultLocale();
-            $currentLocale = User::getLocaleProvider()->getLocale();
-            LocaleProvider::setDefaultLocale($locale ?? $currentLocale);
+            // Send notification with proper locale
+            $defaultLocale = $this->localeProvider->getDefaultLocale();
+            $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
+            $this->localeProvider->setDefaultLocale($locale);
             $this->notifier->send($notification, $recipient);
-            LocaleProvider::setDefaultLocale($defaultLocale);
+            $this->localeProvider->setDefaultLocale($defaultLocale);
         }
 
         $notification->setChannels($prevChannels);

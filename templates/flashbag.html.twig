@@ -11,28 +11,23 @@
 
                 {% for flash in flashes %}
                     <div class="alert alert-{{label}} alert-dismissible fade show">
-                        {% if flash is iterable %}
+                        {% if flash is iterable and  flash|length > 1 %}
 
-                            {% if flash|length > 1 %}
+                            {% set flash_title = flash|first %}
+                            {% set flash_message = flash|slice(1,flash|length) %}
 
-                                {% set flash_title = flash|first %}
-                                {% set flash_message = flash|slice(1,flash|length) %}
-
-                                {% if flash_title is not empty %}
-                                <div class="title">{{flash_title|trans2|raw}}</div><hr>
-                                {% endif %}
-
-                                {% for message in flash_message %}
-                                    {{ message|trans2|raw }}<br/>
-                                {% endfor %}
-
-                            {% else %}
-                                {{ flash|trans2|raw }}
+                            {% if flash_title is not empty %}
+                            <div class="title">{{flash_title|trans|raw}}</div><hr>
                             {% endif %}
 
+                            {% for message in flash_message %}
+                            <span class="message">{{ message|trans|raw }}</span>
+                            {% endfor %}
+
                         {% else %}
-                            {{ flash|trans2|raw }}
+                            <span class="message">{{ flash|trans|raw }}</span>
                         {% endif %}
+
                         <button type="button" class="btn-close alert-{{label}}" aria-label="Close" onclick="this.closest('article').style.display='none'"></button>
                     </div>
                 {% endfor %}

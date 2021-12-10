@@ -110,13 +110,6 @@ class QuillType extends AbstractType implements DataMapperInterface
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
     }
 
-    public function mapDataToForms($viewData, Traversable $forms)
-    {
-        dump(iterator_to_array($forms));
-    }
-
-    public function mapFormsToData(Traversable $forms, &$viewData)
-    {
-        dump(iterator_to_array($forms));
-    }
+    public function mapDataToForms($viewData, Traversable $forms) { }
+    public function mapFormsToData(Traversable $forms, &$viewData) { }
 }

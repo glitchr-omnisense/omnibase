@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Service\Traits\BaseCommonTrait;
+use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 
@@ -30,7 +31,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 
-final class BaseService implements RuntimeExtensionInterface
+class BaseService implements RuntimeExtensionInterface
 {
     /**
      * @var KernelInterface
@@ -38,41 +39,55 @@ final class BaseService implements RuntimeExtensionInterface
     private $kernel;
 
     /**
-     * @var Container
-     */
-    private $container;
-
-    /**
-     * @var RequestStack
-     */
-    private $requestStack;
-
-    /**
      * @var AdminContextProvider
      */
-    private $adminContextProvider;
-
+    protected $adminContextProvider;
 
     /**
      * @var AuthorizationCheckerInterface
      */
-    private $authorizationChecker;
+    protected $authorizationChecker;
     
     /**
      * @var TokenStorageInterface
      */
-    private $tokenStorage;
+    protected $tokenStorage;
     
     /**
      * @var CsrfTokenManagerInterface
      */
-    private $csrfTokenManager;
+    protected $csrfTokenManager;
     
+    /**
+     * @var Container
+     */
+    protected $container;
+    public function getContainer($name) { return ($name ? $this->container->get($name) : $this->container); }
+    public function getAvailableServices(): array
+    {
+        if (!isset($this->container))
+            throw new \Exception("Symfony container not found in BaseService. Did you overloaded BaseService::__construct ?");
+
+        return $this->container->getServiceIds();
+    }
+    
+    /**
+     * @var RequestStack
+     */
+    protected $requestStack;
+    public function getRequestStack(): RequestStack { return $this->requestStack; }
+
+    /**
+     * @var BaseTwigExtension
+     */
+    protected static $twigExtension = null;
+    public static function getTwigExtension(): BaseTwigExtension { return self::$twigExtension; }
 
     public function __construct(
         KernelInterface $kernel,
         RequestStack $requestStack,
         Environment $twig,
+        BaseTwigExtension $baseTwigExtension,
 
         SluggerInterface $slugger,
         EntityManagerInterface $entityManager,
@@ -90,16 +105,19 @@ final class BaseService implements RuntimeExtensionInterface
         BaseController::$foundBaseService = true;
 
         // Kernel and additional stopwatch
-        $this->kernel  = $kernel;
+        $this->kernel      = $kernel;
+        $this->container   = $kernel->getContainer();
+        $this->setProjectDir($kernel->getProjectDir());
         $this->setStartTime();
+        
+        self::$twigExtension       = $baseTwigExtension->setBase($this);
 
         // Symfony basics
-        $this->container = $kernel->getContainer();
         $this->authorizationChecker = $authorizationChecker;
-        $this->tokenStorage = $tokenStorage;
-        $this->csrfTokenManager = $csrfTokenManager;
-        $this->formFactory      = $formFactory;
-        $this->requestStack     = $requestStack;
+        $this->tokenStorage         = $tokenStorage;
+        $this->csrfTokenManager     = $csrfTokenManager;
+        $this->formFactory          = $formFactory;
+        $this->requestStack         = $requestStack;
 
         // Additional containers
         $this->setSettings($settings);
@@ -110,7 +128,6 @@ final class BaseService implements RuntimeExtensionInterface
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
         $this->setEntityManager($entityManager);
-        $this->setProjectDir($this->kernel->getProjectDir());
         $this->setEnvironment($this->kernel->getEnvironment());
         $this->setUserIdentifier($this->getParameterBag("base.user.identifier"));
         $this->setNotifier($notifier);
