@@ -5,6 +5,7 @@ namespace Base\Service\Traits;
 use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Extension\BaseTwigExtension;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
@@ -15,8 +16,11 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
 trait BaseSymfonyTrait
 {
@@ -94,8 +98,32 @@ trait BaseSymfonyTrait
     }
 
     public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->getUrl($urlOrRoute, $opts), $state, $headers); }
-    public function redirectToRoute(string $route, array $opts = [], $event = null, $exceptionPattern = null, $callback = null): ?RedirectResponse
+    public function redirectToRoute(string $route, array $opts = [], int $state = 302, array $headers = []): ?RedirectResponse
     {
+        $event = null;
+        if(array_key_exists("event", $headers)) {
+            $event = $headers["event"];
+            if(! ($event instanceof Event) ) 
+                throw new InvalidArgumentException("header variable \"event\" must be ".Event::class.", currently: ".(is_object($event) ? get_class($event) : gettype($event)));
+            unset($headers["event"]);
+        }
+
+        $exceptions = [];
+        if(array_key_exists("exceptions", $headers)) {
+            $exceptions = $headers["exceptions"];
+            if(!is_string($exceptions) && !is_array($exceptions)) 
+                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
+            unset($headers["exceptions"]);
+        }
+        
+        $callback = null;
+        if(array_key_exists("callback", $headers)) {
+            $callback = $headers["callback"];
+            if(!is_callable($callback)) 
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+            unset($headers["callback"]);
+        }
+        
         $url   = $this->getUrl($route, $opts) ?? $route;
         $route = $this->getRoute($url); // Normalize and check if route exists
         if (!$route) return null;
@@ -103,19 +131,11 @@ trait BaseSymfonyTrait
         $currentRoute = $this->getCurrentRoute();
         if ($route == $currentRoute) return null;
 
-        if($exceptionPattern) {
+        $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
+        foreach($exceptions as $pattern)
+            if (preg_match($pattern, $currentRoute)) return null;
 
-            if(is_string($exceptionPattern))
-                $exceptionPattern = [$exceptionPattern];
-
-            foreach($exceptionPattern as $pattern) {
-
-                if (preg_match($pattern, $currentRoute))
-                    return null;
-            }
-        }
-        
-        $response = new RedirectResponse($url);
+        $response = new RedirectResponse($url, $state, $headers);
         if($event && method_exists($event, "setResponse")) $event->setResponse($response);
 
         // Callable action if redirection happens

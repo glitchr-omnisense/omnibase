@@ -55,14 +55,13 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         if ($this->baseService->isProfiler($event->getRequest())) return;
 
         // Exception triggered
-        if( empty($this->getCurrentRoute($event)) )
-            return;
+        if( empty($this->getCurrentRoute($event)) ) return;
 
         // Check if lock file is found or not..
         if(!$this->baseService->isMaintenance()) {
 
             if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event)))
-                $this->baseService->redirectToRoute($this->homepageRoute, [], $event);
+                $this->baseService->redirectToRoute($this->homepageRoute, [], 302, ["event" => $event]);
 
             return;
         }
@@ -83,7 +82,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
             $isException |= preg_match('/^'.$exception.'/', $this->getCurrentRoute($event));
 
         if (!$isException)
-            $this->baseService->redirectToRoute($this->maintenanceRoute, [], $event);
+            $this->baseService->redirectToRoute($this->maintenanceRoute, [], 302, ["event" => $event]);
 
         // Stopping page execution
         $event->stopPropagation();

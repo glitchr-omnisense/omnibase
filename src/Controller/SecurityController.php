@@ -84,9 +84,6 @@ class SecurityController extends AbstractController
                 if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.main.target_path'));
                 if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
 
-                $request->getSession()->set('_security.main.target_path', null);
-                $request->getSession()->set('_security.account.target_path', null);
-                
                 if ($targetPath &&
                     $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
                     $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )

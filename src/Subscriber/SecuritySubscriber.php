@@ -82,7 +82,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         return [
             SwitchUserEvent::class => ['onSwitchUser'],
-            RequestEvent::class    => ['onKernelRequest', 1],
+            RequestEvent::class    => [['onRefererRequest',0], ['onKernelRequest', 1]],
             ResponseEvent::class   => ['onKernelResponse'],
             TerminateEvent::class  => ['onKernelTerminate'],
             ExceptionEvent::class  => ['onKernelException', -1024],
@@ -152,7 +152,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         $this->baseService->getEntityManager()->flush();
-        $this->baseService->redirectToRoute("base_profile", [], $event);
+        $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event]);
     }
 
     public function onApproval(UserEvent $event)
@@ -175,6 +175,25 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onSwitchUser(SwitchUserEvent $event) { }
 
+    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
+
+    public function onRefererRequest(RequestEvent $event) 
+    {
+        if(!$event->isMainRequest()) return;
+        if($this->baseService->isProfiler()) return;
+
+        $targetPath = $event->getRequest()->get("_target_path");
+        if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.main.target_path');
+        if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.account.target_path');
+        
+        $currentRoute = $this->getCurrentRoute($event);
+        if ($currentRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
+            $currentRoute != LoginFormAuthenticator::LOGIN_ROUTE ) {
+
+            $event->getRequest()->getSession()->set('_security.main.target_path', null);
+            $event->getRequest()->getSession()->set('_security.account.target_path', null);
+        }
+    }
     public function onKernelRequest(RequestEvent $event)
     {
         //Notify user about the authentication method
@@ -194,7 +213,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $event->stopPropagation();
         }
 
-        $exceptionList = [
+        $exceptions = [
             "/^(app|base)_(verifyEmail(_token)*)$/",
             "/^(app|base)_(resetPassword(_token)*)$/",
             "/^(app|base)_(logout|settings|profile)$/"];
@@ -217,21 +236,20 @@ class SecuritySubscriber implements EventSubscriberInterface
             };
 
             if($this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
-            else $this->baseService->redirectToRoute("base_profile", [], $event, $exceptionList, $callbackFn);
+            else $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
 
         } else {
-            
             
             if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
             else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
 
             if (! $user->isApproved()) {
 
-                $this->baseService->redirectToRoute("base_profile", [], $event, $exceptionList, function() {
+                $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
 
                     $notification = new Notification("login.pending");
                     $notification->send("warning");
-                });
+                }]);
 
             } else if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 
@@ -314,7 +332,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->_onLogoutUser = $user;
         $this->_onLogoutImpersonator = $impersonator;
 
-        return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], $event);
+        return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
 
     public function onStoreLog(KernelEvent $event, ?\Throwable $exception = null) {

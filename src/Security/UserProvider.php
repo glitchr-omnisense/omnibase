@@ -52,7 +52,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     /**
      * {@inheritdoc}
      */
-    public function loadUserByOAuthUserResponse(UserResponseInterface $response)
+    public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface
     {
         return $this->loadUserByIdentifier($response);
     }
