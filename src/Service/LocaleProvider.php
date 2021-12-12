@@ -75,7 +75,7 @@ class LocaleProvider implements LocaleProviderInterface
 
     public function getLocale(?string $locale = null): ?string
     {
-        if($locale === null) {
+        if(!$locale) {
 
             $currentRequest = $this->requestStack->getCurrentRequest();
             if ($providerLocale = $this->locale) {
@@ -84,14 +84,14 @@ class LocaleProvider implements LocaleProviderInterface
             } else if ($userLocale = User::getCookie("locale")) {
                 $locale = $userLocale;
 
-            } else if (! $currentRequest instanceof Request) {
-                $locale = $this->getDefaultLocale();
-
             } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
                 $locale = $currentLocale;
 
             } else if ($this->translator !== null) {
                 $locale = $this->translator->getLocale();
+
+            } else {
+                $locale = $this->getDefaultLocale();
             }
         }
         

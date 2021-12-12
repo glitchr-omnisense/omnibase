@@ -73,6 +73,7 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFilter('trans',         [$this, 'trans']),
             new TwigFilter('url',           [$this, 'url']),
+            new TwigFilter('joinIfExists', [$this, 'joinIfExists']),
             new TwigFilter('time',          [$this, 'time']),
             new TwigFilter('mimetype',      [$this, 'mimetype']),
             new TwigFilter('synopsis',      [$this, 'synopsis']),
@@ -94,6 +95,12 @@ final class BaseTwigExtension extends AbstractExtension
     }
 
     public function synopsis($class) { return class_synopsis($class); }
+
+    public function joinIfExists(?array $array, string $separator) 
+    {
+        if($array === null) return null;
+        return implode($separator, array_filter($array));
+    }
 
     public function fontAwesome(array|null|string $icon, array $attributes = []) 
     {

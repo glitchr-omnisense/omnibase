@@ -133,6 +133,19 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     }
 
     /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $title;
+
+    public function getTitle(): string { return $this->title; }
+    public function setTitle(string $title): self
+    {
+        $this->title = trim($title);
+
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="boolean")
      */
     protected $isRead = false;
@@ -192,7 +205,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     protected array $context = [];
     public function getContext(array $additionalContext = [])
     {
-        if($additionalContext) return array_merge($additionalContext, $this->context);
+        if($additionalContext) return array_merge($this->context, $additionalContext);
         return $this->context;
     }
 
@@ -261,6 +274,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         // Notification variables
         $this->importance = parent::getImportance();
         $this->setSubject("");
+        $this->setTitle("");
         $this->setFooter("");
 
         // Formatting strings if exception passed as argument
@@ -330,26 +344,31 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $adminAddress = $notifier->getAdminRecipients()[0] ?? new NoRecipient();
         if($adminAddress instanceof NoRecipient) throw new UnexpectedValueException("No support address found.");
 
+        $title = $this->getTitle();
+        $content = $this->getContent();
+        $footer = $this->getFooter();
+
         $importance = $this->getImportance();
         $this->setImportance(""); // Remove importance from email subject
-    
+
         if($this->isMarkAsAdmin()) {
             
-            $subject = "Fwd: " . $this->getSubject();
             $user = $this->user ?? "User \"".User::getIp()."\"";
-            $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";
+            $subject = "Fwd: " . $this->getSubject();
+            $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
+            $content = $this->getContent();
             $from    = $adminAddress->getEmail();
 
         } else if($this->user && $this->user->getRecipient() != $recipient) {
 
-            $subject = "Fwd: [TEST] Sent by \"".$this->user."\": " . $this->getSubject();
-            $content = $this->getContent();
-            $from = $this->user->getRecipient()->getEmail();
-
+            $subject = "Fwd: " . $this->getSubject();
+            $from    = "[".$notifier->getTranslator()->trans("@emails.fake_test.author")."] ". $this->user->getRecipient()->getEmail();
+            $footer  = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
+            $footer  = implode(" - ", array_filter($footer)); 
+        
         } else {
 
             $subject = $this->getSubject();
-            $content = $this->getContent();
             $from    = $adminAddress->getEmail();
         }
 
@@ -360,9 +379,10 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
          */
         $email = $notification->getMessage(); // Embed image inside email (cid:/)
         $context = $this->getContext([
-            "importance" => $importance,
-            "subject" => $subject,
-            "content" => $content
+            "importance"  => $importance,
+            "title"       => $title,
+            "content"     => $content,
+            "footer_text" => $footer
         ]);
 
         // Attach images using cid:/

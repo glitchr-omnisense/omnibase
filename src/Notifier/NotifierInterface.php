@@ -5,6 +5,7 @@ namespace Base\Notifier;
 use Base\Entity\User\Notification;
 use Symfony\Component\Notifier\Channel\ChannelPolicyInterface;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 interface NotifierInterface extends \Symfony\Component\Notifier\NotifierInterface
 {
@@ -19,4 +20,5 @@ interface NotifierInterface extends \Symfony\Component\Notifier\NotifierInterfac
     public function isTest(RecipientInterface $recipient): bool;
     public function getPolicy(): ChannelPolicyInterface;
     public function getOptions(): array;
+    public function getTranslator(): TranslatorInterface;
 }

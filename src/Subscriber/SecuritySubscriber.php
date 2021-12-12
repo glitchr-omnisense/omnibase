@@ -82,7 +82,9 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         return [
             SwitchUserEvent::class => ['onSwitchUser'],
-            RequestEvent::class    => [['onRefererRequest',0], ['onKernelRequest', 1]],
+
+            /* referer goes first, because kernelrequest then redirects consequently if user not verified */
+            RequestEvent::class    => [['onRefererRequest', 2], ['onKernelRequest', 1]],
             ResponseEvent::class   => ['onKernelResponse'],
             TerminateEvent::class  => ['onKernelTerminate'],
             ExceptionEvent::class  => ['onKernelException', -1024],
@@ -185,15 +187,26 @@ class SecuritySubscriber implements EventSubscriberInterface
         $targetPath = $event->getRequest()->get("_target_path");
         if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.main.target_path');
         if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.account.target_path');
-        
+    
+        $targetRoute = $this->baseService->getRoute($event->getRequest()->request->get("_target_path"));
+        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_security.main.target_path'));
+        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_security.account.target_path'));
+
         $currentRoute = $this->getCurrentRoute($event);
-        if ($currentRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
+        if ($currentRoute != $targetRoute &&
+            $currentRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
             $currentRoute != LoginFormAuthenticator::LOGIN_ROUTE ) {
 
             $event->getRequest()->getSession()->set('_security.main.target_path', null);
             $event->getRequest()->getSession()->set('_security.account.target_path', null);
         }
+
+        if ($targetPath && 
+            $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
+            $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE ) 
+            return $this->baseService->redirect($targetPath, [], 302, ["event" => $event]);
     }
+
     public function onKernelRequest(RequestEvent $event)
     {
         //Notify user about the authentication method
@@ -201,6 +214,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!($user = $token->getUser())) return;
 
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
+        else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
 
         if( $user->isDisabled() || $user->isDirty() ) $user->kick();
         if( $user->isKicked()   ) {
@@ -216,7 +230,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $exceptions = [
             "/^(app|base)_(verifyEmail(_token)*)$/",
             "/^(app|base)_(resetPassword(_token)*)$/",
-            "/^(app|base)_(logout|settings|profile)$/"];
+            "/^(app|base)_(logout|logoutRequest|login|settings|profile)$/"];
 
         if (! $user->isVerified()) {
 
@@ -235,13 +249,12 @@ class SecuritySubscriber implements EventSubscriberInterface
                 }
             };
 
-            if($this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
+            $response    = $event->getResponse();
+            $redirection = $response && $response->getStatusCode() == 302;
+            if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
             else $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
 
         } else {
-            
-            if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
-            else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
 
             if (! $user->isApproved()) {
 

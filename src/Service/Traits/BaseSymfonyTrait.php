@@ -132,7 +132,7 @@ trait BaseSymfonyTrait
         if ($route == $currentRoute) return null;
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
-        foreach($exceptions as $pattern)
+        foreach($exceptions as $pattern) 
             if (preg_match($pattern, $currentRoute)) return null;
 
         $response = new RedirectResponse($url, $state, $headers);

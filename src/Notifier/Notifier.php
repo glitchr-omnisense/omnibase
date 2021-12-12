@@ -8,7 +8,6 @@ use Base\Notifier\NotifierInterface;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
 use Base\Service\BaseSettings;
-use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
@@ -24,6 +23,7 @@ use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Notifier implements NotifierInterface
 {
@@ -115,7 +115,14 @@ class Notifier implements NotifierInterface
         return $this;
     }
 
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
+    public function getTranslator(): TranslatorInterface { return $this->translator; }
+    public function setTranslator(TranslatorInterface $translator) 
+    { 
+        $this->translator = $translator;
+        return $this; 
+    }
+
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
     {
         $this->notifier      = $notifier;
         $this->policy        = $policy;
@@ -130,6 +137,7 @@ class Notifier implements NotifierInterface
         $this->entityManager  = $entityManager;
         $this->baseSettings   = $baseSettings;
         $this->localeProvider = $localeProvider;
+        $this->translator     = $translator;
 
         // Address support only once..
         $adminRecipients = [];

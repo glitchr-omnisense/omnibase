@@ -1,3 +1,10 @@
+admin_forwarding:
+  notice: "{0} a retransmis sa notification : \"{1}\""
+
+fake_test: 
+  author: "TEST"
+  notice: "Cet e-mail a été automatiquement envoyé, l'auteur fait référence à une personne fictive pour les besoins du développement"
+
 action_text: Voir le lien
 unsubscribe:  "Pour se désabonner <a href=\"{0}\">cliquez ici</a>"
 returnHomepage:  "Click <a href='/'>here</a> to return to home page"
@@ -7,14 +14,14 @@ resetPassword:
     subject: "Réinitialiser ton mot de passe"
     content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe.
     action_text: "Réinitialise ton mot de passe"
-    expiry: "Ce lien expirera dans {0}."
+    expiry: "Le lien expirera dans {0}."
 
 verifyEmail:
     subject: "Vérifie ton email"
     content: "Bravo ! Tu as reçu cet email car tu t'es correctement inscrit sur notre site.
               Clique sur le lien suivant pour confirmer ton inscription et ton adresse e-mail."
     action_text: "Confirmer ton compte"
-    expiry: "Ce lien expirera dans {0}."
+    expiry: "Le lien expirera dans {0}."
 
 adminApproval:
   subject: "Validation demandée"

@@ -171,7 +171,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->settingRepository->flush();
 
-            $notification = new Notification("dashboard.controllers.settings.success");
+            $notification = new Notification("@dashboard.controllers.settings.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -212,7 +212,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->widgetSlotRepository->flush();
 
-            $notification = new Notification("dashboard.controllers.widgets.success");
+            $notification = new Notification("@dashboard.controllers.widgets.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 

@@ -17,7 +17,7 @@ login:
     locked: "Ce compte est verrouillé."
     failed: "Les identifiants sont incorrects"
 
-kickout: "Désolé {0}, mais tu as été volontairement déconnecté.."
+kickout: "Désolé {0}, tu as été volontairement déconnecté.."
 
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !

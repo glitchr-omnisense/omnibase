@@ -14,7 +14,7 @@ use DateTime;
 class BaseSettings
 {
     /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
-    private const __CACHE__ = false;
+    private const __CACHE__ = true;
     use BaseSettingsTrait;
 
     public function __construct(EntityManager $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache)

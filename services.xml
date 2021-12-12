@@ -59,6 +59,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="cache.adapter" />
             <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="base.locale_provider" />
             <argument type="service" id="base.settings" />
         </service>

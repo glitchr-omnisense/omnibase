@@ -140,14 +140,22 @@ class SecurityController extends AbstractController
 
             // Remove expired tokens
             $user->removeExpiredTokens();
-            
-            // Redirect to previous page
-            $targetPath = $this->baseService->getRequest()->headers->get('referer') ?? null;
-            if ($targetPath) return $this->redirect($targetPath);
-
+            $request = $this->baseService->getRequest();
         }
 
-        return $this->redirectToRoute('base_homepage');
+        // Redirect to previous page
+        $targetPath = $request->request->get("_target_path");
+        if(!$targetPath) $targetPath = $request->getSession()->get('_security.main.target_path');
+        if(!$targetPath) $targetPath = $request->getSession()->get('_security.account.target_path');
+
+        $targetRoute = $this->baseService->getRoute($this->baseService->getRequest()->request->get("_target_path"));
+        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.main.target_path'));
+        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
+
+        if ($targetPath && $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE)
+            return $this->baseService->redirect($targetPath);
+
+        return $this->redirect('/');
     }
 
     /**
@@ -244,7 +252,7 @@ class SecurityController extends AbstractController
     {
         $user = $this->getUser();
         $user->removeExpiredTokens("verify-email");
-            
+
         if ($user->isVerified()) {
 
             $notification = new Notification('verifyEmail.already');

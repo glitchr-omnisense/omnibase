@@ -1,3 +1,10 @@
+admin_forwarding:
+  notice: "{0} forwarded its notification: \"{1}\""
+
+fake_test: 
+  author: "FAKE"
+  notice: "This email was sent programmatically, the author is referring to a fictive person for development purposes"
+
 action_text: Go to the page
 unsubscribe:  "Click <a href='{0}'>here</a> to unsubscribe"
 returnHomepage:  "Click <a href='/'>here</a> to return to home page"
@@ -9,14 +16,14 @@ resetPassword:
     "You are receiving this email, because you asked to reset your password. 
     If it wasn't you please consider changing your password. Please visit the following link to reset your password."
   action_text: "Reset your password"
-  expiry: "This link will expire in {0}."
+  expiry: "The link will expire in {0}."
 
 verifyEmail:
     subject: "Verify your email"
     content: "Bravo ! You are receiving this email because you successfully sign up to our website.
               Please confirm your email address by clicking the link below"
     action_text: "Confirm my Email"
-    expiry: "This link will expire in {0}."
+    expiry: "The link will expire in {0}."
 
 adminApproval:
   subject: "Validation requested"
