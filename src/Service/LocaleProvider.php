@@ -58,44 +58,23 @@ class LocaleProvider implements LocaleProviderInterface
         self::$isLate = $location;
     }
 
-    protected $locale = null;
-    public function setLocale(?string $locale = null) 
+    public function getLocale(?string $locale = null): string { return self::normalize($locale ?? $this->translator->getLocale()); }
+    public function setLocale(string $locale, ?Request $request = null)
     {
-        if(self::isLate()) {
-        
-            $method = __CLASS__."::".__FUNCTION__;
-            $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
-            throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
-        }
+        if($request !== null) { 
 
-        $this->locale = $locale;
-        $this->translator->setLocale($this->locale);
-        return $this;
-    }
-
-    public function getLocale(?string $locale = null): string
-    {
-        if(!$locale) {
-
-            $currentRequest = $this->requestStack->getCurrentRequest();
-            if ($providerLocale = $this->locale) {
-                $locale = $providerLocale;
-
-            } else if ($userLocale = User::getCookie("locale")) {
-                $locale = $userLocale;
-
-            } else if ( ($currentLocale = $currentRequest->getLocale()) ) {
-                $locale = $currentLocale;
-
-            } else if ($this->translator !== null) {
-                $locale = $this->translator->getLocale();
-
-            } else {
-                $locale = $this->getDefaultLocale();
+            if(self::isLate()) {
+            
+                $method = __CLASS__."::".__FUNCTION__;
+                $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
+                throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
             }
+        
+            $request->setLocale(substr_replace($locale, "_", 2, 1));
         }
 
-        return self::normalize($locale);
+        $this->translator->setLocale($locale);
+        return $this;
     }
 
     protected static ?string $defaultLocale   = null;

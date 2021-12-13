@@ -13,6 +13,7 @@ use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetRepository;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -23,9 +24,9 @@ use Base\Service\BaseService;
  */
 
 class Widget implements TranslatableInterface, IconizeInterface
-{   
+{
     use TranslatableTrait;
-    
+
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-square"]; }
 
@@ -75,6 +76,34 @@ class Widget implements TranslatableInterface, IconizeInterface
     public function setThumbnail($thumbnail)
     {
         $this->thumbnail = $thumbnail;
+        return $this;
+    }
+
+    /**
+     * @ORM\ManyToMany(targetEntity=WidgetSlot::class, mappedBy="widgets")
+     */
+    private $slots;
+
+    /**
+     * @return Collection|WidgetSlot[]
+     */
+    public function getSlots(): Collection { return $this->slots; }
+    public function addSlot(WidgetSlot $slot): self
+    {
+        if (!$this->slots->contains($slot)) {
+            $this->slots[] = $slot;
+            $slot->addWidget($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSlot(WidgetSlot $slot): self
+    {
+        if ($this->slots->removeElement($slot)) {
+            $slot->removeWidget($this);
+        }
+
         return $this;
     }
 }

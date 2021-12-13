@@ -250,18 +250,18 @@ class Notifier implements NotifierInterface
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
             if (empty($channels)) 
-                throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$importance."\"");
+                throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
 
             $prevChannels = array_merge($prevChannels, $channels);
             $notification->setChannels($channels);
             $notification->markAsReadIfNeeded($channels);
 
             // Send notification with proper locale
-            $defaultLocale = $this->localeProvider->getDefaultLocale();
+            $translatorLocale = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setDefaultLocale($locale);
+            $this->localeProvider->setLocale($locale);
             $this->notifier->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
-            $this->localeProvider->setDefaultLocale($defaultLocale);
+            $this->localeProvider->setLocale($translatorLocale);
         }
 
         $notification->setChannels($prevChannels);
@@ -293,11 +293,11 @@ class Notifier implements NotifierInterface
             $notification->setChannels($channels);
 
             // Send notification with proper locale
-            $defaultLocale = $this->localeProvider->getDefaultLocale();
+            $translatorLocale = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setDefaultLocale($locale);
+            $this->localeProvider->setLocale($locale);
             $this->notifier->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
-            $this->localeProvider->setDefaultLocale($defaultLocale);
+            $this->localeProvider->setLocale($translatorLocale);
         }
 
         $notification->setChannels($prevChannels);
@@ -326,11 +326,11 @@ class Notifier implements NotifierInterface
             $notification->setChannels($channels);
 
             // Send notification with proper locale
-            $defaultLocale = $this->localeProvider->getDefaultLocale();
+            $translatorLocale = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
-            $this->localeProvider->setDefaultLocale($locale);
+            $this->localeProvider->setLocale($locale);
             $this->notifier->send($notification, $recipient);
-            $this->localeProvider->setDefaultLocale($defaultLocale);
+            $this->localeProvider->setLocale($translatorLocale);
         }
 
         $notification->setChannels($prevChannels);

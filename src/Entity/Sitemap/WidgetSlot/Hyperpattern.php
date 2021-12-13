@@ -89,7 +89,7 @@ class Hyperpattern extends WidgetSlot implements IconizeInterface
     {
         if (!$this->hyperlinks->contains($hyperlink)) {
             $this->hyperlinks[] = $hyperlink;
-            $hyperlink->setPattern($this);
+            $hyperlink->setHyperpattern($this);
         }
 
         return $this;
@@ -99,8 +99,8 @@ class Hyperpattern extends WidgetSlot implements IconizeInterface
     {
         if ($this->hyperlinks->removeElement($hyperlink)) {
             // set the owning side to null (unless already changed)
-            if ($hyperlink->getPattern() === $this) {
-                $hyperlink->setPattern(null);
+            if ($hyperlink->getHyperpattern() === $this) {
+                $hyperlink->setHyperpattern(null);
             }
         }
 

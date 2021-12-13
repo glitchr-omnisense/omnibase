@@ -14,6 +14,7 @@ use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetSlotRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 /**
@@ -99,14 +100,19 @@ class WidgetSlot implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Widget::class)
+     * @ORM\ManyToMany(targetEntity=Widget::class, inversedBy="slots")
      */
-    protected $widgets;
+    private $widgets;
+
+    /**
+     * @return Collection|Widget[]
+     */
     public function getWidgets(): Collection { return $this->widgets; }
     public function addWidget(Widget $widget): self
     {
-        if(!$this->widgets->contains($widget))
+        if (!$this->widgets->contains($widget)) {
             $this->widgets[] = $widget;
+        }
 
         return $this;
     }
@@ -114,11 +120,7 @@ class WidgetSlot implements TranslatableInterface, IconizeInterface
     public function removeWidget(Widget $widget): self
     {
         $this->widgets->removeElement($widget);
-        return $this;
-    }
-    public function setWidgets($widgets): self
-    {
-        $this->widgets = $widgets;
+
         return $this;
     }
 }

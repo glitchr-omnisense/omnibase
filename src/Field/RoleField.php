@@ -2,7 +2,7 @@
 
 namespace Base\Field;
 
-use Base\Enum\UserRole;
+use App\Enum\UserRole;
 use Base\Field\Type\RoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;

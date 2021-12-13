@@ -38,6 +38,7 @@ class RoleConfigurator extends SelectConfigurator
             $formattedValues[$key] = [$formattedValue, $url];
         }
 
+        dump($formattedValues);
         $field->setFormattedValue($multiple ? $formattedValues : $formattedValues[0]);
     }
 }

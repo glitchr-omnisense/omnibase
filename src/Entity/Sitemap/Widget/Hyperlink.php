@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Sitemap\Widget;
 
+use App\Entity\User\Artist;
 use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
@@ -37,6 +38,12 @@ class Hyperlink extends Widget implements IconizeInterface
      * @ORM\Column(type="array")
      */
     protected $variables;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Artist::class, inversedBy="socialNetworks")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $artist;
 
     public function getVariables(): string { return $this->variables; }
     public function setVariables($variables)

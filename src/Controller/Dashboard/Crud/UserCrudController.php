@@ -11,7 +11,7 @@ use Base\Field\BooleanField;
 use Base\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
@@ -19,7 +19,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 class UserCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
-
+    
+    public function configureFilters(Filters $filters): Filters { return $filters->add('roles'); }
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };

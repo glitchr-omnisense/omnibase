@@ -48,7 +48,7 @@ class IdConfigurator implements FieldConfiguratorInterface
         $value   = $hashtag . u($value)->truncate($maxLength, '…')->toString();
 
         $url = null;
-        if( $field->getCustomOption(IdField::OPTION_ADD_LINK) ) {
+        if( $field->getCustomOption(IdField::OPTION_ADD_LINK) && $entityDto->getInstance()) {
 
             $url = $this->adminUrlGenerator
                 ->setAction('detail')

@@ -505,7 +505,10 @@ class SelectType extends AbstractType implements DataMapperInterface
             $html = null;
 
             $text = ($translator ? $translator->trans(camel_to_snake($className.".".strtolower($entry).".singular"), [], "@enums") : $entry);
-            $icons = [$class::getIcons(0)[$entry]];
+            
+            $icons = [];
+            $icon = $class::getIcons(0)[$entry] ?? null;
+            if($icon) $icons[] = $icon;
 
         } else if(is_object($entry) && $class !== null) {
 
