@@ -14,7 +14,6 @@ use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\WidgetSlotRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 /**

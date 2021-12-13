@@ -83,6 +83,9 @@ trait BaseSettingsTrait
             return $settings;
         }
 
+        if(array_key_exists($name, $this->settings))
+            $this->settings[$name] = !empty($this->settings[$name]) ? $this->settings[$name] : null;
+
         try { $this->settings[$name] = $this->settings[$name] ?? $this->settingRepository->findByInsensitiveNameStartingWith($name)->getResult(); } 
         catch(TableNotFoundException $e) { return []; }
 

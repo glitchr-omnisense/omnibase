@@ -239,7 +239,7 @@ final class BaseTwigExtension extends AbstractExtension
 
             $https      = $_SERVER['HTTPS']       ?? $this->baseService->getSettings()->protocol();
             $serverName = $_SERVER['SERVER_NAME'] ?? $this->baseService->getSettings()->domain();
-            $baseDir    = $_SERVER['BASE']    ?? $this->baseService->getSettings()->base_dir();
+            $baseDir    = $_SERVER['BASE']        ?? $_SERVER["CONTEXT_PREFIX"] ?? $this->baseService->getSettings()->base_dir();
             $baseDir    = "/".trim($baseDir, "/");
 
             if(str_starts_with($path, "http://") || str_starts_with($path, "https://")) $domain = "";
@@ -258,7 +258,7 @@ final class BaseTwigExtension extends AbstractExtension
     {
         $baseDir = null;
         if($this->baseService->isCli()) {
-            $baseDir    = $_SERVER['BASE']    ?? $this->baseService->getSettings()->base_dir();
+            $baseDir    = $_SERVER['BASE']        ?? $_SERVER["CONTEXT_PREFIX"] ?? $this->baseService->getSettings()->base_dir();
             $baseDir    = "/".trim($baseDir, "/");
         }
 
