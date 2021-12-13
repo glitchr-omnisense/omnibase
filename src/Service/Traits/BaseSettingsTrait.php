@@ -89,6 +89,7 @@ trait BaseSettingsTrait
         $values = $this->normalize($name, $this->settings[$name]);
         $values = $this->read($name, $values); // get formatted values
         $this->applyCache($name, $locale, $values);
+        
         return $values;
     }
     
@@ -117,11 +118,7 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        if(($cacheValues = $this->getCache($name, $locale)))
-            return ($cacheValues !== null ? $cacheValues["_self"] ?? null : null);
-
-        $array = $this->getRawScalar($name, $locale);
-       	return ($array ? $array->translate($locale)->getValue() ?? null : null);
+        return $this->get($name, $locale)["_self"] ?? null;
     }
 
     public function get($name, ?string $locale = null): array
@@ -139,13 +136,18 @@ trait BaseSettingsTrait
             return $cacheValues;
 
         $values = $this->getRaw($name, $locale) ?? [];
+        $this->applyCache($name, $locale, $values);
+        
         return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() : $v), $values);
     }
 
     public function set(string $name, $value, ?string $locale = null)
     {
+        // Delete cache
         $this->removeCache($name);
 
+        // Compute new value or create setting if missing
+        $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRaw($name, $locale)["_self"];
         if(!$setting instanceof Setting) {
         
@@ -155,10 +157,6 @@ trait BaseSettingsTrait
 
         $setting->translate($locale)->setValue($value);
         $this->entityManager->flush();
-        
-        $this->removeCache($name);
-        if($value = $this->get($name, $locale))
-            $this->applyCache($name, $locale, $value);
 
         return $this;
     }
@@ -182,56 +180,49 @@ trait BaseSettingsTrait
         return $this;
     }
 
-    protected function getCache(string $name, ?string $locale) 
+    protected function getCache(string $name, ?string $locale) : ?array
     {
         if(!$this->isCacheEnabled()) return null;
 
         $item = $this->cache->getItem($name);
-        $itemList = $item->get() ?? [];
+        if(!$item) return null;
+
+        $settings = $item->get();
+        if(!is_array($settings)) return null;
 
         $locale = $this->localeProvider->getLocale($locale);
-        if (array_key_exists($locale, $itemList))
-            return $itemList[$locale] ?? [];
-
-        return null;
+        return $settings[$locale] ?? null;
     }
 
-    protected function applyCache(string $name, ?string $locale, $value)
+    protected function applyCache(string $name, ?string $locale, array $settings)
     {
-        dump($locale);
-        if(!$value) return false;
+        if(!$settings) return false;
 
-        if(($setting = $value) instanceof Setting) 
-            return $this->applyCache($name, $locale, $setting->translate($locale)->getValue());
+        // Broadcast cache storage
+        foreach  ($settings as $key => $setting) {
 
-        if(is_array( ($values = $value) )) {
-
-            if(array_key_exists("_self", $values) && ($setting = $values["_self"]) instanceof Setting)
-                $values["_self"] = $setting->translate($locale)->getValue();
-
-
-            $item = $this->cache->getItem($name);
-            $localeValues = array_merge($item->get() ?? [], [$locale => $values]);
-            foreach($localeValues as $locale => $values) {
-
-                // Broadcast cache storage
-                foreach  ($values as $key => $innerValue) {
-
-                    if($key == "_self") continue;
-                    $this->applyCache($name.".".$key, $locale, $innerValue);
-                }
-
-                // Process current node
-                $localeValues[$locale] = array_map_recursive(fn($v) => $v instanceof Setting ? $v->translate($locale)->getValue() : $v, $values);
-            }
-
-            if($this->isCacheEnabled()) $this->cache->save($item->set($localeValues));
-            return true;
+            if($key == "_self") continue;
+            else if(array_key_exists("_self", $setting))
+                $this->applyCache($name.".".$key, $locale, $setting);
         }
 
-        $item = $this->cache->getItem($name);
-        $value = array_merge($item->get() ?? [], [$locale => $value]);
-        if($this->isCacheEnabled()) $this->cache->save($item->set($value));
+        // Process current node
+        $settings = array_map_recursive(
+            fn($v) => $v instanceof Setting ? $v->translate($locale)->getValue() : $v, 
+            $settings);
+
+        if($this->isCacheEnabled()) {
+
+            $item = $this->cache->getItem($name);
+
+            $locale = $this->localeProvider->getLocale($locale);
+
+            $settingsWithLocale = [$locale => $settings];
+            $settings = $item->get() ?? [];
+            $settings = is_array($settings) ? array_merge($settings, $settingsWithLocale) : $settingsWithLocale;
+
+            $this->cache->save($item->set($settings));
+        }
 
         return true;
     }
@@ -240,8 +231,8 @@ trait BaseSettingsTrait
     {
         unset($this->settings[$name]);
         foreach(array_reverse(explode(".", $name)) as $last) {
-            
-            if($this->isCacheEnabled()) $this->cache->delete($name);
+
+            $this->cache->delete($name);
             $name = substr($name, 0, strlen($name) - strlen($last) - 1);
         }
 

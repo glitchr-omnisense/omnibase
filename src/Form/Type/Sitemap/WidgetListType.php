@@ -108,7 +108,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 if(!array_key_exists("help", $widgetOptions))
                     $widgetOptions["help"] = $slotHelp ?? "";
 
-                $widgets = $slot->getWidgets()->toArray() ?? [];
+                $widgets = $slot ? $slot->getWidgets()->toArray() : [];
                 $form->add($formattedWidget, SelectType::class, $widgetOptions);
                 $form->get($formattedWidget)->setData($widgetOptions["multiple"] ? array_map(fn($w) => strval($w), $widgets) : strval($widgets[0] ?? null));
             }

@@ -184,21 +184,28 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!$event->isMainRequest()) return;
         if($this->baseService->isProfiler()) return;
 
-        $targetPath = $event->getRequest()->get("_target_path");
+        $targetPath = $event->getRequest()->get("referer");
+        if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_target_path');
         if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.main.target_path');
         if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.account.target_path');
     
-        $targetRoute = $this->baseService->getRoute($event->getRequest()->request->get("_target_path"));
+        $targetRoute = $this->baseService->getRoute($event->getRequest()->request->get("referer"));
+        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_target_path'));
         if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_security.main.target_path'));
         if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_security.account.target_path'));
 
+        $event->getRequest()->getSession()->remove('_security.main.target_path');
+        $event->getRequest()->getSession()->remove('_security.account.target_path');
         $currentRoute = $this->getCurrentRoute($event);
         if ($currentRoute != $targetRoute &&
             $currentRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
             $currentRoute != LoginFormAuthenticator::LOGIN_ROUTE ) {
 
-            $event->getRequest()->getSession()->set('_security.main.target_path', null);
-            $event->getRequest()->getSession()->set('_security.account.target_path', null);
+            $event->getRequest()->getSession()->set('_target_path', null);
+
+        } else {
+
+            $event->getRequest()->getSession()->set('_target_path', $targetPath);
         }
 
         if ($targetPath && 

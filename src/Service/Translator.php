@@ -9,7 +9,7 @@ class Translator implements TranslatorInterface
         $this->translator = $translator;
     }
 
-    public function getLocale() { return $this->translator->getLocale(); }
+    public function getLocale(): string { return $this->translator->getLocale(); }
     public function setLocale(string $locale) { $this->translator->setLocale($locale); }
     public function getFallbackLocales(): array { return $this->translator->getFallbackLocales(); }
 

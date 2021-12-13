@@ -35,7 +35,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public const LOGIN_ROUTE = 'base_login';
     public const LOGOUT_ROUTE = 'base_logout';
-    public const LOGOUT_REQUEST_ROUTE = 'base_logoutRequest';
 
     private $entityManager;
     private $csrfTokenManager;
@@ -99,19 +98,14 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         }
 
         // Check if target path provided via $_POST..
-        $targetPath = $request->request->get("_target_path");
-        if(!$targetPath) $targetPath = $request->getSession()->get('_security.main.target_path');
-        if(!$targetPath) $targetPath = $request->getSession()->get('_security.account.target_path');
+        $targetPath = $request->getSession()->get("_target_path");
+        $targetRoute = $this->baseService->getRoute($request->getSession()->get("_target_path"));
 
-        $targetRoute = $this->baseService->getRoute($request->request->get("_target_path"));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.main.target_path'));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
-
+        $targetPath = $request->getSession()->remove("_target_path");
         if ($targetPath &&
-            $targetRoute != LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE &&
             $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
             $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )
-            return $this->baseService->redirect($targetPath);
+            return $this->baseService->redirectToRoute($targetPath);
 
         return $this->baseService->redirectToRoute($this->baseService->getRoute("/"));
     }

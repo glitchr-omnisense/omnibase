@@ -73,7 +73,7 @@ class LocaleProvider implements LocaleProviderInterface
         return $this;
     }
 
-    public function getLocale(?string $locale = null): ?string
+    public function getLocale(?string $locale = null): string
     {
         if(!$locale) {
 
@@ -94,9 +94,6 @@ class LocaleProvider implements LocaleProviderInterface
                 $locale = $this->getDefaultLocale();
             }
         }
-        
-        if(!$locale)
-            throw new MissingLocaleException("Missing locale.");
 
         return self::normalize($locale);
     }
@@ -135,6 +132,6 @@ class LocaleProvider implements LocaleProviderInterface
         return $country;
     }
 
-    public static function normalize(?string $locale): ?string { return self::getLang($locale) . self::SEPARATOR . self::getCountry($locale); }
+    public static function normalize(?string $locale): string { return self::getLang($locale) . self::SEPARATOR . self::getCountry($locale); }
     public static function normalizeArray(?array $locales): ?array { return array_map(fn ($l) => self::normalize($l), $locales); }
 }

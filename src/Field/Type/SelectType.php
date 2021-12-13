@@ -120,24 +120,24 @@ class SelectType extends AbstractType implements DataMapperInterface
         return $option["autocomplete"] ?? false;
     }
 
-    public function guessChoiceFilters($options, $data)
+    public function guessChoiceFilter($options, $data)
     {
-        if ($options["choice_filters"] === null) {
+        if ($options["choice_filter"] === null) {
             
-            $options["choice_filters"] = [];
+            $options["choice_filter"] = [];
             if(is_array($data)) {
                 foreach($data as $entry)
-                    if(is_object($entry)) $options["choice_filters"][] = get_class($entry);
+                    if(is_object($entry)) $options["choice_filter"][] = get_class($entry);
             } else {
-                if(is_object($data)) $options["choice_filters"][] = get_class($data);
+                if(is_object($data)) $options["choice_filter"][] = get_class($data);
             }
 
-            if(!$options["choice_filters"]  && $options["class"]) {
-                $options["choice_filters"][] = $options["class"];
+            if(!$options["choice_filter"]  && $options["class"]) {
+                $options["choice_filter"][] = $options["class"];
             }
         }
 
-        return $option["choice_filters"] ?? [];
+        return $option["choice_filter"] ?? [];
     }
 
     public function encode(array $array) : string
@@ -160,7 +160,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             //'query_builder'   => null,
 
             'choices' => null,
-            'choice_filters' => null,
+            'choice_filter' => null,
             // 'choice_value'   => function($key)              { return $key;   },   // Return key code
             // 'choice_label'   => function($key, $label, $id) { return $label; },   // Return translated label
             // 'choice_loader'  => function (Options $options) {
@@ -228,11 +228,11 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             /* Override options.. I couldn't done that without accessing data */
             // It might be good to get read of that and be able to use normalizer.. as expected
-            $options["class"]          = $this->guessClass($form, $options, $data);
-            $options["multiple"]       = $this->guessIfMultiple($form, $options);
-            $options["autocomplete"]   = $this->guessAutocomplete($options);
-            $options["choice_filters"] = $this->guessChoiceFilters($options, $data);
-            $options["choices"]        = $this->guessChoices($options);
+            $options["class"]         = $this->guessClass($form, $options, $data);
+            $options["multiple"]      = $this->guessIfMultiple($form, $options);
+            $options["autocomplete"]  = $this->guessAutocomplete($options);
+            $options["choice_filter"] = $this->guessChoiceFilter($options, $data);
+            $options["choices"]       = $this->guessChoices($options);
 
             $multipleExpected = $data instanceof Collection || is_array($data);
             if($options["multiple"] && !$multipleExpected) 
@@ -367,7 +367,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["class"]          = $this->guessClass($form, $options, $form->getData());
             $options["multiple"]       = $this->guessIfMultiple($form, $options);
             $options["autocomplete"]   = $this->guessAutocomplete($options);
-            $options["choice_filters"] = $this->guessChoiceFilters($options, $form->getData());
+            $options["choice_filter"] = $this->guessChoiceFilter($options, $form->getData());
             $options["choices"]        = $this->guessChoices($options);
 
             $multipleExpected = $form->getData() instanceof Collection || is_array($form->getData());
@@ -379,7 +379,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $array = [
                 "class" => $options["class"], 
                 "fields" => $options["autocomplete_fields"],
-                "filters" => $options["choice_filters"],
+                "filters" => $options["choice_filter"],
                 "token" => $this->csrfTokenManager->getToken("select2")->getValue()
             ];
 

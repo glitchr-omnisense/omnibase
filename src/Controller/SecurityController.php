@@ -77,13 +77,7 @@ class SecurityController extends AbstractController
 
                 // Check if target path provided via $_POST..
                 $targetPath = $request->request->get("_target_path");
-                if(!$targetPath) $targetPath = $request->getSession()->get('_security.main.target_path');
-                if(!$targetPath) $targetPath = $request->getSession()->get('_security.account.target_path');
-
                 $targetRoute = $this->baseService->getRoute($request->request->get("_target_path"));
-                if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.main.target_path'));
-                if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
-
                 if ($targetPath &&
                     $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
                     $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )
@@ -114,7 +108,7 @@ class SecurityController extends AbstractController
     /**
      * @Route("/logout", name="base_logout")
      */
-    public function Logout() {
+    public function Logout(Request $request) {
 
         // If user is found.. go to the logout request page
         if($this->getUser())
@@ -140,22 +134,15 @@ class SecurityController extends AbstractController
 
             // Remove expired tokens
             $user->removeExpiredTokens();
-            $request = $this->baseService->getRequest();
         }
 
         // Redirect to previous page
         $targetPath = $request->request->get("_target_path");
-        if(!$targetPath) $targetPath = $request->getSession()->get('_security.main.target_path');
-        if(!$targetPath) $targetPath = $request->getSession()->get('_security.account.target_path');
-
-        $targetRoute = $this->baseService->getRoute($this->baseService->getRequest()->request->get("_target_path"));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.main.target_path'));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($request->getSession()->get('_security.account.target_path'));
-
+        $targetRoute = $this->baseService->getRoute($request->request->get("_target_path"));
         if ($targetPath && $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE)
             return $this->baseService->redirect($targetPath);
 
-        return $this->redirect('/');
+        return $this->redirectToRoute($this->baseService->getRoute("/"));
     }
 
     /**
@@ -334,7 +321,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountGoodbye.already");  
             $notification->send("warning");
 
-            return $this->redirectToRoute('base_homepage');
+            return $this->redirectToRoute($this->baseService->getRoute("/"));
 
         } else {
 
@@ -343,7 +330,7 @@ class SecurityController extends AbstractController
             $this->baseService->Logout();
 
             $this->entityManager->flush();
-            return $this->redirectToRoute('base_homepage');
+            return $this->redirectToRoute($this->baseService->getRoute("/"));
         }
     }
 
@@ -365,7 +352,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountWelcomeBack.invalidToken");  
             $notification->send("danger");
             
-            return $this->redirectToRoute('base_homepage');
+            return $this->redirectToRoute($this->baseService->getRoute("/"));
         
         } else if(!$user->isDisabled()) {
 
@@ -374,7 +361,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountWelcomeBack.already");  
             $notification->send("warning");
 
-            return $this->redirectToRoute('base_homepage');
+            return $this->redirectToRoute($this->baseService->getRoute("/"));
 
         
         } else if ($user->getValidToken("welcome-back")){
@@ -445,7 +432,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
-            return $this->redirectToRoute('base_homepage');
+            return $this->redirectToRoute($this->baseService->getRoute("/"));
 
         } else {
 

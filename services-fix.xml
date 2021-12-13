@@ -29,6 +29,7 @@
             <argument type="service" id="doctrine" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\FormFactory" />
+            <argument type="service" id="event_dispatcher" />
         </service>
 
         <service id="EasyCorp\Bundle\EasyAdminBundle\Factory\PaginatorFactory"    public="true">
