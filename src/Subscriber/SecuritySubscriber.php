@@ -126,6 +126,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("success")->send("email");
     }
 
+    public function onKickout(UserEvent $event) { }
+
     public function onVerification(UserEvent $event) { }
 
     public function onRegistration(UserEvent $event)

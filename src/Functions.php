@@ -136,13 +136,13 @@ namespace {
         if(in_array($units, BYTE_PREFIX)) $val *= 8;
         if ($unitPrefix) {
            
-            $binFactor = array_search($unitPrefix, [""]+BINARY_PREFIX);
-            $decFactor = array_search($unitPrefix, [""]+DECIMAL_PREFIX);
-            if($decFactor xor $binFactor)
+            $binFactor = array_search($unitPrefix, BINARY_PREFIX);
+            $decFactor = array_search($unitPrefix, DECIMAL_PREFIX);
+            if( ! (($decFactor !== false) xor ($binFactor !== false)) )
                 throw new \Exception("Unexpected prefix unit \"$unitPrefix\" for \"".$str."\"");
-
-            $val *= 1000**$decFactor;
-            $val *= 1024**$binFactor;
+            
+            if($decFactor) $val *= 1000**($decFactor+1);
+            if($binFactor) $val *= 1024**($binFactor+1);
         }
         
         return intval($val);
