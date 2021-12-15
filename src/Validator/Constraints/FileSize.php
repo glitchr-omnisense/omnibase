@@ -20,7 +20,7 @@ class FileSize extends Constraint
     {
         parent::__construct($options ?? [], $groups, $payload);
 
-        $this->max = $this->size2int($options["max"]) ?? UploadedFile::getMaxFilesize();
+        $this->max = str2dec($options["max"]) ?? UploadedFile::getMaxFilesize();
         $this->max = min($this->max,  UploadedFile::getMaxFilesize());
     }
 }

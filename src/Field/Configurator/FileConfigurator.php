@@ -40,7 +40,7 @@ class FileConfigurator implements FieldConfiguratorInterface
             $field->setCustomOption(FileField::OPTION_PREFERRED_DOWNLOAD_NAME, $preferredDownloadName);
         }
 
-        $file = Uploader::getPublicPath($entityDto->getInstance(), $field->getProperty()) ?? "";
+        $file = Uploader::getPublic($entityDto->getInstance(), $field->getProperty()) ?? "";
         $field->setFormattedValue($file);
     }
 }

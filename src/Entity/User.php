@@ -219,8 +219,8 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
      * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      */
     protected $avatar;
-    public function getAvatar() { return Uploader::getPublicPath($this, "avatar"); }
-    public function getAvatarFile() { return Uploader::getFile($this, "avatar"); }
+    public function getAvatar() { return Uploader::getPublic($this, "avatar"); }
+    public function getAvatarFile() { return Uploader::get($this, "avatar"); }
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;

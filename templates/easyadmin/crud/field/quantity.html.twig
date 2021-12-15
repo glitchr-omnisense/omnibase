@@ -1,0 +1,10 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{# this template is used to display Doctrine entity primary keys #}
+<div class="badge badge-secondary">
+    <span>
+        <span class="label">{{ "fas fa-truck-loading"|fontAwesome({class:"fa-fw"}) | raw}}</span>
+        {{ field.formattedValue|default("@fields.quantity.unlimited"|trans) }}
+    </span>
+</div>

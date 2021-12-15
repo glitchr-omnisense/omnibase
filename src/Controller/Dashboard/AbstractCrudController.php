@@ -5,6 +5,7 @@ namespace Base\Controller\Dashboard;
 use Base\Config\Extension;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
+use Base\Service\BaseSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -18,12 +19,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 {
     abstract static function getPreferredIcon(): ?string;
 
-    public function __construct(EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
+    public function __construct(BaseSettings $baseSettings, EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
     {
         $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;
         $this->extension = $extension;
         $this->translator = $translator;
+        $this->baseSettings = $baseSettings;
         
         $this->crud = null;
         $this->entity = null;

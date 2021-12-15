@@ -140,7 +140,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if(!is_object($entity)) $files = $form->getData();
         else {
         
-            $files = Uploader::getFile($entity, $form->getName());
+            $files = Uploader::get($entity, $form->getName());
             if(!is_array($files)) $files = [$files];
 
             $files = array_map(fn($f) => $f ? $f->getPath() : null, $files);
@@ -164,7 +164,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $view->vars["value"] = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         if(($options["data_class"] ?? false) || is_object($entity))
-            $view->vars['value'] = Uploader::getPublicPath($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+            $view->vars['value'] = Uploader::getPublic($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
 
         if(is_array($view->vars['value']))
             $view->vars["value"] = implode("|", $view->vars["value"]);

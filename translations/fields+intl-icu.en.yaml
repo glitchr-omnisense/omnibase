@@ -1,3 +1,6 @@
+quantity:
+  unlimited: Unlimited
+
 fileupload:
   dropzone:
     title: "Upload files here"

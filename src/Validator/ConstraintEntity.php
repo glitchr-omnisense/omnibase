@@ -34,8 +34,8 @@ abstract class ConstraintEntity extends Constraint
             $firstField = $fields['fields'][0] ?? "unknown";
 
             $this->message = 
-                self::camelToSnakeCase($firstField) .".".
-                self::camelToSnakeCase($constraintName);
+                camel_to_snake($firstField) .".".
+                camel_to_snake($constraintName);
         }
 
         parent::__construct($options, $groups, $payload);
@@ -53,9 +53,9 @@ abstract class ConstraintEntity extends Constraint
         $constraintName = explode("\\", get_called_class());
         $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
         $this->message = 
-            self::camelToSnakeCase($classname).".".
-            self::camelToSnakeCase($firstField).".".
-            self::camelToSnakeCase($constraintName);
+            camel_to_snake($classname).".".
+            camel_to_snake($firstField).".".
+            camel_to_snake($constraintName);
     }
 
     public function getRequiredOptions() : array

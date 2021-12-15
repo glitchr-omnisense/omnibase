@@ -66,13 +66,13 @@ namespace {
         if (empty($methods)) $methods = "     -- No public method available";
         $parentName = (!empty($classParent)) ? "            extends " . $classParent : "";
 
-        return dump(
-            $classReflection,
-            $objectID .
-                "class " . $className . $parentName . " {\n\n" .
-                $vars . "\n" .
-                $methods . "\n}\n\nMore information in the ReflectionMethod below.."
-        );
+        return  dump(
+                    $classReflection,
+                    $objectID .
+                        "class " . $className . $parentName . " {\n\n" .
+                        $vars . "\n" .
+                        $methods . "\n}\n\nMore information in the ReflectionMethod below.."
+                );
     }
 
     function shorten_str(?string $str, int $length = 100, string $separator = " [..] "): ?string
@@ -94,6 +94,59 @@ namespace {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
         return $randomString;
+    }
+
+    const     BIT_PREFIX = array("b");
+    const    BYTE_PREFIX = array("B", "O", "o");
+    const  BINARY_PREFIX = array("ki", "ki", "gi", "ti", "pi", "ei", "zi", "yi");
+    const DECIMAL_PREFIX = array("k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
+
+    function byte2bit(int $num): int { return 8*$num; } // LOL !
+    function bit2byte(int $num): int { return $num/8; } // LOL LOL !
+    function byte2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix)."B"; }
+    function  bit2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix)."b"; }
+    function  dec2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string
+    {
+             if ($unitPrefix == DECIMAL_PREFIX) $divider = 1000;
+        else if ($unitPrefix == BINARY_PREFIX)  $divider = 1024;
+        else throw new \Exception("Unknown prefix found: \"$unitPrefix\"");
+        $unitPrefix = [''] + $unitPrefix;
+
+        $factor   = (int) floor(log($num) / log($divider));
+        $quotient = (int) ($num / ($divider ** $factor));
+
+        $rest     = $num - $divider*$quotient;
+        if($rest > 0) $quotient--;
+        if($rest > 0) $factor--;
+
+        return strval($factor > 0 ? $quotient.@ucfirst($unitPrefix[$factor]) : $num);
+    }
+
+    function str2dec(string $str): int
+    {
+        $val = trim($str);
+        if(!preg_match('/^([bo]{0,2})([a-z]{0,2})([0-9]*)/i', strrev($val), $matches))
+            throw new \Exception("Failed to parse string \"".$str."\"");
+        
+        $val        = intval($matches[3] == "" ? 1 : strrev($matches[3]));
+        $unitPrefix = strtolower(strrev($matches[2]));
+        $units      = strrev($matches[1]);
+
+        if(in_array($units,  BIT_PREFIX)) $val *= 1; // LOL !
+        if(in_array($units, BYTE_PREFIX)) $val *= 8;
+        if ($unitPrefix) {
+           
+            $binFactor = array_search($unitPrefix, BINARY_PREFIX);
+            $decFactor = array_search($unitPrefix, DECIMAL_PREFIX);
+            if($decFactor xor $binFactor)
+                throw new \Exception("Unexpected prefix unit \"$unitPrefix\" for \"".$str."\"");
+
+            
+            if($decFactor !== false) $val *= 1000**($decFactor+1);
+            if($binFactor !== false) $val *= 1024**($binFactor+1);
+        }
+
+        return intval($val);
     }
 
     function begin(object|array &$array) 
@@ -132,6 +185,8 @@ namespace {
         if (count($rv) > 0) return true;
         return false;
     }
+
+    function browser_supports_webp() { return strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false; }
 
     function is_associative(array $arr): bool
     {

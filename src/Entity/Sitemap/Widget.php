@@ -71,8 +71,8 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
      */
     protected $thumbnail;
-    public function getThumbnail()     { return Uploader::getPublicPath($this, "thumbnail"); }
-    public function getThumbnailFile() { return Uploader::getFile($this, "thumbnail"); }
+    public function getThumbnail()     { return Uploader::getPublic($this, "thumbnail"); }
+    public function getThumbnailFile() { return Uploader::get($this, "thumbnail"); }
     public function setThumbnail($thumbnail)
     {
         $this->thumbnail = $thumbnail;

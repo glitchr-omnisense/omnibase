@@ -43,8 +43,8 @@ class Attachment extends Widget implements IconizeInterface
      */
     protected $file;
 
-    public function getPath() { return Uploader::getPublicPath($this, "file"); }
-    public function getFile() { return Uploader::getFile($this, "file"); }
+    public function getPath() { return Uploader::getPublic($this, "file"); }
+    public function getFile() { return Uploader::get($this, "file"); }
     public function setFile($file)
     {
         $this->file = $file;

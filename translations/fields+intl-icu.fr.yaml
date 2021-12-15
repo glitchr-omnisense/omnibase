@@ -1,3 +1,6 @@
+quantity:
+  unlimited: Illimitée
+
 fileupload:
     dropzone:
         title: "Téléchargez les fichiers ici"

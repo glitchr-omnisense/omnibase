@@ -20,7 +20,7 @@ abstract class SetType extends Type implements IconInterface
 
     public static function getStaticName() { 
         $array = explode('\\', get_called_class());
-        return NamingStrategy::camelToSnakeCase(end($array));
+        return camel_to_snake(end($array));
     }
 
     public function getName() : string { return self::getStaticName(); }

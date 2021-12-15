@@ -4,28 +4,17 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Base\Exception\InvalidMimeTypeException;
-use Base\Exception\InvalidSizeException;
-use Base\Exception\InvalidUuidException;
 use Base\Exception\MissingPublicPathException;
 use Base\Exception\NotDeletableException;
 use Base\Exception\NotReadableException;
 use Base\Exception\NotWritableException;
-use Base\Exception\UploaderAmbiguityException;
-use Base\Service\BaseService;
-use DateTime;
 
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
@@ -44,6 +33,10 @@ use Symfony\Component\Uid\Uuid;
  *
  *   @Attribute("size", type = "string"),
  *   @Attribute("mime", type = "array"),
+ *   @Attribute("thumbnail", type = "array"),
+ *   @Attribute("quality", type = "integer"),
+ *   @Attribute("format",  type = "string"),
+ *   @Attribute("webp",    type = "boolean"),
  * })
  */
 class Uploader extends AbstractAnnotation
@@ -55,23 +48,6 @@ class Uploader extends AbstractAnnotation
     private array $mimeTypes;
     private int $maxSize;
 
-    public static function str2bytes(string $val): int
-    {
-        $last = strtolower($val[strlen($val) - 1]);
-        $val = intval(trim($val));
-
-        switch ($last) {
-            case 'g':
-                $val *= 1024;
-            case 'm':
-                $val *= 1024;
-            case 'k':
-                $val *= 1024;
-        }
-
-        return $val;
-    }
-
     public function __construct( array $data )
     {
         $this->public       = (!empty($data["public"] ?? null) ? ltrim($data["public"],"/") : null);
@@ -81,7 +57,7 @@ class Uploader extends AbstractAnnotation
         $this->keepNotFound = $data["keepNotFound"] ?? false;
         $this->config       = $data["config"] ?? [];
         $this->mimeTypes    = $data["mime"] ?? [];
-        $this->maxSize      = self::str2bytes($data["size"] ?? UploadedFile::getMaxFilesize());
+        $this->maxSize      = str2dec($data["size"] ?? UploadedFile::getMaxFilesize());
     }
 
     protected function getContents(): string { return file_get_contents($this->file["tmp_name"]); }
@@ -111,7 +87,7 @@ class Uploader extends AbstractAnnotation
         return rtrim("/" . $pool . $namespaceDir . "/" . $uuid, ".");
     }
     
-    public static function getPublicPath($entity, $mapping)
+    public static function getPublic($entity, $mapping)
     {
         $that = self::getAnnotation($entity, $mapping);
         if(!$that) return null;
@@ -175,7 +151,7 @@ class Uploader extends AbstractAnnotation
     }
 
     protected static $tmpHashTable = [];
-    public static function getFile($entity, string $mapping)
+    public static function get($entity, string $mapping)
     {
         if($entity === null) return null;
 

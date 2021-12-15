@@ -46,8 +46,8 @@ class SettingTranslation implements TranslationInterface
      */
     protected $value;
 
-    public function getValue()     { return Uploader::getPublicPath($this, "value") ?? $this->value; }
-    public function getValueFile() { return Uploader::getFile($this, "value"); }
+    public function getValue()     { return Uploader::getPublic($this, "value") ?? $this->value; }
+    public function getValueFile() { return Uploader::get($this, "value"); }
     public function setValue($value)
     {
         $this->value = $value;

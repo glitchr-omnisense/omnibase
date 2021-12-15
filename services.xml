@@ -525,29 +525,22 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Field\Configurator\EmailConfigurator">
+        <service id="Base\Field\Configurator\QuantityConfigurator">
             <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
         </service>
 
-        <service id="Base\Field\Configurator\CollectionConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
-
-        <service id="Base\Field\Configurator\DateTimePickerConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
+        <service id="Base\Field\Configurator\EmailConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\CollectionConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\DateTimePickerConfigurator"><tag name="ea.field_configurator" /></service>
 
         <service id="Base\Field\Configurator\SlugConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="translator" />
         </service>
 
-        <service id="Base\Field\Configurator\AvatarConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
-        <service id="Base\Field\Configurator\ImageConfigurator">
-            <tag name="ea.field_configurator" />
-        </service>
+        <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FileConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -595,10 +588,9 @@
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
-
-
         <service id="Base\Controller\Dashboard\AbstractCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="base.settings" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="ea_extension" />
             <argument type="service" id="request_stack" />
