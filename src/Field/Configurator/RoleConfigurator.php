@@ -26,19 +26,19 @@ class RoleConfigurator extends SelectConfigurator
         foreach($formattedValues as $key => $formattedValue) {
 
             $role = $formattedValue["id"];
+            
             $url = $this->adminUrlGenerator
                         ->unsetAll()
                         ->setController(UserCrudController::class)
                         ->setAction(Action::INDEX)
-                        ->set("role", $role)
                         ->set("filters[roles][comparison]", "like")
                         ->set("filters[roles][value]", $role)
                         ->generateUrl();
 
-            $formattedValues[$key] = [$formattedValue, $url];
+            $formattedValues[$key] = $formattedValue;
+            $formattedValues[$key]["url"] = $url;
         }
 
-        dump($formattedValues);
         $field->setFormattedValue($multiple ? $formattedValues : $formattedValues[0]);
     }
 }

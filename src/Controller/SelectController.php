@@ -41,7 +41,7 @@ class SelectController extends AbstractController
     }
     
     /**
-     * @Route("/autocomplete/{hashid}", name="base_autocomplete")
+     * @Route("/autocomplete/{hashid}", name="ux_autocomplete")
      */
     public function Autocomplete(Request $request, string $hashid): Response
     {

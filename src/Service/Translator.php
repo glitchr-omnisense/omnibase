@@ -19,15 +19,15 @@ class Translator implements TranslatorInterface
     {
         if($id === null) return null;
 
-        $id = trim($id);
-
+        $id = trim($id);        
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
+        $atBegin   = str_starts_with($id, "@");
 
-        $domain   = str_starts_with($domain, "@") ? substr($domain, 1) : $domain ?? null;
+        $domain    = str_starts_with($domain, "@") ? substr($domain, 1) : $domain ?? null;
         if ($id && $customId) {
 
             $array  = explode(".", $id);
-            if(str_starts_with($id, "@")) {
+            if($atBegin) {
                 $domain = substr(array_shift($array), 1);
                 $id     = implode(".", $array);
             }
@@ -61,10 +61,10 @@ class Translator implements TranslatorInterface
             unset($parameters[$key]);
         }
 
-        // Call for translation with custom parameters    
+        // Call for translation with custom parameters
         $trans = $this->translator->trans($id, $parameters, $domain, $locale);
         if ($trans == $id && $customId)
-            return ($domain ? "@".$domain.".".$id : $id);
+            return ($domain && $atBegin ? "@".$domain.".".$id : $id);
         
         return trim($trans);
     }

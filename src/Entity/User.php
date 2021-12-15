@@ -544,17 +544,15 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="authors", orphanRemoval=true, cascade={"remove"})
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="owners", orphanRemoval=true, cascade={"remove"})
      */
     protected $threads;
-
-    public function getAuthoredThreads(): Collection { return $this->getThreads(); }
     public function getThreads(): Collection { return $this->threads; }
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {
             $this->threads[] = $thread;
-            $thread->addAuthor($this);
+            $thread->addOwner($this);
         }
 
         return $this;
@@ -563,7 +561,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     public function removeThread(Thread $thread): self
     {
         if ($this->threads->removeElement($thread)) {
-            $thread->removeAuthor($this);
+            $thread->removeOwner($this);
         }
 
         return $this;
@@ -614,37 +612,6 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
             // set the owning side to null (unless already changed)
             if ($mention->getTarget() === $this) {
                 $mention->setTarget(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="author", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    protected $authoredMentions;
-    public function getAuthoredMentions(): ArrayCollection
-    {
-        return $this->authoredMentions;
-    }
-
-    public function addAuthoredMention(Mention $authoredMention): self
-    {
-        if (!$this->authoredMentions->contains($authoredMention)) {
-            $this->authoredMentions[] = $authoredMention;
-            $authoredMention->setAuthor($this);
-        }
-
-        return $this;
-    }
-
-    public function removeAuthoredMention(Mention $authoredMention): self
-    {
-        if ($this->authoredMentions->removeElement($authoredMention)) {
-            // set the owning side to null (unless already changed)
-            if ($authoredMention->getAuthor() === $this) {
-                $authoredMention->setAuthor(null);
             }
         }
 

@@ -7,7 +7,7 @@
 	<article class="half">
 	        <h1>Member #{{ user.id }}: {{ user }}</h1>
 	        <div class="mb-3">
-	            You are logged in as {{ user }}, <a href="{{ path('base_logout') }}">Logout</a>
+	            You are logged in as {{ user }}, <a href="{{ path('base_security_logout') }}">Logout</a>
 	        </div>
 	</article>
     {% endif %}

@@ -154,7 +154,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         $this->baseService->getEntityManager()->flush();
-        $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event]);
+        $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event]);
     }
 
     public function onApproval(UserEvent $event)
@@ -230,14 +230,15 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
             $user->kick(0);
 
-            $event->setResponse($this->baseService->redirectToRoute("base_logoutRequest"));
+            $event->setResponse($this->baseService->redirectToRoute("base_security_logoutRequest"));
             return $event->stopPropagation();
         }
 
         $exceptions = [
-            "/^(app|base)_(verifyEmail(_token)*)$/",
-            "/^(app|base)_(resetPassword(_token)*)$/",
-            "/^(app|base)_(logout|logoutRequest|login|settings|profile)$/"];
+            "/^ux_/",
+            "/^(?:app|base)_maintenance(?:.*)$/",
+            "/^(?:app|base)_security(?:.*)$/",
+            "/^(?:app|base)_user(?:.*)$/"];
 
         if (! $user->isVerified()) {
 
@@ -251,7 +252,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 } else {
 
-                    $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("base_verifyEmail")]);
+                    $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("base_security_verifyEmail")]);
                     $notification->send("warning");
                 }
             };
@@ -259,13 +260,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             $response    = $event->getResponse();
             $redirection = $response && $response->getStatusCode() == 302;
             if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
-            else $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
+            else $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
 
         } else {
 
             if (! $user->isApproved()) {
 
-                $this->baseService->redirectToRoute("base_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
+                $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
 
                     $notification = new Notification("login.pending");
                     $notification->send("warning");

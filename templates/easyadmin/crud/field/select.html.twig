@@ -16,22 +16,20 @@
         {% if hasEntries %}
         
         {% set formattedValue = formattedValues|first %}
-        {% set fieldValue = formattedValue|first %}
-        {% set fieldLink = fieldValue != formattedValue|last ? formattedValue|last : null %}
-
+        {% set fieldLink = formattedValue['url'] ?? null %}
         <span class="badge badge-secondary">
             {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
             {% if showFirst == 1 %}
-                {{fieldValue.text|default("-")}}  
+                {{formattedValue.text|default("-")}}  
             {% elseif showFirst == 2 %}
-                <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
-                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                 |default(fieldValue.icon|imagify)|default("") | raw}}
+                <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
+                {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                 |default(formattedValue.icon|imagify)|default("") | raw}}
                 </div>
             {% else %}
-                {{fieldValue.text|default("-")}} | 
-                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                 |default(fieldValue.icon|imagify)|default("") | raw}}
+                <span class="label">{{formattedValue.text|default("-")}}</span>
+                {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                 |default(formattedValue.icon|imagify)|default("") | raw}}
             {% endif %}
             {% if fieldLink is not null %}</a>{% endif %}
         </span>
@@ -45,6 +43,7 @@
 
         {% set sign = showFirst ? "+" : "" %}
         {%- if formattedValues|length -%}
+            {% set formattedValue = formattedValues|first %}
             {%- set names = formattedValues|map(f => "#{f.text}") -%}
             <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ names|join(', ') }}">
                 {{sign}}{{ names|length }}
@@ -61,34 +60,33 @@
 
         {% for fieldKey,formattedValue in formattedValues %}
 
-        {% set fieldValue = formattedValue|first %}
-        {% set fieldLink = fieldValue != formattedValue|last ? formattedValue|last : null %}
+            {% set fieldLink = formattedValue['url'] ?? null %}
 
-        <span class="badge badge-secondary">
-            {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
-            {% if show == 1 %}
-                {{fieldValue.text|default("-")}}  
-            {% elseif show == 2 %}
-                <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
-                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                 |default(fieldValue.icon|imagify)|default("") | raw}}
-                </div>
-            {% else %}
-                {{fieldValue.text|default("-")}} | 
-                {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                 |default(fieldValue.icon|imagify)|default("") | raw}}
-            {% endif %}
-            {% if fieldLink is not null %}</a>{% endif %}
-        </span>
+            <span class="badge badge-secondary">
+                {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+                {% if show == 1 %}
+                    {{formattedValue.text|default("-")}}  
+                {% elseif show == 2 %}
+                    <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
+                    {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                    |default(formattedValue.icon|imagify)|default("") | raw}}
+                    </div>
+                {% else %}
+                    <span class="label">{{formattedValue.text|default("-")}}</span>
+                    {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                    |default(formattedValue.icon|imagify)|default("") | raw}}
+                {% endif %}
+                {% if fieldLink is not null %}</a>{% endif %}
+            </span>
         {% endfor %}
 
     {% endif %}
 
 {% else %}
 
-    {% set fieldValue = field.formattedValue|first %}
-    {% set fieldLink  = fieldValue != field.formattedValue|last ? field.formattedValue|last : null %}
-    {% set hasEntries = fieldValue is not empty %}
+    {% set formattedValue = field.formattedValue|first %}
+    {% set fieldLink  = formattedValue != field.formattedValue|last ? field.formattedValue|last : null %}
+    {% set hasEntries = formattedValue is not empty %}
 
     {% if showFirst %}
     
@@ -99,24 +97,24 @@
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if showFirst == 1 %}
-            {{fieldValue.text|default("-")}}  
+            {{formattedValue.text|default("-")}}  
         {% elseif showFirst == 2 %}
-            <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
-            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(fieldValue.icon|imagify)|default("") | raw}}
+            <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
+            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                |default(formattedValue.icon|imagify)|default("") | raw}}
             </div>
         {% else %}
-            {{fieldValue.text|default("-")}} | 
-            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(fieldValue.icon|imagify)|default("") | raw}}
+            <span class="label">{{formattedValue.text|default("-")}}</span>
+            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                |default(formattedValue.icon|imagify)|default("") | raw}}
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>
 
     {% elseif renderAsCount %}
 
-        {%- if fieldValue is not empty -%}
-            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">1</span>
+        {%- if formattedValue is not empty -%}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">1</span>
         {%- elseif not hasEntries -%}
             <span class="badge badge-secondary">0</span>
         {%- endif -%}
@@ -130,16 +128,16 @@
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if show == 1 %}
-            {{fieldValue.text|default("-")}}  
+            {{formattedValue.text|default("-")}}  
         {% elseif show == 2 %}
-            <div data-toggle="tooltip" data-placement="top" title="{{ fieldValue.text }}">
-            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                            |default(fieldValue.icon|imagify)|default("") | raw}}
+            <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
+            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                            |default(formattedValue.icon|imagify)|default("") | raw}}
             </div>
         {% else %}
-            {{fieldValue.text|default("-")}} | 
-            {{fieldValue.icon|fontAwesome({class:"fa-fw"})
-                            |default(fieldValue.icon|imagify)|default("") | raw}}
+            <span class="label">{{formattedValue.text|default("-")}}</span>
+            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                            |default(formattedValue.icon|imagify)|default("") | raw}}
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>

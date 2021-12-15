@@ -5,7 +5,7 @@ namespace Base\Database\Factory;
 use Base\Database\Types\EnumType;
 use Base\Database\Types\SetType;
 use Base\Field\Type\DateTimePickerType;
-use Base\Field\Type\EntityType;
+use Base\Field\Type\AssociationType;
 use Base\Field\Type\RelationType;
 use Base\Field\Type\RoleType;
 use Base\Field\Type\SelectType;
@@ -253,7 +253,7 @@ class ClassMetadataManipulator
 
                 $nullable = ($metadata instanceof ClassMetadataInfo) && isset($metadata->discriminatorColumn['nullable']) && $metadata->discriminatorColumn['nullable'];
                 $fields[$assocName] = [
-                    'type' => EntityType::class,
+                    'type' => AssociationType::class,
                     'data_class' => $class,
                     'required' => !$nullable,
                     'allow_recursive' => false
@@ -265,7 +265,7 @@ class ClassMetadataManipulator
             $fields[$assocName] = [
 
                 'type' => CollectionType::class,
-                'entry_type' => EntityType::class,
+                'entry_type' => AssociationType::class,
                 'entry_options' => [
                     'data_class' => $class
                 ],
@@ -278,41 +278,31 @@ class ClassMetadataManipulator
         return $fields;
     }
 
-
-
-
-
-
-    public function getTypeOfField(string $class, string $fieldName): string
-    {
-        return $this->getClassMetadata($class)->getTypeOfField($fieldName);
-    }
-
-    public function getAssociationTargetClass(string $class, string $fieldName): string
-    {
-        return $this->getClassMetadata($class)->getAssociationTargetClass($fieldName);
-    }
-
-    public function getTargetClass(string $class, string $mappedOrInversedBy): ?string
+    public function getTypeOfField(string $class, string $fieldName): string 
     {
         $metadata = $this->getClassMetadata($class);
-        foreach($metadata->getAssociationMappings($class) as $association => $mapping) {
-            if($mapping["inversedBy"] == $mappedOrInversedBy || $mapping["mappedBy"] == $mappedOrInversedBy) 
-                return $mapping["targetEntity"] ?? null;
-        }
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        return $metadata->getTypeOfField($fieldName);
+    }
 
-        return null;
+    public function getAssociationTargetClass(string $class, string $fieldName): string 
+    { 
+        $metadata = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        return $metadata->getAssociationTargetClass($fieldName);
     }
 
     public function hasAssociation(string $class, string $fieldName)
     {
         $metadata = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->hasAssociation($fieldName);
     }
 
     public function getAssociationMapping(string $class, string $fieldName): ?array
     {
-        $metadata = $this->getClassMetadata($class);
+        $metadata  = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMappings()[$fieldName] ?? null;
     }
 
@@ -325,32 +315,34 @@ class ClassMetadataManipulator
     public function isOwningSide(string $class, string $fieldName):bool
     {
         if(!$this->hasAssociation($class, $fieldName)) return false;
-        $metadata = $this->getClassMetadata($class);
-        
+        $metadata  = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return !$metadata->isAssociationInverseSide($fieldName);
     }
 
     public function isInverseSide(string $class, string $fieldName):bool
     {
         if(!$this->hasAssociation($class, $fieldName)) return false;
-        $metadata = $this->getClassMetadata($class);
-        
+        $metadata  = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->isAssociationInverseSide($fieldName);
     }
 
-    public function isToOneSide(string $class, string $fieldName): bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true); }
-    public function isToManySide(string $class, string $fieldName): bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isManyToSide(string $class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isOneToSide(string $class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true); }
-    public function isManyToMany(string $class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isOneToMany (string $class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY], true); }
-    public function isManyToOne (string $class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_ONE], true); }
-    public function isOneToOne  (string $class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_ONE], true); }
-    public function getAssociationType(string $class, string $fieldName)
+    public function isToOneSide($class, string $fieldName): bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true); }
+    public function isToManySide($class, string $fieldName): bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isManyToSide($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isOneToSide($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true); }
+    public function isManyToMany($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isOneToMany ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY], true); }
+    public function isManyToOne ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_ONE], true); }
+    public function isOneToOne  ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_ONE], true); }
+    public function getAssociationType($class, string $fieldName)
     {
+        $class = is_object($class) ? get_class($class) : $class;
         if(!$this->hasAssociation($class, $fieldName)) return false;
-        $metadata = $this->getClassMetadata($class);
 
+        $metadata  = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 

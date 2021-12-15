@@ -2,10 +2,12 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\SelectField;
 use Base\Field\Type\SelectType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
@@ -35,23 +37,31 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
         $values = $field->getValue();
         $values = is_array($values) ? new ArrayCollection($values) : $values;
-
         $formattedValues = [];
-        if (!$values instanceof Collection) {
+
+        if ($values instanceof Collection) {
+
+            foreach ($values as $key => $value) {
+
+                $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
+                $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
+                
+                $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
+                if ($formattedValues[$key] && $dataClassCrudController)
+                    $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
+            }
+
+        } else {
 
             $value = $field->getValue();
             $field->setCustomOption(SelectField::OPTION_RENDER_AS_COUNT, false);
             
             $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
+            $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
+
             $formattedValues = SelectType::getFormattedValues($field->getValue(), $dataClass, $this->translator);
-
-        } else {
-
-            foreach ($values as $key => $value) {
-
-                $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
-                $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
-            }
+            if ($formattedValues && $dataClassCrudController)
+                $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
         }
 
         $field->setFormattedValue(!empty($formattedValues) ? $formattedValues : null);
@@ -61,7 +71,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
             $field->setValue($this->getDefault($field));
 
         $field->setFormTypeOption("empty_data", $this->getDefault($field));
-
         $field->setFormTypeOptionIfNotSet('choice_filter', $field->getCustomOption(SelectField::OPTION_FILTER) ?? null);
         $field->setFormTypeOptionIfNotSet('autocomplete', $field->getCustomOption(SelectField::OPTION_AUTOCOMPLETE));
         $field->setFormTypeOptionIfNotSet('placeholder', '');

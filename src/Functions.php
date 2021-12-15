@@ -30,6 +30,7 @@ namespace {
         if (!is_object($object) && !is_string($object)) return dump($object);
 
         $className    = (is_string($object) ? $object : get_class($object));
+        if(!class_exists($className)) return dump("Class \"$className\" not found.");
         $classParent  = get_parent_class($className);
         $classMethods = get_class_methods($className);
         $classVars    = get_class_vars($className);

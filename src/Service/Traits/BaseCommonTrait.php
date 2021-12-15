@@ -64,7 +64,6 @@ trait BaseCommonTrait {
     /**
      * @var BaseSettings
      */
-    
     protected static $settings;
     public static function setSettings(BaseSettings $settings) { self::$settings = $settings; }
 

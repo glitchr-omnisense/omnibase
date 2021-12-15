@@ -5,7 +5,7 @@ namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
-use Base\Field\EntityField;
+use Base\Field\AssociationField;
 use Base\Field\PatternField;
 use Base\Field\SelectField;
 
@@ -17,7 +17,7 @@ class HyperlinkCrudController extends AbstractCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield EntityField::new('hyperpattern');
+        yield AssociationField::new('hyperpattern');
         foreach ( ($callbacks["hyperpattern"] ?? $defaultCallback)() as $yield)
             yield $yield;
 

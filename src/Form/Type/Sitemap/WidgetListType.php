@@ -3,9 +3,7 @@
 namespace Base\Form\Type\Sitemap;
 
 use Base\Entity\Sitemap\Widget;
-use Base\Field\Type\EntityType;
 use Base\Field\Type\SelectType;
-use Base\Service\BaseService;
 use Base\Service\WidgetProviderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -64,11 +62,13 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
 
             $widgetSlots = [];
-            
+
             $formattedWidgets = $this->getFormattedData($options["widgets"]);
             foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
 
                 $widget = str_replace("-", ".", $formattedWidget);
+
+                $this->widgetProvider->deleteCache(Widget::class, "app.widgets.".$widget);
                 $widgetSlots[$formattedWidget] = $this->widgetProvider->getWidgetSlot($widget);
             }
 

@@ -38,7 +38,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($classname, static::class);
         if(!array_key_exists($mapping, $annotations))
-            throw new Exception("Annotation \"".static::class."\" not found in the mapped property \"$mapping\"");
+            throw new Exception("Annotation \"".static::class."\" not found in the mapped property \"$mapping\". Did you forget to clear cache ?");
 
         return end($annotations[$mapping]);
     }

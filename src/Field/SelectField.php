@@ -72,9 +72,9 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function setClass(array $class)
+    public function setClass($class)
     {
-        $this->setCustomOption(self::OPTION_CLASS, $class);
+        $this->setFormTypeOption(self::OPTION_CLASS, $class);
         return $this;
     }
 

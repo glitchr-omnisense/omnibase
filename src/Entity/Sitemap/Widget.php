@@ -78,32 +78,4 @@ class Widget implements TranslatableInterface, IconizeInterface
         $this->thumbnail = $thumbnail;
         return $this;
     }
-
-    /**
-     * @ORM\ManyToMany(targetEntity=WidgetSlot::class, mappedBy="widgets")
-     */
-    private $slots;
-
-    /**
-     * @return Collection|WidgetSlot[]
-     */
-    public function getSlots(): Collection { return $this->slots; }
-    public function addSlot(WidgetSlot $slot): self
-    {
-        if (!$this->slots->contains($slot)) {
-            $this->slots[] = $slot;
-            $slot->addWidget($this);
-        }
-
-        return $this;
-    }
-
-    public function removeSlot(WidgetSlot $slot): self
-    {
-        if ($this->slots->removeElement($slot)) {
-            $slot->removeWidget($this);
-        }
-
-        return $this;
-    }
 }

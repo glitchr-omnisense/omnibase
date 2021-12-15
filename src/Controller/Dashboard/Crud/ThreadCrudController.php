@@ -41,8 +41,8 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield SelectField::new('authors')->showFirst();
-        foreach ( ($callbacks["authors"] ?? $defaultCallback)() as $yield)
+        yield SelectField::new('owners')->showFirst();
+        foreach ( ($callbacks["owners"] ?? $defaultCallback)() as $yield)
             yield $yield;
             
         yield StateField::new('state');

@@ -8,6 +8,7 @@ use Base\Database\Types\SetType;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\PersistentCollection;
@@ -18,13 +19,10 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\ChoiceList\ChoiceList;
-use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -57,8 +55,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
         $class = $options["class"] ?? null;
         if(!$class) {
-    
+
             if($data instanceof PersistentCollection) $class = $data->getTypeClass()->getName();
+            else if($data instanceof ArrayCollection || is_array($data)) $class = null;
             else $class = is_object($data) ? get_class($data) : null;
         }
         
@@ -87,8 +86,8 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             if($this->classMetadataManipulator->isEntity($target)) {
 
-                $entity = $this->classMetadataManipulator->getTargetClass($target, $entityField);
-                return $this->classMetadataManipulator->isToManySide($entity, $entityField);
+                $entity = $form->getParent()->getViewData();
+                return $entity ? $this->classMetadataManipulator->isToManySide($entity, $entityField) : false;
 
             } else if($this->classMetadataManipulator->isEnumType($target)) {
 
@@ -156,7 +155,6 @@ class SelectType extends AbstractType implements DataMapperInterface
     {
         $resolver->setDefaults([
             'class' => null,
-
             //'query_builder'   => null,
 
             'choices' => null,
@@ -229,6 +227,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             /* Override options.. I couldn't done that without accessing data */
             // It might be good to get read of that and be able to use normalizer.. as expected
             $options["class"]         = $this->guessClass($form, $options, $data);
+            if(!$options["class"]) throw new \Exception("Class cannot be determined in \"".$form->getName()."\"");
+
             $options["multiple"]      = $this->guessIfMultiple($form, $options);
             $options["autocomplete"]  = $this->guessAutocomplete($options);
             $options["choice_filter"] = $this->guessChoiceFilter($options, $data);

@@ -129,7 +129,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     $entityOptions["recursive"] = true;
                 }
 
-                $form->add($locale, EntityType::class, $entityOptions);
+                $form->add($locale, AssociationType::class, $entityOptions);
             }
         });
 

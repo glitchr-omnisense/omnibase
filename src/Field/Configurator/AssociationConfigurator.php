@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Field\EntityField;
+use Base\Field\AssociationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -15,7 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
-class EntityConfigurator implements FieldConfiguratorInterface
+class AssociationConfigurator implements FieldConfiguratorInterface
 {
     private $entityFactory;
     private $adminUrlGenerator;
@@ -28,7 +28,7 @@ class EntityConfigurator implements FieldConfiguratorInterface
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
-        return EntityField::class === $field->getFieldFqcn();
+        return AssociationField::class === $field->getFieldFqcn();
     }
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
@@ -42,8 +42,8 @@ class EntityConfigurator implements FieldConfiguratorInterface
         if ($field->getFormTypeOption("class") == null)
             $field->setFormTypeOption("class", $targetEntity);
 
-        $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(EntityField::OPTION_ALLOW_ADD));
-        $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(EntityField::OPTION_ALLOW_DELETE));
+        $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_ADD));
+        $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_DELETE));
         $field->setFormattedValue($field->getValue());
 
         if ($entityDto->isToOneAssociation($propertyName)) {
@@ -109,10 +109,10 @@ class EntityConfigurator implements FieldConfiguratorInterface
 
     private function configureToOneAssociation(FieldDto $field): void
     {
-        $field->setCustomOption(EntityField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toOne');
+        $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toOne');
 
         $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
-        $targetCrudControllerFqcn = $field->getCustomOption(EntityField::OPTION_CRUD_CONTROLLER);
+        $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER);
 
         $targetEntityDto = null === $field->getValue()
             ? $this->entityFactory->create($targetEntityFqcn)
@@ -121,14 +121,14 @@ class EntityConfigurator implements FieldConfiguratorInterface
 
         $field->setFormTypeOptionIfNotSet('empty_data', null);
 
-        $field->setCustomOption(EntityField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
+        $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
 
         $field->setFormattedValue($this->formatAsString($field->getValue(), $targetEntityDto));
     }
 
     private function configureToManyAssociation(FieldDto $field): void
     {
-        $field->setCustomOption(EntityField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
+        $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
 
         $displayedOn = $field->getDisplayedOn();
         $onForm = $displayedOn->has(Crud::PAGE_EDIT) || $displayedOn->has(Crud::PAGE_NEW);
@@ -158,14 +158,14 @@ class EntityConfigurator implements FieldConfiguratorInterface
             if ($first) {
 
                 $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
-                $targetCrudControllerFqcn = $field->getCustomOption(EntityField::OPTION_CRUD_CONTROLLER);
+                $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER);
                 $targetEntityDto = null === $first
                     ? $this->entityFactory->create($targetEntityFqcn)
                     : $this->entityFactory->createForEntityInstance($first);
 
                 $targetEntityDto = $this->entityFactory->createForEntityInstance($first);
 
-                $field->setCustomOption(EntityField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
+                $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
             }
 
             $count = $this->countNumElements($others);

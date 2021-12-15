@@ -100,6 +100,7 @@
         </service>
 
         <service id="Base\Service\WidgetProvider" public="true">
+            <argument type="service" id="cache.adapter" />
             <argument type="service" id="App\Repository\Sitemap\WidgetRepository" />
             <argument type="service" id="App\Repository\Sitemap\WidgetSlotRepository" />
         </service>
@@ -439,7 +440,7 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Field\Type\EntityType">
+        <service id="Base\Field\Type\AssociationType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
@@ -563,7 +564,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Field\Configurator\EntityConfigurator">
+        <service id="Base\Field\Configurator\AssociationConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />

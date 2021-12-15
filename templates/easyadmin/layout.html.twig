@@ -1,6 +1,11 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {% trans_default_domain ea.i18n.translationDomain %}
 
+{% set _content_title = block('content_title') ?? null %}
+{% if _content_title is empty %}
+    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? null)|default("Dashboard") %}
+{% endif %}
+
 <!DOCTYPE html>
 <html lang="{{ ea.i18n.htmlLocale }}" dir="{{ ea.i18n.textDirection }}">
 <head>
@@ -12,7 +17,7 @@
         <meta name="generator" content="EasyAdmin" />
     {% endblock head_metas %}
 
-    <title>{% block page_title %}{{ block('content_title')|striptags|raw }}{% endblock %}</title>
+    <title>{% block page_title %}{{ _content_title|striptags|raw }}{% endblock %}</title>
 
     {% block head_stylesheets %}
         <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
@@ -85,18 +90,40 @@
                 padding: 1em 2.5em 2em 2.5em !important;
             }
             
+            .datalist dd, .datalist dt {
+                display:flex;
+                align-items: center;
+            }
+
+            .field-impersonate { 
+                font-size:14pt;
+            }
+
+
             .field-email-icon {
 
                 background-color: var(--gray-200);
                 color: var(--gray-600);
                 border-radius:100%;
                 font-size:14pt;
+                width:14pt;
                 padding:0.15em;
+                margin:0.15em;
+                margin-left:0;
             }
 
-            .badge-secondary
+            .badge
             {
-                padding:0.3em 0.5em;
+                padding:0.2em 0.5em;
+            }
+
+            .badge .label { margin:0.2em; border-right:1.5px solid; padding-right:0.3em;}
+            .badge i {  font-size:10pt;            }
+            .badge > * {
+                display:flex;
+                align-items: center;
+                justify-content: center;
+                font-size:9pt;            
             }
 
             .nav-link {
@@ -188,11 +215,29 @@
                 justify-content:center;
             }
 
-            .datagrid tr:hover .ea-lightbox-thumbnail img { border-color:transparent !important; }
+            .datagrid tr:hover .ea-lightbox-thumbnail image { border-color:transparent !important; }
             .datagrid .ea-lightbox-thumbnail img {
                 max-height: 105%;
                 max-width: unset;
                 padding: 0;
+            }
+
+            .ea-extra-image
+            {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                max-height: 105%;
+                max-width: unset;
+                padding: 0;
+            }
+
+            .actions .action-icon 
+            {
+                font-size:14pt !important;
+                top:5px;
+                position:relative;
+                padding-bottom:10px;
             }
 
             .user-menu-wrapper .user-avatar {
@@ -261,13 +306,15 @@
                 background-color:var(--fieldset-bg);
                 border: var(--border-width) var(--border-style) var(--border-color);
                 border-radius:100%;
-                padding:1em;
+
                 margin:0 0.5em;
                 height:70px;
                 width:70px;
                 display:flex;
                 align-items:center;
                 justify-content:center;
+
+                overflow:hidden;
             }
 
             .content-header {
@@ -280,6 +327,7 @@
                 color: var(--sidebar-logo-color);
             }
 
+            .field-impersonate { margin:0.1em;}
             fieldset .sidebar-menu {
             
                 margin:0.25em 0em 0.25em 0 !important;
@@ -577,40 +625,55 @@
                             
                                     {% block content_header_wrapper %}
                                     
-                                    {% set helpMessage = "" %}
-                                    {% if ea.crud is not null %}
-                                        {% set helpMessage = ea.crud.helpMessage %}
-                                    {% endif %}
-                                    {% if helpMessage is empty %}
-                                        {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
-                                    {% endif %}
-                                    {% set has_help_message = (helpMessage is not empty) %}
-
                                     <section class="content-header">
                                     
                                         {% block content_header %}
 
                                         <div class="content-header-icon">
-                                        {% block content_icon %}
-                                        <i class="fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>
-                                        {% endblock %}
+                                        {% set _content_icon = block('content_icon') ?? null %}
+                                        {% if _content_icon is not empty %}
+                                            {{ _content_icon|raw }}
+                                        {% else %}
+                                            {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
+                                            {% if image is not null %}
+                                                <img class="ea-extra-image" src="{{ asset(image) }}">
+                                            {% else %}
+                                                <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>
+                                            {% endif %}
+                                        {% endif %}
                                         </div>
 
                                         <div class="content-header-title">
                                             <h1 class="title">
-                                            
-                                                {% block content_title %}{{ ea_extra.title(ea.crud.getCurrentPage() ?? null)|default("Dashboard") }}{% endblock %}
- 
-                                                {% block content_help %}
-                                                    {% if has_help_message %}
-                                                    <span class="content-header-help">
-                                                        <i class="far fa-question-circle" data-bs-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
-                                                    </span>
-                                                    {% endif %}
-                                                {% endblock %}
+                                            {{ _content_title|raw }}
+
+                                            {% set _content_help = block('content_help') ?? null %}
+                                            {% if _content_help is not empty %}
+                                                {{ _content_help|raw }}
+                                            {% else %}
+                                                {% set helpMessage = "" %}
+                                                {% if ea.crud is not null %}
+                                                    {% set helpMessage = ea.crud.helpMessage %}
+                                                {% endif %}
+                                                {% if helpMessage is empty %}
+                                                    {% set helpMessage = ea_extra.help(ea.crud.getCurrentPage() ?? null) %}
+                                                {% endif %}
+                                                {% set has_help_message = (helpMessage is not empty) %}
+
+                                                {% if has_help_message %}
+                                                <span class="content-header-help">
+                                                    <i class="far fa-question-circle" data-bs-toggle="tooltip" title="{{ helpMessage|e('html_attr') }}"></i>
+                                                </span>
+                                                {% endif %}
+                                            {% endif %}
                                             </h1>
 
-                                            <span>{% block content_text %}{{ ea_extra.text(ea.crud.getCurrentPage() ?? null) }}{% endblock %}</span>
+                                            {% set _content_text = block('content_text') ?? null %}
+                                            {% if _content_text is not empty %}
+                                                {{ _content_text|raw }}
+                                            {% else %}
+                                                <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
+                                            {% endif %}
                                         </div>
 
                                         {% block page_actions_wrapper %}

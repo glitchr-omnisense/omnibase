@@ -25,6 +25,7 @@ class Extension
         return $this->{$varname}[$pageName] ?? $this->{$varname}[self::PAGE_DEFAULT] ?? null;
     }
 
+    protected array $title;
     public function getPageTitle(?string $pageName = null): ?string { return $this->getFallback("title", $pageName); }
     public function setPageTitle($title, ?string $pageName = null) { return $this->setTitle($title, $pageName); }
     public function getTitle    (?string $pageName = null): ?string { return $this->getFallback("title", $pageName); }
@@ -34,6 +35,7 @@ class Extension
         return $this;
     }
 
+    protected array $help;
     public function getHelp(?string $pageName = null): ?string { return $this->getFallback("help", $pageName); }
     public function setHelp(string $help, ?string $pageName = null)
     {
@@ -41,6 +43,7 @@ class Extension
         return $this;
     }
 
+    protected array $text;
     public function getText(?string $pageName = null): ?string { return $this->getFallback("text", $pageName); }
     public function setText(string $text, ?string $pageName = null)
     {
@@ -48,6 +51,7 @@ class Extension
         return $this;
     }
 
+    protected array $icon;
     public function getIcon(?string $pageName = null): ?string { return $this->getFallback("icon", $pageName); }
     public function setIcon(string $icon, ?string $pageName = null)
     {
@@ -55,6 +59,15 @@ class Extension
         return $this;
     }
 
+    protected array $image;
+    public function getImage(?string $pageName = null): ?string { return $this->getFallback("image", $pageName); }
+    public function setImage(string $image, ?string $pageName = null)
+    {
+        $this->image[$pageName ?? self::PAGE_DEFAULT] = $image;
+        return $this;
+    }
+
+    protected array $widgets;
     public function getWidgets(?string $pageName = null): ?array { return $this->getFallback("widgets", $pageName); }
     public function setWidgets(array $widgets, ?string $pageName = null)
     {

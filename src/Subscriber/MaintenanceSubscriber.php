@@ -37,7 +37,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     {
     	$this->baseService = $baseService;
         $this->exceptionRoute   = $baseService->getParameterBag("base.maintenance.exception");
-        $this->exceptionRoute[] = "base_login";
+        $this->exceptionRoute[] = "base_security_login";
 
         $this->homepageRoute = $baseService->getParameterBag("base.maintenance.homepage");
         $this->maintenanceRoute = $baseService->getParameterBag("base.maintenance.redirect");

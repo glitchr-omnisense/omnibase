@@ -1,0 +1,5 @@
+action:
+  index: "Retour"
+  create_and_continue: 'Créer et continuer'
+  save: 'Enregistrer'
+  save_and_continue: 'Enregistrer et continuer'

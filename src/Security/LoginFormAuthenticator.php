@@ -33,8 +33,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 {
     use TargetPathTrait;
 
-    public const LOGIN_ROUTE = 'base_login';
-    public const LOGOUT_ROUTE = 'base_logout';
+    public const LOGIN_ROUTE = 'base_security_login';
+    public const LOGOUT_ROUTE = 'base_security_logout';
 
     private $entityManager;
     private $csrfTokenManager;

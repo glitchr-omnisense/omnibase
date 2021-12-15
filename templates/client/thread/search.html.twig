@@ -65,8 +65,8 @@
                 <div class="header">
 
                     <ul class="field-avatar">
-                        {% for author in thread.authors|reverse %}
-                        <li>{{ author.getFormattedAvatar()|raw }}</li>
+                        {% for owner in thread.owners|reverse %}
+                        <li>{{ owner.getFormattedAvatar()|raw }}</li>
                         {% endfor %}
                     </ul>
 
@@ -88,16 +88,16 @@
                                 thread.publishedAt()|datetime("HH:mm")
                             ])|raw }}&nbsp
 
-                            {% if thread.authors|length > 2 %}
+                            {% if thread.owners|length > 2 %}
                             <br/>
                             {% endif %}
 
                             {{ '@messages.blog.article.by'|trans }}
-                            {% for author in thread.authors %}
+                            {% for owner in thread.owners %}
                                     {% if not loop.first %}
                                     {% if loop.last %} {{ '@messages.blog.article.and'|trans }} {% else %}, {% endif %}
                                     {% endif %}
-                                    <a href="/profile/{{ author.username|lower }}">{{ author.username }}</a>
+                                    <a href="/profile/{{ owner.username|lower }}">{{ owner.username }}</a>
                             {% endfor %}
                         </div>
                     </div>

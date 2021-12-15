@@ -75,7 +75,7 @@ class BaseConfiguration implements ConfigurationInterface
                             ->end()
                         ->scalarNode('homepage')
                             ->info('Website home page')
-                            ->defaultValue("base_homepage")
+                            ->defaultValue("app_index")
                             ->end()
                         ->arrayNode('exception')
                             ->prototype('scalar')->end()

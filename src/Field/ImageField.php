@@ -2,15 +2,13 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AvatarType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class ImageField implements FieldInterface
+class ImageField extends FileField implements FieldInterface
 {
     use FieldTrait;
 
@@ -29,17 +27,5 @@ final class ImageField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("data_class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "image");
-    }
-
-    public function allowDelete(bool $allowDelete = true): self
-    {
-        $this->setFormTypeOption("allow_delete", $allowDelete);
-        return $this;
-    }
-
-    public function setMultipleFiles(bool $multipleFiles = true): self
-    {
-        $this->setFormTypeOption("multiple", $multipleFiles);
-        return $this;
     }
 }

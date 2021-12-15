@@ -191,7 +191,7 @@ class FileType extends AbstractType implements DataMapperInterface
             if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = $acceptedFiles;
 
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
-                ?? '<h4>'.$this->translator->trans("messages.dropzone.title").'</h4><p>'.$this->translator->trans("messages.dropzone.description").'</p>';
+                ?? '<h4>'.$this->translator->trans("@fields.fileupload.dropzone.title").'</h4><p>'.$this->translator->trans("@fields.fileupload.dropzone.description").'</p>';
 
             if(array_key_exists("maxFiles", $options["dropzone"]) && !empty($view->vars["value"]))
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));

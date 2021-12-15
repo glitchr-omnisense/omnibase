@@ -18,8 +18,10 @@ use ReflectionProperty;
  * @Annotation
  * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
- *   @Attribute("column", type = "string"),
- *   @Attribute("alias" , type = "string")
+ *   @Attribute("column",     type = "string"),
+ *   @Attribute("inversedBy", type = "string"),
+ *   @Attribute("mappedBy",   type = "string"),
+ *   @Attribute("alias" ,     type = "string")
  * })
  */
 
@@ -31,6 +33,8 @@ class ColumnAlias extends AbstractAnnotation
     public function __construct(array $data)
     {
         $this->column = $data["column"] ?? "";
+        $this->inversedBy = $data["inversedBy"] ?? "";
+        $this->mappedBy = $data["mappedBy"] ?? "";
         $this->alias  = $data["alias"]  ?? "";
     }
 
@@ -44,15 +48,17 @@ class ColumnAlias extends AbstractAnnotation
         if($target == "property") $alias = $targetValue;
         else $alias = $this->alias;
 
-        if(!property_exists($classMetadata->getName(), $alias))  throw new Exception("Invalid alias property \"$alias\" provided in annotation of class ".$classMetadata->getName());
-        if(!property_exists($classMetadata->getName(), $this->column)) throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
-        
-        $aliasOrm  = $classMetadata->hasAssociation($alias) || $classMetadata->hasField($alias);
-        if($aliasOrm) throw new Exception("Alias variable \"$alias\" cannot be an ORM variable.");
-        $columnOrm = $classMetadata->hasAssociation($this->column) || $classMetadata->hasField($this->column);
-        if(!$columnOrm) throw new Exception("Column variable \"$this->column\" must be an ORM variable.");
+        if(!property_exists($classMetadata->getName(), $alias))
+            throw new Exception("Invalid alias property \"$alias\" provided in annotation of class ".$classMetadata->getName());
+        else if(!property_exists($classMetadata->getName(), $this->column)) 
+            throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
+        else if($classMetadata->hasAssociation($alias) /*&& !isset($classMetadata->associationMappings[$alias]["alias"])*/)
+            throw new Exception("Alias variable \"$alias\" cannot be used, association mapping already found.");
+        else if($classMetadata->hasField($alias) /*&& !isset($classMetadata->fieldMappings[$alias]["alias"])*/)
+            throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
 
         $classMetadata->fieldNames[$alias] = $this->column;
+        $classMetadata->reflFields[$alias] = $classMetadata->reflFields[$this->column];
     }
     
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

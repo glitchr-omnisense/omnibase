@@ -9,7 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Entity\Sitemap\Widget\Hyperlink;
-use Base\Field\EntityField;
+use Base\Field\AssociationField;
 
 class HyperpatternCrudController extends AbstractCrudController
 {
@@ -31,7 +31,7 @@ class HyperpatternCrudController extends AbstractCrudController
 
         yield TranslationField::new("label");
 
-        yield EntityField::new("hyperlinks")->renderAsCount()/*->hideOnForm()*/;
+        yield AssociationField::new("hyperlinks")->renderAsCount()/*->hideOnForm()*/;
 
         yield TextField::new('pattern');
         foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)

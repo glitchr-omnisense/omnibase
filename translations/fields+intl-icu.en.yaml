@@ -1,0 +1,19 @@
+fileupload:
+  dropzone:
+    title: "Upload files here"
+    description: "Drop files here or click to upload"
+
+  max_file: "The maximum file size allowed is {0}."
+  mime_type: "{0, plural,
+          =0 {}
+          =1 {Only {1} files are allowed }
+          other {Allowed extensions are : {1}}
+        }"
+  file_counter: 
+      none: "No files found."
+      singular: "{0} file found."
+      plural: "{0} files found."
+  file_counter_max:
+      none: "You cannot add any more files."
+      singular: "You can still add {0} file."
+      plural: "You can still add {0} files."

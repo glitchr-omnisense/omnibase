@@ -17,15 +17,15 @@
                             {% set flash_message = flash|slice(1,flash|length) %}
 
                             {% if flash_title is not empty %}
-                            <div class="title">{{flash_title|trans|raw}}</div><hr>
+                            <div class="title">{{flash_title|raw}}</div><hr>
                             {% endif %}
 
                             {% for message in flash_message %}
-                            <span class="message">{{ message|trans|raw }}</span>
+                            <span class="message">{{ message|raw }}</span>
                             {% endfor %}
 
                         {% else %}
-                            <span class="message">{{ flash|trans|raw }}</span>
+                            <span class="message">{{ flash|raw }}</span>
                         {% endif %}
 
                         <button type="button" class="btn-close alert-{{label}}" aria-label="Close" onclick="this.closest('article').style.display='none'"></button>

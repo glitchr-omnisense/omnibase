@@ -286,12 +286,12 @@
     'data-file-sortable'              : form.vars.sortable,
     'data-file-ajax'                  : form.vars.ajax,
     'data-file-max-files'             : form.vars.max_files,
-    'data-file-counter[none]'         : "@forms.field.fileCounter.none"       | trans(["{0}"]),
-    'data-file-counter[singular]'     : "@forms.field.fileCounter.singular"   | trans(["{0}"]),
-    'data-file-counter[plural]'       : "@forms.field.fileCounter.plural"     | trans(["{0}"]),
-    'data-file-counter-max[none]'     : "@forms.field.fileCounterMax.none"    | trans(["{0}"]),
-    'data-file-counter-max[singular]' : "@forms.field.fileCounterMax.singular"| trans(["{0}"]),
-    'data-file-counter-max[plural]'   : "@forms.field.fileCounterMax.plural"  | trans(["{0}"])
+    'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
+    'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
+    'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
+    'data-file-counter-max[none]'     : "@fields.fileupload.file_counter_max.none"    | trans(["{0}"]),
+    'data-file-counter-max[singular]' : "@fields.fileupload.file_counter_max.singular"| trans(["{0}"]),
+    'data-file-counter-max[plural]'   : "@fields.fileupload.file_counter_max.plural"  | trans(["{0}"])
 }) %}
 
 <div class="fileupload" data-file-field="{{ id }}" data-file-dropzone="{{form.vars.dropzone}}">
@@ -320,12 +320,12 @@
     </div>
 
     {% if form.vars.max_filesize %}
-    <div class="form-filesize form-text text-muted">{{"@forms.field.maxFile"|trans([form.vars.max_filesize|filesize])}}</div>
+    <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_file"|trans([form.vars.max_filesize|filesize])}}</div>
     {% endif %}
     
     {% set exts = form.vars.accept|extension %}
     {% if exts is not empty %}
-    <div class="form-filesize form-text text-muted">{{"@forms.field.mimeType"|trans([exts|length, exts|join(', ')|upper])}}</div>
+    <div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>
     {% endif %}
 
     {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
@@ -443,7 +443,7 @@
     {% if allow_add|default(false) %}
         <button type="button" class="btn btn-link form-collection-add-button">
             <i class="fa fa-plus pr-1"></i>
-            {{ 'EasyAdminBundle.action.add_new_item'|trans }}
+            {{ '@EasyAdminBundle.action.add_new_item'|trans }}
         </button>
     {% endif %}
 {%- endblock collection2_widget -%}

@@ -31,7 +31,7 @@ class SettingsController extends AbstractController
     }
 
     /**
-     * @Route("/settings", name="base_settings")
+     * @Route("/settings", name="base_user_settings")
      */
     public function Settings()
     {
@@ -40,7 +40,7 @@ class SettingsController extends AbstractController
     }
 
     /**
-     * @Route("/settings/2fa", name="base_settings_2fa")
+     * @Route("/settings/2fa", name="base_user_settings_2fa")
      */
     public function TwoFactorAuthentification(Request $request)
     {
@@ -72,7 +72,7 @@ class SettingsController extends AbstractController
                 // } else {
 
                 //     // generate a signed url and email it to the user
-                //     $this->emailVerifier->sendEmailConfirmation('base_verifyEmail_token', $newUser,
+                //     $this->emailVerifier->sendEmailConfirmation('base_security_verifyEmail_token', $newUser,
                 //         (new TemplatedEmail())
                 //             ->from(new Address('support@example.com', 'Support'))
                 //             ->to($newUser->getEmail())
@@ -93,7 +93,7 @@ class SettingsController extends AbstractController
     }
 
      /**
-     * @Route("/settings/2fa/qr-code", name="base_settings_2fa_qrcode")
+     * @Route("/settings/2fa/qr-code", name="base_user_settings_2fa_qrcode")
      */
     public function TwoFactorAuthentification_QrCode()
     {

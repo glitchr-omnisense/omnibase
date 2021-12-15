@@ -4,7 +4,7 @@
 {# this template is used to display Doctrine entity primary keys #}
 {% if field.getCustomOption("impersonate") %}
     {% set identifier = field.value.username %}
-    <a href="{{ app.request.uri }}&_switch_user={{ identifier }}"><i class="fa fa-fw fa-user-secret"></i></a> 
+    <a class="field-impersonate" href="{{ app.request.uri }}&_switch_user={{ identifier }}"><i class="fa fa-fw fa-user-secret"></i></a> 
 {% endif %}
 
 {% if field.getProperty() == "id" %}

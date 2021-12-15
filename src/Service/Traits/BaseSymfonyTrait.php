@@ -25,6 +25,8 @@ use Symfony\Contracts\EventDispatcher\Event;
 trait BaseSymfonyTrait
 {
     private static $startTime = 0;
+    public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
+    public function execution_time() { return $this->getExecutionTime(); }
     public function setStartTime()
     {
         // Provide the kernel start time as time reference
@@ -194,10 +196,4 @@ trait BaseSymfonyTrait
         $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
         return !empty($eaParents);
     }
-
-    public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
-    public function execution_time() { return $this->getExecutionTime(); }
-
-    public function getSettings() { return BaseService::$settings; }
-    public function settings() { return $this->getSettings(); }
 }

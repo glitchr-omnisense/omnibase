@@ -10,13 +10,14 @@ use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class FileField implements FieldInterface
+class FileField implements FieldInterface
 {
     use FieldTrait;
 
     public const OPTION_RENDER_FORMAT  = "renderFormat";
 
     public const OPTION_ALLOW_DOWNLOAD = "allowDownload";
+    public const OPTION_SHOWFIRST = "showFirst";
     public const OPTION_PREFERRED_DOWNLOAD_NAME = "preferredDownloadName";
 
     public static function new(string $propertyName, ?string $label = null): self
@@ -74,6 +75,12 @@ final class FileField implements FieldInterface
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "image")
              ->setFormType(ImageType::class);
+        return $this;
+    }
+
+    public function showFirst(bool $show = true): self
+    {
+        $this->setCustomOption(self::OPTION_SHOWFIRST, true);
         return $this;
     }
 }

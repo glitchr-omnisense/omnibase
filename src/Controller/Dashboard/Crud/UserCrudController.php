@@ -2,7 +2,9 @@
 
 namespace Base\Controller\Dashboard\Crud;
 
+use Base\Config\Extension;
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Dashboard\AbstractDashboardController;
 use Base\Field\AvatarField;
 
 use Base\Field\PasswordField;
@@ -11,15 +13,44 @@ use Base\Field\BooleanField;
 use Base\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 
 class UserCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
-    
+
+    public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
+    {
+        if($entity = $this->getEntity()) {
+
+            $extension->setImage($entity->getAvatar());
+
+            $userClass = "user.".strtolower(camel_to_snake(class_basename($entity)));
+            $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+            if($entityLabel == $userClass.".singular") $entityLabel = null;
+            else $extension->setTitle(ucwords($entityLabel));
+
+            $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
+            $entityLabel = !empty($entityLabel) ? ucwords($entityLabel) : "";
+
+            $impersonate = null;
+            if($this->isGranted("ROLE_SUPERADMIN"))
+                $impersonate = $entity->getUserIdentifier();
+
+            $impersonate = $impersonate ? '<a href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>' : null;
+            $extension->setTitle($entity.$impersonate);
+            $extension->setText($entityLabel." #".$entity->getId()." | Since ".$entity->getCreatedAt()->format("Y")); 
+        }
+        
+        return $extension;
+    }
+
     public function configureFilters(Filters $filters): Filters { return $filters->add('roles'); }
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
@@ -29,7 +60,7 @@ class UserCrudController extends AbstractCrudController
 
             "id" => function() use ($defaultCallback, $callbacks) {
 
-                yield AvatarField::new('avatar');
+                yield AvatarField::new('avatar')->hideOnDetail();
                 foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
                     yield $yield;
             
@@ -66,7 +97,7 @@ class UserCrudController extends AbstractCrudController
 
     public function configureActions(Actions $actions): Actions
     {
-        $approveUser = Action::new('approve', 'Approve Users', 'fa fa-user-check')
+        $approveUser = Action::new('approve', 'Approve', 'fa fa-user-check')
             ->linkToCrudAction('approveUsers')
             ->addCssClass('btn btn-primary');
 

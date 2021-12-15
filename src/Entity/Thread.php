@@ -6,7 +6,7 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-
+use Base\Annotations\Annotation\ColumnAlias;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -46,17 +46,17 @@ class Thread implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
     public static function __staticIconize() : ?array { return ["fas fa-box"]; } 
 
-    public function __construct(?User $author = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
+    public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->followers = new ArrayCollection();
         $this->mentions = new ArrayCollection();
         $this->likes = new ArrayCollection();
-        $this->authors = new ArrayCollection();
+        $this->owners = new ArrayCollection();
 
         $this->setParent($parent);
-        $this->addAuthor($author);
+        $this->addOwner($owner);
         $this->setTitle($title);
 
         $this->slug = $slug;
@@ -186,23 +186,23 @@ class Thread implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
-    protected $authors;
-    public function getAuthor(): ?User { return $this->authors[0] ?? null; }
-    public function getAuthors(): Collection { return $this->authors; }
-    public function addAuthor(?User $author): self
+    protected $owners;
+    public function getOwner(): ?User { return $this->owners[0] ?? null; }
+    public function getOwners(): Collection { return $this->owners; }
+    public function addOwner(?User $owner): self
     {
-        if(!$author) return $this;
+        if(!$owner) return $this;
 
-        if (!$this->authors->contains($author)) {
-            $this->authors[] = $author;
+        if (!$this->owners->contains($owner)) {
+            $this->owners[] = $owner;
         }
 
         return $this;
     }
 
-    public function removeAuthor(?User $author): self
+    public function removeOwner(?User $owner): self
     {
-        $this->authors->removeElement($author);
+        $this->owners->removeElement($owner);
 
         return $this;
     }

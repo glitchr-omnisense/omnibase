@@ -197,4 +197,6 @@ trait BaseTwigTrait {
                 return "preload";
         }
     }
+
+    public function settings() { return $this->getSettings(); }
 }

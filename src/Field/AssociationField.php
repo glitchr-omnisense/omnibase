@@ -2,14 +2,13 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\AvatarType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-use Base\Field\Type\EntityType;
+use Base\Field\Type\AssociationType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class EntityField implements FieldInterface
+final class AssociationField implements FieldInterface
 {
     use FieldTrait;
 
@@ -29,11 +28,11 @@ final class EntityField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/entity')
-            ->setFormType(EntityType::class)
+            ->setFormType(AssociationType::class)
             ->addCssClass('field-entity')
             ->addCssClass('file-widget')
             ->setFormTypeOption("multiple", true)
-            ->setTemplatePath('@EasyAdmin/crud/field/entity.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/association.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("class", null)
             ->setFormTypeOption("multiple", true)
@@ -65,6 +64,12 @@ final class EntityField implements FieldInterface
     public function renderAsCount(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+        return $this;
+    }
+
+    public function showFirst(bool $show = true): self
+    {
+        $this->setCustomOption(self::OPTION_SHOWFIRST, $show);
         return $this;
     }
 

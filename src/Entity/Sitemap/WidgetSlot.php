@@ -100,7 +100,7 @@ class WidgetSlot implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Widget::class, inversedBy="slots")
+     * @ORM\ManyToMany(targetEntity=Widget::class)
      */
     private $widgets;
 

@@ -43,7 +43,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/login", name="base_login")
+     * @Route("/login", name="base_security_login")
      */
     public function Login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
@@ -83,7 +83,7 @@ class SecurityController extends AbstractController
                     $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )
                     return $this->baseService->redirect($targetPath);
 
-                return $this->redirectToRoute($request->isMethod('POST') ? "base_settings" : $this->baseService->getRoute("/"));
+                return $this->redirectToRoute($request->isMethod('POST') ? "base_user_settings" : $this->baseService->getRoute("/"));
             }
 
             $notification = new Notification("login.partial");
@@ -106,13 +106,13 @@ class SecurityController extends AbstractController
 
 
     /**
-     * @Route("/logout", name="base_logout")
+     * @Route("/logout", name="base_security_logout")
      */
     public function Logout(Request $request) {
 
         // If user is found.. go to the logout request page
         if($this->getUser())
-            return $this->redirectToRoute('base_logoutRequest');
+            return $this->redirectToRoute('base_security_logoutRequest');
 
         // Check if the session is found.. meaning, the user just logged out
         if($user = $this->baseService->removeSession("_user")) {
@@ -146,7 +146,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/logout-request", name="base_logoutRequest")
+     * @Route("/logout-request", name="base_security_logoutRequest")
      */
     public function LogoutRequest()
     {
@@ -154,13 +154,13 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/register", name="base_register")
+     * @Route("/register", name="base_security_register")
      */
     public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
 
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent())
-            return $this->redirectToRoute('base_profile');
+            return $this->redirectToRoute('base_user_profile');
 
         // Prepare registration form
         $newUser = new User();
@@ -195,7 +195,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/verify-email", name="base_verifyEmail")
+     * @Route("/verify-email", name="base_security_verifyEmail")
      * @IsGranted("ROLE_USER")
      */
     public function VerifyEmailRequest(Request $request, NotifierInterface $notifier)
@@ -228,11 +228,11 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
-        return $this->redirectToRoute('base_profile');
+        return $this->redirectToRoute('base_user_profile');
     }
 
     /**
-     * @Route("/verify-email/{token}", name="base_verifyEmail_token")
+     * @Route("/verify-email/{token}", name="base_security_verifyEmailWithToken")
      * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
     public function VerifyEmailResponse(Request $request, string $token): Response
@@ -270,11 +270,11 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
-        return $this->redirectToRoute('base_profile');
+        return $this->redirectToRoute('base_user_profile');
     }
 
     /**
-     * @Route("/admin-approval", name="base_adminApproval")
+     * @Route("/admin-approval", name="base_security_adminApproval")
      */
     public function AdminApprovalRequest(Request $request)
     {
@@ -306,11 +306,11 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
-        return $this->redirectToRoute('base_profile');
+        return $this->redirectToRoute('base_user_profile');
     }
 
     /**
-     * @Route("/account-goodbye", name="base_accountGoodbye")
+     * @Route("/account-goodbye", name="base_security_accountGoodbye")
      */
     public function DisableAccountRequest(Request $request)
     {
@@ -335,7 +335,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/welcome-back/{token}", name="base_accountWelcomeBack_token")
+     * @Route("/welcome-back/{token}", name="base_security_accountWelcomeBackWithToken")
      */
     public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
@@ -378,13 +378,13 @@ class SecurityController extends AbstractController
     /**
      * Display & process form to request a password reset.
      *
-     * @Route("/reset-password", name="base_resetPassword")
+     * @Route("/reset-password", name="base_security_resetPassword")
      */
     public function ResetPasswordRequest(Request $request): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent())
-            return $this->redirectToRoute('base_profile');
-            
+            return $this->redirectToRoute('base_user_profile');
+
         $form = $this->createForm(ResetPasswordType::class);
         $form->handleRequest($request);
 
@@ -419,12 +419,12 @@ class SecurityController extends AbstractController
     /**
      * Validates and process the reset URL that the user clicked in their email.
      *
-     * @Route("/reset-password/{token}", name="base_resetPassword_token")
+     * @Route("/reset-password/{token}", name="base_security_resetPasswordWithToken")
      */
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent())
-            return $this->redirectToRoute('base_profile');
+            return $this->redirectToRoute('base_user_profile');
             
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {

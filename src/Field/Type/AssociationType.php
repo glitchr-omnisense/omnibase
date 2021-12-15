@@ -6,7 +6,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-use Exception;
+
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -25,7 +25,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-class EntityType extends AbstractType implements DataMapperInterface
+class AssociationType extends AbstractType implements DataMapperInterface
 {
     /**
      * @var ClassMetadataManipulator
@@ -98,7 +98,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     'by_reference' => false,
                     "entry_inline" => $options["inline"],
                     "entry_row_inline" => $options["row_inline"],
-                    'entry_type' => EntityType::class,
+                    'entry_type' => AssociationType::class,
                     'entry_options' => array_merge($options, [
                         'allow_entity' => $options["allow_entity"],
                         'data_class' => $dataClass,
@@ -120,7 +120,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                 if(!$dataClass)
                     throw new \RuntimeException(
                         'Unable to get "class" or compute "data_class" from form "'.$form->getName().'" or any of its parents. '.
-                        'Please define "class" option in the main EntityType you defined or make sure there is a way to guess the expected output information');
+                        'Please define "class" option in the main AssociationType you defined or make sure there is a way to guess the expected output information');
 
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
                 
@@ -149,7 +149,7 @@ class EntityType extends AbstractType implements DataMapperInterface
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];
                     unset($field['allow_entity']);
 
-                    if (!$fieldEntity || !$fieldType == EntityType::class)
+                    if (!$fieldEntity || !$fieldType == AssociationType::class)
                         $form->add($fieldName, $fieldType, $field);
                 }
             }

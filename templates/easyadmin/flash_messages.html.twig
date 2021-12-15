@@ -15,16 +15,16 @@
                                     {% set flash_title = flash|first %}
                                     {% set flash_message = flash|slice(1,flash|length) %}
 
-                                    <b>{{flash_title|trans|raw}}</b>
+                                    <b>{{flash_title|raw}}</b>
                                     {% for message in flash_message %}
-                                        <br/>{{ message|trans|raw }}
+                                        <br/>{{ message|raw }}
                                     {% endfor %}
                                 {% else %}
-                                    {{ flash|trans|raw }}
+                                    {{ flash|raw }}
                                 {% endif %}
 
                         {% else %}
-                                {{ flash|trans|raw }}
+                                {{ flash|raw }}
                         {% endif %}
                         </p>
 

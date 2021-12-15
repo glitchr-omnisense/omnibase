@@ -9,6 +9,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -22,6 +24,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->requestStack = $requestStack;
         $this->extension = $extension;
         $this->translator = $translator;
+        
+        $this->crud = null;
+        $this->entity = null;
     }
 
     public static function getEntityFqcn(): string
@@ -88,19 +93,33 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $extension;
     }
 
+    public function getCrud():Crud { return $this->crud; }
+    public function getEntityDto():EntityDto { return $this->entityDto; }
+    public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }
+    public function getExtension():Extension { return $this->extension; }
+    
     public function configureCrud(Crud $crud): Crud
     {
-        $entityTranslationPrefix = $this->getEntityTranslationPrefix();
-        $crudTranslationPrefix = $this->getCrudTranslationPrefix();
+        $this->crud = $crud;
 
+        $entityTranslationPrefix = $this->getEntityTranslationPrefix();
+        
+        $entityLabelInSingular = $this->translator->trans($entityTranslationPrefix.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        if($entityLabelInSingular == $entityTranslationPrefix.".singular") $entityLabelInSingular = null;
+        $crud->getAsDto()->setEntityLabelInSingular($entityLabelInSingular ?? "");
+        
+        $entityLabelInPlural = $this->translator->trans($entityTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        if($entityLabelInPlural == $entityTranslationPrefix.".plural") $entityLabelInPlural = null;
+        $crud->getAsDto()->setEntityLabelInPlural($entityLabelInPlural ?? "");
+
+        $crudTranslationPrefix = $this->getCrudTranslationPrefix();
         $action = $this->requestStack->getCurrentRequest()->query->get("crudAction") ?? "";
         $crudTranslationPrefixWithAction = $crudTranslationPrefix . ($action ? "." . $action : "");
 
         $title = $this->translator->trans($crudTranslationPrefixWithAction.".title");
         if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title");
         if($title == $crudTranslationPrefix.".title") $title = $this->translator->trans($crudTranslationPrefix.".plural");
-        if($title == $crudTranslationPrefix.".plural") $title = $this->translator->trans($entityTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
-        if($title == $entityTranslationPrefix.".plural") $title = class_basename($this->getEntityFqcn());
+        if($title == $crudTranslationPrefix.".plural") $title = $entityLabelInPlural ?? class_basename($this->getEntityFqcn());
 
         $help = $this->translator->trans($crudTranslationPrefixWithAction.".help");
         if($help == $crudTranslationPrefixWithAction.".help") $help = $this->translator->trans($crudTranslationPrefix.".help");
@@ -117,16 +136,51 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->extension->setTitle(ucfirst($title));
         $this->extension->setHelp($help);
         $this->extension->setText($text);
+        
+        return $this->configureExtension($this->extension)
+                    ->configureCrud($crud)
+                    ->showEntityActionsInlined(true)
+                    ->setDefaultSort(['id' => 'DESC'])
+                    ->setPaginatorPageSize(30)
+                    ->setFormOptions(
+                        ['validation_groups' => ['new' ]],
+                        ['validation_groups' => ['edit']]
+                    );
+    }
 
-        $extension = $this->configureExtension($this->extension);
-        return $extension->configureCrud($crud)
-                ->showEntityActionsInlined(true)
-                ->setDefaultSort(['id' => 'DESC'])
-                ->setPaginatorPageSize(30)
-                ->setFormOptions(
-                    ['validation_groups' => ['new' ]],
-                    ['validation_groups' => ['edit']]
-                );
+    public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
+    {
+        if($entity = $this->getEntity()) {
+
+            $userClass = "user.".strtolower(camel_to_snake(class_basename($entity)));
+            $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+            if($entityLabel == $userClass.".singular") $entityLabel = null;
+            else $extension->setTitle(ucwords($entityLabel));
+
+            $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
+            $entityLabel = !empty($entityLabel) ? ucwords($entityLabel) : "";
+
+            $entityTitle = $entity->getTitle();
+            if($entityTitle) $entityText  = $entityLabel ." ID #".$entity->getId();
+            else {
+
+                $entityTitle = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
+                $entityText  = "ID #".$entity->getId();
+            }
+
+            $extension->setTitle($entityTitle);
+            $extension->setText($entityText); 
+        }
+
+        return $extension;
+    }
+
+    public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
+    {
+        $this->entityDto = $responseParameters->get("entity");
+
+        $this->extension = $this->configureExtensionWithResponseParameters($this->extension, $responseParameters);
+        return parent::configureResponseParameters($responseParameters);
     }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
@@ -136,7 +190,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         foreach ( ($callbacks[""] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield IdField::new('id')->hideOnForm();
+        yield IdField::new('id')->hideOnForm()->hideOnDetail();
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

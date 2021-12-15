@@ -40,17 +40,7 @@ class TagTranslation implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $name;
-
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $description;
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
+    public function getName(): ?string { return $this->name; }
     public function setName(?string $name): self
     {
         $this->name = $name;
@@ -58,11 +48,11 @@ class TagTranslation implements TranslationInterface
         return $this;
     }
 
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     */
+    protected $description;
+    public function getDescription(): ?string { return $this->description; }
     public function setDescription(?string $description): self
     {
         $this->description = $description;

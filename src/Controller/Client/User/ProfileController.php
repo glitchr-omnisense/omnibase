@@ -23,19 +23,19 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @Route("/profile/edit", name="base_profile_edit")
+     * @Route("/profile/edit", name="base_user_profileEdit")
      */
     public function Edit()
     {
         if (!($user = $this->getUser()) || !$user->isPersistent())
-            return $this->redirectToRoute('base_login');
+            return $this->redirectToRoute('base_security_login');
 
         return $this->render('@Base/client/user/profile_edit.html.twig', ['user' => $user]);
     }
 
     /**
-     * @Route("/profile", name="base_profile")
-     * @Route("/profile/{id}", name="base_profile_id")
+     * @Route("/profile", name="base_user_profile")
+     * @Route("/profile/{id}", name="base_user_profileId")
      */
     public function Show($id = -1)
     {

@@ -329,10 +329,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function configureActions(): Actions
     {
         return parent::configureActions()
+            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+            ->update(Crud::PAGE_INDEX, Action::DETAIL,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-search')->setLabel(""))
             ->update(Crud::PAGE_INDEX, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt')->setLabel(""))
             ->update(Crud::PAGE_INDEX, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt')->setLabel(""))
 
             ->update(Crud::PAGE_DETAIL, Action::EDIT,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
@@ -363,7 +366,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setAvatarUrl($avatar)
             ->addMenuItems([
                 MenuItem::linkToUrl('My Profile', 'fas fa-fw fa-id-card', $this->baseService->getUrl("base_profile")),
-                MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("base_settings"))
+                MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("base_user_settings"))
             ])->setAvatarUrl($avatar);
     }
 

@@ -45,10 +45,11 @@ class IdConfigurator implements FieldConfiguratorInterface
                ? $accessor->getValue  ($field->getValue(), $field->getProperty()) : null;
 
         $hashtag = gettype($value) == "integer" ?  "#" : "";
-        $value   = $hashtag . u($value)->truncate($maxLength, '…')->toString();
+        $value   = $hashtag . ($maxLength !== -1 ? u($value)->truncate($maxLength, '…')->toString() : $value);
 
         $url = null;
-        if( $field->getCustomOption(IdField::OPTION_ADD_LINK) && $entityDto->getInstance()) {
+        if( Crud::PAGE_DETAIL !== $context->getCrud()->getCurrentPage() &&
+            $field->getCustomOption(IdField::OPTION_ADD_LINK) && $entityDto->getInstance()) {
 
             $url = $this->adminUrlGenerator
                 ->setAction('detail')
@@ -56,8 +57,10 @@ class IdConfigurator implements FieldConfiguratorInterface
                 ->generateUrl();
         }
         
-        if (-1 !== $maxLength && null !== $field->getValue()) {
+        if (null !== $field->getValue()) {
+            
             $field->setFormattedValue( ($url ? "<a href='".$url."'>".$value."</a>" : $value));
+
         }
     }
 }
