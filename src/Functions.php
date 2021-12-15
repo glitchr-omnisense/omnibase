@@ -98,7 +98,7 @@ namespace {
 
     const     BIT_PREFIX = array("b");
     const    BYTE_PREFIX = array("B", "O", "o");
-    const  BINARY_PREFIX = array("ki", "ki", "gi", "ti", "pi", "ei", "zi", "yi");
+    const  BINARY_PREFIX = array("ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");
     const DECIMAL_PREFIX = array("k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
 
     function byte2bit(int $num): int { return 8*$num; } // LOL !
@@ -136,16 +136,15 @@ namespace {
         if(in_array($units, BYTE_PREFIX)) $val *= 8;
         if ($unitPrefix) {
            
-            $binFactor = array_search($unitPrefix, BINARY_PREFIX);
-            $decFactor = array_search($unitPrefix, DECIMAL_PREFIX);
+            $binFactor = array_search($unitPrefix, [""]+BINARY_PREFIX);
+            $decFactor = array_search($unitPrefix, [""]+DECIMAL_PREFIX);
             if($decFactor xor $binFactor)
                 throw new \Exception("Unexpected prefix unit \"$unitPrefix\" for \"".$str."\"");
 
-            
-            if($decFactor !== false) $val *= 1000**($decFactor+1);
-            if($binFactor !== false) $val *= 1024**($binFactor+1);
+            $val *= 1000**$decFactor;
+            $val *= 1024**$binFactor;
         }
-
+        
         return intval($val);
     }
 
