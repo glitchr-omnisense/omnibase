@@ -43,7 +43,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/login", name="base_security_login")
+     * @Route("/login", name="security_login")
      */
     public function Login(Request $request, AuthenticationUtils $authenticationUtils): Response
     {
@@ -106,13 +106,13 @@ class SecurityController extends AbstractController
 
 
     /**
-     * @Route("/logout", name="base_security_logout")
+     * @Route("/logout", name="security_logout")
      */
     public function Logout(Request $request) {
 
         // If user is found.. go to the logout request page
         if($this->getUser())
-            return $this->redirectToRoute('base_security_logoutRequest');
+            return $this->redirectToRoute('security_logoutRequest');
 
         // Check if the session is found.. meaning, the user just logged out
         if($user = $this->baseService->removeSession("_user")) {
@@ -146,7 +146,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/logout-request", name="base_security_logoutRequest")
+     * @Route("/logout-request", name="security_logoutRequest")
      */
     public function LogoutRequest()
     {
@@ -154,7 +154,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/register", name="base_security_register")
+     * @Route("/register", name="security_register")
      */
     public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
 
@@ -167,7 +167,7 @@ class SecurityController extends AbstractController
         $form = $this->createForm(RegistrationType::class, $newUser, ['validation_groups' => ['new']]);
 
         // An account might require to be verified by an admin
-        $adminApprovalRequired = $this->baseService->getParameterBag("base_security.user.adminApproval") ?? false;
+        $adminApprovalRequired = $this->baseService->getParameterBag("security.user.adminApproval") ?? false;
         $newUser->approve(!$adminApprovalRequired);
 
         $form->handleRequest($request);
@@ -195,7 +195,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/verify-email", name="base_security_verifyEmail")
+     * @Route("/verify-email", name="security_verifyEmail")
      * @IsGranted("ROLE_USER")
      */
     public function VerifyEmailRequest(Request $request, NotifierInterface $notifier)
@@ -232,7 +232,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/verify-email/{token}", name="base_security_verifyEmailWithToken")
+     * @Route("/verify-email/{token}", name="security_verifyEmailWithToken")
      * @IsGranted("IS_AUTHENTICATED_FULLY")
      */
     public function VerifyEmailResponse(Request $request, string $token): Response
@@ -274,7 +274,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/admin-approval", name="base_security_adminApproval")
+     * @Route("/admin-approval", name="security_adminApproval")
      */
     public function AdminApprovalRequest(Request $request)
     {
@@ -310,7 +310,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/account-goodbye", name="base_security_accountGoodbye")
+     * @Route("/account-goodbye", name="security_accountGoodbye")
      */
     public function DisableAccountRequest(Request $request)
     {
@@ -335,7 +335,7 @@ class SecurityController extends AbstractController
     }
 
     /**
-     * @Route("/welcome-back/{token}", name="base_security_accountWelcomeBackWithToken")
+     * @Route("/welcome-back/{token}", name="security_accountWelcomeBackWithToken")
      */
     public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
@@ -378,7 +378,7 @@ class SecurityController extends AbstractController
     /**
      * Display & process form to request a password reset.
      *
-     * @Route("/reset-password", name="base_security_resetPassword")
+     * @Route("/reset-password", name="security_resetPassword")
      */
     public function ResetPasswordRequest(Request $request): Response
     {
@@ -419,7 +419,7 @@ class SecurityController extends AbstractController
     /**
      * Validates and process the reset URL that the user clicked in their email.
      *
-     * @Route("/reset-password/{token}", name="base_security_resetPasswordWithToken")
+     * @Route("/reset-password/{token}", name="security_resetPasswordWithToken")
      */
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {

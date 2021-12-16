@@ -232,7 +232,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
             $user->kick(0);
 
-            $event->setResponse($this->baseService->redirectToRoute("base_security_logoutRequest"));
+            $event->setResponse($this->baseService->redirectToRoute("security_logoutRequest"));
             return $event->stopPropagation();
         }
 
@@ -254,7 +254,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 } else {
 
-                    $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("base_security_verifyEmail")]);
+                    $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("security_verifyEmail")]);
                     $notification->send("warning");
                 }
             };
