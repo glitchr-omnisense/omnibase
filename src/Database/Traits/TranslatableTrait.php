@@ -193,7 +193,7 @@ trait TranslatableTrait
             if (!$accessor->isWritable($this, $property))
                 throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($this));
 
-            $accessor->setValue($this, $property, $arguments);
+            $accessor->setValue($this, $property, ...$arguments);
             return $this;
         }
 
@@ -207,7 +207,7 @@ trait TranslatableTrait
             if (!$accessor->isWritable($entityTranslation, $property))
                 throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityTranslation));
 
-            $accessor->setValue($entityTranslation, $property, $arguments);
+            $accessor->setValue($entityTranslation, $property, ...$arguments);
             return $this;
         }
     }
