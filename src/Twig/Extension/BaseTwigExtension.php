@@ -72,8 +72,11 @@ final class BaseTwigExtension extends AbstractExtension
     {
         return [
             new TwigFilter('trans',         [$this, 'trans']),
+            new TwigFilter('thumbnail',     [$this, 'thumbnail']),
+            new TwigFilter('webp',          [$this, 'webp']),
+            new TwigFilter('trans',         [$this, 'trans']),
             new TwigFilter('url',           [$this, 'url']),
-            new TwigFilter('joinIfExists', [$this, 'joinIfExists']),
+            new TwigFilter('joinIfExists',  [$this, 'joinIfExists']),
             new TwigFilter('time',          [$this, 'time']),
             new TwigFilter('mimetype',      [$this, 'mimetype']),
             new TwigFilter('synopsis',      [$this, 'synopsis']),
@@ -100,6 +103,16 @@ final class BaseTwigExtension extends AbstractExtension
     {
         if($array === null) return null;
         return implode($separator, array_filter($array));
+    }
+
+    public function thumbnail(string $path): string
+    {
+        return $path;
+    }
+
+    public function webp(string $path): string
+    {
+        return $path;
     }
 
     public function fontAwesome(array|null|string $icon, array $attributes = []) 

@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
+//  *   @Attribute("thumbnails",   type = "array"),
 /**
  * Class Uploader
  * package Base\Annotations\Annotation\Uploader
@@ -31,12 +32,8 @@ use Symfony\Component\Uid\Uuid;
  *   @Attribute("public",       type = "string"),
  *   @Attribute("keepNotFound", type = "boolean"),
  *
- *   @Attribute("size", type = "string"),
- *   @Attribute("mime", type = "array"),
- *   @Attribute("thumbnail", type = "array"),
- *   @Attribute("quality", type = "integer"),
- *   @Attribute("format",  type = "string"),
- *   @Attribute("webp",    type = "boolean"),
+ *   @Attribute("size",         type = "string"),
+ *   @Attribute("mime",         type = "array")
  * })
  */
 class Uploader extends AbstractAnnotation

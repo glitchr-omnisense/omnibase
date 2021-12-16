@@ -47,7 +47,8 @@
         "twig/intl-extra": "^3.0",
         "twig/inky-extra": "^3.0",
         "twig/cssinliner-extra": "^3.0",
-
+        "liip/imagine-bundle": "^2.7",
+        
         "sensio/framework-extra-bundle": "^5.4",
         "scheb/2fa": "^5.0",
         "scheb/2fa-email": "^5.0",
