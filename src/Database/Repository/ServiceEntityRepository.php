@@ -52,6 +52,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public const OPTION_WITH_ROUTE    = "WithRoute";
     public const OPTION_PARTIAL       = "Partial";
     public const OPTION_MODEL         = "Model";
+    public const OPTION_BUT           = "But";
     
     // Separators
     public const SEPARATOR     = ":"; // Field separator
@@ -196,6 +197,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         foreach($this->getClassMetadata()->getFieldNames() as $field) {
 
             if (str_contains($field, self::OPTION_WITH_ROUTE )   ||
+                str_contains($field, self::OPTION_BUT        )   ||
                 str_contains($field, self::OPTION_MODEL      )   ||
                 str_contains($field, self::OPTION_PARTIAL    )   ||
                 str_contains($field, self::OPTION_INSENSITIVE)   ||
@@ -272,7 +274,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         if (preg_match('/^(find(?:One|Last)?By)(.*)/', $method, $matches)) {
 
             $magicFn = "__".$matches[1] ?? "";
-            $method  = 
+            $byNames   = $matches[2] ?? "";
+
+        } else if (preg_match('/^(find(?:One|Last))(.*)/', $method, $matches)) {
+
+            $magicFn = "__".$matches[1] ?? "";
             $byNames   = $matches[2] ?? "";
 
         } else if (preg_match('/^(distinctCount|count)(?:For([^By]*))?(?:By){0,1}(.*)/', $method, $matches)) {
@@ -293,7 +299,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
             throw new Exception(sprintf(
                 'Undefined method "%s". The method name must start with ' .
-                'either findBy, findOneBy, findLastBy, distinctCount, count, lengthOf!',
+                'either findBy, findOne, findOneBy, findLast, findLastBy, distinctCount, count, lengthOf!',
                 $method
             ));
         }
@@ -324,6 +330,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
             $operator = self::OPTION_EQUAL;
             $isInsensitive = $isPartial = false;
             $withRoute = null;
+            $but = null;
             
             while ($oldBy != $by) {
 
@@ -337,6 +344,8 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     
                 else if ( str_ends_with($by, self::OPTION_WITH_ROUTE) )
                     $option = self::OPTION_WITH_ROUTE;
+                else if ( str_ends_with($by, self::OPTION_BUT) )
+                    $option = self::OPTION_BUT;
 
                 else if ( str_ends_with($by, self::OPTION_STARTING_WITH) )
                     $option = self::OPTION_STARTING_WITH;
@@ -388,6 +397,11 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                         list($method, $by) = $this->stripByEnd($method, $by, self::OPTION_WITH_ROUTE);
                         break;
 
+                    case self::OPTION_BUT:
+                        $but = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, self::OPTION_BUT);
+                        break;
+
                     // String related
                     case self::OPTION_STARTING_WITH:
                     case self::OPTION_ENDING_WITH:
@@ -415,7 +429,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                 }
             }
 
-            if(empty($by))
+            if(empty($by) && !preg_match("/find(?:One|Last)/", $method))
                 throw new Exception("Malformed magic method. \"$methodBak\" cannot be parsed.. unknown name for parameter #".($id+1));
 
             // First check if WithRoute special argument is found..
@@ -443,6 +457,18 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
                     $id = $this->addCriteria($by, $fieldValue);
                     if ($operator == self::OPTION_EQUAL) $this->addCustomOption($id, $operator);
                     else throw new Exception("Unexpected operator \"".$operator."\" found in model definition");    
+                }
+
+            } else if ($but) {
+
+                $fieldValue = array_shift($arguments);
+                if(!empty($fieldValue)) {
+
+                    $by = "id";
+                    $operator = self::OPTION_NOT_EQUAL;
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    $this->addCustomOption($id, $operator);
                 }
 
             } else if ($by == self::OPTION_MODEL) {
@@ -790,14 +816,17 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $qb;
     }
 
+    
     protected function __findBy(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
     {
         return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();
     }
+    protected function __findLast(array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
     protected function __findLastBy(array $criteria = [], $orderBy = null, $groupBy = null)
     {
         return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null;
     }
+    protected function __findOne(array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
     protected function __findOneBy(array $criteria = [], $orderBy = null, $groupBy = null)
     {
         return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult();
