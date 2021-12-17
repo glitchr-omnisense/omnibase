@@ -79,7 +79,8 @@ class ClassMetadataManipulator
         return is_subclass_of($class, SetType::class);
     }
 
-    public function getDoctrineType(string $type) {
+    public function getDoctrineType(?string $type) {
+        if(!$type) return $type;
         return \Doctrine\DBAL\Types\Type::getType($type);
     }
 
@@ -98,7 +99,7 @@ class ClassMetadataManipulator
 
     public function getDataClass(FormInterface $form): ?string
     {
-        // Simple case, data_class from current form (with ORM Proxy management)
+        // Simple case, data_class from current form (handle ORM Proxy management)
         if (null !== $dataClass = $form->getConfig()->getDataClass()) {
             if (false === $pos = strrpos($dataClass, '\\__CG__\\')) {
                 return $dataClass;
@@ -127,6 +128,8 @@ class ClassMetadataManipulator
             // Doctrine types as well.. (e.g. EnumType or SetType)
             $fieldType = $this->getTypeOfField($dataClass, $form->getName());
             $doctrineType = $this->getDoctrineType($fieldType);
+
+            dump($doctrineType);
             if($this->isEnumType($doctrineType) || $this->isSetType($doctrineType))
                 return get_class($doctrineType);
 
@@ -278,7 +281,7 @@ class ClassMetadataManipulator
         return $fields;
     }
 
-    public function getTypeOfField(string $class, string $fieldName): string 
+    public function getTypeOfField(string $class, string $fieldName): ?string 
     {
         $metadata = $this->getClassMetadata($class);
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;

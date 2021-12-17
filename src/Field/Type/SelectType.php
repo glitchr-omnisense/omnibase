@@ -51,20 +51,19 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public function getBlockPrefix(): string { return 'select2'; }
 
-    public function guessClass($form, $options, $data) :?string {
+
+    public function guessClass($form, $options, $data = null) :?string {
        
         $class = $options["class"] ?? null;
+
         if(!$class) {
 
             if($data instanceof PersistentCollection) $class = $data->getTypeClass()->getName();
             else if($data instanceof ArrayCollection || is_array($data)) $class = null;
             else $class = is_object($data) ? get_class($data) : null;
         }
-        
-        if(!$class)
-            $class = $this->classMetadataManipulator->getDataClass($form);
 
-        return $class;
+        return $class ?? $this->classMetadataManipulator->getDataClass($form);
     }
 
     public function guessChoices($options)
@@ -74,6 +73,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             return $options["class"]::getPermittedValues();
         }
+
         return $options["choices"] ?? null;
     }
 
@@ -154,6 +154,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
+
             'class' => null,
             //'query_builder'   => null,
 
@@ -183,7 +184,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
 
             // Use 'template' in replacement of selection/result template
-            'template'          => "function(option, that) { return $('<span class=\"select2-selection__entry\">' + (option.html ? option.html : (option.icon ? '<i class=\"'+option.icon+'\"></i>  ' : '') + option.text + '</span>')); }",
+            'template'          => "function(option, that) { console.log(option, that);return $('<span class=\"select2-selection__entry\">' + (option.html ? option.html : (option.icon ? '<i class=\"'+option.icon+'\"></i>  ' : '') + option.text + '</span>')); }",
             'templateSelection' => null,
             'templateResult'    => null,
 
@@ -224,20 +225,25 @@ class SelectType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
-            /* Override options.. I couldn't done that without accessing data */
-            // It might be good to get read of that and be able to use normalizer.. as expected
-            $options["class"]         = $this->guessClass($form, $options, $data);
-            dump("=====>".$options["class"], $form);
-            if(!$options["class"]) throw new \Exception("Class cannot be determined in \"".$form->getName()."\"");
-
+            $options["class"]         = $this->guessClass($form, $options);
             $options["multiple"]      = $this->guessIfMultiple($form, $options);
-            $options["autocomplete"]  = $this->guessAutocomplete($options);
-            $options["choice_filter"] = $this->guessChoiceFilter($options, $data);
-            $options["choices"]       = $this->guessChoices($options);
-
-            $multipleExpected = $data instanceof Collection || is_array($data);
+            $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
             if($options["multiple"] && !$multipleExpected) 
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
+
+            $options["choice_filter"] = $this->guessChoiceFilter($options, $data);
+            if(!$options["choices"]) {
+
+                $options["autocomplete"]  = $this->guessAutocomplete($options);
+
+                /* Override options.. I couldn't done that without accessing data */
+                // It might be good to get read of that and be able to use normalizer.. as expected
+                if(!$options["autocomplete"] && !$options["class"]) 
+                    throw new \Exception("No choices provided, no \"autocomplete\" option found, and option \"class\" cannot be determined in \"".$form->getName()."\"");
+
+                $options["class"]         = $this->guessClass($form, $options, $data);
+                $options["choices"]       = $this->guessChoices($options);
+            }
 
             $formOptions = [
                 'choices'    => [],
@@ -439,7 +445,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Format preselected values
             $selectedData  = [];
             $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-            $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use ($dataset, &$options, &$selectedData) : array { 
+            $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use ($dataset, &$options, &$selectedData) : ?array { 
 
                 // Recursive categories
                 if(is_array($value) && is_associative($value))
@@ -447,7 +453,8 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 // Format values
                 $entry = self::getFormattedValues($value, $options["class"], $this->translator);
-                
+                if(!$entry) return null;
+
                 // // Check if entry selected
                 $entry["selected"] = false;
                 foreach($dataset as $data)
@@ -499,6 +506,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null) 
     {
+        if($entry == null) return null;
         if (is_subclass_of($class, EnumType::class) || is_subclass_of($class, SetType::class)) {
             
             $className = class_basename($class);

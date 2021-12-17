@@ -266,11 +266,7 @@ namespace {
                     throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
             }
 
-            if($ret == null) {
-                $tArray[$key] = $entry[$key];
-                continue;
-            }
-
+            if($ret == null) continue;
             list($tKey, $tEntry) = [$ret[0] ?? $key, $ret[1] ?? $entry];
             $tArray[$tKey] = $tEntry;
 
