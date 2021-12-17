@@ -39,7 +39,7 @@ class SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::NO_SHOW)
             ->setCustomOption(self::OPTION_RENDER_AS_COUNT, true)
             ->setColumns(6)
-            ->setTextAlign(TextAlign::RIGHT)
+            ->setTextAlign(TextAlign::CENTER)
             ->addCssClass('field-select');
     }
 
@@ -62,7 +62,10 @@ class SelectField implements FieldInterface
     {
         if(!$filter) $filter = [];
         if(!is_array($filter)) $filter = [$filter];
-    
+
+        if(count($filter) == 1)
+            $this->setFormTypeOptionIfNotSet(self::OPTION_CLASS, $filter[0]);
+        
         $this->setCustomOption(self::OPTION_FILTER, $filter);
         return $this;
     }

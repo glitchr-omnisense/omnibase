@@ -2,6 +2,7 @@
 
 namespace Base\Field;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
@@ -18,9 +19,15 @@ final class AssociationField implements FieldInterface
     public const OPTION_ALLOW_ADD = 'allowAdd';
     public const OPTION_ALLOW_DELETE = 'allowDelete';
 
-    public const OPTION_SHOWFIRST = 'showFirst';
+    public const OPTION_DISPLAY_LIMIT = 'displayLimit';
     public const OPTION_RELATED_URL = 'relatedUrl';
     public const OPTION_DOCTRINE_ASSOCIATION_TYPE = 'associationType';
+
+    public const OPTION_SHOWFIRST = 'showFirst';
+    public const NO_SHOW        = 0;
+    public const SHOW_NAME_ONLY = 1;
+    public const SHOW_ICON_ONLY = 2;
+    public const SHOW_ALL       = 3;
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -37,6 +44,7 @@ final class AssociationField implements FieldInterface
             ->setFormTypeOptionIfNotSet("class", null)
             ->setFormTypeOption("multiple", true)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "text")
+            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOWFIRST, false)
             ->setCustomOption(self::OPTION_CRUD_CONTROLLER, null)
             ->setCustomOption(self::OPTION_RELATED_URL, null)
@@ -67,7 +75,13 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    public function showFirst(bool $show = true): self
+    public function setDisplayLimit(int $limit = 2): self
+    {
+        $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
+        return $this;
+    }
+
+    public function showFirst(int $show = self::SHOW_ALL)
     {
         $this->setCustomOption(self::OPTION_SHOWFIRST, $show);
         return $this;

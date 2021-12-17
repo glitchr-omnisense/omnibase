@@ -18,6 +18,7 @@
         <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>
         <service id="Base\Form\FormFactory" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
@@ -432,6 +433,7 @@
 
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -454,11 +456,16 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Type\AssociationType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
         <service id="Base\Field\Type\QuillType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\AssociationType"><tag name="form.type" /><argument type="service" id="base.database.metadata_manipulator" /></service>
         <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\SlugType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\PatternType"><tag name="form.type" /><argument type="service" id="base.service" /></service>

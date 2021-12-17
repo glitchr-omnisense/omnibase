@@ -9,7 +9,7 @@ user:
   thread:
     singular: "thread"
     plural: "threads"
-    
+
   permission:
     singular: "permission"
     plural: "permissions"

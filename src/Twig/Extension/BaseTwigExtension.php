@@ -64,7 +64,8 @@ final class BaseTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction("path",  [$this, "path"]),
-            new TwigFunction('asset', [$this, 'asset'])
+            new TwigFunction('asset', [$this, 'asset']),
+            new TwigFunction('method_exists', [$this, 'method_exists'])
         ];
     }
 
@@ -98,6 +99,8 @@ final class BaseTwigExtension extends AbstractExtension
     }
 
     public function synopsis($class) { return class_synopsis($class); }
+
+    public function method_exists($object, $method) { return method_exists($object, $method); }
 
     public function joinIfExists(?array $array, string $separator) 
     {

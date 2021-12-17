@@ -50,6 +50,9 @@ thread_state:
   state_secret: 
     singular: "secret"
     plural: "secrets"
+  state_archived: 
+    singular: "archive"
+    plural: "archives"
   
   state_approved: 
     singular: "approved"
@@ -60,6 +63,9 @@ thread_state:
   state_rejected: 
     singular: "rejected"
     plural: "rejected"
+  state_suspended: 
+    singular: "suspended"
+    plural: "suspended"
   state_deleted: 
     singular: "deleted"
     plural: "deleted"

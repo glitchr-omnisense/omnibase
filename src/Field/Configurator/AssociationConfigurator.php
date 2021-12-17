@@ -174,7 +174,11 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             $count = $this->countNumElements($others);
             if($first && $showFirst) $count++;
 
-            $field->setFormattedValue([$count, $first, implode(", ", $others)]);
+            $field->setFormattedValue([
+                "count" => $count,
+                "first" => $first,
+                "others" => $others
+            ]);
         }
     }
 }

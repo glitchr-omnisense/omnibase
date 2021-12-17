@@ -73,8 +73,8 @@
                     </div>
                 {% else %}
                     <span class="label">{{formattedValue.text|default("-")}}</span>
-                    {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                    |default(formattedValue.icon|imagify)|default("") | raw}}
+                    <span>{{formattedValue.icon|fontAwesome({class:"fa-fw"})
+                                    |default(formattedValue.icon|imagify)|default("") | raw}}</span>
                 {% endif %}
                 {% if fieldLink is not null %}</a>{% endif %}
             </span>
@@ -97,16 +97,16 @@
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if showFirst == 1 %}
-            {{formattedValue.text|default("-")}}  
+            <span>{{formattedValue.text|default("-")}}</span>
         {% elseif showFirst == 2 %}
             <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
             {{formattedValue.icon|fontAwesome({class:"fa-fw"})
                                 |default(formattedValue.icon|imagify)|default("") | raw}}
             </div>
         {% else %}
-            <span class="label">{{formattedValue.text|default("-")}}</span>
+            <span><span class="label">{{formattedValue.text|default("-")}}</span>
             {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(formattedValue.icon|imagify)|default("") | raw}}
+                                |default(formattedValue.icon|imagify)|default("") | raw}}</span>
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>
@@ -128,16 +128,16 @@
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if show == 1 %}
-            {{formattedValue.text|default("-")}}  
+            <span>{{formattedValue.text|default("-")}}</span>
         {% elseif show == 2 %}
             <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
             {{formattedValue.icon|fontAwesome({class:"fa-fw"})
                             |default(formattedValue.icon|imagify)|default("") | raw}}
             </div>
         {% else %}
-            <span class="label">{{formattedValue.text|default("-")}}</span>
+            <span><span class="label">{{formattedValue.text|default("-")}}</span>
             {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                            |default(formattedValue.icon|imagify)|default("") | raw}}
+                                |default(formattedValue.icon|imagify)|default("") | raw}}</span>
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>

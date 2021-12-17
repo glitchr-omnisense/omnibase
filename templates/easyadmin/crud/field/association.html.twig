@@ -1,27 +1,58 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% set displayLimit = field.customOptions.get('displayLimit') %}
 {% if 'toMany' == field.customOptions.get('associationType') %}
 
-    {% if field.customOptions.get('showFirst') and field.formattedValue[0] %}
+    {% if field.customOptions.get('showFirst') and field.formattedValue.count is defined %}
+        {% set displayLimit = displayLimit > 0 ? displayLimit - 1 : displayLimit %}
+    {% endif %}
+
+    {% set stillMore = "" %}
+    {% set others = [] %}
+    {% for other in field.formattedValue.others %}
+        {% if displayLimit > others|length %}
+            {% set others = others|merge([other]) %}
+        {% elseif displayLimit > 0 %}
+            {% set stillMore = others|length != 0 ? ", [..]" : "[..]" %}
+        {% endif %}
+    {% endfor %}
+
+    {% if field.customOptions.get('showFirst') and field.formattedValue.count is defined %}
+
+        {% set icon = null %}
+        {% if method_exists(field.formattedValue.first, "__iconize") %}
+            {% set icon = field.formattedValue.first.__iconize()[0] ?? null %}
+        {% endif %}
+
+        {% if icon is null and method_exists(field.formattedValue.first, "__staticIconize") %}
+            {% set icon = field.formattedValue.first.__staticIconize()[0] ?? null %}
+        {% endif %}
+        
+        {% set icon  = icon|fontAwesome({class:"fa-fw"})|default(icon|imagify)|default(null) %}
+        {% if icon is not null %}
+            {% set label = "<span class='label'>"~field.formattedValue.first~"</span>" %}
+        {% else %}
+            {% set label = field.formattedValue.first %}
+        {% endif %}
 
         <span class="badge badge-secondary">
             {% if field.customOptions.get('relatedUrl') is not null %}
-            <a href="{{ field.customOptions.get('relatedUrl') }}">{{ field.formattedValue[1] }}</a>
+            <a href="{{ field.customOptions.get('relatedUrl') }}">{{ label|raw }}{{icon|raw}}</a>
             {% else %}
-            {{ field.formattedValue[1] }}
+            <div>{{ label|raw }}{{icon|raw}}</div>
             {% endif %}
         </span>
 
-        {% if field.formattedValue[0] > 1 %}
-            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[2] }}">
-            +{{ field.formattedValue[0]-1 }}
+        {% if field.formattedValue.count > 1 %}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ others|join(", ")~stillMore }}">
+            +{{ field.formattedValue.count - 1 }}
                 </span>
         {% endif %}
 
-    {% elseif field.formattedValue[0] %}
-        <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ field.formattedValue[2] }}">
-            {{ field.formattedValue[0] }}
+    {% elseif field.formattedValue.count %}
+        <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ others|join(", ")~stillMore }}">
+            {{ field.formattedValue.count }}
         </span>
     {% else %}
 	    <span class="badge badge-secondary">0</span>

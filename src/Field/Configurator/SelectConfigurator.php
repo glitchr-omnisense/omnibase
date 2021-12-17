@@ -43,9 +43,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
             if($values instanceof Collection) 
                 $class = is_object($values->first()) ? get_class($values->first()) : null;
         }
-
-        dump($class,$field->getValue());
-
         
         $values = $field->getValue();
         $values = is_array($values) ? new ArrayCollection($values) : $values;
@@ -61,6 +58,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
                 if ($formattedValues[$key] && $dataClassCrudController)
                     $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
+
             }
 
         } else {

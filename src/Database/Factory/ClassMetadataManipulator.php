@@ -12,12 +12,14 @@ use Base\Field\Type\SelectType;
 use Base\Field\Type\SlugType;
 use Base\Field\Type\TranslationType;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\TextType;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use Doctrine\Persistence\Mapping\ClassMetadataFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
@@ -25,6 +27,7 @@ use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 
@@ -65,7 +68,7 @@ class ClassMetadataManipulator
             return isset($class->name);
         else if (is_object($class))
             $class = get_class($class);
-    
+
         return is_subclass_of($class, EnumType::class);
     }
 
@@ -75,7 +78,7 @@ class ClassMetadataManipulator
             return isset($class->name);
         else if (is_object($class))
             $class = get_class($class);
-    
+
         return is_subclass_of($class, SetType::class);
     }
 
@@ -97,50 +100,6 @@ class ClassMetadataManipulator
         return $metadata;
     }
 
-    public function getDataClass(FormInterface $form): ?string
-    {
-        // Simple case, data_class from current form (handle ORM Proxy management)
-        if (null !== $dataClass = $form->getConfig()->getDataClass()) {
-            if (false === $pos = strrpos($dataClass, '\\__CG__\\')) {
-                return $dataClass;
-            }
-
-            return substr($dataClass, $pos + 8);
-        }
-
-        // Advanced case, loop parent form to get closest data_class
-        while (null !== $formParent = $form->getParent()) {
-            
-            if (null === $dataClass = $formParent->getConfig()->getDataClass()) {
-                $form = $formParent;
-                continue;
-            }
-
-            if (is_subclass_of($dataClass, Collection::class)) {
-                $form = $formParent;
-                continue;
-            }
-
-            // Associations can help to guess the expected returned values
-            if($this->hasAssociation($dataClass, $form->getName())) 
-                return $this->getAssociationTargetClass($dataClass, $form->getName());
-            
-            // Doctrine types as well.. (e.g. EnumType or SetType)
-            $fieldType = $this->getTypeOfField($dataClass, $form->getName());
-            $doctrineType = $this->getDoctrineType($fieldType);
-
-            dump($doctrineType);
-            if($this->isEnumType($doctrineType) || $this->isSetType($doctrineType))
-                return get_class($doctrineType);
-
-            break;
-        }
-
-        return null;
-    }
-
-
-
     public function getFields(string $class, array $fields = [], array $excludedFields = []): array
     {
         if(!empty($fields) && !is_associative($fields))
@@ -150,7 +109,7 @@ class ClassMetadataManipulator
         $validFields = array_fill_keys($metadata->getFieldNames(), []);
 
         if (!empty($associationNames = array_intersect_key($validFields, $metadata->getAssociationNames())))
-            $validFields += $this->getFieldMapping($metadata, $associationNames);
+            $validFields += $this->getFieldFormType($metadata, $associationNames);
 
         // Auto detect some fields..
         foreach($validFields as $fieldName => $field) {
@@ -241,7 +200,7 @@ class ClassMetadataManipulator
         return $unmappedFields;
     }
 
-    private function getFieldMapping(ClassMetadata $metadata, array $associationNames): array
+    private function getFieldFormType(ClassMetadata $metadata, array $associationNames): array
     {
         $fields = [];
 
@@ -281,41 +240,65 @@ class ClassMetadataManipulator
         return $fields;
     }
 
-    public function getTypeOfField(string $class, string $fieldName): ?string 
+    public function hasField($class, string $fieldName): ?string
+    {
+        $metadata = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        return $metadata->hasField($fieldName);
+    }
+
+    public function getTypeOfField($class, string $fieldName): ?string 
     {
         $metadata = $this->getClassMetadata($class);
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getTypeOfField($fieldName);
     }
 
-    public function getAssociationTargetClass(string $class, string $fieldName): string 
+    public function getAssociationTargetClass($class, string $fieldName): string 
     { 
         $metadata = $this->getClassMetadata($class);
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationTargetClass($fieldName);
     }
 
-    public function hasAssociation(string $class, string $fieldName)
+    public function hasAssociation($class, string $fieldName)
     {
         $metadata = $this->getClassMetadata($class);
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->hasAssociation($fieldName);
     }
 
-    public function getAssociationMapping(string $class, string $fieldName): ?array
+    public function getFieldMapping($class, string $fieldName): ?array
     {
         $metadata  = $this->getClassMetadata($class);
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
-        return $metadata->getAssociationMappings()[$fieldName] ?? null;
+        return $metadata->getFieldMapping($fieldName) ?? null;
+    }
+    
+    public function getAssociationMapping($class, string $fieldName): ?array
+    {
+        $metadata  = $this->getClassMetadata($class);
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        return $metadata->getAssociationMapping($fieldName) ?? null;
     }
 
-    public function getAssociationMappings(string $class): array
+    public function getMapping($class, string $fieldName): ?array
+    {
+        if($this->hasAssociation($class, $fieldName))
+            return $this->getAssociationMapping($class, $fieldName);
+        else if($this->hasField($class, $fieldName))
+            return $this->getFieldMapping($class, $fieldName);
+    
+        return null;
+    }
+    
+    public function getAssociationMappings($class): array
     {
         $metadata = $this->getClassMetadata($class);
         return $metadata->getAssociationMappings();
     }
     
-    public function isOwningSide(string $class, string $fieldName):bool
+    public function isOwningSide($class, string $fieldName):bool
     {
         if(!$this->hasAssociation($class, $fieldName)) return false;
         $metadata  = $this->getClassMetadata($class);
@@ -323,7 +306,7 @@ class ClassMetadataManipulator
         return !$metadata->isAssociationInverseSide($fieldName);
     }
 
-    public function isInverseSide(string $class, string $fieldName):bool
+    public function isInverseSide($class, string $fieldName):bool
     {
         if(!$this->hasAssociation($class, $fieldName)) return false;
         $metadata  = $this->getClassMetadata($class);

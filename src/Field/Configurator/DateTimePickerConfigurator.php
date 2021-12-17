@@ -70,6 +70,7 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
             }
 
             $formattedValue = $this->intlFormatter->formatTime($field->getValue(), $timeFormat, $icuDateTimePattern, $timezone);
+            
         }
 
         $widgetOption = $field->getCustomOption(DateTimePickerField::OPTION_WIDGET);

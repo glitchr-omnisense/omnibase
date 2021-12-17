@@ -5,6 +5,7 @@ namespace Base\Field\Type;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Types\EnumType;
 use Base\Database\Types\SetType;
+use Base\Form\FormFactory;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
@@ -39,7 +40,10 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var BaseService */
     protected $baseService;
 
-    public function __construct(EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
+    /** @var FormFactory */
+    protected $formFactory;
+
+    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
@@ -47,97 +51,11 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->translator = $translator;
         $this->entityManager = $entityManager;
         $this->hashIds = new Hashids();
+
+        $this->formFactory = $formFactory;
     }
 
     public function getBlockPrefix(): string { return 'select2'; }
-
-
-    public function guessClass($form, $options, $data = null) :?string {
-       
-        $class = $options["class"] ?? null;
-
-        if(!$class) {
-
-            if($data instanceof PersistentCollection) $class = $data->getTypeClass()->getName();
-            else if($data instanceof ArrayCollection || is_array($data)) $class = null;
-            else $class = is_object($data) ? get_class($data) : null;
-        }
-
-        return $class ?? $this->classMetadataManipulator->getDataClass($form);
-    }
-
-    public function guessChoices($options)
-    {
-        if ($options["choices"] !== null && $this->classMetadataManipulator->isEnumType($options["class"]) ||
-                                            $this->classMetadataManipulator->isSetType ($options["class"])) {
-
-            return $options["class"]::getPermittedValues();
-        }
-
-        return $options["choices"] ?? null;
-    }
-
-    public function guessIfMultiple(FormInterface|FormBuilderInterface $form, $options)
-    {
-        if($options["multiple"] === null && $options["class"]) {
-            
-            $target = $options["class"];
-            $entityField = $form->getName();
-
-            if($this->classMetadataManipulator->isEntity($target)) {
-
-                $entity = $form->getParent()->getViewData();
-                return $entity ? $this->classMetadataManipulator->isToManySide($entity, $entityField) : false;
-
-            } else if($this->classMetadataManipulator->isEnumType($target)) {
-
-                return false;
-
-            } else if($this->classMetadataManipulator->isSetType($target)) {
-
-                return true;
-            }
-        }
-
-        return $option["multiple"] ?? false;
-    }
-
-    public function guessAutocomplete($options)
-    {
-        if($options["choices"]) return false;
-        if($options["autocomplete"] === null && $options["class"]) {
-            
-            $target = $options["class"];
-            if($this->classMetadataManipulator->isEntity($target))
-                return true;
-            if($this->classMetadataManipulator->isEnumType($target))
-                return false;
-            if($this->classMetadataManipulator->isSetType($target))
-                return false;
-        }
-
-        return $option["autocomplete"] ?? false;
-    }
-
-    public function guessChoiceFilter($options, $data)
-    {
-        if ($options["choice_filter"] === null) {
-            
-            $options["choice_filter"] = [];
-            if(is_array($data)) {
-                foreach($data as $entry)
-                    if(is_object($entry)) $options["choice_filter"][] = get_class($entry);
-            } else {
-                if(is_object($data)) $options["choice_filter"][] = get_class($data);
-            }
-
-            if(!$options["choice_filter"]  && $options["class"]) {
-                $options["choice_filter"][] = $options["class"];
-            }
-        }
-
-        return $option["choice_filter"] ?? [];
-    }
 
     public function encode(array $array) : string
     {
@@ -156,6 +74,12 @@ class SelectType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
 
             'class' => null,
+            'class_priority' => [
+                FormFactory::GUESS_FROM_FORM,
+                FormFactory::GUESS_FROM_PHPDOC, 
+                FormFactory::GUESS_FROM_DATA,
+                FormFactory::GUESS_FROM_VIEW,
+            ],
             //'query_builder'   => null,
 
             'choices' => null,
@@ -224,25 +148,33 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
+            
+            // Guess class without data in the first place.. 
+            // To make sure the form can return something in the worst case
+            $options["guess_priority"] = array_intersect(
+                [FormFactory::GUESS_FROM_FORM, FormFactory::GUESS_FROM_PHPDOC], 
+                $options["class_priority"]
+            );
 
-            $options["class"]         = $this->guessClass($form, $options);
-            $options["multiple"]      = $this->guessIfMultiple($form, $options);
+            // Guess class option
+            $options["class"]         = $this->formFactory->guessType($event, $options);
+            
+            // Guess multiple option
+            $options["multiple"]      = $this->formFactory->guessIfMultiple($form, $options);
             $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
             if($options["multiple"] && !$multipleExpected) 
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
-            $options["choice_filter"] = $this->guessChoiceFilter($options, $data);
+            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($options, $data);
             if(!$options["choices"]) {
 
-                $options["autocomplete"]  = $this->guessAutocomplete($options);
+                $options["choices"] = $this->formFactory->guessChoices($options);
+                $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($options);
 
                 /* Override options.. I couldn't done that without accessing data */
                 // It might be good to get read of that and be able to use normalizer.. as expected
-                if(!$options["autocomplete"] && !$options["class"]) 
-                    throw new \Exception("No choices provided, no \"autocomplete\" option found, and option \"class\" cannot be determined in \"".$form->getName()."\"");
-
-                $options["class"]         = $this->guessClass($form, $options, $data);
-                $options["choices"]       = $this->guessChoices($options);
+                if(!$options["choices"] && !$options["autocomplete"]) 
+                    throw new \Exception("No choices, or autocomplete option, could be guessed without using data information for \"".$form->getName()."\"");
             }
 
             $formOptions = [
@@ -257,6 +189,10 @@ class SelectType extends AbstractType implements DataMapperInterface
             
             $form = $event->getForm();
             $data = $event->getData();
+            
+            // Guess including class_priority
+            $options["guess_priority"] = $options["class_priority"]; 
+            $options["class"]          = $this->formFactory->guessType($event, $options);
             
             $choiceData = $options["multiple"] ? $data["choice"] : [$data["choice"]];
 
@@ -340,7 +276,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $choiceData = $choiceType->getViewData();
 
         $options = $choiceType->getConfig()->getOptions();
-        $options["class"] = $this->guessClass($choiceType, $options, $choiceType->getData());
+        $options["class"] = $this->formFactory->guessType($choiceType, $options);
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
@@ -371,11 +307,11 @@ class SelectType extends AbstractType implements DataMapperInterface
         if($options["select2"] !== null) {
 
             /* Override options.. I couldn't done that without accessing data */
-            $options["class"]          = $this->guessClass($form, $options, $form->getData());
-            $options["multiple"]       = $this->guessIfMultiple($form, $options);
-            $options["autocomplete"]   = $this->guessAutocomplete($options);
-            $options["choice_filter"] = $this->guessChoiceFilter($options, $form->getData());
-            $options["choices"]        = $this->guessChoices($options);
+            $options["class"]         = $this->formFactory->guessType($form, $options);
+            $options["multiple"]      = $this->formFactory->guessIfMultiple($form, $options);
+            $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($options);
+            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($options, $form->getData());
+            $options["choices"]       = $this->formFactory->guessChoices($options);
 
             $multipleExpected = $form->getData() instanceof Collection || is_array($form->getData());
             if($options["multiple"] && !$multipleExpected) 

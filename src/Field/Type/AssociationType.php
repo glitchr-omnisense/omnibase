@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Form\FormFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
@@ -32,10 +33,16 @@ class AssociationType extends AbstractType implements DataMapperInterface
      */
     protected $classMetadataManipulator = null;
     
+    /**
+     * @var FormFactory
+     */
+    protected $formFactory = null;
+    
     public function getBlockPrefix(): string { return 'entity2'; }
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
+        $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -116,14 +123,14 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             } else {
 
-                $dataClass = $options["class"] ?? $this->classMetadataManipulator->getDataClass($form);
+                $dataClass = $options["class"] ?? $this->formFactory->guessType($event, $options);
                 if(!$dataClass)
                     throw new \RuntimeException(
                         'Unable to get "class" or compute "data_class" from form "'.$form->getName().'" or any of its parents. '.
                         'Please define "class" option in the main AssociationType you defined or make sure there is a way to guess the expected output information');
 
                 $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-                
+
                 $fields = $options["fields"];
                 if($options["autoload"])
                     $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
@@ -142,7 +149,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldType = $field['form_type'] ?? (!empty($field['data']) ? HiddenType::class : null);
                     unset($field['form_type']);
 
-                    $isNullable = $classMetadata->getFieldMapping($fieldName)["nullable"] ?? false;
+                    $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
                     if(!array_key_exists("required", $field) && $isNullable)
                         $field['required'] = false;
                     

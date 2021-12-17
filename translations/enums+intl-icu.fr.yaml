@@ -50,6 +50,9 @@ thread_state:
   state_secret: 
     singular: "invisible"
     plural: "invisibles"
+  state_archived: 
+    singular: "archive"
+    plural: "archives"
   
   state_approved: 
     singular: "approuvé"
@@ -60,6 +63,9 @@ thread_state:
   state_rejected: 
     singular: "refusé"
     plural: "refusés"
+  state_suspended: 
+    singular: "suspendu"
+    plural: "suspendus"
   state_deleted: 
     singular: "supprimé"
     plural: "supprimés"
