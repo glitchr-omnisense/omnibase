@@ -49,6 +49,10 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["state"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
+        yield SlugField::new('slug')->setTargetFieldName("translations.title");
+        foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+    
         yield TranslationField::new('title');
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
             yield $yield;

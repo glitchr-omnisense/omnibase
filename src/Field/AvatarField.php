@@ -27,6 +27,7 @@ final class AvatarField implements FieldInterface
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
+            ->setColumns(2)
             ->setFormTypeOptionIfNotSet("data_class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar");
     }

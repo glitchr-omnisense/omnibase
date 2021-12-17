@@ -68,7 +68,7 @@
                 .form-group.field-collection.form-control > div:nth-last-child(-n+2) .accordion-item { border-bottom: 0px solid lightgrey; }
                 .form-select2 { margin-bottom: 0em !important; }
 
-                .ea-edit-form > .form-group, .ea-new-form > .form-group  { padding: 1em 0 !important; }
+                .ea-edit-form > .form-group, .ea-new-form > .form-group  { padding: 1em 0.5em !important; }
                 #filters { padding: .5em !important; }
                 .form-translatable .tab-pane > div:first-child { padding: 0.5em 0 0 0 !important; }
                 .form-translatable .tab-pane > div { margin-bottom: 1.5em !important; }
@@ -96,7 +96,6 @@
                 .field-impersonate { 
                     font-size:14pt;
                 }
-
 
                 .field-email-icon {
 
@@ -247,7 +246,7 @@
                     height:50px !important;
                 }
 
-                .user-avatar, .thumbnail-avatar, .thumbnail-image {
+                .user-avatar, .ea-index .thumbnail-avatar, .ea-index .thumbnail-image {
 
                     overflow:hidden;
                     box-shadow: 0 0 0 2px var(--white),0 0 4px 1px var(--gray-600) !important;
@@ -257,8 +256,21 @@
                     height: 50px !important;
                     max-width: 50px !important;
                     width: 50px !important;
-
                 }
+
+                .ea-detail .thumbnail-avatar, .ea-detail .thumbnail-image {
+
+                    overflow:hidden;
+                    box-shadow: 0 0 0 2px var(--white),0 0 4px 1px var(--gray-600) !important;
+                    margin: 10px 5px !important;
+                    
+                    max-height: 250px !important;
+                    height: 250px !important;
+                    max-width: 250px !important;
+                    width: 250px !important;
+                }
+
+                .ea-detail .user-avatar i, .ea-detail .thumbnail-avatar i, .ea-detail .thumbnail-image  i { font-size:150pt; }
 
                 #header-logo 
                 {

@@ -84,9 +84,9 @@
 
 {% else %}
 
-    {% set formattedValue = field.formattedValue|first %}
-    {% set fieldLink  = formattedValue != field.formattedValue|last ? field.formattedValue|last : null %}
-    {% set hasEntries = formattedValue is not empty %}
+    {% set formattedValue = field.formattedValue %}
+    {% set fieldLink = formattedValue['url'] ?? null %}
+    {% set hasEntries = field.formattedValue is not empty %}
 
     {% if showFirst %}
     

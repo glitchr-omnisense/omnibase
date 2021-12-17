@@ -20,6 +20,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 
 class UserCrudController extends AbstractCrudController
 {
@@ -45,7 +46,7 @@ class UserCrudController extends AbstractCrudController
 
             $impersonate = $impersonate ? '<a href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>' : null;
             $extension->setTitle($entity.$impersonate);
-            $extension->setText($entityLabel." #".$entity->getId()." | Since ".$entity->getCreatedAt()->format("Y")); 
+            $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@dashboard.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
         }
         
         return $extension;
@@ -61,18 +62,19 @@ class UserCrudController extends AbstractCrudController
             "id" => function() use ($defaultCallback, $callbacks) {
 
                 yield AvatarField::new('avatar')->hideOnDetail();
+                
                 foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
                     yield $yield;
-            
-                yield RoleField::new('roles')->allowMultipleChoices();
+
+                yield RoleField::new('roles')->setColumns(4)->allowMultipleChoices();
                 foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
                     yield $yield;
                     
-                yield EmailField::new('email');
+                yield EmailField::new('email')->setColumns(4);
                 foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
                     yield $yield;
         
-                yield PasswordField::new('plainPassword')->onlyOnForms();
+                yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
                 foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
                     yield $yield;
             

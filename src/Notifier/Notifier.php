@@ -115,6 +115,13 @@ class Notifier implements NotifierInterface
         return $this;
     }
 
+    /**
+     * @var bool
+     */
+    protected bool $enable = true;
+    public function enable()  { $this->enable = true; return $this; }
+    public function disable() { $this->enable = false; return $this; }
+
     public function getTranslator(): TranslatorInterface { return $this->translator; }
     public function setTranslator(TranslatorInterface $translator) 
     { 
@@ -229,7 +236,11 @@ class Notifier implements NotifierInterface
         return array_unique($channels);
     }
 
-    public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void { $this->notifier->send($notification, ...$recipients); }
+    public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void 
+    { 
+        if ($this->enable) 
+            $this->notifier->send($notification, ...$recipients); 
+    }
 
     public function sendUsers(Notification $notification, RecipientInterface ...$recipients)
     {
@@ -260,7 +271,7 @@ class Notifier implements NotifierInterface
             $translatorLocale = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
-            $this->notifier->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
+            $this->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
             $this->localeProvider->setLocale($translatorLocale);
         }
 
@@ -296,7 +307,7 @@ class Notifier implements NotifierInterface
             $translatorLocale = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
-            $this->notifier->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
+            $this->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
             $this->localeProvider->setLocale($translatorLocale);
         }
 
@@ -329,7 +340,7 @@ class Notifier implements NotifierInterface
             $translatorLocale = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
-            $this->notifier->send($notification, $recipient);
+            $this->send($notification, $recipient);
             $this->localeProvider->setLocale($translatorLocale);
         }
 

@@ -1,5 +1,5 @@
-quantity:
-  unlimited: Illimitée
+stock:
+  unlimited: Illimité
 
 fileupload:
     dropzone:

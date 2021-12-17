@@ -21,4 +21,8 @@ interface NotifierInterface extends \Symfony\Component\Notifier\NotifierInterfac
     public function getPolicy(): ChannelPolicyInterface;
     public function getOptions(): array;
     public function getTranslator(): TranslatorInterface;
+
+    public function enable();
+    public function disable();
+    
 }

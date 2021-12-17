@@ -20,15 +20,21 @@ final class PasswordField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(RepeatedType::class)
+            ->addCssClass('field-password')
             ->setFormTypeOptions([
                     'type' => PasswordType::class,
                     'first_options' => [
                         'label' => "New Password",
-                        'attr' => ["autocomplete" => "new-password"]
+                        'attr' => [
+                            "autocomplete" => "new-password"
+                        ]
+
                     ],
                     'second_options' => [
                         'label' => "Confirm New Password",
-                        'attr' => ["autocomplete" => "new-password"]
+                        'attr' => [
+                            "autocomplete" => "new-password"
+                        ]
                     ]
                 ]);
     }

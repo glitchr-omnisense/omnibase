@@ -21,20 +21,26 @@
 
 {% block form2_row -%}
 
-    {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {%- set widget_attr = {attr: attr} -%}
-    {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%} #}
+    {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%} #}
+    {# {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%} #}
     <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
         <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
-        {{- form_errors(form) -}}
-        {{- form_widget(form) -}}
+
+        {% set _form_error = form_errors(form, {row_attr:{}}) %}
+        {% if _form_error is not empty %}
+            {%- set attr = attr|merge({'class': 'is-invalid' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+        {% endif %}
+
+        {{- form_widget(form, {attr:attr}) -}}
+        {{- _form_error|raw -}}
+
     </div>
 {%- endblock form2_row -%}
 
 {# Custom FormType widgets are below.. #}
 {%- block quill_row -%}
-<div class="form-quill">
-    {{ form_label(form) }}
+<div class="form-quill form-group">
+    <span>{{ form_label(form) }}</span>
     {{ form_errors(form) }}
     {{ form_row(form) }}
 </div>
@@ -54,9 +60,8 @@
 {%- endblock quill_widget -%}
 
 {%- block select2_row -%}
-    <div class="form-select2 form-group">
-        {{form_row(form)}}
-    </div>
+    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {{form_row(form)}}    
 {%- endblock -%}
 
 {%- block select2_widget -%}
@@ -148,7 +153,6 @@
 
 {%- block pattern_widget -%}
 
-{# Define slug parameters #}
 {% set attr = attr|merge({
     'data-pattern-field': form.vars.id,
     'data-pattern': pattern
@@ -175,7 +179,6 @@
 </div> #}
 
 {%- endblock -%}
-
 
 {%- block slug_widget -%}
 
@@ -492,7 +495,6 @@
                 </h2>
                 <div id="{{ id }}-contents" class="accordion-collapse collapse">
                     <div class="accordion-body">
-                        {# {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-group') %} #}
                         {{ form_widget(form, {attr:attr}) }}
                     </div>
                 </div>
@@ -506,3 +508,93 @@
 {%- block collection2_empty -%}
     <div class="empty collection-empty"></div>
 {%- endblock collection2_empty -%}
+
+{%- block stock_widget -%}
+    
+{% set attr = attr|merge({
+    'data-stock-field': form.vars.id,
+    'data-stock-unlimited': "@fields.stock.unlimited"|trans,
+    "min": form.vars.min is defined and form.vars.max > 0 ? form.vars.max : 0,
+}) %}
+
+{% if form.vars.max is defined %}
+    {% set attr = attr|merge({max: form.vars.max}) %}
+{% endif %}
+
+<div class="input-group form-stock">
+    <div class="input-group-text">
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-btn" type="button">
+            <i class="fas fa-box-open"></i>
+        </button>
+    </div>
+    {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
+    {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
+    <div class="input-group-text">
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
+    </div>
+     <div class="input-group-text">
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
+    </div>
+</div>
+
+{%- endblock -%}
+
+{%- block password_row -%}
+    {%- set row_attr = row_attr|merge({'class': 'col-md-6 form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    {{form_row(form, {row_attr:row_attr})}}
+{%- endblock -%}
+
+{%- block money_widget -%}
+
+{# Search for target inside form based on parent including translation #}
+{% set currencyForm = form.parent %}
+{% for child in currency_target %}
+
+    {% set currencyForm = currencyForm[child] %}
+
+    {% if child == "translations" %}
+        {% if currencyForm.vars.default_locale is defined and currencyForm.vars.default_locale in currencyForm|keys %}
+            {% set currencyForm = currencyForm[currencyForm.vars.default_locale] %}
+        {% else %} 
+            {% set currencyForm = currencyForm|first %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% set attr = attr|merge({
+    'data-currency-field': currencyForm.vars.id,
+    'data-scale-field': form.vars.scale ?? ''
+}) %}
+
+<div class="input-group form-money">
+
+    {{ block('form_widget') }}
+    <div class="input-group-append">
+        {% set currency_list = form.vars.currency_list is defined ? form.vars.currency_list : [] %}
+        {%  if currency_list is empty or currency_list is not iterable %}
+            <button id="{{form.vars.id}}-btn" class="input-group-text" type="button">
+                {{form.vars.currency_pattern|trans({"{{ widget }}":""})|trim}}
+                {{form.vars.currency_label ?? ""|trim}}
+            </button>
+        {% else %}
+            {% set code     = currency %}
+            {% set label    = currency_label[code] ?? code %}
+            {% set exchange = currency_exchange[code] ?? 1 %}
+            <button id="{{form.vars.id}}-btn" class="input-group-text dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">{{label}}</button>
+            <ul id="{{form.vars.id}}-list" class="dropdown-menu dropdown-menu-end" >
+
+                <li id="{{form.vars.id}}-selected" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="dropdown-item">{{label}}</a></li>
+                <li><hr class="dropdown-divider"></li>
+
+                {% for code in currency_list %}
+                    {% set label    = currency_label[code] ?? code %}
+                    {% set exchange = currency_exchange[code] ?? 1 %}
+                    <li class="item" data-label="{{label}}" data-code="{{code}}" data-exchange="{{ exchange }}"><a class="text-right dropdown-item">{{label}}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+
+
+{%- endblock -%}

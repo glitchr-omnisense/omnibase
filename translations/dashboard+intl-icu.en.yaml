@@ -62,6 +62,7 @@ crud:
   user:
     # title: "User page"
     # text: "This page is meant for user administration"
+    since: since {0}
 
     group:
       # title: "User Edit TITLE"

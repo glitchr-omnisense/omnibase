@@ -2,14 +2,14 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Field\QuantityField;
+use Base\Field\StockField;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter;
 
-final class QuantityConfigurator implements FieldConfiguratorInterface
+final class StockConfigurator implements FieldConfiguratorInterface
 {
     private $intlFormatter;
 
@@ -20,7 +20,7 @@ final class QuantityConfigurator implements FieldConfiguratorInterface
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
-        return QuantityField::class === $field->getFieldFqcn();
+        return StockField::class === $field->getFieldFqcn();
     }
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
@@ -30,9 +30,9 @@ final class QuantityConfigurator implements FieldConfiguratorInterface
             return;
         }
 
-        $scale = $field->getCustomOption(QuantityField::OPTION_NUM_DECIMALS);
-        $roundingMode = $field->getCustomOption(QuantityField::OPTION_ROUNDING_MODE);
-        $isStoredAsString = $field->getCustomOption(QuantityField::OPTION_STORED_AS_STRING);
+        $scale = $field->getCustomOption(StockField::OPTION_NUM_DECIMALS);
+        $roundingMode = $field->getCustomOption(StockField::OPTION_ROUNDING_MODE);
+        $isStoredAsString = $field->getCustomOption(StockField::OPTION_STORED_AS_STRING);
 
         $field->setFormTypeOptionIfNotSet('input', $isStoredAsString ? 'string' : 'number');
         $field->setFormTypeOptionIfNotSet('rounding_mode', $roundingMode);

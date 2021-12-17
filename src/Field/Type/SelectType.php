@@ -52,7 +52,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function getBlockPrefix(): string { return 'select2'; }
 
     public function guessClass($form, $options, $data) :?string {
-
+       
         $class = $options["class"] ?? null;
         if(!$class) {
 
@@ -227,6 +227,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             /* Override options.. I couldn't done that without accessing data */
             // It might be good to get read of that and be able to use normalizer.. as expected
             $options["class"]         = $this->guessClass($form, $options, $data);
+            dump("=====>".$options["class"], $form);
             if(!$options["class"]) throw new \Exception("Class cannot be determined in \"".$form->getName()."\"");
 
             $options["multiple"]      = $this->guessIfMultiple($form, $options);
@@ -507,7 +508,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $text = ($translator ? $translator->trans(camel_to_snake($className.".".strtolower($entry).".singular"), [], "@enums") : $entry);
             
             $icons = [];
-            $icon = $class::getIcons(0)[$entry] ?? null;
+            $icon = $class::getIcons(0)[$entry] ?? [];
             if($icon) $icons[] = $icon;
 
         } else if(is_object($entry) && $class !== null) {

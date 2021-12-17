@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\AssociationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -20,8 +21,9 @@ class AssociationConfigurator implements FieldConfiguratorInterface
     private $entityFactory;
     private $adminUrlGenerator;
 
-    public function __construct(EntityFactory $entityFactory, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, EntityFactory $entityFactory, AdminUrlGenerator $adminUrlGenerator)
     {
+        $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityFactory = $entityFactory;
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
@@ -34,11 +36,12 @@ class AssociationConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $propertyName = $field->getProperty();
-        if (!$entityDto->isAssociation($propertyName)) {
+        
+        if (!$this->classMetadataManipulator->hasAssociation($entityDto->getFqcn(), $propertyName)) {
             throw new \RuntimeException(sprintf('The "%s" field is not a Doctrine association, so it cannot be used as an association field.', $propertyName));
         }
         
-        $targetEntity = $entityDto->getPropertyMetadata($propertyName)->get("targetEntity");
+        $targetEntity = $this->classMetadataManipulator->getAssociationMapping($entityDto->getFqcn(), $propertyName)["targetEntity"] ?? null;
         if ($field->getFormTypeOption("class") == null)
             $field->setFormTypeOption("class", $targetEntity);
 
@@ -46,11 +49,11 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_DELETE));
         $field->setFormattedValue($field->getValue());
 
-        if ($entityDto->isToOneAssociation($propertyName)) {
+        if ($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
             $this->configureToOneAssociation($field);
         }
 
-        if ($entityDto->isToManyAssociation($propertyName)) {
+        if ($this->classMetadataManipulator->isToManySide($entityDto->getFqcn(), $propertyName)) {
             $this->configureToManyAssociation($field);
         }
 

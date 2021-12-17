@@ -3,10 +3,12 @@
 namespace Base\Field\Configurator;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\SelectField;
 use Base\Field\Type\SelectType;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -19,10 +21,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -34,7 +37,16 @@ class SelectConfigurator implements FieldConfiguratorInterface
     {
         // Formatted value
         $class = $field->getCustomOption(SelectField::OPTION_CLASS);
+        if(!$class) {
 
+            $values = $field->getValue();
+            if($values instanceof Collection) 
+                $class = is_object($values->first()) ? get_class($values->first()) : null;
+        }
+
+        dump($class,$field->getValue());
+
+        
         $values = $field->getValue();
         $values = is_array($values) ? new ArrayCollection($values) : $values;
         $formattedValues = [];

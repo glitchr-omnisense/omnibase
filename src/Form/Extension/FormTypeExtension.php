@@ -40,19 +40,22 @@ class FormTypeExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'form2' => $this->baseService->getParameterBag("base.twig.use_form2")
+            'form2' => $this->baseService->getParameterBag("base.twig.use_form2"),
+            'easyadmin' => $this->baseService->getParameterBag("base.twig.use_ea")
         ]);
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+            
         $this->browseView( $view, $form, $options);
     }
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
         if($options["form2"]) $this->applyForm2($view);
-
+        if($options["easyadmin"]) $this->applyEA($form, $view);
+        
         foreach($view->children as $field => $childView) {
 
             if (!$form->has($field))
@@ -61,6 +64,7 @@ class FormTypeExtension extends AbstractTypeExtension
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
             $childOptions["form2"] = $options["form2"];
+            $childOptions["easyadmin"] = $options["easyadmin"];
 
             $this->browseView($childView, $childForm, $childOptions);
         }
@@ -74,6 +78,29 @@ class FormTypeExtension extends AbstractTypeExtension
             array_search("form2", $view->vars['block_prefixes']) === false)
         {
             array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
+        }
+    }
+    
+    public function applyEA($form, $view) {
+        
+        if(!empty($view->vars["ea_crud_form"])) {
+
+            if(!$form->getParent()) {
+                if(!array_key_exists("class", $view->vars["attr"]))
+                    $view->vars["attr"]["class"] = "";
+
+                $view->vars["attr"]["class"] .= " row ";
+            }
+        }
+        
+        $fieldDto = $view->vars["ea_crud_form"]["ea_field"] ?? null;
+        if($fieldDto) {
+
+            $columns = $fieldDto->getColumns() ?? $fieldDto->getDefaultColumns() ?? "";
+            if(!array_key_exists("class", $view->vars["row_attr"]))
+                $view->vars["row_attr"]["class"] = "";
+
+            $view->vars["row_attr"]["class"] .= " ".$columns;
         }
     }
 }

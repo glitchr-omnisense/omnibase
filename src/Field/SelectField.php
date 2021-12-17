@@ -38,6 +38,7 @@ class SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::NO_SHOW)
             ->setCustomOption(self::OPTION_RENDER_AS_COUNT, true)
+            ->setColumns(6)
             ->setTextAlign(TextAlign::RIGHT)
             ->addCssClass('field-select');
     }

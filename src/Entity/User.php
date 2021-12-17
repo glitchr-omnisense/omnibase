@@ -215,8 +215,8 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", size="1024K", mime={"image/*"})
-     * @AssertBase\FileSize(max="1024K", groups={"new", "edit"})
+     * @Uploader(storage="local.storage", public="/storage", size="2MB", mime={"image/*"})
+     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
      */
     protected $avatar;
     public function getAvatar() { return Uploader::getPublic($this, "avatar"); }
@@ -226,7 +226,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
         $this->avatar = $avatar;
         return $this;
     }
-
+    
     /**
      * @ORM\Column(type="string", length=16)
      * @Assert\Locale(canonicalize = true)

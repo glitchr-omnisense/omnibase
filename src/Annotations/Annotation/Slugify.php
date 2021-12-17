@@ -24,6 +24,9 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  *   @Attribute("updatable", type = "bool"),
  *   @Attribute("unique",    type = "bool"),
  *
+ *   @Attribute("length",     type = "integer"),
+ *   @Attribute("zeros",     type = "integer"),
+ * 
  *   @Attribute("locale",    type = "string"),
  *   @Attribute("map",       type = "array"),
  *   @Attribute("separator", type = "string"),
@@ -46,6 +49,9 @@ class Slugify extends AbstractAnnotation
 
         $this->updatable = $data['updatable'] ?? false;
         $this->unique    = $data['unique']    ?? true;
+
+        $this->zeros = $data['zeros'] ?? 0;
+        $this->length = $data['length'] ?? null;
 
         $this->separator = $data['separator'] ?? '-';
         $this->lowercase = $data['lowercase'] ?? true;

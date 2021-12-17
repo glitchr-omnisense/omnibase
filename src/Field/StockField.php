@@ -2,18 +2,18 @@
 
 namespace Base\Field;
 
+use Base\Field\Type\StockType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
-final class QuantityField implements FieldInterface
+final class StockField implements FieldInterface
 {
     use FieldTrait;
 
     public const OPTION_NUM_DECIMALS = 'numDecimals';
     public const OPTION_ROUNDING_MODE = 'roundingMode';
     public const OPTION_STORED_AS_STRING = 'storedAsString';
-
+    public const OPTION_ALLOW_INFINITY = "allowInfinity";
     /**
      * @param string|false|null $label
      */
@@ -22,11 +22,12 @@ final class QuantityField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel($label)
-            ->setTemplateName('crud/field/number')
-            ->setTemplatePath('@EasyAdmin/crud/field/quantity.html.twig')
-            ->setFormType(NumberType::class)
-            ->addCssClass('field-number')
-            ->setDefaultColumns('col-md-4 col-xxl-3')
+            ->setTemplateName('crud/field/stock')
+            ->setTemplatePath('@EasyAdmin/crud/field/stock.html.twig')
+            ->setFormType(StockType::class)
+            ->addCssClass('field-stock')
+            ->setDefaultColumns(3)
+            ->setCustomOption(self::OPTION_ALLOW_INFINITY, false)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)
             ->setCustomOption(self::OPTION_ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP)
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);
@@ -39,7 +40,12 @@ final class QuantityField implements FieldInterface
         }
 
         $this->setCustomOption(self::OPTION_NUM_DECIMALS, $num);
+        return $this;
+    }
 
+    public function setAllowInfinity(bool $nullable = true)
+    {
+        $this->setCustomOption(self::OPTION_ALLOW_INFINITY, $nullable);
         return $this;
     }
 

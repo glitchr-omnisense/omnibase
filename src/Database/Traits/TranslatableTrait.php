@@ -128,16 +128,16 @@ trait TranslatableTrait
         if (str_starts_with($method, "set")) {
 
             $property = lcfirst(substr($method, 3));
-            try { return $this->__set($property, $arguments); }
-            catch (\BadMethodCallException $e) 
-            {
+        
+            if (empty($arguments))
+                throw new \BadMethodCallException("Missing argument for setter property \"$property\" in ". $className);
+            
+            try { return $this->__set($property, $arguments[0]); } 
+            catch (\BadMethodCallException $e) {
+
                 // Parent fallback setter
                 if($parentClass && method_exists($parentClass, "__set")) 
-                    return parent::__set($property, $arguments);
-
-            } catch (\InvalidArgumentException $e) { 
-
-                throw $e;
+                    return parent::__set($property, $arguments[0]);
             }
         }
 
@@ -180,20 +180,18 @@ trait TranslatableTrait
         throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 
-    public function __set($property, $arguments)
+    public function __set($property, $argument)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
-
+        
         //
         // Setter method in called class
         if(property_exists($this, $property)) {
 
-            if (empty($arguments))
-                throw new \InvalidArgumentException("Missing argument for setter property \"$property\" in ". get_class($this));
             if (!$accessor->isWritable($this, $property))
                 throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($this));
 
-            $accessor->setValue($this, $property, ...$arguments);
+            $accessor->setValue($this, $property, $argument);
             return $this;
         }
 
@@ -202,12 +200,10 @@ trait TranslatableTrait
         $entityTranslation = $this->translate();
         if(property_exists($entityTranslation, $property)) {
 
-            if (empty($arguments))
-                throw new \InvalidArgumentException("Missing argument for setter property \"$property\" in ". get_class($entityTranslation));
             if (!$accessor->isWritable($entityTranslation, $property))
                 throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityTranslation));
 
-            $accessor->setValue($entityTranslation, $property, ...$arguments);
+            $accessor->setValue($entityTranslation, $property, $argument);
             return $this;
         }
     }
@@ -257,6 +253,7 @@ trait TranslatableTrait
                 return $accessor->getValue($entityTranslation, $property);
         }
 
-        throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        return null; // PropertyAccessor try to access variable this way.
+        //throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 }

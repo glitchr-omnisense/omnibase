@@ -39,7 +39,7 @@ final class SlugType extends AbstractType
         $targetPath = explode(".", $options["target"]);
         $view->vars['target'] = $targetPath;
 
-        // Check if child exists
+        // Check if child exists.. this just trigger an exception..
         $target = $form->getParent();
         foreach($targetPath as $path) {
 

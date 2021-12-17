@@ -26,6 +26,7 @@ class ImageField extends FileField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("data_class", null)
+            ->setCustomOption(self::OPTION_SHOWFIRST, true)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "image");
     }
 }
