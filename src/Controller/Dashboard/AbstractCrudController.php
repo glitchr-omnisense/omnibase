@@ -56,9 +56,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         if(array_key_exists($entityFqcn, self::$crudController))
             return self::$crudController[$entityFqcn];
-
+        
         $crudController = preg_replace('/\\\Entity\\\/', "\\Controller\\\Dashboard\\\Crud\\", $entityFqcn);
         $crudController = $crudController . "CrudController";
+        if( false !== ($pos = strrpos($crudController, '\\__CG__\\')) ) 
+            $crudController = substr($crudController, $pos + 8);
 
         $appCrudController  = preg_replace("/^Base/", 'App', $crudController);
         $baseCrudController = preg_replace("/^App/", 'Base', $appCrudController);

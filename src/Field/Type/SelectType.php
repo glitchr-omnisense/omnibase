@@ -158,7 +158,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Guess class option
             $options["class"]         = $this->formFactory->guessType($event, $options);
-            
+
             // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessIfMultiple($form, $options);
             $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);

@@ -119,7 +119,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if ($options["allow_delete"] !== null) 
                     $collectionOptions['allow_delete'] = $options["allow_delete"];
 
-                $form->add($form->getName(), CollectionType::class, $collectionOptions);
+                $form->add("collection", CollectionType::class, $collectionOptions);
 
             } else {
 
@@ -150,7 +150,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     unset($field['form_type']);
 
                     $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
-                    if(!array_key_exists("required", $field) && $isNullable)
+                    if(array_key_exists("required", $field) && $isNullable)
                         $field['required'] = false;
                     
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];

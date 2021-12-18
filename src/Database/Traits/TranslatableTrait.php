@@ -241,8 +241,8 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for default locale
-        if ($entityTranslation->getLocale() == $defaultLocale) return $value;
-        else {
+
+        if ($entityTranslation->getLocale() != $defaultLocale) {
 
             $entityTranslation = $this->translate($defaultLocale);
             if(method_exists($entityTranslation, $property))
@@ -253,7 +253,7 @@ trait TranslatableTrait
                 return $accessor->getValue($entityTranslation, $property);
         }
 
+        throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
         return null; // PropertyAccessor try to access variable this way.
-        //throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 }

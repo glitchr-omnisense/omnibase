@@ -121,9 +121,9 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
                     // Simple case, data view from current form (handle ORM Proxy management)
                     if (null !== $dataClass = $form->getConfig()->getDataClass()) {
-                        if (false === $pos = strrpos($dataClass, '\\__CG__\\')) {
+
+                        if (false === $pos = strrpos($dataClass, '\\__CG__\\'))
                             return $dataClass;
-                        }
 
                         return substr($dataClass, $pos + 8);
                     }
