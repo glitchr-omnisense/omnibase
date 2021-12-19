@@ -64,32 +64,27 @@ class UserCrudController extends AbstractCrudController
         return parent::configureFields($pageName, [
 
             "id" => function() use ($defaultCallback, $callbacks) {
+    
+                yield BooleanField::new("isApproved")->withConfirmation();
+                foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
 
                 yield AvatarField::new('avatar')->hideOnDetail();
-                
                 foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
-                yield RoleField::new('roles')->setColumns(4)->allowMultipleChoices(true);
+                yield RoleField::new('roles')->setColumns(6)->allowMultipleChoices(true);
                 foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
                     yield $yield;
                     
-                yield EmailField::new('email')->setColumns(4);
+                yield EmailField::new('email')->setColumns(6);
                 foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
                     yield $yield;
         
                 yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
                 foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
                     yield $yield;
-            
-                yield BooleanField::new("isVerified")->hideOnIndex()->withConfirmation();
-                foreach ( ($callbacks["isVerified"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-                
-                yield BooleanField::new("isApproved")->onlyOnIndex()->withConfirmation();
-                foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-                        
+
                 yield DateTimeField::new('updatedAt')->onlyOnDetail();
                 foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
                     yield $yield;
