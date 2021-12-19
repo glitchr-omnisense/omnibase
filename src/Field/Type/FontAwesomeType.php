@@ -49,7 +49,7 @@ class FontAwesomeType extends SelectType
             $styles = $icon["styles"];
 
             foreach ($styles as $style)
-                $choices[ucfirst($style)." Style"][$label] = "fa".$style[0]." fa-".$key;
+                $choices[mb_ucfirst($style)." Style"][$label] = "fa".$style[0]." fa-".$key;
         }
 
         return $choices;

@@ -68,7 +68,7 @@ final class CrudWidgetItem implements MenuItemInterface
      */
     public function setDefaultSort(array $sortFieldsAndOrder): self
     {
-        $sortFieldsAndOrder = array_map('strtoupper', $sortFieldsAndOrder);
+        $sortFieldsAndOrder = array_map('mb_strtoupper', $sortFieldsAndOrder);
         foreach ($sortFieldsAndOrder as $sortField => $sortOrder) {
             if (!\in_array($sortOrder, [SortOrder::ASC, SortOrder::DESC])) {
                 throw new \InvalidArgumentException(sprintf('The sort order can be only "ASC" or "DESC", "%s" given.', $sortOrder));

@@ -15,8 +15,8 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 {
     public const TABLE_NAME_SIZE = 64;
 
-    public static function camelToSnakeCase($input): string { return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input)); }
-    public static function snakeToCamelCase($input): string { return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $input)))); }
+    public static function camelToSnakeCase($input): string { return mb_strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input)); }
+    public static function snakeToCamelCase($input): string { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace('_', ' ', $input)))); }
 
     /**
      * {@inheritdoc}

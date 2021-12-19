@@ -17,6 +17,7 @@ class RoleType extends AbstractType
     public function configureOptions(OptionsResolver $resolver) {
 
         $resolver->setDefaults([
+            "capitalize" => true,
             'class'      => UserRole::class,
             'empty_data' => UserRole::USER
         ]);

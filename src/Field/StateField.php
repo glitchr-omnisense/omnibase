@@ -22,7 +22,7 @@ class StateField extends SelectField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setFormType(StateType::class)
             ->setCustomOption(self::OPTION_CLASS, ThreadState::class)
-            ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
+            ->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL)
             ->setTextAlign(TextAlign::CENTER)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
     }

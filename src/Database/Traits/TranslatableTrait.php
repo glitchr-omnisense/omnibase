@@ -217,8 +217,8 @@ trait TranslatableTrait
         $entity = $this;
         if(method_exists($entity, $property))
             return $entity->{$property}();
-        else if (method_exists($entity, "get".ucfirst($property)))
-            return $entity->{"get".ucfirst($property)}();
+        else if (method_exists($entity, "get".mb_ucfirst($property)))
+            return $entity->{"get".mb_ucfirst($property)}();
         else if (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) 
             return $accessor->getValue($entity, $property);
 
@@ -230,8 +230,8 @@ trait TranslatableTrait
         $value = null;
         if(method_exists($entityTranslation, $property))
             $value = $entityTranslation->{$property}();
-        else if (method_exists($entityTranslation, "get".ucfirst($property)))
-            $value = $entityTranslation->{"get".ucfirst($property)}();
+        else if (method_exists($entityTranslation, "get".mb_ucfirst($property)))
+            $value = $entityTranslation->{"get".mb_ucfirst($property)}();
         else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property))
             $value = $accessor->getValue($entityTranslation, $property);
 
@@ -247,13 +247,16 @@ trait TranslatableTrait
             $entityTranslation = $this->translate($defaultLocale);
             if(method_exists($entityTranslation, $property))
                 return $entityTranslation->{$property}();
-            else if(method_exists($entityTranslation, "get".ucfirst($property)))
-                return $entityTranslation->{"get".ucfirst($property)}();
+            else if(method_exists($entityTranslation, "get".mb_ucfirst($property)))
+                return $entityTranslation->{"get".mb_ucfirst($property)}();
             else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property)) 
                 return $accessor->getValue($entityTranslation, $property);
         }
 
-        throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
-        return null; // PropertyAccessor try to access variable this way.
+        // Exception for EA variables (cf. EA's FormField)
+        if(!str_starts_with("ea_", $property))
+            throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        
+        return null;
     }
 }

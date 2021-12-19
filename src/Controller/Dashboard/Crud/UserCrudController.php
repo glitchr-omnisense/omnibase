@@ -32,13 +32,13 @@ class UserCrudController extends AbstractCrudController
 
             $extension->setImage($entity->getAvatar());
 
-            $userClass = "user.".strtolower(camel_to_snake(class_basename($entity)));
+            $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
             $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
             if($entityLabel == $userClass.".singular") $entityLabel = null;
-            else $extension->setTitle(ucwords($entityLabel));
+            else $extension->setTitle(mb_ucwords($entityLabel));
 
             $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-            $entityLabel = !empty($entityLabel) ? ucwords($entityLabel) : "";
+            $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
 
             $impersonate = null;
             if($this->isGranted("ROLE_SUPERADMIN"))
@@ -52,7 +52,11 @@ class UserCrudController extends AbstractCrudController
         return $extension;
     }
 
-    public function configureFilters(Filters $filters): Filters { return $filters->add('roles'); }
+    public function configureFilters(Filters $filters): Filters 
+    { 
+        return $filters->add('roles'); 
+    }
+    
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
@@ -66,7 +70,7 @@ class UserCrudController extends AbstractCrudController
                 foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
-                yield RoleField::new('roles')->setColumns(4)->allowMultipleChoices();
+                yield RoleField::new('roles')->setColumns(4)->allowMultipleChoices(true);
                 foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
                     yield $yield;
                     

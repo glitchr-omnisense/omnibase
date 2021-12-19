@@ -65,8 +65,8 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     public function getSalt(): ?string { return null; }
     // DEPRECATED-END
 
-    public const __ACTIVE_TIME__ = 60; /* time before next request */
-    public const __ONLINE_TIME__ = 60; /* time before next request */
+    public const __ACTIVE_TIME__ = 60;
+    public const __ONLINE_TIME__ = 60*5;
     private const __DEFAULT_IDENTIFIER__ = "email";
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
 
@@ -657,88 +657,76 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
         return $this;
     }
 
+    public function newcomer(bool $newState = true): self { return $this->setIsNewcomer( $newState); }
+    public function elder   (bool $newState = true): self { return $this->setIsNewcomer(!$newState); }
     public function isNewcomer(): bool { return in_array(UserState::NEWCOMER, $this->states); }
-    public function newcomer(bool $newState = true): self 
+    public function isElder()   : bool { return !$this->isNewcomer(); }
+    public function setIsNewcomer(bool $newState): self 
     { 
-        $state = $this->isNewcomer();
-        if($newState && !$state) $this->states[] = UserState::NEWCOMER;
-        else if (!$newState && $state) unset($this->state[UserState::NEWCOMER]);
-
+        $this->states = $newState ? array_keys_insert(UserState::NEWCOMER, $this->states, true) : array_keys_delete(UserState::NEWCOMER, $this->states);
         return $this;
     }
 
-    public function isApproved(): bool { return in_array(UserState::APPROVED, $this->states); }
-    public function approve(bool $newState = true): self 
+    public function approve    (bool $newState = true): self { return $this->setIsApproved( $newState); }
+    public function disregarded(bool $newState = true): self { return $this->setIsApproved(!$newState); }
+    public function isApproved()   : bool { return in_array(UserState::APPROVED, $this->states); }
+    public function isDisregarded(): bool { return !$this->isApproved(); }
+    public function setIsApproved(bool $newState): self 
     { 
-        $state = $this->isApproved();
-        if($newState && !$state) $this->states[] = UserState::APPROVED;
-        else if (!$newState && $state) unset($this->state[UserState::APPROVED]);
-
+        $this->states = $newState ? array_keys_insert(UserState::APPROVED, $this->states, true) : array_keys_delete(UserState::APPROVED, $this->states);
         return $this;
     }
 
+    public function verify(bool $newState = true): self { return $this->setIsVerified($newState); }
     public function isVerified(): bool { return in_array(UserState::VERIFIED, $this->states); }
-    public function verify(bool $newState = true): self
-    { 
-        $state = $this->isVerified();
-        if($newState && !$state) $this->states[] = UserState::VERIFIED;
-        else if (!$newState && $state) unset($this->state[UserState::VERIFIED]);
-
-        return $this;
-    }
-
-    public function isDisabled(): bool { return !$this->isEnabled(); }
-    public function isEnabled(): bool { return in_array(UserState::ENABLED, $this->states); }
-    public function disable(bool $newState = true): self { return $this->enable(!$newState); }
-    public function enable(bool $newState = true): self
-    { 
-        $state = $this->isEnabled();
-        if($newState && !$state) $this->states[] = UserState::ENABLED;
-        else if (!$newState && $state) unset($this->state[UserState::ENABLED]);
-
-        return $this;
-    }
-
-    public function isLocked(): bool { return in_array(UserState::LOCKED, $this->states); }
-    public function unlock(bool $newState = true): self { return $this->lock(!$newState); }
-    public function lock(bool $newState = true): self
-    { 
-        $state = $this->isLocked();
-        if($newState && !$state) $this->states[] = UserState::LOCKED;
-        else if (!$newState && $state) unset($this->state[UserState::LOCKED]);
-
-        return $this;
-    }
-
-    public function isBanned() { return in_array(UserState::BANNED, $this->states); } // TO IMPLEMENT..
-    public function unban(bool $newState = true): self { return $this->unban(!$newState); }
-    public function ban(bool $newState = true): self
-    { 
-        $state = $this->isBanned();
-        if($newState && !$state) $this->states[] = UserState::BANNED;
-        else if (!$newState && $state) unset($this->state[UserState::BANNED]);
-
-        return $this;
-    }
-
-    public function isKicked() { return in_array(UserState::KICKED, $this->states); } // TO IMPLEMENT..
-    public function unkick(bool $newState = true): self { return $this->unkick(!$newState); }
-    public function kick(bool $newState = true): self
+    public function setIsVerified(bool $newState) 
     {
-        $state = $this->isKicked();
-        if($newState && !$state) $this->states[] = UserState::KICKED;
-        else if (!$newState && $state) unset($this->state[UserState::KICKED]);
-
+        $this->states = $newState ? array_keys_insert(UserState::VERIFIED, $this->states, true) : array_keys_delete(UserState::VERIFIED, $this->states);
         return $this;
     }
 
-    public function isGhost() { return in_array(UserState::GHOST, $this->states); } // TO IMPLEMENT..
-    public function ghost(bool $newState = true): self
+    public function enable (bool $newState = true): self { return $this->setIsEnabled( $newState); }
+    public function disable(bool $newState = true): self { return $this->setIsEnabled(!$newState); }
+    public function isEnabled() : bool { return in_array(UserState::ENABLED, $this->states); }
+    public function isDisabled(): bool { return !$this->isEnabled(); }
+    public function setIsEnabled (bool $newState): self
     { 
-        $state = $this->isGhost();
-        if($newState && !$state) $this->states[] = UserState::GHOST;
-        else if (!$newState && $state) unset($this->state[UserState::GHOST]);
+        $this->states = $newState ? array_keys_insert(UserState::ENABLED, $this->states, true) : array_keys_delete(UserState::ENABLED, $this->states);
+        return $this;
+    }
 
+    public function lock  (bool $newState = true): self { return $this->setIsLocked( $newState); }
+    public function unlock(bool $newState = true): self { return $this->setIsLocked(!$newState); }
+    public function isLocked(): bool { return in_array(UserState::LOCKED, $this->states); }
+    public function setIsLocked(bool $newState): self 
+    {
+        $this->states = $newState ? array_keys_insert(UserState::LOCKED, $this->states, true) : array_keys_delete(UserState::LOCKED, $this->states);
+        return $this;
+    }
+
+    public function ban  (bool $newState = true): self { return $this->setIsBanned( $newState); }
+    public function unban(bool $newState = true): self { return $this->setIsBanned(!$newState); }
+    public function isBanned(): bool { return in_array(UserState::BANNED, $this->states); } // TO IMPLEMENT..
+    public function setIsBanned(bool $newState = true): self
+    { 
+        $this->states = $newState ? array_keys_insert(UserState::BANNED, $this->states, true) : array_keys_delete(UserState::BANNED, $this->states);
+        return $this;
+    }
+
+    public function kick  (bool $newState = true): self { return $this->setIsKicked( $newState); }
+    public function unkick(bool $newState = true): self { return $this->setIsKicked(!$newState); }
+    public function isKicked(): bool { return in_array(UserState::KICKED, $this->states); }
+    public function setIsKicked(bool $newState = true): self
+    {
+        $this->states = $newState ? array_keys_insert(UserState::KICKED, $this->states, true) : array_keys_delete(UserState::KICKED, $this->states);
+        return $this;
+    }
+
+    public function ghost(bool $newState = true): self { return $this->setIsGhost($newState); }
+    public function isGhost(): bool { return in_array(UserState::GHOST, $this->states); }
+    public function setIsGhost(bool $newState): self
+    { 
+        $this->states = $newState ? array_keys_insert(UserState::GHOST, $this->states, true) : array_keys_delete(UserState::GHOST, $this->states);
         return $this;
     }
 

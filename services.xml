@@ -438,25 +438,20 @@
             <argument type="service" id="translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.locale_provider" />
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Field\Type\FontAwesomeType">
-            <tag name="form.type" />
-            <argument type="service" id="translator" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Field\Type\CountryType">
-            <tag name="form.type" />
-            <argument type="service" id="translator" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="base.service" />
-        </service>
-
+        <service id="Base\Field\Type\FontAwesomeType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
+        
         <service id="Base\Field\Type\AssociationType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Field\Type\DiscriminatorType">
             <tag name="form.type" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -562,10 +557,11 @@
             <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
-        <service id="Base\Field\Configurator\RoleConfigurator"        parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\StateConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\CountryConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\FontAwesomeConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\RoleConfigurator"          parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\StateConfigurator"         parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\CountryConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\FontAwesomeConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\DiscriminatorConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
 
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Dashboard\AbstractDashboardController">

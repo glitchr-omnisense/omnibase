@@ -35,6 +35,8 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
+        $showFirst = $field->getCustomOption(SelectField::OPTION_SHOW_FIRST);
+        
         // Formatted value
         $class = $field->getCustomOption(SelectField::OPTION_CLASS);
         if(!$class) {
@@ -48,11 +50,17 @@ class SelectConfigurator implements FieldConfiguratorInterface
         $values = is_array($values) ? new ArrayCollection($values) : $values;
         $formattedValues = [];
 
+        $defaultClass = $this->classMetadataManipulator->getTargetClass($entityDto->getFqcn(), $field->getProperty());
+        if($this->classMetadataManipulator->isEntity($entityDto->getFqcn()) && $this->classMetadataManipulator->isToManySide($entityDto->getFqcn(), $field->getProperty()))
+            $field->setSortable(false);
+
         if ($values instanceof Collection) {
 
             foreach ($values as $key => $value) {
 
                 $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
+                $dataClass = $dataClass ?? $defaultClass;
+            
                 $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
                 
                 $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
@@ -64,9 +72,11 @@ class SelectConfigurator implements FieldConfiguratorInterface
         } else {
 
             $value = $field->getValue();
-            $field->setCustomOption(SelectField::OPTION_RENDER_AS_COUNT, false);
+            $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");
             
             $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
+            $dataClass = $dataClass ?? $defaultClass;
+
             $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
 
             $formattedValues = SelectType::getFormattedValues($field->getValue(), $dataClass, $this->translator);

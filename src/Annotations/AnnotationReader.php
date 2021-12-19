@@ -289,7 +289,7 @@ class AnnotationReader
 
             $targets = [];
             if (preg_match_all('/@Target\(\{(.*)\}\)/', $reflClass->getDocComment(), $matches, PREG_SET_ORDER))
-                $targets = json_decode(strtolower("[" . end($matches)[1] . "]"));
+                $targets = json_decode(mb_strtolower("[" . end($matches)[1] . "]"));
 
             foreach ($targets as $target) {
 

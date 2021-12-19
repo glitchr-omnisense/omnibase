@@ -20,8 +20,8 @@ namespace {
         }, $input);
     }
 
-    function camel_to_snake($input) { return strtolower(str_replace("._", ".", preg_replace('/(?<!^)[A-Z]/', '_$0', $input))); }
-    function snake_to_came($input)  { return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $input)))); }
+    function camel_to_snake($input) { return mb_strtolower(str_replace("._", ".", preg_replace('/(?<!^)[A-Z]/', '_$0', $input))); }
+    function snake_to_came($input)  { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace('_', ' ', $input)))); }
     function class_synopsis($object)
     {
         if (!$object) return dump("Object passed is null");
@@ -119,7 +119,7 @@ namespace {
         if($rest > 0) $quotient--;
         if($rest > 0) $factor--;
 
-        return strval($factor > 0 ? $quotient.@ucfirst($unitPrefix[$factor]) : $num);
+        return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor]) : $num);
     }
 
     function str2dec(string $str): int
@@ -129,20 +129,20 @@ namespace {
             throw new \Exception("Failed to parse string \"".$str."\"");
         
         $val        = intval($matches[3] == "" ? 1 : strrev($matches[3]));
-        $unitPrefix = strtolower(strrev($matches[2]));
+        $unitPrefix = mb_strtolower(strrev($matches[2]));
         $units      = strrev($matches[1]);
 
         if(in_array($units,  BIT_PREFIX)) $val *= 1; // LOL !
         if(in_array($units, BYTE_PREFIX)) $val *= 8;
         if ($unitPrefix) {
-           
+
             $binFactor = array_search($unitPrefix, BINARY_PREFIX);
             $decFactor = array_search($unitPrefix, DECIMAL_PREFIX);
             if( ! (($decFactor !== false) xor ($binFactor !== false)) )
                 throw new \Exception("Unexpected prefix unit \"$unitPrefix\" for \"".$str."\"");
-            
-            if($decFactor) $val *= 1000**($decFactor+1);
-            if($binFactor) $val *= 1024**($binFactor+1);
+
+            if($decFactor !== false) $val *= 1000**($decFactor+1);
+            if($binFactor !== false) $val *= 1024**($binFactor+1);
         }
         
         return intval($val);
@@ -159,7 +159,13 @@ namespace {
         return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array));
     }
 
-    function stringeable($value) {
+    function is_html(string $str)
+    {
+        return $str != strip_tags($str); 
+    }
+
+    function stringeable($value) 
+    {
         return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString');
     }
 
@@ -176,6 +182,16 @@ namespace {
     {
         $class = is_object($class) ? get_class($class) : $class;
         return basename(str_replace('\\', '/', $class));
+    }
+
+    function mb_ucfirst(string $str, ?string $encoding = null): string
+    {
+        return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding);
+    }
+
+    function mb_ucwords(string $str, ?string $encoding = null): string
+    {
+        return mb_convert_case($str, MB_CASE_TITLE, $encoding);
     }
 
     function array_is_nested($a)
@@ -296,7 +312,21 @@ namespace {
         return $result;
     }
 
-    function array_key_missing($keys, array $array) 
+    function array_keys_insert($keys, array $array, bool $unique = false) 
+    {
+        if(!is_array($keys)) $keys = [$keys => null];
+
+        $keys = array_keys($keys);
+        if(is_associative($keys))
+            throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
+
+        foreach($keys as $key)
+            if(!in_array($key, $array) || $unique == false) $array[] = $key;
+        
+        return $array;
+    }
+
+    function array_keys_delete($keys, array $array) 
     {
         if(!is_array($keys)) $keys = [$keys => null];
 

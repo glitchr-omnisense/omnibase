@@ -36,7 +36,7 @@ class StockType extends NumberType
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix()
+    public function getBlockPrefix(): string
     {
         return 'stock';
     }

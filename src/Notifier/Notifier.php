@@ -96,7 +96,7 @@ class Notifier implements NotifierInterface
         if(!$mail) $mail = $this->technicalRecipient->getEmail();
         if(!$mail) return null;
 
-        $mailName = $this->baseSettings->mail_name() ?? ucfirst(explode("@", $mail)[0]);
+        $mailName = $this->baseSettings->mail_name() ?? mb_ucfirst(explode("@", $mail)[0]);
         return $mailName." <".$mail.">";
     }
 

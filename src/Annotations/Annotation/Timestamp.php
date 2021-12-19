@@ -33,7 +33,7 @@ class Timestamp extends AbstractAnnotation
 
     public function __construct( array $data ) {
 
-        $this->context = array_map("strtolower", $data['on']);
+        $this->context = array_map("mb_strtolower", $data['on']);
         $this->fields = $data['fields'] ?? [];
         $this->value = $data['value'] ?? "";
     }

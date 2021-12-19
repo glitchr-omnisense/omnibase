@@ -89,7 +89,7 @@ class LocaleProvider implements LocaleProviderInterface
         return array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales));
     }
     
-    public static function getLang(string $locale): string
+    public static function getLang(?string $locale = null): string
     {
         $lang = substr($locale,0,2);
         if(!array_key_exists($lang, self::getLocales()))
@@ -98,7 +98,7 @@ class LocaleProvider implements LocaleProviderInterface
         return $lang;
     }
 
-    public static function getCountry(string $locale): string
+    public static function getCountry(?string $locale = null): string
     {
         $lang           = self::getLang($locale);
         $langCountries  = self::getLocales()[$lang];

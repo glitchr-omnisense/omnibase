@@ -16,7 +16,10 @@ use Base\Field\TranslationField;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class ThreadCrudController extends AbstractCrudController
 {
@@ -41,7 +44,7 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield SelectField::new('owners')->showFirst();
+        yield SelectField::new('owners')->showFirst()->setTextAlign(TextAlign::RIGHT);
         foreach ( ($callbacks["owners"] ?? $defaultCallback)() as $yield)
             yield $yield;
             
@@ -53,14 +56,9 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
             yield $yield;
     
-        yield TranslationField::new('title');
+        yield TranslationField::new()->hideOnIndex();
+        yield TextField::new('title')->hideOnDetail()->hideOnForm();
         foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-        yield TranslationField::new("excerpt")->hideOnIndex();
-        foreach ( ($callbacks["excerpt"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-        yield TranslationField::new("content")->hideOnIndex();
-        foreach ( ($callbacks["content"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
         yield TranslationField::new();
@@ -71,7 +69,7 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["publishedAt"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield DateTimePickerField::new('updatedAt');
+        yield DateTimePickerField::new('updatedAt')->onlyOnDetail();
         foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
             yield $yield;
             

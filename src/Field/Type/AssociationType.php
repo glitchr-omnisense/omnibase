@@ -129,8 +129,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
                         'Unable to get "class" or compute "data_class" from form "'.$form->getName().'" or any of its parents. '.
                         'Please define "class" option in the main AssociationType you defined or make sure there is a way to guess the expected output information');
 
-                $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-
                 $fields = $options["fields"];
                 if($options["autoload"])
                     $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
@@ -150,8 +148,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     unset($field['form_type']);
 
                     $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
-                    if(array_key_exists("required", $field) && $isNullable)
-                        $field['required'] = false;
+                    if( $isNullable) $field['required'] = false;
                     
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];
                     unset($field['allow_entity']);
@@ -194,7 +191,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
 
-        $dataClass = $form->getConfig()->getOption("data_class") ?? (is_object($viewData) ? get_class($viewData) : null);
+        $dataClass = $form->getConfig()->getOption("class") ?? (is_object($viewData) ? get_class($viewData) : null);
         if($this->classMetadataManipulator->isEntity($dataClass)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);

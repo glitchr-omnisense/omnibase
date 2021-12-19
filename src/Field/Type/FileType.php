@@ -188,8 +188,8 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['allow_delete'] !== null) $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
             if($options['max_filesize'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_filesize"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
-            if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = $acceptedFiles;
-
+            if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = implode(",", $acceptedFiles);
+            
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans("@fields.fileupload.dropzone.title").'</h4><p>'.$this->translator->trans("@fields.fileupload.dropzone.description").'</p>';
 

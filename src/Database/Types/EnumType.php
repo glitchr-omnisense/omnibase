@@ -32,7 +32,7 @@ abstract class EnumType extends Type implements IconInterface
         if(!$permittedValues)
             throw new \Exception("Enum type \"".get_called_class()."\" is empty");
 
-        if( ($missingKeys = array_key_missing(get_called_class()::getIcons(), $permittedValues)) )
+        if( ($missingKeys = array_keys_delete(get_called_class()::getIcons(), $permittedValues)) )
             throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
 
         return $permittedValues;

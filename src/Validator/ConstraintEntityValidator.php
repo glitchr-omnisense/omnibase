@@ -55,7 +55,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         foreach ($attributes as $key => $value) {
 
             // One gets the setter's name matching the attribute.
-            $method = 'set' . ucfirst($key);
+            $method = 'set' . mb_ucfirst($key);
 
             // If the matching setter exists
             if (method_exists($originalEntity, $method)) {
@@ -96,7 +96,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
        // $errorPath = (null !== $constraint->errorPath ? $constraint->errorPath : $constraint->fields[0]);
 
         $entityExploded = explode("\\", \get_class($entity));
-        $entityName = strtolower(array_pop($entityExploded));
+        $entityName = mb_strtolower(array_pop($entityExploded));
 
         if ($constraint->em) {
             $em = $this->getDoctrine()->getManager($constraint->em);

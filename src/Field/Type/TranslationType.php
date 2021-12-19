@@ -138,7 +138,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
             $multiple = $event->getForm()->getConfig()->getOption("multiple");
             if(!$multiple) $data = [$data];
-            
+
             foreach($data as $key => $array) {
 
                 foreach ($array as $locale => $translation) {
@@ -294,6 +294,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
+
         foreach(iterator_to_array($forms) as $locale => $form) {
 
             $data = $form->getData();

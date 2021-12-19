@@ -82,9 +82,30 @@ class ClassMetadataManipulator
         return is_subclass_of($class, SetType::class);
     }
 
-    public function getDoctrineType(?string $type) {
+    public function getDoctrineType(?string $type)
+    {
         if(!$type) return $type;
         return \Doctrine\DBAL\Types\Type::getType($type);
+    }
+
+    public function getTargetClass($entity, $fieldName)
+    {
+        // Associations can help to guess the expected returned values
+        if($this->hasAssociation($entity, $fieldName)) {
+            
+            return $this->getAssociationTargetClass($entity, $fieldName);
+
+        } else if($this->hasField($entity, $fieldName)) {
+
+            // Doctrine types as well.. (e.g. EnumType or SetType)
+            $fieldType = $this->getTypeOfField($entity, $fieldName);
+
+            $doctrineType = $this->getDoctrineType($fieldType);
+            if($this->isEnumType($doctrineType) || $this->isSetType($doctrineType))
+                return get_class($doctrineType);
+        }
+
+        return null;
     }
 
     public function getClassMetadata($entity)
@@ -314,10 +335,10 @@ class ClassMetadataManipulator
         return $metadata->isAssociationInverseSide($fieldName);
     }
 
-    public function isToOneSide($class, string $fieldName): bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true); }
-    public function isToManySide($class, string $fieldName): bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isToOneSide ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true); }
+    public function isToManySide($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true); }
     public function isManyToSide($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isOneToSide($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true); }
+    public function isOneToSide ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true); }
     public function isManyToMany($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_MANY], true); }
     public function isOneToMany ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::ONE_TO_MANY], true); }
     public function isManyToOne ($class, string $fieldName):bool { return \in_array($this->getAssociationType($class, $fieldName), [ClassMetadataInfo::MANY_TO_ONE], true); }

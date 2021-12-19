@@ -50,7 +50,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         $type = explode("\\", get_class($form->getConfig()->getType()->getInnerType()));
             
             $label = $view->vars["label"] ?? null;
-            if($label === null) $label = ucfirst((string) $view->vars["name"]);
+            if($label === null) $label = mb_ucfirst((string) $view->vars["name"]);
 
             $attr = $view->vars["attr"];
            

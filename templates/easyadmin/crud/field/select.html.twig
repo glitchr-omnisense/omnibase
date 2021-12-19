@@ -2,11 +2,15 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 
+{% set displayLimit = field.customOptions.get('displayLimit') %}
 {% set show = field.customOptions.get('show') %}
 {% set showFirst = field.customOptions.get('showFirst') %}
-{% set renderAsCount = field.customOptions.get('renderAsCount') %}
 
 {% if field.value is iterable %}
+
+    {% if showFirst and field.formattedValue.count is defined %}
+        {% set displayLimit = displayLimit > 0 ? displayLimit - 1 : displayLimit %}
+    {% endif %}
 
     {% set formattedValues = field.formattedValue %}
     {% set hasEntries = formattedValues|length > 0 %}
@@ -14,38 +18,55 @@
     {% if showFirst %}
 
         {% if hasEntries %}
-        
-        {% set formattedValue = formattedValues|first %}
-        {% set fieldLink = formattedValue['url'] ?? null %}
-        <span class="badge badge-secondary">
-            {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
-            {% if showFirst == 1 %}
-                {{formattedValue.text|default("-")}}  
-            {% elseif showFirst == 2 %}
-                <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
-                {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                 |default(formattedValue.icon|imagify)|default("") | raw}}
-                </div>
-            {% else %}
-                <span class="label">{{formattedValue.text|default("-")}}</span>
-                {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                 |default(formattedValue.icon|imagify)|default("") | raw}}
-            {% endif %}
-            {% if fieldLink is not null %}</a>{% endif %}
-        </span>
 
-        {% set formattedValues = formattedValues|slice(1) %}
+            {% set formattedValue = formattedValues|first %}
+            {% set fieldLink = formattedValue['url'] ?? null %}
+
+            {% set icon = null %}
+            {% if formattedValue.icon is defined %}
+                {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+            {% endif %}
+
+            <span class="badge badge-secondary">
+                {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+                {% if showFirst == 1 %}
+                    {{formattedValue.text|default("-")}}  
+                {% elseif showFirst == 2 %}
+                    <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
+                {% else %}
+                    {% if icon is not null %}
+                        <span class="label">{{formattedValue.text|default("-")}}</span>
+                    {% else %}
+                        {{formattedValue.text|default("-")}}
+                    {% endif %}
+                    {{ icon|raw }}
+                {% endif %}
+                {% if fieldLink is not null %}</a>{% endif %}
+            </span>
+
+            {% set formattedValues = formattedValues|slice(1) %}
         {% endif %}
 
     {% endif %}
 
-    {% if renderAsCount %}
+    {% set stillMore = "" %}
+
+    {% set others = [] %}
+    {% for other in formattedValues %}
+        {% if displayLimit > others|length %}
+            {% set others = others|merge([other]) %}
+        {% elseif displayLimit > 0 %}
+            {% set stillMore = others|length != 0 ? ", [..]" : "[..]" %}
+        {% endif %}
+    {% endfor %}
+
+    {% if field.customOptions.get('renderFormat') == "count" %}
 
         {% set sign = showFirst ? "+" : "" %}
         {%- if formattedValues|length -%}
             {% set formattedValue = formattedValues|first %}
-            {%- set names = formattedValues|map(f => "#{f.text}") -%}
-            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ names|join(', ') }}">
+            {%- set names = others|map(f => "#{f.text}") -%}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ names|join(', ')~stillMore }}">
                 {{sign}}{{ names|length }}
             </span>
         {%- elseif not hasEntries -%}
@@ -58,7 +79,12 @@
             <span class="badge badge-secondary">-</span>
         {% endif %}
 
-        {% for fieldKey,formattedValue in formattedValues %}
+        {% for fieldKey,formattedValue in others %}
+
+            {% set icon = null %}
+            {% if formattedValue.icon is defined %}
+                {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+            {% endif %}
 
             {% set fieldLink = formattedValue['url'] ?? null %}
 
@@ -66,19 +92,27 @@
                 {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if show == 1 %}
                     {{formattedValue.text|default("-")}}  
-                {% elseif show == 2 %}
-                    <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
-                    {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                    |default(formattedValue.icon|imagify)|default("") | raw}}
-                    </div>
+                {% elseif showFirst == 2 %}
+                    <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
                 {% else %}
-                    <span class="label">{{formattedValue.text|default("-")}}</span>
-                    <span>{{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                    |default(formattedValue.icon|imagify)|default("") | raw}}</span>
+                    {% if icon is not null %}
+                        <span class="label">{{formattedValue.text|default("-")}}</span>
+                    {% else %}
+                        {{formattedValue.text|default("-")}}
+                    {% endif %}
+                    {{ icon|raw }}
                 {% endif %}
+
                 {% if fieldLink is not null %}</a>{% endif %}
             </span>
         {% endfor %}
+
+        {% set sign = (formattedValues|length - others|length > 0) ? "+" : "" %}
+        {%- if sign is not empty -%}
+            <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="[..]">
+                {{sign}}{{ (formattedValues|length - others|length) }}
+            </span>
+        {%- endif -%}
 
     {% endif %}
 
@@ -94,24 +128,31 @@
             <span class="badge badge-secondary">-</span>
         {% endif %}
 
+        {% set icon = null %}
+        {% if formattedValue.icon is defined %}
+            {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+        {% endif %}
+
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if showFirst == 1 %}
             <span>{{formattedValue.text|default("-")}}</span>
         {% elseif showFirst == 2 %}
-            <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
-            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(formattedValue.icon|imagify)|default("") | raw}}
-            </div>
+            <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
         {% else %}
-            <span><span class="label">{{formattedValue.text|default("-")}}</span>
-            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(formattedValue.icon|imagify)|default("") | raw}}</span>
+            <span>
+                {% if icon is not null %}
+                    <span class="label">{{formattedValue.text|default("-")}}</span>
+                {% else %}
+                    {{formattedValue.text|default("-")}}
+                {% endif %}
+                {{ icon|raw }}
+            </span>
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>
 
-    {% elseif renderAsCount %}
+    {% elseif field.customOptions.get('renderFormat') == "count" %}
 
         {%- if formattedValue is not empty -%}
             <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">1</span>
@@ -125,19 +166,26 @@
             <span class="badge badge-secondary">-</span>
         {% endif %}
 
+        {% set icon = null %}
+        {% if formattedValue.icon is defined %}
+            {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+        {% endif %}
+
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if show == 1 %}
             <span>{{formattedValue.text|default("-")}}</span>
         {% elseif show == 2 %}
-            <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">
-            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                            |default(formattedValue.icon|imagify)|default("") | raw}}
-            </div>
+            <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
         {% else %}
-            <span><span class="label">{{formattedValue.text|default("-")}}</span>
-            {{formattedValue.icon|fontAwesome({class:"fa-fw"})
-                                |default(formattedValue.icon|imagify)|default("") | raw}}</span>
+            <span>
+                {% if icon is not null %}
+                    <span class="label">{{formattedValue.text|default("-")}}</span>
+                {% else %}
+                    {{formattedValue.text|default("-")}}
+                {% endif %}
+                {{ icon|raw }}
+            </span>
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>

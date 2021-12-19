@@ -11,17 +11,21 @@ class SelectField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_ALLOW_MULTIPLE_CHOICES = 'allowMultipleChoices';
     public const OPTION_AUTOCOMPLETE = 'autocomplete';
+    
     public const OPTION_CHOICES = 'choices';
-    public const OPTION_ICONS = 'icons';
-    public const OPTION_FILTER = 'filter';
-    public const OPTION_DEFAULT_CHOICE = "default_choice";
-    public const OPTION_CLASS = 'class';
+    public const OPTION_ICONS   = 'icons';
+    public const OPTION_FILTER  = 'filter';
 
-    public const OPTION_RENDER_AS_COUNT = 'renderAsCount';
-    public const OPTION_SHOW_FIRST = 'showFirst';
-    public const OPTION_SHOW = 'show';
+    public const OPTION_DEFAULT_CHOICE = "default_choice";
+    public const OPTION_CLASS          = 'class';
+
+    public const OPTION_DISPLAY_LIMIT = 'displayLimit';
+
+    public const OPTION_RENDER_FORMAT   = "renderFormat";
+    public const OPTION_SHOW_FIRST      = 'showFirst';
+    public const OPTION_SHOW            = 'show';
+
     public const NO_SHOW        = 0;
     public const SHOW_NAME_ONLY = 1;
     public const SHOW_ICON_ONLY = 2;
@@ -35,9 +39,10 @@ class SelectField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setFormType(SelectType::class)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
+            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::NO_SHOW)
-            ->setCustomOption(self::OPTION_RENDER_AS_COUNT, true)
+            ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
             ->setColumns(6)
             ->setTextAlign(TextAlign::CENTER)
             ->addCssClass('field-select');
@@ -45,7 +50,7 @@ class SelectField implements FieldInterface
 
     public function allowMultipleChoices(bool $allow = true): self
     {
-        $this->setCustomOption(self::OPTION_ALLOW_MULTIPLE_CHOICES, $allow);
+        $this->setFormTypeOptionIfNotSet("multiple", $allow);
         return $this;
     }
 
@@ -67,6 +72,12 @@ class SelectField implements FieldInterface
             $this->setFormTypeOptionIfNotSet(self::OPTION_CLASS, $filter[0]);
         
         $this->setCustomOption(self::OPTION_FILTER, $filter);
+        return $this;
+    }
+
+    public function setDisplayLimit(int $limit = 2): self
+    {
+        $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
         return $this;
     }
 
@@ -94,9 +105,15 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function renderAsCount(bool $render = true)
+    public function renderAsCount(): self
     {
-        $this->setCustomOption(self::OPTION_RENDER_AS_COUNT, $render);
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+        return $this;
+    }
+
+    public function renderAsText(): self
+    {
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
         return $this;
     }
 

@@ -19,8 +19,8 @@ trait ProxyTrait
 
         if(method_exists(get_class($this->_proxy), $methodOrProperty))
             return $this->_proxy->{$methodOrProperty}(...$arguments);
-        if(method_exists(get_class($this->_proxy), "get".ucfirst($methodOrProperty)))
-            return $this->_proxy->{"get".ucfirst($methodOrProperty)}(...$arguments);
+        if(method_exists(get_class($this->_proxy), "get".mb_ucfirst($methodOrProperty)))
+            return $this->_proxy->{"get".mb_ucfirst($methodOrProperty)}(...$arguments);
 
         $accessor = PropertyAccess::createPropertyAccessor();
         if ($accessor->isReadable($this->_proxy, $methodOrProperty))

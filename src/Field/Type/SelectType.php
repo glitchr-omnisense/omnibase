@@ -9,7 +9,7 @@ use Base\Form\FormFactory;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\ArrayCollection;
+use Base\Service\LocaleProvider;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\PersistentCollection;
@@ -43,7 +43,12 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var FormFactory */
     protected $formFactory;
 
-    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
+    public const FORMAT_TITLECASE    = "FORMAT_TITLECASE";
+    public const FORMAT_SENTENCECASE = "FORMAT_SENTENCECASE";
+    public const FORMAT_LOWERCASE    = "FORMAT_LOWERCASE";
+    public const FORMAT_UPPERCASE    = "FORMAT_UPPERCASE";
+    
+    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, BaseService $baseService)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
@@ -53,6 +58,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->hashIds = new Hashids();
 
         $this->formFactory = $formFactory;
+        $this->localeProvider = $localeProvider;
     }
 
     public function getBlockPrefix(): string { return 'select2'; }
@@ -84,6 +90,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             'choices' => null,
             'choice_filter' => null,
+            'choice_exclusive' => true,
             // 'choice_value'   => function($key)              { return $key;   },   // Return key code
             // 'choice_label'   => function($key, $label, $id) { return $label; },   // Return translated label
             // 'choice_loader'  => function (Options $options) {
@@ -108,12 +115,14 @@ class SelectType extends AbstractType implements DataMapperInterface
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
 
             // Use 'template' in replacement of selection/result template
-            'template'          => "function(option, that) { console.log(option, that);return $('<span class=\"select2-selection__entry\">' + (option.html ? option.html : (option.icon ? '<i class=\"'+option.icon+'\"></i>  ' : '') + option.text + '</span>')); }",
+            'template'          => "function(option, that) { return $('<span class=\"select2-selection__entry\">' + (option.html ? option.html : (option.icon ? '<i class=\"'+option.icon+'\"></i>  ' : '') + option.text + '</span>')); }",
             'templateSelection' => null,
             'templateResult'    => null,
 
             // Generic parameters
             'placeholder'        => "Choose your selection..",
+            'capitalize'         => false,
+            'language'           => null,
             'required'           => true,
             'multiple'           => null,
             'maximum'            => 0,
@@ -160,16 +169,16 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["class"]         = $this->formFactory->guessType($event, $options);
 
             // Guess multiple option
-            $options["multiple"]      = $this->formFactory->guessIfMultiple($form, $options);
+            $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
             $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
             if($options["multiple"] && !$multipleExpected) 
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
-            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($options, $data);
+            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $data);
             if(!$options["choices"]) {
 
-                $options["choices"] = $this->formFactory->guessChoices($options);
-                $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($options);
+                $options["choices"] = $this->formFactory->guessChoices($form, $options);
+                $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
 
                 /* Override options.. I couldn't done that without accessing data */
                 // It might be good to get read of that and be able to use normalizer.. as expected
@@ -193,8 +202,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"]; 
             $options["class"]          = $this->formFactory->guessType($event, $options);
-            
-            $choiceData = $options["multiple"] ? $data["choice"] : [$data["choice"]];
+
+            $choiceData = $options["multiple"] ? $data["choice"] ?? [] : [];
+            if(!$options["multiple"]) $choiceData[] = $data["choice"];
 
             if ($options["class"]) {
 
@@ -206,9 +216,12 @@ class SelectType extends AbstractType implements DataMapperInterface
                         return [$i, array_key_transforms($callback, $value)];
 
                     // Format values
-                    $entry = self::getFormattedValues($value, $options["class"], $this->translator);
-                    if(!$options["class"]) $entry["text"] = $key;
+                    $entry = self::getFormattedValues(
+                        $value, $options["class"], $this->translator, 
+                        $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE
+                    );
 
+                    if(!$options["class"]) $entry["text"] = $key;
                     return [$entry["id"], $entry["text"]];
 
                 }, $dataset ?? []);
@@ -276,8 +289,12 @@ class SelectType extends AbstractType implements DataMapperInterface
         $choiceData = $choiceType->getViewData();
 
         $options = $choiceType->getConfig()->getOptions();
-        $options["class"] = $this->formFactory->guessType($choiceType, $options);
+        $options["class"] = $this->formFactory->guessType($choiceType->getParent());
+
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
+
+            $options["multiple"] = null;
+            $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
@@ -286,7 +303,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $choiceData = $classRepository->findOneById($choiceData);
             }
         }
-        
+
         if($viewData instanceof Collection) {
         
             $viewData->clear();
@@ -308,13 +325,13 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             /* Override options.. I couldn't done that without accessing data */
             $options["class"]         = $this->formFactory->guessType($form, $options);
-            $options["multiple"]      = $this->formFactory->guessIfMultiple($form, $options);
-            $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($options);
-            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($options, $form->getData());
-            $options["choices"]       = $this->formFactory->guessChoices($options);
+            $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
+            $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
+            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $form->getData());
+            $options["choices"]       = $this->formFactory->guessChoices($form, $options);
 
             $multipleExpected = $form->getData() instanceof Collection || is_array($form->getData());
-            if($options["multiple"] && !$multipleExpected) 
+            if($options["multiple"] && !$multipleExpected)
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
             //
@@ -353,8 +370,10 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             if(!array_key_exists("placeholder", $selectOpts))
                      $selectOpts["placeholder"] = $options["placeholder"] ?? "";
+
             if(!array_key_exists("language", $selectOpts))
-                     $selectOpts["language"]        = $options["locale"] ?? \Locale::getDefault();
+                     $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));
+
             if(!array_key_exists("tokenSeparators", $selectOpts))
                      $selectOpts["tokenSeparators"] = $selectOpts["tokenSeparators"] ?? $options["tokenSeparators"];
             if(!array_key_exists("allowClear", $selectOpts))
@@ -440,7 +459,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     }
     
 
-    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null) 
+    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = self::FORMAT_SENTENCECASE) 
     {
         if($entry == null) return null;
         if (is_subclass_of($class, EnumType::class) || is_subclass_of($class, SetType::class)) {
@@ -449,7 +468,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $id = $entry;
             $html = null;
 
-            $text = ($translator ? $translator->trans(camel_to_snake($className.".".strtolower($entry).".singular"), [], "@enums") : $entry);
+            $text = ($translator ? $translator->trans(camel_to_snake($className.".".mb_strtolower($entry).".singular"), [], "@enums") : $entry);
             
             $icons = [];
             $icon = $class::getIcons(0)[$entry] ?? [];
@@ -459,14 +478,18 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $accessor = PropertyAccess::createPropertyAccessor();
             $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
-            $html = null;
+
+            $autocomplete = null;
             if(class_implements_interface($entry, AutocompleteInterface::class))
-                $html = $entry->autocomplete() ?? null;
+                $autocomplete = $entry->__autocomplete() ?? null;
             
             $className = class_basename(get_class($entry));
             if($translator) $className = $translator->trans(camel_to_snake($className.".singular"), [], "@entities");
 
-            $text = stringeable($entry) ? strval($entry) : $className + "#".$entry->getId();
+            $html = is_html($autocomplete) ? $autocomplete : null;
+            $text = is_html($autocomplete) ? null : $autocomplete;
+            if(!$text)
+                $text = stringeable($entry) ? strval($entry) : $className + " #".$entry->getId();
 
             $icons = $entry->__iconize() ?? [];
             if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
@@ -480,10 +503,25 @@ class SelectType extends AbstractType implements DataMapperInterface
             $html = null;
         }
 
+        switch($format)
+        {
+            case self::FORMAT_TITLECASE: $text = mb_ucfirst(mb_strtolower($text));
+                break;
+                
+            case self::FORMAT_SENTENCECASE: $text = mb_ucwords(mb_strtolower($text));
+                break;
+                
+            case self::FORMAT_LOWERCASE: $text = mb_strtolower($text);
+                break;
+                
+            case self::FORMAT_UPPERCASE: $text = mb_strtoupper($text);
+                break;
+        }
+
         return [
             "id"   => $id ?? null,
             "icon" => begin($icons),
-            "text" => ucwords($text),
+            "text" => $text,
             "html" => $html
         ];
     }

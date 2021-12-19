@@ -45,7 +45,7 @@ use function end;
 use function explode;
 use function is_subclass_of;
 use function strpos;
-use function strtolower;
+use function mb_strtolower;
 
 /**
  *
@@ -353,12 +353,12 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     private function getShortName(string $className): string
     {
         // if (strpos($className, '\\') === false) {
-        //     return strtolower($className);
+        //     return mb_strtolower($className);
         // }
 
         // $parts = explode('\\', $className);
 
-        // return strtolower(end($parts));
+        // return mb_strtolower(end($parts));
 
         return $className;
     }

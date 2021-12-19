@@ -2,9 +2,10 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% set displayLimit = field.customOptions.get('displayLimit') %}
+{% set showFirst = field.customOptions.get('showFirst') %}
 {% if 'toMany' == field.customOptions.get('associationType') %}
 
-    {% if field.customOptions.get('showFirst') and field.formattedValue.count is defined %}
+    {% if showFirst and field.formattedValue.count is defined %}
         {% set displayLimit = displayLimit > 0 ? displayLimit - 1 : displayLimit %}
     {% endif %}
 
@@ -18,7 +19,7 @@
         {% endif %}
     {% endfor %}
 
-    {% if field.customOptions.get('showFirst') and field.formattedValue.count is defined %}
+    {% if showFirst and field.formattedValue.count is defined %}
 
         {% set icon = null %}
         {% if method_exists(field.formattedValue.first, "__iconize") %}
@@ -40,7 +41,15 @@
             {% if field.customOptions.get('relatedUrl') is not null %}
             <a href="{{ field.customOptions.get('relatedUrl') }}">{{ label|raw }}{{icon|raw}}</a>
             {% else %}
-            <div>{{ label|raw }}{{icon|raw}}</div>
+            <div>
+                {% if showFirst == 1 %}
+                    {{ label|raw }}
+                {% elseif showFirst == 2 %}
+                    {{icon|raw}}
+                {% else %}
+                    {{ label|raw }}{{icon|raw}}
+                {% endif %}
+            </div>
             {% endif %}
         </span>
 

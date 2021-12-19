@@ -17,7 +17,7 @@ use App\Repository\User\PermissionRepository;
 class Permission implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-exclamation-triangle"]; } 
+    public static function __staticIconize() : ?array { return ["fas fa-lock"]; } 
 
     /**
      * @ORM\Id

@@ -7,11 +7,19 @@ use Base\Field\IdField;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseSettings;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterCrudActionEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -29,6 +37,32 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         
         $this->crud = null;
         $this->entity = null;
+    }
+
+    protected function ajaxEdit(EntityDto $entityDto, ?string $propertyName, bool $newValue): AfterCrudActionEvent
+    {
+        if($propertyName)
+            $this->container->get(EntityUpdater::class)->updateProperty($entityDto, $propertyName, $newValue);
+
+        $event = new BeforeEntityUpdatedEvent($entityDto->getInstance());
+        $this->container->get('event_dispatcher')->dispatch($event);
+        $entityInstance = $event->getEntityInstance();
+
+        $this->updateEntity($this->container->get('doctrine')->getManagerForClass($entityDto->getFqcn()), $entityInstance);
+
+        $this->container->get('event_dispatcher')->dispatch(new AfterEntityUpdatedEvent($entityInstance));
+
+        $entityDto->setInstance($entityInstance);
+
+        $parameters = KeyValueStore::new([
+            'action' => Action::EDIT,
+            'entity' => $entityDto,
+        ]);
+
+        $event = new AfterCrudActionEvent($this->getContext(), $parameters);
+        $this->container->get('event_dispatcher')->dispatch($event);
+
+        return $event;
     }
 
     public static function getEntityFqcn(): string
@@ -137,7 +171,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $icon = $this->getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
 
         $this->extension->setIcon($icon);
-        $this->extension->setTitle(ucfirst($title));
+        $this->extension->setTitle(mb_ucfirst($title));
         $this->extension->setHelp($help);
         $this->extension->setText($text);
         
@@ -156,13 +190,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         if($entity = $this->getEntity()) {
 
-            $userClass = "user.".strtolower(camel_to_snake(class_basename($entity)));
+            $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
             $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
             if($entityLabel == $userClass.".singular") $entityLabel = null;
-            else $extension->setTitle(ucwords($entityLabel));
+            else $extension->setTitle(mb_ucwords($entityLabel));
 
             $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-            $entityLabel = !empty($entityLabel) ? ucwords($entityLabel) : "";
+            $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
 
             $entityTitle = $entity->getTitle();
             if($entityTitle) $entityText  = $entityLabel ." ID #".$entity->getId();

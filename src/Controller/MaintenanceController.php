@@ -20,7 +20,7 @@ class MaintenanceController extends AbstractController
     /**
      * Link to this controller to start the maintenance
      *
-     * @Route("/m", name="base_maintenance")
+     * @Route("/m", name="maintenance")
      */
     public function Main(): Response
     {

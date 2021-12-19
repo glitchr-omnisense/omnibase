@@ -5,6 +5,7 @@ namespace Base\Controller;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\Type\SelectType;
 use Base\Service\BaseService;
+use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
@@ -18,6 +19,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectController extends AbstractController
 {
+    /**
+     * @var Paginator
+     */
+    protected $paginator;
+
     public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
         $this->hashIds = new Hashids();
@@ -49,6 +55,7 @@ class SelectController extends AbstractController
         $token   = $dict["token"] ?? null;
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
+        $page    = $dict["page"] ?? 0;
         $class   = $dict["class"] ?? null;
 
         $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
@@ -62,38 +69,14 @@ class SelectController extends AbstractController
             if($this->classMetadataManipulator->isEntity($class)) {
                 
                 $repository = $this->entityManager->getRepository($class);
-                if ($fields && !empty($term)) {
+                
+                $fields = array_fill_keys($fields, $term);
+                $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
 
-                    $fields = array_fill_keys($fields, $term);
-                    $entries = $repository->findByInsensitivePartialModel($fields);
-                    if($filters) $entries = array_filter($entries, function($entry) use ($filters) {
+                $book = $this->paginator->paginate($entries, $page);
+                $pagination = $book->getTotalPages() > $book->getPage();
 
-                        foreach($filters as $filter)
-                            if(is_subclass_of($entry, $filter)) return true;
-
-                        return false;
-                    });
-
-                    $book = $this->paginator->paginate($entries, $page);
-                    $pagination = $book->getTotalPages() == $book->getPage();
-
-                } else {
-
-                    $entries = $repository->findAll(); // If no field, then get them all..
-                    if($filters) $entries = array_filter($entries, function($entry) use ($filters) {
-
-                        foreach($filters as $filter)
-                            if(is_subclass_of($entry, $filter)) return true;
-
-                        return false;
-                    });
-                    
-                    if($term) $entries = array_filter($entries, fn($e) => str_contains(strval($e), $term));
-
-                    $pagination = false;
-                }
-
-                foreach($entries as $i => $entry) 
+                foreach($book as $i => $entry)
                     $results[] = SelectType::getFormattedValues($entry, $class, $this->translator);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
@@ -106,7 +89,7 @@ class SelectController extends AbstractController
             $array = [];
             $array["pagination"] = ["more" => $pagination];
             $array["results"] = !empty($results) ? $results : [];
-            $array["results"] = array_filter($array["results"], fn($r) => str_contains(strval($r["text"]), $term));
+            $array["results"] = array_values(array_filter($array["results"], fn($r) => !empty($fields) || str_contains(strval($r["text"]), $term)));
 
             return new JsonResponse($array);
         }

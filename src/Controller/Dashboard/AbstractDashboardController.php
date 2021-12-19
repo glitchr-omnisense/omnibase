@@ -139,8 +139,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
             "base.settings.maintenance.uptime"   => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.domain.https"         => ["form_type" => HiddenType::class, "data" => strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
-            "base.settings.domain"               => ["form_type" => HiddenType::class, "data" => strtolower($_SERVER['HTTP_HOST'])],
+            "base.settings.domain.https"         => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
+            "base.settings.domain"               => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
             "base.settings.domain.base_dir"      => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => [],
@@ -255,7 +255,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             if ($role == UserRole::USER) continue;
 
-            $label = ucfirst($this->translator->trans("user_role.".strtolower($role).".plural", [], self::TRANSLATION_ENUM));
+            $label = mb_ucfirst($this->translator->trans("user_role.".mb_strtolower($role).".plural", [], self::TRANSLATION_ENUM));
             $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
 
             $url = $this->adminUrlGenerator

@@ -33,6 +33,8 @@ class TranslationConfigurator implements FieldConfiguratorInterface
         $required = $field->getCustomOption("required");
         $field->setFormTypeOption("required", $required);
 
+        $field->setSortable(false);
+        
         // Show formatted value
         if( ($fieldName = $field->getCustomOption("show_field")) ) {
             
@@ -41,7 +43,7 @@ class TranslationConfigurator implements FieldConfiguratorInterface
             if(!$translationClassMetadata->hasField($fieldName)) 
                 throw new \Exception("Field \"$fieldName\" not found in \"".$translationClassMetadata->getName()."\".");
             
-            $field->setLabel(ucfirst($fieldName));
+            $field->setLabel(mb_ucfirst($fieldName));
             $field->setFormattedValue("-");
 
             $childField = $field->getValue();

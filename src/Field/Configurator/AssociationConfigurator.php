@@ -56,7 +56,6 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         if ($this->classMetadataManipulator->isToManySide($entityDto->getFqcn(), $propertyName)) {
             $this->configureToManyAssociation($field);
         }
-
     }
 
     private function countNumElements($collection): int
@@ -134,11 +133,10 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
 
         $displayedOn = $field->getDisplayedOn();
-        $onForm = $displayedOn->has(Crud::PAGE_EDIT) || $displayedOn->has(Crud::PAGE_NEW);
-
+        
         // associations different from *-to-one cannot be sorted
         $field->setSortable(false);
-
+        
         $field->setFormTypeOptionIfNotSet('multiple', true);
         $field->setFormTypeOptionIfNotSet('empty_data', []);
 

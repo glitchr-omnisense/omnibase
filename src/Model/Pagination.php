@@ -47,7 +47,7 @@ class Pagination implements PaginationInterface, Iterator
     public function next()    { $this->pageIter++; }
     public function key()     { return ($this->page-1)*$this->pageSize + $this->pageIter+1;    }
     public function current() { return $this->getResult()[$this->pageIter]; } 
-    public function valid()   { return $this->pageIter < $this->pageSize && $this->pageIter < count($this->getResult()); }
+    public function valid()   { return $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()); }
 
     public function getDoctrinePaginator() { return $this->doctrinePaginator; }
     public function getQuery() { $this->doctrinePaginator->getQuery(); }

@@ -206,12 +206,9 @@ final class BaseTwigExtension extends AbstractExtension
         return $this->mimeTypes->guessMimeType($fileOrArray);
     }
 
-    public function filesize($bytes): string
+    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string
     {
-        $size = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-        $factor = (int) floor(log($bytes) / log(1024));
-
-        return (int) ($bytes / (1024 ** $factor)).@$size[$factor];
+        return dec2str($size, $unitPrefix);
     }
 
     public function flattenArray($array): ?array { return array_flatten($array); }

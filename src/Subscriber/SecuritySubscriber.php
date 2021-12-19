@@ -238,8 +238,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $exceptions = [
             "/^ux_/",
-            "/^(?:app|base)_maintenance(?:.*)$/",
-            "/^(?:app|base)_security(?:.*)$/",
+            "/^maintenance(?:.*)$/",
+            "/^security(?:.*)$/",
             "/^(?:app|base)_user(?:.*)$/"];
 
         if (! $user->isVerified()) {

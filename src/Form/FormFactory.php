@@ -17,6 +17,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\SingletonTrait;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
@@ -87,24 +88,22 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
                     $parentDataClass = null;
                     $formParent = $form->getParent();
-                    if($formParent) $parentDataClass = $formParent->getConfig()->getOption("data_class") 
-                                        ?? get_class($formParent->getConfig()->getType()->getInnerType())
-                                        ?? null;
 
-                    if($this->classMetadataManipulator->isEntity($parentDataClass)) {
+                    // Simple case, data view from current form (handle ORM Proxy management)
+                    $dataClass = $form->getConfig()->getOption("data_class");
 
-                        // Associations can help to guess the expected returned values
-                        if($this->classMetadataManipulator->hasAssociation($parentDataClass, $form->getName())) {
-                            $class = $this->classMetadataManipulator->getAssociationTargetClass($parentDataClass, $form->getName());
+                    while (null !== $formParent) {
 
-                        } else if($this->classMetadataManipulator->hasField($parentDataClass, $form->getName())) {
+                        $parentDataClass = $formParent->getConfig()->getOption("data_class") 
+                            ?? get_class($formParent->getConfig()->getType()->getInnerType())
+                            ?? null;
 
-                            // Doctrine types as well.. (e.g. EnumType or SetType)
-                            $fieldType = $this->classMetadataManipulator->getTypeOfField($parentDataClass, $form->getName());
-                            $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldType);
-                            if($this->classMetadataManipulator->isEnumType($doctrineType) || $this->classMetadataManipulator->isSetType($doctrineType))
-                                $class = get_class($doctrineType);
-                        }
+                        if($this->classMetadataManipulator->isEntity($parentDataClass))
+                            $class = $this->classMetadataManipulator->getTargetclass($parentDataClass, $form->getName());
+
+                        if($class) break;
+
+                        $formParent = $formParent->getParent();
                     }
 
                     break;
@@ -143,20 +142,12 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                             continue;
                         }
 
-                        // Associations can help to guess the expected returned values
-                        if($this->classMetadataManipulator->hasAssociation($data, $form->getName())) 
-                            return $this->classMetadataManipulator->getAssociationTargetClass($data, $form->getName());
-
-                        // Doctrine types as well.. (e.g. EnumType or SetType)
-                        $fieldType = $this->classMetadataManipulator->getTypeOfField($data, $form->getName());
-                        $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldType);
-
-                        if($this->classMetadataManipulator->isEnumType($doctrineType) || $this->classMetadataManipulator->isSetType($doctrineType))
-                            return get_class($doctrineType);
+                        if($this->classMetadataManipulator->isEntity($data))
+                            $class = $this->classMetadataManipulator->getTargetClass($data, $form->getName());
 
                         $formParent = $formParent->getParent();
-                        break;
                     }
+
                     break;
 
                 case self::GUESS_FROM_PHPDOC:
@@ -168,20 +159,29 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             if($class) break;
         }
 
-        return $class ?? $options["class"];
+        return $class ?? $options["class"] ?? null;
     }
 
-    public function guessIfMultiple(FormInterface|FormBuilderInterface $form, $options)
+    public function guessMultiple(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
+        $options = $options ?? $form->getConfig()->getOptions();
+
         if($options["multiple"] === null && $options["class"]) {
             
             $target = $options["class"];
-            $entityField = $form->getName();
 
             if($this->classMetadataManipulator->isEntity($target)) {
 
-                $entity = $form->getParent()->getViewData();
-                return $entity ? $this->classMetadataManipulator->isToManySide($entity, $entityField) : false;
+                $parentForm = $form->getParent();
+                if(!$parentForm) return false;
+
+                $entityField = $form->getName();
+                $entity = $parentForm->getConfig()->getOption("data_class");
+
+                if($this->classMetadataManipulator->hasAssociation($entity, $entityField) )
+                    return $this->classMetadataManipulator->isToManySide($entity, $entityField);
+                else if($this->classMetadataManipulator->hasField($entity, $entityField))
+                    return $this->classMetadataManipulator->getTypeOfField($entity, $entityField) == "array";
 
             } else if($this->classMetadataManipulator->isEnumType($target)) {
 
@@ -193,11 +193,13 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             }
         }
 
-        return $option["multiple"] ?? false;
+        return $options["multiple"] ?? false;
     }
 
-    public function guessChoices($options)
+    public function guessChoices(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
+        $options = $options ?? $form->getConfig()->getOptions();
+
         if (!$options["choices"]) {
 
             if($this->classMetadataManipulator->isEnumType($options["class"])) return $options["class"]::getPermittedValues();
@@ -207,8 +209,10 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $options["choices"] ?? null;
     }
 
-    public function guessChoiceAutocomplete($options)
+    public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
+        $options = $options ?? $form->getConfig()->getOptions();
+        
         if($options["choices"]) return false;
         if($options["autocomplete"] === null && $options["class"]) {
             
@@ -221,19 +225,27 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                 return false;
         }
 
-        return $option["autocomplete"] ?? false;
+        return $options["autocomplete"] ?? false;
     }
 
-    public function guessChoiceFilter($options, $data)
+    public function guessChoiceFilter(FormInterface|FormBuilderInterface $form, ?array $options = null, $data)
     {
+        $options = $options ?? $form->getConfig()->getOptions();
+
         if ($options["choice_filter"] === null) {
-            
+
             $options["choice_filter"] = [];
-            if(is_array($data)) {
-                foreach($data as $entry)
-                    if(is_object($entry)) $options["choice_filter"][] = get_class($entry);
-            } else {
-                if(is_object($data)) $options["choice_filter"][] = get_class($data);
+            if($options["choice_exclusive"]) {
+                
+                if($data instanceof Collection || is_array($data)) {
+
+                    foreach($data as $entry)
+                        if(is_object($entry)) $options["choice_filter"][] = get_class($entry);
+
+                } else if(is_object($data)) {
+                    
+                    $options["choice_filter"][] = get_class($data);
+                }
             }
 
             if(!$options["choice_filter"]  && $options["class"]) {
@@ -241,6 +253,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             }
         }
 
-        return $option["choice_filter"] ?? [];
+        return $options["choice_filter"] ?? [];
     }
 }

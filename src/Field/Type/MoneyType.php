@@ -13,12 +13,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     public const LABEL_ONLY = 1;
     public const LABELCODE_ONLY = 2;
     
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-    }
-
-
+    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $targetPath = explode(".", $options["currency_target"]);
@@ -82,7 +77,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'currency_target'   => false,
+            "currency_target"   => false,
             "currency_label"    => self::LABEL_ONLY,
             "currency_exchange" => ["USD" => 1, "EUR" => 0.90],
             'currency_list'     => ["USD", "EUR"]

@@ -91,7 +91,7 @@ class TranslatableSubscriber implements EventSubscriber
             'mappedBy' => 'translatable',
             'indexBy' => self::LOCALE,
             'cascade' => ['persist', 'merge', 'remove'],
-            //'fetch' => $this->convertFetchString("LAZY"),
+            'fetch' => $this->convertFetchString("LAZY"),
             'targetEntity' => $classMetadataInfo->getReflectionClass()
                 ->getMethod('getTranslationEntityClass')
                 ->invoke(null),
@@ -126,7 +126,6 @@ class TranslatableSubscriber implements EventSubscriber
                 'columns' => ['translatable_id', self::LOCALE]
             ];
         }
-
 
         if (! $classMetadataInfo->hasField(self::LOCALE) && ! $classMetadataInfo->hasAssociation(self::LOCALE)) {
             $classMetadataInfo->mapField([
