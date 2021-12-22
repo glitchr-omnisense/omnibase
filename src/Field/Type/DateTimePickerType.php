@@ -47,26 +47,14 @@ class DateTimePickerType extends AbstractType
 
             "datetimepicker" => [
                 "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
-                "sideBySide" => true
+                "sideBySide" => true,
+                "allowInputToggle" => true
             ]
         ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent() : ?string
-    {
-        return DateTimeType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'datetimepicker';
-    }
+    public function getParent()     : ?string { return DateTimeType::class; }
+    public function getBlockPrefix():  string { return 'datetimepicker'; }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
@@ -79,6 +67,7 @@ class DateTimePickerType extends AbstractType
         // Datetime picker Options
         $dateTimePickerOpts = $options["datetimepicker"];
         $dateTimePickerOpts["defaultDate"] = $view->vars["value"];
+
         $view->vars["datetimepicker"] = json_encode($dateTimePickerOpts);
 
         //

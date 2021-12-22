@@ -11,9 +11,8 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
+
 use Base\Repository\Sitemap\WidgetRepository;
-use Base\Service\BaseService;
-use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -28,7 +27,7 @@ class Widget implements TranslatableInterface, IconizeInterface
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-square"]; }
+    public static function __staticIconize() : ?array { return ["fas fa-cube"]; }
 
     protected string $template = "";
     public function getTemplate()

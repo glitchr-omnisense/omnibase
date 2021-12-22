@@ -5,11 +5,12 @@ namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
 use Base\Field\AssociationField;
 use Base\Field\PatternField;
 use Base\Field\SelectField;
 
-class HyperlinkCrudController extends AbstractCrudController
+class HyperlinkCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }
 

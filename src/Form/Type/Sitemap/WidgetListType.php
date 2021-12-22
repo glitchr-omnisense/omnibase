@@ -69,7 +69,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 $widget = str_replace("-", ".", $formattedWidget);
 
                 $this->widgetProvider->deleteCache(Widget::class, "app.widgets.".$widget);
-                $widgetSlots[$formattedWidget] = $this->widgetProvider->getWidgetSlot($widget);
+                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widget);
             }
 
             foreach($widgetSlots as $formattedWidget => $slot) {

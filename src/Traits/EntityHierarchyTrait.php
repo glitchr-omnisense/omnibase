@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Repository\Traits;
+namespace Base\Traits;
 
 trait EntityHierarchyTrait
 {

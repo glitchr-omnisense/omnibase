@@ -62,13 +62,41 @@ sitemap:
       singular: "menu"
       plural: "menu"
 
-  widget_slot:
-    singular: widget slot
-    plural: "widget slots"
+    slot:
+      singular: widget slot
+      plural: "widget slots"
 
-    hyperpattern:
+  attribute:
+    singular: attribute
+    plural: attributes
+    
+    hyperpattern_attribute:
       singular: "hyperpattern"
       plural: "hyperpatterns"
+
+    number_attribute:
+      singular: "number"
+      plural: "numbers"
+
+    text_attribute:
+      singular: "text"
+      plural: "text"
+
+    textarea_attribute:
+      singular: "textarea"
+      plural: "textareas"
+
+    datetime_attribute:
+      singular: "datetime"
+      plural: "datetime"
+
+    percent_attribute:
+      singular: "percent"
+      plural: "percents"
+
+    array_attribute:
+      singular: "array"
+      plural: "arrays"
 
   setting:
     singular: "setting"

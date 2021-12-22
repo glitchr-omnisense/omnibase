@@ -270,7 +270,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function path(string $name, array $parameters = [], bool $relative = false): string
     {
         $baseDir = null;
-        if($this->baseService->isCli()) {
+        if(is_cli()) {
             $baseDir    = $_SERVER['BASE']        ?? $_SERVER["CONTEXT_PREFIX"] ?? $this->baseService->getSettings()->base_dir();
             $baseDir    = "/".trim($baseDir, "/");
         }

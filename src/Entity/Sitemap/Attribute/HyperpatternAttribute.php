@@ -1,51 +1,40 @@
 <?php
 
-namespace Base\Entity\Sitemap\WidgetSlot;
-
-use Symfony\Component\Validator\Constraints as Assert;
+namespace Base\Entity\Sitemap\Attribute;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Slugify;
+use Base\Entity\Sitemap\Attribute;
+use Base\Entity\Sitemap\AttributeInterface;
 use Base\Entity\Sitemap\Widget\Hyperlink;
-use Base\Entity\Sitemap\WidgetSlot;
 use Base\Model\IconizeInterface;
+
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Sitemap\WidgetSlot\HyperpatternRepository;
+use Base\Repository\Sitemap\Attribute\HyperpatternAttributeRepository;
+
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 /**
- * @ORM\Entity(repositoryClass=HyperpatternRepository::class)
+ * @ORM\Entity(repositoryClass=HyperpatternAttributeRepository::class)
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
 
-class Hyperpattern extends WidgetSlot implements IconizeInterface
+class HyperpatternAttribute extends Attribute implements IconizeInterface, AttributeInterface
 {
     public        function __iconize()       : ?array { return [$this->getIcon()]; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
-    protected const __PREFIX__ = "app.hyperlink";
+    public static function getType(): string { return TextType::class; }
+    public static function getOptions(): array { return []; }
 
     public function __toString() { return $this->getPattern(); }
-    public function __construct(string $path = "website", string $icon = "fas fa-laptop", string $pattern = "{0}")
+    public function __construct(string $code, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
     {
-        $this->setAttribute("class", "widget-hyperlink");
-        $this->setPath($path);
-        $this->setIcon($icon);
-
+        parent::__construct($code, $icon);
         $this->hyperlinks = new ArrayCollection();
-        $this->setPattern($pattern);
-    }
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $icon;
-    public function getIcon(): string { return $this->icon; }
-    public function setIcon(string $icon)
-    {
-        $this->icon = $icon;
-        return $this;
+        $this->setPattern($pattern);
     }
 
     /**
@@ -53,7 +42,7 @@ class Hyperpattern extends WidgetSlot implements IconizeInterface
      */
     protected $pattern;
     public function getPattern(): string { return $this->pattern; }
-    public function setPattern(string $pattern = "{0}")
+    public function setPattern(string $pattern = "https://{0}")
     {
         $this->pattern = $pattern;
         return $this;

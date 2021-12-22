@@ -2,19 +2,15 @@
 
 namespace Base\Repository\Sitemap;
 
-use Base\Annotations\Annotation\EntityHierarchy;
-use Base\Entity\Thread;
-use Doctrine\Persistence\Event\ManagerEventArgs;
-use Doctrine\Persistence\ManagerRegistry;
-use Base\Repository\Traits\EntityHierarchyTrait;
+use Base\Entity\Sitemap\Widget;
 
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
- * @method Thread|null find($id, $lockMode = null, $lockVersion = null)
- * @method Thread|null findOneBy(array $criteria, array ?array $orderBy = null)
- * @method Thread[]    findAll()
- * @method Thread[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ * @method Widget|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Widget|null findOneBy(array $criteria, array ?array $orderBy = null)
+ * @method Widget[]    findAll()
+ * @method Widget[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
  */
 
 class WidgetRepository extends ServiceEntityRepository

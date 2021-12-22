@@ -254,7 +254,7 @@ trait TranslatableTrait
         }
 
         // Exception for EA variables (cf. EA's FormField)
-        if(!str_starts_with("ea_", $property))
+        if(!str_starts_with($property, "ea_"))
             throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
         
         return null;

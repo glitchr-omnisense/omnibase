@@ -2,11 +2,8 @@
 
 namespace Base\Repository;
 
-use Base\Annotations\Annotation\EntityHierarchy;
 use Base\Entity\Thread;
-use Doctrine\Persistence\Event\ManagerEventArgs;
-use Doctrine\Persistence\ManagerRegistry;
-use Base\Repository\Traits\EntityHierarchyTrait;
+use Base\Traits\EntityHierarchyTrait;
 
 use Base\Database\Repository\ServiceEntityRepository;
 
@@ -24,7 +21,7 @@ class ThreadRepository extends ServiceEntityRepository
     public function countForChildrenIn($thread)
     {
         $nDiscussions = $this->countByParent($thread, [], "", null, ["children"]);
-        
+
         $nComments = [];
         foreach($nDiscussions as $entry)
             $nComments[$entry["children"]] = ($nComments[$entry["children"]] ?? 0) + $entry["count"];

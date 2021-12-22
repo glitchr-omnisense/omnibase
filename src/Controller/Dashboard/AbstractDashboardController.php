@@ -14,8 +14,8 @@ use App\Entity\Thread;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use App\Entity\Thread\Tag;
-use App\Entity\Sitemap\WidgetSlot;
-use App\Entity\Sitemap\WidgetSlot\Hyperpattern;
+use App\Entity\Sitemap\Widget\Slot;
+use App\Entity\Sitemap\Attribute\HyperpatternAttribute as Hyperpattern;
 
 use App\Entity\Sitemap\Setting;
 use App\Entity\Sitemap\Widget;
@@ -43,7 +43,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
-use Base\Entity\Sitemap\WidgetSlot as SitemapWidgetSlot;
+use Base\Entity\Sitemap\Attribute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -91,7 +91,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->baseService           = $baseService;
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
         $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
-        $this->widgetSlotRepository  = $baseService->getEntityManager()->getRepository(WidgetSlot::class);
+        $this->slotRepository  = $baseService->getEntityManager()->getRepository(Slot::class);
 
         $this->gaService = $gaService;
     }
@@ -200,17 +200,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data = $form->getData();
             foreach(array_keys($widgetSlots) as $path) {
 
-                $widgetSlot = $this->widgetSlotRepository->findOneByPath($path);
+                $widgetSlot = $this->slotRepository->findOneByPath($path);
                 if(!$widgetSlot) {
-                    $widgetSlot = new WidgetSlot($path);
-                    $this->widgetSlotRepository->persist($widgetSlot);
+                    $widgetSlot = new Slot($path);
+                    $this->slotRepository->persist($widgetSlot);
                 }
 
                 $widgets = $data[$path] ?? [];
                 $widgetSlot->setWidgets($widgets);
             }
 
-            $this->widgetSlotRepository->flush();
+            $this->slotRepository->flush();
 
             $notification = new Notification("@dashboard.controllers.widgets.success");
             $notification->setUser($this->getUser());
@@ -398,25 +398,25 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('SITEMAP', null, 1));
-        $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
-            WidgetItem::linkToCrud(Page::class      ),
-            WidgetItem::linkToCrud(Hyperlink::class ),
-            WidgetItem::linkToCrud(Attachment::class),
-            WidgetItem::linkToCrud(Menu::class      )
-        ]);
-
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 
             $section = $this->getSectionWidgetItem($widgets, "SITEMAP");
             if($section) $section->setWidth(2);
 
             $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
-                WidgetItem::linkToCrud(Hyperpattern::class    ),
-                WidgetItem::linkToCrud(Setting::class   ),
-                WidgetItem::linkToCrud(WidgetSlot::class),
-                WidgetItem::linkToCrud(Widget::class    ),
+                WidgetItem::linkToCrud(Setting::class  ),
+                WidgetItem::linkToCrud(Widget::class   ),
+                WidgetItem::linkToCrud(Slot::class     ),
+                WidgetItem::linkToCrud(Attribute::class),
             ]);
         }
+
+        $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+            WidgetItem::linkToCrud(Menu::class      ),
+            WidgetItem::linkToCrud(Attachment::class),
+            WidgetItem::linkToCrud(Page::class      ),
+            WidgetItem::linkToCrud(Hyperlink::class ),
+        ]);
 
         return $widgets;
     }

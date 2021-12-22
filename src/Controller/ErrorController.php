@@ -39,7 +39,7 @@ class ErrorController extends AbstractController
             throw new Exception("Twig rendering engine failed (".trim($fatalException->getMessage(), ".").") following a first exception. (see below)", 500, $exception);
             $response = $this->rescue($exception);
         }
-
+dump("xxx");
         $notification = new Notification($exception);
         if ($this->baseService->isDevelopment()) $notification->send("danger");
         if ($this->baseService->isDevelopment()) dump($exception);

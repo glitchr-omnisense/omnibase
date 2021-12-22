@@ -52,8 +52,8 @@ sitemap:
       plural: "pages"
 
     hyperlink:
-      singular: "lien hypertexte"
-      plural: "liens hypertextes"
+      singular: "lien"
+      plural: "liens"
 
     attachment:
       singular: "pièce jointe"
@@ -63,13 +63,41 @@ sitemap:
       singular: "menu"
       plural: "menu"
 
-  widget_slot:
-    singular: widget slot
-    plural: "widget slots"
+    slot:
+      singular: widget slot
+      plural: "widget slots"
 
-    hyperpattern:
+  attribute:
+    singular: attribut
+    plural: attributs
+    
+    hyperpattern_attribute:
       singular: "modèle de liens"
       plural: "modèles de liens"
+
+    number_attribute:
+      singular: "nombre"
+      plural: "nombres"
+
+    text_attribute:
+      singular: "texte"
+      plural: "textes"
+
+    textarea_attribute:
+      singular: "zone de texte"
+      plural: "zones de texte"
+
+    datetime_attribute:
+      singular: "dateheure"
+      plural: "dateheure"
+
+    percent_attribute:
+      singular: "pourcentage"
+      plural: "pourcentages"
+
+    array_attribute:
+      singular: "groupe"
+      plural: "groupes"
 
   setting:
     singular: "paramètre"

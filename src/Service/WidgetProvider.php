@@ -3,20 +3,19 @@
 namespace Base\Service;
 
 use Base\Entity\Sitemap\Widget;
-use Base\Entity\Sitemap\WidgetSlot;
+use Base\Entity\Sitemap\Widget\Slot;
+use Base\Repository\Sitemap\Widget\SlotRepository as WidgetSlotRepository;
 use Base\Repository\Sitemap\WidgetRepository;
-use Base\Repository\Sitemap\WidgetSlotRepository;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class WidgetProvider implements WidgetProviderInterface
 {    
     public const __CACHE__ = true;
-    public function isCli() { return (php_sapi_name() == "cli"); }
     protected function isCacheEnabled() 
     {
         if(!self::__CACHE__) return false;
         if(!$this->cache)    return false;
-        if($this->isCli())   return false;
+        if(is_cli())   return false;
 
         return true;
     }
@@ -42,16 +41,15 @@ class WidgetProvider implements WidgetProviderInterface
     }
 
     protected $widgetSlots = [];
-    public function getSlot(string $name): ?WidgetSlot { return $this->getWidgetSlot($name); }
-    public function getWidgetSlot(string $path): ?WidgetSlot
+    public function getSlot(string $path): ?Slot
     {
-        if($this->hasCache(WidgetSlot::class, $path))
-            return $this->getCache(WidgetSlot::class, $path);
+        if($this->hasCache(Slot::class, $path))
+            return $this->getCache(Slot::class, $path);
 
-        $this->widgetSlots[$path] = $this->widgetSlots[$path] ?? $this->widgetSlotRepository->findOneByPath($path);
-        $this->applyCache(WidgetSlot::class, $path, $this->widgetSlots[$path]);
+        $this->slots[$path] = $this->slots[$path] ?? $this->widgetSlotRepository->findOneByInstanceOfAndPath(Slot::class, $path);
+        $this->applyCache(Slot::class, $path, $this->slots[$path]);
 
-        return $this->widgetSlots[$path];
+        return $this->slots[$path];
     }
 
     protected function applyCache($class, string $identifier, $widget)

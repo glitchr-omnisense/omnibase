@@ -10,16 +10,16 @@ use Base\Database\Traits\TranslationTrait;
 /**
  * @ORM\Entity()
  */
-class WidgetSlotTranslation implements TranslationInterface
+class AttributeTranslation implements TranslationInterface
 {
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255)
      */
     protected $label;
-    public function getLabel(): ?string { return $this->label; }
-    public function setLabel(?string $label)
+    public function getLabel(): string { return $this->label; }
+    public function setLabel(string $label)
     {
         $this->label = $label;
         return $this;

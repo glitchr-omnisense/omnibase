@@ -7,9 +7,10 @@ use Base\Field\TranslationField;
 use Base\Field\SlugField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
 use Base\Field\Type\QuillType;
 
-class PageCrudController extends AbstractCrudController
+class PageCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 

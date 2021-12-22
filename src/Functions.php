@@ -20,8 +20,8 @@ namespace {
         }, $input);
     }
 
-    function camel_to_snake($input) { return mb_strtolower(str_replace("._", ".", preg_replace('/(?<!^)[A-Z]/', '_$0', $input))); }
-    function snake_to_came($input)  { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace('_', ' ', $input)))); }
+    function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
+    function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
     function class_synopsis($object)
     {
         if (!$object) return dump("Object passed is null");
@@ -30,7 +30,9 @@ namespace {
         if (!is_object($object) && !is_string($object)) return dump($object);
 
         $className    = (is_string($object) ? $object : get_class($object));
-        if(!class_exists($className)) return dump("Class \"$className\" not found.");
+        if(!class_exists($className)) 
+            return dump("Class \"$className\" not found.");
+        
         $classParent  = get_parent_class($className);
         $classMethods = get_class_methods($className);
         $classVars    = get_class_vars($className);
@@ -56,7 +58,7 @@ namespace {
         foreach ($classVars as $varName => $value) {
 
             $value = ( is_array($value)) ? print_r($value, true) : (
-                        (is_object($value) && !method_exists($value, '__toString')) ? get_class($value)."(not stringeable)" : $value);
+                        (is_object($value) && !method_exists($value, '__toString')) ? get_class($value)."(not is_stringeable)" : $value);
 
             $vars .= (!empty($vars)) ? ",\n" : "";
             $vars .= "     $" . $varName . " = \"" . $value . "\"";
@@ -164,7 +166,7 @@ namespace {
         return $str != strip_tags($str); 
     }
 
-    function stringeable($value) 
+    function is_stringeable($value) 
     {
         return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString');
     }
@@ -192,6 +194,11 @@ namespace {
     function mb_ucwords(string $str, ?string $encoding = null): string
     {
         return mb_convert_case($str, MB_CASE_TITLE, $encoding);
+    }
+
+    function is_cli(): bool 
+    {
+        return (php_sapi_name() == "cli");
     }
 
     function array_is_nested($a)

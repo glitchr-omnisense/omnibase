@@ -808,7 +808,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
             $translatableClass = $metadata->getName()::getTranslatableEntityClass();
             $translatableMetadata = $this->getMetadataFor($translatableClass);
-
+       
             if(!$metadata->discriminatorMap) {
                 $metadata->discriminatorMap = array_filter(array_map(function($class) {
 
@@ -829,7 +829,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                         "\". Did you forgot to implement \"".TranslatableInterface::class.
                         "\" in \"".$metadata->getName()::getTranslatableEntityClass()."\".");
             
-                $metadata->discriminatorValue  = array_flip($metadata->discriminatorMap)[$metadata->getName()] ?? null;
+                $metadata->discriminatorValue  = array_flip($translatableMetadata->discriminatorMap)[$translatableMetadata->getName()] ?? null;
                 if(!$metadata->discriminatorValue) 
                     throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
             }

@@ -40,7 +40,7 @@ class EntityHierarchy extends AbstractAnnotation
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
         if(!method_exists($classMetadata->customRepositoryClassName, "getHierarchyTree") && !$this->parent_method_exists($classMetadata->customRepositoryClassName, "getHierarchyTree"))
-            throw new Exception("Did you forgot to use Base\Repository\Trait\EntityHierarchyTrait in $classMetadata->customRepositoryClassName ?");
+            throw new Exception("Did you forgot to use \"Base\Traits\EntityHierarchyTrait\" in $classMetadata->customRepositoryClassName ?");
 
         $classMetadata->entityHierarchy = $this->hierarchy;
         $classMetadata->entityHierarchySeparator = $this->separator;

@@ -113,7 +113,7 @@ final class CrudWidgetItem implements MenuItemInterface
             } else {
 
                 $crudControllers = WidgetItem::$adminContextProvider->getContext()->getCrudControllers();
-                if (null === $controllerFqcn = $crudControllers->findCrudFqcnByEntityFqcn($entityFqcn)) {
+                if (null === $controllerFqcn = AbstractCrudController::getCrudControllerFqcn($entityFqcn)) {
                     throw new \RuntimeException(sprintf('Unable to find the controller related to the "%s" Entity; did you forget to extend "%s"?', $entityFqcn, AbstractCrudController::class));
                 }
 

@@ -3,8 +3,8 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 
 {% set displayLimit = field.customOptions.get('displayLimit') %}
-{% set show = field.customOptions.get('show') %}
-{% set showFirst = field.customOptions.get('showFirst') %}
+{% set showFirst    = field.customOptions.get('showFirst') %}
+{% set show         = field.customOptions.get('show') %}
 
 {% if field.value is iterable %}
 

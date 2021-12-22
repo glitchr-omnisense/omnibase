@@ -11,11 +11,12 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\Response;
 
-class AttachmentCrudController extends AbstractCrudController
+class AttachmentCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 

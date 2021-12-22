@@ -1,20 +1,20 @@
 <?php
 
-namespace Base\Controller\Dashboard\Crud\Sitemap;
+namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 
 use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-use Base\Controller\Dashboard\AbstractCrudController;
-use Base\Entity\Sitemap\WidgetSlot;
+use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
+use Base\Entity\Sitemap\Widget\Slot;
 
-class WidgetSlotCrudController extends AbstractCrudController
+class SlotCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
     public function createEntity(string $entityFqcn)
     {
-        return new WidgetSlot("");
+        return new Slot("");
     }
 
     public function configureFields(string $pageName, array $callbacks = []): iterable

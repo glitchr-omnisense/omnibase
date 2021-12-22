@@ -104,8 +104,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 return $appCrudController;
         }
 
-        return  class_exists($appCrudController)  ? $appCrudController :
-               (class_exists($baseCrudController) ? $baseCrudController : null);
+        return (class_exists($appCrudController)  ? $appCrudController :
+               (class_exists($baseCrudController) ? $baseCrudController : null));
     }
 
     public static function getCrudTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".self::getTranslationPrefix("Crud\\"); }
@@ -157,7 +157,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $title = $this->translator->trans($crudTranslationPrefixWithAction.".title");
         if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title");
         if($title == $crudTranslationPrefix.".title") $title = $this->translator->trans($crudTranslationPrefix.".plural");
-        if($title == $crudTranslationPrefix.".plural") $title = $entityLabelInPlural ?? class_basename($this->getEntityFqcn());
+        if($title == $crudTranslationPrefix.".plural") $title = $entityLabelInPlural ?? camel_to_snake(class_basename($this->getEntityFqcn()), " ");
 
         $help = $this->translator->trans($crudTranslationPrefixWithAction.".help");
         if($help == $crudTranslationPrefixWithAction.".help") $help = $this->translator->trans($crudTranslationPrefix.".help");
@@ -198,16 +198,20 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
             $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
 
-            $entityTitle = $entity->getTitle();
-            if($entityTitle) $entityText  = $entityLabel ." ID #".$entity->getId();
-            else {
+            $entityTitle = class_basename(get_class($entity));
+            if($entityTitle) {
+
+                $entityText = $entityLabel ." ID #".$entity->getId();
+
+            } else {
 
                 $entityTitle = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
                 $entityText  = "ID #".$entity->getId();
             }
 
             $extension->setTitle($entityTitle);
-            $extension->setText($entityText); 
+            if($this->getCrud()->getAsDto()->getCurrentAction() != "new")
+                $extension->setText($entityText); 
         }
 
         return $extension;

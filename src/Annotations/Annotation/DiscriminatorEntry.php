@@ -36,6 +36,9 @@ class DiscriminatorEntry extends AbstractAnnotation
 
     public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
     {
+        if(empty($classMetadata->discriminatorMap) || empty($classMetadata->discriminatorColumn))
+            throw new \Exception("@DiscriminatorEntry \"".$this->value."\" found for \"".$classMetadata->getName()."\", but missing discriminator mapping");
+
         // Only act on the top parent class when discriminatorMap found
         return empty($classMetadata->parentClasses) && count($classMetadata->discriminatorMap) > 0;
     }

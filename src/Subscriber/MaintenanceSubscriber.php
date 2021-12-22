@@ -51,7 +51,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
     public function onRequestEvent(RequestEvent $event)
     {
-        if ($this->baseService->isCli()) return;
+        if (is_cli()) return;
         if ($this->baseService->isProfiler($event->getRequest())) return;
 
         // Exception triggered

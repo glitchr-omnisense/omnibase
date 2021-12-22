@@ -13,12 +13,11 @@ trait BaseSettingsTrait
     protected $settingRepository = null;
     protected $settings = [];
 
-    public function isCli() { return (php_sapi_name() == "cli"); }
-    protected function isCacheEnabled() 
+    protected function isCacheEnabled()
     {
         if(!self::__CACHE__) return false;
         if(!$this->cache)    return false;
-        if($this->isCli())   return false;
+        if(is_cli())   return false;
 
         return true;
     }
@@ -27,7 +26,7 @@ trait BaseSettingsTrait
     {
         $nameArray = explode(".", $name);
         foreach ($nameArray as $index => $key) {
-        
+
             if($key == "_self" && $index != count($nameArray)-1)
                 throw new \Exception("Failed to read \"$name\": _self can only be used as tail parameter");
 

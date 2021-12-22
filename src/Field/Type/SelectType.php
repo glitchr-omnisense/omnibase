@@ -63,17 +63,8 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public function getBlockPrefix(): string { return 'select2'; }
 
-    public function encode(array $array) : string
-    {
-        $hex = bin2hex(serialize($array));
-        return $this->hashIds->encodeHex($hex);
-    }
-
-    public function decode(string $hash): array
-    {
-        $hex = $this->hashIds->decodeHex($hash);
-        return unserialize(hex2bin($hex));
-    }
+    public function encode(array $array) : string { return $this->hashIds->encodeHex(bin2hex(serialize($array)));  }
+    public function decode(string $hash): array   { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -271,7 +262,6 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //
             // Note for later: when disabling select2, it might happend that the label of the label of selected entries are wrong
-            // 
             $formOptions = [
                 'choices'  => $choices, 
                 'multiple' => $options["multiple"]
@@ -469,7 +459,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $html = null;
 
             $text = ($translator ? $translator->trans(camel_to_snake($className.".".mb_strtolower($entry).".singular"), [], "@enums") : $entry);
-            
+
             $icons = [];
             $icon = $class::getIcons(0)[$entry] ?? [];
             if($icon) $icons[] = $icon;
@@ -482,39 +472,43 @@ class SelectType extends AbstractType implements DataMapperInterface
             $autocomplete = null;
             if(class_implements_interface($entry, AutocompleteInterface::class))
                 $autocomplete = $entry->__autocomplete() ?? null;
-            
+
             $className = class_basename(get_class($entry));
             if($translator) $className = $translator->trans(camel_to_snake($className.".singular"), [], "@entities");
 
             $html = is_html($autocomplete) ? $autocomplete : null;
             $text = is_html($autocomplete) ? null : $autocomplete;
             if(!$text)
-                $text = stringeable($entry) ? strval($entry) : $className + " #".$entry->getId();
+                $text = is_stringeable($entry) ? strval($entry) : $className + " #".$entry->getId();
 
             $icons = $entry->__iconize() ?? [];
             if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
                 $icons = $entry::__staticIconize();
-            
+
         } else {
 
-            $id = $entry;
             $icons = [];
-            $text = $entry;
-            $html = null;
+            $id    = is_array($entry) ? $entry[0] : $entry;
+            $text  = is_array($entry) ? $entry[1] : $entry;
+            $html  = null;
         }
 
-        switch($format)
-        {
-            case self::FORMAT_TITLECASE: $text = mb_ucfirst(mb_strtolower($text));
+        switch($format) {
+
+            case self::FORMAT_TITLECASE:
+                $text = mb_ucfirst(mb_strtolower($text));
                 break;
-                
-            case self::FORMAT_SENTENCECASE: $text = mb_ucwords(mb_strtolower($text));
+
+            case self::FORMAT_SENTENCECASE:
+                $text = mb_ucwords(mb_strtolower($text));
                 break;
-                
-            case self::FORMAT_LOWERCASE: $text = mb_strtolower($text);
+
+            case self::FORMAT_LOWERCASE:
+                $text = mb_strtolower($text);
                 break;
-                
-            case self::FORMAT_UPPERCASE: $text = mb_strtoupper($text);
+
+            case self::FORMAT_UPPERCASE:
+                $text = mb_strtoupper($text);
                 break;
         }
 

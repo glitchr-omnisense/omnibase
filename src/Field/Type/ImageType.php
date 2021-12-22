@@ -35,18 +35,8 @@ class ImageType extends AbstractType
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix(): string
-    {
-        return 'imageupload';
-    }
-
-    public function getParent() : ?string
-    {
-        return FileType::class;
-    }
+    public function getBlockPrefix(): string { return 'imageupload'; }
+    public function getParent() : ?string { return FileType::class; }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

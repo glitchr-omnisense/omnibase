@@ -12,11 +12,11 @@ class DiscriminatorField extends SelectField implements FieldInterface
 {
     use FieldTrait; 
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName = "id", ?string $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)
-            ->setLabel($label)
+            ->setLabel($label ?? "Type")
             ->setTemplateName('crud/field/text')
             ->setFormType(DiscriminatorType::class)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL)

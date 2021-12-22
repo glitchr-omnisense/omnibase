@@ -98,8 +98,10 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                             ?? get_class($formParent->getConfig()->getType()->getInnerType())
                             ?? null;
 
-                        if($this->classMetadataManipulator->isEntity($parentDataClass))
+                        if($this->classMetadataManipulator->isEntity($parentDataClass)) {
+
                             $class = $this->classMetadataManipulator->getTargetclass($parentDataClass, $form->getName());
+                        }
 
                         if($class) break;
 

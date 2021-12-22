@@ -38,6 +38,9 @@ class WidgetItem
     public static function linkToCrud(string $entityFqcn, ?string $label = null, ?string $icon = null): CrudWidgetItem
     {
         $crudController          = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
+        if(!class_exists($crudController))
+            throw new \Exception("CRUD controller for \"".$entityFqcn."\" not found");
+        
         $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 

@@ -24,7 +24,6 @@ use Base\Enum\ThreadState;
 use Base\Database\TranslationInterface;
 use Base\Traits\BaseTrait;
 use Base\Database\Traits\TranslationTrait;
-use Base\Traits\EntityHierarchyTrait;
 
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
 

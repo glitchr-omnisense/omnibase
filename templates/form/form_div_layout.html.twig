@@ -33,7 +33,6 @@
 
         {{- form_widget(form, {attr:attr}) -}}
         {{- _form_error|raw -}}
-
     </div>
 {%- endblock form2_row -%}
 
@@ -76,14 +75,32 @@
 
 {% endblock select2_widget %}
 
+{%- block discriminator_row -%}
+    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {{form_row(form)}}    
+{%- endblock -%}
+
+{%- block discriminator_widget -%}
+
+    {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
+
+{% endblock discriminator_widget %}
+
 {%- block datetimepicker_widget -%}
 
-    {% set attr = attr|merge({
-        'data-datetimepicker-field': form.vars.id,
-        'data-datetimepicker-options': datetimepicker
-    }) %}
+{% set attr = attr|merge({
+    'data-datetimepicker-field': form.vars.id,
+    'data-datetimepicker-options': datetimepicker
+}) %}
 
-    {{ form_widget(form, {attr: attr}) }}
+<div class="input-group form-stock">
+    <div class="input-group-text">
+        <button class="btn btn-outline-secondary" type="button" id="{{form.vars.id}}-btn">
+            <i class="fas fa-calendar-day"></i>
+        </button>
+    </div>
+    {{ form_widget(form, {attr:attr}) }}
+</div>
 
 {% endblock datetimepicker_widget %}
 

@@ -6,8 +6,9 @@ use Base\Field\TranslationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
 
-class MenuCrudController extends AbstractCrudController
+class MenuCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
