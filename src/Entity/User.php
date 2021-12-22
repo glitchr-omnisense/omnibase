@@ -61,7 +61,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     public static function __staticIconize() : ?array { return ["fas fa-user"]; } 
 
     // DEPRECATED: These two methods should soon be removed  in S6.0
-    public function getUsername() : string { return $this->getUserIdentifier(); }
+    public function getUsername() : ?string { return $this->getUserIdentifier(); }
     public function getSalt(): ?string { return null; }
     // DEPRECATED-END
 

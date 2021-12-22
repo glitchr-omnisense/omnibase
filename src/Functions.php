@@ -161,7 +161,7 @@ namespace {
         return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array));
     }
 
-    function is_html(string $str)
+    function is_html(?string $str)
     {
         return $str != strip_tags($str); 
     }

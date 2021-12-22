@@ -25,7 +25,7 @@ class RoleConfigurator extends SelectConfigurator
         $formattedValues = $multiple ? $formattedValues : [$formattedValues];
         foreach($formattedValues as $key => $formattedValue) {
 
-            $role = $formattedValue["id"];
+            $role = $formattedValue["id"] ?? null;
             
             $url = $this->adminUrlGenerator
                         ->unsetAll()

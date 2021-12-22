@@ -50,6 +50,7 @@ class ServiceEntityParser
     public const SEPARATOR     = ":"; // Field separator
     public const SEPARATOR_OR   = "Or";
     public const SEPARATOR_AND  = "And";
+    public const SEPARATOR_BY  = "By";
 
     // Count options
     public const COUNT_ALL = "ALL";
@@ -200,6 +201,7 @@ class ServiceEntityParser
 
                 str_contains($field, self::SEPARATOR_AND      )  ||
                 str_contains($field, self::SEPARATOR_OR       )  ||
+                str_contains($field, self::SEPARATOR_BY       )  ||
                 str_contains($field, self::SEPARATOR         ))
 
                 throw new Exception(
@@ -248,16 +250,11 @@ class ServiceEntityParser
         }
 
         // Extract method name and extra parameters
-        if (preg_match('/^(find(?:One|AtMost|Last))$/', $method, $matches)) {
+        if (preg_match('/^(find(?:One|AtMost|Last)?)(.*)/', $method, $matches)) {
 
             $magicFn = $matches[1] ?? "";
-            $byNames = "";
+            $byNames = $matches[2];
 
-        } else if (preg_match('/^(find(?:One|AtMost|Last)?By)(.*)/', $method, $matches)) {
-
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[2] ?? "";
-            
         } else if (preg_match('/^(distinctCount|count)(?:For([^By]*))?(?:By){0,1}(.*)/', $method, $matches)) {
             
             $magicFn = $matches[1] ?? "";
@@ -282,6 +279,7 @@ class ServiceEntityParser
         }
 
         // Reveal obvious logical ambiguities..
+        $byNames = strpos($byNames, self::SEPARATOR_BY) === 0 ? substr($byNames, strlen(self::SEPARATOR_BY)) : $byNames;
         if (str_contains($byNames, self::SEPARATOR_AND ) && str_contains($byNames, self::SEPARATOR_OR ))
             throw new Exception("\"".$byNames. "\" method gets an AND/OR ambiguity");
 
@@ -298,7 +296,7 @@ class ServiceEntityParser
         }
 
         $methodBak = $method;
-        $method = strpos($method, $magicFn) == 0 ? substr($method, strlen($magicFn)) : $method;
+        $method = strpos($method, $magicFn) === 0 ? substr($method, strlen($magicFn)) : $method;
 
         $operator = self::OPTION_EQUAL; // Default case (e.g. "findBy" alone)
         foreach($byNames as $id => $by) {

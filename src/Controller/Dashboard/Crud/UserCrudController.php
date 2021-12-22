@@ -39,14 +39,16 @@ class UserCrudController extends AbstractCrudController
 
             $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
             $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
-
+            
             $impersonate = null;
-            if($this->isGranted("ROLE_SUPERADMIN"))
+            if($this->isGranted("ROLE_SUPERADMIN") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $impersonate = $entity->getUserIdentifier();
+                $impersonate = '<a href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>';
+            }
 
-            $impersonate = $impersonate ? '<a href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>' : null;
             $extension->setTitle($entity.$impersonate);
-            $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@dashboard.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
+            if($this->getCrud()->getAsDto()->getCurrentAction() != "new") 
+                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@dashboard.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
         }
         
         return $extension;
@@ -103,7 +105,18 @@ class UserCrudController extends AbstractCrudController
             ->addCssClass('btn btn-primary');
 
         return parent::configureActions($actions)
-            ->addBatchAction($approveUser)->setPermission($approveUser, 'ROLE_SUPERADMIN');
+            ->remove(Crud::PAGE_INDEX, Action::NEW)
+            ->add(Crud::PAGE_INDEX, Action::NEW)
+            ->update(Crud::PAGE_INDEX, Action::NEW,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
+            
+            ->remove(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER)
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER)
+            ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
+
+            ->addBatchAction($approveUser)
+            ->setPermission($approveUser, 'ROLE_SUPERADMIN');
     }
 
     public function approveUsers(BatchActionDto $batchActionDto)

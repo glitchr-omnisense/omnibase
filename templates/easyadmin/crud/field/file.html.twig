@@ -32,10 +32,6 @@
         {% set images = field.formattedValue is empty or null ? [] : [field.formattedValue] %}
     {% endif %}
 
-    {% if images is empty %}
-        {{ "@fields.fileupload.file_counter.none"|trans }}
-    {% endif %}
-
     {% for key, image in images %}
 
         {% if image is not null %}
@@ -50,14 +46,18 @@
             <div id="{{ html_id }}" class="ea-lightbox">
                 <img src="{{ image }}">
             </div>
-
-        {% elseif not pageDetail %}
-            {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
-            <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">{{ icon|raw }}</div>
         {% endif %}
 
     {% endfor %}
-    
+
+    {% if images is empty %}
+        {% if pageDetail %}
+            {{ "@fields.fileupload.file_counter.none"|trans }}
+        {% else %}
+            {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
+            <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">{{ icon|raw }}</div>
+        {% endif %}
+    {% endif %}
 
 {% elseif renderFormat == 'count' or field.value is iterable %}
 

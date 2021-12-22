@@ -580,6 +580,7 @@
 
         <service id="Base\Controller\Dashboard\AbstractCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.settings" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="ea_extension" />
@@ -619,7 +620,7 @@
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\NumberAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         
     </services>

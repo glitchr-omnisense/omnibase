@@ -63,12 +63,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
             $tableName = str_replace("\\", "", $tableName);
             $tableName = explode("_",self::camelToSnakeCase($tableName));
-            
-            $prev = null;
-            foreach($tableName as $key => $current) {
-                if($current == $prev) unset($tableName[$key]);
-                $prev = $current;
-            }
+            $tableName = array_unique($tableName);
 
             $tableName = self::snakeToCamelCase(implode("_", $tableName));
             $tableName = lcfirst($tableName);
