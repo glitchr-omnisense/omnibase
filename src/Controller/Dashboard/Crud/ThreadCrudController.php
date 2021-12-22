@@ -2,8 +2,9 @@
 
 namespace Base\Controller\Dashboard\Crud;
 
+use Base\Config\Extension;
 use Base\Controller\Dashboard\AbstractCrudController;
-
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Enum\ThreadState;
 use Base\Field\DateTimePickerField;
 use Base\Field\IdField;
@@ -14,12 +15,16 @@ use Base\Field\SlugField;
 use Base\Field\StateField;
 use Base\Field\TranslationField;
 use Base\Field\Type\SelectType;
+use Base\Service\BaseSettings;
+use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 class ThreadCrudController extends AbstractCrudController
 {
