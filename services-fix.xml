@@ -50,6 +50,5 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\UrlSigner" />
         </service>
 
-
     </services>
 </container>

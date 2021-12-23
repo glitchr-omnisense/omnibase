@@ -163,9 +163,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
-            $settings = $this->baseService->getSettings()->get($fields);
+            $settings = array_key_transforms(function($k, $f): ?array {
+
+                $setting = $f["_self"] ?? null;
+                if($setting === null) return null;
+
+                return [$setting->getName(), $f["_self"]];
+
+            }, $this->baseService->getSettings()->getRaw($fields));
             $settings = array_filter($settings, fn($value) => !is_null($value));
             
+            dump($data);
+
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
@@ -351,7 +360,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->add(Crud::PAGE_EDIT, Action::INDEX) // Adding return button..
             ->update(Crud::PAGE_EDIT, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
-            
             ->update(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-save'))
             ->update(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE,

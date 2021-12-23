@@ -194,5 +194,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $this->baseSettings->removeCache($field);
             }
         }
+
+        dump($viewData);
     }
 }

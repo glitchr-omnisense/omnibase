@@ -165,8 +165,14 @@ trait TranslatableTrait
             catch (\BadMethodCallException $e) 
             {
                 // Parent fallback getter
-                if($parentClass && method_exists($className, "__get")) 
-                    return parent::__get($property);
+                if($parentClass && method_exists($className, "__get")) {
+
+                    try { return parent::__get($property); }
+                    catch (\BadMethodCallException $e) 
+                    {
+                        throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+                    }
+                }
             }
         }
 
@@ -175,9 +181,7 @@ trait TranslatableTrait
         if($parentClass && method_exists($parentClass,"__call")) 
             return parent::__call($method, $arguments);
 
-        //
-        // Failed to find a valid accessor
-        throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        return null;
     }
 
     public function __set($property, $argument)

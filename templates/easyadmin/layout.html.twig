@@ -119,7 +119,8 @@
                     padding:0.4em 0.5em;
                 }
 
-                .badge .label { margin-right:0.5em; border-right:1.5px solid; padding-right:0.5em;}
+                .badge .label:first-child { margin-right:0.5em; padding-right:0.5em; border-right:1.5px solid; }
+                .badge .label:last-child  { margin-left:0.15em; padding-left:0.5em; border-left:1.5px solid; }
                 .badge i {  font-size:10pt;            }
                 .badge > * {
                     display:flex;
@@ -137,6 +138,11 @@
                 {
                     padding:0;
                     margin:0;
+                }
+
+                .field-icon i  
+                {
+                    text-shadow: var(--white) 1px 0 5px !important;
                 }
 
                 body.ea-edit .content-header, body.ea-new .content-header {
@@ -296,6 +302,11 @@
                     padding: 0 !important;
                 }
                 
+                .dropdown-item a { text-align:center; }
+                .dropdown i, .action-index i, .action-edit i, .action-new i 
+                {
+                    margin:0.25em 0.25em 0.25em 0;
+                }
 
                 .responsive-menu { padding:1.25em; }
                 .logo, .responsive-logo {

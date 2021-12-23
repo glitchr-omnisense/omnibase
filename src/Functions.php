@@ -183,7 +183,14 @@ namespace {
     function class_basename($class)
     {
         $class = is_object($class) ? get_class($class) : $class;
-        return basename(str_replace('\\', '/', $class));
+        return str_replace("/", "\\", basename(str_replace('\\', '/', $class)));
+    }
+
+    function class_dirname($class)
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+        $dirname = str_replace("/", "\\", dirname(str_replace('\\', '/', $class)));
+        return $dirname == "." ? "" : $dirname;
     }
 
     function mb_ucfirst(string $str, ?string $encoding = null): string
@@ -331,6 +338,12 @@ namespace {
             if(!in_array($key, $array) || $unique == false) $array[] = $key;
         
         return $array;
+    }
+
+    function array_value_delete($values, array $array)
+    {
+        if(!is_array($values)) $values = [$values];
+        return array_filter($array, fn($e) => !in_array($e, $values));
     }
 
     function array_keys_delete($keys, array $array) 

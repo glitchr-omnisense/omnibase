@@ -191,8 +191,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
 
-        $dataClass = $form->getConfig()->getOption("class") ?? (is_object($viewData) ? get_class($viewData) : null);
-        if($this->classMetadataManipulator->isEntity($dataClass)) {
+        $dataClass = $form->getConfig()->getOption("class")    ?? (is_object($viewData) ? get_class($viewData) : null);
+        $multiple  = $form->getConfig()->getOption("multiple");
+
+        if(!$multiple && $this->classMetadataManipulator->isEntity($dataClass)) {
 
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
             if(!$classMetadata)
@@ -207,8 +209,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
             
             foreach ($fields as $property => $value)
                 $this->setFieldValue($viewData, $property, $value);
-            foreach($associations as $property => $value)
+            foreach($associations as $property => $value) {
                 $this->setFieldValue($viewData, $property, $value);
+            }
 
         } else if($viewData instanceof PersistentCollection) {
 
@@ -232,14 +235,18 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 }
             }
 
-        } else {
+        } else if($multiple) {
 
             $viewData = new ArrayCollection();
             foreach(iterator_to_array($forms) as $fieldName => $childForm) {
-
+                
                 foreach($childForm as $key => $value)
                     $viewData[$key] = $value->getViewData();
             }
+
+        } else {
+
+            $viewData = current(iterator_to_array($forms))->getViewData();
         }
     }
 

@@ -70,6 +70,10 @@ sitemap:
     singular: attribute
     plural: attributes
     
+    color_attribute:
+      singular: "color"
+      plural: "color"
+      
     hyperpattern_attribute:
       singular: "hyperpattern"
       plural: "hyperpatterns"

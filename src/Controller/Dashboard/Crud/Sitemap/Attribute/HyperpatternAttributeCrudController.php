@@ -28,6 +28,7 @@ class HyperpatternAttributeCrudController extends AttributeCrudController
                 //             "translations" => ["form_type" => TranslationType::class],
                 //             // "slug" => ["form_type" => SlugType::class, "target" => "translations.name"],                            
                 //         ])*/;
+
                 yield AssociationField::new("hyperlinks")->renderAsCount()/*->hideOnForm()*/;
 
                 yield TextField::new('pattern');

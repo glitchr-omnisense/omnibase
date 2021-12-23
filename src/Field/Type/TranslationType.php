@@ -301,18 +301,25 @@ class TranslationType extends AbstractType implements DataMapperInterface
             if(!$multiple) {
 
                 if ($data instanceof TranslationInterface) { 
-                    $viewData[$locale] = is_array($data) && empty($data) ? null : $data;
-                    $viewData[$locale]->setLocale($locale);
+
+                    if($data->isEmpty()) unset($viewData[$locale]);
+                    else {
+
+                        $viewData[$locale] = is_array($data) && empty($data) ? null : $data;
+                        $viewData[$locale]->setLocale($locale);
+                    }
                 }
 
             } else {
 
+                dump($data);
                 foreach($data as $key => $translation) {
 
-                    $translation->setLocale($locale);
-
+                    if ($translation === null) continue;
                     if(!$translation instanceof TranslationInterface)
-                        throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"".get_class($translation)."\" received.");
+                        throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"".(is_object($translation) ? get_class($translation) : $translation)."\" received.");
+
+                    $translation->setLocale($locale);
 
                     if($viewData[$key] instanceof PersistentCollection) {
 

@@ -3,19 +3,18 @@
 namespace Base\Entity\Sitemap\Attribute;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Entity\Sitemap\Attribute;
-use Base\Entity\Sitemap\AttributeInterface;
 use Base\Model\IconizeInterface;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Attribute\NumberAttributeRepository;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
 /**
  * @ORM\Entity(repositoryClass=NumberAttributeRepository::class)
  * @DiscriminatorEntry( value = "number" )
  */
 
-class NumberAttribute extends Attribute implements IconizeInterface, AttributeInterface
+class NumberAttribute extends AbstractAttribute implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-calculator"]; }

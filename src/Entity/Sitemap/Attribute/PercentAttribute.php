@@ -3,20 +3,18 @@
 namespace Base\Entity\Sitemap\Attribute;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Entity\Sitemap\Attribute;
-use Base\Entity\Sitemap\AttributeInterface;
 use Base\Model\IconizeInterface;
+use Symfony\Component\Form\Extension\Core\Type\PercentType;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Sitemap\Widget\PercentAttributeRepository;
-use Symfony\Component\Form\Extension\Core\Type\PercentType;
+use Base\Repository\Sitemap\Attribute\PercentAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PercentAttributeRepository::class)
  * @DiscriminatorEntry( value = "percent" )
  */
 
-class PercentAttribute extends Attribute implements IconizeInterface, AttributeInterface
+class PercentAttribute extends AbstractAttribute implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-percent"]; } 

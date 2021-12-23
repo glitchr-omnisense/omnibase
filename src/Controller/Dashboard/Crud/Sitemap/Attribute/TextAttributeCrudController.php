@@ -3,6 +3,8 @@
 namespace Base\Controller\Dashboard\Crud\Sitemap\Attribute;
 
 use Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class TextAttributeCrudController extends AttributeCrudController
 {
@@ -10,7 +12,11 @@ class TextAttributeCrudController extends AttributeCrudController
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
-        $defaultCallback = function() { return []; };
-        return parent::configureFields($pageName, $callbacks);
+        return parent::configureFields($pageName, array_merge($callbacks, [
+            "id" => function () {
+                yield NumberField::new('length');
+                yield TextField::new('value');
+            },
+        ]));
     }
 }

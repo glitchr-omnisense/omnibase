@@ -3,6 +3,7 @@
 namespace Base\Controller\Dashboard\Crud\Sitemap\Attribute;
 
 use Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\PercentField;
 
 class PercentAttributeCrudController extends AttributeCrudController
 {
@@ -10,7 +11,10 @@ class PercentAttributeCrudController extends AttributeCrudController
 
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
-        $defaultCallback = function() { return []; };
-        return parent::configureFields($pageName, $callbacks);
+        return parent::configureFields($pageName, array_merge($callbacks, [
+            "id" => function () {
+                yield PercentField::new('value');
+            },
+        ]));
     }
 }

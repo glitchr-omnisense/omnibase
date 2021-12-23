@@ -109,7 +109,7 @@ trait BaseSettingsTrait
         return $this->getRaw($name, $locale)["_self"] ?? null;
     }
 
-    public function getScalar($name, ?string $locale = null): string|object|null
+    public function getScalar($name, ?string $locale = null): string|array|object|null
     {
         if(is_array($names = $name)) {
             

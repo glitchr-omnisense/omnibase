@@ -46,6 +46,8 @@
                     {{ label|raw }}
                 {% elseif showFirst == 2 %}
                     {{icon|raw}}
+                {% elseif field.textAlign == "left" %}
+                    {{icon|raw}}{{ label|raw }}
                 {% else %}
                     {{ label|raw }}{{icon|raw}}
                 {% endif %}

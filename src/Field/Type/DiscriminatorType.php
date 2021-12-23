@@ -2,11 +2,13 @@
 
 namespace Base\Field\Type;
 
+use Base\Controller\Dashboard\AbstractDashboardController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Sitemap\AttributeInterface;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Model\IconizeInterface;
+use Base\Service\TranslatorInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -47,34 +49,68 @@ class DiscriminatorType extends AbstractType
             $discriminatorMap   = $this->classMetadataManipulator->getDiscriminatorMap($class);
             $rootEntityName   = $this->classMetadataManipulator->getRootEntityName($class);
 
-            $choices = [];
-            foreach($discriminatorMap as $key => $entity) {
+            if($options["discriminator_autoload"]) {
 
-                $icon = null;
-                if(class_implements_interface($entity, IconizeInterface::class))
-                    $icon = $entity::__staticIconize()[0];
+                $choices = [];
+                foreach($discriminatorMap as $key => $entity) {
 
-                if($options["exclude_root"] && $entity == $rootEntityName)
-                    continue;
+                    $icon = null;
+                    if(class_implements_interface($entity, IconizeInterface::class))
+                        $icon = $entity::__staticIconize()[0];
 
-                $choices[mb_ucwords($key)] = [$icon, $key];
+                    if($options["exclude_root"] && $entity == $rootEntityName)
+                        continue;
 
-                // if(!class_implements_interface($entity, AttributeInterface::class))
-                //     continue;
-                
-                // $fieldType    = $entity::getType();
-                // $fieldOptions = $entity::getOptions();
-                // $form->add($fieldName, $fieldType, $fieldOptions);
-                // dump($fieldType);
+                    $choices[mb_ucwords($key)] = [$icon, $key];
+
+                    // if(!class_implements_interface($entity, AttributeInterface::class))
+                    //     continue;
+                    
+                    // $fieldType    = $entity::getType();
+                    // $fieldOptions = $entity::getOptions();
+                    // $form->add($fieldName, $fieldType, $fieldOptions);
+                    // dump($fieldType);
+                }
+
+                $form->add("choice", SelectType::class, ["choices" => $choices]);
             }
-
-            $form->add("choice", SelectType::class, ["choices" => $choices]);
         });
+    }
+
+    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = SelectType::FORMAT_TITLECASE) 
+    {
+        $entry = implode(".", array_unique(explode(".", $entry)));
+
+        $formattedValues = SelectType::getFormattedValues($entry, $class, $translator, $format);
+        $formattedValues["icon"] = class_implements_interface($class, IconizeInterface::class) ? $class::__staticIconize()[0] ?? null : null;
+
+        $text = $translator->trans($entry.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        switch($format) {
+
+            case SelectType::FORMAT_TITLECASE:
+                $text = mb_ucwords(mb_strtolower($text));
+                break;
+
+            case SelectType::FORMAT_SENTENCECASE:
+                $text = mb_ucfirst(mb_strtolower($text));
+                break;
+
+            case SelectType::FORMAT_LOWERCASE:
+                $text = mb_strtolower($text);
+                break;
+
+            case SelectType::FORMAT_UPPERCASE:
+                $text = mb_strtoupper($text);
+                break;
+        }
+
+        $formattedValues["text"] = $text;
+        return $formattedValues;
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        
+        //Optional: Implement SelectType + AssociationType with autoload if option enabled
     }
 
     public function getBlockPrefix(): string { return 'discriminator'; }
@@ -82,7 +118,8 @@ class DiscriminatorType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            "exclude_root" => true
+            "exclude_root" => true,
+            "discriminator_autoload" => false
         ]);
     }
 }

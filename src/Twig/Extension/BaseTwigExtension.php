@@ -4,6 +4,9 @@ namespace Base\Twig\Extension;
 
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
+use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Types\EnumType;
+use Base\Database\Types\SetType;
 use Base\Exception\NotFoundResourceException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
@@ -45,11 +48,12 @@ final class BaseTwigExtension extends AbstractExtension
 
         BaseController::$foundBaseTwigExtension = true;
 
-        $this->translator       = $translator;
-        $this->routingExtension = $routingExtension;
-        $this->assetExtension   = $assetExtension;
-        $this->intlExtension    = new IntlExtension();
-        $this->mimeTypes        = new MimeTypes();
+        $this->translator               = $translator;
+        $this->routingExtension         = $routingExtension;
+        $this->assetExtension           = $assetExtension;
+        
+        $this->intlExtension            = new IntlExtension();
+        $this->mimeTypes                = new MimeTypes();
     }
 
     public function setBase(BaseService $baseService) 
@@ -65,7 +69,9 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFunction("path",  [$this, "path"]),
             new TwigFunction('asset', [$this, 'asset']),
-            new TwigFunction('method_exists', [$this, 'method_exists'])
+            new TwigFunction('exit',  [$this, 'exit']),
+            new TwigFunction('method_exists', [$this, 'method_exists']),
+            new TwigFunction('static_call', [$this, 'static_call'])
         ];
     }
 
@@ -73,6 +79,7 @@ final class BaseTwigExtension extends AbstractExtension
     {
         return [
             new TwigFilter('trans',         [$this, 'trans']),
+            new TwigFilter('trans2',         [$this, 'trans']),
             new TwigFilter('thumbnail',     [$this, 'thumbnail']),
             new TwigFilter('webp',          [$this, 'webp']),
             new TwigFilter('trans',         [$this, 'trans']),
@@ -86,7 +93,10 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('shorten',       [$this, 'shorten']),
             new TwigFilter('highlight',     [$this, 'highlight']),
             new TwigFilter('flatten_array', [$this, 'flattenArray']),
+            new TwigFilter('url_decode',    [$this, 'url_decode']),
             new TwigFilter('filesize',      [$this, 'filesize']),
+            new TwigFilter('singular',      [$this, 'singular']),
+            new TwigFilter('plural',        [$this, 'plural']),
             new TwigFilter('lang',          [$this, 'lang']),
             new TwigFilter('country',       [$this, 'country']),
             new TwigFilter('fontAwesome',   [$this, 'fontAwesome']),
@@ -98,6 +108,7 @@ final class BaseTwigExtension extends AbstractExtension
         ];
     }
 
+    public function exit(int $code) { exit($code); }
     public function synopsis($class) { return class_synopsis($class); }
 
     public function method_exists($object, $method) { return method_exists($object, $method); }
@@ -211,11 +222,42 @@ final class BaseTwigExtension extends AbstractExtension
         return dec2str($size, $unitPrefix);
     }
 
-    public function flattenArray($array): ?array { return array_flatten($array); }
+    function static_call($class, $method, ...$args) {
+        if (!class_exists($class))
+            throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
+        if (!method_exists($class, $method))
+            throw new \Exception("Cannot call static method $method on \"$class\": invalid method");
+   
+        return forward_static_call_array([$class, $method], $args);
+    }
+
+    public function flattenArray($array):    ?array { return array_flatten($array); }
     public function lang(string $locale):    string { return substr($locale, 0, 2); }
     public function country(string $locale): string { return substr($locale, 3, 2); }
     public function time(int $time):         string { return $this->translator->time($time); }
+    public function url_decode(string $url): string { return urldecode($url); }
 
+    public function singular($entity) 
+    {
+        if( $entity = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", $entity) )
+            return $this->trans("@entities.".camel_to_snake(str_replace("\\", ".", $entity)).".singular");
+        if( $entity = preg_replace('/^(App|Base)\\\Enum\\\/', $prefix ?? "", $entity) )
+            return $this->trans("@enums.".camel_to_snake(str_replace("\\", ".", $entity)).".singular");
+
+        return $this->trans(camel_to_snake(class_basename($entity), " "));
+    }
+
+    public function plural($entity) 
+    {
+        if( $entity = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", $entity) )
+            return $this->trans("@entities.".camel_to_snake(str_replace("\\", ".", $entity)).".plural");
+        if( $entity = preg_replace('/^(App|Base)\\\Enum\\\/', $prefix ?? "", $entity) )
+            return $this->trans("@enums.".camel_to_snake(str_replace("\\", ".", $entity)).".plural");
+
+        return $this->trans(camel_to_snake(class_basename($entity), " "));
+    }
+
+    
     public function image(Environment $env, array $context, $image): ?string
     {
         if( ( ($context["email"] ?? null) instanceof WrappedTemplatedEmail) ) {

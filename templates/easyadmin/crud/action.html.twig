@@ -2,8 +2,14 @@
 {# @var action \EasyCorp\Bundle\EasyAdminBundle\Dto\ActionDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% if 'a' == action.htmlElement %}
+
+    {% set linkUrl = action.linkUrl %}
+    {% if action.crudActionName == "index" and action.type == "entity" %}
+        {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
+    {% endif %}
+
     <a class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
-       href="{{ action.linkUrl }}"
+       href="{{ linkUrl }}"
        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
         {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
         {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
@@ -15,40 +21,47 @@
             {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
         </span>
     </button>
-{% elseif 'ul' == action.htmlElement %}
 
-<div class="btn-group">
-    <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+{% elseif 'discriminator' == action.htmlElement %}
+
+<div class="input-group dropdown action-discriminator">
+
+    {% set actionHtmlAttributes = action.htmlAttributes %}
+    {% set discriminatorMap     = actionHtmlAttributes["map"] %}
+    {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'map') %}
+    {% set rootEntity           = actionHtmlAttributes["root-entity"] %}
+    {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'root-entity') %}
+
+    <a class="{{ action.cssClass }}"  href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
         {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
         {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
     </a>
 
-    {% if action.actionList|length > 0 %}
-    <button type="button" class="btn btn-lg btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+    {% if discriminatorMap|length > 0 %}
+    <button type="button" class="btn btn-secondary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
         <span class="visually-hidden"></span>
     </button>
-    <ul class="dropdown-menu">
-        {% for action in action.actionList|length %}
-            
-            {% if action.htmlElement == "ul" %}
 
-                <li><hr class="dropdown-divider"></li>
-
-                {% for subAction in action.actionList|length %}
-                <li><a class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ subAction.cssClass }}"
-                    href="{{subAction.linkUrl}}"
-                    {% for name, value in subAction.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                    {%- if subAction.icon %}<i class="action-icon {{ subAction.icon }}"></i> {% endif -%}
-                    {%- if subAction.label is not empty -%}{{ subAction.label }}{%- endif -%}
-                </a></li>
-                {% endfor %}
-
-            {% else %}
-
-                <li>{{ include(action.templatePath, { action: action }, with_context = false) }}</li>
-
+    <ul class="dropdown-menu dropdown-menu-end">
+        {% for group,entities in discriminatorMap %}
+            {% if entities|length != 1 %}
+                {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
+                {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans|capitalize }}</li>{% endif %}
             {% endif %}
 
+            {% for entity in entities %}
+
+                {% set icon    = static_call(entity|url_decode, "getEntityIcon")|default(null) %}
+                {% set label   = static_call(entity|url_decode, "getEntityLabelInSingular")|trans|capitalize %}
+                {% set linkUrl = action.linkUrl|replace({(rootEntity): entity}) %}
+
+                <li class="dropdown-item label-item"><a href="{{ linkUrl }}"
+                    {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                    {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
+                    {{label}}
+                </a></li>
+
+            {% endfor %}
         {% endfor %}
     </ul>
     {% endif %}

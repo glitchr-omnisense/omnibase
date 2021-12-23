@@ -194,8 +194,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["guess_priority"] = $options["class_priority"]; 
             $options["class"]          = $this->formFactory->guessType($event, $options);
 
-            $choiceData = $options["multiple"] ? $data["choice"] ?? [] : [];
-            if(!$options["multiple"]) $choiceData[] = $data["choice"];
+            $dataChoice = $data["choice"] ?? null;
+            $choiceData = $options["multiple"] ? $dataChoice ?? [] : [];
+            if(!$options["multiple"] && $dataChoice) $choiceData[] = $dataChoice;
 
             if ($options["class"]) {
 
@@ -239,7 +240,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                         return [$i, array_key_transforms($callback, $value)];
 
                     // Format values
-                    $entry = self::getFormattedValues($value, $options["class"], $this->translator);
+                    $entry = self::getFormattedValues($value, $options["class"], $this->translator, 
+                        $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE
+                    );
 
                     if(!$options["class"]) $entry["text"] = $key;
 
@@ -258,12 +261,16 @@ class SelectType extends AbstractType implements DataMapperInterface
                     return [$label, $value];
 
                 }, $choiceData));
+
+            } else {
+
+                $choices = $choiceData;
             }
 
             //
             // Note for later: when disabling select2, it might happend that the label of the label of selected entries are wrong
             $formOptions = [
-                'choices'  => $choices, 
+                'choices'  => $choices,
                 'multiple' => $options["multiple"]
             ];
 
@@ -397,7 +404,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                     return [$i, ["text" => $key, "children" => array_key_transforms($callback, $value)]];
 
                 // Format values
-                $entry = self::getFormattedValues($value, $options["class"], $this->translator);
+                $entry = self::getFormattedValues($value, $options["class"], $this->translator, 
+                            $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE
+                        );
                 if(!$entry) return null;
 
                 // // Check if entry selected
@@ -496,11 +505,11 @@ class SelectType extends AbstractType implements DataMapperInterface
         switch($format) {
 
             case self::FORMAT_TITLECASE:
-                $text = mb_ucfirst(mb_strtolower($text));
+                $text = mb_ucwords(mb_strtolower($text));
                 break;
 
             case self::FORMAT_SENTENCECASE:
-                $text = mb_ucwords(mb_strtolower($text));
+                $text = mb_ucfirst(mb_strtolower($text));
                 break;
 
             case self::FORMAT_LOWERCASE:

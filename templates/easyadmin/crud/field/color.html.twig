@@ -9,13 +9,13 @@
 					   document.body.appendChild(clipboard); clipboard.select();
 
 					   $(this).attr('data-original-title', clipboard.value+': copied').tooltip('show');
-					   var that = this; setTimeout(function() {
+					   var that = this; setTimeout(function() {
 						   $(that).attr('data-original-title', clipboard.value);
 					   }, 1000);
 
 					   document.execCommand('copy'); clipboard.remove();"
 
-		  style="cursor: pointer; width:40px; border:1px solid; background-color:{{field.formattedValue}}"
+		  style="cursor: pointer; margin:0.25em 0; width:40px; border:1px solid; background-color:{{field.formattedValue}}"
 		  data-toggle="tooltip" data-placement="top"
 		  title="{{ field.formattedValue }}" value="{{field.formattedValue}}">&nbsp</span>
 {% else %}

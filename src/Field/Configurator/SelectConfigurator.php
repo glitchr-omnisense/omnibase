@@ -66,7 +66,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
                 if ($formattedValues[$key] && $dataClassCrudController)
                     $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
-
             }
 
         } else {

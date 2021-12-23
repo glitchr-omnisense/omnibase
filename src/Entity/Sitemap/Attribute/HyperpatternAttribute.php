@@ -3,24 +3,21 @@
 namespace Base\Entity\Sitemap\Attribute;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Entity\Sitemap\Attribute;
-use Base\Entity\Sitemap\AttributeInterface;
 use Base\Entity\Sitemap\Widget\Hyperlink;
 use Base\Model\IconizeInterface;
-
-use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Sitemap\Attribute\HyperpatternAttributeRepository;
-
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\Sitemap\Attribute\HyperpatternAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=HyperpatternAttributeRepository::class)
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
 
-class HyperpatternAttribute extends Attribute implements IconizeInterface, AttributeInterface
+class HyperpatternAttribute extends AbstractAttribute implements IconizeInterface
 {
     public        function __iconize()       : ?array { return [$this->getIcon()]; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }

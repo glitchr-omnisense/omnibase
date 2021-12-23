@@ -21,6 +21,7 @@ class SelectField implements FieldInterface
     public const OPTION_CLASS          = 'class';
 
     public const OPTION_DISPLAY_LIMIT = 'displayLimit';
+    public const OPTION_ICON_ALIGN    = 'iconAlign';
 
     public const OPTION_RENDER_FORMAT   = "renderFormat";
     public const OPTION_SHOW_FIRST      = 'showFirst';
@@ -41,11 +42,24 @@ class SelectField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
-            ->setCustomOption(self::OPTION_SHOW_FIRST, self::NO_SHOW)
+            ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
             ->setColumns(6)
             ->setTextAlign(TextAlign::CENTER)
             ->addCssClass('field-select');
+    }
+
+    public function setTextAlign(string $textAlign)
+    {
+        $this->setIconAlign($textAlign);
+        $this->dto->setTextAlign($textAlign);
+        return $this;
+    }
+
+    public function setIconAlign(string $iconAlign)
+    {
+        $this->setCustomOption(self::OPTION_ICON_ALIGN, $iconAlign);
+        return $this;
     }
 
     public function allowMultipleChoices(bool $allow = true): self

@@ -209,10 +209,13 @@
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
-
         <service id="Base\DatabaseSubscriber\TranslatableSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="base.locale_provider" />
+        </service>
+        <service id="Base\DatabaseSubscriber\DiscriminatorSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
@@ -580,6 +583,7 @@
 
         <service id="Base\Controller\Dashboard\AbstractCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.settings" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -615,8 +619,9 @@
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\HyperlinkCrudController"  parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>

@@ -17,8 +17,10 @@ class AttributeCrudController extends AbstractCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
+            yield $yield;
 
-        yield FontAwesomeField::new('icon');
+        yield FontAwesomeField::new('icon')->setColumns(6);
         foreach ( ($callbacks["icon"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
@@ -26,11 +28,9 @@ class AttributeCrudController extends AbstractCrudController
         foreach ( ($callbacks["code"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield DiscriminatorField::new();
-        
+        yield DiscriminatorField::new("type");
+
         yield TranslationField::new("label");
-        yield TranslationField::new()->showOnIndex("help")->setRequired(false);
-        foreach ( ($callbacks["value"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        yield TranslationField::new()->showOnIndex("help");
     }
 }

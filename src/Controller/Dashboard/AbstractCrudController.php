@@ -18,6 +18,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterCrudActionEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
+use EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -25,10 +26,21 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 {
     abstract static function getPreferredIcon(): ?string;
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, BaseSettings $baseSettings, EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
+     * @var ActionFactory
+     */
+    protected $actionFactory;
+
+    public function __construct(ActionFactory $actionFactory, ClassMetadataManipulator $classMetadataManipulator, BaseSettings $baseSettings, EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
+        $this->actionFactory = $actionFactory;
         $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;
         $this->extension = $extension;
@@ -69,19 +81,19 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
         $entityFqcn = preg_replace('/\\\Controller\\\Dashboard\\\Crud\\\/', "\\Entity\\", $entityFqcn);
+        self::$crudController[$entityFqcn] = get_called_class();
 
         if(str_starts_with($entityFqcn, "Base")) {
 
             $appEntityFqcn     = preg_replace("/^Base/", 'App', $entityFqcn);
             $appCrudController = preg_replace("/^Base/", 'App', get_called_class());
-            if (!class_exists($appCrudController)) {
-
+            if (!class_exists($appCrudController))
                 self::$crudController[$appEntityFqcn] = get_called_class();
-                return $appEntityFqcn;
-            }
+
+            if ( class_exists($appEntityFqcn))
+                $entityFqcn = $appEntityFqcn;
         }
 
-        self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
     }
 
@@ -116,32 +128,43 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return camel_to_snake(str_replace("\\", ".", $entityFqcn));
     }
 
-    public function configureActionAsDiscriminatorDropdownIfPossible(Action $action): Action
-    {
-        $actionDto = $action->getAsDto();
-        if($actionDto->getName() == Action::NEW) {
-
-            $actionDto->setHtmlElement("ul");
-            
-            $actionList = [];
-            $actionList[] = $this->classMetadataManipulator;
-
-            $htmlAttributes = $actionDto->getHtmlAttributes();
-            $htmlAttributes["action-list"] = $actionList;
-
-            $actionDto->setHtmlAttributes($htmlAttributes);            
-        }
-
-        return $action;
-    }
-
     public function configureActions(Actions $actions): Actions
     {
         return $actions
                 ->update(Crud::PAGE_INDEX, Action::NEW,
-                    fn (Action $action) => $this->configureActionAsDiscriminatorDropdownIfPossible($action))
-                ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
-                    fn (Action $action) => $this->configureActionAsDiscriminatorDropdownIfPossible($action))
+                    function (Action $action) {
+
+                        $entity     = $this->getEntityFqcn();
+                        $entity     = str_replace("Base\\", "App\\", $entity);
+                        $rootEntity = str_replace("Base\\", "App\\", $this->classMetadataManipulator->getRootEntityName($entity));
+
+                        $actionDto = $action->getAsDto();
+                        if($actionDto->getName() == Action::NEW && $entity == $rootEntity) {
+
+                            $htmlAttributes        = $actionDto->getHtmlAttributes();
+                            $htmlAttributes["root-entity"] = urlencode($this->getCrudControllerFqcn($rootEntity));
+                            $htmlAttributes["map"] = [];
+                            
+                            foreach($this->classMetadataManipulator->getDiscriminatorMap($entity) as $key => $class) {
+
+                                $class = str_replace("Base\\", "App\\", $class);
+                                if($class == $rootEntity) continue;
+
+                                $k     = explode("_", $key);
+                                $key   = array_shift($k);
+
+                                if(( $crudClassController = $this->getCrudControllerFqcn($class) )) {
+                                    $array = [implode("_", $k) => urlencode($crudClassController)];
+                                    $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
+                                }
+                            }
+
+                            $actionDto->setHtmlElement("discriminator");
+                            $actionDto->setHtmlAttributes($htmlAttributes);
+                        }
+
+                        return $action;
+                    })
 
                 ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN')
@@ -153,24 +176,31 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $extension;
     }
 
-    public function getCrud():Crud { return $this->crud; }
-    public function getEntityDto():EntityDto { return $this->entityDto; }
-    public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }
     public function getExtension():Extension { return $this->extension; }
-    
+
+    public function getCrud():Crud { return $this->crud; }
+    public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }
+    public function getEntityDto():EntityDto { return $this->entityDto; }
+
+    public static function getEntityLabelInSingular() { return self::getEntityTranslationPrefix().".singular"; }
+    public static function getEntityLabelInPlural() { return self::getEntityTranslationPrefix().".plural"; }
+    public static function getEntityIcon()
+    {
+        $icon = get_called_class()::getPreferredIcon() ?? null;
+        return $icon ?? class_implements_interface(self::getEntityFqcn(), IconizeInterface::class) ? self::getEntityFqcn()::__staticIconize()[0] : null;
+    }
+
     public function configureCrud(Crud $crud): Crud
     {
         $this->crud = $crud;
 
         // Extra information configuration
-        $entityTranslationPrefix = $this->getEntityTranslationPrefix();
-
-        $entityLabelInSingular = $this->translator->trans($entityTranslationPrefix.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
-        if($entityLabelInSingular == $entityTranslationPrefix.".singular") $entityLabelInSingular = null;
+        $entityLabelInSingular = $this->translator->trans(self::getEntityLabelInSingular());
+        if($entityLabelInSingular == self::getEntityLabelInSingular()) $entityLabelInSingular = null;
         $crud->getAsDto()->setEntityLabelInSingular($entityLabelInSingular ?? "");
         
-        $entityLabelInPlural = $this->translator->trans($entityTranslationPrefix.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
-        if($entityLabelInPlural == $entityTranslationPrefix.".plural") $entityLabelInPlural = null;
+        $entityLabelInPlural = $this->translator->trans(self::getEntityLabelInPlural());
+        if($entityLabelInPlural == self::getEntityLabelInPlural()) $entityLabelInPlural = null;
         $crud->getAsDto()->setEntityLabelInPlural($entityLabelInPlural ?? "");
 
         $crudTranslationPrefix = $this->getCrudTranslationPrefix();
@@ -190,14 +220,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($text == $crudTranslationPrefixWithAction.".text") $text = $this->translator->trans($crudTranslationPrefix.".text");
         if($text == $crudTranslationPrefix.".text") $text = "";
 
-        $icon = class_implements_interface($this->getEntityFqcn(), IconizeInterface::class) ? $this->getEntityFqcn()::__staticIconize()[0] : null;
-        $icon = $this->getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
-
-        $this->extension->setIcon($icon);
+        $this->extension->setIcon($this->getEntityIcon() ?? "fas fa-question-circle");
         $this->extension->setTitle(mb_ucfirst($title));
         $this->extension->setHelp($help);
         $this->extension->setText($text);
-
 
         // Configure CRUD and extension
         return $this->configureExtension($this->extension)
@@ -213,27 +239,39 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
-        if($entity = $this->getEntity()) {
+        $entity = $this->getEntity();
+        if(!$entity) return $extension;
+        
+        $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
+        $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        if($entityLabel == $userClass.".singular") $entityLabel = null;
+        else $extension->setTitle(mb_ucwords($entityLabel));
 
-            $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
-            $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
-            if($entityLabel == $userClass.".singular") $entityLabel = null;
-            else $extension->setTitle(mb_ucwords($entityLabel));
+        $entityLabel = $entityLabel ?? $this->getEntityLabelInSingular() ?? "";
+        $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
 
-            $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-            $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
+        $entityTitle = null;
+        if ($entity) {
 
-            $entityTitle = class_basename(get_class($entity));
-            if(!$entityTitle) $entityTitle = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-            $extension->setTitle($entityTitle);
+            $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], get_class($entity));
+            $class = implode(".", array_map("camel_to_snake", explode("\\", $class)));
+            $entityLabel = mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
+        }
 
-            if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
-                $entityText = $entityLabel ." ID #".$entity->getId();
-                $extension->setText($entityText); 
-            }
+        $entityTitle = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
+        $extension->setTitle($entityTitle);
+
+        if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+            $entityText = $entityLabel ." ID #".$entity->getId();
+            $extension->setText($entityText); 
         }
 
         return $extension;
+    }
+
+    public function configureActionsWithResponseParameters(Actions $actions, KeyValueStore $responseParameters): Extension
+    {
+        return $actions;
     }
 
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore

@@ -11,6 +11,8 @@ class FontAwesomeField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
+
     public static function new(string $propertyName, ?string $label = null): self
     {
         return (new self())
@@ -20,5 +22,11 @@ class FontAwesomeField extends SelectField implements FieldInterface
             ->setFormType(FontAwesomeType::class)
             ->setTemplatePath('@EasyAdmin/crud/field/font_awesome.html.twig')
             ->setTextAlign(TextAlign::CENTER);
+    }
+
+    public function setTargetColor(string $fieldName)
+    {
+        $this->setCustomOption(self::OPTION_TARGET_FIELD_NAME, $fieldName);
+        return $this;
     }
 }

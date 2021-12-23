@@ -5,6 +5,7 @@
 {% set displayLimit = field.customOptions.get('displayLimit') %}
 {% set showFirst    = field.customOptions.get('showFirst') %}
 {% set show         = field.customOptions.get('show') %}
+{% set iconAlign    = field.customOptions.get('iconAlign') %}
 
 {% if field.value is iterable %}
 
@@ -34,12 +35,13 @@
                 {% elseif showFirst == 2 %}
                     <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
                 {% else %}
+                    {{ iconAlign == "left" ? icon|raw : "" }}
                     {% if icon is not null %}
                         <span class="label">{{formattedValue.text|default("-")}}</span>
                     {% else %}
                         {{formattedValue.text|default("-")}}
                     {% endif %}
-                    {{ icon|raw }}
+                    {{ iconAlign != "left" ? icon|raw : "" }}
                 {% endif %}
                 {% if fieldLink is not null %}</a>{% endif %}
             </span>
@@ -53,7 +55,7 @@
 
     {% set others = [] %}
     {% for other in formattedValues %}
-        {% if displayLimit > others|length %}
+        {% if displayLimit >= others|length %}
             {% set others = others|merge([other]) %}
         {% elseif displayLimit > 0 %}
             {% set stillMore = others|length != 0 ? ", [..]" : "[..]" %}
@@ -95,12 +97,13 @@
                 {% elseif showFirst == 2 %}
                     <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
                 {% else %}
+                    {{ iconAlign == "left" ? icon|raw : "" }}
                     {% if icon is not null %}
                         <span class="label">{{formattedValue.text|default("-")}}</span>
                     {% else %}
                         {{formattedValue.text|default("-")}}
                     {% endif %}
-                    {{ icon|raw }}
+                    {{ iconAlign != "left" ? icon|raw : "" }}
                 {% endif %}
 
                 {% if fieldLink is not null %}</a>{% endif %}
@@ -141,12 +144,13 @@
             <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
         {% else %}
             <span>
+                {{ iconAlign == "left" ? icon|raw : "" }}
                 {% if icon is not null %}
                     <span class="label">{{formattedValue.text|default("-")}}</span>
                 {% else %}
                     {{formattedValue.text|default("-")}}
                 {% endif %}
-                {{ icon|raw }}
+                {{ iconAlign != "left" ? icon|raw : "" }}
             </span>
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
@@ -179,12 +183,15 @@
             <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
         {% else %}
             <span>
+                {{ iconAlign == "left" ? icon|raw : "" }}
+
                 {% if icon is not null %}
                     <span class="label">{{formattedValue.text|default("-")}}</span>
                 {% else %}
                     {{formattedValue.text|default("-")}}
                 {% endif %}
-                {{ icon|raw }}
+                
+                {{ iconAlign != "left" ? icon|raw : "" }}
             </span>
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}

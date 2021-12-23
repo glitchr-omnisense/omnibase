@@ -15,24 +15,14 @@ class AttributeTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text")
      */
-    protected $label;
-    public function getLabel(): string { return $this->label; }
-    public function setLabel(string $label)
+    protected $value;
+
+    public function getValue():mixed     { return $this->value; }
+    public function setValue($value)
     {
-        $this->label = $label;
-        return $this;
-    }
-    
-    /**
-     * @ORM\Column(type="text", nullable=true)
-     */
-    protected $help;
-    public function getHelp(): ?string { return $this->help; }
-    public function setHelp(?string $help)
-    {
-        $this->help = $help;
+        $this->value = $value;
         return $this;
     }
 }

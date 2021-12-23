@@ -88,6 +88,7 @@ class ClassMetadataManipulator
         return \Doctrine\DBAL\Types\Type::getType($type);
     }
 
+    public function getDiscriminatorColumn($entity): ?string { return $this->getClassMetadata($entity)->discriminatorColumn["fieldName"]; }
     public function getDiscriminatorValue($entity): ?string { return $this->getClassMetadata($entity)->discriminatorValue; }
     public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity)->discriminatorMap; }
     public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity)->rootEntityName; }
