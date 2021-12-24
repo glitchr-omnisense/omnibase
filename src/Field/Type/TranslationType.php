@@ -312,7 +312,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
             } else {
 
-                dump($data);
                 foreach($data as $key => $translation) {
 
                     if ($translation === null) continue;

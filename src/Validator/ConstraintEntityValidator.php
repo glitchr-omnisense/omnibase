@@ -9,6 +9,7 @@ use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Annotation
@@ -18,9 +19,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
     protected $doctrine;
     protected $em;
 
-    public function __construct(ManagerRegistry $doctrine)
+    public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator)
     {
         $this->doctrine = $doctrine;
+        $this->translator = $translator;
         parent::__construct();
     }
 

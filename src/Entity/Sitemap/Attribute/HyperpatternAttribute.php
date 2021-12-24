@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Attribute\HyperpatternAttributeRepository;
+use Base\Service\LocaleProvider;
 
 /**
  * @ORM\Entity(repositoryClass=HyperpatternAttributeRepository::class)
@@ -26,12 +27,14 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
     public static function getOptions(): array { return []; }
 
     public function __toString() { return $this->getPattern(); }
-    public function __construct(string $code, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
+    public function __construct(?string $code = "website", ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
     {
         parent::__construct($code, $icon);
-        $this->hyperlinks = new ArrayCollection();
 
+        $this->translate(LocaleProvider::getDefaultLocale())->setLabel(ucfirst($code));
         $this->setPattern($pattern);
+
+        $this->hyperlinks = new ArrayCollection();
     }
 
     /**

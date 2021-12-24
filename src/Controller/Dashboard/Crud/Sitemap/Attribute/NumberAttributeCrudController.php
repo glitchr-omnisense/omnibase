@@ -2,10 +2,9 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap\Attribute;
 
-use Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\NumberField;
 
-class NumberAttributeCrudController extends AttributeCrudController
+class NumberAttributeCrudController extends AbstractAttributeCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
@@ -13,7 +12,8 @@ class NumberAttributeCrudController extends AttributeCrudController
     {
         return parent::configureFields($pageName, array_merge($callbacks, [
             "id" => function () {
-                yield NumberField::new('value');
+                yield NumberField::new('minimum')->setColumns(6);
+                yield NumberField::new('maximum')->setColumns(6);
             },
         ]));
     }

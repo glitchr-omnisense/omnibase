@@ -2,16 +2,11 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap\Attribute;
 
-use Base\Field\FontAwesomeField;
-use Base\Field\SlugField;
-use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
-use Base\Controller\Dashboard\AbstractCrudController;
-use Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController;
 use Base\Field\AssociationField;
 
-class HyperpatternAttributeCrudController extends AttributeCrudController
+class HyperpatternAttributeCrudController extends AbstractAttributeCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
@@ -29,7 +24,7 @@ class HyperpatternAttributeCrudController extends AttributeCrudController
                 //             // "slug" => ["form_type" => SlugType::class, "target" => "translations.name"],                            
                 //         ])*/;
 
-                yield AssociationField::new("hyperlinks")->renderAsCount()/*->hideOnForm()*/;
+                // yield AssociationField::new("hyperlinks")->renderAsCount()/*->hideOnForm()*/;
 
                 yield TextField::new('pattern');
                 foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)

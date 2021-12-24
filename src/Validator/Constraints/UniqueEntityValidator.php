@@ -127,13 +127,16 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             return;
         }
 
-        if($constraint instanceof \Base\Validator\ConstraintEntity)
-            $constraint->setEntity($entity);
+        if($constraint instanceof \Base\Validator\ConstraintEntity) {
+
+            $constraint->getTranslation($entity, $this->translator);
+            $constraint->entity  = $entity;
+        }
 
         $errorPath = null !== $constraint->errorPath ? $constraint->errorPath : $fields[0];
         $invalidValue = $criteria[$errorPath] ?? $criteria[$fields[0]];
 
         $this->buildViolation($invalidValue, $constraint)
-        ->setTranslationDomain('validators');
+             ->setTranslationDomain('validators');
     }
 }

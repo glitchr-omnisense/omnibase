@@ -1,7 +1,23 @@
 {% use "@Twig/Form/form_div_layout.html.twig" %}
 
-{# Overloaded form template.. #}
+{# Overriding the EA form overriding >( #}
+{% block form_start %}
+    {{ parent() }}
+        <input type="hidden" name="referrer" value="{{ ea.request.query.get('referrer') }}">
+        {% if form.vars.errors|length > 0 and 'ea_crud' in form.vars.block_prefixes|default([]) %}
+            {{ form_errors(form, {attr: { class: 'global-invalid-feedback' }}) }}
+        {% endif %}
 
+{% endblock form_start %}
+
+{% block form_end %}
+        {% if not render_rest is defined or render_rest %}
+            {{ form_rest(form) }}
+        {% endif %}
+    </form>
+{% endblock %}
+
+{# Overloaded form template.. #}
 {%- block form2_label  -%}{{- form_label(form)  -}}{%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
 {%- block form2_errors -%}
@@ -20,7 +36,6 @@
 {%- endblock -%}
 
 {% block form2_row -%}
-
     {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%} #}
     {# {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%} #}
     <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>

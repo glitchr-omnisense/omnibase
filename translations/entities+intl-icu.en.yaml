@@ -69,6 +69,10 @@ sitemap:
   attribute:
     singular: attribute
     plural: attributes
+
+    abstract_attribute:  
+      singular: attribute
+      plural: attributes
     
     color_attribute:
       singular: "color"
@@ -83,8 +87,8 @@ sitemap:
       plural: "numbers"
 
     text_attribute:
-      singular: "text"
-      plural: "text"
+      singular: "text field"
+      plural: "text fields"
 
     textarea_attribute:
       singular: "textarea"

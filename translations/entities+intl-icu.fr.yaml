@@ -70,7 +70,11 @@ sitemap:
   attribute:
     singular: attribut
     plural: attributs
-    
+
+    abstract_attribute:
+      singular: attribute
+      plural: attributes
+
     hyperpattern_attribute:
       singular: "modèle de liens"
       plural: "modèles de liens"
@@ -84,8 +88,8 @@ sitemap:
       plural: "nombres"
 
     text_attribute:
-      singular: "texte"
-      plural: "textes"
+      singular: "ligne de texte"
+      plural: "lignes de texte"
 
     textarea_attribute:
       singular: "zone de texte"

@@ -2,6 +2,8 @@
 
 namespace Base\Validator;
 
+use Symfony\Contracts\Translation\TranslatorInterface;
+
 /**
  * @Annotation
  */
@@ -41,21 +43,30 @@ abstract class ConstraintEntity extends Constraint
         parent::__construct($options, $groups, $payload);
     }
 
-    public function setEntity($entity)
+    public function getTranslation($entity, TranslatorInterface $translator)
     {
-        $this->entity = $entity;
+        $parentClass = null;
+        $class = get_class($entity);
+        while($class !== $parentClass) {
 
-        $classname = explode("\\", get_class($this->entity));
-        $classname = array_pop($classname);
+            $parentClass = $class;
+            $classname = explode("\\", $class);
+            $classname = array_pop($classname);
 
-        $firstField = $this->fields[0] ?? "unknown";
+            $firstField = $this->fields[0] ?? "unknown";
 
-        $constraintName = explode("\\", get_called_class());
-        $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
-        $this->message = 
-            camel_to_snake($classname).".".
-            camel_to_snake($firstField).".".
-            camel_to_snake($constraintName);
+            $constraintName = explode("\\", get_called_class());
+            $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
+            
+            $id = camel_to_snake($classname).".".camel_to_snake($firstField).".".camel_to_snake($constraintName);
+            $this->message = $translator->trans($id);
+
+            if($this->message != $id) break;
+
+            $class = get_parent_class($entity);
+        }
+
+        return $this->message;
     }
 
     public function getRequiredOptions() : array

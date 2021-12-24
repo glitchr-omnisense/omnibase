@@ -22,7 +22,7 @@ class PercentAttribute extends AbstractAttribute implements IconizeInterface
     public static function getType(): string { return PercentType::class; }
     public static function getOptions(): array { return []; }
 
-    public function __construct(string $code, ?string $icon = null, int $precision = NAN, int $scale = NAN)
+    public function __construct(?string $code = null, ?string $icon = null, int $precision = 4, int $scale = 2)
     {
         parent::__construct($code, $icon);
         $this->setPrecision($precision);

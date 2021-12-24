@@ -46,9 +46,11 @@ class UserCrudController extends AbstractCrudController
                 $impersonate = '<a href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>';
             }
 
-            $extension->setTitle($entity.$impersonate);
-            if($this->getCrud()->getAsDto()->getCurrentAction() != "new") 
+            if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);
+            else {
+                $extension->setTitle($entity.$impersonate);
                 $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@dashboard.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
+            }
         }
         
         return $extension;
@@ -67,22 +69,23 @@ class UserCrudController extends AbstractCrudController
 
             "id" => function() use ($defaultCallback, $callbacks) {
     
-                yield BooleanField::new("isApproved")->withConfirmation();
-                foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
 
                 yield AvatarField::new('avatar')->hideOnDetail();
                 foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
-                yield RoleField::new('roles')->setColumns(6)->allowMultipleChoices(true);
+                yield EmailField::new('email')->setColumns(5);
+                foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+
+                yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
                 foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
                     yield $yield;
                     
-                yield EmailField::new('email')->setColumns(6);
-                foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
+                yield BooleanField::new("isApproved")->withConfirmation();
+                foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
                     yield $yield;
-        
+
                 yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
                 foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
                     yield $yield;
@@ -105,15 +108,6 @@ class UserCrudController extends AbstractCrudController
             ->addCssClass('btn btn-primary');
 
         return parent::configureActions($actions)
-            ->remove(Crud::PAGE_INDEX, Action::NEW)
-            ->add(Crud::PAGE_INDEX, Action::NEW)
-            ->update(Crud::PAGE_INDEX, Action::NEW,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
-            
-            ->remove(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER)
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER)
-            ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
 
             ->addBatchAction($approveUser)
             ->setPermission($approveUser, 'ROLE_SUPERADMIN');

@@ -336,14 +336,14 @@
             Validation constraints
 
             -->
-        <service id="Base\Validator\Constraints\UniqueEntityValidator">
+        <service id="Base\Validator\ConstraintEntityValidator">
             <tag name="validator.constraint_validator" />
             <argument type="service" id="doctrine" />
+            <argument type="service" id="translator" />
         </service>
-        <service id="Base\Validator\Constraints\StringCaseEntityValidator">
-            <tag name="validator.constraint_validator" />
-            <argument type="service" id="doctrine" />
-        </service>
+
+        <service id="Base\Validator\Constraints\UniqueEntityValidator"     parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
+        <service id="Base\Validator\Constraints\StringCaseEntityValidator" parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
 
         <!--
             Notifier
@@ -619,6 +619,7 @@
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\HyperlinkCrudController"  parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
 
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>

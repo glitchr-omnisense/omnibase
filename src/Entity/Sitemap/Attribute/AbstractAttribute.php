@@ -11,7 +11,8 @@ use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Sitemap\AbstractAttributeRepository;
+use Base\Repository\Sitemap\Attribute\AbstractAttributeRepository;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 /**
  * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
@@ -22,12 +23,15 @@ use Base\Repository\Sitemap\AbstractAttributeRepository;
  * 
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
-abstract class AbstractAttribute implements AbstractAttributeInterface, TranslatableInterface, IconizeInterface
+class AbstractAttribute implements AbstractAttributeInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-question-circle"]; }
+    public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
+
+    public static function getType(): string { return HiddenType::class; }
+    public static function getOptions(): array { return []; }
 
     public function __construct(?string $code = null, ?string $icon = null)
     {

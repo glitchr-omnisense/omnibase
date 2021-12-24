@@ -132,12 +132,12 @@ trait TranslatableTrait
             if (empty($arguments))
                 throw new \BadMethodCallException("Missing argument for setter property \"$property\" in ". $className);
             
-            try { return $this->__set($property, $arguments[0]); } 
+            try { return $this->__set($property, ...$arguments); } 
             catch (\BadMethodCallException $e) {
 
                 // Parent fallback setter
                 if($parentClass && method_exists($parentClass, "__set")) 
-                    return parent::__set($property, $arguments[0]);
+                    return parent::__set($property, ...$arguments);
             }
         }
 

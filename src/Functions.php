@@ -2,7 +2,9 @@
 
 namespace {
 
-    function interpret_link($input)
+    use Base\BaseBundle;
+
+function interpret_link($input)
     {
         return preg_replace_callback(
             "@
@@ -169,6 +171,22 @@ namespace {
     function is_stringeable($value) 
     {
         return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString');
+    }
+
+    function get_alias($class): string
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+        if(!class_exists($class)) return false;
+
+        return BaseBundle::getAlias($class);
+    }
+
+    function alias_exists($class): bool
+    {
+        $class = is_object($class) ? get_class($class) : $class;
+        if(!class_exists($class)) return false;
+
+        return BaseBundle::getAlias($class) != $class;
     }
 
     function class_implements_interface($objectOrClass, $interface)

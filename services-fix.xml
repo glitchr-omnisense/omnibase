@@ -50,5 +50,9 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\UrlSigner" />
         </service>
 
+        <service id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider"    public="true">
+            <argument type="service" id="request_stack" />
+        </service>
+
     </services>
 </container>

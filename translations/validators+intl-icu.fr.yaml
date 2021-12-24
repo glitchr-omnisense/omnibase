@@ -1,6 +1,10 @@
 alphanumeric: "Utilisez uniquement des caractères alphanumériques"
 alphanumeric_plus: "Utilisez uniquement des caractères de \"a\" à \"Z\" et (_, -, .)"
 
+abstract_attribute:
+   code:
+      unique: "Ce code est déjà utilisé"
+
 user:
    email:
       unique: "Cet email est déjà utilisé"

@@ -25,7 +25,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __construct(AbstractAttribute $pattern, ?string $value = null, ?string $locale = null)
+    public function __construct(?AbstractAttribute $pattern = null, ?string $value = null, ?string $locale = null)
     {
         $this->setPattern($pattern);
         $this->setValue($value);

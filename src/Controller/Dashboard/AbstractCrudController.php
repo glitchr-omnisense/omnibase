@@ -51,49 +51,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->entity = null;
     }
 
-    protected function ajaxEdit(EntityDto $entityDto, ?string $propertyName, bool $newValue): AfterCrudActionEvent
-    {
-        if($propertyName !== null)
-            $this->container->get(EntityUpdater::class)->updateProperty($entityDto, $propertyName, $newValue);
-
-        $event = new BeforeEntityUpdatedEvent($entityDto->getInstance());
-        $this->container->get('event_dispatcher')->dispatch($event);
-        $entityInstance = $event->getEntityInstance();
-
-        $this->updateEntity($this->container->get('doctrine')->getManagerForClass($entityDto->getFqcn()), $entityInstance);
-
-        $this->container->get('event_dispatcher')->dispatch(new AfterEntityUpdatedEvent($entityInstance));
-
-        $entityDto->setInstance($entityInstance);
-
-        $parameters = KeyValueStore::new([
-            'action' => Action::EDIT,
-            'entity' => $entityDto,
-        ]);
-
-        $event = new AfterCrudActionEvent($this->getContext(), $parameters);
-        $this->container->get('event_dispatcher')->dispatch($event);
-
-        return $event;
-    }
-
     public static function getEntityFqcn(): string
     {
         $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
-        $entityFqcn = preg_replace('/\\\Controller\\\Dashboard\\\Crud\\\/', "\\Entity\\", $entityFqcn);
+        $entityFqcn = get_alias(preg_replace('/\\\Controller\\\Dashboard\\\Crud\\\/', "\\Entity\\", $entityFqcn));
         self::$crudController[$entityFqcn] = get_called_class();
-
-        if(str_starts_with($entityFqcn, "Base")) {
-
-            $appEntityFqcn     = preg_replace("/^Base/", 'App', $entityFqcn);
-            $appCrudController = preg_replace("/^Base/", 'App', get_called_class());
-            if (!class_exists($appCrudController))
-                self::$crudController[$appEntityFqcn] = get_called_class();
-
-            if ( class_exists($appEntityFqcn))
-                $entityFqcn = $appEntityFqcn;
-        }
-
         return $entityFqcn;
     }
 
@@ -128,44 +90,44 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return camel_to_snake(str_replace("\\", ".", $entityFqcn));
     }
 
+    function setDiscriminatorMapAttribute(Action $action)
+    {
+        $entity     = get_alias($this->getEntityFqcn());
+        $rootEntity = get_alias($this->classMetadataManipulator->getRootEntityName($entity));
+        $actionDto = $action->getAsDto();
+
+        if($entity == $rootEntity) {
+
+            $htmlAttributes        = $actionDto->getHtmlAttributes();
+            $htmlAttributes["root-entity"] = urlencode($this->getCrudControllerFqcn($rootEntity));
+            $htmlAttributes["map"] = [];
+            
+            foreach($this->classMetadataManipulator->getDiscriminatorMap($entity) as $key => $class) {
+
+                $class = get_alias($class);
+                if($class == $rootEntity) continue;
+
+                $k     = explode("_", $key);
+                $key   = array_shift($k);
+
+                if(( $crudClassController = $this->getCrudControllerFqcn($class) )) {
+                    $array = [implode("_", $k) => urlencode($crudClassController)];
+                    $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
+                }
+            }
+
+            $actionDto->setHtmlElement("discriminator");
+            $actionDto->setHtmlAttributes($htmlAttributes);
+        }
+
+
+        return $action;
+    }
+
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-                ->update(Crud::PAGE_INDEX, Action::NEW,
-                    function (Action $action) {
-
-                        $entity     = $this->getEntityFqcn();
-                        $entity     = str_replace("Base\\", "App\\", $entity);
-                        $rootEntity = str_replace("Base\\", "App\\", $this->classMetadataManipulator->getRootEntityName($entity));
-
-                        $actionDto = $action->getAsDto();
-                        if($actionDto->getName() == Action::NEW && $entity == $rootEntity) {
-
-                            $htmlAttributes        = $actionDto->getHtmlAttributes();
-                            $htmlAttributes["root-entity"] = urlencode($this->getCrudControllerFqcn($rootEntity));
-                            $htmlAttributes["map"] = [];
-                            
-                            foreach($this->classMetadataManipulator->getDiscriminatorMap($entity) as $key => $class) {
-
-                                $class = str_replace("Base\\", "App\\", $class);
-                                if($class == $rootEntity) continue;
-
-                                $k     = explode("_", $key);
-                                $key   = array_shift($k);
-
-                                if(( $crudClassController = $this->getCrudControllerFqcn($class) )) {
-                                    $array = [implode("_", $k) => urlencode($crudClassController)];
-                                    $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
-                                }
-                            }
-
-                            $actionDto->setHtmlElement("discriminator");
-                            $actionDto->setHtmlAttributes($htmlAttributes);
-                        }
-
-                        return $action;
-                    })
-
+                ->update(Crud::PAGE_INDEX, Action::NEW   , fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
                 ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN');

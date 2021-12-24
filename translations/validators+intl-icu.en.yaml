@@ -1,6 +1,10 @@
 alphanumeric: "It can only contain letters (a-zA-Z), numbers (0-9)"
 alphanumeric_plus: "It can only contain letters (a-zA-Z), numbers (0-9) and specials (_ - .)"
 
+abstract_attribute:
+   code:
+      unique: "This code is already used"
+
 user:
    email:
       unique: "This email is already used"

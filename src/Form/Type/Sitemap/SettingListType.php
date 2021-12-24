@@ -3,6 +3,7 @@
 namespace Base\Form\Type\Sitemap;
 
 use Base\Annotations\Annotation\Uploader;
+use Base\Database\TranslationInterface;
 use Base\Entity\Sitemap\Setting;
 use Base\Entity\Sitemap\SettingTranslation;
 use Base\Field\Type\AvatarType;
@@ -80,6 +81,9 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
             $fields = [];
             $fields["value"] = [];
+
+            $intlData = [];
+            $translationData = [];
             foreach($settings as $formattedField => $setting) {
 
                 // Exclude requested fields
@@ -116,7 +120,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $fields["value"][$formattedField] = $fieldOptions;
 
                 $translations = $setting->getTranslations();
-                foreach($translations as $locale => $settingTranslation) {
+                foreach($translations as $_ => $settingTranslation) {
 
                     $settingValue = $settingTranslation->getValue();
                     switch($fieldOptions["form_type"]) {
@@ -134,29 +138,34 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     }
                 }
 
-                if($isTranslatable) $translationData[$formattedField] = $translations;
+                if ($isTranslatable) $translationData[$formattedField] = $translations;
                 else $intlData[$formattedField] = $translations;
             }
 
-            $form->add("translations", TranslationType::class, [
-                "multiple" => true,
-                "translation_class" => SettingTranslation::class,
-                "only_fields" => ["value"], 
-                "fields" => $fields,
-            ]);
-            $form->get("translations")->setData($translationData);
+            if($translationData) {
 
-            $form->add("intl", TranslationType::class, [
-                "multiple" => true,
-                "single_locale" => true,
-                "translation_class" => SettingTranslation::class,
-                "only_fields" => ["value"], 
-                "fields" => $fields,
-            ]);
-            $form->get("intl")->setData($intlData);
+                $form->add("translations", TranslationType::class, [
+                    "multiple" => true,
+                    "translation_class" => SettingTranslation::class,
+                    "only_fields" => ["value"], 
+                    "fields" => $fields,
+                ]);
+                $form->get("translations")->setData($translationData);
+            }
 
-            if(count($fields) > 0) 
-                $form->add('valid', SubmitType::class);
+            if($intlData) {
+
+                $form->add("intl", TranslationType::class, [
+                    "multiple" => true,
+                    "single_locale" => true,
+                    "translation_class" => SettingTranslation::class,
+                    "only_fields" => ["value"], 
+                    "fields" => $fields,
+                ]);
+                $form->get("intl")->setData($intlData);
+            }
+
+            if(count($fields) > 0) $form->add('valid', SubmitType::class);
         });
     }
 
@@ -170,13 +179,13 @@ class SettingListType extends AbstractType implements DataMapperInterface
             else if($formName == "translations" || $formName == "intl") {
 
                 foreach($form->getData() as $formattedField => $translations) {
-                    
+
                     $field = str_replace("-", ".", $formattedField);
                     foreach($translations as $locale => $translation) {
 
-                        $viewData[$field] = $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field, "");
-                        $viewData[$field]->setValue($translation->getValue() ?? "", $locale);
-                        
+                        $viewData[$field] = $viewData[$field] ?? $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field);
+                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
+
                         $this->baseSettings->removeCache($field);
                     }
                  }
@@ -186,15 +195,16 @@ class SettingListType extends AbstractType implements DataMapperInterface
             } else {
 
                 if(!$viewData[$formName] instanceof Setting)
-                    $viewData[$formName] = $this->baseSettings->getRawScalar($formName) ?? new Setting($formName, "");
+                    $viewData[$formName] = $viewData[$formName] ?? $this->baseSettings->getRawScalar($formName) ?? new Setting($formName);
+
+                $translation = $form->getViewData();
+                $locale      = $translation->getLocale();
 
                 $field = str_replace("-", ".", $formName);
-                $viewData[$formName] = $viewData[$formName]->setValue($form->getViewData() ?? "");
-                
+                $viewData[$formName] = $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
+
                 $this->baseSettings->removeCache($field);
             }
         }
-
-        dump($viewData);
     }
 }

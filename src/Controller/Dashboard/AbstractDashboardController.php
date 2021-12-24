@@ -44,6 +44,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
 use Base\Entity\Sitemap\Attribute;
+use Base\Entity\Sitemap\Attribute\AbstractAttribute;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -163,18 +164,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
-            $settings = array_key_transforms(function($k, $f): ?array {
+            $settings = array_key_transforms(function($k, $s): ?array {
+                if($s === null) return null;
+                return [$s->getName(), $s];
+            }, $this->baseService->getSettings()->getRawScalar($fields));
 
-                $setting = $f["_self"] ?? null;
-                if($setting === null) return null;
-
-                return [$setting->getName(), $f["_self"]];
-
-            }, $this->baseService->getSettings()->getRaw($fields));
             $settings = array_filter($settings, fn($value) => !is_null($value));
-            
-            dump($data);
-
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
@@ -337,9 +332,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureActions(): Actions
     {
+        $approveUser = Action::new('approve', 'Approve', 'fa fa-user-check')
+            ->linkToCrudAction('approveUsers')
+            ->addCssClass('btn btn-primary');
+
         return parent::configureActions()
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
-            
+
             ->update(Crud::PAGE_INDEX, Action::NEW,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
             ->update(Crud::PAGE_INDEX, Action::DETAIL,
@@ -366,6 +365,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
 
             ->add(Crud::PAGE_NEW, Action::INDEX) // Adding return button..
+            ->reorder(Crud::PAGE_NEW, [Action::INDEX, Action::SAVE_AND_ADD_ANOTHER, Action::SAVE_AND_RETURN])
             ->update(Crud::PAGE_NEW, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-backspace'))
             ->update(Crud::PAGE_NEW, Action::SAVE_AND_RETURN,
@@ -426,7 +426,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(Setting::class  ),
                 WidgetItem::linkToCrud(Widget::class   ),
                 WidgetItem::linkToCrud(Slot::class     ),
-                WidgetItem::linkToCrud(Attribute::class),
+                WidgetItem::linkToCrud(AbstractAttribute::class),
             ]);
         }
 

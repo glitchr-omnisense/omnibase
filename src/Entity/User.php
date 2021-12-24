@@ -81,8 +81,12 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
         if ($accessor->isReadable($this, self::__DEFAULT_IDENTIFIER__) && !$identifier) 
             $identifier = $accessor->getValue($this, self::$identifier);
 
+        if( $identifier === null)
+            throw new Exception("User identifier is NULL, is this user already persistent in the database?");
+        
         return $identifier; 
     }
+
     public function __toString() { return $this->getUserIdentifier(); }
     public function equals($other): bool { return ($other->getId() == $this->getId()); }
 
