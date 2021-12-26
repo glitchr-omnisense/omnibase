@@ -112,8 +112,6 @@ final class DateTimePickerField implements FieldInterface
         $this->setCustomOption(self::OPTION_DATE_PATTERN, $dateFormatOrPattern);
         $this->setCustomOption(self::OPTION_TIME_PATTERN, $timeFormat);
 
-        // These lines above are crazy, guys! God damn',..
-        $this->setFormTypeOption("format", $dateFormatOrPattern);
         return $this;
     }
 
