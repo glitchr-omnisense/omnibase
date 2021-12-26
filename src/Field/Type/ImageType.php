@@ -12,13 +12,10 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-class ImageType extends AbstractType
+class ImageType extends FileType
 {
-    public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager)
-    {
-        $this->baseService = $baseService;
-        $this->csrfTokenManager = $csrfTokenManager;
-    }
+    public function getBlockPrefix(): string { return 'imageupload'; }
+    public function getParent() : ?string { return FileType::class; }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -34,9 +31,6 @@ class ImageType extends AbstractType
 
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
     }
-
-    public function getBlockPrefix(): string { return 'imageupload'; }
-    public function getParent() : ?string { return FileType::class; }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

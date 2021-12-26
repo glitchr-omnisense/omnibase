@@ -60,7 +60,7 @@ class TranslationField implements FieldInterface
         $this->setFormTypeOption("excluded_fields", $excludedFields);
         return $this;
     }
-    public function onlySetFields($onlyFields): self
+    public function onlyShowFields($onlyFields): self
     {
         if(!is_array($onlyFields)) $onlyFields = [$onlyFields];
         $this->setFormTypeOption("only_fields", $onlyFields);

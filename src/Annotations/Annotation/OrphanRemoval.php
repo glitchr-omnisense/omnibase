@@ -47,6 +47,7 @@ class OrphanRemoval extends AbstractAnnotation
         $associationMapping = $classMetadata->getAssociationMapping($this->column);
         $associationMapping["orphanRemoval"] = $this->value;
 
-        $classMetadata->setAssociationOverride($this->column, $associationMapping);
+        if(array_key_exists($this->column,  $classMetadata->associationMappings))
+            $classMetadata->associationMappings[$this->column] = $associationMapping;
     }
 }

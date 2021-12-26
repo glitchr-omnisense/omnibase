@@ -38,7 +38,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
      */
     protected $formFactory = null;
     
-    public function getBlockPrefix(): string { return 'entity2'; }
+    public function getBlockPrefix(): string { return 'association'; }
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -75,7 +75,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         });
 
         $resolver->setNormalizer('autoload', function (Options $options, $value) {
-            return $options["fields"] ? false : $value;
+            return $options["only_fields"] ? false : $value;
         });
     }
 

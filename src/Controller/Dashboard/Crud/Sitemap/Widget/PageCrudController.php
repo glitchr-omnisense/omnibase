@@ -19,8 +19,8 @@ class PageCrudController extends WidgetCrudController
         $defaultCallback = function() { return []; };
 
         yield ImageField::new('thumbnail');
-        yield SlugField::new('slug')->setTargetFieldName("translations.title");
 
+        yield SlugField::new('slug')->setTargetFieldName("translations.title");
         yield TranslationField::new()->showOnIndex('title')->setFields([
             "content" => ["form_type" => QuillType::class],
         ]);

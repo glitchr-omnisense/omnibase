@@ -164,13 +164,16 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $class ?? $options["class"] ?? null;
     }
 
-    public function guessMultiple(FormInterface|FormBuilderInterface $form, ?array $options = null)
+    public function guessMultiple(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
+        if ($form instanceof FormEvent)
+            $form = $form->getForm();
+
         $options = $options ?? $form->getConfig()->getOptions();
 
-        if($options["multiple"] === null && $options["class"]) {
+        if($options["multiple"] === null && ($options["class"] !== null || $options["data_class"] !== null)) {
             
-            $target = $options["class"];
+            $target = $options["class"] ?? $options["data_class"] ?? null;
 
             if($this->classMetadataManipulator->isEntity($target)) {
 

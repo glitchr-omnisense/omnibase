@@ -46,7 +46,7 @@ class WidgetItem
 
         $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural");
         if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural");
-        if($label == $entityTranslationPrefix.".plural") $label = class_basename($entityFqcn);
+        if($label == $entityTranslationPrefix.".plural") $label = camel_to_snake(class_basename($entityFqcn), " ");
 
         if(!$icon) {
             $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__staticIconize()[0] : null;

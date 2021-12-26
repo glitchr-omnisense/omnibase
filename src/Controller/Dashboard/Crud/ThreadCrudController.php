@@ -60,7 +60,7 @@ class ThreadCrudController extends AbstractCrudController
         foreach ( ($callbacks["state"] ?? $defaultCallback)() as $yield)
             yield $yield;
         
-        yield DateTimePickerField::new('publishedAt');
+        yield DateTimePickerField::new('publishedAt')->setFormat("dd MMM yyyy");
         foreach ( ($callbacks["publishedAt"] ?? $defaultCallback)() as $yield)
             yield $yield;
 

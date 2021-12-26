@@ -2,6 +2,16 @@ stock:
   unlimited: Unlimited
 
 fileupload:
+  error:
+    invalid_token: Token expired.
+    too_many: Unexpected number of files provided.
+    too_big: "File too big."
+    partial_upload: "The uploaded file was only partially uploaded."
+    no_file: "No file was uploaded."
+    no_tmp_dir : "Missing a temporary folder."
+    cant_write: "Failed to write file to disk."
+    php_extension: "A PHP extension stopped the file upload. "
+    
   dropzone:
     title: "Upload files here"
     description: "Drop files here or click to upload"

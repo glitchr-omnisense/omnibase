@@ -86,6 +86,9 @@ class Uploader extends AbstractAnnotation
     
     public static function getPublic($entity, $mapping)
     {
+        if(!self::hasAnnotation($entity, $mapping)) 
+            return null;
+        
         $that = self::getAnnotation($entity, $mapping);
         if(!$that) return null;
         
@@ -135,15 +138,23 @@ class Uploader extends AbstractAnnotation
 
     public static function getMimeTypes($entity, $mapping): array
     {
+        if(!self::hasAnnotation($entity, $mapping)) 
+            return [];
+        
         $that = self::getAnnotation($entity, $mapping);
         if(!$that) return [];
+
         return $that->mimeTypes;
     }
 
     public static function getMaxFilesize($entity, $mapping): int
     {
+        if(!self::hasAnnotation($entity, $mapping)) 
+            return UploadedFile::getMaxFilesize();
+        
         $that = self::getAnnotation($entity, $mapping);
         if(!$that) return UploadedFile::getMaxFilesize();
+
         return min($that->maxSize ?: \PHP_INT_MAX, UploadedFile::getMaxFilesize());
     }
 
@@ -152,6 +163,8 @@ class Uploader extends AbstractAnnotation
     {
         if($entity === null) return null;
 
+        if(!self::hasAnnotation($entity, $mapping)) return null;
+        
         $that       = self::getAnnotation($entity, $mapping);
         if(!$that) return null;
 
@@ -291,7 +304,7 @@ class Uploader extends AbstractAnnotation
 
             //
             // Upload files
-            $path         = $this->getPath($entity);
+            $path         = $this->getPath($entity ?? $oldEntity ?? null);
             $pathPrefixer = $this->getPathPrefixer($this->storage);
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
@@ -341,12 +354,12 @@ class Uploader extends AbstractAnnotation
 
         if(!$oldList) return;
 
-        foreach (array_diff($oldListStringable,$newListStringable) as $file) {
+        foreach (array_diff($oldList, $newList) as $file) {
 
             if(!$file) continue;
 
             if($file instanceof File) $path = $file->getRealPath();
-            else $path = $this->getPath($entity, $file);
+            else $path = $this->getPath($entity ?? $oldEntity ?? null, $file);
 
             if($path) $this->deleteFile($path, $this->getStorageFilesystem());
         }
@@ -386,6 +399,6 @@ class Uploader extends AbstractAnnotation
 
     public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $this->deleteFiles(null, $entity, $property);
+        $this->deleteFiles([], $entity, $property);
     }
 }

@@ -7,6 +7,11 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
 use Base\Entity\Sitemap\Widget\Slot;
+use Base\Field\SelectField;
+use Base\Field\SlugField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class SlotCrudController extends WidgetCrudController
 {
@@ -21,13 +26,21 @@ class SlotCrudController extends WidgetCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield TextField::new('path');
+        yield SlugField::new('path')->setColumns(6)->setTargetFieldName("label");
         foreach ( ($callbacks["path"] ?? $defaultCallback)() as $yield)
             yield $yield;
+        
+        yield TextField::new("label")->setColumns(6);
+        foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
+            yield $yield;
 
-        yield TranslationField::new("label")->setRequired(false);
-        yield TranslationField::new()->showOnIndex("help")->setRequired(false);
+        yield SelectField::new("widgets")->setColumns(12);
+        foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
+            yield $yield;
+
+        yield TextareaField::new("help")->setColumns(12);
         foreach ( ($callbacks["help"] ?? $defaultCallback)() as $yield)
             yield $yield;
+            
     }
 }

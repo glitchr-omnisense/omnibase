@@ -41,8 +41,8 @@ class SettingTranslation implements TranslationInterface
     
     /**
      * @ORM\Column(type="array")
-     * @AssertBase\FileSize(max="2M", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", size="2M", keepNotFound=true)
+     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
+     * @Uploader(storage="local.storage", public="/storage", size="2MB", keepNotFound=true)
      */
     protected $value;
 

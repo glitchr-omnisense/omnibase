@@ -42,6 +42,15 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
         return end($annotations[$mapping]);
     }
+
+    public static function hasAnnotation($entity, string $mapping)
+    {
+        $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
+        if(!$classname) return null;
+        
+        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($classname, static::class);
+        return array_key_exists($mapping, $annotations);
+    }
     
     /**
      * Minimize the use unit of work to very specific context.. (doctrine internal use only)

@@ -44,7 +44,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
 use Base\Entity\Sitemap\Attribute;
-use Base\Entity\Sitemap\Attribute\AbstractAttribute;
+use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
+use Base\Entity\Sitemap\Widget\Link;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -434,7 +435,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             WidgetItem::linkToCrud(Menu::class      ),
             WidgetItem::linkToCrud(Attachment::class),
             WidgetItem::linkToCrud(Page::class      ),
-            WidgetItem::linkToCrud(Hyperlink::class ),
+            WidgetItem::linkToCrud(Link::class ),
         ]);
 
         return $widgets;

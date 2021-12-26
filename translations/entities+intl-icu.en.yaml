@@ -49,19 +49,15 @@ sitemap:
     page:
       singular: "page"
       plural: "pages"
-
-    hyperlink:
-      singular: "hyperlink"
-      plural: "hyperlinks"
-
+    link:
+      singular: "link"
+      plural: "links"
     attachment:
       singular: "attachment"
       plural: "attachments"
-
     menu:
       singular: "menu"
       plural: "menu"
-
     slot:
       singular: widget slot
       plural: "widget slots"
@@ -70,41 +66,41 @@ sitemap:
     singular: attribute
     plural: attributes
 
-    abstract_attribute:  
+    hyperlink:
+      singular: "hyperlink"
+      plural: "hyperlinks"
+
+    abstract:
       singular: attribute
       plural: attributes
-    
-    color_attribute:
-      singular: "color"
-      plural: "color"
-      
-    hyperpattern_attribute:
-      singular: "hyperpattern"
-      plural: "hyperpatterns"
 
-    number_attribute:
-      singular: "number"
-      plural: "numbers"
-
-    text_attribute:
-      singular: "text field"
-      plural: "text fields"
-
-    textarea_attribute:
-      singular: "textarea"
-      plural: "textareas"
-
-    datetime_attribute:
-      singular: "datetime"
-      plural: "datetime"
-
-    percent_attribute:
-      singular: "percent"
-      plural: "percents"
-
-    array_attribute:
-      singular: "array"
-      plural: "arrays"
+      abstract_attribute:  
+        singular: attribute
+        plural: attributes
+      color_attribute:
+        singular: "color"
+        plural: "color"
+      hyperpattern_attribute:
+        singular: "hyperpattern"
+        plural: "hyperpatterns"
+      number_attribute:
+        singular: "number"
+        plural: "numbers"
+      text_attribute:
+        singular: "text field"
+        plural: "text fields"
+      textarea_attribute:
+        singular: "textarea"
+        plural: "textareas"
+      datetime_attribute:
+        singular: "datetime"
+        plural: "datetime"
+      percent_attribute:
+        singular: "percent"
+        plural: "percents"
+      array_attribute:
+        singular: "array"
+        plural: "arrays"
 
   setting:
     singular: "setting"

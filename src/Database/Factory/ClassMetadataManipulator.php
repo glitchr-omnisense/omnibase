@@ -27,6 +27,7 @@ use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
@@ -142,14 +143,22 @@ class ClassMetadataManipulator
 
             if($fieldName == "id") 
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
-            if($fieldName == "uuid") 
+            else if($fieldName == "uuid") 
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
-            if($fieldName == "translations")
+            else if($fieldName == "translations")
                 $validFields[$fieldName] = ["form_type" => TranslationType::class];
-            if($metadata->getTypeOfField($fieldName) == "datetime")
+            
+            else if($this->getTypeOfField($class, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
-            if($metadata->getTypeOfField($fieldName) == "array")
+            else if($this->getTypeOfField($class, $fieldName) == "array")
                 $validFields[$fieldName] = ["form_type" => SelectType::class];
+            else if($this->getTypeOfField($class, $fieldName) == "integer")
+                $validFields[$fieldName] = ["form_type" => NumberType::class];
+
+            else if( ($enumType = $this->getDoctrineType($this->getTypeOfField($class, $fieldName))) instanceof EnumType)
+                $validFields[$fieldName] = ["form_type" => SelectType::class, "class" => get_class($enumType)];
+            else if( ($setType = $this->getDoctrineType($this->getTypeOfField($class, $fieldName))) instanceof SetType)
+                $validFields[$fieldName] = ["form_type" => SelectType::class, "class" => get_class($setType)];
         }
         
         foreach($fields as $fieldName => $field) {

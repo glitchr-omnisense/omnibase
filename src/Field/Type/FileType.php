@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Annotations\Annotation\Uploader;
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\User;
 use Base\Field\Transformer\StringToFileTransformer;
 use Base\Service\BaseService;
@@ -23,6 +24,7 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -41,12 +43,14 @@ class FileType extends AbstractType implements DataMapperInterface
     protected $baseService;
     protected $translator;
 
-    public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager, ValidatorInterface $validator)
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, ValidatorInterface $validator)
     {
-        $this->baseService = $baseService;
-        $this->translator  = $baseService->getTranslator();
+        $this->baseService              = $baseService;
+        $this->classMetadataManipulator = $classMetadataManipulator;
+
+        $this->translator       = $baseService->getTranslator();
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->validator = $validator;
+        $this->validator        = $validator;
     }
 
     /**
@@ -63,13 +67,16 @@ class FileType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            'class'        => null,
+
             'dropzone'     => [],
             'dropzone-js'  => $this->baseService->getParameterBag("base.vendor.dropzone.js"),
             'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.css"),
 
             'allow_delete' => true,
             'multiple'     => false,
-
+            'href' => null,
+            
             'sortable'     => true,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.js"),
 
@@ -78,6 +85,10 @@ class FileType extends AbstractType implements DataMapperInterface
             'mime_types'   => null,
             "data_mapping" => null,
         ]);
+
+        $resolver->setNormalizer('class', function (Options $options, $value) {
+            return $value === null ? $options["data_class"] : $value;
+        });
 
         $resolver->setAllowedTypes("dropzone", ['null', 'array']);
     }
@@ -91,7 +102,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $builder->add('file', HiddenType::class);
         $entity = $builder->getData();
 
-        $maxFilesize   = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $builder->getName());
+        $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $builder->getName());
         if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
             $maxFilesize = min($maxFilesize, $options["max_filesize"]);
 
@@ -137,9 +148,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $parent = $form->getParent();
         $entity = $parent->getData();
 
-        if(!is_object($entity)) $files = $form->getData();
-        else {
-        
+        if($this->classMetadataManipulator->isEntity($entity)) {
+
             $files = Uploader::get($entity, $form->getName());
             if(!is_array($files)) $files = [$files];
 
@@ -148,24 +158,26 @@ class FileType extends AbstractType implements DataMapperInterface
             $propertyType = Uploader::getTypeOfField($entity, $form->getName());
             if($options["multiple"] && $propertyType != "array")
                 $view->vars['max_files']     = 1;
+
+        } else {
+
+            $files = $form->getData();
         }
 
-        if(!is_array($files)) $files = ($files ? [$files] : []);
-        $view->vars['files'] = $files;
+        if(!is_array($files)) $files = $files ? [$files] : [];
+        $view->vars['files'] = array_filter($files);
 
         $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
-        $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
-        if(array_key_exists('max_filesize', $options))
+        $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+        if($options["max_filesize"] !== null)
             $view->vars['max_filesize'] = min($view->vars['max_filesize'], $options["max_filesize"]);
+        $acceptedFiles = $options["mime_types"] ?? [];
+        if(!$acceptedFiles && $entity)
+            $acceptedFiles = Uploader::getMimeTypes($options["class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
 
-        $acceptedFiles = ($options["mime_types"] ? $options["mime_types"] : []);
-        if(!$acceptedFiles && $entity) $acceptedFiles = Uploader::getMimeTypes($options["data_class"] ?? $entity, $form->getName());
         $view->vars["accept"] = $acceptedFiles;
-
-        $view->vars["value"] = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
-        if(($options["data_class"] ?? false) || is_object($entity))
-            $view->vars['value'] = Uploader::getPublic($options["data_class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
-
+        $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
+        $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
         if(is_array($view->vars['value']))
             $view->vars["value"] = implode("|", $view->vars["value"]);
 
@@ -174,10 +186,11 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["ajax"]         = null;
         $view->vars['multiple']     = $options['multiple'];
         $view->vars['allow_delete'] = $options['allow_delete'];
+        $view->vars['href']         = $options["href"];
 
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
-            if($options["dropzone-js"]) $this->baseService->addHtmlContent("javascripts", $options["dropzone-js"]);
+            if($options["dropzone-js"] ) $this->baseService->addHtmlContent("javascripts", $options["dropzone-js"]);
             if($options["dropzone-css"]) $this->baseService->addHtmlContent("stylesheets", $options["dropzone-css"]);
 
             $action = (!empty($options["action"]) ? $options["action"] : ".");
@@ -189,7 +202,7 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['max_filesize'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_filesize"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
             if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = implode(",", $acceptedFiles);
-            
+
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans("@fields.fileupload.dropzone.title").'</h4><p>'.$this->translator->trans("@fields.fileupload.dropzone.description").'</p>';
 

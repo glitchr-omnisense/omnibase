@@ -131,7 +131,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
     private function configureToManyAssociation(FieldDto $field): void
     {
         $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
-
+        
         $displayedOn = $field->getDisplayedOn();
         
         // associations different from *-to-one cannot be sorted

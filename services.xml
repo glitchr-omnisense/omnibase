@@ -454,6 +454,19 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
+        <service id="Base\Field\Type\AssociationFileType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Field\Type\AttributeType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
         <service id="Base\Field\Type\DiscriminatorType">
             <tag name="form.type" />
             <argument type="service" id="base.form.factory" />
@@ -467,12 +480,13 @@
         <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\SlugType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\PatternType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-
+       
         <service id="Base\Controller\DropzoneController">
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
+            <argument type="service" id="translator" />
             <argument type="service" id="cache.adapter" />
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
@@ -494,6 +508,7 @@
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="validator" />
         </service>
@@ -548,6 +563,13 @@
         </service>
 
         <service id="Base\Field\Configurator\AssociationConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Field\Configurator\AssociationFileConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
@@ -616,18 +638,21 @@
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\SlotCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\MenuCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\AttachmentCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\HyperlinkCrudController"  parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
         
     </services>
 </container>

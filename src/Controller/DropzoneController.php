@@ -19,6 +19,7 @@ use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DropzoneController extends AbstractController
 {
@@ -28,10 +29,11 @@ class DropzoneController extends AbstractController
     public const STATUS_BAD     = "BAD";
     public const STATUS_NOTOKEN = "NO_TOKEN";
 
-    public function __construct(CacheInterface $cache, string $cacheDir)
+    public function __construct(TranslatorInterface $translator, CacheInterface $cache, string $cacheDir)
     {
         $this->cache    = $cache;
         $this->cacheDir = $cacheDir;
+        $this->translator = $translator;
 
         $this->filesystem = new \Symfony\Component\Filesystem\Filesystem();
     }
@@ -49,14 +51,32 @@ class DropzoneController extends AbstractController
     public function Main(Request $request, $token = null): Response
     {
         if(!$token || !$this->isCsrfTokenValid("dropzone", $token)) 
-            return new Response("Invalid token.", 500);
-
+            return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
+        
         // Move.. with flysystem
         if( !($file = $request->files->get("file")) )
-            return new Response("Unexpected number of files provided", 500);
+            return new Response($this->translator->trans("fileupload.error.too_many", [], "fields"), 500);
+        
  
-        if($file->getError()) 
-           return new Response("Error during upload.", 500);
+        switch($file->getError()) {
+
+            case UPLOAD_ERR_OK: break;
+            case UPLOAD_ERR_INI_SIZE:
+            case UPLOAD_ERR_FORM_SIZE:
+                return new Response($this->translator->trans("fileupload.error.too_big", [], "fields"), 500);
+            case UPLOAD_ERR_PARTIAL:
+                return new Response($this->translator->trans("fileupload.error.partial_upload", [], "fields"), 500);
+            case UPLOAD_ERR_NO_FILE:
+                return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
+            case UPLOAD_ERR_NO_TMP_DIR:
+                return new Response($this->translator->trans("fileupload.error.no_tmp_dir", [], "fields"), 500);
+            case UPLOAD_ERR_CANT_WRITE:
+                return new Response($this->translator->trans("fileupload.error.cant_write", [], "fields"), 500);
+            case UPLOAD_ERR_EXTENSION:
+                return new Response($this->translator->trans("fileupload.error.php_extension", [], "fields"), 500);
+            default:
+                return new Response("Unknown error during upload.", 500);
+        }
 
         $cacheDir = $this->getCacheDir()."/dropzone";
         if(!$this->filesystem->exists($cacheDir))

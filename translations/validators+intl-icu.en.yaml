@@ -21,7 +21,7 @@ file:
                }"
 
 notBlank:
-   property: "This field is blank."
+   property: "Field \"{label}\" is blank."
    class: "All fields are blank."
 
 widget_slot:

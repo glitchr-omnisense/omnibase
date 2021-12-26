@@ -16,7 +16,7 @@ class ThreadTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $title;
 

@@ -3,6 +3,7 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% set displayLimit = field.customOptions.get('displayLimit') %}
 {% set showFirst = field.customOptions.get('showFirst') %}
+
 {% if 'toMany' == field.customOptions.get('associationType') %}
 
     {% if showFirst and field.formattedValue.count is defined %}

@@ -82,8 +82,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
             $fields = [];
             $fields["value"] = [];
 
+            $unvData = [];
             $intlData = [];
-            $translationData = [];
             foreach($settings as $formattedField => $setting) {
 
                 // Exclude requested fields
@@ -138,22 +138,22 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     }
                 }
 
-                if ($isTranslatable) $translationData[$formattedField] = $translations;
-                else $intlData[$formattedField] = $translations;
+                if ($isTranslatable) $intlData[$formattedField] = $translations;
+                else $unvData[$formattedField] = $translations;
             }
 
-            if($translationData) {
+            if($intlData) {
 
-                $form->add("translations", TranslationType::class, [
+                $form->add("unv", TranslationType::class, [
                     "multiple" => true,
                     "translation_class" => SettingTranslation::class,
                     "only_fields" => ["value"], 
                     "fields" => $fields,
                 ]);
-                $form->get("translations")->setData($translationData);
+                $form->get("unv")->setData($intlData);
             }
 
-            if($intlData) {
+            if($unvData) {
 
                 $form->add("intl", TranslationType::class, [
                     "multiple" => true,
@@ -162,7 +162,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "only_fields" => ["value"], 
                     "fields" => $fields,
                 ]);
-                $form->get("intl")->setData($intlData);
+                $form->get("intl")->setData($unvData);
             }
 
             if(count($fields) > 0) $form->add('valid', SubmitType::class);
@@ -176,7 +176,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
         foreach(iterator_to_array($forms) as $formName => $form)
         {
             if($formName == "valid") continue;
-            else if($formName == "translations" || $formName == "intl") {
+            else if($formName == "unv" || $formName == "intl") {
 
                 foreach($form->getData() as $formattedField => $translations) {
 

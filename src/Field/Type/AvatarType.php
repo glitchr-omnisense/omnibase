@@ -13,23 +13,10 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-class AvatarType extends AbstractType
+class AvatarType extends ImageType
 {
-    public function __construct(BaseService $baseService, CsrfTokenManagerInterface $csrfTokenManager)
-    {
-        $this->baseService = $baseService;
-        $this->csrfTokenManager = $csrfTokenManager;
-    }
-
-    public function getBlockPrefix(): string
-    {
-        return 'avatar';
-    }
-
-    public function getParent() : ?string
-    {
-        return ImageType::class;
-    }
+    public function getBlockPrefix(): string { return 'avatar'; }
+    public function getParent() : ?string { return ImageType::class; }
 
     public function configureOptions(OptionsResolver $resolver): void
     {

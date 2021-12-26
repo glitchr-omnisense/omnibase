@@ -2,6 +2,16 @@ stock:
   unlimited: Illimité
 
 fileupload:
+    error:
+      invalid_token: Jeton expiré.
+      too_many: Trop de fichiers mis en ligne.
+      too_big: "Fichier trop volumineux."
+      partial_upload: "Échec, fichier partiellement téléversé."
+      no_file: "Échec, fichier non reçu."
+      no_tmp_dir : "Dossier temporaire manquant."
+      cant_write: "Échec d'écriture du fichier sur le disque."
+      php_extension: "Une extension PHP a stoppé le téléversement."
+      
     dropzone:
         title: "Téléchargez les fichiers ici"
         description: "Déposez les fichiers ici ou cliquez pour télécharger"

@@ -219,7 +219,7 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string
     {
-        return dec2str($size, $unitPrefix);
+        return byte2str($size, $unitPrefix);
     }
 
     function static_call($class, $method, ...$args) {

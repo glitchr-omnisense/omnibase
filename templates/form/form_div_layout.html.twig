@@ -96,120 +96,111 @@
 {%- endblock -%}
 
 {%- block discriminator_widget -%}
-
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
-
 {% endblock discriminator_widget %}
 
 {%- block datetimepicker_widget -%}
+    {% set attr = attr|merge({
+        'data-datetimepicker-field': form.vars.id,
+        'data-datetimepicker-options': datetimepicker
+    }) %}
 
-{% set attr = attr|merge({
-    'data-datetimepicker-field': form.vars.id,
-    'data-datetimepicker-options': datetimepicker
-}) %}
-
-<div class="input-group form-stock">
-    <div class="input-group-text">
-        <button class="btn btn-outline-secondary" type="button" id="{{form.vars.id}}-btn">
-            <i class="fas fa-calendar-day"></i>
-        </button>
+    <div class="input-group form-stock">
+        <div class="input-group-text">
+            <button class="btn btn-outline-secondary" type="button" id="{{form.vars.id}}-btn">
+                <i class="fas fa-calendar-day"></i>
+            </button>
+        </div>
+        {{ form_widget(form, {attr:attr}) }}
     </div>
-    {{ form_widget(form, {attr:attr}) }}
-</div>
-
 {% endblock datetimepicker_widget %}
-
 
 {%- block translatable_row -%}
     {{ form_widget(form) }}
 {%- endblock -%}
 
 {%- block translatable_widget -%}
+    {% set row_attr = row_attr|merge({'class': 'form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
+    <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+        
+    {% if form.children|length == 1 and single_locale %}
 
-{% set row_attr = row_attr|merge({'class': 'form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
-<div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
-       
-{% if form.children|length == 1 and single_locale %}
+        {% for row in form.children %}
+        
+            {% if form.vars.row_inline == false %}
+                {{ form_widget(row) }}
+            {% else %}
+                {{ form_row(row) }}
+            {% endif %}
+        {% endfor %}
 
-    {% for row in form.children %}
-    
-        {% if form.vars.row_inline == false %}
-            {{ form_widget(row) }}
-        {% else %}
-            {{ form_row(row) }}
+    {% else %}
+
+        {% if translations_empty is defined and translations_empty == false %}
+
+                <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
+
+                {% for form_locale, form_child in form.children %}
+                    {% if form_locale in form.vars.available_locales %}
+                    <li class="nav-item" role="presentation">
+
+                        {% set lang    = form_locale|lang %}
+                        {% set country = form_locale|country %}
+
+                        <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
+                            <label {% if form_child.vars['required'] %}class="required"{% endif %}>
+                                <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
+                            </label>
+                        </button>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+
+                <div class="tab-content" id="{{ form.vars['id'] }}_tab">
+                {% for form_locale, formChild in form.children %}
+                    {% if form_locale in form.vars.available_locales %}
+                        {% set lang    = form_locale|lang %}
+                        {% set country = form_locale|country %}
+                        <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
+                            {% for row in formChild %}
+                                {{ form_row(row) }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+                </div>
         {% endif %}
-    {% endfor %}
 
-{% else %}
-
-    {% if translations_empty is defined and translations_empty == false %}
-
-            <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
-
-            {% for form_locale, form_child in form.children %}
-                {% if form_locale in form.vars.available_locales %}
-                <li class="nav-item" role="presentation">
-
-                    {% set lang    = form_locale|lang %}
-                    {% set country = form_locale|country %}
-
-                    <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="home-tab" data-bs-toggle="tab" data-bs-target="#{{country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-                        <label {% if form_child.vars['required'] %}class="required"{% endif %}>
-                            <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
-                        </label>
-                    </button>
-                </li>
-                {% endif %}
-            {% endfor %}
-            </ul>
-
-            <div class="tab-content" id="{{ form.vars['id'] }}_tab">
-            {% for form_locale, formChild in form.children %}
-                {% if form_locale in form.vars.available_locales %}
-                    {% set lang    = form_locale|lang %}
-                    {% set country = form_locale|country %}
-                    <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{country}}" role="tabpanel" aria-labelledby="{{country}}-tab">
-                        {% for row in formChild %}
-                            {{ form_row(row) }}
-                        {% endfor %}
-                    </div>
-                {% endif %}
-            {% endfor %}
-            </div>
     {% endif %}
-
-{% endif %}
-</div>
-
+    </div>
 {%- endblock translatable_widget -%}
 
 {%- block pattern_widget -%}
+    {% set attr = attr|merge({
+        'data-pattern-field': form.vars.id,
+        'data-pattern': pattern
+    }) %}
 
-{% set attr = attr|merge({
-    'data-pattern-field': form.vars.id,
-    'data-pattern': pattern
-}) %}
-
-<div class="input-group mb-3">
-  <div class="input-group-text" id="basic-addon3">https://example.com/users/</div>
-  <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
-  <div class="input-group-text">$</div>
-  <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
-  <div class="input-group-text">.00</div>
-  <input type="text" class="form-control" placeholder="Username" aria-label="Username">
-  <div class="input-group-text">@</div>
-  <input type="text" class="form-control" placeholder="Server" aria-label="Server">
-  <div class="input-group-text">.com</div>
-</div>
-{# <div class="input-group">
-    {{ block('form_widget') }}
-    <div class="input-group-append">
-        <button class="input-group-text" type="button">
-            <i class="fas fa-lock fa-fw"></i>
-        </button>
+    <div class="input-group mb-3">
+    <div class="input-group-text" id="basic-addon3">https://example.com/users/</div>
+    <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+    <div class="input-group-text">$</div>
+    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
+    <div class="input-group-text">.00</div>
+    <input type="text" class="form-control" placeholder="Username" aria-label="Username">
+    <div class="input-group-text">@</div>
+    <input type="text" class="form-control" placeholder="Server" aria-label="Server">
+    <div class="input-group-text">.com</div>
     </div>
-</div> #}
-
+    {# <div class="input-group">
+        {{ block('form_widget') }}
+        <div class="input-group-append">
+            <button class="input-group-text" type="button">
+                <i class="fas fa-lock fa-fw"></i>
+            </button>
+        </div>
+    </div> #}
 {%- endblock -%}
 
 {%- block slug_widget -%}
@@ -321,6 +312,7 @@
     'data-file-sortable'              : form.vars.sortable,
     'data-file-ajax'                  : form.vars.ajax,
     'data-file-max-files'             : form.vars.max_files,
+    'data-file-href'                  : form.vars.href|default("")|url_decode,
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
     'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
@@ -342,7 +334,7 @@
         {% set title = '' %}
         {% set filesLabel = 'files'|trans %}
 
-        {{ form_widget(form.file, { attr: form.file.vars.attr, value: form.vars.value }) }}
+        {{ form_widget(form.file, { attr: form.file.vars.attr, value: value }) }}
         {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept|join(',') }) }) }}
     
         {% if allow_delete %}
@@ -374,7 +366,14 @@
 
 {%- endblock -%}
 
-{%- block entity2_label -%}
+{%- block associationfile_widget -%}
+    {% for childForm in form.children%}
+        {% set attr = childForm.vars.attr|merge({'data-entity-id': form.vars.entityId }) %}
+        {{ form_widget(childForm, {attr:attr}) }}
+    {% endfor %}
+{% endblock associationfile_widget %}
+
+{%- block association_label -%}
     {% if form.vars.multiple %}
         {{ form_label(form, null, {'required': false}) }}
     {% else %}
@@ -382,7 +381,7 @@
     {% endif %}
 {%- endblock -%}
 
-{%- block entity2_row -%}
+{%- block association_row -%}
     {% if form.parent.parent is null and multiple %}
     
         {% if form.children is iterable %}
@@ -628,6 +627,5 @@
         {% endif %}
     </div>
 </div>
-
 
 {%- endblock -%}

@@ -51,7 +51,7 @@ sitemap:
       singular: "page"
       plural: "pages"
 
-    hyperlink:
+    link:
       singular: "lien"
       plural: "liens"
 
@@ -71,41 +71,41 @@ sitemap:
     singular: attribut
     plural: attributs
 
-    abstract_attribute:
-      singular: attribute
-      plural: attributes
+    hyperlink:
+      singular: "lien hypertexte"
+      plural: "liens hypertextes"
 
-    hyperpattern_attribute:
-      singular: "modèle de liens"
-      plural: "modèles de liens"
+    abstract:
+      singular: attribut
+      plural: attributs
 
-    color_attribute:
-      singular: "couleur"
-      plural: "couleur"
-
-    number_attribute:
-      singular: "nombre"
-      plural: "nombres"
-
-    text_attribute:
-      singular: "ligne de texte"
-      plural: "lignes de texte"
-
-    textarea_attribute:
-      singular: "zone de texte"
-      plural: "zones de texte"
-
-    datetime_attribute:
-      singular: "dateheure"
-      plural: "dateheure"
-
-    percent_attribute:
-      singular: "pourcentage"
-      plural: "pourcentages"
-
-    array_attribute:
-      singular: "groupe"
-      plural: "groupes"
+      abstract_attribute:
+        singular: attribute
+        plural: attributes
+      hyperpattern_attribute:
+        singular: "modèle de liens"
+        plural: "modèles de liens"
+      color_attribute:
+        singular: "couleur"
+        plural: "couleur"
+      number_attribute:
+        singular: "nombre"
+        plural: "nombres"
+      text_attribute:
+        singular: "ligne de texte"
+        plural: "lignes de texte"
+      textarea_attribute:
+        singular: "zone de texte"
+        plural: "zones de texte"
+      datetime_attribute:
+        singular: "dateheure"
+        plural: "dateheure"
+      percent_attribute:
+        singular: "pourcentage"
+        plural: "pourcentages"
+      array_attribute:
+        singular: "groupe"
+        plural: "groupes"
 
   setting:
     singular: "paramètre"

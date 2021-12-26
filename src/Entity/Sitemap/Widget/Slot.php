@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Sitemap\Widget;
 
+use Base\Annotations\Annotation\ColumnAlias;
 use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Slugify;
@@ -15,6 +16,7 @@ use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Widget\SlotRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
@@ -30,9 +32,9 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public static function __staticIconize() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
-    public function __construct(string $path)
+    public function __construct()
     {
-        $this->setPath($path);
+        $this->widgets = new ArrayCollection();
     }
 
     /**
@@ -45,6 +47,18 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public function setPath(string $path): self
     {
         $this->path = $path;
+        return $this;
+    }
+
+    public function getLabel(): ?string { return $this->translate()->getTitle(); }
+    public function setLabel(string $label) { 
+        $this->translate()->setTitle($label);
+        return $this;
+    }
+
+    public function getHelp(): ?string { return $this->translate()->getExcerpt(); }
+    public function setHelp(string $help) { 
+        $this->translate()->setExcerpt($help);
         return $this;
     }
 

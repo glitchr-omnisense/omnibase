@@ -102,8 +102,8 @@ function interpret_link($input)
 
     const     BIT_PREFIX = array("b");
     const    BYTE_PREFIX = array("B", "O", "o");
-    const  BINARY_PREFIX = array("ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");
-    const DECIMAL_PREFIX = array("k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
+    const  BINARY_PREFIX = array("", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");
+    const DECIMAL_PREFIX = array("", "k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
 
     function byte2bit(int $num): int { return 8*$num; } // LOL !
     function bit2byte(int $num): int { return $num/8; } // LOL LOL !
@@ -120,12 +120,18 @@ function interpret_link($input)
         $quotient = (int) ($num / ($divider ** $factor));
 
         $rest     = $num - $divider*$quotient;
-        if($rest > 0) $quotient--;
-        if($rest > 0) $factor--;
+        if($rest < 0) $factor--;
 
+        $quotient = (int) ($num / ($divider ** $factor));
         return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor]) : $num);
     }
 
+    function is_parent_of(mixed $object_or_class, string $class, bool $allow_string = true): bool
+    {
+        $object_or_class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
+        return $object_or_class == $class || is_subclass_of($object_or_class, $class, $allow_string);
+    }
+    
     function str2dec(string $str): int
     {
         $val = trim($str);
