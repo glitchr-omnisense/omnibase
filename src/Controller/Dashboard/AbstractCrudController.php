@@ -101,7 +101,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $htmlAttributes        = $actionDto->getHtmlAttributes();
             $htmlAttributes["root-entity"] = urlencode($this->getCrudControllerFqcn($rootEntity));
             $htmlAttributes["map"] = [];
-            
+
             foreach($this->classMetadataManipulator->getDiscriminatorMap($entity) as $key => $class) {
 
                 $class = get_alias($class);
@@ -116,8 +116,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 }
             }
 
-            $actionDto->setHtmlElement("discriminator");
-            $actionDto->setHtmlAttributes($htmlAttributes);
+            if(!empty($htmlAttributes["map"])) {
+
+                $actionDto->setHtmlElement("discriminator");
+                $actionDto->setHtmlAttributes($htmlAttributes);
+            }
         }
 
 

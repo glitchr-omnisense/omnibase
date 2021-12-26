@@ -185,33 +185,32 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $form = current(iterator_to_array($forms))->getParent();
+        $form    = current(iterator_to_array($forms))->getParent();
+        $options = current(iterator_to_array($forms))->getParent()->getConfig()->getOptions();
 
         $data = new ArrayCollection();
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
 
-        $dataClass = $form->getConfig()->getOption("class")    ?? (is_object($viewData) ? get_class($viewData) : null);
-        $multiple  = $form->getConfig()->getOption("multiple");
+        $options["class"]    = $options["class"] ?? $this->formFactory->guessType($form, $options);
+        $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($form, $options);
 
-        if(!$multiple && $this->classMetadataManipulator->isEntity($dataClass)) {
+        if(!$options["multiple"] && $this->classMetadataManipulator->isEntity($options["class"])) {
 
-            $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
+            $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["class"]);
             if(!$classMetadata)
-                throw new \Exception("Entity \"$dataClass\" not found.");
+                throw new \Exception("Entity \"".$options["class"]."\" not found.");
             
             $fieldNames  = $classMetadata->getFieldNames();
             $fields = array_intersect_key($data->toArray(), array_flip($fieldNames));
             $associations = array_diff_key($data->toArray(), array_flip($fieldNames));
+        
+            $viewData = is_object($viewData) ? $viewData : self::getSerializer()->deserialize(json_encode($fieldNames), $options["class"], 'json');
 
-            if(!is_object($viewData) || get_class($viewData) != $dataClass)
-                $viewData = self::getSerializer()->deserialize(json_encode($fieldNames), $dataClass, 'json');
-            
             foreach ($fields as $property => $value)
                 $this->setFieldValue($viewData, $property, $value);
-            foreach($associations as $property => $value) {
+            foreach($associations as $property => $value)
                 $this->setFieldValue($viewData, $property, $value);
-            }
 
         } else if($viewData instanceof PersistentCollection) {
 
@@ -235,7 +234,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 }
             }
 
-        } else if($multiple) {
+        } else if($options["multiple"]) {
 
             $viewData = new ArrayCollection();
             foreach(iterator_to_array($forms) as $fieldName => $childForm) {

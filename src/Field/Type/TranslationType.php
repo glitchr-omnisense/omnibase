@@ -108,6 +108,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                 $entityOptions = [
                     'fields' => $fields[$locale],
+                    'only_fields' => $options["only_fields"],
                     'class' => $translationClass,
                     'excluded_fields' => $options['excluded_fields'],
                 ];
@@ -311,11 +312,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 }
 
             } else {
-
+    
                 foreach($data as $key => $translation) {
 
-                    if ($translation === null) continue;
-                    if(!$translation instanceof TranslationInterface)
+                    if ( $translation === null) continue;
+                    if(!($translation instanceof TranslationInterface))
                         throw new UnexpectedValueException("Object expected to be an instance of TranslationInterface, \"".(is_object($translation) ? get_class($translation) : $translation)."\" received.");
 
                     $translation->setLocale($locale);
