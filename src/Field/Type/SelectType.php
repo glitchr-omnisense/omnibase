@@ -105,11 +105,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             'select2-css'      => $this->baseService->getParameterBag("base.vendor.select2.css"),
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
 
-            // Use 'template' in replacement of selection/result template
-            'template'          => "function(option, that) { return $('<span class=\"select2-selection__entry\">' + (option.html ? option.html : (option.icon ? '<i class=\"'+option.icon+'\"></i>  ' : '') + option.text + '</span>')); }",
-            'templateSelection' => null,
-            'templateResult'    => null,
-
             // Generic parameters
             'placeholder'        => "Choose your selection..",
             'capitalize'         => false,
@@ -123,7 +118,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             'closeOnSelect'      => null,
             'selectOnClose'      => false,
             'minimumResultsForSearch' => 0,
-
+            "dropdownCssClass"   => null,
+            "selectionCssClass"  => null,
+            
             // Autocomplete 
             'autocomplete'          => null,
             'autocomplete_endpoint' => "autocomplete",
@@ -158,7 +155,6 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Guess class option
             $options["class"]         = $this->formFactory->guessType($event, $options);
-
             // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
             $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
@@ -364,6 +360,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                      $selectOpts["closeOnSelect"] = $options["closeOnSelect"] ?? !$options["multiple"];
             if(!array_key_exists("selectOnClose", $selectOpts))
                      $selectOpts["selectOnClose"] = $options["selectOnClose"];
+            if(!array_key_exists("dropdownCssClass", $selectOpts))
+                     $selectOpts["dropdownCssClass"]  = $options["dropdownCssClass"];
+            if(!array_key_exists("selectionCssClass", $selectOpts))
+                     $selectOpts["selectionCssClass"] = $options["selectionCssClass"];
 
             if(!array_key_exists("placeholder", $selectOpts))
                      $selectOpts["placeholder"] = $options["placeholder"] ?? "";
@@ -379,16 +379,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                      $selectOpts["maximum"]     = (array_key_exists("maximum"        , $options) &&  $options["maximum"] > 0) ? $options["maximum"]         : "";
             if(!array_key_exists("tags", $selectOpts))
                      $selectOpts["tags"]        = (array_key_exists("tags"           , $options) &&  $options["tags"]       ) ? true                      : false;
-
-            // /!\ NB: Template functions must be defined later on because
-            // the width is determined by the size of the biggeste <option> entry
-            
-            if(!array_key_exists("template", $selectOpts))
-                     $selectOpts["template"]          = $options["template"]          ?? "";
-            if(!array_key_exists("templateResult", $selectOpts))
-                     $selectOpts["templateResult"]    = $options["templateResult"]    ?? $selectOpts["template"];
-            if(!array_key_exists("templateSelection", $selectOpts))
-                     $selectOpts["templateSelection"] = $options["templateSelection"] ?? $selectOpts["template"];
 
             if(!array_key_exists("theme", $selectOpts))
                      $selectOpts["theme"] = $options["theme"];
@@ -465,6 +455,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $className = class_basename($class);
             $id = $entry;
             $html = null;
+            $data = [];
 
             $text = ($translator ? $translator->trans(camel_to_snake($className.".".mb_strtolower($entry).".singular"), [], "@enums") : $entry);
 
@@ -477,17 +468,25 @@ class SelectType extends AbstractType implements DataMapperInterface
             $accessor = PropertyAccess::createPropertyAccessor();
             $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
 
-            $autocomplete = null;
-            if(class_implements_interface($entry, AutocompleteInterface::class))
+            $autocomplete     = null;
+            $autocompleteData = [];
+            if(class_implements_interface($entry, AutocompleteInterface::class)) {
                 $autocomplete = $entry->__autocomplete() ?? null;
+                $autocompleteData = $entry->__autocompleteData() ?? []; 
+            }
 
-            $className = class_basename(get_class($entry));
+            $className = get_class($entry);
+            $className = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], $className);
+            $className = implode(".", array_map("camel_to_snake", explode("\\", $className)));
+            
             if($translator) $className = $translator->trans(camel_to_snake($className.".singular"), [], "@entities");
 
             $html = is_html($autocomplete) ? $autocomplete : null;
-            $text = is_html($autocomplete) ? null : $autocomplete;
+            $text = is_html($autocomplete) ? null          : $autocomplete;
+            $data = $autocompleteData;
+
             if(!$text)
-                $text = is_stringeable($entry) ? strval($entry) : $className + " #".$entry->getId();
+                $text = is_stringeable($entry) ? strval($entry) : $className . " #".$entry->getId();
 
             $icons = $entry->__iconize() ?? [];
             if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
@@ -499,6 +498,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $id    = is_array($entry) ? $entry[0] : $entry;
             $text  = is_array($entry) ? $entry[1] : $entry;
             $html  = null;
+            $data  = [];
         }
 
         switch($format) {
@@ -524,7 +524,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             "id"   => $id ?? null,
             "icon" => begin($icons),
             "text" => $text,
-            "html" => $html
+            "html" => $html,
+            "data" => $data
         ];
     }
 }

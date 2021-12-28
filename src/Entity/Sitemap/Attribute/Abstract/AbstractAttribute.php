@@ -6,6 +6,7 @@ use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
+use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
 
 use Base\Validator\Constraints as AssertBase;
@@ -23,7 +24,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
  * 
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
-class AbstractAttribute implements AbstractAttributeInterface, TranslatableInterface, IconizeInterface
+class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
@@ -34,6 +35,8 @@ class AbstractAttribute implements AbstractAttributeInterface, TranslatableInter
     public static function getOptions(): array { return []; }
     public function getFormattedValue(string $value): mixed { return $value; }
 
+    public function __autocomplete():?string { return $this->translate()->getLabel(); }
+    public function __autocompleteData():array { return ["pattern" => $this->getPattern()]; }
     public function __construct(?string $code = null, ?string $icon = null)
     {
         $this->setCode($code);
@@ -71,5 +74,4 @@ class AbstractAttribute implements AbstractAttributeInterface, TranslatableInter
         $this->icon = $icon;
         return $this;
     }
-
 }

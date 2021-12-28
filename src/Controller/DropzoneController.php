@@ -119,7 +119,6 @@ class DropzoneController extends AbstractController
             $dropzone = $cacheDropzone->get() ?? [];
             foreach($dropzone as $uuid => $_)
                 if(file_exists($cacheDir."/".$uuid)) unlink($cacheDir."/".$uuid);
-
         }
 
         $dropzone[(string) $fileUuid] = time() + self::CACHE_DURATION;

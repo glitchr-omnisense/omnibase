@@ -5,6 +5,7 @@ namespace Base\Controller\Dashboard\Crud\Sitemap\Widget;
 use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
+use Base\Entity\Sitemap\Attribute\Abstract\HyperpatternAttribute;
 use Base\Field\AttributeField;
 use Base\Field\Type\QuillType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -17,7 +18,7 @@ class LinkCrudController extends WidgetCrudController
     {
         $defaultCallback = function() { return []; };
 
-        yield AttributeField::new('hyperlink');
+        yield AttributeField::new('hyperlink')->setClass(HyperpatternAttribute::class);
         foreach ( ($callbacks["hyperlink"] ?? $defaultCallback)() as $yield)
             yield $yield;
 

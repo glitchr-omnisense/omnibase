@@ -283,7 +283,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             else {
 
                 $newViewData = new ArrayCollection();
-                foreach($viewData as $key => $data)
+                foreach($viewData ?? [] as $key => $data)
                     $newViewData[$key] = $data[$locale];
 
                 $form->setData($newViewData);

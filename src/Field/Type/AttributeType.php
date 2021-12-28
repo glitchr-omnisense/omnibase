@@ -3,7 +3,10 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Entity\Sitemap\Attribute;
+use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
 use Base\Form\FormFactory;
+use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
@@ -11,6 +14,7 @@ use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -40,8 +44,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
     
     public function getBlockPrefix(): string { return 'attribute'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
+        $this->baseService = $baseService;
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
@@ -51,10 +56,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
         parent::configureOptions($resolver);
         
         $resolver->setDefaults([
-            'recursive' => false,
-            "multiple" => false,
+            'class'        => false,
+            'recursive'    => false,
+            "multiple"     => false,
 
-            'allow_add' => true,
+            'allow_add'    => true,
             'allow_delete' => true,
         ]);
 
@@ -66,6 +72,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
         $view->vars["multiple"] = $options["multiple"];
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"] = $options["allow_add"];
@@ -77,13 +84,43 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
 
             $form = $event->getForm();
+            $data = $event->getData();
 
+            $class = $options["class"] ?? AbstractAttribute::class;
             $form->add("choice", SelectType::class, [
-                "class" => Attribute::class,
-                "multiple" => $options["multiple"]
+                "class"             => $class,
+                "multiple"          => $options["multiple"],
+                "dropdownCssClass"  => "field-attribute-dropdown",
+                "selectionCssClass" => "field-attribute-selection"
             ]);
 
-            $form->add("intl", TranslationType::class);
+            $form->add("intl", TranslationType::class, [
+                "multiple" => true,
+                "translation_class" => SettingTranslation::class,
+                "only_fields" => ["value"], 
+                "fields" => ["value" => ["label" => false, "form_type" => TextType::class]]
+            ]);
+        });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
+
+            $form = $event->getForm();
+            $data = $event->getData();
+
+            $class = $form->getConfig()->getOption("class") ?? (is_object($data) ? get_class($data) : null);
+            $multiple  = $form->getConfig()->getOption("multiple");
+            if($multiple) {
+
+            } else {
+
+                $form->add("intl", TranslationType::class, [
+                    "row_inline"        => true,
+                    "only_fields" => ["value"],
+                    "fields" => ["value" => ["label" => false, "form_type" => TextType::class /*$class::getType()*/]]
+                ]);
+            }
+
+            exit(1);
         });
     }
 

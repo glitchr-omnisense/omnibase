@@ -7,7 +7,7 @@ use Base\Field\Type\AttributeType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class AttributeField implements FieldInterface
+final class AttributeField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 
