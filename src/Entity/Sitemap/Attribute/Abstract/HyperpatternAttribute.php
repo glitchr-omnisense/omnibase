@@ -18,7 +18,6 @@ use Base\Service\LocaleProvider;
 
 class HyperpatternAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return [$this->getIcon()]; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
     public static function getType(): string { return PatternType::class; }

@@ -211,18 +211,18 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
         $entityLabel = $this->translator->trans($userClass.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
         if($entityLabel == $userClass.".plural") $entityLabel = null;
-        else $extension->setTitle(mb_ucwords($entityLabel));
+        else $extension->setTitle(mb_ucfirst($entityLabel));
 
         $entityLabel = $entityLabel ?? $this->getEntityLabelInSingular() ?? "";
-        $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
+        $entityLabel = !empty($entityLabel) ? mb_ucfirst($entityLabel) : "";
 
         if ($entity) {
 
             $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], get_class($entity));
             $class = implode(".", array_map("camel_to_snake", explode("\\", $class)));
-            $entityLabel = mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
+            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
 
-            $extension->setTitle(mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".plural", [], AbstractDashboardController::TRANSLATION_ENTITY)));
+            $extension->setTitle(mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".plural", [], AbstractDashboardController::TRANSLATION_ENTITY)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {

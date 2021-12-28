@@ -49,9 +49,9 @@ abstract class EnumType extends Type implements IconInterface
     public function convertToPHPValue($value, AbstractPlatform $platform) : mixed { return $value; }
     public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed 
     {
-        if (!in_array($value, $this->getPermittedValues())) {
+        if ($value !== null && !in_array($value, $this->getPermittedValues()))
             throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
-        }
+
         return $value;
     }
 

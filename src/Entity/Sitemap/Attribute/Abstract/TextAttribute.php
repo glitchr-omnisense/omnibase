@@ -16,7 +16,6 @@ use Base\Repository\Sitemap\Attribute\Abstract\TextAttributeRepository;
 
 class TextAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-paragraph"]; } 
 
     public static function getType(): string { return TextType::class; }

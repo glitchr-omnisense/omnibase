@@ -19,9 +19,6 @@ final class AssociationFileField extends SelectField implements FieldInterface
     public const OPTION_RENDER_FORMAT   = "renderFormat";
     public const OPTION_CRUD_CONTROLLER = 'crudControllerFqcn';
 
-    public const OPTION_ALLOW_ADD = 'allowAdd';
-    public const OPTION_ALLOW_DELETE = 'allowDelete';
-
     public const OPTION_RELATED_URL = 'relatedUrl';
     public const OPTION_DOCTRINE_ASSOCIATION_TYPE = 'associationType';
     public const OPTION_CLASS          = 'class';
@@ -40,12 +37,6 @@ final class AssociationFileField extends SelectField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
-    }
-
-    public function allowDelete(bool $allowDelete = true): self
-    {
-        $this->setFormTypeOption("allow_delete", $allowDelete);
-        return $this;
     }
 
     public function setMultipleFiles(bool $multipleFiles = true): self

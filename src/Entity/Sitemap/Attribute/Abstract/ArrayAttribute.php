@@ -16,7 +16,6 @@ use Base\Repository\Sitemap\Attribute\Abstract\ArrayAttributeRepository;
 
 class ArrayAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-clipboard-list"]; }
 
     public static function getType(): string { return ArrayType::class; }

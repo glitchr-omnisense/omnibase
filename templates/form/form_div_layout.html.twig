@@ -374,7 +374,8 @@
 {%- endblock -%}
 
 {%- block associationfile_widget -%}
-    {% for childForm in form.children%}
+
+    {% for childForm in form.children %}
         {% set attr = childForm.vars.attr|merge({'data-entity-id': form.vars.entityId }) %}
         {{ form_widget(childForm, {attr:attr}) }}
     {% endfor %}

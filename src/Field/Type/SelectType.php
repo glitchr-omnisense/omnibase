@@ -155,6 +155,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Guess class option
             $options["class"]         = $this->formFactory->guessType($event, $options);
+
             // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
             $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
@@ -360,9 +361,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                      $selectOpts["closeOnSelect"] = $options["closeOnSelect"] ?? !$options["multiple"];
             if(!array_key_exists("selectOnClose", $selectOpts))
                      $selectOpts["selectOnClose"] = $options["selectOnClose"];
-            if(!array_key_exists("dropdownCssClass", $selectOpts))
+            if(!array_key_exists("dropdownCssClass", $selectOpts) && $options["dropdownCssClass"] !== null)
                      $selectOpts["dropdownCssClass"]  = $options["dropdownCssClass"];
-            if(!array_key_exists("selectionCssClass", $selectOpts))
+            if(!array_key_exists("selectionCssClass", $selectOpts) && $options["selectionCssClass"] !== null)
                      $selectOpts["selectionCssClass"] = $options["selectionCssClass"];
 
             if(!array_key_exists("placeholder", $selectOpts))
@@ -461,6 +462,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $icons = [];
             $icon = $class::getIcons(0)[$entry] ?? [];
+            
             if($icon) $icons[] = $icon;
 
         } else if(is_object($entry) && $class !== null) {

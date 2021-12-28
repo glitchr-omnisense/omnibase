@@ -23,7 +23,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return $this->attributePattern ? $this->attributePattern->__iconize() : null; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
     /**

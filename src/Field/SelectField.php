@@ -32,7 +32,7 @@ class SelectField implements FieldInterface
     public const SHOW_ICON_ONLY = 2;
     public const SHOW_ALL       = 3;
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName, ?string $label = null)
     {
         return (new self())
             ->setProperty($propertyName)
@@ -62,13 +62,19 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function allowMultipleChoices(bool $allow = true): self
+    public function allowMultipleChoices(bool $allow = true)
     {
         $this->setFormTypeOptionIfNotSet("multiple", $allow);
         return $this;
     }
 
-    public function setChoices($choiceGenerator): self
+    public function allowDelete(bool $allow = true)
+    {
+        $this->setFormTypeOption("allow_delete", $allow);
+        return $this;
+    }
+
+    public function setChoices($choiceGenerator)
     {
         if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator))
             throw new \InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, \gettype($choiceGenerator)));
@@ -89,7 +95,7 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function setDisplayLimit(int $limit = 2): self
+    public function setDisplayLimit(int $limit = 2)
     {
         $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
         return $this;
@@ -119,13 +125,13 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function renderAsCount(): self
+    public function renderAsCount()
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
         return $this;
     }
 
-    public function renderAsText(): self
+    public function renderAsText()
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
         return $this;

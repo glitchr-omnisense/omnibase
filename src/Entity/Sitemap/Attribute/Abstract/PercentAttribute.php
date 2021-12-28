@@ -16,7 +16,6 @@ use Base\Repository\Sitemap\Attribute\Abstract\PercentAttributeRepository;
 
 class PercentAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-percent"]; } 
 
     public static function getType(): string { return PercentType::class; }

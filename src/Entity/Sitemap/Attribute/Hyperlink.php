@@ -18,7 +18,7 @@ use Base\Repository\Sitemap\Attribute\HyperlinkRepository;
 
 class Hyperlink extends Attribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return $this->getHyperpattern() ? [$this->getHyperpattern()->getIcon()] : null; } 
     public static function __staticIconize() : ?array { return ["fas fa-link"]; } 
 
     /**
@@ -32,7 +32,6 @@ class Hyperlink extends Attribute implements IconizeInterface
         return $this;
     }
 
-    public function getIcon()      { return $this->getHyperpattern()->getIcon(); }
     public function generateHtml(?string $locale = null) { return $this->getHyperpattern()->generateHtml($this->translate($locale)->getValue()); }
     public function generateUrl(?string $locale = null)  { return $this->getHyperpattern()->generateUrl($this->translate($locale)->getValue()); }
 }
