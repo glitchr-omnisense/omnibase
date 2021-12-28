@@ -3,12 +3,14 @@
 namespace Base\Field;
 
 use Base\Field\Type\AssociationFileType;
+use Base\Field\Type\AvatarType;
+use Base\Field\Type\ImageType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class AssociationFileField implements FieldInterface
+final class AssociationFileField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 
@@ -31,6 +33,7 @@ final class AssociationFileField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/entity')
             ->setFormType(AssociationFileType::class)
+            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->addCssClass('field-entity')
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/association.html.twig')
@@ -72,13 +75,16 @@ final class AssociationFileField implements FieldInterface
     public function renderAsImage(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "image")
-             ->setFormType(ImageType::class);
+            ->setFormTypeOption("form_type", ImageType::class);
+
         return $this;
     }
 
-    public function showFirst(bool $show = true): self
+    public function renderAsAvatar(): self
     {
-        $this->setCustomOption(self::OPTION_SHOWFIRST, true);
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar")
+             ->setFormTypeOption("form_type", AvatarType::class);
+
         return $this;
     }
 

@@ -35,8 +35,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        $showFirst = $field->getCustomOption(SelectField::OPTION_SHOW_FIRST);
-        
         // Formatted value
         $class = $field->getCustomOption(SelectField::OPTION_CLASS);
         if(!$class) {

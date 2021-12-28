@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\AssociationField;
 
@@ -15,6 +16,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AssociationConfigurator implements FieldConfiguratorInterface
 {
@@ -131,9 +133,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
     private function configureToManyAssociation(FieldDto $field): void
     {
         $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
-        
-        $displayedOn = $field->getDisplayedOn();
-        
+
         // associations different from *-to-one cannot be sorted
         $field->setSortable(false);
         
@@ -159,12 +159,12 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             if ($first) {
 
                 $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
-                $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER);
                 $targetEntityDto = null === $first
                     ? $this->entityFactory->create($targetEntityFqcn)
                     : $this->entityFactory->createForEntityInstance($first);
 
                 $targetEntityDto = $this->entityFactory->createForEntityInstance($first);
+                $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER) ?? AbstractCrudController::getCrudControllerFqcn($targetEntityDto->getFqcn());
 
                 $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
             }
@@ -172,11 +172,14 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             $count = $this->countNumElements($others);
             if($first && $showFirst) $count++;
 
-            $field->setFormattedValue([
-                "count" => $count,
-                "first" => $first,
-                "others" => $others
-            ]);
+            if($first != null || !empty($others))  {
+         
+                $field->setFormattedValue([
+                    "count" => $count,
+                    "first" => $first,
+                    "others" => $others
+                ]);
+            }
         }
     }
 }

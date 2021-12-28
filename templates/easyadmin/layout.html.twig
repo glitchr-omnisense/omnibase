@@ -95,6 +95,27 @@
                     background-color:transparent;
                 }
 
+                .datagrid .ea-lightbox-association img { filter: blur(2px); }
+                .datagrid .ea-lightbox-association:hover img { filter: blur(0px); }
+                .datagrid .ea-lightbox-association:hover span { visibility:hidden; }
+                .datagrid .ea-lightbox-association span 
+                { 
+                    font-weight: bold;
+                    position: absolute;
+                    color: var(--gray-600); 
+                }
+
+
+                .content-header-icon a { color: var(--sidebar-logo-color); }
+                .content-header-icon a:hover { color: var(--sidebar-menu-color); }
+                .content-header-title .title i { vertical-align:top; }
+                .content-header-title .title a { color: var(--sidebar-logo-color); }
+                .content-header-title .title a:hover { color: var(--sidebar-menu-color); }
+                .content-header-title .title a.impersonate { color: var(--link-color); text-decoration: var(--link-decoration); } 
+                .content-header-title .title a.impersonate:hover { color: var(--link-hover-color); text-decoration: var(--link-hover-decoration); } 
+                
+                .content-header-title span { color: var(--sidebar-menu-icon-color); }
+                
                 .ea-sidebar-width-compact #header-logo { visibility:hidden; }
                 .ea-sidebar-width-compact .navbar { display:none; }
                 .ea-sidebar-width-compact .main-header { padding-top:7em; }
@@ -730,6 +751,8 @@
                                         {% block content_header %}
 
                                         <div class="content-header-icon">
+                                        {% set url = ea.crud is not null and ea.crud.paginator.pageNumber != 1 ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
+                                        
                                         {% set _content_icon = block('content_icon') ?? null %}
                                         {% if _content_icon is not empty %}
                                             {{ _content_icon|raw }}
@@ -738,14 +761,22 @@
                                             {% if image is not null %}
                                                 <img class="ea-extra-image" src="{{ asset(image) }}">
                                             {% else %}
+                                                {% if url is not empty %}<a href="{{url}}">{% endif %}
                                                 <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>
+                                                {% if url is not empty %}</a>{% endif %}
                                             {% endif %}
                                         {% endif %}
+
                                         </div>
 
                                         <div class="content-header-title">
                                             <h1 class="title">
-                                            {{ _content_title|raw }}
+                                            {% set url = ea.crud is not null and ea.crud.getCurrentPage() == "detail" ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
+                                            {% set isHtml = _content_title != (_content_title|striptags) %}
+
+                                            {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
+                                                {{ _content_title|raw }}
+                                            {% if url is not empty %}</a>{% endif %}
 
                                             {% set _content_help = block('content_help') ?? null %}
                                             {% if _content_help is not empty %}

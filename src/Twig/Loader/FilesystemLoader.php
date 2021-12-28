@@ -52,7 +52,6 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
                 // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
                 if(($defaultLoader = $loaders[0]) )
                     $defaultLoader->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-
             }
 
             $chainLoader = new ChainLoader($loaders);
@@ -66,6 +65,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->prependPath($projectDir . "/src", "App");
         $this->prependPath($projectDir . "/src/Controller", "Controller");
         $this->prependPath($projectDir . "/assets", "Assets");
+        $this->prependPath($projectDir . "/public", "Public");
 
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         $this->prependPath($bundlePath, "Base");

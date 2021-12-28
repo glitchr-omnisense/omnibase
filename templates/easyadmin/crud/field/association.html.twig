@@ -2,9 +2,63 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% set displayLimit = field.customOptions.get('displayLimit') %}
-{% set showFirst = field.customOptions.get('showFirst') %}
+{% set showFirst    = field.customOptions.get('showFirst') %}
+{% set renderFormat = field.customOptions.get('renderFormat') ?? false %}
 
-{% if 'toMany' == field.customOptions.get('associationType') %}
+{% set entityFile    = field.formTypeOptions['entity_file'] %}
+
+{% if renderFormat == "image" or renderFormat == "avatar" %}
+
+    {% set counter = field.formattedValue.count %}
+    
+    {% if renderFormat == 'avatar' %}
+        {% set icon = '<i class="fas fa-fw fa-user-circle fa-3x"></i>' %}
+    {% else %}
+        {% set icon = '<i class="fas fa-fw fa-image fa-3x"></i>' %}
+    {% endif %}
+    
+    {% if field.value is iterable %}
+        {% if ea.crud.currentAction == 'detail' %}
+            {% set images = field.value %}
+        {% else %}
+            {% set path  = field.value|first %}
+            {% set images = path is empty or null ? [] : [path] %}
+        {% endif %}
+    {% else %}
+        {% set images = field.value is empty or null ? [] : [field.value] %}
+    {% endif %}
+    
+    {% for key, entity in images %}
+
+        {% set image = attribute(entity,entityFile) %}
+        {% if image is not null %}
+
+            {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
+            {% set class_index = ea.crud.currentAction != 'detail' ? 'ea-lightbox-association' : '' %}
+
+            <a href="#" class="{{ class_index }} ea-lightbox-thumbnail" data-featherlight="#{{ html_id }}" data-ea-lightbox-content-selector="#{{ html_id }}" data-featherlight-close-on-click="anywhere">
+                <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">
+                    <img src="{{ image }}">
+                    {% if ea.crud.currentAction != 'detail' %}<span>+{{counter-1}}</span>{% endif %}
+                </div>
+            </a>
+            
+            <div id="{{ html_id }}" class="ea-lightbox">
+                <img src="{{ image }}">
+            </div>
+        {% endif %}
+    {% endfor %}
+
+    {% if images is empty %}
+        {% if pageDetail %}
+            {{ "@fields.fileupload.file_counter.none"|trans }}
+        {% else %}
+            {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
+            <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">{{ icon|raw }}</div>
+        {% endif %}
+    {% endif %}
+
+{% elseif 'toMany' == field.customOptions.get('associationType') %}
 
     {% if showFirst and field.formattedValue.count is defined %}
         {% set displayLimit = displayLimit > 0 ? displayLimit - 1 : displayLimit %}
@@ -30,12 +84,12 @@
         {% if icon is null and method_exists(field.formattedValue.first, "__staticIconize") %}
             {% set icon = field.formattedValue.first.__staticIconize()[0] ?? null %}
         {% endif %}
-        
+
         {% set icon  = icon|fontAwesome({class:"fa-fw"})|default(icon|imagify)|default(null) %}
         {% if icon is not null %}
-            {% set label = "<span class='label'>"~field.formattedValue.first~"</span>" %}
+            {% set label = "<span class='label'>"~(field.formattedValue.first|capitalize)~"</span>" %}
         {% else %}
-            {% set label = field.formattedValue.first %}
+            {% set label = field.formattedValue.first|capitalize %}
         {% endif %}
 
         <span class="badge badge-secondary">

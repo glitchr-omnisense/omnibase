@@ -43,7 +43,7 @@ class UserCrudController extends AbstractCrudController
             $impersonate = null;
             if($this->isGranted("ROLE_SUPERADMIN") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $impersonate = $entity->getUserIdentifier();
-                $impersonate = '<a href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>';
+                $impersonate = '<a class="impersonate" href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>';
             }
 
             if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);

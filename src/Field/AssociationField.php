@@ -33,6 +33,7 @@ final class AssociationField extends SelectField implements FieldInterface
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/association.html.twig')
             ->setTextAlign(TextAlign::CENTER)
+            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setFormTypeOptionIfNotSet("class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
             ->setCustomOption(self::OPTION_CRUD_CONTROLLER, null)

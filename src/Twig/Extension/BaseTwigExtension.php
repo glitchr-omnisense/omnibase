@@ -111,7 +111,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function exit(int $code) { exit($code); }
     public function synopsis($class) { return class_synopsis($class); }
 
-    public function method_exists($object, $method) { return method_exists($object, $method); }
+    public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
 
     public function joinIfExists(?array $array, string $separator) 
     {
@@ -260,6 +260,7 @@ final class BaseTwigExtension extends AbstractExtension
     
     public function image(Environment $env, array $context, $image): ?string
     {
+        if(str_starts_with($image, "/")) $image = "@Public".$image;
         if( ( ($context["email"] ?? null) instanceof WrappedTemplatedEmail) ) {
 
             $email = $context["email"];

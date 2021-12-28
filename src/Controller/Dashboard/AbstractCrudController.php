@@ -19,6 +19,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Event\AfterCrudActionEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -60,7 +61,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected static array $crudController = [];
-    public static function getCrudControllerFqcn($entityFqcn): ?string
+    public static function getCrudControllerFqcn(string $entityFqcn): ?string
     {
         if(array_key_exists($entityFqcn, self::$crudController))
             return self::$crudController[$entityFqcn];
@@ -208,23 +209,21 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if(!$entity) return $extension;
         
         $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
-        $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
-        if($entityLabel == $userClass.".singular") $entityLabel = null;
+        $entityLabel = $this->translator->trans($userClass.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        if($entityLabel == $userClass.".plural") $entityLabel = null;
         else $extension->setTitle(mb_ucwords($entityLabel));
 
         $entityLabel = $entityLabel ?? $this->getEntityLabelInSingular() ?? "";
         $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
 
-        $entityTitle = null;
         if ($entity) {
 
             $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], get_class($entity));
             $class = implode(".", array_map("camel_to_snake", explode("\\", $class)));
             $entityLabel = mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
-        }
 
-        $entityTitle = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-        $extension->setTitle($entityTitle);
+            $extension->setTitle(mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".plural", [], AbstractDashboardController::TRANSLATION_ENTITY)));
+        }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
             $entityText = $entityLabel ." ID #".$entity->getId();
@@ -234,7 +233,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $extension;
     }
 
-    public function configureActionsWithResponseParameters(Actions $actions, KeyValueStore $responseParameters): Extension
+    public function configureActionsWithResponseParameters(Actions $actions, KeyValueStore $responseParameters): Actions
     {
         return $actions;
     }

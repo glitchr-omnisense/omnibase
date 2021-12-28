@@ -6,6 +6,10 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\AssociationField;
 use Base\Field\AssociationFileField;
+use Base\Field\SelectField;
+use Base\Field\Type\SelectType;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
@@ -16,6 +20,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AssociationFileConfigurator implements FieldConfiguratorInterface
 {
@@ -25,8 +30,8 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, EntityFactory $entityFactory, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->entityFactory = $entityFactory;
-        $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->entityFactory            = $entityFactory;
+        $this->adminUrlGenerator        = $adminUrlGenerator;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -55,7 +60,7 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
                 ->setEntityId("{0}")
                 ->generateUrl());
 
-        if ($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
+        if($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
            $this->configureToOneAssociation($field);
         }
 
@@ -126,11 +131,9 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
             ? $this->entityFactory->create($targetEntityFqcn)
             : $this->entityFactory->createForEntityInstance($field->getValue());
         $field->setFormTypeOptionIfNotSet('class', $targetEntityDto->getFqcn());
-
         $field->setFormTypeOptionIfNotSet('empty_data', null);
 
         $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
-
         $field->setFormattedValue($this->formatAsString($field->getValue(), $targetEntityDto));
     }
 
@@ -148,7 +151,6 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
 
         /* @var PersistentCollection $collection */
         $field->setFormTypeOptionIfNotSet('class', $field->getDoctrineMetadata()->get('targetEntity'));
-
         if (null === $field->getTextAlign()) {
             $field->setTextAlign(TextAlign::RIGHT);
         }
@@ -165,12 +167,12 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
             if ($first) {
 
                 $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
-                $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER);
                 $targetEntityDto = null === $first
                     ? $this->entityFactory->create($targetEntityFqcn)
                     : $this->entityFactory->createForEntityInstance($first);
 
                 $targetEntityDto = $this->entityFactory->createForEntityInstance($first);
+                $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER) ?? AbstractCrudController::getCrudControllerFqcn($targetEntityDto->getFqcn());
 
                 $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
             }
@@ -178,11 +180,14 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
             $count = $this->countNumElements($others);
             if($first && $showFirst) $count++;
 
-            $field->setFormattedValue([
-                "count" => $count,
-                "first" => $first,
-                "others" => $others
-            ]);
+            if($first != null || !empty($others))  {
+         
+                $field->setFormattedValue([
+                    "count" => $count,
+                    "first" => $first,
+                    "others" => $others
+                ]);
+            }
         }
     }
 }

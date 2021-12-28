@@ -456,7 +456,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
     }
-    
 
     public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = self::FORMAT_SENTENCECASE) 
     {

@@ -2,11 +2,15 @@
 
 namespace Base\Service;
 
+use Base\Traits\BaseTrait;
+use Symfony\Component\HttpKernel\KernelInterface;
+
 class Translator implements TranslatorInterface
 {
-    public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator)
+    public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel)
     {
         $this->translator = $translator;
+        $this->isDebug    = $kernel->isDebug();
     }
 
     public function getLocale(): string { return $this->translator->getLocale(); }
@@ -19,7 +23,7 @@ class Translator implements TranslatorInterface
     {
         if($id === null) return null;
 
-        $id = trim($id);        
+        $id = trim($id);
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
         $atBegin   = str_starts_with($id, "@");
 
@@ -63,9 +67,12 @@ class Translator implements TranslatorInterface
 
         // Call for translation with custom parameters
         $trans = $this->translator->trans($id, $parameters, $domain, $locale);
+        if ($trans == $id && !$this->isDebug)
+            $trans = $this->translator->trans($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
+
         if ($trans == $id && $customId)
             return ($domain && $atBegin ? "@".$domain.".".$id : $id);
-        
+
         return trim($trans);
     }
 
