@@ -64,6 +64,12 @@
                     outline: none !important;
                 }
 
+                @media (max-width: 992px)
+                {
+                    .text-center { text-align:left !important; }
+                    .text-right { text-align:left !important; }
+                }
+                
                 .dropdown-menu { min-width: 200px;}
                 .dropdown-item.label-group:hover { background-color: transparent;  }
                 .dropdown-item.label-group
@@ -206,7 +212,7 @@
                     transition: opacity 0.5s;
                 }
 
-                .dropdown-menu.show {
+                .dropdown-menu.show, .dropdown-menu.bootstrap-datetimepicker-widget {
 
                     transition: all 500ms, opacity 0.5s;
                     transform-origin:top;
@@ -357,7 +363,7 @@
 
                     overflow:hidden;
                     box-shadow: 0 0 0 2px var(--white),0 0 4px 1px var(--gray-600) !important;
-                    margin: 10px auto !important;
+                    margin: 10px 0 !important;
                     
                     max-height: 50px !important;
                     height: 50px !important;

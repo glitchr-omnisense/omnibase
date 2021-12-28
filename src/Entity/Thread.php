@@ -162,18 +162,6 @@ class Thread implements TranslatableInterface, IconizeInterface
      */
     protected $state;
     public function getState() { return $this->state; }
-    public function isDeleted()  : bool { return $this->state == ThreadState::DELETED;   }
-    public function isDraft()    : bool { return $this->state == ThreadState::DRAFT;     }
-    public function isPublished(): bool { return $this->state == ThreadState::PUBLISHED; }
-    public function isFuture()   : bool { return $this->state == ThreadState::FUTURE;    }
-    public function isSecret()   : bool { return $this->state == ThreadState::SECRET;    }
-    
-    public function isPublishable(): bool
-    {
-        if(!$this->publishedAt) return false;
-        return time() - $this->publishedAt->getTimestamp() >= 0;
-    }
-
     public function setState($state): self
     {
         $this->state = $state;
@@ -181,6 +169,13 @@ class Thread implements TranslatableInterface, IconizeInterface
             $this->setPublishedAt(new \DateTime("now"));
 
         return $this;
+    }
+
+    public function isScheduled(): bool { return $this->publishedAt && !$this->isPublishable(); }
+    public function isPublishable(): bool
+    {
+        if(!$this->publishedAt) return false;
+        return time() - $this->publishedAt->getTimestamp() >= 0;
     }
 
     /**

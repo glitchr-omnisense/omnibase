@@ -15,13 +15,11 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use App\Entity\Thread\Tag;
 use App\Entity\Sitemap\Widget\Slot;
-use App\Entity\Sitemap\Attribute\HyperpatternAttribute as Hyperpattern;
 
 use App\Entity\Sitemap\Setting;
 use App\Entity\Sitemap\Widget;
 use App\Entity\User\Notification;
 use App\Entity\Sitemap\Widget\Attachment;
-use App\Entity\Sitemap\Widget\Hyperlink;
 use App\Entity\Sitemap\Widget\Menu;
 use App\Entity\Sitemap\Widget\Page;
 
@@ -43,7 +41,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
-use Base\Entity\Sitemap\Attribute;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Sitemap\Widget\Link;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -333,10 +330,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureActions(): Actions
     {
-        $approveUser = Action::new('approve', 'Approve', 'fa fa-user-check')
-            ->linkToCrudAction('approveUsers')
-            ->addCssClass('btn btn-primary');
-
         return parent::configureActions()
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
 

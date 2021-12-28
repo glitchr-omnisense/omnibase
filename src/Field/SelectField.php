@@ -27,6 +27,9 @@ class SelectField implements FieldInterface
     public const OPTION_SHOW_FIRST      = 'showFirst';
     public const OPTION_SHOW            = 'show';
 
+    public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
+    public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
+
     public const NO_SHOW        = 0;
     public const SHOW_NAME_ONLY = 1;
     public const SHOW_ICON_ONLY = 2;
@@ -143,6 +146,14 @@ class SelectField implements FieldInterface
             $defaultChoices = [$defaultChoices];
 
         $this->setCustomOption(self::OPTION_DEFAULT_CHOICE, $defaultChoices);
+        return $this;
+    }
+    
+    public function withConfirmation(bool $onCheck = true, bool $onUncheck = true): self
+    {
+        $this->setCustomOption(self::OPTION_CONFIRMATION_MODAL_ON_CHECK, $onCheck);
+        $this->setCustomOption(self::OPTION_CONFIRMATION_MODAL_ON_UNCHECK, $onUncheck);
+
         return $this;
     }
 }
