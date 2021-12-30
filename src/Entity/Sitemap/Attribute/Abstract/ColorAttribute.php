@@ -19,5 +19,5 @@ class ColorAttribute extends AbstractAttribute implements IconizeInterface
     public static function __staticIconize() : ?array { return ["fas fa-tint"]; }
 
     public static function getType(): string { return ColorType::class; }
-    public static function getOptions(): array { return []; }
+    public function getOptions(): array { return []; }
 }

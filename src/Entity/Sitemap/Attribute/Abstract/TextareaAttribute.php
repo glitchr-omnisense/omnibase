@@ -20,5 +20,5 @@ class TextareaAttribute extends AbstractAttribute implements IconizeInterface
     public static function __staticIconize() : ?array { return ["fas fa-align-left"]; }
 
     public static function getType(): string { return TextareaType::class; }
-    public static function getOptions(): array { return []; }
+    public function getOptions(): array { return []; }
 }

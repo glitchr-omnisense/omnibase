@@ -160,11 +160,12 @@ class ServiceEntityParser
     {
         // Head parameters (depends on the method name) + default ones
         // Default parameters:
-        // - 0: criteria
-        // - 1: orderBy
-        // - 2: groupBy
-        // - 3: limit
-        // - 4: offset
+        // - "MAGIC ARGUMENTS"
+        // - "MAGIC ARGUMENTS"+0: criteria
+        // - "MAGIC ARGUMENTS"+1: orderBy
+        // - "MAGIC ARGUMENTS"+2: groupBy
+        // - "MAGIC ARGUMENTS"+3: limit
+        // - "MAGIC ARGUMENTS"+4: offset
         
         // Definition of the returned values
         $magicFn = null;
@@ -531,7 +532,8 @@ class ServiceEntityParser
 
         // Index definition:
         // "criteria"  = argument #0, after removal of head parameters
-        foreach($arguments as $i => $arg) $magicArgs[$i] = $arg;
+        foreach($arguments as $i => $arg) 
+            $magicArgs[$i] = $arg; // +1 because of array shift
 
         $magicFn = "__".$magicFn;
         $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []);
@@ -734,7 +736,7 @@ class ServiceEntityParser
                     else $expr[] = $queryExpr;
                 }
 
-                $expr = $qb->expr()->orX(...$expr);
+                $expr = empty($expr) ? null : $qb->expr()->orX(...$expr);
 
             } else {
 
@@ -742,15 +744,18 @@ class ServiceEntityParser
                 $expr = $this->buildQueryExpr($qb, $field, $fieldValue);
             }
 
-            // Set logical operator
-            switch ($this->getSeparator()) {
+            if($expr !== null) {
 
-                case self::SEPARATOR_OR: $qb->orWhere($expr);
-                    break;
+                // Apply logical operator (if needed)
+                switch ($this->getSeparator()) {
 
-                default:
-                case self::SEPARATOR_AND: $qb->andWhere($expr);
-                    break;
+                    case self::SEPARATOR_OR: $qb->orWhere($expr);
+                        break;
+
+                    default:
+                    case self::SEPARATOR_AND: $qb->andWhere($expr);
+                        break;
+                }
             }
         }
 
@@ -853,6 +858,7 @@ class ServiceEntityParser
             if(is_string($orderBy)) $orderBy = [$orderBy => "ASC"];
             if(!is_array($orderBy)) throw new Exception("Unexpected \"orderBy\" argument type provided \"".gettype($orderBy)."\"");
 
+            $first = true;
             foreach ($orderBy as $name => $value) {
 
                 $path = array_map(fn ($name) => $this->getAlias($name), explode(".", $name));
@@ -862,15 +868,19 @@ class ServiceEntityParser
                 $formattedName = $this->getClassMetadata()->hasAssociation($entity) ? "t_".$name : "t.".$name;
                 $qb = $this->innerJoin($qb, $entity);
 
-                $qb->orderBy($formattedName, $value);
+                $orderBy = $first ? "orderBy" : "addOrderBy";
+                if(is_array($value)) $qb->add($orderBy, "FIELD(".$formattedName.",".implode(",",$value).")");
+                else $qb->$orderBy($formattedName, $value);
+
+                $first = false;
             }
         }
 
         return $qb;
     }
 
-    protected function __find        (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query {  return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();   }
-    protected function __findBy      (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query {  return $this->__find($criteria, $orderBy, $groupBy, $limit, $offset);   }
+    protected function __find        (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();   }
+    protected function __findBy      (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->__find($criteria, $orderBy, $groupBy, $limit, $offset);   }
 
     protected function __findOne     (array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
     protected function __findOneBy   (array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findBy($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }

@@ -88,19 +88,19 @@ class TranslationType extends AbstractType implements DataMapperInterface
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->setDataMapper($this);
+
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) {
 
             $form = $event->getForm();
             $data = $event->getData();
 
             $options = $form->getConfig()->getOptions();
-
             $locales = ($options["single_locale"] ? [$options["locale"]] : $options['available_locales']);
             $dataLocale = $data instanceof Collection ? $data->getKeys() : [$options["locale"]];
 
             $translationClass = $this->getTranslationClass($form);
             $fields = $this->getTranslationFields($translationClass, $options);
-
+            
             foreach ($locales as $key => $locale) {
 
                 if (!isset($fields[$locale]))
@@ -284,7 +284,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                 $newViewData = new ArrayCollection();
                 foreach($viewData ?? [] as $key => $data)
-                    $newViewData[$key] = $data[$locale];
+                    $newViewData[$key] = $data[$locale] ?? null;
 
                 $form->setData($newViewData);
             }

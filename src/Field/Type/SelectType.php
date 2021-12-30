@@ -79,12 +79,12 @@ class SelectType extends AbstractType implements DataMapperInterface
             ],
             //'query_builder'   => null,
 
-            'choices' => null,
-            'choice_filter' => null,
+            'choices'          => null,
+            'choice_filter'    => false,
             'choice_exclusive' => true,
-            // 'choice_value'   => function($key)              { return $key;   },   // Return key code
-            // 'choice_label'   => function($key, $label, $id) { return $label; },   // Return translated label
-            // 'choice_loader'  => function (Options $options) {
+            // 'choice_value'  => function($key)              { return $key;   },   // Return key code
+            // 'choice_label'  => function($key, $label, $id) { return $label; },   // Return translated label
+            // 'choice_loader' => function (Options $options) {
 
             //     return ChoiceList::loader($this, new IntlCallbackChoiceLoader(function () use ($options) {
 
@@ -120,7 +120,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'minimumResultsForSearch' => 0,
             "dropdownCssClass"   => null,
             "selectionCssClass"  => null,
-            
+
             // Autocomplete 
             'autocomplete'          => null,
             'autocomplete_endpoint' => "autocomplete",
@@ -175,7 +175,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             $formOptions = [
-                'choices'    => [],
+                'choices'    => $options["choices"],
                 'multiple'   => $options["multiple"]
             ];
 
@@ -186,7 +186,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             
             $form = $event->getForm();
             $data = $event->getData();
-            
+
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"]; 
             $options["class"]          = $this->formFactory->guessType($event, $options);
@@ -287,12 +287,16 @@ class SelectType extends AbstractType implements DataMapperInterface
 
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
-            $options["multiple"] = null;
-            $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
+            $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
-                $choiceData = $classRepository->findById($choiceData)->getResult();
+
+                $orderBy = array_flip($choiceData);
+                $default = count($orderBy);
+                $choiceData = $classRepository->findById($choiceData, [])->getResult();
+                usort($choiceData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+                
             } else {
                 $choiceData = $classRepository->findOneById($choiceData);
             }

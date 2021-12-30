@@ -47,7 +47,6 @@ class SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
-            ->setColumns(6)
             ->setTextAlign(TextAlign::CENTER)
             ->addCssClass('field-select');
     }
@@ -83,6 +82,12 @@ class SelectField implements FieldInterface
             throw new \InvalidArgumentException(sprintf('The argument of the "%s" method must be an array or a closure ("%s" given).', __METHOD__, \gettype($choiceGenerator)));
 
         $this->setCustomOption(self::OPTION_CHOICES, $choiceGenerator);
+        return $this;
+    }
+
+    public function setAutoFilter()
+    {
+        $this->setCustomOption(self::OPTION_FILTER, null);
         return $this;
     }
 

@@ -20,4 +20,15 @@ final class AttributeField extends SelectField implements FieldInterface
             ->setFormType(AttributeType::class)
             ->addCssClass('field-text');
     }
+
+    public const OPTION_FILTER_CODE  = 'filter';
+
+    public function setFilterCodePrefix(?string $filter = null): self
+    {
+        if(!$filter) $filter = [];
+        if(!is_array($filter)) $filter = [$filter];
+
+        $this->setCustomOption(self::OPTION_FILTER_CODE, $filter);
+        return $this;
+    }
 }

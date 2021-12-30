@@ -172,7 +172,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         $options = $options ?? $form->getConfig()->getOptions();
 
         if($options["multiple"] === null && ($options["class"] !== null || $options["data_class"] !== null)) {
-            
+
             $target = $options["class"] ?? $options["data_class"] ?? null;
 
             if($this->classMetadataManipulator->isEntity($target)) {
@@ -237,6 +237,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     {
         $options = $options ?? $form->getConfig()->getOptions();
 
+        if ($options["choice_filter"] === false) return [];
         if ($options["choice_filter"] === null) {
 
             $options["choice_filter"] = [];

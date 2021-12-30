@@ -32,7 +32,7 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
     public static function getType(): string { return HiddenType::class; }
-    public static function getOptions(): array { return []; }
+    public function getOptions(): array { return []; }
     public function getFormattedValue(string $value): mixed { return $value; }
 
     public function __autocomplete():?string { return $this->translate()->getLabel(); }
