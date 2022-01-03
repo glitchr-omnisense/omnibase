@@ -41,7 +41,6 @@ class Slugify extends AbstractAnnotation
     protected bool $lowercase;
 
     protected string $separator;
-    protected string $reference;
 
     public function __construct( array $data ) {
 

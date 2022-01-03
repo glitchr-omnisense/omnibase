@@ -73,17 +73,17 @@
 
 {%- endblock quill_widget -%}
 
-{%- block select2_row -%}
-    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{form_row(form)}}    
-{%- endblock -%}
-
 {%- block attribute_widget -%}
 <div class="form-control form-attribute">
     {{ form_widget(form.choice) }}
     {% if form.intl is defined %} {{ form_widget(form.intl) }} {% endif %}
 </div>
 {% endblock attribute_widget %}
+
+{%- block select2_row -%}
+    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {{form_row(form)}}    
+{%- endblock -%}
 
 {%- block select2_widget -%}
 

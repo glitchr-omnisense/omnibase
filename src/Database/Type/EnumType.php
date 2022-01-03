@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database\Types;
+namespace Base\Database\Type;
 
 use Base\Database\NamingStrategy;
 use Base\Model\IconInterface;
@@ -24,12 +24,25 @@ abstract class EnumType extends Type implements IconInterface
     }
 
     public function getName() : string { return self::getStaticName(); }
-    public static function getPermittedValues() { 
+    public static function getPermittedValuesByClass()
+    {
+        $refl = new \ReflectionClass(get_called_class());
+        if($refl->getName() == self::class) return [];
+
+        $permittedValues = [$refl->getName() => $refl->getName()::getPermittedValues(false)];
+        while(($refl = $refl->getParentClass()) && $refl->getName() != self::class && $refl->getName() != Type::class)
+            $permittedValues[$refl->getName()] = $refl->getName()::getPermittedValues(false);
+
+        return $permittedValues;
+    }
+    
+    public static function getPermittedValues(bool $inheritance = true) { 
 
         $refl = new \ReflectionClass(get_called_class());
-        $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
-        
-        if(!$permittedValues)
+        if($inheritance) $permittedValues = array_values($refl->getConstants());
+        else $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
+
+        if($refl->getName() != self::class && $refl->getName() != Type::class && !$permittedValues)
             throw new \Exception("Enum type \"".get_called_class()."\" is empty");
 
         if( ($missingKeys = array_keys_delete(get_called_class()::getIcons(), $permittedValues)) )

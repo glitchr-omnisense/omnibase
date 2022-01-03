@@ -49,8 +49,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
-        $this->baseService = $baseService;
-        $this->formFactory = $formFactory;
+        $this->baseService   = $baseService;
+        $this->formFactory   = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -123,7 +123,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-            
+
             // if($options["multiple"]) {
 
             // } else {

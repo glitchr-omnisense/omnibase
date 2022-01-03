@@ -17,13 +17,14 @@ final class AttributeField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
+            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
             ->setFormType(AttributeType::class)
             ->addCssClass('field-text');
     }
 
     public const OPTION_FILTER_CODE  = 'filter';
 
-    public function setFilterCodePrefix(?string $filter = null): self
+    public function setFilterCode(?string $filter = null): self
     {
         if(!$filter) $filter = [];
         if(!is_array($filter)) $filter = [$filter];

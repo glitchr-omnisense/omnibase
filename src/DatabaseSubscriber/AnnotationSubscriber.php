@@ -55,7 +55,15 @@ class AnnotationSubscriber implements EventSubscriber {
             $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_CLASS, $className);
         }
 
-        $annotationMethods = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
+        $annotationMethods = array_key_transforms(function($m, $a) use ($classMetadata): ?array {
+
+            $reflClass = $classMetadata->getReflectionClass();
+            if($reflClass->getMethod($m)->getDeclaringClass()->getName() != $reflClass->getName()) 
+                return null;
+
+            return [$m, $a];
+
+        }, $annotations[AnnotationReader::TARGET_METHOD][$className] ?? []);
         foreach ($annotationMethods as $method => $array) {
 
             foreach ($array as $entry) {
@@ -70,7 +78,15 @@ class AnnotationSubscriber implements EventSubscriber {
             }
         }
 
-        $annotationProperties = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        $annotationProperties = array_key_transforms(function($p, $a) use ($classMetadata): ?array {
+
+            $reflClass = $classMetadata->getReflectionClass();
+            if($reflClass->getProperty($p)->getDeclaringClass()->getName() != $reflClass->getName()) 
+                return null;
+
+            return [$p, $a];
+
+        }, $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? []);
         foreach ($annotationProperties as $property => $array) {
 
             foreach ($array as $entry) {

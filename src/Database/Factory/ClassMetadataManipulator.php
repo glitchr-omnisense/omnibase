@@ -2,8 +2,8 @@
 
 namespace Base\Database\Factory;
 
-use Base\Database\Types\EnumType;
-use Base\Database\Types\SetType;
+use Base\Database\Type\EnumType;
+use Base\Database\Type\SetType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\AssociationType;
 use Base\Field\Type\RelationType;

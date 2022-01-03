@@ -2,7 +2,7 @@
 
 namespace Base\Enum;
 
-use Base\Database\Types\EnumType;
+use Base\Database\Type\EnumType;
 
 class SpamApi extends EnumType
 {

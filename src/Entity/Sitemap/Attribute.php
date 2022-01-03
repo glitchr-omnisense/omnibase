@@ -3,6 +3,7 @@
 namespace Base\Entity\Sitemap;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Annotations\Annotation\OrderColumn;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
@@ -43,6 +44,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\ManyToOne(targetEntity=AbstractAttribute::class)
      * @ORM\JoinColumn(nullable=false)
+     * @OrderColumn(reference="attributePattern[index]")
      */
     protected $attributePattern;
     public function getAttributePattern(): ?AbstractAttribute { return $this->attributePattern; }
