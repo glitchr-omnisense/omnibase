@@ -11,7 +11,7 @@ final class PatternField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_PATTERN_FIELD_NAME = 'patternFieldName';
+    public const OPTION_PATTERN_FIELD_NAME = 'pattern';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -20,14 +20,13 @@ final class PatternField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
             ->setFormType(PatternType::class)
-            ->setCustomOption(self::OPTION_PATTERN_FIELD_NAME, null)
             ->addCssClass('field-text')
         ;
     }
 
     public function setPatternFieldName(string $fieldName): self
     {
-        $this->setCustomOption(self::OPTION_PATTERN_FIELD_NAME, $fieldName);
+        $this->setFormType(self::OPTION_PATTERN_FIELD_NAME, $fieldName);
         return $this;
     }
 }

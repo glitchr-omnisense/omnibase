@@ -29,22 +29,6 @@ final class PatternType extends AbstractType
     }
 
     public function getNumberOfArguments($options):int { return preg_match_all('/\{[0-9]*\}/i', $options["pattern"]); }
-    public function generateUrl(...$replace): string
-    {
-        $search = [];
-        foreach($replace as $index => $_)
-            $search[] = "{".$index."}";
-
-        $subject = $this->getPattern();
-        $url = str_replace($search, $replace, $subject);
-        return preg_replace('\{[0-9]*\}', '', $url); // Remove missing entries
-        
-        $icon = $this->getIcon();
-        $class = $this->getAttribute("class");
-        
-        return "<a class='".$class."' href='".$url."'><i class='".$icon."'></a>";
-    }
-
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars["pattern"] = $options["pattern"];
