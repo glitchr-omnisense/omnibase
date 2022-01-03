@@ -44,7 +44,14 @@ class OrderColumn extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        dump("PRE PERSIST !");
+        // dump("PRE PERSIST !");
+        // exit(1);
+    }
+
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    {
+        // dump("PRE UPDATE !");
+        // exit(1);
     }
 
     /**
@@ -52,18 +59,18 @@ class OrderColumn extends AbstractAnnotation
      */
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
     {
-        dump("LOAD CLASSMETADATA SORTING..". $target . " = ". $targetValue);
+        // dump("LOAD CLASSMETADATA SORTING..". $target . " = ". $targetValue);
     }
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        dump("POST LOAD SORTING.. ".$property);
+        // dump("POST LOAD SORTING.. ".$property);
         // dump($entity);
     }
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        dump("ORDER COLUMN.. ".$property);
+        // dump("FLUSH ORDER COLUMN.. ".$property);
         // dump($this->getOldEntity($entity));
         // dump($entity);
         

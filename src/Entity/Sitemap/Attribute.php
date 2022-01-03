@@ -44,7 +44,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\ManyToOne(targetEntity=AbstractAttribute::class)
      * @ORM\JoinColumn(nullable=false)
-     * @OrderColumn(reference="attributePattern[index]")
+     * @OrderColumn(reference="attributePattern[index2]")
      */
     protected $attributePattern;
     public function getAttributePattern(): ?AbstractAttribute { return $this->attributePattern; }

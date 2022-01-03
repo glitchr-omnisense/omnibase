@@ -208,9 +208,15 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         if (!$options["choices"]) {
 
             $class = $options["class"];
-            if($this->classMetadataManipulator->isEnumType($class)) $permittedValues = $class::getPermittedValuesByClass();
-            if($this->classMetadataManipulator->isSetType ($class)) $permittedValues = $class::getPermittedValuesByClass();
-            
+
+            $permittedValues = null;
+            if($this->classMetadataManipulator->isEnumType($class)) 
+                $permittedValues = $class::getPermittedValuesByClass();
+            if($this->classMetadataManipulator->isSetType ($class)) 
+                $permittedValues = $class::getPermittedValuesByClass();
+
+            if($permittedValues === null) return null;
+
             return count($permittedValues) == 1 ? $permittedValues[0] : $permittedValues;
         }
 

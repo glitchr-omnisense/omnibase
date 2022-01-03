@@ -62,6 +62,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'class'        => null,
             'recursive'    => false,
             "multiple"     => null,
+            'filter_code'  => null, 
 
             'allow_add'    => true,
             'allow_delete' => true,

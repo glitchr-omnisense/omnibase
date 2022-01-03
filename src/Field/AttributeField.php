@@ -22,14 +22,13 @@ final class AttributeField extends SelectField implements FieldInterface
             ->addCssClass('field-text');
     }
 
-    public const OPTION_FILTER_CODE  = 'filter';
-
+    public const OPTION_FILTER_CODE  = 'filter_code';
     public function setFilterCode(?string $filter = null): self
     {
         if(!$filter) $filter = [];
         if(!is_array($filter)) $filter = [$filter];
 
-        $this->setCustomOption(self::OPTION_FILTER_CODE, $filter);
+        $this->setFormTypeOption(self::OPTION_FILTER_CODE, $filter);
         return $this;
     }
 }
