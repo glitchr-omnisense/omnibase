@@ -82,7 +82,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             //'query_builder'   => null,
 
             'choices'          => null,
-            'choice_filter'    => null,
+            'choice_filter'    => false,
             'choice_exclusive' => true,
             // 'choice_value'  => function($key)              { return $key;   },   // Return key code
             // 'choice_label'  => function($key, $label, $id) { return $label; },   // Return translated label
@@ -113,6 +113,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'language'           => null,
             'required'           => true,
             'multiple'           => null,
+            'vertical'           => false,
             'maximum'            => 0,
             'tags'               => false,
             'minimumInputLength' => 0,
@@ -121,7 +122,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'selectOnClose'      => false,
             'minimumResultsForSearch' => 0,
             "dropdownCssClass"   => null,
-            "selectionCssClass"  => null,
+            "containerCssClass"  => null,
 
             // Autocomplete 
             'autocomplete'          => null,
@@ -167,6 +168,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $data);
+
             if(!$options["choices"]) {
 
                 $options["choices"] = $this->formFactory->guessChoices($form, $options);
@@ -202,7 +204,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             if ($options["class"]) {
 
                 $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-                $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use (&$options) : array { 
+                $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use (&$options) : ?array { 
+
+                    if($value === null) return null;
 
                     // Recursive categories
                     if(is_array($value)) {
@@ -225,6 +229,8 @@ class SelectType extends AbstractType implements DataMapperInterface
                         $value, $options["class"], $this->translator, 
                         $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE
                     );
+
+                    if($entry === null) return null;
 
                     if(!$options["class"]) $entry["text"] = $key;
                     return [$entry["id"], $entry["text"]];
@@ -395,8 +401,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                      $selectOpts["selectOnClose"] = $options["selectOnClose"];
             if(!array_key_exists("dropdownCssClass", $selectOpts) && $options["dropdownCssClass"] !== null)
                      $selectOpts["dropdownCssClass"]  = $options["dropdownCssClass"];
-            if(!array_key_exists("selectionCssClass", $selectOpts) && $options["selectionCssClass"] !== null)
-                     $selectOpts["selectionCssClass"] = $options["selectionCssClass"];
+            
+            $selectOpts["containerCssClass"] = "";
+            if($options["vertical"] != false)
+                $selectOpts["containerCssClass"] .= " select2-selection--vertical";
 
             if(!array_key_exists("placeholder", $selectOpts))
                      $selectOpts["placeholder"] = $options["placeholder"] ?? "";

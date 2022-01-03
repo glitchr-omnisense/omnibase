@@ -32,9 +32,10 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public static function __staticIconize() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
-    public function __construct()
+    public function __construct(?string $path = null)
     {
         $this->widgets = new ArrayCollection();
+        $this->path    = $path;
     }
 
     /**
@@ -51,13 +52,15 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     }
 
     public function getLabel(): ?string { return $this->translate()->getTitle(); }
-    public function setLabel(string $label) { 
+    public function setLabel(string $label)
+    {
         $this->translate()->setTitle($label);
         return $this;
     }
 
     public function getHelp(): ?string { return $this->translate()->getExcerpt(); }
-    public function setHelp(string $help) { 
+    public function setHelp(string $help) 
+    {
         $this->translate()->setExcerpt($help);
         return $this;
     }
@@ -73,7 +76,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public function getWidgets(): Collection { return $this->widgets; }
     public function addWidget(Widget $widget): self
     {
-        if (!$this->widgets->contains($widget)) {
+        if(!$this->widgets->contains($widget)) {
             $this->widgets[] = $widget;
         }
 

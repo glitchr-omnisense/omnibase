@@ -48,16 +48,20 @@ class AttachmentCrudController extends WidgetCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, [
+            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
 
-        yield FileField::new('file')->setPreferredDownloadName("slug");
-        foreach ( ($callbacks["file"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
-        yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
+                $defaultCallback = function() { return []; };
 
-        yield TranslationField::new()->showOnIndex('title');
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield FileField::new('file')->setPreferredDownloadName("slug");
+                foreach ( ($callbacks["file"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+                    
+                yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
 
+                yield TranslationField::new()->showOnIndex('title');
+                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        }]);
     }
 }

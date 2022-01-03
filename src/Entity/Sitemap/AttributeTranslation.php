@@ -15,7 +15,7 @@ class AttributeTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="text")
+     * @ORM\Column(type="array")
      */
     protected $value;
 

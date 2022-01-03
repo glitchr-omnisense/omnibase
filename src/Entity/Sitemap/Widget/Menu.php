@@ -13,7 +13,7 @@ use Base\Repository\Sitemap\Widget\MenuRepository;
  * @DiscriminatorEntry( value = "menu" )
  */
 
-class Menu extends Widget implements IconizeInterface
+class Menu extends Slot implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-compass"]; } 

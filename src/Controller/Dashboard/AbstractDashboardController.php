@@ -14,7 +14,6 @@ use App\Entity\Thread;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use App\Entity\Thread\Tag;
-use App\Entity\Sitemap\Widget\Slot;
 
 use App\Entity\Sitemap\Setting;
 use App\Entity\Sitemap\Widget;
@@ -43,6 +42,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Sitemap\Widget\Link;
+use Base\Entity\Sitemap\Widget\Slot;
 use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -91,7 +91,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->baseService           = $baseService;
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
         $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
-        $this->slotRepository  = $baseService->getEntityManager()->getRepository(Slot::class);
+        $this->slotRepository        = $baseService->getEntityManager()->getRepository(Slot::class);
 
         $this->gaService = $gaService;
     }
@@ -204,6 +204,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach(array_keys($widgetSlots) as $path) {
 
                 $widgetSlot = $this->slotRepository->findOneByPath($path);
+                
                 if(!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);

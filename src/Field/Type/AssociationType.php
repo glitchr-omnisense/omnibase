@@ -185,14 +185,14 @@ class AssociationType extends AbstractType implements DataMapperInterface
             foreach($childForms as $fieldName => $childForm) {
 
                 $value = $classMetadata->getFieldValue($entity, $fieldName);
-
+                
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
                 switch($childFormType) {
                     case IntegerType::class:
                     case NumberType::class:
                     case PercentType::class:
                         $value = intval($value);
-
+                        break;
                     // case DateTimeType::class:
                     //     $value = new \DateTime($value);
                 }

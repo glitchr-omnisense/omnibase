@@ -481,8 +481,7 @@
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\SlugType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\PatternType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-       
+        
         <service id="Base\Controller\DropzoneController">
             <tag name="controller.service_arguments" />
             <call method="setContainer">
@@ -519,6 +518,10 @@
             <tag name="form.type" />
             <argument type="service" id="base.service" />
         </service>
+        <service id="Base\Field\Type\ArrayType" parent="Base\Field\Type\CollectionType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+        </service>
 
         <service id="Base\Field\Configurator\IdConfigurator">
             <tag name="ea.field_configurator" />
@@ -537,9 +540,10 @@
             <argument type="service" id="property_accessor" />
         </service>
 
-        <service id="Base\Field\Configurator\EmailConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\CollectionConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\EmailConfigurator"         ><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DateTimePickerConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\CollectionConfigurator"    ><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\ArrayConfigurator" parent="Base\Field\Configurator\CollectionConfigurator"><tag name="ea.field_configurator" /></service>
 
         <service id="Base\Field\Configurator\SlugConfigurator">
             <tag name="ea.field_configurator" />

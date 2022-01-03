@@ -72,9 +72,9 @@ class SelectController extends AbstractController
                 
                 if(!is_associative($fields))
                     $fields = array_fill_keys($fields, $term);
-    
-                $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
 
+                $fields = array_filter($fields);
+                $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
                 $book = $this->paginator->paginate($entries, $page);
                 $pagination = $book->getTotalPages() > $book->getPage();
 

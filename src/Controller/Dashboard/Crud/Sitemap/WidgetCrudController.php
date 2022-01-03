@@ -15,13 +15,12 @@ class WidgetCrudController extends AbstractCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, array_merge([
+            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
 
-        yield SlugField::new('slug')->setTargetFieldName("translations.title");
-        foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-    
-        yield TranslationField::new()->showOnIndex("title");
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield TranslationField::new()->showOnIndex("title");
+                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        }],$callbacks));
     }
 }

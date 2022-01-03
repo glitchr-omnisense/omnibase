@@ -80,16 +80,19 @@ class Slugify extends AbstractAnnotation
         foreach ($uow->getScheduledEntityUpdates() as $entity2)
             $candidateEntities[] = $entity2;
 
-        $classMetadata = $this->getClassMetadata(get_class($entity));
-        $propertyClassOrigin = $classMetadata->getFieldMapping($property)["declared"] ?? null;
-
         $invalidSlugs = [];
         foreach ($candidateEntities as $entity2) {
 
             if($entity === $entity2) continue;
-            if(!is_subclass_of($entity2, $propertyClassOrigin)) continue;
+            if(!is_a($entity, get_class($entity2))) continue;
 
             $invalidSlugs[] = $this->getFieldValue($entity2, $property);
+        }
+
+        $firstEntity = begin($candidateEntities);
+        if($firstEntity === $entity) {
+            $firstSlug = $this->getFieldValue($entity, $property);
+            $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
         return $invalidSlugs;
@@ -148,16 +151,8 @@ class Slugify extends AbstractAnnotation
             $candidateEntities[] = $entity2;
 
         $classMetadata = $this->getClassMetadata(get_class($entity));
-        $propertyClassOrigin = $classMetadata->getFieldMapping($property)["declared"] ?? null;
-
-        $invalidSlugs = [];
-        foreach ($candidateEntities as $entity2) {
-
-            if($entity === $entity2) continue;
-            if(!is_subclass_of($entity2, $propertyClassOrigin)) continue;
-
-            $invalidSlugs[] = $this->getFieldValue($entity2, $property);
-        }
+        $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
+        dump($invalidSlugs);
 
         $defaultInput = $this->getFieldValue($entity, $property);
         $slug = $this->getSlug($entity, $property, $defaultInput, $invalidSlugs);
