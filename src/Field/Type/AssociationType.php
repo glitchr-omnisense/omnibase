@@ -11,6 +11,10 @@ use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\Form\Extension\Core\Type\PercentType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -142,7 +146,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                         continue;
 
                     if($options["recursive"] && array_key_exists($form->getName(), $field))
-                        $field = $field[$form->getName()];
+                    $field = $field[$form->getName()];
 
                     $fieldType = $field['form_type'] ?? (!empty($field['data']) ? HiddenType::class : null);
                     unset($field['form_type']);
@@ -153,7 +157,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];
                     unset($field['allow_entity']);
 
-                    if ($fieldEntity || $fieldType != AssociationType::class)
+                    if ($fieldEntity !== null || ($fieldType !== null && $fieldType != AssociationType::class))
                         $form->add($fieldName, $fieldType, $field);
                 }
             }
@@ -178,8 +182,23 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
 
             $childForms = iterator_to_array($forms);
-            foreach($childForms as $fieldName => $childForm)
-                $childForm->setData($classMetadata->getFieldValue($entity, $fieldName));
+            foreach($childForms as $fieldName => $childForm) {
+
+                $value = $classMetadata->getFieldValue($entity, $fieldName);
+
+                $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
+                switch($childFormType) {
+                    case IntegerType::class:
+                    case NumberType::class:
+                    case PercentType::class:
+                        $value = intval($value);
+
+                    // case DateTimeType::class:
+                    //     $value = new \DateTime($value);
+                }
+
+                $childForm->setData($value);
+            }
         }
     }
 

@@ -16,11 +16,10 @@ use Base\Repository\Sitemap\Attribute\Abstract\NumberAttributeRepository;
 
 class NumberAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-calculator"]; }
 
     public static function getType(): string { return NumberType::class; }
-    public static function getOptions(): array { return []; }
+    public function getOptions(): array { return []; }
 
     public function __construct(?string $code = null, ?string $icon = null, ?int $minimum = null, ?int $maximum = null)
     {

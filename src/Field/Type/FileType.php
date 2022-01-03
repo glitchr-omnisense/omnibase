@@ -80,10 +80,12 @@ class FileType extends AbstractType implements DataMapperInterface
             'sortable'     => true,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.js"),
 
-            'max_filesize' => null,
-            'max_files'    => null,
-            'mime_types'   => null,
-            "data_mapping" => null,
+            'thumbnailWidth'     => null,
+            'thumbnailHeight'    => 120,
+            'max_filesize'       => null,
+            'max_files'          => null,
+            'mime_types'         => null,
+            "data_mapping"       => null,
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
@@ -202,6 +204,9 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['max_filesize'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_filesize"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
             if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = implode(",", $acceptedFiles);
+
+            $options["dropzone"]["thumbnailWidth"]  = $options['thumbnailWidth'] ?? null;
+            $options["dropzone"]["thumbnailHeight"] = $options['thumbnailHeight'] ?? null;
 
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans("@fields.fileupload.dropzone.title").'</h4><p>'.$this->translator->trans("@fields.fileupload.dropzone.description").'</p>';

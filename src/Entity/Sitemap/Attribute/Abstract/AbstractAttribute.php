@@ -28,11 +28,12 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return $this->icon ? [$this->icon] : null; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
+    public function __toString() { return $this->getLabel(); }
     public static function getType(): string { return HiddenType::class; }
-    public static function getOptions(): array { return []; }
+    public function getOptions(): array { return []; }
     public function getFormattedValue(string $value): mixed { return $value; }
 
     public function __autocomplete():?string { return $this->translate()->getLabel(); }
@@ -40,7 +41,7 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
     public function __construct(?string $code = null, ?string $icon = null)
     {
         $this->setCode($code);
-        $this->setIcon($icon ?? $this->__iconize()[0] ?? get_called_class()::__staticIconize()[0]);
+        $this->setIcon($icon ?? get_called_class()::__staticIconize()[0]);
     }
 
     /**

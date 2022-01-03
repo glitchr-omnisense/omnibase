@@ -591,6 +591,7 @@
         <service id="Base\Field\Configurator\CountryConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FontAwesomeConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DiscriminatorConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\AttributeConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
 
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Dashboard\AbstractDashboardController">
@@ -609,6 +610,7 @@
 
         <service id="Base\Controller\Dashboard\AbstractCrudController">
             <tag name="ea.crud_controller" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.settings" />

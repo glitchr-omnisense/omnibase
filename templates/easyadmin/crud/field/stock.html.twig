@@ -2,9 +2,9 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {# this template is used to display Doctrine entity primary keys #}
-<div class="badge badge-secondary">
+<span class="badge badge-secondary">
     <span>
-        <span class="label">{{ "fas fa-truck-loading"|fontAwesome({class:"fa-fw"}) | raw}}</span>
-        {{ field.formattedValue|default("@fields.stock.unlimited"|trans) }}
+        <span class="label">{{ field.formattedValue|default("@fields.stock.unlimited"|trans) }}</span>
+        {{ "fas fa-truck-loading"|fontAwesome({class:"fa-fw"}) | raw}}
     </span>
-</div>
+</span>

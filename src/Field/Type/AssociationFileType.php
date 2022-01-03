@@ -53,8 +53,6 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        parent::configureOptions($resolver);
-        
         $resolver->setDefaults([
             'class' => null,
             'form_type' => FileType::class,
@@ -68,7 +66,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             'max_filesize' => null,
             'max_files'    => null,
-            'mime_types'   => null
+            'mime_types'   => null,
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -90,7 +88,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
         $resolver->setNormalizer('entity_file', function (Options $options, $value) {
 
-            if($value === null) throw new \Exception("Option \"entity_file\" must be pointing to the class upload field");
+            if($value === null) throw new \Exception("Option \"entity_file\" must be pointing to the file field");
             return $value;
         });
     }
@@ -101,7 +99,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $view->vars["allow_delete"] = $options["allow_delete"];
 
         $data = $form->getData();
-        $view->vars["entityId"]     = json_encode(array_key_transforms(fn($k,$e):array => [basename($e->getImage()), $e->getId()], ($data instanceof Collection) ? $data->toArray() : []));
+        $view->vars["entityId"] = json_encode(array_key_transforms(function($k,$e) use ($options):array {
+
+            $path = PropertyAccess::createPropertyAccessor()->getValue($e, $options["entity_file"]);
+            return [basename($path), $e->getId()];
+
+        }, ($data instanceof Collection) ? $data->toArray() : []));
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -114,6 +117,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             
             $options["class"]    = $options["class"] ?? $this->formFactory->guessType($event, $options);
             $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($event, $options);
+            $options["sortable"] = $options["sortable"]   ?? $this->formFactory->guessSortable($event, $options);
 
             $fieldName = $options["entity_file"];
             $form->add($fieldName, $options["form_type"], [
@@ -124,7 +128,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                 'max_filesize' => $options["max_filesize"],
                 'max_files'    => $options["max_files"],
-                'mime_types'   => $options["mime_types"]
+                'mime_types'   => $options["mime_types"],
+                'sortable'     => $options["sortable"]
             ]);
 
             $files = array_map(fn($e) => Uploader::getPublic($e, $fieldName), $data->toArray());
@@ -175,10 +180,6 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         }
 
         if($options["multiple"]) {
-
-            $mappedBy =  $viewData->getMapping()["mappedBy"];
-            $fieldName = $viewData->getMapping()["fieldName"];
-            $isOwningSide = $viewData->getMapping()["isOwningSide"];
 
             if($viewData instanceof PersistentCollection) {
 

@@ -51,14 +51,18 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         if ($field->getFormTypeOption("class") == null)
             $field->setFormTypeOption("class", $targetEntity);
 
-        $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_DELETE));
         $field->setFormattedValue($field->getValue());
-        $field->setFormTypeOptionIfNotSet("href", $this->adminUrlGenerator
-                ->unsetAll()
-                ->setController(AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class")))
-                ->setAction(Action::EDIT)
-                ->setEntityId("{0}")
-                ->generateUrl());
+
+        $crudController = AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"));
+        if($crudController) {
+
+            $field->setFormTypeOption("href", $this->adminUrlGenerator
+                    ->unsetAll()
+                    ->setController($crudController)
+                    ->setAction(Action::EDIT)
+                    ->setEntityId("{0}")
+                    ->generateUrl());
+        }
 
         if($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
            $this->configureToOneAssociation($field);
@@ -122,10 +126,10 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
 
     private function configureToOneAssociation(FieldDto $field): void
     {
-        $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toOne');
+        $field->setCustomOption(AssociationFileField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toOne');
 
         $targetEntityFqcn = $field->getDoctrineMetadata()->get('targetEntity');
-        $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER);
+        $targetCrudControllerFqcn = $field->getCustomOption(AssociationFileField::OPTION_CRUD_CONTROLLER);
 
         $targetEntityDto = null === $field->getValue()
             ? $this->entityFactory->create($targetEntityFqcn)
@@ -133,16 +137,14 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
         $field->setFormTypeOptionIfNotSet('class', $targetEntityDto->getFqcn());
         $field->setFormTypeOptionIfNotSet('empty_data', null);
 
-        $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
+        $field->setCustomOption(AssociationFileField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
         $field->setFormattedValue($this->formatAsString($field->getValue(), $targetEntityDto));
     }
 
     private function configureToManyAssociation(FieldDto $field): void
     {
-        $field->setCustomOption(AssociationField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
+        $field->setCustomOption(AssociationFileField::OPTION_DOCTRINE_ASSOCIATION_TYPE, 'toMany');
 
-        $displayedOn = $field->getDisplayedOn();
-        
         // associations different from *-to-one cannot be sorted
         $field->setSortable(false);
         
@@ -172,9 +174,9 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
                     : $this->entityFactory->createForEntityInstance($first);
 
                 $targetEntityDto = $this->entityFactory->createForEntityInstance($first);
-                $targetCrudControllerFqcn = $field->getCustomOption(AssociationField::OPTION_CRUD_CONTROLLER) ?? AbstractCrudController::getCrudControllerFqcn($targetEntityDto->getFqcn());
+                $targetCrudControllerFqcn = $field->getCustomOption(AssociationFileField::OPTION_CRUD_CONTROLLER) ?? AbstractCrudController::getCrudControllerFqcn($targetEntityDto->getFqcn());
 
-                $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
+                $field->setCustomOption(AssociationFileField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));
             }
 
             $count = $this->countNumElements($others);

@@ -2,8 +2,8 @@
 
 namespace Base\Database\Factory;
 
-use Base\Database\Types\EnumType;
-use Base\Database\Types\SetType;
+use Base\Database\Type\EnumType;
+use Base\Database\Type\SetType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\AssociationType;
 use Base\Field\Type\RelationType;
@@ -278,6 +278,8 @@ class ClassMetadataManipulator
     public function hasField($class, string $fieldName): ?string
     {
         $metadata = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->hasField($fieldName);
     }
@@ -285,6 +287,8 @@ class ClassMetadataManipulator
     public function getTypeOfField($class, string $fieldName): ?string 
     {
         $metadata = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getTypeOfField($fieldName);
     }
@@ -292,6 +296,8 @@ class ClassMetadataManipulator
     public function getAssociationTargetClass($class, string $fieldName): string 
     { 
         $metadata = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationTargetClass($fieldName);
     }
@@ -299,6 +305,8 @@ class ClassMetadataManipulator
     public function hasAssociation($class, string $fieldName)
     {
         $metadata = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->hasAssociation($fieldName);
     }
@@ -306,6 +314,8 @@ class ClassMetadataManipulator
     public function getFieldMapping($class, string $fieldName): ?array
     {
         $metadata  = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getFieldMapping($fieldName) ?? null;
     }
@@ -313,6 +323,8 @@ class ClassMetadataManipulator
     public function getAssociationMapping($class, string $fieldName): ?array
     {
         $metadata  = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName) ?? null;
     }
@@ -330,6 +342,8 @@ class ClassMetadataManipulator
     public function getAssociationMappings($class): array
     {
         $metadata = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         return $metadata->getAssociationMappings();
     }
     
@@ -337,6 +351,8 @@ class ClassMetadataManipulator
     {
         if(!$this->hasAssociation($class, $fieldName)) return false;
         $metadata  = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return !$metadata->isAssociationInverseSide($fieldName);
     }
@@ -345,6 +361,8 @@ class ClassMetadataManipulator
     {
         if(!$this->hasAssociation($class, $fieldName)) return false;
         $metadata  = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->isAssociationInverseSide($fieldName);
     }
@@ -363,6 +381,8 @@ class ClassMetadataManipulator
         if(!$this->hasAssociation($class, $fieldName)) return false;
 
         $metadata  = $this->getClassMetadata($class);
+        if(!$metadata) return false;
+
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }

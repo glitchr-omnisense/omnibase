@@ -73,7 +73,7 @@ class CollectionType extends AbstractType
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
             $builder->setAttribute('prototype', $prototype->getForm());
         }
-
+        
         $builder->addEventSubscriber(new ResizeFormListener(
             $options['entry_type'],
             $options['entry_options'],

@@ -15,13 +15,11 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use App\Entity\Thread\Tag;
 use App\Entity\Sitemap\Widget\Slot;
-use App\Entity\Sitemap\Attribute\HyperpatternAttribute as Hyperpattern;
 
 use App\Entity\Sitemap\Setting;
 use App\Entity\Sitemap\Widget;
 use App\Entity\User\Notification;
 use App\Entity\Sitemap\Widget\Attachment;
-use App\Entity\Sitemap\Widget\Hyperlink;
 use App\Entity\Sitemap\Widget\Menu;
 use App\Entity\Sitemap\Widget\Page;
 
@@ -43,9 +41,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
-use Base\Entity\Sitemap\Attribute;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Sitemap\Widget\Link;
+use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -254,15 +252,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->disableUrlSignatures();
     }
 
-    public function addRoles(array &$menu, array $roles)
+    public function addRoles(array &$menu, string $class)
     {
+        $roles = $class::getPermittedValues(false);
         foreach ($roles as $i => $role) {
 
             if ($role == UserRole::USER) continue;
 
-            $label = mb_ucfirst($this->translator->trans("user_role.".mb_strtolower($role).".plural", [], self::TRANSLATION_ENUM));
+            $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
             $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
-
+            
             $url = $this->adminUrlGenerator
                 ->unsetAll()
                 ->setController(UserCrudController::class)
@@ -290,12 +289,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         $menu[] = MenuItem::section('BUSINESS CARD');
         if(UserRole::class != \Base\Enum\UserRole::class)
-            $menu   = $this->addRoles($menu, array_diff(UserRole::getPermittedValues(), \Base\Enum\UserRole::getPermittedValues()));
+            $menu   = $this->addRoles($menu, UserRole::class);
 
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 
             $menu[] = MenuItem::section('MEMBERSHIP');
-            $menu   = $this->addRoles($menu, \Base\Enum\UserRole::getPermittedValues());
+            $menu   = $this->addRoles($menu, \Base\Enum\UserRole::class);
             $menu[] = MenuItem::linkToCrud('All users', 'fas fa-fw fa-tags', User::class);
             $menu[] = MenuItem::linkToCrud('Add user', 'fas fa-fw fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
                 ->setAction('new');
@@ -333,10 +332,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureActions(): Actions
     {
-        $approveUser = Action::new('approve', 'Approve', 'fa fa-user-check')
-            ->linkToCrudAction('approveUsers')
-            ->addCssClass('btn btn-primary');
-
         return parent::configureActions()
             ->add(Crud::PAGE_INDEX, Action::DETAIL)
 

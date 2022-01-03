@@ -27,7 +27,6 @@ final class SlugField implements FieldInterface
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
             ->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, null)
             ->addCssClass('field-text')
-            ->hideOnIndex()
         ;
     }
 

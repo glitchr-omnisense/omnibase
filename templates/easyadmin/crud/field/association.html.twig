@@ -31,6 +31,9 @@
     {% for key, entity in images %}
 
         {% set image = attribute(entity,entityFile) %}
+        {% set image = image is iterable ? image|first : image %}
+        {% set image = image is not null ? image : "bundles/base/images.svg" %}
+
         {% if image is not null %}
 
             {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
@@ -39,7 +42,7 @@
             <a href="#" class="{{ class_index }} ea-lightbox-thumbnail" data-featherlight="#{{ html_id }}" data-ea-lightbox-content-selector="#{{ html_id }}" data-featherlight-close-on-click="anywhere">
                 <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">
                     <img src="{{ image }}">
-                    {% if ea.crud.currentAction != 'detail' %}<span>+{{counter-1}}</span>{% endif %}
+                    {% if ea.crud.currentAction != 'detail' and counter > 1 %}<span>+{{counter-1}}</span>{% endif %}
                 </div>
             </a>
             
@@ -66,6 +69,7 @@
 
     {% set stillMore = "" %}
     {% set others = [] %}
+    
     {% for other in field.formattedValue.others %}
         {% if displayLimit > others|length %}
             {% set others = others|merge([other]) %}

@@ -2,7 +2,7 @@
 
 namespace Base\Enum;
 
-use Base\Database\Types\SetType;
+use Base\Database\Type\SetType;
 
 class UserState extends SetType
 {

@@ -49,6 +49,7 @@ class TranslatableSubscriber implements EventSubscriber
         if($translation->isEmpty())
             $translatable->removeTranslation($translation);
     }
+
     /**
      * Adds mapping to the translatable and translations.
      */

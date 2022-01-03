@@ -320,8 +320,9 @@ function interpret_link($input)
                     throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
             }
 
-            if($ret == null) continue;
+            if($ret === null) continue;
             list($tKey, $tEntry) = [$ret[0] ?? $key, $ret[1] ?? $entry];
+            if($tKey === null) continue;
             $tArray[$tKey] = $tEntry;
 
             $counter++;

@@ -8,16 +8,13 @@ use Base\Field\IdField;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseSettings;
 use Doctrine\ORM\EntityManagerInterface;
-
+use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 
-use EasyCorp\Bundle\EasyAdminBundle\Event\AfterCrudActionEvent;
-use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
-use EasyCorp\Bundle\EasyAdminBundle\Event\BeforeEntityUpdatedEvent;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -37,7 +34,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      */
     protected $actionFactory;
 
-    public function __construct(ActionFactory $actionFactory, ClassMetadataManipulator $classMetadataManipulator, BaseSettings $baseSettings, EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
+    public function __construct(AdminUrlGenerator $adminUrlGenerator, ActionFactory $actionFactory, ClassMetadataManipulator $classMetadataManipulator, BaseSettings $baseSettings, EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
@@ -47,9 +44,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->extension = $extension;
         $this->translator = $translator;
         $this->baseSettings = $baseSettings;
+        $this->adminUrlGenerator = $adminUrlGenerator;
         
         $this->crud = null;
-        $this->entity = null;
     }
 
     public static function getEntityFqcn(): string
@@ -61,8 +58,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected static array $crudController = [];
-    public static function getCrudControllerFqcn(string $entityFqcn): ?string
+    public static function getCrudControllerFqcn($entity): ?string
     {
+        $entityFqcn = is_object($entity) ? get_class($entity) : (class_exists($entity) ? $entity : null);
         if(array_key_exists($entityFqcn, self::$crudController))
             return self::$crudController[$entityFqcn];
         
@@ -83,15 +81,15 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                (class_exists($baseCrudController) ? $baseCrudController : null));
     }
 
-    public static function getCrudTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".self::getTranslationPrefix("Crud\\"); }
-    public static function getEntityTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_ENTITY.".".self::getTranslationPrefix(); }
+    public static function getCrudTranslationPrefix()   { return "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".self::getTranslationPrefix("Crud\\"); }
+    public static function getEntityTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_ENTITY   .".".self::getTranslationPrefix(); }
     public static function getTranslationPrefix(?string $prefix = "")
     {
         $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", self::getEntityFqcn());
         return camel_to_snake(str_replace("\\", ".", $entityFqcn));
     }
 
-    function setDiscriminatorMapAttribute(Action $action)
+    public function setDiscriminatorMapAttribute(Action $action)
     {
         $entity     = get_alias($this->getEntityFqcn());
         $rootEntity = get_alias($this->classMetadataManipulator->getRootEntityName($entity));
@@ -124,14 +122,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             }
         }
 
-
         return $action;
     }
 
     public function configureActions(Actions $actions): Actions
     {
         return $actions
-                ->update(Crud::PAGE_INDEX, Action::NEW   , fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
+                ->update(Crud::PAGE_INDEX, Action::NEW ,    fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
                 ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN')
                 ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN');
@@ -147,6 +144,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function getCrud():Crud { return $this->crud; }
     public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }
     public function getEntityDto():EntityDto { return $this->entityDto; }
+    public function getEntityCollection():EntityCollection { return $this->entityCollection; }
 
     public static function getEntityLabelInSingular() { return self::getEntityTranslationPrefix().".singular"; }
     public static function getEntityLabelInPlural() { return self::getEntityTranslationPrefix().".plural"; }
@@ -202,6 +200,35 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                         ['validation_groups' => ['edit']]
                     );
     }
+    
+    public function configureEntityCollectionWithResponseParameters(?EntityCollection $entityCollection, KeyValueStore $responseParameters): ?EntityCollection
+    {
+        foreach($entityCollection ?? [] as $entity) {
+
+            $actions = $entity->getActions();
+            foreach($actions ?? [] as $action) {
+
+                $instance = $entity->getInstance();
+                $crudController = $this->getCrudControllerFqcn($instance);
+
+                $discriminatorValue = $this->classMetadataManipulator->getDiscriminatorValue($instance);
+                if($crudController && $discriminatorValue) {
+
+                    $url = $this->adminUrlGenerator
+                            ->unsetAll()
+                            ->setController($crudController)
+                            ->setEntityId($instance->getId())
+                            ->setAction($action->getName())
+                            ->includeReferrer()
+                            ->generateUrl();
+
+                    $action->setLinkUrl($url);
+                }
+            }
+        }
+
+        return $entityCollection;
+    }
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
@@ -211,18 +238,18 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
         $entityLabel = $this->translator->trans($userClass.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
         if($entityLabel == $userClass.".plural") $entityLabel = null;
-        else $extension->setTitle(mb_ucwords($entityLabel));
+        else $extension->setTitle(mb_ucfirst($entityLabel));
 
         $entityLabel = $entityLabel ?? $this->getEntityLabelInSingular() ?? "";
-        $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
+        $entityLabel = !empty($entityLabel) ? mb_ucfirst($entityLabel) : "";
 
         if ($entity) {
 
             $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], get_class($entity));
             $class = implode(".", array_map("camel_to_snake", explode("\\", $class)));
-            $entityLabel = mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
+            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
 
-            $extension->setTitle(mb_ucwords($this->translator->trans(mb_strtolower(camel_to_snake($class)).".plural", [], AbstractDashboardController::TRANSLATION_ENTITY)));
+            $extension->setTitle(mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".plural", [], AbstractDashboardController::TRANSLATION_ENTITY)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
@@ -240,7 +267,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
     {
-        $this->entityDto = $responseParameters->get("entity");
+        $this->entityDto        = $responseParameters->get("entity");
+        $this->entityCollection = $responseParameters->get("entities");
+        $this->entityCollection = $this->configureEntityCollectionWithResponseParameters($this->entityCollection, $responseParameters);
+        $this->entityCollection = $responseParameters->set("entities", $this->entityCollection);
+        
+        if($this->entityCollection)
+            $this->responseParameters->set("entities", $this->entityCollection);
 
         $this->extension = $this->configureExtensionWithResponseParameters($this->extension, $responseParameters);
         return parent::configureResponseParameters($responseParameters);

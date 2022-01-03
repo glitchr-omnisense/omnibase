@@ -70,7 +70,9 @@ class SelectController extends AbstractController
                 
                 $repository = $this->entityManager->getRepository($class);
                 
-                $fields = array_fill_keys($fields, $term);
+                if(!is_associative($fields))
+                    $fields = array_fill_keys($fields, $term);
+    
                 $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
 
                 $book = $this->paginator->paginate($entries, $page);

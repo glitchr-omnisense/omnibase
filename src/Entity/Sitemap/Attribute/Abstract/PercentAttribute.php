@@ -16,28 +16,27 @@ use Base\Repository\Sitemap\Attribute\Abstract\PercentAttributeRepository;
 
 class PercentAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-percent"]; } 
 
     public static function getType(): string { return PercentType::class; }
-    public static function getOptions(): array { return []; }
+    public function getOptions(): array { return []; }
 
-    public function __construct(?string $code = null, ?string $icon = null, int $precision = 4, int $scale = 2)
+    public function __construct(?string $code = null, ?string $icon = null, int $epsilon = 4, int $scale = 2)
     {
         parent::__construct($code, $icon);
-        $this->setPrecision($precision);
+        $this->setPrecision($epsilon);
         $this->setScale($scale);
     }
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $precision;
+    protected $epsilon;
 
-    public function getPrecision():int     { return $this->precision; }
-    public function setPrecision(int $precision)
+    public function getPrecision():int     { return $this->epsilon; }
+    public function setPrecision(int $epsilon)
     {
-        $this->precision = $precision;
+        $this->epsilon = $epsilon;
         return $this;
     }
 

@@ -5,7 +5,7 @@ namespace Base\Entity\Sitemap\Attribute\Abstract;
 interface AbstractAttributeInterface
 {
     public static function getType(): string;
-    public static function getOptions(): array;
+    public function getOptions(): array;
 
     public function getFormattedValue(string $value);
 }

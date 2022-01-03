@@ -172,7 +172,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         $options = $options ?? $form->getConfig()->getOptions();
 
         if($options["multiple"] === null && ($options["class"] !== null || $options["data_class"] !== null)) {
-            
+
             $target = $options["class"] ?? $options["data_class"] ?? null;
 
             if($this->classMetadataManipulator->isEntity($target)) {
@@ -201,18 +201,42 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $options["multiple"] ?? false;
     }
 
+    public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
+    {
+        if ($form instanceof FormEvent)
+            $form = $form->getForm();
+
+        $options = $options ?? $form->getConfig()->getOptions();
+        if($options["sortable"] === null) {
+
+            $options["sortable"] = false;
+        }
+
+        return $options["sortable"] ?? false;
+    }
+
     public function guessChoices(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
 
         if (!$options["choices"]) {
 
-            if($this->classMetadataManipulator->isEnumType($options["class"])) return $options["class"]::getPermittedValues();
-            if($this->classMetadataManipulator->isSetType ($options["class"])) return $options["class"]::getPermittedValues();
+            $class = $options["class"];
+
+            $permittedValues = null;
+            if($this->classMetadataManipulator->isEnumType($class)) 
+                $permittedValues = $class::getPermittedValuesByClass();
+            if($this->classMetadataManipulator->isSetType ($class)) 
+                $permittedValues = $class::getPermittedValuesByClass();
+
+            if($permittedValues === null) return null;
+
+            return count($permittedValues) == 1 ? $permittedValues[0] : $permittedValues;
         }
 
         return $options["choices"] ?? null;
     }
+
 
     public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
@@ -237,6 +261,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     {
         $options = $options ?? $form->getConfig()->getOptions();
 
+        if ($options["choice_filter"] === false) return [];
         if ($options["choice_filter"] === null) {
 
             $options["choice_filter"] = [];

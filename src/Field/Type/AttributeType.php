@@ -5,12 +5,15 @@ namespace Base\Field\Type;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Sitemap\Attribute;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
+use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttributeInterface;
+use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttributeTranslation;
+use Base\Entity\Sitemap\AttributeTranslation;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-
+use InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -46,8 +49,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
-        $this->baseService = $baseService;
-        $this->formFactory = $formFactory;
+        $this->baseService   = $baseService;
+        $this->formFactory   = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -56,9 +59,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
         parent::configureOptions($resolver);
         
         $resolver->setDefaults([
-            'class'        => false,
+            'class'        => null,
             'recursive'    => false,
-            "multiple"     => false,
+            "multiple"     => null,
+            'filter_code'  => null, 
+            'sortable'     => null, 
 
             'allow_add'    => true,
             'allow_delete' => true,
@@ -81,46 +86,59 @@ class AttributeType extends AbstractType implements DataMapperInterface
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
+
+        // $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
+        // $builder->setAttribute('prototype', $prototype->getForm());
+
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
             $form = $event->getForm();
             $data = $event->getData();
 
-            $class = $options["class"] ?? AbstractAttribute::class;
+            $options["class"]    = $options["class"] ?? AbstractAttribute::class;
+            $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
+            $options["sortable"] = $this->formFactory->guessSortable($event, $options);
+
             $form->add("choice", SelectType::class, [
-                "class"             => $class,
-                "multiple"          => $options["multiple"],
-                "dropdownCssClass"  => "field-attribute-dropdown",
-                "selectionCssClass" => "field-attribute-selection"
+                "class"               => $options["class"],
+                "autocomplete_fields" => ["code" => $options["filter_code"]], 
+                "multiple"            => $options["multiple"],
+                "sortable"            => $options["sortable"],
+                "dropdownCssClass"    => "field-attribute-dropdown",
+                "selectionCssClass"   => "field-attribute-selection"
             ]);
 
-            $form->add("intl", TranslationType::class, [
-                "multiple" => true,
-                "translation_class" => SettingTranslation::class,
-                "only_fields" => ["value"], 
-                "fields" => ["value" => ["label" => false, "form_type" => TextType::class]]
-            ]);
-        });
+            $fields   = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
+            $intlData = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data->toArray());
 
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
-
-            $form = $event->getForm();
-            $data = $event->getData();
-
-            $class = $form->getConfig()->getOption("class") ?? (is_object($data) ? get_class($data) : null);
-            $multiple  = $form->getConfig()->getOption("multiple");
-            if($multiple) {
-
-            } else {
+            if(!empty($fields)) {
 
                 $form->add("intl", TranslationType::class, [
-                    "row_inline"        => true,
+                    "translation_class" => AttributeTranslation::class,
+                    "multiple" => true,
                     "only_fields" => ["value"],
-                    "fields" => ["value" => ["label" => false, "form_type" => TextType::class /*$class::getType()*/]]
+                    "fields" => ["value" => $fields]
                 ]);
-            }
 
-            exit(1);
+                $form->get("intl")->setData($intlData);
+            }
+        });
+
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
+
+            $form = $event->getForm();
+            $data = $event->getData();
+
+            // if($options["multiple"]) {
+
+            // } else {
+
+            //     $form->add("intl", TranslationType::class, [
+            //         "row_inline"        => true,
+            //         "only_fields" => ["value"],
+            //         "fields" => ["value" => ["label" => false, "form_type" => TextType::class /*$class::getType()*/]]
+            //     ]);
+            // }
         });
     }
 
@@ -131,86 +149,57 @@ class AttributeType extends AbstractType implements DataMapperInterface
             return;
         }
 
-        $data = $viewData;
-        if ($data instanceof Collection) {
-
-            $form = current(iterator_to_array($forms));
-            $form->setData($data);
-
-        } else if(is_object($entity = $data)) {
-
-            $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-
-            $childForms = iterator_to_array($forms);
-            foreach($childForms as $fieldName => $childForm)
-                $childForm->setData($classMetadata->getFieldValue($entity, $fieldName));
-        }
+        $choiceForm = iterator_to_array($forms)["choice"];
+        if ($viewData instanceof PersistentCollection)
+            $choiceForm->setData($viewData->map(fn($e) => $e->getAttributePattern()));
+        else if(is_object($entity = $viewData))
+            $choiceForm->setData($viewData->getAttributePattern());
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $form = current(iterator_to_array($forms))->getParent();
+        $options = $form->getConfig()->getOptions();
+        $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessType($form, $options) ?? Attribute::class;
+        $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($form, $options);
 
-        $data = new ArrayCollection();
-        foreach(iterator_to_array($forms) as $fieldName => $childForm)
-            $data[$fieldName] = $childForm->getData();
+        $choiceForm     = iterator_to_array($forms)["choice"];
+        $choiceMultiple = $choiceForm->getConfig()->getOption("multiple") ?? false;
+        $choiceData     = $choiceForm->getData();
+ 
+        if($choiceMultiple !=  $options["multiple"])
+            throw new \Exception("Unexpected mismatching between choices and attributes");
 
-        $dataClass = $form->getConfig()->getOption("class")    ?? (is_object($viewData) ? get_class($viewData) : null);
-        $multiple  = $form->getConfig()->getOption("multiple");
+        $intlForm       = iterator_to_array($forms)["intl"];
+        $intlData       = $intlForm->getData();
+        
+        $bakData = clone $viewData;
+        if($choiceMultiple) {
 
-        if(!$multiple && $this->classMetadataManipulator->isEntity($dataClass)) {
+            $viewData->clear();
+            foreach($choiceData as $data) {
 
-            $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
-            if(!$classMetadata)
-                throw new \Exception("Entity \"$dataClass\" not found.");
-            
-            $fieldNames  = $classMetadata->getFieldNames();
-            $fields = array_intersect_key($data->toArray(), array_flip($fieldNames));
-            $associations = array_diff_key($data->toArray(), array_flip($fieldNames));
-
-            if(!is_object($viewData) || get_class($viewData) != $dataClass)
-                $viewData = self::getSerializer()->deserialize(json_encode($fieldNames), $dataClass, 'json');
-            
-            foreach ($fields as $property => $value)
-                $this->setFieldValue($viewData, $property, $value);
-            foreach($associations as $property => $value) {
-                $this->setFieldValue($viewData, $property, $value);
+                $existingData = $bakData->filter(fn(Attribute $e) => $e->getAttributePattern() === $data)->first() ?? null;
+                if($existingData) $viewData->add($existingData); // I use "clone" here, to make sure collection gets refreshed
+                else if ($data instanceof AbstractAttribute) $viewData->add(new ($attributeClass)($data));
+                else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);
             }
 
-        } else if($viewData instanceof PersistentCollection) {
+            if($viewData instanceof PersistentCollection) {
 
-            $mappedBy =  $viewData->getMapping()["mappedBy"];
-            $fieldName = $viewData->getMapping()["fieldName"];
-            $isOwningSide = $viewData->getMapping()["isOwningSide"];
-
-            if($data->containsKey($fieldName)) {
-
-                $child = $data[$fieldName];
+                $mappedBy =  $viewData->getMapping()["mappedBy"];
+                $isOwningSide = $viewData->getMapping()["isOwningSide"];
                 if(!$isOwningSide) {
+
                     foreach($viewData as $entry)
-                        $this->setFieldValue($entry, $mappedBy, null);
+                        $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
                 }
-
-                $viewData->clear();
-                foreach($child as $entry) {
-
-                    $viewData->add($entry);
-                    if(!$isOwningSide) $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
-                }
-            }
-
-        } else if($multiple) {
-
-            $viewData = new ArrayCollection();
-            foreach(iterator_to_array($forms) as $fieldName => $childForm) {
-                
-                foreach($childForm as $key => $value)
-                    $viewData[$key] = $value->getViewData();
             }
 
         } else {
 
-            $viewData = current(iterator_to_array($forms))->getViewData();
+            if ($viewData->getAttributePattern() === $choiceData)
+                $viewData->add(new ($attributeClass)($choiceData));
         }
     }
 

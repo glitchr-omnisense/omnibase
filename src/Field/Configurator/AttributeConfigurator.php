@@ -9,14 +9,10 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
 use Base\Field\AttributeField;
 
-class AttributeConfigurator implements FieldConfiguratorInterface
+class AttributeConfigurator extends SelectConfigurator implements FieldConfiguratorInterface
 {
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return AttributeField::class === $field->getFieldFqcn();
-    }
-
-    public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
-    {
     }
 }

@@ -3,10 +3,22 @@
 namespace Base\Service;
 
 use Base\Traits\BaseTrait;
+use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
 
 class Translator implements TranslatorInterface
 {
+    public const PARSE_EXTENDS   = "extends";
+    public const PARSE_NAMESPACE = "namespace";
+
+    public const DOMAIN_ENTITY       = "entities";
+    public const DOMAIN_ENUM         = "enums";
+
+    public const TRANSLATION_SINGULAR     = "singular";
+    public const TRANSLATION_PLURAL       = "plural";
+    public const TRANSLATION_FEMININE     = "feminine";
+    public const TRANSLATION_MASCULINE    = "masculine";
+
     public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel)
     {
         $this->translator = $translator;
@@ -74,6 +86,54 @@ class Translator implements TranslatorInterface
             return ($domain && $atBegin ? "@".$domain.".".$id : $id);
 
         return trim($trans);
+    }
+
+    public function parseClass($class, string $parseBy = self::PARSE_NAMESPACE) :string
+    {
+        switch($parseBy) {
+
+            case self::PARSE_EXTENDS:
+                $parent = class_exists($class) ? get_parent_class($class) : null;
+
+                $class = class_basename($class);
+                if($parent) $class .= ".".class_basename($parent);
+                while(class_exists($parent) && ( $parent = get_parent_class($parent) ))
+                    $class .= ".".class_basename($parent);
+
+                return camel_to_snake($class);
+
+            break;
+
+            case self::PARSE_NAMESPACE:
+            default: return camel_to_snake(implode(".", array_slice(explode("\\", $class), 2)));
+        }
+    }
+
+    public function enum(?string $value, $class, string $noun = self::TRANSLATION_SINGULAR): string
+    {
+        $declaringClass = $class;
+        while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
+
+            $declaringClass = get_parent_class($declaringClass);
+            if($declaringClass === Type::class || $declaringClass === null) {
+                $declaringClass = $class;
+                break;
+            }
+        }
+
+        $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
+        $class  = implode(".", array_slice(explode(".",$class), 0, -2));
+        $value = !empty($value) ? ".".$value : $value;
+        $noun  = !empty($noun)  ? ".".$noun  : $noun;
+
+        return mb_ucfirst($this->trans(mb_strtolower($class.$value.$noun), [], self::DOMAIN_ENUM));
+    }
+
+    public function entity($class, string $noun = self::TRANSLATION_SINGULAR): string
+    {
+        $class = $this->parseClass($class, self::PARSE_NAMESPACE);
+        $noun  = !empty($noun)  ? ".".$noun  : $noun;
+        return mb_ucfirst($this->trans(mb_strtolower($class.$noun), [], self::DOMAIN_ENTITY));
     }
 
     public function time(int $time): string

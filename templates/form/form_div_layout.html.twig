@@ -73,17 +73,17 @@
 
 {%- endblock quill_widget -%}
 
+{%- block attribute_widget -%}
+<div class="form-control form-attribute">
+    {{ form_widget(form.choice) }}
+    {% if form.intl is defined %} {{ form_widget(form.intl) }} {% endif %}
+</div>
+{% endblock attribute_widget %}
+
 {%- block select2_row -%}
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {{form_row(form)}}    
 {%- endblock -%}
-
-{%- block attribute_widget -%}
-<div class="form-control form-attribute">
-    {{ form_widget(form.choice) }}
-    {{ form_widget(form.intl) }}
-</div>
-{% endblock attribute_widget %}
 
 {%- block select2_widget -%}
 
@@ -200,14 +200,14 @@
     <input type="text" class="form-control" placeholder="Server" aria-label="Server">
     <div class="input-group-text">.com</div>
     </div>
-    {# <div class="input-group">
+    <div class="input-group">
         {{ block('form_widget') }}
         <div class="input-group-append">
             <button class="input-group-text" type="button">
                 <i class="fas fa-lock fa-fw"></i>
             </button>
         </div>
-    </div> #}
+    </div>
 {%- endblock -%}
 
 {%- block slug_widget -%}
@@ -242,6 +242,17 @@
     </div>
 </div>
 
+{%- endblock -%}
+
+{%- block percent_widget -%}
+    <div class="input-group">
+        {{ block('form_widget') }}
+        <div class="input-group-append">
+            <button class="input-group-text" type="button">
+                <i class="fas fa-percent fa-fw"></i>
+            </button>
+        </div>
+    </div>
 {%- endblock -%}
 
 {%- block avatar_widget -%}
@@ -374,7 +385,7 @@
 {%- endblock -%}
 
 {%- block associationfile_widget -%}
-    {% for childForm in form.children%}
+    {% for childForm in form.children %}
         {% set attr = childForm.vars.attr|merge({'data-entity-id': form.vars.entityId }) %}
         {{ form_widget(childForm, {attr:attr}) }}
     {% endfor %}
