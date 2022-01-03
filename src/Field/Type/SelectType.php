@@ -82,7 +82,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             //'query_builder'   => null,
 
             'choices'          => null,
-            'choice_filter'    => false,
+            'choice_filter'    => null,
             'choice_exclusive' => true,
             // 'choice_value'  => function($key)              { return $key;   },   // Return key code
             // 'choice_label'  => function($key, $label, $id) { return $label; },   // Return translated label
@@ -131,7 +131,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'autocomplete_type'     => $this->baseService->isDebug() ? "GET" : "POST",
 
             // Sortable option
-            'sortable'              => true
+            'sortable'              => null
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
