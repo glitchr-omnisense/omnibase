@@ -88,9 +88,9 @@ class SelectConfigurator implements FieldConfiguratorInterface
             $field->setValue($this->getDefault($field));
 
         $field->setFormTypeOption("empty_data", $this->getDefault($field));
-        $field->setFormTypeOptionIfNotSet('choice_filter', $field->getCustomOption(SelectField::OPTION_FILTER) ?? null);
-        $field->setFormTypeOptionIfNotSet('autocomplete', $field->getCustomOption(SelectField::OPTION_AUTOCOMPLETE));
-        $field->setFormTypeOptionIfNotSet('placeholder', '');
+        // $field->setFormTypeOptionIfNotSet('choice_filter', $field->getCustomOption(SelectField::OPTION_FILTER) ?? null);
+        // $field->setFormTypeOptionIfNotSet('autocomplete', $field->getCustomOption(SelectField::OPTION_AUTOCOMPLETE));
+        // $field->setFormTypeOptionIfNotSet('placeholder', '');
 
         $fieldValue = $field->getValue();
         $isIndexOrDetail = \in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);

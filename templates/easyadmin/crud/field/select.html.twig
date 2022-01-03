@@ -29,7 +29,7 @@
             {% endif %}
 
             <span class="badge badge-secondary">
-                {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+                <span>{% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if showFirst == 1 %}
                     {{formattedValue.text|default("-")}}  
                 {% elseif showFirst == 2 %}
@@ -43,19 +43,18 @@
                     {% endif %}
                     {{ iconAlign != "left" ? icon|raw : "" }}
                 {% endif %}
-                {% if fieldLink is not null %}</a>{% endif %}
+                {% if fieldLink is not null %}</a>{% endif %}</span>
             </span>
-
             {% set formattedValues = formattedValues|slice(1) %}
         {% endif %}
 
     {% endif %}
 
     {% set stillMore = "" %}
-
     {% set others = [] %}
+
     {% for other in formattedValues %}
-        {% if displayLimit >= others|length %}
+        {% if displayLimit > others|length %}
             {% set others = others|merge([other]) %}
         {% elseif displayLimit > 0 %}
             {% set stillMore = others|length != 0 ? ", [..]" : "[..]" %}
@@ -89,12 +88,11 @@
             {% endif %}
 
             {% set fieldLink = formattedValue['url'] ?? null %}
-
             <span class="badge badge-secondary">
-                {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+                <span>{% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if show == 1 %}
                     {{formattedValue.text|default("-")}}  
-                {% elseif showFirst == 2 %}
+                {% elseif show == 2 %}
                     <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text }}">{{ icon ? icon|raw : formattedValue.text|default("-") }}</div>
                 {% else %}
                     {{ iconAlign == "left" ? icon|raw : "" }}
@@ -107,6 +105,7 @@
                 {% endif %}
 
                 {% if fieldLink is not null %}</a>{% endif %}
+                </span>
             </span>
         {% endfor %}
 

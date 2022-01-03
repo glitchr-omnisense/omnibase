@@ -63,6 +63,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'recursive'    => false,
             "multiple"     => null,
             'filter_code'  => null, 
+            'sortable'     => null, 
 
             'allow_add'    => true,
             'allow_delete' => true,
@@ -95,13 +96,16 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
 
             $options["class"]    = $options["class"] ?? AbstractAttribute::class;
-            $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($event, $options);
+            $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
+            $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
             $form->add("choice", SelectType::class, [
-                "class"             => $options["class"],
-                "multiple"          => $options["multiple"],
-                "dropdownCssClass"  => "field-attribute-dropdown",
-                "selectionCssClass" => "field-attribute-selection"
+                "class"               => $options["class"],
+                "autocomplete_fields" => ["code" => $options["filter_code"]], 
+                "multiple"            => $options["multiple"],
+                "sortable"            => $options["sortable"],
+                "dropdownCssClass"    => "field-attribute-dropdown",
+                "selectionCssClass"   => "field-attribute-selection"
             ]);
 
             $fields   = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
@@ -150,7 +154,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $choiceForm->setData($viewData->map(fn($e) => $e->getAttributePattern()));
         else if(is_object($entity = $viewData))
             $choiceForm->setData($viewData->getAttributePattern());
-
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void

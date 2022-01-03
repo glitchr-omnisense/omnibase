@@ -201,6 +201,20 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $options["multiple"] ?? false;
     }
 
+    public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
+    {
+        if ($form instanceof FormEvent)
+            $form = $form->getForm();
+
+        $options = $options ?? $form->getConfig()->getOptions();
+        if($options["sortable"] === null) {
+
+            $options["sortable"] = false;
+        }
+
+        return $options["sortable"] ?? false;
+    }
+
     public function guessChoices(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
@@ -222,6 +236,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
         return $options["choices"] ?? null;
     }
+
 
     public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {

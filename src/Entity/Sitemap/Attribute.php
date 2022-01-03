@@ -3,7 +3,6 @@
 namespace Base\Entity\Sitemap;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\OrderColumn;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
@@ -27,6 +26,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return $this->attributePattern ? $this->attributePattern->__iconize() : null; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
+    public function __toString() { return $this->getAttributePattern()->getLabel(); }
     public function __construct(AbstractAttribute $attributePattern)
     {
         $this->setAttributePattern($attributePattern);
@@ -44,7 +44,6 @@ class Attribute implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\ManyToOne(targetEntity=AbstractAttribute::class)
      * @ORM\JoinColumn(nullable=false)
-     * @OrderColumn(reference="attributePattern[index2]")
      */
     protected $attributePattern;
     public function getAttributePattern(): ?AbstractAttribute { return $this->attributePattern; }

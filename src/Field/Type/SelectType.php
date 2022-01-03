@@ -78,6 +78,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 FormFactory::GUESS_FROM_DATA,
                 FormFactory::GUESS_FROM_VIEW,
             ],
+            
             //'query_builder'   => null,
 
             'choices'          => null,
@@ -108,7 +109,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Generic parameters
             'placeholder'        => "Choose your selection..",
-            'capitalize'         => false,
+            'capitalize'         => true,
             'language'           => null,
             'required'           => true,
             'multiple'           => null,
@@ -155,7 +156,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             );
 
             // Guess class option
-            $options["class"]         = $this->formFactory->guessType($event, $options);
+            $options["class"]    = $this->formFactory->guessType($event, $options);
+
+            $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
             // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
@@ -179,7 +182,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'choices'    => [],
                 'multiple'   => $options["multiple"]
             ];
-
+            
             $form->add('choice', ChoiceType::class, $formOptions);
         });
 
@@ -520,9 +523,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             $className = get_class($entry);
-            $className = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], $className);
-            $className = implode(".", array_map("camel_to_snake", explode("\\", $className)));
-            
             if($translator) $className = $translator->entity($className, Translator::TRANSLATION_SINGULAR);
 
             $html = is_html($autocomplete) ? $autocomplete : null;

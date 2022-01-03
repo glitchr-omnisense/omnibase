@@ -99,7 +99,7 @@ class SelectField implements FieldInterface
         if(count($filter) == 1)
             $this->setFormTypeOptionIfNotSet(self::OPTION_CLASS, $filter[0]);
         
-        $this->setCustomOption(self::OPTION_FILTER, $filter);
+        $this->setFormTypeOptionIfNotSet(self::OPTION_FILTER, $filter);
         return $this;
     }
 

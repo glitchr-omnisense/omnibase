@@ -591,6 +591,7 @@
         <service id="Base\Field\Configurator\CountryConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FontAwesomeConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DiscriminatorConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\AttributeConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
 
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Dashboard\AbstractDashboardController">

@@ -66,7 +66,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             'max_filesize' => null,
             'max_files'    => null,
-            'mime_types'   => null
+            'mime_types'   => null,
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -117,6 +117,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             
             $options["class"]    = $options["class"] ?? $this->formFactory->guessType($event, $options);
             $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($event, $options);
+            $options["sortable"] = $options["sortable"]   ?? $this->formFactory->guessSortable($event, $options);
 
             $fieldName = $options["entity_file"];
             $form->add($fieldName, $options["form_type"], [
@@ -127,7 +128,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                 'max_filesize' => $options["max_filesize"],
                 'max_files'    => $options["max_files"],
-                'mime_types'   => $options["mime_types"]
+                'mime_types'   => $options["mime_types"],
+                'sortable'     => $options["sortable"]
             ]);
 
             $files = array_map(fn($e) => Uploader::getPublic($e, $fieldName), $data->toArray());
