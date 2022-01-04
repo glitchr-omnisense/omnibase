@@ -17,14 +17,17 @@ class PageCrudController extends WidgetCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, [
+            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
 
-        yield ImageField::new('thumbnail');
+                yield ImageField::new('thumbnail');
 
-        yield SlugField::new('slug')->setTargetFieldName("translations.title");
-        yield TranslationField::new()->showOnIndex('title')->setFields([
-            "content" => ["form_type" => QuillType::class],
-        ]);
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield SlugField::new('slug')->setTargetFieldName("translations.title");
+                yield TranslationField::new()->showOnIndex('title')->setFields([
+                    "content" => ["form_type" => QuillType::class],
+                ]);
+                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        }]);
     }
 }

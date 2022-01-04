@@ -25,22 +25,24 @@ class SlotCrudController extends WidgetCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, [
+            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
 
-        yield SlugField::new('path')->setColumns(6)->setTargetFieldName("label");
-        foreach ( ($callbacks["path"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-        
-        yield TextField::new("label")->setColumns(6);
-        foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield SlugField::new('path')->setColumns(6)->setTargetFieldName("label");
+                foreach ( ($callbacks["path"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+                
+                yield TextField::new("label")->setColumns(6);
+                foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
 
-        yield SelectField::new("widgets")->setColumns(12);
-        foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield SelectField::new("widgets")->setColumns(12);
+                foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
 
-        yield TextareaField::new("help")->setColumns(12);
-        foreach ( ($callbacks["help"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-            
+                yield TextareaField::new("help")->setColumns(12);
+                foreach ( ($callbacks["help"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        }]);
     }
 }

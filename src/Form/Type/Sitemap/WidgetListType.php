@@ -4,6 +4,7 @@ namespace Base\Form\Type\Sitemap;
 
 use Base\Entity\Sitemap\Widget;
 use Base\Field\Type\SelectType;
+use Base\Service\WidgetProvider;
 use Base\Service\WidgetProviderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -16,11 +17,12 @@ use Symfony\Component\Form\FormEvents;
 
 class WidgetListType extends AbstractType implements DataMapperInterface
 {
-    public function __construct(WidgetProviderInterface $widgetProvider)
-    {
-        $this->widgetProvider = $widgetProvider;
-    }
+    /**
+     * @var WidgetProvider
+     */
+    protected $widgetProvider;
 
+    public function __construct(WidgetProviderInterface $widgetProvider) { $this->widgetProvider = $widgetProvider; }
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -66,10 +68,9 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $formattedWidgets = $this->getFormattedData($options["widgets"]);
             foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
 
-                $widget = str_replace("-", ".", $formattedWidget);
-
-                $this->widgetProvider->deleteCache(Widget::class, "app.widgets.".$widget);
-                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widget);
+                $widgetSlot = str_replace("-", ".", $formattedWidget);
+                $this->widgetProvider->deleteCache(Slot::class, $widgetSlot);
+                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot);
             }
 
             foreach($widgetSlots as $formattedWidget => $slot) {
@@ -91,13 +92,8 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 $widgetOptions["required"]   = $options["widgets"][$widget]["required"] ?? false;
                 $widgetOptions["select2"]    = $options["select2"] ?? [];
 
-                $widgetOptions["choices"] = $data ?? [];
+                $widgetOptions["class"] = Widget::class;
                 $widgetOptions["choice_filter"] =  $options["widgets"][$widget]["choice_filter"] ?? null;
-                $widgetOptions["choice_filter"] = is_array($widgetOptions["choice_filter"]) ? 
-                function ($widgets) use ($widgetOptions) {
-                    if( !is_object($widgets) ) return true;
-                    return $widgets !== null && in_array(get_class($widgets), $widgetOptions["choice_filter"], true);
-                } : $widgetOptions["choice_filter"];
 
                 // Set default label
                 if(!array_key_exists("label", $widgetOptions)) {

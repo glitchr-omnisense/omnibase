@@ -17,17 +17,20 @@ class LinkCrudController extends WidgetCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, [
+            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
 
-        yield AttributeField::new('hyperlink')->setClass(HyperpatternAttribute::class);
-        foreach ( ($callbacks["hyperlink"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield AttributeField::new('hyperlink')->setClass(HyperpatternAttribute::class);
+                foreach ( ($callbacks["hyperlink"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
 
-        yield TranslationField::new()->showOnIndex('title')->setFields([
-            "title" => [],
-            "excerpt" => ["form_type" => TextareaType::class],
-            "content" => ["form_type" => QuillType::class],
-        ]);
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield TranslationField::new()->showOnIndex('title')->setFields([
+                    "title" => [],
+                    "excerpt" => ["form_type" => TextareaType::class],
+                    "content" => ["form_type" => QuillType::class],
+                ]);
+                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        }]);
     }
 }

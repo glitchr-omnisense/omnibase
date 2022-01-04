@@ -74,13 +74,14 @@ class UserCrudController extends AbstractCrudController
                 foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
+                yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
+                foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+                    
                 yield EmailField::new('email')->setColumns(5);
                 foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
-                yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
-                foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
                     
                 yield BooleanField::new("isApproved")->withConfirmation();
                 foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)

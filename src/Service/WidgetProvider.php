@@ -10,7 +10,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class WidgetProvider implements WidgetProviderInterface
 {    
-    public const __CACHE__ = true;
+    public const __CACHE__ = false;
     protected function isCacheEnabled() 
     {
         if(!self::__CACHE__) return false;
@@ -47,6 +47,7 @@ class WidgetProvider implements WidgetProviderInterface
             return $this->getCache(Slot::class, $path);
 
         $this->slots[$path] = $this->slots[$path] ?? $this->widgetSlotRepository->findOneByInstanceOfAndPath(Slot::class, $path);
+        
         $this->applyCache(Slot::class, $path, $this->slots[$path]);
 
         return $this->slots[$path];
@@ -54,31 +55,34 @@ class WidgetProvider implements WidgetProviderInterface
 
     protected function applyCache($class, string $identifier, $widget)
     {
-        $class = camel_to_snake(class_basename($class));
-        $item = $this->cache->getItem("app.".$class."[".$identifier."]");
+        $item = $this->cache->getItem($class."[".$identifier."]");
         if($this->isCacheEnabled())
             $this->cache->save( $item->set($widget) );
         
+        // dump($class."[".$identifier."]");
         return true;
     }
     
-    protected function hasCache($class, string $identifier)
+    protected function hasCache($class, string $identifier): bool
     {
-        $class = camel_to_snake(class_basename($class));
-        return $this->cache->getItem("app.".$class."[".$identifier."]")->isHit();
+        // dump("HAS CACHE?: ", $this->cache->getItem($class."[".$identifier."]"));
+        return $this->isCacheEnabled() && $this->cache->getItem($class."[".$identifier."]")->isHit();
     }
 
-    protected function getCache($class, string $identifier) 
+    protected function getCache($class, string $identifier)
     {
-        $class = camel_to_snake(class_basename($class));
-        $item = $this->cache->getItem("app.".$class."[".$identifier."]");
+        $item = $this->cache->getItem($class."[".$identifier."]");
         return $item->get();
     }
 
-    protected function deleteCache($class, string $identifier)
+    public function deleteCache($class, string $identifier)
     {
-        $class = camel_to_snake(class_basename($class));
-        $this->cache->delete("app.".$class."[".$identifier."]");
+        // dump("-----");
+        // dump($class."[".$identifier."]", $this->hasCache($class, $identifier));
+        // dump($this->cache->getItem($class."[".$identifier."]"))->get();
+        $this->cache->delete($class."[".$identifier."]");
+        // dump($this->cache->getItem($class."[".$identifier."]"))->get();
+
         return $this;
     }
 }

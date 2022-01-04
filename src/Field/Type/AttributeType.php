@@ -105,23 +105,26 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 "multiple"            => $options["multiple"],
                 "sortable"            => $options["sortable"],
                 "dropdownCssClass"    => "field-attribute-dropdown",
-                "selectionCssClass"   => "field-attribute-selection"
+                "containerCssClass"   => "field-attribute-selection"
             ]);
 
-            $fields   = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
-            $intlData = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data->toArray());
+            if($data !== null) {
+                
+                $fields   = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
+                $intlData = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data->toArray());
 
-            if(!empty($fields)) {
+                if(!empty($fields)) {
 
-                $form->add("intl", TranslationType::class, [
-                    "translation_class" => AttributeTranslation::class,
-                    "multiple" => true,
-                    "only_fields" => ["value"],
-                    "fields" => ["value" => $fields]
-                ]);
+                    $form->add("intl", TranslationType::class, [
+                        "translation_class" => AttributeTranslation::class,
+                        "multiple" => true,
+                        "only_fields" => ["value"],
+                        "fields" => ["value" => $fields]
+                    ]);
 
-                $form->get("intl")->setData($intlData);
-            }
+                    $form->get("intl")->setData($intlData);
+                }
+            } 
         });
 
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
@@ -129,6 +132,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
+            dump($data);
+            
             // if($options["multiple"]) {
 
             // } else {
@@ -171,7 +176,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
             throw new \Exception("Unexpected mismatching between choices and attributes");
 
         $intlForm       = iterator_to_array($forms)["intl"];
-        $intlData       = $intlForm->getData();
         
         $bakData = clone $viewData;
         if($choiceMultiple) {
@@ -197,10 +201,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
             }
 
         } else {
-
+            
             if ($viewData->getAttributePattern() === $choiceData)
                 $viewData->add(new ($attributeClass)($choiceData));
         }
+
     }
 
     protected static $entitySerializer = null;

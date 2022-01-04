@@ -33,7 +33,6 @@ final class ColorType extends AbstractType
         $resolver->setDefaults([
             'jscolor'     => [],
             'jscolor-js'  => $this->baseService->getParameterBag("base.vendor.jscolor.js"),
-            'empty_data'  => "#00000000",
             'is_nullable' => true
         ]);
     }
@@ -42,8 +41,10 @@ final class ColorType extends AbstractType
     {
         $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
 
-            if ($event->getData() == $options["empty_data"] && $options["is_nullable"])
+            if ($event->getData() == "#00000000" && $options["is_nullable"])
                 $event->setData(null);
+
+            dump($event->getData());
         });
     }
 

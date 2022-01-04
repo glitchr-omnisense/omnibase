@@ -76,6 +76,12 @@ class SelectField implements FieldInterface
         return $this;
     }
 
+    public function turnHorizontal(bool $horizontal) { return $this->turnVertical(!$horizontal); }
+    public function turnVertical(bool $vertical = true)
+    {
+        return $this->setFormTypeOption("vertical", $vertical);
+    }
+
     public function setChoices($choiceGenerator)
     {
         if (!\is_array($choiceGenerator) && !\is_callable($choiceGenerator))

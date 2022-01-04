@@ -183,33 +183,17 @@
     </div>
 {%- endblock translatable_widget -%}
 
-{%- block pattern_widget -%}
-    {% set attr = attr|merge({
-        'data-pattern-field': form.vars.id,
-        'data-pattern': pattern
-    }) %}
-
-    <div class="input-group mb-3">
-    <div class="input-group-text" id="basic-addon3">https://example.com/users/</div>
-    <input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
-    <div class="input-group-text">$</div>
-    <input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
-    <div class="input-group-text">.00</div>
-    <input type="text" class="form-control" placeholder="Username" aria-label="Username">
-    <div class="input-group-text">@</div>
-    <input type="text" class="form-control" placeholder="Server" aria-label="Server">
-    <div class="input-group-text">.com</div>
-    </div>
-    
-    <div class="input-group">
-        {{ block('form_widget') }}
-        <div class="input-group-append">
-            <button class="input-group-text" type="button">
-                <i class="fas fa-lock fa-fw"></i>
-            </button>
-        </div>
-    </div>
-{%- endblock -%}
+{# <div class="input-group mb-3">
+<div class="input-group-text" id="basic-addon3">https://example.com/users/</div>
+<input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
+<div class="input-group-text">$</div>
+<input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
+<div class="input-group-text">.00</div>
+<input type="text" class="form-control" placeholder="Username" aria-label="Username">
+<div class="input-group-text">@</div>
+<input type="text" class="form-control" placeholder="Server" aria-label="Server">
+<div class="input-group-text">.com</div>
+</div> #}
 
 {%- block slug_widget -%}
 
@@ -559,6 +543,102 @@
 {%- block collection2_empty -%}
     <div class="empty collection-empty"></div>
 {%- endblock collection2_empty -%}
+
+
+{%- block array_row -%}
+
+    {% if prototype is defined and not prototype.rendered %}
+        {% set prototype_row = form_row(prototype, {attr:{"class": "form-control"}}) %}
+        {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
+    {% endif %}
+
+    {% set attr = attr|merge({
+        'data-array-field': 'true',
+        'data-allow-add': allow_add ? 'true' : 'false',
+        'data-allow-delete': allow_delete ? 'true' : 'false',
+        'data-num-items': form.children is empty ? 0 : max(form.children|keys),
+        'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
+        'data-empty-array': block('array_empty')
+    }) %}
+    
+    {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
+    {%- set attr = attr|merge({'class': 'form-array' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+
+    {% set inline = form.vars.entry_inline|default(false) %}
+    {% if inline == true %}
+        {{ form_widget(form, {attr:attr}) }}
+    {% else %}
+        {% if form.children is not empty or allow_add != false %}
+        <div class="form-group">
+            {{ form_label(form)}}
+            <div {{ block('widget_attributes') }}>
+                {{ form_widget(form) }}
+            </div>
+        </div>
+        {% endif %}
+    {% endif %}
+
+{%- endblock array_row -%}
+
+{%- block array_label -%}
+    {{ form_label(form, null, {'required': false}) }}
+{%- endblock -%}
+
+{%- block array_widget -%}
+
+    {# the "is iterable" check is needed because if an object implements __toString() and
+               returns an empty string, "is empty" returns true even if it's not a array #}
+
+    {% set isEmptyCollection = value is null or (value is iterable and value is empty) %}
+    {% if  isEmptyCollection %}
+        {{ block('array_empty') }}
+    {% else %}
+        {% set attr = attr|merge({'class': 'form-array-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
+        {{ form_widget(form, {attr: attr}) }}
+    {% endif %}
+    
+    {% if allow_add|default(false) %}
+        <button type="button" class="btn btn-link form-array-add-button">
+            <i class="fa fa-plus pr-1"></i>
+            {{ '@EasyAdminBundle.action.add_new_item'|trans }}
+        </button>
+    {% endif %}
+{%- endblock array_widget -%}
+
+{%- block array_entry_row -%}
+    {{ form_row(form) }}
+{%- endblock array_entry_row -%}
+
+{%- block array_entry_widget -%}
+
+    {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
+    {% set delete_item_button %}
+        <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
+                title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
+            <i class="far fa-trash-alt"></i>
+        </button>
+    {% endset %}
+
+    <div class="accordion form-array-item">
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+                    <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
+                    {{ form_widget(form, {attr:attr}) }}
+                </button>
+
+                {% if allows_deleting_items %}
+                    {{ delete_item_button }}
+                {% endif %}
+            </h2>
+        </div>
+    </div>
+
+{%- endblock array_entry_widget -%}
+
+{%- block array_empty -%}
+    <div class="empty array-empty"></div>
+{%- endblock array_empty -%}
 
 {%- block stock_widget -%}
     

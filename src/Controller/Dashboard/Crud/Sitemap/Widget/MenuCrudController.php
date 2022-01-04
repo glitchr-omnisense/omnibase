@@ -7,6 +7,7 @@ use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
+use Base\Field\SelectField;
 
 class MenuCrudController extends WidgetCrudController
 {
@@ -15,13 +16,16 @@ class MenuCrudController extends WidgetCrudController
     public function configureFields(string $pageName, array $callbacks = []): iterable
     {
         $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, [
+            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
 
-        yield TextField::new('name');
-        foreach ( ($callbacks["name"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield SelectField::new('widgets')->turnVertical();
+                foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
 
-        yield TranslationField::new()->showOnIndex('title')->setRequired(false);
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+                yield TranslationField::new()->showOnIndex('title')->setRequired(false);
+                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
+                    yield $yield;
+        }]);
     }
 }

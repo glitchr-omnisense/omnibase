@@ -3,7 +3,7 @@
 namespace Base\Entity\Sitemap\Attribute\Abstract;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
-use Base\Field\Type\PatternType;
+use Base\Field\Type\ArrayType;
 use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
@@ -20,7 +20,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
 {
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
-    public static function getType(): string { return PatternType::class; }
+    public static function getType(): string { return ArrayType::class; }
     public function getOptions(): array { return ["pattern" => $this->getPattern()]; }
 
     public function __toString() { return $this->getPattern(); }
