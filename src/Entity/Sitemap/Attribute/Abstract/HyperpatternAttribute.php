@@ -21,7 +21,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
     public static function getType(): string { return ArrayType::class; }
-    public function getOptions(): array { return ["pattern" => $this->getPattern()]; }
+    public function getOptions(): array { return ["pattern" => $this->getPattern(), "placeholder" => $this->getPlaceholder()]; }
 
     public function __toString() { return $this->getPattern(); }
     public function __construct(?string $code = "website", ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")

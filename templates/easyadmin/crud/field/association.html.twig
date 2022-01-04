@@ -5,8 +5,6 @@
 {% set showFirst    = field.customOptions.get('showFirst') %}
 {% set renderFormat = field.customOptions.get('renderFormat') ?? false %}
 
-{% set entityFile    = field.formTypeOptions['entity_file'] %}
-
 {% if renderFormat == "image" or renderFormat == "avatar" %}
 
     {% set counter = field.formattedValue.count %}
@@ -28,9 +26,10 @@
         {% set images = field.value is empty or null ? [] : [field.value] %}
     {% endif %}
     
+    {% set entityFile    = field.formTypeOptions['entity_file'] ?? null %}
     {% for key, entity in images %}
 
-        {% set image = attribute(entity,entityFile) %}
+        {% set image = attribute(entity, entityFile) %}
         {% set image = image is iterable ? image|first : image %}
         {% set image = image is not null ? image : "bundles/base/images.svg" %}
 

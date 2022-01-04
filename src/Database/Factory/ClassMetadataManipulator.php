@@ -4,6 +4,7 @@ namespace Base\Database\Factory;
 
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
+use Base\Field\Type\ArrayType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\AssociationType;
 use Base\Field\Type\RelationType;
@@ -151,7 +152,7 @@ class ClassMetadataManipulator
             else if($this->getTypeOfField($class, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
             else if($this->getTypeOfField($class, $fieldName) == "array")
-                $validFields[$fieldName] = ["form_type" => SelectType::class];
+                $validFields[$fieldName] = ["form_type" => ArrayType::class];
             else if($this->getTypeOfField($class, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
 

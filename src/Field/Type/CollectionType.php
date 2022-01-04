@@ -21,6 +21,7 @@ class CollectionType extends AbstractType
     {
         $resolver->setDefaults([
             'form2' => false,
+            'length' => 0,
             'allow_add' => true,
             'allow_delete' => true,
             'collection_required' => true,
@@ -79,7 +80,8 @@ class CollectionType extends AbstractType
             $options['entry_options'],
             $options['allow_add'],
             $options['allow_delete'],
-            $options['delete_empty']
+            $options['delete_empty'],
+            $options['length']
         ));
     }
 

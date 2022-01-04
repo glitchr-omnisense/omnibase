@@ -22,14 +22,22 @@ class ArrayType extends CollectionType
             "pattern" => null,
             "length" => 0
         ]);
+
+        $resolver->setNormalizer('length',       fn(Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
+        $resolver->setNormalizer('allow_add',    fn(Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_delete', fn(Options $options, $value) => $options["length"] == 0 && $value);
     }
 
-    public function getNumberOfArguments($options):int { return preg_match_all('/\{[0-9]*\}/i', $options["pattern"]); }
+    public function getNumberOfArguments($pattern):int { return preg_match_all('/\{[0-9]*\}/i', $pattern); }
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         parent::finishView($view, $form, $options);
         $view->vars["pattern"] = $options["pattern"];
-        
+        // if($options["pattern"] !== null) {
+        //     foreach($view as $childView) 
+        //         $childView->vars['block_prefixes'] = array_filter($childView->vars['block_prefixes'], fn($b) => $b != "array_entry");
+        // }
+
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");
     }
 }

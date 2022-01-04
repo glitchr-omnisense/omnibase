@@ -79,7 +79,7 @@ final class BaseTwigExtension extends AbstractExtension
     {
         return [
             new TwigFilter('trans',         [$this, 'trans']),
-            new TwigFilter('trans2',         [$this, 'trans']),
+            new TwigFilter('preg_split',    [$this, 'preg_split']),
             new TwigFilter('thumbnail',     [$this, 'thumbnail']),
             new TwigFilter('webp',          [$this, 'webp']),
             new TwigFilter('trans',         [$this, 'trans']),
@@ -112,6 +112,11 @@ final class BaseTwigExtension extends AbstractExtension
     public function synopsis($class) { return class_synopsis($class); }
 
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
+
+    public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) 
+    {
+        return preg_split($pattern, $subject, $limit, $flags);
+    }
 
     public function joinIfExists(?array $array, string $separator) 
     {

@@ -36,6 +36,7 @@ class CollectionField implements FieldInterface
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
             ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
             ->setCustomOption(self::OPTION_RENDER_EXPANDED, false)
+            ->setFormTypeOption(self::OPTION_LENGTH, 0)
             ->setFormTypeOption("allow_add", true)
             ->setFormTypeOption("allow_delete", true);
     }

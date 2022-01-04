@@ -38,11 +38,7 @@ class ArrayField extends CollectionField implements FieldInterface
 
     public function setLength(int $length): self 
     {
-        $length = min(0, $length);
-        $this->setFormTypeOption(self::OPTION_LENGTH, $length);
-        $this->setFormTypeOption("allow_add", $length == 0);
-        $this->setFormTypeOption("allow_delete", $length == 0);
-
+        $this->setFormTypeOption(self::OPTION_LENGTH, min(0, $length));
         return $this;
     }
 

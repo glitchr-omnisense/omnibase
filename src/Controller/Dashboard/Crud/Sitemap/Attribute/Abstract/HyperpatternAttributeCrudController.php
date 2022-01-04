@@ -19,15 +19,6 @@ class HyperpatternAttributeCrudController extends AbstractAttributeCrudControlle
                 yield TextField::new('pattern')->onlyOnForms()->setColumns(12);
             },
             "translations" => function () use ($defaultCallback) {
-                
-                // yield AssociationField::new('tags')
-                //         ->showFirst()
-                //         /*->setFields([
-                //             "translations" => ["form_type" => TranslationType::class],
-                //             // "slug" => ["form_type" => SlugType::class, "target" => "translations.name"],                            
-                //         ])*/;
-
-                // yield AssociationField::new("hyperlinks")->renderAsCount()/*->hideOnForm()*/;
 
                 yield TextField::new('pattern')->hideOnForm();
                 foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)

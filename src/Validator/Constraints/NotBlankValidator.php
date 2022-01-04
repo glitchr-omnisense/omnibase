@@ -22,7 +22,6 @@ class NotBlankValidator extends ConstraintValidator
         if ($constraint->allowNull && null === $object) {
             return;
         }
-        dump($object, $constraint);
 
         if (\is_string($object) && null !== $constraint->normalizer) {
             $object = ($constraint->normalizer)($object);

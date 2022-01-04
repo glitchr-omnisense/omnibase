@@ -183,18 +183,6 @@
     </div>
 {%- endblock translatable_widget -%}
 
-{# <div class="input-group mb-3">
-<div class="input-group-text" id="basic-addon3">https://example.com/users/</div>
-<input type="text" class="form-control" id="basic-url" aria-describedby="basic-addon3">
-<div class="input-group-text">$</div>
-<input type="text" class="form-control" aria-label="Amount (to the nearest dollar)">
-<div class="input-group-text">.00</div>
-<input type="text" class="form-control" placeholder="Username" aria-label="Username">
-<div class="input-group-text">@</div>
-<input type="text" class="form-control" placeholder="Server" aria-label="Server">
-<div class="input-group-text">.com</div>
-</div> #}
-
 {%- block slug_widget -%}
 
 {# Search for target inside form based on parent including translation #}
@@ -544,7 +532,6 @@
     <div class="empty collection-empty"></div>
 {%- endblock collection2_empty -%}
 
-
 {%- block array_row -%}
 
     {% if prototype is defined and not prototype.rendered %}
@@ -564,18 +551,31 @@
     {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
     {%- set attr = attr|merge({'class': 'form-array' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
-    {% set inline = form.vars.entry_inline|default(false) %}
-    {% if inline == true %}
-        {{ form_widget(form, {attr:attr}) }}
-    {% else %}
-        {% if form.children is not empty or allow_add != false %}
-        <div class="form-group">
-            {{ form_label(form)}}
+    {% if form.children is not empty or allow_add != false or form.vars.pattern is not empty %}
+    <div class="form-group">
+        {{ form_label(form)}}
+        {% if form.vars.pattern is not empty %}
+            <div class="input-group mb-3">
+
+                {% set pattern = pattern|preg_split("/{[0-9]*}/") %}
+                {% for key,formChild in form %}
+                    {% set prevPattern = pattern[key] ?? "" %}
+                    {% if prevPattern is not empty %}
+                        <div class="input-group-text">{{prevPattern}}</div>
+                    {% endif %}
+                    {{ form_widget(formChild) }}
+                {% endfor %}
+                
+                {% if pattern|last is not empty %}
+                    <div class="input-group-text">{{ pattern|last }}</div>
+                {% endif %}
+            </div>
+        {% else %}
             <div {{ block('widget_attributes') }}>
                 {{ form_widget(form) }}
             </div>
-        </div>
         {% endif %}
+    </div>
     {% endif %}
 
 {%- endblock array_row -%}
@@ -610,29 +610,34 @@
 {%- endblock array_entry_row -%}
 
 {%- block array_entry_widget -%}
+    
+    {% set pattern = form_parent(form).vars.pattern|default("") %}
+    {% if pattern is not empty %}
+        {{ form_widget(form, {attr:attr}) }}
+    {% else %}
+        {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
+        {% set delete_item_button %}
+            <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
+                    title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
+                <i class="far fa-trash-alt"></i>
+            </button>
+        {% endset %}
 
-    {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
-    {% set delete_item_button %}
-        <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
-                title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-            <i class="far fa-trash-alt"></i>
-        </button>
-    {% endset %}
+        <div class="accordion form-array-item">
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+                        <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
+                        {{ form_widget(form, {attr:attr}) }}
+                    </button>
 
-    <div class="accordion form-array-item">
-        <div class="accordion-item">
-            <h2 class="accordion-header">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
-                    <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
-                    {{ form_widget(form, {attr:attr}) }}
-                </button>
-
-                {% if allows_deleting_items %}
-                    {{ delete_item_button }}
-                {% endif %}
-            </h2>
+                    {% if allows_deleting_items %}
+                        {{ delete_item_button }}
+                    {% endif %}
+                </h2>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
 {%- endblock array_entry_widget -%}
 

@@ -6,6 +6,7 @@ use Base\Annotations\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
+use Base\Entity\Sitemap\Attribute;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
 
@@ -13,6 +14,7 @@ use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Attribute\Abstract\AbstractAttributeRepository;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 /**
@@ -51,6 +53,12 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
      */
     protected $id;
     public function getId(): ?int { return $this->id; }
+
+    /**
+     * @ORM\OneToMany(targetEntity=Attribute::class, mappedBy="attributePattern")
+     */
+    protected $attributes;
+    public function getAttributes(): Collection { return $this->attributes; }
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)

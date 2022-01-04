@@ -42,7 +42,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\ManyToOne(targetEntity=AbstractAttribute::class)
+     * @ORM\ManyToOne(targetEntity=AbstractAttribute::class, inversedBy="attributes")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $attributePattern;
