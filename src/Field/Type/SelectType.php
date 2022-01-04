@@ -82,7 +82,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             //'query_builder'   => null,
 
             'choices'          => null,
-            'choice_filter'    => null,
+            'choice_filter'    => false,
             'choice_exclusive' => true,
             // 'choice_value'  => function($key)              { return $key;   },   // Return key code
             // 'choice_label'  => function($key, $label, $id) { return $label; },   // Return translated label

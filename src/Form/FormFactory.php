@@ -231,7 +231,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
             if($permittedValues === null) return null;
 
-            return count($permittedValues) == 1 ? $permittedValues[0] : $permittedValues;
+            return count($permittedValues) == 1 ? begin($permittedValues) : $permittedValues;
         }
 
         return $options["choices"] ?? null;
