@@ -15,7 +15,7 @@ class SelectField implements FieldInterface
     
     public const OPTION_CHOICES = 'choices';
     public const OPTION_ICONS   = 'icons';
-    public const OPTION_FILTER  = 'filter';
+    public const OPTION_FILTER  = 'choice_filter';
 
     public const OPTION_DEFAULT_CHOICE = "default_choice";
     public const OPTION_CLASS          = 'class';

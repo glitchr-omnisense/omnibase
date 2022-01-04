@@ -67,6 +67,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'max_filesize' => null,
             'max_files'    => null,
             'mime_types'   => null,
+            'sortable'     => null
         ]);
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -115,21 +116,21 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
             
-            $options["class"]    = $options["class"] ?? $this->formFactory->guessType($event, $options);
-            $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($event, $options);
-            $options["sortable"] = $options["sortable"]   ?? $this->formFactory->guessSortable($event, $options);
+            $options["class"]    = $this->formFactory->guessType($event, $options);
+            $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
+            $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
             $fieldName = $options["entity_file"];
             $form->add($fieldName, $options["form_type"], [
-                'class'        => $options["class"],
-                'allow_delete' => $options["allow_delete"] ?? true,
-                'multiple'     => $options["multiple"] ?? false,
-                'href'         => $options["href"] ?? null,
+                'class'         => $options["class"],
+                'allow_delete'  => $options["allow_delete"] ?? true,
+                'multiple'      => $options["multiple"] ?? false,
+                'href'          => $options["href"] ?? null,
 
-                'max_filesize' => $options["max_filesize"],
-                'max_files'    => $options["max_files"],
-                'mime_types'   => $options["mime_types"],
-                'sortable'     => $options["sortable"]
+                'max_filesize'  => $options["max_filesize"],
+                'max_files'     => $options["max_files"],
+                'mime_types'    => $options["mime_types"],
+                'sortable'      => $options["sortable"]
             ]);
 
             $files = array_map(fn($e) => Uploader::getPublic($e, $fieldName), $data->toArray());
