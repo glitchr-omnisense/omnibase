@@ -1,6 +1,18 @@
 stock:
   unlimited: Unlimited
 
+attribute:
+  empty: Save to update selected attribute fields
+
+select:
+  placeholder: Choose your selection..
+
+collection:
+  empty: Empty
+  
+array:
+  empty: Empty
+  
 fileupload:
   error:
     invalid_token: Token expired.

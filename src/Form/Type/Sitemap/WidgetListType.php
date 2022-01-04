@@ -69,7 +69,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
 
                 $widgetSlot = str_replace("-", ".", $formattedWidget);
-                $this->widgetProvider->deleteCache(Slot::class, $widgetSlot);
+                $this->widgetProvider->deleteCache($this->widgetProvider->getUuidByPath($widgetSlot));
                 $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot);
             }
 
@@ -106,7 +106,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
                 $widgets = $slot ? $slot->getWidgets()->toArray() : [];
                 $form->add($formattedWidget, SelectType::class, $widgetOptions);
-                $form->get($formattedWidget)->setData($widgetOptions["multiple"] ? array_map(fn($w) => strval($w), $widgets) : strval($widgets[0] ?? null));
+                $form->get($formattedWidget)->setData($widgetOptions["multiple"] ? $widgets : begin($widgets) ?? null);
             }
 
             if(count($options["widgets"]) > 0)

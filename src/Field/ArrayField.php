@@ -13,6 +13,7 @@ class ArrayField extends CollectionField implements FieldInterface
 
     public const OPTION_LENGTH             = 'length';
     public const OPTION_PATTERN_FIELD_NAME = 'pattern';
+    public const OPTION_PLACEHOLDER        = 'placeholder';
 
     /**
      * @param string|false|null $label
@@ -32,6 +33,7 @@ class ArrayField extends CollectionField implements FieldInterface
             ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
             ->setCustomOption(self::OPTION_RENDER_EXPANDED, false)
             ->setFormTypeOption(self::OPTION_LENGTH, 0)
+            ->setFormTypeOption(self::OPTION_PLACEHOLDER, null)
             ->setFormTypeOption("allow_add", true)
             ->setFormTypeOption("allow_delete", true);
     }
@@ -39,6 +41,12 @@ class ArrayField extends CollectionField implements FieldInterface
     public function setLength(int $length): self 
     {
         $this->setFormTypeOption(self::OPTION_LENGTH, min(0, $length));
+        return $this;
+    }
+
+    public function setPlaceholder(array $placeholder): self 
+    {
+        $this->setFormTypeOption(self::OPTION_PLACEHOLDER, $placeholder);
         return $this;
     }
 

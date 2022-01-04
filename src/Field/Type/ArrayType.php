@@ -20,7 +20,8 @@ class ArrayType extends CollectionType
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             "pattern" => null,
-            "length" => 0
+            "length" => 0,
+            "placeholder" => []
         ]);
 
         $resolver->setNormalizer('length',       fn(Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
@@ -33,10 +34,7 @@ class ArrayType extends CollectionType
     {
         parent::finishView($view, $form, $options);
         $view->vars["pattern"] = $options["pattern"];
-        // if($options["pattern"] !== null) {
-        //     foreach($view as $childView) 
-        //         $childView->vars['block_prefixes'] = array_filter($childView->vars['block_prefixes'], fn($b) => $b != "array_entry");
-        // }
+        $view->vars["placeholder"] = $options["placeholder"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");
     }

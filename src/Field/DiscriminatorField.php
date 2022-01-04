@@ -17,7 +17,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
     public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';
     public const OPTION_SHOW_INLINE            = 'discriminatorInline';
 
-    public static function new(string $propertyName, ?string $label = null): self
+    public static function new(string $propertyName = "id", ?string $label = null): self
     {
         return (new self())
             ->setProperty($propertyName)

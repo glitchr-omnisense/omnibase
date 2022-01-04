@@ -55,9 +55,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
         parent::configureOptions($resolver);
         
         $resolver->setDefaults([
-            'class' => null,
+            'class'     => null,
             'form_type' => null,
-            'autoload' => true,
+            'autoload'  => true,
+            'href'      => null,
 
             'fields' => [],
             'only_fields' => [],
@@ -79,12 +80,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
         });
 
         $resolver->setNormalizer('autoload', function (Options $options, $value) {
-            return $options["only_fields"] ? false : $value;
+            return !empty($options["only_fields"]) ? false : $value;
         });
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+        $view->vars['href']         = $options["href"];
         $view->vars["multiple"] = $options["multiple"];
         $view->vars["inline"] = $options["inline"];
         $view->vars["row_inline"] = $options["row_inline"];
@@ -112,9 +114,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     'entry_type' => AssociationType::class,
                     'entry_options' => array_merge($options, [
                         'allow_entity' => $options["allow_entity"],
-                        'data_class' => $dataClass,
-                        'multiple' => false,
-                        'label' => false,
+                        'data_class'   => $dataClass,
+                        'multiple'     => false,
+                        'label'        => false,
+                        'href'         => $options["href"] ?? null,
                     ]),
                 ];
                 
@@ -184,8 +187,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $childForms = iterator_to_array($forms);
             foreach($childForms as $fieldName => $childForm) {
 
-                $value = $classMetadata->getFieldValue($entity, $fieldName);
-                
+                $value = null;
+                if($classMetadata->hasField($fieldName))
+                    $value = $classMetadata->getFieldValue($entity, $fieldName);
+
+                if(empty($value)) $value = null;
+
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
                 switch($childFormType) {
                     case IntegerType::class:
@@ -193,8 +200,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     case PercentType::class:
                         $value = intval($value);
                         break;
-                    // case DateTimeType::class:
-                    //     $value = new \DateTime($value);
                 }
 
                 $childForm->setData($value);

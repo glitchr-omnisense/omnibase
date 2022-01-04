@@ -15,5 +15,13 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 class WidgetRepository extends ServiceEntityRepository
 {
-
+    public function findOneByUuid(string $uuid)
+    {
+        return $this->createQueryBuilder("w")
+            ->where('w.uuid = :uuid')
+            ->setParameter('uuid', $uuid)
+            ->leftJoin('w.translations', 't')
+            ->addSelect("t")
+            ->getQuery()->getOneOrNullResult();
+    }
 }

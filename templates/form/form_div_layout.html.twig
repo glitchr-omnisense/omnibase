@@ -76,7 +76,11 @@
 {%- block attribute_widget -%}
 <div class="form-control form-attribute">
     {{ form_widget(form.choice) }}
-    {% if form.intl is defined %} {{ form_widget(form.intl) }} {% endif %}
+    {% if form.intl is defined %}
+        {{ form_widget(form.intl) }}
+    {% else %}
+        <div class="form-text text-muted">{{"@fields.attribute.empty"|trans}}</span></div>
+    {% endif %}
 </div>
 {% endblock attribute_widget %}
 
@@ -94,7 +98,7 @@
     }) %}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
-
+        
 {% endblock select2_widget %}
 
 {%- block discriminator_row -%}
@@ -155,7 +159,7 @@
                         {% set country = form_locale|country %}
 
                         <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="{{ form.vars['id']~"_"~country}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-                            <label {% if form_child.vars['required'] %}class="required"{% endif %}>
+                            <label {% if form_child.vars['required'] or default_locale == form_locale %}class="required"{% endif %}>
                                 <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                             </label>
                         </button>
@@ -507,20 +511,43 @@
         <div class="accordion form-collection-item">
             <div class="accordion-item">
                 <h2 class="accordion-header">
+                    {% if href is not empty and form.vars.value is not null and form.children is empty  %}
+                    <a class="accordion-button collapsed" href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}">
+                    {% else %}
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+
+                    {% endif %}
+
                         <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
                         {{ form_parent(form).vars.entry_label|default(value)|ea_as_string }}
+                    
+                    
+                    {% if href is not empty and form.vars.value is not null and form.children is empty %}
+                    </a>
+                    {% else %}
                     </button>
-
-                    {% if allows_deleting_items %}
-                        {{ delete_item_button }}
                     {% endif %}
+                    
+
+                    <div class="form-collection-buttons">
+                        {% if href is not empty and form.vars.value is not null %}
+                        <button type="button" class="btn btn-link form-collection-link-button">
+                            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
+                        </button>
+                        {% endif %}
+                        {% if allows_deleting_items %}
+                            {{ delete_item_button }}
+                        {% endif %}
+                    </div>
                 </h2>
+
+                {% if form.children is not empty %}
                 <div id="{{ id }}-contents" class="accordion-collapse collapse">
                     <div class="accordion-body">
                         {{ form_widget(form, {attr:attr}) }}
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
 
@@ -529,7 +556,14 @@
 {%- endblock collection2_entry_widget -%}
 
 {%- block collection2_empty -%}
-    <div class="empty collection-empty"></div>
+    <div class="empty collection-empty">
+        {% if not form.vars.allow_add %}
+        <button class="accordion-button collapsed" disabled="disabled" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+            <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
+            {{"@fields.collection.empty"|trans}}
+        </button>
+        {% endif %}
+    </div>
 {%- endblock collection2_empty -%}
 
 {%- block array_row -%}
@@ -547,7 +581,7 @@
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
         'data-empty-array': block('array_empty')
     }) %}
-    
+
     {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
     {%- set attr = attr|merge({'class': 'form-array' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
@@ -642,7 +676,14 @@
 {%- endblock array_entry_widget -%}
 
 {%- block array_empty -%}
-    <div class="empty array-empty"></div>
+    <div class="empty array-empty">
+        {% if not form.vars.allow_add %}
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+            <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
+            {{"@fields.array.empty"|trans}}
+        </button>
+        {% endif %}
+    </div>
 {%- endblock array_empty -%}
 
 {%- block stock_widget -%}

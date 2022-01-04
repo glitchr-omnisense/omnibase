@@ -8,6 +8,7 @@ use Base\Field\IdField;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseSettings;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -203,12 +204,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     
     public function configureEntityCollectionWithResponseParameters(?EntityCollection $entityCollection, KeyValueStore $responseParameters): ?EntityCollection
     {
-        foreach($entityCollection ?? [] as $entity) {
+        foreach($entityCollection ?? [] as $entityDto) {
 
-            $actions = $entity->getActions();
+            $entityDto = $this->configureEntityDto($entityDto);
+            $actions = $entityDto->getActions();
             foreach($actions ?? [] as $action) {
 
-                $instance = $entity->getInstance();
+                $instance = $entityDto->getInstance();
                 $crudController = $this->getCrudControllerFqcn($instance);
 
                 $discriminatorValue = $this->classMetadataManipulator->getDiscriminatorValue($instance);
@@ -225,6 +227,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                     $action->setLinkUrl($url);
                 }
             }
+
+            $actions = $this->configureActionsWithEntityDto($actions, $entityDto);
         }
 
         return $entityCollection;
@@ -260,9 +264,14 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return $extension;
     }
 
-    public function configureActionsWithResponseParameters(Actions $actions, KeyValueStore $responseParameters): Actions
+    public function configureActionsWithEntityDto(ActionCollection $actions, EntityDto $entityDto): ActionCollection
     {
         return $actions;
+    }
+
+    public function configureEntityDto(EntityDto $entityDto): EntityDto
+    {
+        return $entityDto;
     }
 
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore

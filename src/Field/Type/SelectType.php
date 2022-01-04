@@ -25,6 +25,8 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\ChoiceList\ChoiceList;
+use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -79,28 +81,16 @@ class SelectType extends AbstractType implements DataMapperInterface
                 FormFactory::GUESS_FROM_VIEW,
             ],
             
+            // To be implemented if necessary... (currently relying on autocomplete..)
             //'query_builder'   => null,
 
             'choices'          => null,
+            'choice_loader'    => null,
             'choice_filter'    => false,
             'choice_exclusive' => true,
-            // 'choice_value'  => function($key)              { return $key;   },   // Return key code
-            // 'choice_label'  => function($key, $label, $id) { return $label; },   // Return translated label
-            // 'choice_loader' => function (Options $options) {
 
-            //     return ChoiceList::loader($this, new IntlCallbackChoiceLoader(function () use ($options) {
-
-            //         $choices = $options["choices"];
-            //         if(!is_associative($choices)) {
-
-            //             $idx = array_map("strval", $choices);
-            //             $choices = array_replace_keys($choices, array_keys($choices), $idx);
-            //         }
-
-            //         return $choices;
-
-            //     }), $options);
-            // },
+            'choice_value'     => function($value)              { return $value; },   // Return key code
+            'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
 
             'select2'          => [],
             'select2-js'       => $this->baseService->getParameterBag("base.vendor.select2.js"),
@@ -108,7 +98,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
 
             // Generic parameters
-            'placeholder'        => "Choose your selection..",
+            'placeholder'        => "@fields.select.placeholder",
             'capitalize'         => true,
             'language'           => null,
             'required'           => true,
@@ -168,7 +158,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $data);
 
-            if(!$options["choices"]) {
+            if(!$options["choices"] && $options["choice_loader"] === null) {
 
                 $options["choices"] = $this->formFactory->guessChoices($form, $options);
                 $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
@@ -180,8 +170,11 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
 
             $formOptions = [
-                'choices'    => [],
-                'multiple'   => $options["multiple"]
+                'choices'       => [],
+                'choice_loader' => $options["choice_loader"],
+                'choice_label'  => $options["choice_label"],
+                'choice_value'  => $options["choice_value"],
+                'multiple'      => $options["multiple"]
             ];
             
             $form->add('choice', ChoiceType::class, $formOptions);
@@ -405,8 +398,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             if($options["vertical"] != false)
                 $selectOpts["containerCssClass"] .= " select2-selection--vertical";
 
-            if(!array_key_exists("placeholder", $selectOpts))
-                     $selectOpts["placeholder"] = $options["placeholder"] ?? "";
+            if(!array_key_exists("placeholder", $selectOpts) && $options["placeholder"] !== null)
+                     $selectOpts["placeholder"] = $this->translator->trans($options["placeholder"] ?? "", [], "@fields");
 
             if(!array_key_exists("language", $selectOpts))
                      $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));

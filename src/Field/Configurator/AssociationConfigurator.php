@@ -51,6 +51,17 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_DELETE));
         $field->setFormattedValue($field->getValue());
 
+        $crudController = AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"));
+        if($crudController) {
+
+            $field->setFormTypeOption("href", $this->adminUrlGenerator
+                    ->unsetAll()
+                    ->setController($crudController)
+                    ->setAction(Action::EDIT)
+                    ->setEntityId("{0}")
+                    ->generateUrl());
+        }
+
         if ($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
             $this->configureToOneAssociation($field);
         }

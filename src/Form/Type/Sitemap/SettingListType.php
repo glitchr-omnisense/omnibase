@@ -164,7 +164,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                 ]);
 
-                dump($fields,$intlData);
                 $form->get("intl")->setData($intlData);
             }
 

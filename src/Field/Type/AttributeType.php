@@ -126,25 +126,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 }
             } 
         });
-
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use (&$options) {
-
-            $form = $event->getForm();
-            $data = $event->getData();
-
-            dump($data);
-            
-            // if($options["multiple"]) {
-
-            // } else {
-
-            //     $form->add("intl", TranslationType::class, [
-            //         "row_inline"        => true,
-            //         "only_fields" => ["value"],
-            //         "fields" => ["value" => ["label" => false, "form_type" => TextType::class /*$class::getType()*/]]
-            //     ]);
-            // }
-        });
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void
@@ -175,8 +156,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
         if($choiceMultiple !=  $options["multiple"])
             throw new \Exception("Unexpected mismatching between choices and attributes");
 
-        $intlForm       = iterator_to_array($forms)["intl"];
-        
+        // $intlForm       = iterator_to_array($forms)["intl"];
+
         $bakData = clone $viewData;
         if($choiceMultiple) {
 

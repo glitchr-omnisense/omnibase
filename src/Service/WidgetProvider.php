@@ -10,7 +10,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class WidgetProvider implements WidgetProviderInterface
 {    
-    public const __CACHE__ = false;
+    public const __CACHE__ = true;
     protected function isCacheEnabled() 
     {
         if(!self::__CACHE__) return false;
@@ -25,64 +25,87 @@ class WidgetProvider implements WidgetProviderInterface
         $this->cache = $cache;
         $this->widgetRepository = $widgetRepository;
         $this->widgetSlotRepository = $widgetSlotRepository;
+
+        $this->uuidByPath = $this->cache->getItem(self::class."[Slot][uuidByPath]")->get() ?? [];
     }
 
     protected $widgets = [];
-    public function get(string $slug): ?Widget { return $this->getWidget($slug); }
-    public function getWidget(string $slug): ?Widget
+    public function get(string $uuid): ?Widget { return $this->getWidget($uuid); }
+    public function getWidget(string $uuid): ?Widget
     {
-        if($this->hasCache(Widget::class, $slug))
-            return $this->getCache(Widget::class, $slug);
+        if($this->hasCache($uuid))
+            return $this->getCache($uuid);
 
-        $this->widgets[$slug] = $this->widgets[$slug] ?? $this->widgetRepository->findOneBySlug($slug);
-        $this->applyCache(Widget::class, $slug, $this->widget[$slug]);
+        $this->widgets[$uuid] = $this->widgets[$uuid] ?? $this->widgetRepository->findOneByUuid($uuid);
+        $this->applyCache($uuid, $this->widget[$uuid]);
 
-        return $this->widgets[$slug];
+        return $this->widgets[$uuid];
     }
 
-    protected $widgetSlots = [];
-    public function getSlot(string $path): ?Slot
+    protected $uuidByPath = [];
+    public function getSlot(string $path): ?Slot { return $this->getWidgetSlot($path); }
+    public function getWidgetSlot(string $path): ?Slot
     {
-        if($this->hasCache(Slot::class, $path))
-            return $this->getCache(Slot::class, $path);
-
-        $this->slots[$path] = $this->slots[$path] ?? $this->widgetSlotRepository->findOneByInstanceOfAndPath(Slot::class, $path);
+        $uuid = $this->uuidByPath[$path] ?? null;
+        if($this->hasCache($uuid))
+            return $this->getCache($uuid);
         
-        $this->applyCache(Slot::class, $path, $this->slots[$path]);
+        $slot = $this->widgetSlotRepository->findOneByPath($path);
 
-        return $this->slots[$path];
+        $this->uuidByPath[$path] = $slot ? $slot->getUuid() : null;
+        $item = $this->cache->getItem(self::class."[Slot][uuidByPath]");
+        if ($this->isCacheEnabled())
+            $this->cache->save( $item->set($this->uuidByPath) );
+
+        $uuid = $this->uuidByPath[$path] ?? null;
+        $this->widgets[$uuid] = $slot;
+        $this->applyCache($uuid, $this->widgets[$uuid]);
+
+        return $this->widgets[$uuid];
     }
 
-    protected function applyCache($class, string $identifier, $widget)
+    public function getUuidByPath(string $path) { return $this->uuidByPath[$path] ?? null; }
+    protected function applyCache(?string $uuid, $widget)
     {
-        $item = $this->cache->getItem($class."[".$identifier."]");
-        if($this->isCacheEnabled())
+        if($uuid === null) return false;
+        $item = $this->cache->getItem(self::class."[".$uuid."]");
+        if ($this->isCacheEnabled()) {
+
             $this->cache->save( $item->set($widget) );
+            if($widget instanceof Slot) {
+
+                foreach($widget->getWidgets() as $subWidget)
+                    $this->cache->save( $item->set($subWidget) );
+            }
+        }
         
-        // dump($class."[".$identifier."]");
         return true;
     }
     
-    protected function hasCache($class, string $identifier): bool
+    protected function hasCache(?string $uuid): bool
     {
-        // dump("HAS CACHE?: ", $this->cache->getItem($class."[".$identifier."]"));
-        return $this->isCacheEnabled() && $this->cache->getItem($class."[".$identifier."]")->isHit();
+        if($uuid === null) return false;
+        return $this->isCacheEnabled() && $this->cache->getItem(self::class."[".$uuid."]")->isHit();
     }
 
-    protected function getCache($class, string $identifier)
+    protected function getCache(?string $uuid)
     {
-        $item = $this->cache->getItem($class."[".$identifier."]");
+        if($uuid === null) return null;
+
+        $item = $this->cache->getItem(self::class."[".$uuid."]");
+        // dump($uuid, $item->get());
         return $item->get();
     }
 
-    public function deleteCache($class, string $identifier)
+    public function deleteCache(?string $uuid)
     {
-        // dump("-----");
-        // dump($class."[".$identifier."]", $this->hasCache($class, $identifier));
-        // dump($this->cache->getItem($class."[".$identifier."]"))->get();
-        $this->cache->delete($class."[".$identifier."]");
-        // dump($this->cache->getItem($class."[".$identifier."]"))->get();
-
+        if($uuid === null) return $this;
+        // dump($this->hasCache($uuid));
+        $this->cache->delete(self::class."[".$uuid."]");
+        // dump($this->hasCache($uuid));
+        if(array_key_exists($uuid, $this->widgets))
+            unset($this->widgets[$uuid]);
+ 
         return $this;
     }
 }

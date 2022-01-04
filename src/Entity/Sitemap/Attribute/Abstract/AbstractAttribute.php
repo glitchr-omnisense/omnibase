@@ -14,6 +14,7 @@ use Base\Validator\Constraints as AssertBase;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Sitemap\Attribute\Abstract\AbstractAttributeRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
@@ -33,7 +34,8 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
     public        function __iconize()       : ?array { return $this->icon ? [$this->icon] : null; } 
     public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __toString() { return $this->getLabel(); }
+    public function __toString() { return $this->getLabel(). " #".$this->getId() . "[".$this->getCode()."]"; }
+
     public static function getType(): string { return HiddenType::class; }
     public function getOptions(): array { return []; }
     public function getFormattedValue(string $value): mixed { return $value; }
@@ -42,6 +44,8 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
     public function __autocompleteData():array { return ["pattern" => $this->getPattern()]; }
     public function __construct(?string $code = null, ?string $icon = null)
     {
+        $this->attributes = new ArrayCollection();
+
         $this->setCode($code);
         $this->setIcon($icon ?? get_called_class()::__staticIconize()[0]);
     }
@@ -59,6 +63,13 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }
+    public function setAttributes(Collection $attributes): self
+    {
+        $this->attributes = $attributes;
+        return $this;
+    }
+
+
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)

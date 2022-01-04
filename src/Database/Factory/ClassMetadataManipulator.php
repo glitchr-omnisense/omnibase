@@ -134,10 +134,8 @@ class ClassMetadataManipulator
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
         $metadata = $this->getClassMetadata($class);
-        $validFields = array_fill_keys($metadata->getFieldNames(), []);
-
-        if (!empty($associationNames = array_intersect_key($validFields, $metadata->getAssociationNames())))
-            $validFields += $this->getFieldFormType($metadata, $associationNames);
+        $validFields  = array_fill_keys(array_merge($metadata->getFieldNames()), []);
+        $validFields += $this->getAssociationFormType($metadata, $metadata->getAssociationNames());
 
         // Auto detect some fields..
         foreach($validFields as $fieldName => $field) {
@@ -236,7 +234,7 @@ class ClassMetadataManipulator
         return $unmappedFields;
     }
 
-    private function getFieldFormType(ClassMetadata $metadata, array $associationNames): array
+    private function getAssociationFormType(ClassMetadata $metadata, array $associationNames): array
     {
         $fields = [];
 

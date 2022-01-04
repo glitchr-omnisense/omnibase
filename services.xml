@@ -651,7 +651,6 @@
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController"><tag name="ea.crud_controller" /></service>
 
         <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>

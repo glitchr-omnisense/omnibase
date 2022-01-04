@@ -29,12 +29,14 @@ final class WidgetTwigExtension extends AbstractExtension
         ];
     }
 
-    function render_widget(string $slotName, int $position = 0, array $widgetOptions = []): string
+    function render_widget(string $slot, int $position = 0, array $widgetOptions = []): string
     {
-        $widgetSlot = $this->widgetProvider->getSlot($slotName);
+        $widgetSlot = $this->widgetProvider->getSlot($slot);
+        
         if(!$widgetSlot) return "";
 
         $widgets = $widgetSlot->getWidgets();
+        dump($slot, $widgets->toArray());
         $widget  = $widgets->toArray()[$position] ?? null;
         if(!$widget) return "";
 

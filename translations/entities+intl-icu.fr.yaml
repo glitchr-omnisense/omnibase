@@ -44,8 +44,8 @@ thread:
 
 sitemap:
   widget:
-    singular: "widget"
-    plural: "widgets"
+    singular: "personnalisation"
+    plural: "personnalisations"
 
     page:
       singular: "page"
@@ -64,8 +64,8 @@ sitemap:
       plural: "menu"
 
     slot:
-      singular: widget slot
-      plural: "widget slots"
+      singular: emplacement
+      plural: "emplacements"
 
   attribute:
     singular: attribut

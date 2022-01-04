@@ -1,6 +1,18 @@
 stock:
   unlimited: Illimité
 
+attribute:
+  empty: Sauvegarde pour afficher les champs d'attributes selectionnés
+
+select:
+  placeholder: Faites votre selection..
+
+collection:
+  empty: Vide
+
+array:
+  empty: Vide
+
 fileupload:
     error:
       invalid_token: Jeton expiré.

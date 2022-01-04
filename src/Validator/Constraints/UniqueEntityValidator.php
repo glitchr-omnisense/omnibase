@@ -123,7 +123,6 @@ class UniqueEntityValidator extends ConstraintEntityValidator
          * which is the same as the entity being validated, the criteria is
          * unique.
          */
-        dump($result, $entity);
         if (!$result || (1 === \count($result) && current($result) === $entity)) {
             return;
         }

@@ -3,6 +3,8 @@
 namespace Base\Entity\Sitemap\Attribute\Abstract;
 
 use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Traits\TranslationTrait;
+use Base\Database\TranslationInterface;
 use Base\Field\Type\ArrayType;
 use Base\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -23,7 +25,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
     public static function getType(): string { return ArrayType::class; }
     public function getOptions(): array { return ["pattern" => $this->getPattern(), "placeholder" => $this->getPlaceholder()]; }
 
-    public function __toString() { return $this->getPattern(); }
+    // public function __toString() { return $this->getPattern(); }
     public function __construct(?string $code = "website", ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
     {
         parent::__construct($code, $icon);

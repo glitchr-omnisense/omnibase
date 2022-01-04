@@ -5,6 +5,11 @@ namespace Base\Controller\Dashboard\Crud\Sitemap;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\SelectField;
 use Base\Field\TranslationField;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 
 class AttributeCrudController extends AbstractCrudController
 {
