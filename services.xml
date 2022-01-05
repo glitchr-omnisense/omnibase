@@ -477,6 +477,7 @@
 
         <service id="Base\Field\Type\QuillType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
@@ -527,6 +528,11 @@
             <tag name="ea.field_configurator" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Field\Configurator\NumberConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
         </service>
 
         <service id="Base\Field\Configurator\StockConfigurator">

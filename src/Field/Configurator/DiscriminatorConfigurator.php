@@ -39,6 +39,7 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
     {
         $showColumn = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_COLUMN);
         $showInline = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_INLINE);
+        $showLast   = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_LAST_ONLY);
 
         $discriminatorAutoload = $field->getCustomOption(DiscriminatorField::OPTION_DISCRIMINATOR_AUTOLOAD);
         if($discriminatorAutoload)
@@ -74,7 +75,12 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
             $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);
         }
         
-        if($showInline) {
+        dump($showLast);
+        if($showLast) {
+
+            $formattedValues = [end($formattedValues)];
+    
+        } else if($showInline) {
 
             $lastEntry = end($formattedValues);
             $label = array_map(fn($v) => $v["text"], $formattedValues);

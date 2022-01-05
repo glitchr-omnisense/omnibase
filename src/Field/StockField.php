@@ -33,6 +33,18 @@ final class StockField implements FieldInterface
             ->setCustomOption(self::OPTION_STORED_AS_STRING, false);
     }
 
+    public function step(float $step) { return $this->stepUp($step)->stepDown($step); }
+    public function stepUp(float $stepUp) 
+    {
+        $this->setFormTypeOption("stepUp", $stepUp);
+        return $this;
+    }
+    public function stepDown(float $stepDown) 
+    {
+        $this->setFormTypeOption("stepDown", $stepDown);
+        return $this;
+    }
+    
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {

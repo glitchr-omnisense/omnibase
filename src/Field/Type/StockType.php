@@ -20,6 +20,8 @@ class StockType extends NumberType
     {
         parent::buildView($view, $form, $options);
         $view->vars['allow_infinite'] = $options["allow_infinite"];
+        $view->vars["stepUp"]   = $options["stepUp"];
+        $view->vars["stepDown"] = $options["stepDown"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-stock.js");
     }
@@ -27,17 +29,15 @@ class StockType extends NumberType
     public function configureOptions(OptionsResolver $resolver)
     {
         parent::configureOptions($resolver);
-
         $resolver->setDefaults([
-            'allow_infinite' => true
+            'allow_infinite' => true,
+            'stepUp'  => 1,
+            'stepDown' => 1
         ]);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getBlockPrefix(): string
-    {
-        return 'stock';
-    }
+    public function getBlockPrefix(): string { return 'stock'; }
 }

@@ -80,7 +80,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             "currency_target"   => false,
             "currency_label"    => self::LABEL_ONLY,
             "currency_exchange" => ["USD" => 1, "EUR" => 0.90],
-            'currency_list'     => ["USD", "EUR"]
+            'currency_list'     => ["USD", "EUR"],
         ]);
     }
 }

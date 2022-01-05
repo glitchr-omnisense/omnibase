@@ -16,6 +16,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';
     public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';
     public const OPTION_SHOW_INLINE            = 'discriminatorInline';
+    public const OPTION_SHOW_LAST_ONLY         = 'discriminatorLastEntry';
 
     public static function new(string $propertyName = "id", ?string $label = null): self
     {
@@ -29,8 +30,9 @@ class DiscriminatorField extends SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_DISCRIMINATOR_AUTOLOAD, false)
             ->setCustomOption(self::OPTION_SHOW_COLUMN, false)
             ->setCustomOption(self::OPTION_SHOW_INLINE, true)
+            ->setCustomOption(self::OPTION_SHOW_LAST_ONLY, false)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "text")
-            ->setIconAlign(TextAlign::RIGHT)
+            ->setIconAlign(TextAlign::RIGHT)->hideOnForm()
             ->setTextAlign(TextAlign::LEFT)->setColumns(6)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
     }
@@ -40,9 +42,14 @@ class DiscriminatorField extends SelectField implements FieldInterface
         $this->setCustomOption(self::OPTION_SHOW_COLUMN, $show);
         return $this;
     }
-    public function showInline(bool $inlien = true): self
+    public function showInline(bool $inline = true): self
     {
-        $this->setCustomOption(self::OPTION_SHOW_INLINE, $inlien);
+        $this->setCustomOption(self::OPTION_SHOW_INLINE, $inline);
+        return $this;
+    }
+    public function showLastEntry(bool $show = true): self
+    {
+        $this->setCustomOption(self::OPTION_SHOW_LAST_ONLY, $show);
         return $this;
     }
 }

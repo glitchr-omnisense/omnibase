@@ -503,7 +503,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $html = null;
             $data = [];
 
-            $text = $translator ? $translator->enum($entry, $class, Translator::TRANSLATION_PLURAL) : $entry;
+            $text = $translator ? $translator->enum($entry, $class, Translator::TRANSLATION_SINGULAR) : $entry;
             
             $icons = [];
             $icon = $class::getIcons(0)[$entry] ?? [];
