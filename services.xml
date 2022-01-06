@@ -102,7 +102,6 @@
         </service>
 
         <service id="Base\Service\WidgetProvider" public="true">
-            <argument type="service" id="cache.adapter" />
             <argument type="service" id="App\Repository\Sitemap\WidgetRepository" />
             <argument type="service" id="App\Repository\Sitemap\Widget\SlotRepository" />
         </service>
