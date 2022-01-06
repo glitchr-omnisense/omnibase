@@ -164,20 +164,12 @@ namespace {
         return $first !== null ? $array[$first] : null;
     }
 
-    function closest(array $array, $position = -1)
-    {
-        return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array));
-    }
+    function head(object|array &$array):mixed { return array_slice($array, 0, 1)[0] ?? null; }
+    function tail(object|array &$array):array  { return array_slice($array, 1   ); }
 
-    function is_html(?string $str)
-    {
-        return $str != strip_tags($str); 
-    }
-
-    function is_stringeable($value) 
-    {
-        return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString');
-    }
+    function closest(array $array, $position = -1) { return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array)); }
+    function is_html(?string $str)  { return $str != strip_tags($str); }
+    function is_stringeable($value) { return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString'); }
 
     function get_alias($class): string
     {
