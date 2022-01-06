@@ -23,7 +23,7 @@ class MenuCrudController extends WidgetCrudController
                 foreach ( ($callbacks["widgets"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
-                yield TranslationField::new()->showOnIndex('title')->setRequired(false);
+                yield TranslationField::new()->showOnIndex('title');
                 foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
                     yield $yield;
         }]);

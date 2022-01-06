@@ -71,7 +71,7 @@
     
     {% for other in field.formattedValue.others %}
         {% if displayLimit > others|length %}
-            {% set others = others|merge([other]) %}
+            {% set others = others|merge([other|stringify]) %}
         {% elseif displayLimit > 0 %}
             {% set stillMore = others|length != 0 ? ", [..]" : "[..]" %}
         {% endif %}

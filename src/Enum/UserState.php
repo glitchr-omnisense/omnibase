@@ -3,8 +3,9 @@
 namespace Base\Enum;
 
 use Base\Database\Type\SetType;
+use Base\Model\IconizeInterface;
 
-class UserState extends SetType
+class UserState extends SetType implements IconizeInterface
 {
     const NEWCOMER = "USER_NEWCOMER";
     const GHOST    = "USER_GHOST";
@@ -15,9 +16,10 @@ class UserState extends SetType
     const APPROVED = "USER_APPROVED";
     const ENABLED  = "USER_ENABLED";
 
-    public static function getIcons(int $pos = -1, ...$arrays): array
+    public function __iconize(): ?array { return null; }
+    public static function __staticIconize(): ?array
     {
-        $arrays[] = [
+        return [
             self::NEWCOMER => ["fas fa-user-plus"],
             self::GHOST    => ["fas fa-user-ghost"],
             self::BANNED   => ["fas fa-user-slash"],
@@ -27,7 +29,5 @@ class UserState extends SetType
             self::APPROVED => ["fas fa-user-shield"],
             self::ENABLED  => ["fas fa-user"],
         ];
-
-        return parent::getIcons($pos, ...$arrays);
     }
 }

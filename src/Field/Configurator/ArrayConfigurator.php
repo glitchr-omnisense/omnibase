@@ -2,6 +2,7 @@
 
 namespace Base\Field\Configurator;
 
+use Base\Field\ArrayField;
 use Base\Field\Type\CollectionType;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;

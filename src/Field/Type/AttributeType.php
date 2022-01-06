@@ -110,8 +110,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             if($data !== null) {
                 
-                $fields   = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
-                $intlData = array_key_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data->toArray());
+                $fields   = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "help" => $v->getAttributePattern()->getHelp(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
+                $intlData = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data->toArray());
 
                 if(!empty($fields)) {
 
@@ -155,8 +155,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
  
         if($choiceMultiple !=  $options["multiple"])
             throw new \Exception("Unexpected mismatching between choices and attributes");
-
-        // $intlForm       = iterator_to_array($forms)["intl"];
 
         $bakData = clone $viewData;
         if($choiceMultiple) {

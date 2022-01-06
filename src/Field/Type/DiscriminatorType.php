@@ -77,7 +77,7 @@ class DiscriminatorType extends AbstractType
         });
     }
 
-    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = SelectType::FORMAT_TITLECASE) 
+    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_TITLECASE) 
     {
         $entry = implode(".", array_unique(explode(".", $entry)));
 
@@ -87,19 +87,19 @@ class DiscriminatorType extends AbstractType
         $text = $translator->trans($entry.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
         switch($format) {
 
-            case SelectType::FORMAT_TITLECASE:
+            case FORMAT_TITLECASE:
                 $text = mb_ucwords(mb_strtolower($text));
                 break;
 
-            case SelectType::FORMAT_SENTENCECASE:
+            case FORMAT_SENTENCECASE:
                 $text = mb_ucfirst(mb_strtolower($text));
                 break;
 
-            case SelectType::FORMAT_LOWERCASE:
+            case FORMAT_LOWERCASE:
                 $text = mb_strtolower($text);
                 break;
 
-            case SelectType::FORMAT_UPPERCASE:
+            case FORMAT_UPPERCASE:
                 $text = mb_strtoupper($text);
                 break;
         }

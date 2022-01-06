@@ -2,14 +2,14 @@
 
 namespace Base\Controller\Dashboard\Crud\Sitemap\Attribute;
 
-use Base\Controller\Dashboard\Crud\Sitemap\AttributeCrudController;
+use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\TranslationField;
 
 use Base\Field\SelectField;
 use Base\Field\Type\QuillType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
-class HyperlinkCrudController extends AttributeCrudController
+class HyperlinkCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }
 

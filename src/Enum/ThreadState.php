@@ -3,8 +3,9 @@
 namespace Base\Enum;
 
 use Base\Database\Type\EnumType;
+use Base\Model\IconizeInterface;
 
-class ThreadState extends EnumType
+class ThreadState extends EnumType implements IconizeInterface
 {
     const PUBLISHED = "STATE_PUBLISHED";
     const DRAFT     = "STATE_DRAFT";
@@ -18,9 +19,10 @@ class ThreadState extends EnumType
     const REJECTED   = "STATE_REJECTED";
     const DELETED    = "STATE_DELETED";
 
-    public static function getIcons(int $pos = -1, ...$arrays): array
+    public function __iconize(): ?array { return null; }
+    public static function __staticIconize(): ?array
     {
-        $arrays[] = [
+        return [
             self::PUBLISHED => "fas fa-book",
             self::DRAFT     => "fas fa-drafting-compass",
             self::FUTURE    => "fas fa-stopwatch",
@@ -33,7 +35,5 @@ class ThreadState extends EnumType
             self::REJECTED  => "fas fa-times-circle",
             self::DELETED   => "fas fa-trash-alt",
         ];
-
-        return parent::getIcons($pos, ...$arrays);
     }
 }

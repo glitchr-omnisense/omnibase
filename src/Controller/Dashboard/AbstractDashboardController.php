@@ -163,7 +163,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
 
-            $settings = array_key_transforms(function($k, $s): ?array {
+            $settings = array_transforms(function($k, $s): ?array {
                 if($s === null) return null;
                 return [$s->getName(), $s];
             }, $this->baseService->getSettings()->getRawScalar($fields));
@@ -261,7 +261,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if ($role == UserRole::USER) continue;
 
             $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
-            $icon  = UserRole::getIcons(1)[$role] ?? "fas fa-fw";
+            $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw";
             
             $url = $this->adminUrlGenerator
                 ->unsetAll()

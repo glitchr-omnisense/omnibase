@@ -117,8 +117,8 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 if($options["single_locale"] && \count($dataLocale) == 1)
                     $defaultLocale = $locale = $dataLocale[0];
 
-                if($locale != $defaultLocale && !in_array($locale, $options['required_locales'], true))
-                    $entityOptions["required"] = false;
+                if($locale == $defaultLocale || in_array($locale, $options['required_locales'], true))
+                    $entityOptions["required"] = true;
 
                 if($options["multiple"]) {
 
@@ -170,6 +170,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     
         $view->vars["default_locale"]    = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];
+        $view->vars["required_locales"]  = $options["required_locales"];
 
         $view->vars["translations_empty"] = true;
         foreach($form->all() as $childForm) {

@@ -44,7 +44,6 @@ final class ColorType extends AbstractType
             if ($event->getData() == "#00000000" && $options["is_nullable"])
                 $event->setData(null);
 
-            dump($event->getData());
         });
     }
 

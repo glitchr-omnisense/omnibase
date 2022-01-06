@@ -41,6 +41,8 @@ final class AssociationField extends SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_DOCTRINE_ASSOCIATION_TYPE, null);
     }
 
+    public function justDisplay(): self { return $this->allowDelete(false)->allowAdd(false)->autoload(false); }
+
     public function allowDelete(bool $allowDelete = true): self
     {
         $this->setFormTypeOption("allow_delete", $allowDelete);

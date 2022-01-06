@@ -8,6 +8,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Exception\NotFoundResourceException;
+use Base\Service\TranslatorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
@@ -18,7 +19,6 @@ use Twig\TwigFilter;
 
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Error\LoaderError;
 use Twig\TwigFunction;
 
@@ -78,33 +78,35 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters() : array
     {
         return [
-            new TwigFilter('trans',         [$this, 'trans']),
-            new TwigFilter('preg_split',    [$this, 'preg_split']),
-            new TwigFilter('thumbnail',     [$this, 'thumbnail']),
-            new TwigFilter('webp',          [$this, 'webp']),
-            new TwigFilter('trans',         [$this, 'trans']),
-            new TwigFilter('url',           [$this, 'url']),
-            new TwigFilter('joinIfExists',  [$this, 'joinIfExists']),
-            new TwigFilter('time',          [$this, 'time']),
-            new TwigFilter('mimetype',      [$this, 'mimetype']),
-            new TwigFilter('synopsis',      [$this, 'synopsis']),
-            new TwigFilter('extension',     [$this, 'extension']),
-            new TwigFilter('stringify',     [$this, 'stringify']),
-            new TwigFilter('shorten',       [$this, 'shorten']),
-            new TwigFilter('highlight',     [$this, 'highlight']),
-            new TwigFilter('flatten_array', [$this, 'flattenArray']),
-            new TwigFilter('url_decode',    [$this, 'url_decode']),
-            new TwigFilter('filesize',      [$this, 'filesize']),
-            new TwigFilter('singular',      [$this, 'singular']),
-            new TwigFilter('plural',        [$this, 'plural']),
-            new TwigFilter('lang',          [$this, 'lang']),
-            new TwigFilter('country',       [$this, 'country']),
-            new TwigFilter('fontAwesome',   [$this, 'fontAwesome']),
-            new TwigFilter('imagify',       [$this, 'imagify']),
-            new TwigFilter('image',         [$this, 'image'],       ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFilter('datetime',      [$this, 'datetime'],    ['needs_environment' => true]),
-            new TwigFilter('lessThan',      [$this, 'lessThan']),
-            new TwigFilter('greaterThan',   [$this, 'greaterThan'])
+            new TwigFilter('trans',           [$this, 'trans']),
+            new TwigFilter('preg_split',      [$this, 'preg_split']),
+            new TwigFilter('intval',          [$this, 'intval']),
+            new TwigFilter('strval',          [$this, 'strval']),
+            new TwigFilter('thumbnail',       [$this, 'thumbnail']),
+            new TwigFilter('webp',            [$this, 'webp']),
+            new TwigFilter('trans',           [$this, 'trans']),
+            new TwigFilter('url',             [$this, 'url']),
+            new TwigFilter('joinIfExists',    [$this, 'joinIfExists']),
+            new TwigFilter('time',            [$this, 'time']),
+            new TwigFilter('mimetype',        [$this, 'mimetype']),
+            new TwigFilter('synopsis',        [$this, 'synopsis']),
+            new TwigFilter('extension',       [$this, 'extension']),
+            new TwigFilter('stringify',       [$this, 'stringify']),
+            new TwigFilter('shorten',         [$this, 'shorten']),
+            new TwigFilter('highlight',       [$this, 'highlight']),
+            new TwigFilter('flatten_array',   [$this, 'flattenArray']),
+            new TwigFilter('url_decode',      [$this, 'url_decode']),
+            new TwigFilter('filesize',        [$this, 'filesize']),
+            new TwigFilter('singular',        [$this, 'singular']),
+            new TwigFilter('plural',          [$this, 'plural']),
+            new TwigFilter('lang',            [$this, 'lang']),
+            new TwigFilter('country',         [$this, 'country']),
+            new TwigFilter('fontAwesome',     [$this, 'fontAwesome']),
+            new TwigFilter('imagify',         [$this, 'imagify']),
+            new TwigFilter('image',           [$this, 'image'],       ['needs_environment' => true, 'needs_context' => true]),
+            new TwigFilter('datetime',        [$this, 'datetime'],    ['needs_environment' => true]),
+            new TwigFilter('lessThan',        [$this, 'lessThan']),
+            new TwigFilter('greaterThan',     [$this, 'greaterThan'])
         ];
     }
 
@@ -113,10 +115,9 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
 
-    public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) 
-    {
-        return preg_split($pattern, $subject, $limit, $flags);
-    }
+    public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) { return preg_split($pattern, $subject, $limit, $flags); }
+    public function strval(mixed $value):string { return strval($value); }
+    public function intval(mixed $value, int $base = 10):int { return intval($value, $base); }
 
     public function joinIfExists(?array $array, string $separator) 
     {
@@ -453,15 +454,15 @@ final class BaseTwigExtension extends AbstractExtension
         }
 
         if (\is_object($value)) {
-            if (method_exists($value, '__toString')) {
+            if (is_stringeable($value))
                 return (string) $value;
-            }
 
-            if (method_exists($value, 'getId')) {
-                return sprintf('%s #%s', \get_class($value), $value->getId());
-            }
+            if (method_exists($value, 'getId'))
+                return sprintf('%s #%s', $this->translator->entity(get_class($value)), $value->getId());
+            else if (method_exists($value, 'getUuid'))
+                return sprintf('%s #%s', $this->translator->entity(get_class($value)), $value->getUuid());
 
-            return sprintf('%s #%s', \get_class($value), substr(md5(spl_object_hash($value)), 0, 7));
+            return sprintf('%s #%s', $this->translator->entity(get_class($value)), substr(md5(spl_object_hash($value)), 0, 7));
         }
 
         return '';

@@ -33,12 +33,11 @@ class Pagination implements PaginationInterface, Iterator
     
     protected $template = "@Base/paginator/sliding.html.twig";
 
-    public function __construct(Query $query, RouterInterface $router, ?string $parameterName = "page")
+    public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
-        $this->doctrinePaginator = new DoctrinePaginator($query);
-        $this->totalCount = count($this->doctrinePaginator);
+        $this->instance      = ($arrayOrQuery instanceof Query) ? new DoctrinePaginator($arrayOrQuery) : $arrayOrQuery;
+        $this->totalCount    = count_leaves($this->instance);
         $this->parameterName = $parameterName;
-
         $this->build = true;
         $this->router = $router;
     }
@@ -46,16 +45,20 @@ class Pagination implements PaginationInterface, Iterator
     public function rewind(): void { $this->pageIter = 0; }
     public function next(): void   { $this->pageIter++; }
     public function key()          { return ($this->page-1)*$this->pageSize + $this->pageIter+1;    }
-    public function current()      { return $this->getResult()[$this->pageIter]; } 
-    public function valid(): bool  { return $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()); }
+    public function valid(): bool  { return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0; }
+    public function current()      { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
 
-    public function getDoctrinePaginator() { return $this->doctrinePaginator; }
-    public function getQuery() { $this->doctrinePaginator->getQuery(); }
+    public function get() { return $this->instance; }
+    public function getQuery() { $this->isQuery() ? $this->doctrinePaginator->getQuery() : null; }
+    public function isQuery()  { return $this->instance instanceof DoctrinePaginator; }
+
     public function getTotalCount() { return $this->totalCount; }
     public function getTotalPages()
     {
         $pageSize = $this->getPageSize();
-        return ceil(($pageSize < 1 ? 0 : $this->getTotalCount()/$pageSize));
+        
+        if($this->getTotalCount() <= $pageSize) return 1;
+        return ceil(($pageSize < 1 ? 1 : $this->getTotalCount()/$pageSize));
     }
 
     public function getTemplate() { return $this->template; }
@@ -111,20 +114,30 @@ class Pagination implements PaginationInterface, Iterator
         return $this->router->generate($name, array_merge($parameters, [$this->getParameterName() => $page]));
     }
 
+    protected array $lastResult = [];
     public function getResult() { return $this->build(); }
     protected function build() 
     {
         if(!$this->build) return $this->lastResult;
         $this->build = false;
 
+        if($this->page < 1) return ($this->lastResult = []);
         if($this->page > $this->getTotalPages())
             throw new InvalidPageException("Page not found.");
 
-        if($this->page < 1) $this->lastResult = [];
-        else $this->lastResult = $this->doctrinePaginator->getQuery()
-                                      ->setFirstResult($this->pageSize * ($this->page-1))
-                                      ->setMaxResults ($this->pageSize)->getResult();
+        if($this->isQuery()) {
 
-        return $this->lastResult;
+            return $this->lastResult = $this->doctrinePaginator
+                                            ->getQuery()
+                                            ->setFirstResult($this->pageSize * ($this->page-1))
+                                            ->setMaxResults ($this->pageSize)->getResult();
+
+        }
+        
+        return $this->lastResult =  array_slice_recursive(
+                                        $this->get(), 
+                                        $this->pageSize * ($this->page-1), 
+                                        $this->pageSize
+                                    );
     } 
 }

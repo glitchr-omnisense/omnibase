@@ -5,6 +5,8 @@ namespace Base\Field\Type;
 use Base\Entity\Thread;
 use Base\Field\Traits\SelectTypeInterface;
 use Base\Field\Traits\SelectTypeTrait;
+use Base\Model\FontAwesome;
+use Base\Model\SelectInterface;
 use Base\Service\BaseService;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
@@ -21,117 +23,30 @@ use Symfony\Component\Form\FormView;
 //https://codepen.io/peiche/pen/mRBGmR
 //https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml
 
-class FontAwesomeType extends SelectType
+class FontAwesomeType extends SelectType implements SelectInterface
 {
-    protected static $metadata;
+    /**
+     * @var FontAwesome
+     */
+    protected static $instance;
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        if (empty(self::$metadata))
-            self::$metadata = $this->baseService->getParameterBag("base.vendor.font_awesome.metadata");
-
+        self::$instance = new FontAwesome($this->baseService->getParameterBag("base.vendor.font_awesome.metadata"));
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
             'fontawesome-js'    => $this->baseService->getParameterBag("base.vendor.font_awesome.js"),
             'fontawesome-css'   => $this->baseService->getParameterBag("base.vendor.font_awesome.css"),
 
-            'choices' => self::getChoices()
+            "autocomplete" => true,
+            "autocomplete_endpoint" => "autocomplete/fa/500"
         ]);
     }
 
-    public static function getChoices(): array
-    {
-        $choices = [];
-        foreach(self::getIcons() as $key => $icon)
-        {
-            $label  = $icon["label"];
-            $styles = $icon["styles"];
-
-            foreach ($styles as $style)
-                $choices[mb_ucfirst($style)." Style"][$label] = "fa".$style[0]." fa-".$key;
-        }
-
-        return $choices;
-    }
-
-    /*
-     * Available icons
-     */
-    protected static $icons = [];
-    public static function getIcon(string $value = null): string
-    {
-        return self::$icons[$value] ?? "";
-    }
-    public static function getIcons(): array
-    {
-        // Default metadata location
-        if (empty(self::$metadata))
-            self::$metadata = dirname(__DIR__,2)."/Resources/public/vendor/font-awesome/5.15.1/metadata/icons.json";
-
-        if (empty(self::$icons)) {
-
-            self::$icons =
-                (str_ends_with(self::$metadata, "yml") ?
-                    Yaml::parse(file_get_contents(self::$metadata)) :
-                (str_ends_with(self::$metadata, "yaml") ?
-                    Yaml::parse(file_get_contents(self::$metadata)) :
-                (str_ends_with(self::$metadata, "json") ?
-                    json_decode(file_get_contents(self::$metadata), true) : [])));
-        }
-
-        return self::$icons;
-    }
-
-    protected static $version;
-    public static function getVersion()
-    {
-        if( !empty(self::$version) )
-            return self::$version;
-
-        if ( !preg_match('/.*\/([0-9.]*)\/metadata/', self::$metadata ?? "", $match) )
-            return "unk.";
-
-        self::$version = $match[1];
-        return self::$version;
-    }
-
-    public static function getValue(string $name)
-    {
-        if (!array_key_exists($name, self::$icons)) return "";
-        return $name;
-    }
-
-    public static function getValues()
-    {
-        return array_keys(self::$icons);
-    }
-
-    public static function getLabel(string $name = null)
-    {
-        if (!$name)
-            return array_map(function($icon) { return $icon["label"]; }, self::$icons);
-
-        if (!array_key_exists($name, self::$icons)) return "";
-        return self::$icons[$name]["label"];
-    }
-
-    public static function getStyles(string $name = null)
-    {
-        if (!$name)
-            return array_map(function($icon) { return $icon["styles"]; }, self::$icons);
-
-        if (!array_key_exists($name, self::$icons)) return [];
-        return self::$icons[$name]["styles"] . " " ;
-    }
-
-    public static function getUnicode(string $name = null)
-    {
-        if (!$name)
-            return array_map(function($icon) { return $icon["unicode"]; }, self::$icons);
-
-        if (!array_key_exists($name, self::$icons)) return [];
-        return self::$icons[$name]["unicode"];
-    }
-
+    public static function getIds(): array { return array_keys(self::$instance->getEntries()); }
+    public static function getIcon(string $id, int $index = -1): ?string { return $id;  }
+    public static function getText(string $id): ?string { return self::$instance->getLabel($id); }
+    public static function getHtml(string $id): ?string { return null; }
+    public static function getData(string $id): ?array  { return null; }
 }

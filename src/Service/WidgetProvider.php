@@ -9,8 +9,9 @@ use Base\Repository\Sitemap\WidgetRepository;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class WidgetProvider implements WidgetProviderInterface
-{    
-    public const __CACHE__ = true;
+{
+    // NB: Cache is disabled, because I should the implementation using secondary level cache
+    public const __CACHE__ = false; 
     protected function isCacheEnabled() 
     {
         if(!self::__CACHE__) return false;
@@ -37,6 +38,9 @@ class WidgetProvider implements WidgetProviderInterface
             return $this->getCache($uuid);
 
         $this->widgets[$uuid] = $this->widgets[$uuid] ?? $this->widgetRepository->findOneByUuid($uuid);
+        foreach($this->widget[$uuid]->getTranslations() as $t) 
+            $t->fetchAll();
+
         $this->applyCache($uuid, $this->widget[$uuid]);
 
         return $this->widgets[$uuid];
@@ -51,7 +55,7 @@ class WidgetProvider implements WidgetProviderInterface
             return $this->getCache($uuid);
         
         $slot = $this->widgetSlotRepository->findOneByPath($path);
-
+        
         $this->uuidByPath[$path] = $slot ? $slot->getUuid() : null;
         $item = $this->cache->getItem(self::class."[Slot][uuidByPath]");
         if ($this->isCacheEnabled())
@@ -59,6 +63,7 @@ class WidgetProvider implements WidgetProviderInterface
 
         $uuid = $this->uuidByPath[$path] ?? null;
         $this->widgets[$uuid] = $slot;
+
         $this->applyCache($uuid, $this->widgets[$uuid]);
 
         return $this->widgets[$uuid];

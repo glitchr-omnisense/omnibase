@@ -4,7 +4,7 @@ namespace {
 
     use Base\BaseBundle;
 
-function interpret_link($input)
+    function interpret_link($input)
     {
         return preg_replace_callback(
             "@
@@ -283,7 +283,46 @@ function interpret_link($input)
         return array_map($func, $array);
     }
 
-    function array_key_transforms(callable $callback, array $array, bool $checkReturnType = true): array {
+    function count_leaves(array $array)
+    {
+        $counter = 0;
+        array_map_recursive(function($k) use (&$counter) { $counter++; }, $array);
+        return $counter;
+    }
+
+    define("FORMAT_IDENTITY",     0); // "no changes"
+    define("FORMAT_TITLECASE",    1); // Lorem Ipsum Dolor Sit Amet
+    define("FORMAT_SENTENCECASE", 2); // Lorem ipsum dolor sit amet
+    define("FORMAT_LOWERCASE",    3); // lorem ipsum dolor sit amet
+    define("FORMAT_UPPERCASE",    4); // LOREM IPSUM DOLOR SIT AMET
+    
+    function castcase(string $str, int $format = 0): string
+    {
+        switch($format) {
+
+            case FORMAT_TITLECASE:
+                return mb_ucwords(mb_strtolower($str));
+                break;
+
+            case FORMAT_SENTENCECASE:
+                return mb_ucfirst(mb_strtolower($str));
+                break;
+
+            case FORMAT_LOWERCASE:
+                return mb_strtolower($str);
+                break;
+
+            case FORMAT_UPPERCASE:
+                return mb_strtoupper($str);
+                break;
+
+            default:
+            case FORMAT_IDENTITY:
+                return $str;
+        }
+    }
+
+    function array_transforms(callable $callback, array $array, bool $checkReturnType = true): array {
 
         $reflection = new ReflectionFunction($callback);
         if($checkReturnType) {
@@ -321,14 +360,42 @@ function interpret_link($input)
             }
 
             if($ret === null) continue;
-            list($tKey, $tEntry) = [$ret[0] ?? $key, $ret[1] ?? $entry];
-            if($tKey === null) continue;
+            list($tKey, $tEntry) = [$ret[0] ?? count($tArray), $ret[1] ?? $entry];
             $tArray[$tKey] = $tEntry;
 
             $counter++;
         }
 
         return $tArray;
+    }
+
+    function array_filter_recursive(array $array, ?callable $callback, int $mode = 0) 
+    {
+        return array_transforms(function($k,$v,$i,$_) use ($callback, $mode):?array {
+            return [$k, is_array($v) ? array_transforms($_, array_filter($v, $callback, $mode)) : $v];
+        }, $array);
+    }
+
+    function array_slice_recursive(array $array, int $offset, ?int $length, bool $preserve_keys = false): array
+    {
+        $offsetCounter = 0;
+        $lengthCounter = 0;
+        return array_transforms(function($k, $v, $i, $callback) use (&$offsetCounter, $offset, &$lengthCounter, $length):?array {
+
+            if(is_array($v)) {
+                $v = array_transforms($callback, $v);
+                $array = empty($v) ? null : [$k, $v];
+                return $array;
+            }
+
+            $array = ($offsetCounter < $offset || ($lengthCounter >= $length)) ? null : [$k,$v];
+            if($array !== null) $lengthCounter++;
+
+            $offsetCounter++;
+            return $array;
+
+        }, $array);
+
     }
 
     function array_flatten($array = null)
@@ -374,9 +441,7 @@ function interpret_link($input)
     function array_keys_delete($keys, array $array) 
     {
         if(!is_array($keys)) $keys = [$keys => null];
-
-        $keys = array_keys($keys);
-        if(is_associative($keys))
+        if (is_associative($keys))
             throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
 
         return array_diff($array, $keys);
@@ -395,7 +460,7 @@ function interpret_link($input)
     {
         $regex = '/(?:\w*:)*\s*(?:"([^"]*)"|([^,;\/""<>]*))?\s*(?:(?:[,;\/]|<|\s+|^)([^<@\s;,]+@[^>@\s,;\/]+)>?)\s*/';
         if (preg_match_all($regex, $addresses, $matches, PREG_SET_ORDER) > 0)
-            $matches = array_key_transforms(fn($k, $x): array => [trim($x[3]), trim($x[1] . $x[2])], $matches);
+            $matches = array_transforms(fn($k, $x): array => [trim($x[3]), trim($x[1] . $x[2])], $matches);
 
         return $matches;
     }

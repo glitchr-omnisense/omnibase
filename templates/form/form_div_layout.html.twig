@@ -132,7 +132,7 @@
 
 {%- block translatable_widget -%}
     {% set row_attr = row_attr|merge({'class': 'form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
-    <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+    <div id="{{ form.vars['id'] }}" {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
         
     {% if form.children|length == 1 and single_locale %}
 
@@ -155,11 +155,9 @@
                     {% if form_locale in form.vars.available_locales %}
                     <li class="nav-item" role="presentation">
 
-                        {% set lang    = form_locale|lang %}
                         {% set country = form_locale|country %}
-
-                        <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="{{ form.vars['id']~"_"~country}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~country}}" type="button" role="tab" aria-controls="{{country}}" aria-selected="true">
-                            <label {% if form_child.vars['required'] or default_locale == form_locale %}class="required"{% endif %}>
+                        <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~form_locale}}" type="button" role="tab" aria-controls="{{form_locale}}" aria-selected="true">
+                            <label {% if form_locale == default_locale or form_locale in required_locales %}class="required"{% endif %}>
                                 <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                             </label>
                         </button>
@@ -171,9 +169,7 @@
                 <div class="tab-content" id="{{ form.vars['id'] }}_tab">
                 {% for form_locale, formChild in form.children %}
                     {% if form_locale in form.vars.available_locales %}
-                        {% set lang    = form_locale|lang %}
-                        {% set country = form_locale|country %}
-                        <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{ form.vars['id']~"_"~country}}" role="tabpanel" aria-labelledby="{{ form.vars['id']~"_"~country}}-tab">
+                        <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}" role="tabpanel" aria-labelledby="{{ form.vars['id']~"_"~form_locale}}-tab">
                             {% for row in formChild %}
                                 {{ form_row(row) }}
                             {% endfor %}
@@ -490,7 +486,7 @@
 
         {% if row_inline == false %}
             {% if form_parent(form).vars.entry_label == true %}
-                <label>{{ value|ea_as_string }}</label>
+                <label>{{ value|stringify }}</label>
             {% endif %}
             <div class="form-collection-inline">
             {{ form_widget(form, {attr:attr}) }}
@@ -498,6 +494,7 @@
         {% else %}
             {{ form_widget(form, {attr:attr}) }}
         {% endif %}
+        
     {% else %}
 
         {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
@@ -515,12 +512,10 @@
                     <a class="accordion-button collapsed" href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}">
                     {% else %}
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
-
                     {% endif %}
 
-                        <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-                        {{ form_parent(form).vars.entry_label|default(value)|ea_as_string }}
-                    
+                    <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
+                    {{ form_parent(form).vars.entry_label|default(value)|stringify }}
                     
                     {% if href is not empty and form.vars.value is not null and form.children is empty %}
                     </a>
@@ -587,7 +582,7 @@
 
     {% if form.children is not empty or allow_add != false or form.vars.pattern is not empty %}
     <div class="form-group">
-        {{ form_label(form)}}
+        <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
         {% if form.vars.pattern is not empty %}
             <div class="input-group mb-3">
 
@@ -646,6 +641,12 @@
 {%- block array_entry_widget -%}
     
     {% set pattern = form_parent(form).vars.pattern|default("") %}
+    {% set placeholder = form_parent(form).vars.placeholder|default([])%}
+    {% set key = form.vars.name|intval %}
+    {% if key in placeholder|keys and placeholder[key] is not empty %}
+        {% set attr = attr|merge({'placeholder': placeholder[key]}) %}
+
+    {% endif %}
     {% if pattern is not empty %}
         {{ form_widget(form, {attr:attr}) }}
     {% else %}

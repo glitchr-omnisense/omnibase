@@ -152,7 +152,6 @@ class Slugify extends AbstractAnnotation
 
         $classMetadata = $this->getClassMetadata(get_class($entity));
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
-        dump($invalidSlugs);
 
         $defaultInput = $this->getFieldValue($entity, $property);
         $slug = $this->getSlug($entity, $property, $defaultInput, $invalidSlugs);

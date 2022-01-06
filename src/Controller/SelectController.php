@@ -4,6 +4,7 @@ namespace Base\Controller;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\Type\SelectType;
+use Base\Model\FontAwesome;
 use Base\Service\BaseService;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectController extends AbstractController
@@ -24,7 +26,7 @@ class SelectController extends AbstractController
      */
     protected $paginator;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
+    public function __construct(CacheInterface $cache, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
     {
         $this->hashIds = new Hashids();
         $this->entityManager = $entityManager;
@@ -32,6 +34,7 @@ class SelectController extends AbstractController
         $this->paginator = $paginator;
         $this->translator = $translator;
         $this->baseService = $baseService;
+        $this->cache = $cache;
     }
 
     public function encode(array $array) : string
@@ -55,13 +58,13 @@ class SelectController extends AbstractController
         $token   = $dict["token"] ?? null;
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
-        $page    = $dict["page"] ?? 0;
         $class   = $dict["class"] ?? null;
+        $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
         $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
         
-            $term = $request->get("term") ?? "";
+            $term = mb_strtolower($request->get("term")) ?? "";
             $page = $request->get("page") ?? 1;
 
             $results = [];
@@ -79,23 +82,62 @@ class SelectController extends AbstractController
                 $pagination = $book->getTotalPages() > $book->getPage();
 
                 foreach($book as $i => $entry)
-                    $results[] = SelectType::getFormattedValues($entry, $class, $this->translator);
+                    $results[] = SelectType::getFormattedValues($entry, $class, $this->translator, $format);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = SelectType::getFormattedValues($value, $class, $this->translator);
+                    $results[] = SelectType::getFormattedValues($value, $class, $this->translator, $format);
             }
 
             $array = [];
             $array["pagination"] = ["more" => $pagination];
             $array["results"] = !empty($results) ? $results : [];
-            $array["results"] = array_values(array_filter($array["results"], fn($r) => !empty($fields) || str_contains(strval($r["text"]), $term)));
+            $array["results"] = array_values(array_filter($array["results"], fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
 
             return new JsonResponse($array);
         }
-        
+
+        $array = ["status" => "Invalid request"];
+        return new JsonResponse($array, 500);
+    }
+
+    /**
+     * @Route("/autocomplete/fa/{pageSize}/{hashid}", name="ux_autocomplete_fa")
+     */
+    public function AutocompleteFontAwesome(Request $request, int $pageSize, string $hashid): Response
+    {
+        $dict    = $this->decode($hashid);
+        $token   = $dict["token"] ?? null;
+        $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+
+        $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
+        if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
+
+            $term = mb_strtolower($request->get("term")) ?? "";
+            $page = $request->get("page") ?? 1;
+
+            $fa = new FontAwesome($this->baseService->getParameterBag("base.vendor.font_awesome.metadata"));
+            $entries = $fa->getChoices($term);
+
+            $book = $this->paginator->paginate($entries, $page, $pageSize);
+            $pagination = $book->getTotalPages() > $book->getPage();
+            $array["pagination"] = ["more" => $pagination];
+            $results = $book->current();
+
+            $array["results"] = array_transforms(function($k,$v,$i,$callback) use ($format): ?array {
+                
+                if(is_array($v))
+                    return [null, ["text" => $k, "children" => array_transforms($callback, $v)]];
+
+                return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $format)]];
+
+            }, !empty($results) ? $results : []);
+
+            return new JsonResponse($array);
+        }
+
         $array = ["status" => "Invalid request"];
         return new JsonResponse($array, 500);
     }

@@ -57,7 +57,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
 {
     use BaseTrait;
     
-    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcons(0)[$r], $this->getRoles()); }
+    public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __staticIconize() : ?array { return ["fas fa-user"]; } 
 
     // DEPRECATED: These two methods should soon be removed  in S6.0

@@ -100,14 +100,14 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $view->vars["allow_delete"] = $options["allow_delete"];
 
         $data = $form->getData();
-        $view->vars["entityId"] = json_encode(array_key_transforms(function($k,$e) use ($options):array {
+        $view->vars["entityId"] = json_encode(array_transforms(function($k,$e) use ($options):array {
 
             $path = PropertyAccess::createPropertyAccessor()->getValue($e, $options["entity_file"]);
             return [basename($path), $e->getId()];
 
         }, ($data instanceof Collection) ? $data->toArray() : []));
     }
-    
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
@@ -115,7 +115,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-            
+
             $options["class"]    = $this->formFactory->guessType($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);

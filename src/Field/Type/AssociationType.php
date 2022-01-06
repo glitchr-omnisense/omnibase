@@ -155,7 +155,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     unset($field['form_type']);
 
                     $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
-                    if( $isNullable) $field['required'] = false;
+                    $field['required'] = !$isNullable;
 
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];
                     unset($field['allow_entity']);

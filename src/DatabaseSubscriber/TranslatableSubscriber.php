@@ -33,7 +33,7 @@ class TranslatableSubscriber implements EventSubscriber
 
     public function prePersist(LifecycleEventArgs $event)
     {
-        if (is_subclass_of($event->getEntity(), TranslationInterface::class, true)) 
+        if (is_subclass_of($event->getEntity(), TranslationInterface::class, true))
             $this->removeIfEmpty($event->getEntity());
     }
 
@@ -61,10 +61,9 @@ class TranslatableSubscriber implements EventSubscriber
             return; // Class has not yet been fully built, ignore this event
 
         if ($classMetadata->isMappedSuperclass) return;
-
+        
         if (is_subclass_of($classMetadata->reflClass->getName(), TranslatableInterface::class, true))
             $this->mapTranslatable($classMetadata);
-
         if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))  
             $this->mapTranslation($classMetadata);
     }
@@ -84,25 +83,58 @@ class TranslatableSubscriber implements EventSubscriber
 
     private function mapTranslatable(ClassMetadataInfo $classMetadataInfo): void
     {
-        if ($classMetadataInfo->hasAssociation('translations'))
-            return;
+        if($classMetadataInfo->hasAssociation('translations')) {
+        
+            $mapping = $classMetadataInfo->getAssociationMapping("translations");
+            $targetEntity = $mapping["targetEntity"] ?? null;
 
-        $classMetadataInfo->mapOneToMany([
-            'fieldName' => 'translations',
-            'mappedBy' => 'translatable',
-            'indexBy' => self::LOCALE,
-            'cascade' => ['persist', 'merge', 'remove'],
-            'fetch' => $this->convertFetchString("LAZY"),
-            'targetEntity' => $classMetadataInfo->getReflectionClass()
-                ->getMethod('getTranslationEntityClass')
-                ->invoke(null),
-            'orphanRemoval' => true,
-        ]);
+            $preferredTargetEntity = $classMetadataInfo->getReflectionClass()
+            ->getMethod('getTranslationEntityClass')
+            ->invoke(null);
+
+            if(is_subclass_of($preferredTargetEntity, $targetEntity)) {
+                $classMetadataInfo->associationMappings["translations"]["targetEntity"] = $preferredTargetEntity;
+                $classMetadataInfo->associationMappings["translations"]["sourceEntity"] = $classMetadataInfo->getName();
+                $classMetadataInfo->associationMappings["translations"]["declared"] = $classMetadataInfo->getName();
+            }
+
+        } else {
+        
+        
+            $targetEntity = $classMetadataInfo->getReflectionClass()
+                                                ->getMethod('getTranslationEntityClass')
+                                                ->invoke(null);
+
+            $classMetadataInfo->mapOneToMany([
+                'fieldName' => 'translations',
+                'mappedBy' => 'translatable',
+                'indexBy' => self::LOCALE,
+                'cascade' => ['persist', 'merge', 'remove'],
+                'fetch' => $this->convertFetchString("LAZY"),
+                'targetEntity' => $targetEntity,
+                'orphanRemoval' => true,
+            ]);
+        }
     }
 
     private function mapTranslation(ClassMetadataInfo $classMetadataInfo): void
     {
-        if(!$classMetadataInfo->hasAssociation('translatable')) {
+        if($classMetadataInfo->hasAssociation('translatable')) {
+
+            $mapping = $classMetadataInfo->getAssociationMapping("translatable");
+            $targetEntity = $mapping["targetEntity"] ?? null;
+
+            $preferredTargetEntity = $classMetadataInfo->getReflectionClass()
+            ->getMethod('getTranslatableEntityClass')
+            ->invoke(null);
+
+            if(is_subclass_of($preferredTargetEntity, $targetEntity)) {
+                $classMetadataInfo->associationMappings["translatable"]["targetEntity"] = $preferredTargetEntity;
+                $classMetadataInfo->associationMappings["translatable"]["sourceEntity"] = $classMetadataInfo->getName();
+                $classMetadataInfo->associationMappings["translatable"]["declared"] = $classMetadataInfo->getName();
+            }
+
+        } else {
 
             $classMetadataInfo->mapManyToOne([
                 'fieldName'   => 'translatable',

@@ -2,35 +2,56 @@
 
 namespace Base\Database\Type;
 
-use Base\Database\NamingStrategy;
-use Base\Model\IconInterface;
+use Base\Model\IconizeInterface;
+use Base\Model\SelectInterface;
+use Base\Service\Translator;
+use Base\Service\TranslatorInterface;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use UnexpectedValueException;
 
-abstract class EnumType extends Type implements IconInterface
+abstract class EnumType extends Type implements SelectInterface
 {
-    public static function getIcons(int $pos = -1, ...$arrays): array
+    public static function getIds(): array { return array_keys(self::getIcons()); }
+    public static function getIcons(): array 
     {
-        return array_map(function($values) use ($pos) {
-            if(is_array($values)) return ($pos < 0 ? $values : closest($values, $pos));
-            else return $values;
-        }, array_union(...$arrays));
+        $class = static::class;
+        $icons = static::class::__staticIconize();
+
+        while($class) {
+
+            if(class_implements_interface($class, IconizeInterface::class)) {
+
+                if( ($missingKeys = array_keys_delete(array_keys($class::__staticIconize()), $class::getPermittedValues(0))) )
+                    throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
+
+                $icons = array_union($icons, $class::__staticIconize());
+            }
+
+            $class = get_parent_class($class);
+        }
+
+        return $icons;
     }
 
+    public static function getIcon(string $id, int $index = -1): ?string { return array_map( fn($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons() )[$id] ?? null; }
+    public static function getText(string $id, ?TranslatorInterface $translator = null): ?string { return $translator ? $translator->enum($id, get_called_class(), Translator::TRANSLATION_SINGULAR) : $id; }
+    public static function getHtml(string $id): ?string { return null; }
+    public static function getData(string $id): ?array { return null; }
+
+    public function getName() : string { return self::getStaticName(); }
     public static function getStaticName() { 
         $array = explode('\\', get_called_class());
         return camel_to_snake(end($array));
     }
 
-    public function getName() : string { return self::getStaticName(); }
     public static function getPermittedValuesByClass()
     {
         $refl = new \ReflectionClass(get_called_class());
-        if($refl->getName() == self::class) return [];
+        if(in_array($refl->getName(), [EnumType::class, SetType::class])) return [];
 
         $permittedValues = [$refl->getName() => $refl->getName()::getPermittedValues(false)];
-        while(($refl = $refl->getParentClass()) && $refl->getName() != self::class && $refl->getName() != Type::class)
+        while(($refl = $refl->getParentClass()) && !in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class)
             $permittedValues[$refl->getName()] = $refl->getName()::getPermittedValues(false);
 
         return $permittedValues;
@@ -42,11 +63,8 @@ abstract class EnumType extends Type implements IconInterface
         if($inheritance) $permittedValues = array_values($refl->getConstants());
         else $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
 
-        if($refl->getName() != self::class && $refl->getName() != Type::class && !$permittedValues)
-            throw new \Exception("Enum type \"".get_called_class()."\" is empty");
-
-        if( ($missingKeys = array_keys_delete(get_called_class()::getIcons(), $permittedValues)) )
-            throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
+        if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$permittedValues)
+            throw new \Exception("\"".get_called_class()."\" is empty");
 
         return $permittedValues;
     }
@@ -55,7 +73,6 @@ abstract class EnumType extends Type implements IconInterface
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
-
         return "ENUM(".implode(", ", $permittedValues).")";
     }
 

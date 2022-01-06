@@ -8,6 +8,7 @@ use Base\Database\Type\SetType;
 use Base\Form\FormFactory;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
+use Base\Model\SelectInterface;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
@@ -45,11 +46,6 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     /** @var FormFactory */
     protected $formFactory;
-
-    public const FORMAT_TITLECASE    = "FORMAT_TITLECASE";
-    public const FORMAT_SENTENCECASE = "FORMAT_SENTENCECASE";
-    public const FORMAT_LOWERCASE    = "FORMAT_LOWERCASE";
-    public const FORMAT_UPPERCASE    = "FORMAT_UPPERCASE";
     
     public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, BaseService $baseService)
     {
@@ -195,8 +191,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             if ($options["class"]) {
 
+                $innerType = get_class($form->getConfig()->getType()->getInnerType());
                 $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-                $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use (&$options) : ?array { 
+                $formattedData = array_transforms(function ($key, $value, $i, $callback) use ($innerType, &$options) : ?array { 
 
                     if($value === null) return null;
 
@@ -205,23 +202,19 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         $text = null;
                         if(class_exists($key)) {
-                        
+
                             $text = null;
                             if($this->classMetadataManipulator->isEntity($key)  ) $text = $this->translator->entity($key, Translator::TRANSLATION_PLURAL); 
                             if($this->classMetadataManipulator->isEnumType($key)) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
                             if($this->classMetadataManipulator->isSetType($key) ) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
                         }
-                        
+
                         $text = empty($text) ? $key : $text;
-                        return [$i, ["text" => $text, "children" => array_key_transforms($callback, $value)]];
+                        return [null, ["text" => $text, "children" => array_transforms($callback, $value)]];
                     }
 
                     // Format values
-                    $entry = self::getFormattedValues(
-                        $value, $options["class"], $this->translator, 
-                        $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE
-                    );
-
+                    $entry = self::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE);
                     if($entry === null) return null;
 
                     if(!$options["class"]) $entry["text"] = $key;
@@ -244,38 +237,37 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $missingData = $classRepository->findById($missingData)->getResult();
                 }
 
-                $formattedData += array_key_transforms(function ($key, $value, $i, $callback) use (&$options) : array { 
-                    
+                $innerType = $form->getConfig()->getType()->getInnerType();
+                $formattedData += array_transforms(function ($key, $value, $i, $callback) use ($innerType, &$options) : array { 
+
                     // Recursive categories
                     if(is_array($value)) {
 
                         $text = null;
                         if(class_exists($key)) {
-                        
+
                             $text = null;
                             if($this->classMetadataManipulator->isEntity($key)  ) $text = $this->translator->entity($key, Translator::TRANSLATION_PLURAL); 
                             if($this->classMetadataManipulator->isEnumType($key)) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
                             if($this->classMetadataManipulator->isSetType($key) ) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
                         }
-                        
+
                         $text = empty($text) ? $key : $text;
-                        return [$i, ["text" => $text, "children" => array_key_transforms($callback, $value)]];
+                        return [null, ["text" => $text, "children" => array_transforms($callback, $value)]];
                     }
 
                     // Format values
-                    $entry = self::getFormattedValues($value, $options["class"], $this->translator, 
-                        $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE
-                    );
+                    $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                    $entry = self::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $entryFormat);
 
                     if(!$options["class"]) $entry["text"] = $key;
-
                     return [$entry["id"], $entry["text"]];
 
                 }, $missingData ?? []);
 
                 //
                 // Compute in choice list format
-                $choices = array_filter(array_key_transforms(function($key, $value) use($formattedData) : ?array {
+                $choices = array_filter(array_transforms(function($key, $value) use($formattedData) : ?array {
 
                     $id    = $value;
                     $label = $formattedData[$id] ?? null;
@@ -364,6 +356,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "class" => $options["class"], 
                 "fields" => $options["autocomplete_fields"],
                 "filters" => $options["choice_filter"],
+                'capitalize' => $options["capitalize"],
                 "token" => $this->csrfTokenManager->getToken("select2")->getValue()
             ];
 
@@ -420,26 +413,29 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Format preselected values
             $selectedData  = [];
             $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-            $formattedData = array_key_transforms(function ($key, $value, $i, $callback) use ($dataset, &$options, &$selectedData) : ?array { 
+
+            $innerType = get_class($form->getConfig()->getType()->getInnerType());
+            $formattedData = array_transforms(function ($key, $value, $i, $callback) use ($innerType, $dataset, &$options, &$selectedData) : ?array { 
 
                 // Recursive categories
                 if(is_array($value)) {
 
                     $text = null;
                     if(class_exists($key)) {
-                    
+
                         $text = null;
-                        if($this->classMetadataManipulator->isEntity($key)  ) $text = $this->translator->entity($key, Translator::TRANSLATION_PLURAL); 
+                        if($this->classMetadataManipulator->isEntity($key)  ) $text = $this->translator->entity(      $key, Translator::TRANSLATION_PLURAL); 
                         if($this->classMetadataManipulator->isEnumType($key)) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
                         if($this->classMetadataManipulator->isSetType($key) ) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
                     }
-                    
+
                     $text = empty($text) ? $key : $text;
-                    return [$i, ["text" => $text, "children" => array_key_transforms($callback, $value)]];
+                    return [null, ["text" => $text, "children" => array_transforms($callback, $value)]];
                 }
 
                 // Format values
-                $entry = self::getFormattedValues($value, $options["class"], $this->translator, $options["capitalize"] ? self::FORMAT_TITLECASE : self::FORMAT_SENTENCECASE);
+                $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                $entry = self::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $entryFormat);
                 if(!$entry) return null;
 
                 // Check if entry selected
@@ -450,12 +446,11 @@ class SelectType extends AbstractType implements DataMapperInterface
                 if($entry["selected"])
                     $selectedData[]  = $entry["id"];
 
-                    // Special display if no class found
-                if(!$options["class"]) {
-
+                // Special display if no class/innerType found
+                if(!array_key_exists("text", $entry))
                     $entry["text"] = $key;
+                if(!array_key_exists("text", $entry))
                     $entry["icon"] = $value;
-                }
 
                 return [$i, $entry];
 
@@ -493,24 +488,10 @@ class SelectType extends AbstractType implements DataMapperInterface
         }
     }
 
-    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = self::FORMAT_SENTENCECASE) 
+    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_SENTENCECASE) 
     {
         if($entry == null) return null;
-        if (is_subclass_of($class, EnumType::class) || is_subclass_of($class, SetType::class)) {
-            
-            $className = class_basename($class);
-            $id = $entry;
-            $html = null;
-            $data = [];
-
-            $text = $translator ? $translator->enum($entry, $class, Translator::TRANSLATION_SINGULAR) : $entry;
-            
-            $icons = [];
-            $icon = $class::getIcons(0)[$entry] ?? [];
-            
-            if($icon) $icons[] = $icon;
-
-        } else if(is_object($entry) && $class !== null) {
+        if(is_object($entry) && $class !== null) {
 
             $accessor = PropertyAccess::createPropertyAccessor();
             $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
@@ -536,38 +517,30 @@ class SelectType extends AbstractType implements DataMapperInterface
             if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
                 $icons = $entry::__staticIconize();
 
+            $icon = begin($icons);
+
+        } else if(class_implements_interface($class, SelectInterface::class)) {
+
+            $id    = $entry;
+            $icon  = $class::getIcon($entry, 0);
+            $text  = $class::getText($entry, $translator);
+            $html  = $class::getHtml($entry);
+            $data  = $class::getData($entry);
+
         } else {
 
-            $icons = [];
             $id    = is_array($entry) ? $entry[0] : $entry;
+            $icon  = null;
             $text  = is_array($entry) ? $entry[1] : $entry;
             $html  = null;
             $data  = [];
         }
 
-        switch($format) {
-
-            case self::FORMAT_TITLECASE:
-                $text = mb_ucwords(mb_strtolower($text));
-                break;
-
-            case self::FORMAT_SENTENCECASE:
-                $text = mb_ucfirst(mb_strtolower($text));
-                break;
-
-            case self::FORMAT_LOWERCASE:
-                $text = mb_strtolower($text);
-                break;
-
-            case self::FORMAT_UPPERCASE:
-                $text = mb_strtoupper($text);
-                break;
-        }
-
-        return [
+        return
+        [
             "id"   => $id ?? null,
-            "icon" => begin($icons),
-            "text" => $text,
+            "icon" => $icon,
+            "text" => castcase($text, $format),
             "html" => $html,
             "data" => $data
         ];

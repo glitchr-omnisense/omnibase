@@ -41,9 +41,11 @@ class AbstractAttributeCrudController extends AbstractCrudController
             yield $yield;
 
         yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
+
         yield FontAwesomeField::new('icon')->setTextAlign(TextAlign::LEFT)->setColumns(6);
         foreach ( ($callbacks["icon"] ?? $defaultCallback)() as $yield)
             yield $yield;
+
         yield SlugField::new('code')->setColumns(6)->setTargetFieldName("translations.label");
         foreach ( ($callbacks["code"] ?? $defaultCallback)() as $yield)
             yield $yield;
@@ -53,7 +55,7 @@ class AbstractAttributeCrudController extends AbstractCrudController
         foreach ( ($callbacks["translations"] ?? $defaultCallback)() as $yield)
             yield $yield;
 
-        yield AssociationField::new("attributes")->allowAdd(false)->allowDelete(false)->autoload(false);
+        yield AssociationField::new("attributes")->justDisplay();
         foreach ( ($callbacks["attributes"] ?? $defaultCallback)() as $yield)
             yield $yield;
     }

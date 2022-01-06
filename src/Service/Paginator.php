@@ -15,14 +15,14 @@ class Paginator implements PaginatorInterface
         $this->baseService = $baseService;
     }
 
-    public function paginate(Query $query, int $page = 0, int $pageSize = 0, int $pageRange = 0): ?Pagination
+    public function paginate(array|Query $arrayOrQuery, int $page = 0, int $pageSize = 0, int $pageRange = 0): ?Pagination
     {
         $pageSize      = ($pageSize  < 1 ? $this->baseService->getParameterBag("base.paginator.page_size") : $pageSize);
         $pageRange     = ($pageRange < 1 ? $this->baseService->getParameterBag("base.paginator.page_range") : $pageRange);
         $parameterName = $this->baseService->getParameterBag("base.paginator.page_parameter");
         $pageTemplate  = $this->baseService->getParameterBag("base.paginator.default_template");
 
-        $pagination = new Pagination($query, $this->router, $parameterName);
+        $pagination = new Pagination($arrayOrQuery, $this->router, $parameterName);
         $pagination->setPage($page);
         $pagination->setPageSize($pageSize);
         $pagination->setPageRange($pageRange);

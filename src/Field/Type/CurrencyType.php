@@ -34,11 +34,11 @@ class CurrencyType extends AbstractType
 
                 return ChoiceList::loader($this, new IntlCallbackChoiceLoader(function() use ($options, $choiceTranslationLocale) {
 
-                    return array_key_transforms(fn($name, $code) : ?array => [
+                    return array_transforms(fn($name, $code) : ?array => [
                         trim(mb_ucwords($name).
                             ($options["display_code"] && Currencies::getSymbol($code) != $code ? " / ".$code : null).
                             ($options["display_symbol"] ? " / ".Currencies::getSymbol($code) : null)
-                        ), $code], 
+                        ), $code],
 
                     array_flip(Currencies::getNames($choiceTranslationLocale)));
 

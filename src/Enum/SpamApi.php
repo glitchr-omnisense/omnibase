@@ -3,17 +3,17 @@
 namespace Base\Enum;
 
 use Base\Database\Type\EnumType;
+use Base\Model\IconizeInterface;
 
-class SpamApi extends EnumType
+class SpamApi extends EnumType implements IconizeInterface
 {
     const AKISMET      = "AKISMET";
     
-    public static function getIcons(int $pos = -1, ...$arrays): array
+    public function __iconize(): ?array { return null; }
+    public static function __staticIconize(): ?array
     {
-        $arrays[] = [
-            self::AKISMET => ["fas fa-backspace"],
+        return [
+            self::AKISMET => ["fas fa-backspace"]
         ];
-
-        return parent::getIcons($pos, ...$arrays);
     }
 }

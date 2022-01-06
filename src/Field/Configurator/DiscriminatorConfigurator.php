@@ -75,7 +75,6 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
             $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);
         }
         
-        dump($showLast);
         if($showLast) {
 
             $formattedValues = [end($formattedValues)];
@@ -91,7 +90,7 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
         if (!empty($formattedValues) && $classCrudController)
             $formattedValues[count($formattedValues)-1]["url"] = $this->adminUrlGenerator->unsetAll()->setController($classCrudController)->setAction(Action::INDEX)->set("filters[".$field->getProperty()."][value]", $discriminatorValue)->generateUrl();
 
-        $field->setValue(array_key_transforms(fn($k,$v):array => [$k, $v["id"] ?? null], $formattedValues));
+        $field->setValue(array_transforms(fn($k,$v):array => [$k, $v["id"] ?? null], $formattedValues));
         $field->setFormattedValue($formattedValues);
     }
 }

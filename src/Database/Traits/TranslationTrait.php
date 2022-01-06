@@ -70,5 +70,4 @@ trait TranslationTrait
 
         return true;
     }
-
 }

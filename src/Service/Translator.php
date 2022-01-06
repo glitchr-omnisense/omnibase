@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Base\Database\Type\SetType;
 use Base\Traits\BaseTrait;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
@@ -121,8 +122,9 @@ class Translator implements TranslatorInterface
             }
         }
 
+        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
         $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
-        $class  = implode(".", array_slice(explode(".",$class), 0, -2));
+        $class  = implode(".", array_slice(explode(".",$class), 0, $offset));
         $value = !empty($value) ? ".".$value : $value;
         $noun  = !empty($noun)  ? ".".$noun  : $noun;
 
