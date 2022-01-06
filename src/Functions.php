@@ -412,10 +412,8 @@ namespace {
 
     function array_keys_insert($keys, array $array, bool $unique = false) 
     {
-        if(!is_array($keys)) $keys = [$keys => null];
-
-        $keys = array_keys($keys);
-        if(is_associative($keys))
+        if(!is_array($keys)) $keys = [$keys];
+        if (is_associative($keys))
             throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
 
         foreach($keys as $key)
@@ -424,19 +422,19 @@ namespace {
         return $array;
     }
 
-    function array_value_delete($values, array $array)
-    {
-        if(!is_array($values)) $values = [$values];
-        return array_filter($array, fn($e) => !in_array($e, $values));
-    }
-
     function array_keys_delete($keys, array $array) 
     {
-        if(!is_array($keys)) $keys = [$keys => null];
+        if(!is_array($keys)) $keys = [$keys];
         if (is_associative($keys))
             throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
 
         return array_diff($array, $keys);
+    }
+
+    function array_value_delete($values, array $array)
+    {
+        if(!is_array($values)) $values = [$values];
+        return array_filter($array, fn($e) => !in_array($e, $values));
     }
 
     function array_union(...$arrays) 
