@@ -3,8 +3,11 @@
 namespace {
 
     use Base\BaseBundle;
+    use Doctrine\Common\Collections\ArrayCollection;
+    use Doctrine\Common\Collections\Collection;
+    use Doctrine\ORM\PersistentCollection;
 
-    function interpret_link($input)
+function interpret_link($input)
     {
         return preg_replace_callback(
             "@
@@ -361,7 +364,7 @@ namespace {
         return $tArray;
     }
 
-    function array_filter_recursive(array $array, ?callable $callback, int $mode = 0) 
+    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) 
     {
         return array_transforms(function($k,$v,$i,$_) use ($callback, $mode):?array {
             return [$k, is_array($v) ? array_transforms($_, array_filter($v, $callback, $mode)) : $v];
@@ -414,7 +417,7 @@ namespace {
     {
         if(!is_array($keys)) $keys = [$keys];
         if (is_associative($keys))
-            throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
+            throw new InvalidArgumentException("Provided keys must be either a single key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
 
         foreach($keys as $key)
             if(!in_array($key, $array) || $unique == false) $array[] = $key;
@@ -426,15 +429,15 @@ namespace {
     {
         if(!is_array($keys)) $keys = [$keys];
         if (is_associative($keys))
-            throw new InvalidArgumentException("Provided keys must be either a key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
+            throw new InvalidArgumentException("Provided keys must be either a single key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
 
-        return array_diff($array, $keys);
+        return array_filter($array, fn($k) => !in_array($k, $keys), ARRAY_FILTER_USE_KEY);
     }
 
     function array_value_delete($values, array $array)
     {
         if(!is_array($values)) $values = [$values];
-        return array_filter($array, fn($e) => !in_array($e, $values));
+        return array_filter($array, fn($v) => !in_array($v, $values));
     }
 
     function array_union(...$arrays) 
@@ -459,5 +462,43 @@ namespace {
     {
         $arrayMask = array_fill_keys(array_keys(array_unique(array_map($callback, $array), $flags)), null);
         return array_intersect_key($array, $arrayMask);
+    }
+
+    function cast_from_array(array $array, string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"',serialize((object) $array) )); }
+    function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
+    function cast($object, $newClass, ...$args)
+    {
+        $reflClass      = new \ReflectionClass($object);
+        $reflProperties = $reflClass->getProperties();
+
+        $newObject    = new $newClass(...$args);
+        $reflNewClass = new \ReflectionClass($newObject);
+        foreach ($reflNewClass->getProperties() as $reflNewProperty) {
+
+            $reflNewProperty->setAccessible(true);
+            
+            $reflProperty = array_filter($reflProperties, fn($p) => $p->getName() == $reflNewProperty->getName());
+            $reflProperty = begin($reflProperty) ?? null;
+            if ($reflProperty) {
+
+                $reflProperty->setAccessible(true);
+
+                $value = $reflProperty->getValue($object);
+                $value = $value instanceof PersistentCollection ? new ArrayCollection() : $value; 
+
+                $reflNewProperty->setValue($newObject, $reflProperty->getValue($object));
+            }
+        }
+
+        return $newObject;
+    }
+
+    function is_serialized($string) { return ($string == 'b:0;' || @unserialize($string) !== false); }
+    function is_serializable($object) 
+    {
+        try { serialize($object); }
+        catch (Exception $e) { return false; }
+
+        return true;
     }
 }
