@@ -27,7 +27,7 @@ class WidgetProvider implements WidgetProviderInterface
         $this->widgetRepository = $widgetRepository;
         $this->widgetSlotRepository = $widgetSlotRepository;
 
-        $this->uuidByPath = $this->cache->getItem(self::class."[Slot][uuidByPath]")->get() ?? [];
+        $this->uuidByPath = $this->cache->getItem(class_basename(self::class)."[Slot][uuidByPath]")->get() ?? [];
     }
 
     protected $widgets = [];
@@ -57,7 +57,7 @@ class WidgetProvider implements WidgetProviderInterface
         $slot = $this->widgetSlotRepository->findOneByPath($path);
         
         $this->uuidByPath[$path] = $slot ? $slot->getUuid() : null;
-        $item = $this->cache->getItem(self::class."[Slot][uuidByPath]");
+        $item = $this->cache->getItem(class_basename(self::class)."[Slot][uuidByPath]");
         if ($this->isCacheEnabled())
             $this->cache->save( $item->set($this->uuidByPath) );
 
@@ -73,7 +73,7 @@ class WidgetProvider implements WidgetProviderInterface
     protected function applyCache(?string $uuid, $widget)
     {
         if($uuid === null) return false;
-        $item = $this->cache->getItem(self::class."[".$uuid."]");
+        $item = $this->cache->getItem(class_basename(self::class)."[".$uuid."]");
         if ($this->isCacheEnabled()) {
 
             $this->cache->save( $item->set($widget) );
@@ -90,14 +90,14 @@ class WidgetProvider implements WidgetProviderInterface
     protected function hasCache(?string $uuid): bool
     {
         if($uuid === null) return false;
-        return $this->isCacheEnabled() && $this->cache->getItem(self::class."[".$uuid."]")->isHit();
+        return $this->isCacheEnabled() && $this->cache->getItem(class_basename(self::class)."[".$uuid."]")->isHit();
     }
 
     protected function getCache(?string $uuid)
     {
         if($uuid === null) return null;
 
-        $item = $this->cache->getItem(self::class."[".$uuid."]");
+        $item = $this->cache->getItem(class_basename(self::class)."[".$uuid."]");
         // dump($uuid, $item->get());
         return $item->get();
     }
@@ -105,9 +105,7 @@ class WidgetProvider implements WidgetProviderInterface
     public function deleteCache(?string $uuid)
     {
         if($uuid === null) return $this;
-        // dump($this->hasCache($uuid));
-        $this->cache->delete(self::class."[".$uuid."]");
-        // dump($this->hasCache($uuid));
+        $this->cache->delete(class_basename(self::class)."[".$uuid."]");
         if(array_key_exists($uuid, $this->widgets))
             unset($this->widgets[$uuid]);
  
