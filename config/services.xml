@@ -1,1 +1,670 @@
-../services.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <defaults public="false" />
+
+        <!--
+
+            Base features
+
+            -->
+        <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
+        <service id="Base\Form\FormProxy" public="true" />
+
+        <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>
+        <service id="Base\Form\FormFactory" public="true">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
+        <service id="Base\Service\ParameterBag" parent="parameter_bag" public="true" />
+
+        <service id="Base\Controller\BaseController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Controller\SelectController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="cache.adapter" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.paginator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Subscriber\BaseSubscriber">
+            <tag name="kernel.event_subscriber" />            
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Service\BaseSettings" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="assets.packages" />
+            <argument type="service" id="cache.adapter" />
+        </service>
+
+        <service id="Base\Notifier\NotifierInterface" alias="Base\Notifier\Notifier"/>
+        <service id="Base\Notifier\Notifier" public="true">
+            <argument type="service" id="notifier" />
+            <argument type="service" id="notifier.channel_policy" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="cache.adapter" />
+            <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="base.settings" />
+        </service>
+
+        <service id="Base\Service\BaseService" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="kernel" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="twig.extension.base" />
+            <argument type="service" id="slugger" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="base.notifier" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="base.settings" />
+            <argument type="service" id="ea_extension" />
+        </service>
+
+        <service id="Base\Service\LocaleProvider" public="true">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Service\Paginator" public="true">
+            <argument type="service" id="router.default" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Service\Breadgrinder" public="true">
+            <argument type="service" id="router.default" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Service\WidgetProvider" public="true">
+            <argument type="service" id="App\Repository\Sitemap\WidgetRepository" />
+            <argument type="service" id="App\Repository\Sitemap\Widget\SlotRepository" />
+        </service>
+
+        <service id="Base\Form\Extension\FormTypeFlowExtension" >
+            <tag name="form.type_extension" />
+        </service>
+        <service id="Base\Form\Extension\FormTypeTranslateExtension" >
+            <tag name="form.type_extension" />
+        </service>
+        <service id="Base\Form\Extension\FormTypeSpamExtension" >
+            <tag name="form.type_extension" />
+            <argument type="service" id="Base\Service\SpamChecker" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <!--
+            Commands
+        -->
+
+        <service id="Base\Command\MappingCommand">
+            <tag name="console.command" />
+        </service>
+        <service id="Base\Command\StatusCommand">
+            <tag name="console.command" />
+        </service>
+        <service id="Base\Command\ThreadPublishableCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        <service id="Base\Command\UserLogCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Command\UserNotificationCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Command\UploaderEntitiesCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <!--
+            Controllers
+        -->
+        <service id="Base\Controller\ErrorController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="error_handler.error_renderer.html" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Controller\SecurityController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="App\Repository\User\TokenRepository" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Controller\MaintenanceController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="base.service" />
+        </service>
+
+        <!--
+
+            Type declaration
+
+            -->
+        <service id="Base\Form\FormProcessor">
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="request_stack" />
+        </service>
+
+        <!--
+
+            Subscriber
+
+            -->
+        <service id="Base\Subscriber\LocaleSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Subscriber\MaintenanceSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Subscriber\TimezoneSubscriber">
+            <tag name="kernel.event_subscriber" />
+        </service>
+
+        <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+        <service id="Base\DatabaseSubscriber\TranslatableSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="base.locale_provider" />
+        </service>
+        <service id="Base\DatabaseSubscriber\DiscriminatorSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\EntitySubscriber\ThreadSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="event_dispatcher" />
+        </service>
+
+        <service id="Base\Service\SpamChecker" public="true">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="monolog.http_client" />
+            <argument type="service" id="base.service" />
+        </service>
+
+
+        <!--
+            DOCTRINE
+        -->
+        <service id="Base\Database\NamingStrategy"  public="true" />
+        <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
+
+        <service id="Doctrine\Persistence\Mapping\ClassMetadataFactory">
+            <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />
+        </service>
+
+        <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="parameter_bag" />
+        </service>
+
+        <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.annotation_reader" />
+        </service>
+
+        <service id="Base\Annotations\AnnotationReader" public="true">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="cache.adapter" />
+            <argument type="service" id="flysystem.adapter.lazy.factory" />
+            <argument type="service" id="request_stack" />
+        </service>
+
+        <!--
+
+            Twig declarations
+
+            -->
+
+        <service id="Base\Twig\Loader\FilesystemLoader">
+            <tag name="twig.loader" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="base.twig.app_variable" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Service\TranslatorInterface" alias="Base\Service\Translator"/>
+        <service id="Base\Service\Translator" decorates="translator" public="true">
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="kernel" />
+        </service>
+
+        <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="base.settings" />
+        </service>
+
+        <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
+            <tag name="twig.extension" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="twig.extension.routing" />
+            <argument type="service" id="twig.extension.assets" />
+       </service>
+
+        <service id="Base\Twig\Extension\ClassTwigExtension" >
+            <tag name="twig.extension" />
+       </service>
+
+        <service id="Base\Form\Extension\FormTypeCsrfExtension" >
+            <tag name="form.type_extension" />
+        </service>
+
+        <service id="Base\Twig\Extension\FormTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="base.form.proxy" />
+        </service>
+
+        <service id="Base\Form\Extension\FormTypeExtension" >
+            <tag name="form.type_extension" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Form\Extension\FormTypeBootstrapExtension" >
+            <tag name="form.type_extension" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Twig\Extension\WidgetTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="base.widget_provider" />
+       </service>
+
+        <service id="Base\Twig\Extension\BreadgrinderTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="base.breadgrinder" />
+       </service>
+
+        <service id="Base\Twig\Extension\PaginatorTwigExtension">
+            <tag name="twig.extension" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="translator" />
+       </service>
+
+        <!--
+
+            Validation constraints
+
+            -->
+        <service id="Base\Validator\ConstraintEntityValidator">
+            <tag name="validator.constraint_validator" />
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Validator\Constraints\UniqueEntityValidator"     parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
+        <service id="Base\Validator\Constraints\StringCaseEntityValidator" parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
+
+        <!--
+            Notifier
+        -->
+        <service id="Base\Notifier\Channel\BrowserPlusChannel">
+            <tag name="notifier.channel" channel="browser+" />
+            <argument type="service" id="request_stack" />
+        </service>
+        <service id="Base\Notifier\Channel\EmailPlusChannel">
+            <tag name="notifier.channel" channel="email+" />
+            <argument type="service" id="mailer.default_transport" on-invalid="null" />
+        </service>
+
+        <!--
+            USER SECTION
+        -->
+        <service id="Base\Controller\Client\Thread\SearchController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
+        <service id="Base\Controller\Client\User\SearchController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="App\Repository\UserRepository" />
+        </service>
+
+        <service id="Base\Controller\Client\User\ProfileController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="App\Repository\UserRepository" />
+        </service>
+
+        <service id="Base\Controller\Client\User\SettingsController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="base.service" />
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="scheb_two_factor.qr_code_generator" />
+        </service>
+
+        <service id="Base\Security\UserChecker"           >
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="twig.extension.base" />
+        </service>
+
+        <service id="Base\Security\UserProvider"           />
+        <service id="Base\Security\LoginFormAuthenticator">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="router.default" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <!-- Listener declarations 
+        NB: SecuritySubscriber is now defined in BaseExtension.php due to security.event_dispatcher. -->
+        <service id="Base\Subscriber\SecuritySubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="security.untracked_token_storage" />
+            <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
+            <argument type="service" id="translator" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\EntitySubscriber\UserSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Form\Type\Sitemap\SettingListType">
+            <tag name="form.type" />
+            <argument type="service" id="base.settings" />
+        </service>
+        <service id="Base\Form\Type\Sitemap\WidgetListType">
+            <tag name="form.type" />
+            <argument type="service" id="base.widget_provider" />
+        </service>
+
+        <service id="Base\Field\Type\TranslationType">
+            <tag name="form.type" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Field\Type\SelectType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Field\Type\FontAwesomeType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
+        
+        <service id="Base\Field\Type\AssociationType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Field\Type\AssociationFileType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Field\Type\AttributeType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Field\Type\DiscriminatorType">
+            <tag name="form.type" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Field\Type\QuillType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\SlugType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        
+        <service id="Base\Controller\DropzoneController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+            <argument type="service" id="translator" />
+            <argument type="service" id="cache.adapter" />
+            <bind key="$cacheDir">%kernel.cache_dir%</bind>
+        </service>
+
+        <service id="Base\Controller\PageController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+            <argument type="service" id="App\Repository\Sitemap\Widget\PageRepository" />
+        </service>
+
+        <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType">
+            <tag name="form.type" />
+        </service>
+        <service id="Base\Field\Type\ImageType" parent="Base\Field\Type\FileType">
+            <tag name="form.type" />
+        </service>
+        <service id="Base\Field\Type\FileType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="validator" />
+        </service>
+
+        <service id="Base\Field\Type\CollectionType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Field\Type\ArrayType" parent="Base\Field\Type\CollectionType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Field\Configurator\IdConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Field\Configurator\NumberConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
+        </service>
+
+        <service id="Base\Field\Configurator\StockConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
+        </service>
+
+        <service id="Base\Field\Configurator\MoneyConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
+            <argument type="service" id="property_accessor" />
+        </service>
+
+        <service id="Base\Field\Configurator\EmailConfigurator"         ><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\DateTimePickerConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\CollectionConfigurator"    ><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\ArrayConfigurator" parent="Base\Field\Configurator\CollectionConfigurator"><tag name="ea.field_configurator" /></service>
+
+        <service id="Base\Field\Configurator\SlugConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\FileConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Field\Configurator\TranslationConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="base.locale_provider" />
+        </service>
+
+        <service id="Base\Field\Configurator\BooleanConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Field\Configurator\AssociationConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Field\Configurator\AssociationFileConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Field\Configurator\SelectConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+        <service id="Base\Field\Configurator\RoleConfigurator"          parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\StateConfigurator"         parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\CountryConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\FontAwesomeConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\DiscriminatorConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\AttributeConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+
+        <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
+        <service id="Base\Controller\Dashboard\AbstractDashboardController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="ga.service" on-invalid="null" />
+        </service>
+
+        <service id="Base\Controller\Dashboard\AbstractCrudController">
+            <tag name="ea.crud_controller" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="base.settings" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="ea_extension" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="translator" />
+            <tag name="controller.service_arguments" />
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+
+        <service id="Base\Controller\Dashboard\Crud\ThreadCrudController"         parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Thread\LikeCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Thread\MentionCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Thread\TagCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        
+        <service id="Base\Controller\Dashboard\Crud\UserCrudController"              parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\GroupCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\LogCrudController"          parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\NotificationCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\PermissionCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController"      parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /> </service>
+        
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\SettingCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\SlotCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\MenuCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\AttachmentCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        
+    </services>
+</container>

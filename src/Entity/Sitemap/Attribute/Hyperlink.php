@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Sitemap\Attribute;
 
-use Base\Annotations\Annotation\ColumnAlias;
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\ColumnAlias;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Sitemap\Attribute;
 use Base\Entity\Sitemap\Attribute\Abstract\HyperpatternAttribute;
 use Base\Model\IconizeInterface;

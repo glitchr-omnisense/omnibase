@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\TranslatableInterface;
 use Base\Model\IconizeInterface;

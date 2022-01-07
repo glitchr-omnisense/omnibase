@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Sitemap\Attribute\Abstract;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Model\IconizeInterface;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 

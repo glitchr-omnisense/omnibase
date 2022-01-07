@@ -15,11 +15,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Hierarchify;
 use Base\Enum\ThreadState;
 use Base\Database\TranslationInterface;
 use Base\Traits\BaseTrait;

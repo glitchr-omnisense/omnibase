@@ -46,11 +46,11 @@ class Slugify extends AbstractAnnotation
 
         $this->referenceColumn = $data['reference'] ?? null;
 
-        $this->updatable = $data['updatable'] ?? false;
+        $this->updatable = $data['updatable'] ?? false; // TODO: IMPLEMENT
         $this->unique    = $data['unique']    ?? true;
 
-        $this->zeros = $data['zeros'] ?? 0;
-        $this->length = $data['length'] ?? null;
+        $this->zeros = $data['zeros'] ?? 0; // TODO: IMPLEMENT
+        $this->length = $data['length'] ?? null; // TODO: IMPLEMENT
 
         $this->separator = $data['separator'] ?? '-';
         $this->lowercase = $data['lowercase'] ?? true;

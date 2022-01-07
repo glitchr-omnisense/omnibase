@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Sitemap\Widget;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Sitemap\Attribute;
 use Base\Entity\Sitemap\Attribute\Hyperlink;
 use Base\Entity\Sitemap\Widget;

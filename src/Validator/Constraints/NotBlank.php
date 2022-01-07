@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
  * Constraint for the Unique Entity validator.
  *
  * @Annotation
- * @Target({"CLASS", "PROPERTY", "METHOD", "ANNOTATION"})
+ * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
  *
  */
 class NotBlank extends Constraint
@@ -24,7 +24,7 @@ class NotBlank extends Constraint
         return [self::CLASS_CONSTRAINT, self::PROPERTY_CONSTRAINT];
     }
 
-    public function __construct(array $options = null, string $message = null, bool $allowNull = true, callable $normalizer = null, array $groups = null, $payload = null)
+    public function __construct(array $options = null, string $message = null, bool $allowNull = null, callable $normalizer = null, array $groups = null, $payload = null)
     {
         parent::__construct($options ?? [], $groups, $payload);
         $this->message = $message ?? $this->message;

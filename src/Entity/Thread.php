@@ -6,17 +6,19 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-use Base\Annotations\Annotation\ColumnAlias;
+use Base\Database\Annotation\ColumnAlias;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
-use Base\Annotations\Annotation\EntityHierarchy;
+use Base\Annotations\Annotation\Hierarchify;
+use Base\Database\OrderableInterface;
+use Base\Database\Traits\OrderableTrait;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
@@ -33,7 +35,7 @@ use Base\Repository\ThreadRepository;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  * 
- * @EntityHierarchy(null, separator = "/" );
+ * @Hierarchify(null, separator = "/" );
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
@@ -60,7 +62,6 @@ class Thread implements TranslatableInterface, IconizeInterface
         $this->setTitle($title);
 
         $this->slug = $slug;
-        $this->priority = 0;
         
         $this->setState(ThreadState::DRAFT);
     }
@@ -90,17 +91,6 @@ class Thread implements TranslatableInterface, IconizeInterface
     public function getUuid() { return $this->uuid; }
 
     /**
-     * @ORM\Column(type="integer")
-     */
-    protected $priority;
-    public function getPriority(): ?int { return $this->priority; }
-    public function setPriority(?int $priority): self
-    {
-        $this->priority = $priority;
-        return $this;
-    }
-
-    /**
      * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
      * @ORM\JoinColumn(onDelete="SET NULL")
      */
@@ -117,7 +107,6 @@ class Thread implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
-     * @ORM\OrderBy({"priority" = "DESC", "createdAt" = "ASC"})
      */
     protected $children;
     public function getChildren(): Collection { return $this->children; }

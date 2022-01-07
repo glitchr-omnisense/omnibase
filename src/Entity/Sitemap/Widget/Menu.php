@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Sitemap\Widget;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Sitemap\Widget;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;

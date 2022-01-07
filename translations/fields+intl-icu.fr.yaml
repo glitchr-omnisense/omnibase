@@ -2,7 +2,7 @@ stock:
   unlimited: Illimité
 
 attribute:
-  empty: Sauvegarde pour afficher les champs d'attributes selectionnés
+  empty: Sauvegarde pour mettre à jour la liste des attributs selectionnés
 
 select:
   placeholder: Faites votre selection..

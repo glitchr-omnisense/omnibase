@@ -103,6 +103,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $view->vars["entityId"] = json_encode(array_transforms(function($k,$e) use ($options):array {
 
             $path = PropertyAccess::createPropertyAccessor()->getValue($e, $options["entity_file"]);
+            $path = is_array($path) ? begin($path) ?? null : $path;
+
             return [basename($path), $e->getId()];
 
         }, ($data instanceof Collection) ? $data->toArray() : []));
@@ -133,7 +135,13 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 'sortable'      => $options["sortable"]
             ]);
 
-            $files = array_map(fn($e) => Uploader::getPublic($e, $fieldName), $data->toArray());
+            $files = array_filter(array_map(function($e) use ($fieldName) {
+
+                $public = Uploader::getPublic($e, $fieldName);
+                return is_array($public) ? begin($public) ?? null : $public;
+
+            }, $data->toArray()));
+
             $form->get($fieldName)->setData($files);
         });
     }

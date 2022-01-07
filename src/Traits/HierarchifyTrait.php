@@ -2,7 +2,7 @@
 
 namespace Base\Traits;
 
-trait EntityHierarchyTrait
+trait HierarchifyTrait
 {
     public function getHierarchy($id = -1, ?string $separator = null)
     {
@@ -21,7 +21,7 @@ trait EntityHierarchyTrait
     public function getHierarchyTree(?string $separator = null)
     {
         if (!isset($this->getClassMetadata()->entityHierarchy))
-            throw new \Exception("Missing @EntityHierarchy for class \"" . get_class($this) . "\"");
+            throw new \Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
 
         $separator = $separator ?? $this->getClassMetadata()->entityHierarchySeparator ?? "/";
         return (is_array($this->getClassMetadata()->entityHierarchy) ?

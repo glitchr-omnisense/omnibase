@@ -26,7 +26,6 @@ final class StockField implements FieldInterface
             ->setTemplatePath('@EasyAdmin/crud/field/stock.html.twig')
             ->setFormType(StockType::class)
             ->addCssClass('field-stock')
-            ->setDefaultColumns(3)
             ->setCustomOption(self::OPTION_ALLOW_INFINITY, false)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, null)
             ->setCustomOption(self::OPTION_ROUNDING_MODE, \NumberFormatter::ROUND_HALFUP)

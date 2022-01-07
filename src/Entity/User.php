@@ -25,7 +25,7 @@ use Scheb\TwoFactorBundle\Model\Totp\TotpConfiguration;
 use Scheb\TwoFactorBundle\Model\Totp\TotpConfigurationInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\Annotation\Hashify;
@@ -37,13 +37,14 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Base\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
-use Exception;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Base\Database\Traits\OrderableTrait;
+use Base\Enum\UserState;
+use Doctrine\ORM\PersistentCollection;
+use Exception;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Base\Enum\UserState;
-use Doctrine\ORM\PersistentCollection;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -53,10 +54,10 @@ use Doctrine\ORM\PersistentCollection;
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
-class User implements UserInterface, IconizeInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface
 {
     use BaseTrait;
-    
+
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __staticIconize() : ?array { return ["fas fa-user"]; } 
 
@@ -299,6 +300,7 @@ class User implements UserInterface, IconizeInterface, TwoFactorInterface, Passw
     /**
      * @ORM\Column(type="user_role")
      * @Assert\NotBlank(groups={"new", "edit"})
+     * @OrderColumn
      */
     protected $roles;
 

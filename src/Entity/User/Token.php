@@ -156,12 +156,11 @@ class Token implements IconizeInterface
             $this->user->removeToken($this);
 
         if ($user)
-		    $user->addToken($this);
+            $user->addToken($this);
 
         $this->user = $user;
         return $this;
     }
-
 
     /**
      * @ORM\Column(type="datetime")

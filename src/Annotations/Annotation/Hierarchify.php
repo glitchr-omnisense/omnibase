@@ -2,19 +2,14 @@
 
 namespace Base\Annotations\Annotation;
 
-use App\Entity\Gallery\Gallery;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use App\Entity\Thread;
-use Base\Service\BaseService;
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 /**
- * Class EntityHierarchy
- * package Base\Annotations\Annotation\EntityHierarchy
+ * Class Hierarchify
+ * package Base\Annotations\Annotation\Hierarchify
  *
  * @Annotation
  * @Target({"CLASS"})
@@ -24,7 +19,7 @@ use Exception;
  * })
  */
 
-class EntityHierarchy extends AbstractAnnotation
+class Hierarchify extends AbstractAnnotation
 {
     public function __construct(array $data)
     {
@@ -40,7 +35,7 @@ class EntityHierarchy extends AbstractAnnotation
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
         if(!method_exists($classMetadata->customRepositoryClassName, "getHierarchyTree") && !$this->parent_method_exists($classMetadata->customRepositoryClassName, "getHierarchyTree"))
-            throw new Exception("Did you forgot to use \"Base\Traits\EntityHierarchyTrait\" in $classMetadata->customRepositoryClassName ?");
+            throw new Exception("Did you forgot to use \"Base\Traits\HierarchifyTrait\" in $classMetadata->customRepositoryClassName ?");
 
         $classMetadata->entityHierarchy = $this->hierarchy;
         $classMetadata->entityHierarchySeparator = $this->separator;

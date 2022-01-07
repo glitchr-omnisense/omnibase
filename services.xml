@@ -147,11 +147,9 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.service" />
         </service>
-        
+
         <!--
-
             Controllers
-
         -->
         <service id="Base\Controller\ErrorController">
             <tag name="controller.service_arguments" />
@@ -257,6 +255,7 @@
             <argument type="service" id="cache.adapter" />
             <argument type="service" id="flysystem.adapter.lazy.factory" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <!--

@@ -4,16 +4,11 @@ namespace Base\Annotations;
 
 use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
-use Doctrine\Common\Annotations\Annotation\Target;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\ClassLoader\ClassMapGenerator;
 
 use Base\Annotations\AbstractAnnotation;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Exception;
 
-use Annotation as Test;
-use Base\Service\BaseService;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use League\Flysystem\Filesystem;
@@ -23,14 +18,13 @@ use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\PathPrefixer;
 use League\FlysystemBundle\Lazy\LazyFactory;
 use ReflectionClass;
-use ReflectionMethod;
-use ReflectionProperty;
+
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Contracts\Cache\CacheInterface;
-use Symfony\Contracts\Cache\ItemInterface;
 
 class AnnotationReader
 {
@@ -53,7 +47,8 @@ class AnnotationReader
         ParameterBagInterface $parameterBag, 
         CacheInterface $cache,
         LazyFactory $lazyFactory, 
-        RequestStack $requestStack)
+        RequestStack $requestStack,
+        TokenStorage $tokenStorage)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -90,8 +85,18 @@ class AnnotationReader
 
         // Lazy factory for flysystem
         $this->requestStack = $requestStack;
+
+        // Get token storage to access user information
+        $this->tokenStorage = $tokenStorage;
     }
 
+    public function getUser() { return $this->tokenStorage->getUser(); }
+    public function getImpersonator() 
+    {
+        $token = $this->tokenStorage->getToken();
+        return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
+    }
+    
     public function getAsset(string $url): string
     {
         $url = trim($url);

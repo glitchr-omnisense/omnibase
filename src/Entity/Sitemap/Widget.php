@@ -4,7 +4,7 @@ namespace Base\Entity\Sitemap;
 
 use Base\Validator\Constraints as AssertBase;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\TranslatableInterface;

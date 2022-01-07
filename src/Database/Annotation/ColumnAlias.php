@@ -1,7 +1,8 @@
 <?php
 
-namespace Base\Annotations\Annotation;
+namespace Base\Database\Annotation;
 
+use Base\Annotation\AbstractAnnotation as AnnotationAbstractAnnotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -12,9 +13,6 @@ use ReflectionException;
 use ReflectionProperty;
 
 /**
- * Class EntityHierarchy
- * package Base\Annotations\Annotation\EntityHierarchy
- *
  * @Annotation
  * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
@@ -25,7 +23,7 @@ use ReflectionProperty;
  * })
  */
 
-class ColumnAlias extends AbstractAnnotation
+class ColumnAlias extends AnnotationAbstractAnnotation
 {
     /** @Required */
     private string $value;

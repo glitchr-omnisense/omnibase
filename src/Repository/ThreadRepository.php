@@ -3,7 +3,7 @@
 namespace Base\Repository;
 
 use Base\Entity\Thread;
-use Base\Traits\EntityHierarchyTrait;
+use Base\Traits\HierarchifyTrait;
 
 use Base\Database\Repository\ServiceEntityRepository;
 
@@ -16,7 +16,7 @@ use Base\Database\Repository\ServiceEntityRepository;
 
 class ThreadRepository extends ServiceEntityRepository
 {
-    use EntityHierarchyTrait;
+    use HierarchifyTrait;
 
     public function countForChildrenIn($thread)
     {

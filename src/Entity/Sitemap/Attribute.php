@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Sitemap;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;

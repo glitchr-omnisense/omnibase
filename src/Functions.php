@@ -110,8 +110,8 @@ function interpret_link($input)
 
     function byte2bit(int $num): int { return 8*$num; } // LOL !
     function bit2byte(int $num): int { return $num/8; } // LOL LOL !
-    function byte2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix)."B"; }
-    function  bit2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix)."b"; }
+    function byte2str(int $num): string { dump($num); return dec2str($num/8, BINARY_PREFIX).BYTE_PREFIX[0]; }
+    function  bit2str(int $num): string { return dec2str($num).BIT_PREFIX[0]; }
     function  dec2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string
     {
              if ($unitPrefix == DECIMAL_PREFIX) $divider = 1000;
@@ -484,9 +484,7 @@ function interpret_link($input)
                 $reflProperty->setAccessible(true);
 
                 $value = $reflProperty->getValue($object);
-                $value = $value instanceof PersistentCollection ? new ArrayCollection() : $value; 
-
-                $reflNewProperty->setValue($newObject, $reflProperty->getValue($object));
+                $reflNewProperty->setValue($newObject, $value);
             }
         }
 

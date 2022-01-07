@@ -2,8 +2,8 @@
 
 namespace Base\Entity\Sitemap\Widget;
 
-use Base\Annotations\Annotation\ColumnAlias;
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\ColumnAlias;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;

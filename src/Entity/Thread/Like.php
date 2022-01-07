@@ -8,7 +8,7 @@ use App\Entity\Thread;
 use App\Repository\Thread\LikeRepository;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Model\IconizeInterface;
 
 /**

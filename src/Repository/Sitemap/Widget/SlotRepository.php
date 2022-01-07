@@ -14,4 +14,16 @@ use Base\Repository\Sitemap\WidgetRepository;
 
 class SlotRepository extends WidgetRepository
 {
+    // Attempt to cache
+    // public function findOneByPath(string $path) 
+    // {
+    //     return $this->createQueryBuilder("s")
+    //         ->where('s.path = :path')
+    //         ->setParameter('path', $path)
+    //         ->leftJoin('s.widgets', 'w')
+    //         ->leftJoin('s.translations', 't')
+    //         ->addSelect("w", "t")
+    //         ->getQuery()->enableResultCache()->getOneOrNullResult();
+    // }
+
 }

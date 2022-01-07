@@ -9,7 +9,7 @@ use Base\Exception\InvalidPageException;
 use Base\Model\SpamProtectionInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
+use Doctrine\ORM\Tools\Pagination\Paginator as instance;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Iterator;
@@ -20,23 +20,23 @@ class Pagination implements PaginationInterface, Iterator
     protected $router;
     private $build;
     
-    protected $doctrinePaginator = null;
-    protected $totalCount = 0;
+    protected $instance = null;
+    protected $totalCount        = 0;
 
-    protected $route = null;
+    protected       $route           = null;
     protected array $routeParameters = [];
 
-    protected $page = 0;
-    protected $pageIter = 0;
-    protected $pageSize = 0;
+    protected $page      = 0;
+    protected $pageIter  = 0;
+    protected $pageSize  = 0;
     protected $pageRange = 0;
     
     protected $template = "@Base/paginator/sliding.html.twig";
 
     public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
-        $this->instance      = ($arrayOrQuery instanceof Query) ? new DoctrinePaginator($arrayOrQuery) : $arrayOrQuery;
-        $this->totalCount    = count_leaves($this->instance);
+        $this->instance      = ($arrayOrQuery instanceof Query) ? new instance($arrayOrQuery) : $arrayOrQuery;
+        $this->totalCount    = ($arrayOrQuery instanceof Query) ? count($this->instance) : count_leaves($this->instance);
         $this->parameterName = $parameterName;
         $this->build = true;
         $this->router = $router;
@@ -49,8 +49,8 @@ class Pagination implements PaginationInterface, Iterator
     public function current()      { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
 
     public function get() { return $this->instance; }
-    public function getQuery() { $this->isQuery() ? $this->doctrinePaginator->getQuery() : null; }
-    public function isQuery()  { return $this->instance instanceof DoctrinePaginator; }
+    public function getQuery() { $this->isQuery() ? $this->instance->getQuery() : null; }
+    public function isQuery()  { return $this->instance instanceof instance; }
 
     public function getTotalCount() { return $this->totalCount; }
     public function getTotalPages()
@@ -127,7 +127,7 @@ class Pagination implements PaginationInterface, Iterator
 
         if($this->isQuery()) {
 
-            return $this->lastResult = $this->doctrinePaginator
+            return $this->lastResult = $this->instance
                                             ->getQuery()
                                             ->setFirstResult($this->pageSize * ($this->page-1))
                                             ->setMaxResults ($this->pageSize)->getResult();

@@ -3,7 +3,6 @@
 namespace Base\Database\Traits;
 
 use Base\Database\TranslatableInterface;
-
 use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Component\Validator\Constraints as Assert;
@@ -27,8 +26,8 @@ trait TranslationTrait
      */
     public static function getTranslatableEntityClass(): string
     {
-        // By default, the translatable class has the same name but without the "Translation" suffix
-        return substr(static::class, 0, -11);
+        // By default, the translatable class has the same name but without the suffix
+        return substr(static::class, 0, -strlen(__TRANSLATION_SUFFIX__));
     }
 
     /**

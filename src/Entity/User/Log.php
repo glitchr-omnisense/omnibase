@@ -153,7 +153,7 @@ class Log implements IconizeInterface
 
     public function __toString()
     {
-        return "XX";
+        return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt;
     }
 
     function setRequest(Request $request) {

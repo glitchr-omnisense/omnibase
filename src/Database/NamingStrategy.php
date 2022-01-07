@@ -25,30 +25,29 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     private $uniqueTableName = [];
     public function classToTableName($classNameWithNamespace) : string
     {
-        //
-        // Invariant table name if not a class
-        if(!class_exists($classNameWithNamespace))
-            return $classNameWithNamespace;
+        $classNameWithNamespace = class_exists($classNameWithNamespace) 
+            ? (new \ReflectionClass($classNameWithNamespace))->getName()
+            : $classNameWithNamespace;
 
-        //
-        // Cache lookup table
-        $classNameWithNamespace = (new \ReflectionClass($classNameWithNamespace))->getName();
         $tableName = array_search($classNameWithNamespace, $this->uniqueTableName);
 
         //
         // Search for a table name in class annotation
-        if(!$tableName) {
+        if(class_exists($classNameWithNamespace)) {
 
-            $annotationReader = new AnnotationReader();
-            $annotations = $annotationReader->getClassAnnotations(new \ReflectionClass($classNameWithNamespace));
-            while  ($annotation = array_pop($annotations)) {
-                if ($annotation instanceof Table && !empty($annotation->name)) {
-                    $tableName = $annotation->name;
-                    break;
+            if(!$tableName) {
+
+                $annotationReader = new AnnotationReader();
+                $annotations = $annotationReader->getClassAnnotations(new \ReflectionClass($classNameWithNamespace));
+                while  ($annotation = array_pop($annotations)) {
+                    if ($annotation instanceof Table && !empty($annotation->name)) {
+                        $tableName = $annotation->name;
+                        break;
+                    }
                 }
             }
         }
-
+        
         //
         // Determination of table name based on class information
         if(!$tableName) {

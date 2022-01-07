@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Sitemap\Attribute\Abstract;
 
-use Base\Annotations\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Field\Type\ArrayType;
 use Base\Model\IconizeInterface;
 

@@ -29,7 +29,6 @@ final class MoneyField implements FieldInterface
             ->setFormType(MoneyType::class)
             ->addCssClass('field-money')
             ->setTextAlign(TextAlign::CENTER)
-            ->setDefaultColumns(3)
             ->setCustomOption(self::OPTION_CURRENCY, null)
             ->setCustomOption(self::OPTION_CURRENCY_PROPERTY_PATH, null)
             ->setCustomOption(self::OPTION_NUM_DECIMALS, 2)
