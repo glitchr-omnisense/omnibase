@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Service\Traits;
+namespace Base\Traits;
 
 use Base\Service\BaseSettings;
 use Base\Service\LocaleProviderInterface;

@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Entity\Sitemap\Setting;
-use Base\Service\Traits\BaseSettingsTrait;
+use Base\Traits\BaseSettingsTrait;
 use Symfony\Component\Asset\Packages;
 use Symfony\Contracts\Cache\CacheInterface;
 

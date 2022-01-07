@@ -13,6 +13,7 @@ use App\Entity\User\Group;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
 use App\Entity\User\Notification;
+use Base\Database\Annotation\OrderColumn;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -38,7 +39,6 @@ use Base\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Base\Database\Traits\OrderableTrait;
 use Base\Enum\UserState;
 use Doctrine\ORM\PersistentCollection;
 use Exception;

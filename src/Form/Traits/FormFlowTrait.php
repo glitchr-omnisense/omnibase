@@ -1,7 +1,7 @@
 <?php
 
-namespace Base\Traits;
-use Base\Subscriber\FlowFormSubscriber;
+namespace Base\Form\Traits;
+use Base\Subscriber\FormFlowSubscriber;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -10,21 +10,10 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
-trait FlowFormTrait
+trait FormFlowTrait
 {
     public static $flowSessions = [];
     public static $flowCallbacks = [];
-
-    public static function getTokenID($length = 10)
-    {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
-        $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
-        return $randomString;
-    }
 
     public static function configureOptions(OptionsResolver $resolver)
     {
@@ -219,6 +208,6 @@ trait FlowFormTrait
 
         if (!empty($token) && preg_match("/(.*)#([0-9]*)/", $token, $matches)) return $matches[1];
 
-        return self::getTokenID();
+        return random_str();
     }
 }

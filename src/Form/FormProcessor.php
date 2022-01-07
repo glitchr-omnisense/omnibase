@@ -3,7 +3,7 @@
 namespace Base\Form;
 
 use Base\Entity\User\Notification;
-use Base\Traits\FlowFormTrait;
+use Base\Form\Traits\FormFlowTrait;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class FormProcessor implements FormProcessorInterface
 {
-    use FlowFormTrait;
+    use FormFlowTrait;
 
     public FormFactoryInterface $formFactory;
     public CsrfTokenManagerInterface $csrfTokenManager;

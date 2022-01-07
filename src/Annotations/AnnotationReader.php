@@ -23,6 +23,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Contracts\Cache\CacheInterface;
 
@@ -42,13 +43,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(
-        EntityManager $entityManager, 
-        ParameterBagInterface $parameterBag, 
-        CacheInterface $cache,
-        LazyFactory $lazyFactory, 
-        RequestStack $requestStack,
-        TokenStorage $tokenStorage)
+    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache,LazyFactory $lazyFactory, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -115,35 +110,18 @@ class AnnotationReader
         return $path;
     }
 
-    public function getProjectDir()
-    {
-        return dirname(__DIR__, 5);
-    }
+    public function getProjectDir() { return dirname(__DIR__, 5); }
 
     /**
      * @var EntityManager
      */
     protected $entityManager = null;
-    public function getEntityManager()
-    {
-        return $this->entityManager;
-    }
+    public function getEntityManager() { return $this->entityManager; }
+    public function getRepository($entity) { return $this->entityManager->getRepository($entity); }
 
-    public function getRepository($entity)
-    {
-        return $this->entityManager->getRepository($entity);
-    }
+    public function getParameterBag() { return $this->parameterBag; }
 
-    public function getParameterBag()
-    {
-        return $this->parameterBag;
-    }
-
-    public function getFilesystem(string $storage)
-    {
-        return $this->lazyFactory->createStorage($storage, $storage);
-    }
-
+    public function getFilesystem(string $storage) { return $this->lazyFactory->createStorage($storage, $storage); }
     public function getFilesystemPathPrefixer($storage): PathPrefixer
     {
         $reflectionProperty = new \ReflectionProperty(LocalFilesystemAdapter::class, 'prefixer');
@@ -173,10 +151,7 @@ class AnnotationReader
      * @var SimpleAnnotationReader
      */
     protected $doctrineReader = null;
-    public function getDoctrineReader()
-    {
-        return $this->doctrineReader;
-    }
+    public function getDoctrineReader() { return $this->doctrineReader; }
 
     /**
      * @var bool
@@ -253,12 +228,7 @@ class AnnotationReader
 
 
     protected $knownAnnotations = [];
-
-    public function getKnownAnnotations()
-    {
-        return $this->knownAnnotations;
-    }
-
+    public function getKnownAnnotations() { return $this->knownAnnotations; }
     public function addKnownAnnotations(string $annotationName)
     {
         if (!is_subclass_of($annotationName, AbstractAnnotation::class))

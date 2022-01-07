@@ -54,7 +54,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 
-use Base\Traits\DashboardWidgetTrait;
+use Base\Config\Traits\WidgetTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -62,7 +62,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 /* "abstract" (remove because of routes) */
 class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
-    use DashboardWidgetTrait;
+    use WidgetTrait;
 
     protected $baseService;
     protected $adminUrlGenerator;

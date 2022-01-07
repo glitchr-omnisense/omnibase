@@ -2,7 +2,6 @@
 
 namespace Base\Database\Annotation;
 
-use Base\Annotation\AbstractAnnotation as AnnotationAbstractAnnotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -23,7 +22,7 @@ use ReflectionProperty;
  * })
  */
 
-class ColumnAlias extends AnnotationAbstractAnnotation
+class ColumnAlias extends AbstractAnnotation
 {
     /** @Required */
     private string $value;

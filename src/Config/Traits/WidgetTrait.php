@@ -1,11 +1,11 @@
 <?php
 
-namespace Base\Traits;
+namespace Base\Config\Traits;
 
 use Base\Config\Menu\SectionWidgetItem;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 
-trait DashboardWidgetTrait
+trait WidgetTrait
 {
     public function getSectionWidgetItem(array $widgets = [], $positionOrLabel = null): ?SectionWidgetItem
     {  

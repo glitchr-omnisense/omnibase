@@ -2,8 +2,7 @@
 
 namespace Base\Form\Extension;
 
-use Base\Traits\FlowFormTrait;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Base\Form\Traits\FormFlowTrait;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,7 +14,7 @@ use Symfony\Component\Form\AbstractTypeExtension;
 
 class FormTypeFlowExtension extends AbstractTypeExtension
 {
-    use FlowFormTrait;
+    use FormFlowTrait;
 
     protected $defaultEnabled;
     public function __construct(bool $defaultEnabled = false)

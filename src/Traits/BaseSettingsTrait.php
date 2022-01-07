@@ -1,7 +1,8 @@
 <?php
 
-namespace Base\Service\Traits;
+namespace Base\Traits;
 
+use Base\BaseBundle;
 use Base\Entity\Sitemap\Setting;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
@@ -9,13 +10,12 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 trait BaseSettingsTrait
 {
     protected $cache = null;
-
     protected $settingRepository = null;
     protected $settings = [];
 
     protected function isCacheEnabled()
     {
-        if(!self::__CACHE__) return false;
+        if(!BaseBundle::CACHE) return false; /* MUST BE DEFINED */
         if(!$this->cache)    return false;
         if(is_cli())   return false;
 

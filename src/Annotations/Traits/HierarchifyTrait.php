@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Traits;
+namespace Base\Annotations\Traits;
 
 trait HierarchifyTrait
 {

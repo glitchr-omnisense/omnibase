@@ -2,7 +2,7 @@
 
 namespace Base\Form\Extension;
 
-use Base\Traits\FlowFormTrait;
+use Base\Traits\FormFlowTrait;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
