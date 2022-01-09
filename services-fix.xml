@@ -7,6 +7,27 @@
 
         <defaults public="false" />
 
+        <!-- ImagineInterface instances -->
+        <service id="imagine" alias="imagine.gd" />
+
+        <service id="imagine.gd" class="Imagine\Gd\Imagine" public="false">
+            <call method="setMetadataReader">
+                <argument type="service" id="imagine.meta_data.reader" />
+            </call>
+        </service>
+
+        <service id="imagine.imagick" class="Imagine\Imagick\Imagine" public="false">
+            <call method="setMetadataReader">
+                <argument type="service" id="imagine.meta_data.reader" />
+            </call>
+        </service>
+
+        <service id="imagine.gmagick" class="Imagine\Gmagick\Imagine" public="false">
+            <call method="setMetadataReader">
+                <argument type="service" id="imagine.meta_data.reader" />
+            </call>
+        </service>
+
         <!-- TWIG FIX -->
         <service id="Symfony\Bridge\Twig\Extension\AssetExtension">
             <tag name="twig.runtime" />

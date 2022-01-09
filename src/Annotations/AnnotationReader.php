@@ -43,7 +43,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache,LazyFactory $lazyFactory, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
+    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, LazyFactory $lazyFactory, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
     {
         if(!self::getInstance(false))
             self::setInstance($this);

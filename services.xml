@@ -233,6 +233,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="imagine" />
             <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
@@ -241,7 +242,6 @@
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
         </service>
-
 
         <!-- DOCTRINE -->
         <service id="Base\Database\NamingStrategy"  public="true" />

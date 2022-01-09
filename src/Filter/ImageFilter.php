@@ -5,15 +5,19 @@ namespace Base\Filter;
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 
-class WebpFilter extends ImageFilter implements FilterInterface
+class ImageFilter implements FilterInterface
 {
-    public function __construct()
+    public function __construct(string $path, array $filters = [])
     {
-
+        $this->path    = $path;
+        $this->filters = $filters;
     }
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        return parent::apply($image);
+        foreach($this->filters as $filter)
+            $image = $filter->apply($image);
+
+        return $image->save($this->path);
     }
 }

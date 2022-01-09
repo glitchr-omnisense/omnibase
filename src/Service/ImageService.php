@@ -4,20 +4,26 @@ namespace Base\Service;
 
 use Hashids\Hashids;
 use Imagine\Filter\FilterInterface;
+use Imagine\Image\ImagineInterface;
+use League\FlysystemBundle\Lazy\LazyFactory;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mime\MimeTypes;
 use Twig\Environment;
 
 class ImageService implements ImageServiceInterface
 {
-    public function __construct(Environment $twig, AssetExtension $assetExtension, ParameterBagInterface $parameterBag, ) {
-
+    public function __construct(Environment $twig, AssetExtension $assetExtension, ParameterBagInterface $parameterBag, ImagineInterface $imagine, LazyFactory $lazyFactory)
+    {
         $this->twig               = $twig;
         $this->assetExtension = $assetExtension;
-
+        $this->lazyFactory = $lazyFactory;
+        $this->imagine = $imagine;
+        
         $this->hashIds = new Hashids($parameterBag->get("kernel.secret"));
+        $this->mimeTypes = new MimeTypes();
     }
 
     protected $hashIds;
@@ -48,6 +54,12 @@ class ImageService implements ImageServiceInterface
             unset($attributes["src"]);
 
         return "<img ".html_attributes($attributes)." src='".$path."' />";
+    }
+
+    public function mimetype($fileOrArray) {
+
+        if(is_array($fileOrArray)) return array_map(fn($f) => $this->mimetype($f), $fileOrArray);
+        return $fileOrArray ? $this->mimeTypes->guessMimeType($fileOrArray) : null;
     }
 
     public function filter(string $path, array $filters = []): RedirectResponse
