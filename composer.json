@@ -47,13 +47,13 @@
         "twig/intl-extra": "^3.0",
         "twig/inky-extra": "^3.0",
         "twig/cssinliner-extra": "^3.0",
-        "liip/imagine-bundle": "^2.7",
+        "imagine/imagine": "^1.0",
 
         "sensio/framework-extra-bundle": "^5.4",
-        "scheb/2fa": "^5.0",
-        "scheb/2fa-email": "^5.0",
-        "scheb/2fa-qr-code": "^5.0",
-        "scheb/2fa-trusted-device": "^5.0",
+        "scheb/2fa": "^6.0",
+        "scheb/2fa-email": "^6.0",
+        "scheb/2fa-qr-code": "^6.0",
+        "scheb/2fa-trusted-device": "^6.0",
 
         "easycorp/easyadmin-bundle": "^4.0",
         "league/flysystem-bundle": "^2.0",

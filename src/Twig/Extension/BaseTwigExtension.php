@@ -6,7 +6,7 @@ use Base\Service\BaseService;
 use Base\Controller\BaseController;
 use Base\Service\IconService;
 use Base\Service\ImageService;
-use Base\Service\LocaleProviderInterface;
+use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
@@ -24,11 +24,6 @@ use Twig\TwigFunction;
 
 final class BaseTwigExtension extends AbstractExtension
 {
-    /**
-     * @var AssertExtension
-     */
-    protected $assertExtension;
-
     /**
      * @var RoutingExtension
      */
@@ -54,13 +49,12 @@ final class BaseTwigExtension extends AbstractExtension
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, AssetExtension $assetExtension, IconService $iconService, ImageService $imageService) {
+    public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, IconService $iconService, ImageService $imageService) {
 
         BaseController::$foundBaseTwigExtension = true;
 
         $this->translator               = $translator;
         $this->routingExtension         = $routingExtension;
-        $this->assetExtension           = $assetExtension;
         
         $this->intlExtension            = new IntlExtension();
         $this->mimeTypes                = new MimeTypes();
@@ -118,12 +112,12 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('enum',            [Translator::class, 'enum']),
             new TwigFilter('entity',          [Translator::class, 'entity']),
 
-            new TwigFilter('lang',            [LocaleProvider::class, 'lang']),
-            new TwigFilter('country',         [LocaleProvider::class, 'country']),
+            new TwigFilter('lang',            [LocaleProvider::class, 'getLang']),
+            new TwigFilter('country',         [LocaleProvider::class, 'getCountry']),
 
             new TwigFilter('iconify',         [IconService::class, 'iconify']),
-
             new TwigFilter('imagify',         [ImageService::class, 'imagify']),
+
             new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail']),
             new TwigFilter('webp',            [ImageService::class, 'webp']),
             new TwigFilter('image',           [ImageService::class, 'image'])

@@ -157,6 +157,17 @@ function interpret_link($input)
         return intval($val);
     }
 
+    function str_strip(string $str, string $prefix = "", string $suffix = "") {
+        
+        if(0 === strpos($str, $prefix)) 
+            $str = substr($str, strlen($prefix));
+        
+        if(strlen($str) === strpos($str, $suffix)+strlen($suffix)) 
+            $str = substr($str, 0, strlen($str)-strlen($prefix));
+
+        return $str;
+    }
+
     function begin(object|array &$array) 
     {
         $first = array_key_first($array);

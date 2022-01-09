@@ -8,7 +8,6 @@
         <defaults public="false" />
 
         <!-- TWIG FIX -->
-
         <service id="Symfony\Bridge\Twig\Extension\AssetExtension">
             <tag name="twig.runtime" />
             <argument type="service" id="assets.packages" />

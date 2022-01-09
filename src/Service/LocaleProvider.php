@@ -2,18 +2,19 @@
 
 namespace Base\Service;
 
-use App\Entity\User;
-use Base\Exception\MissingLocaleException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Intl\Locales;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleProvider implements LocaleProviderInterface
 {    
     protected $requestStack = null;
     protected $parameterBag = null;
+
+    /**
+     * @var TranslatorInterface
+     */
     protected $translator = null;
 
     public const SEPARATOR = "-";

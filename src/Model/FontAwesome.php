@@ -16,9 +16,7 @@ class FontAwesome implements IconProviderInterface
     public function __construct(string $metadata)
     {
         $this->metadata = $metadata;
-
         $this->getVersion();
-        $this->getEntries();
     }
 
     public function supports(string $icon): bool

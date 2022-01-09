@@ -452,12 +452,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate(TerminateEvent $event)
     {
+        if(!$this->baseService->isDebug()) return;
         return $this->onStoreLog($event);
     }
 
     private static $exceptionOnHold = null;
     public function onKernelException(ExceptionEvent $event)
     {
+        if(!$this->baseService->isDebug()) return;
         $exception = $event->getThrowable();
 
         // Initial exception held here, this is in case of nested exceptions..

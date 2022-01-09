@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Filter;
+namespace Base\Field\Filter;
 
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
@@ -11,7 +11,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\FilterDataDto;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\FilterTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Filter\Type\TextFilterType;
 
-class AssociationFilter implements FilterInterface
+class AliasFilter implements FilterInterface
 {
    use FilterTrait;
 
