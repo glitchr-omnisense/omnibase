@@ -7,27 +7,63 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 
 use App\Form\User\Login2FAType;
-use App\Form\User\ProfileEditType;
-use App\Form\User\ProfileSearchType;
 use Base\Entity\User\Notification;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use Endroid\QrCode\ErrorCorrectionLevel;
-use Scheb\TwoFactorBundle\Security\TwoFactor\QrCode\QrCodeGenerator;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
+use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
+use Endroid\QrCode\Writer\PngWriter;
+
+use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface as GoogleAuthenticatorTwoFactorInterface;
+use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface as TotpTwoFactorInterface;
+use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticatorInterface;
+use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 
 class SettingsController extends AbstractController
 {
     private $baseService;
-    public function __construct(BaseService $baseService, UserRepository $userRepository, QrCodeGenerator $qrCodeGenerator)
+    public function __construct(BaseService $baseService, UserRepository $userRepository)
     {
         $this->baseService     = $baseService;
         $this->userRepository  = $userRepository;
-        $this->qrCodeGenerator = $qrCodeGenerator;
+    }
 
+
+    /**
+     * @Route("/members/qr/totp", name="qr_code_totp")
+     */
+    public function displayTotpQrCode(TokenStorageInterface $tokenStorage, TotpAuthenticatorInterface $totpAuthenticator): Response
+    {
+        $user = $tokenStorage->getToken()->getUser();
+        if (!($user instanceof TotpTwoFactorInterface)) {
+            throw new NotFoundHttpException('Cannot display QR code');
+        }
+
+        return $this->displayQrCode($totpAuthenticator->getQRContent($user));
+    }
+
+    private function displayQrCode(string $qrCodeContent): Response
+    { 
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->writerOptions([])
+            ->data($qrCodeContent)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+            ->size(200)
+            ->margin(0)
+            ->roundBlockSizeMode(new RoundBlockSizeModeMargin())
+            ->build();
+
+        return new Response($result->getString(), 200, ['Content-Type' => 'image/png']);
     }
 
     /**
