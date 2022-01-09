@@ -2,9 +2,7 @@
 
 namespace Base\DatabaseSubscriber;
 
-use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Doctrine\Common\EventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManager;
 use Doctrine\Common\EventSubscriber;
@@ -42,9 +40,11 @@ class AnnotationSubscriber implements EventSubscriber {
 
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
+        
+        $annotations = $this->annotationReader->getAnnotationsFor($className);
 
-        $annotations = $this->annotationReader->getAnnotations($className);
-        foreach ($annotations[AnnotationReader::TARGET_CLASS][$className] as $entry) {
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $entry) {
 
             if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
                 continue;
@@ -55,8 +55,8 @@ class AnnotationSubscriber implements EventSubscriber {
             $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_CLASS, $className);
         }
 
-        $annotationMethods = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
-        foreach ($annotationMethods as $method => $array) {
+        $methodAnnotations = $annotations[AnnotationReader::TARGET_METHOD][$className] ?? [];
+        foreach ($methodAnnotations as $method => $array) {
 
             foreach ($array as $entry) {
 
@@ -70,8 +70,8 @@ class AnnotationSubscriber implements EventSubscriber {
             }
         }
 
-        $annotationProperties = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
-        foreach ($annotationProperties as $property => $array) {
+        $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $array) {
 
             foreach ($array as $entry) {
 
@@ -102,13 +102,15 @@ class AnnotationSubscriber implements EventSubscriber {
         foreach($entities as $entity) {
 
             $className = get_class($entity);
+            $classMetadata  = $this->entityManager->getClassMetadata($className);
 
             if (in_array($className, $this->subscriberHistory)) return;
             $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
-            $classMetadata  = $this->entityManager->getClassMetadata($className);
-            $annotations = $this->annotationReader->getAnnotations($className);
-            foreach ($annotations[AnnotationReader::TARGET_CLASS][$className] as $entry) {
+            $annotations = $this->annotationReader->getAnnotationsFor($className);
+
+            $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+            foreach ($classAnnotations as $entry) {
 
                 if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
                     continue;
@@ -119,10 +121,9 @@ class AnnotationSubscriber implements EventSubscriber {
                 $entry->onFlush($event, $classMetadata, $entity);
             }
 
-            /** ** TARGET_METHOD is missing on purpose ** */
-
             $changeSet = $uow->getEntityChangeSet($entity);
-            foreach ($annotations[AnnotationReader::TARGET_PROPERTY][$className] as $property => $array) {
+            $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+            foreach ($propertyAnnotations as $property => $array) {
 
                 if(!array_key_exists($property, $changeSet))
                     continue;
@@ -145,14 +146,15 @@ class AnnotationSubscriber implements EventSubscriber {
     {
         $entity         = $event->getObject();
         $className      = get_class($entity);
+        $classMetadata  = $this->entityManager->getClassMetadata($className);
 
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
-        $classMetadata  = $this->entityManager->getClassMetadata($className);
-        $annotations    = $this->annotationReader->getAnnotations($className);
+        $annotations    = $this->annotationReader->getAnnotationsFor($className);
         
-        foreach ($annotations[AnnotationReader::TARGET_CLASS][$className] as $entry) {
+        $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+        foreach ($classAnnotations as $entry) {
 
             if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
                 continue;
@@ -163,7 +165,8 @@ class AnnotationSubscriber implements EventSubscriber {
             $entry->{$eventName}($event, $classMetadata, $entity);
         }
 
-        foreach ($annotations[AnnotationReader::TARGET_PROPERTY][$className] as $property => $array) {
+        $propertyAnnotations = $annotations[AnnotationReader::TARGET_PROPERTY][$className] ?? [];
+        foreach ($propertyAnnotations as $property => $array) {
 
             foreach ($array as $entry) {
 
@@ -177,6 +180,7 @@ class AnnotationSubscriber implements EventSubscriber {
             }
         }
     }
+
     public function prePersist(LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function preUpdate (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }
     public function preRemove (LifecycleEventArgs $event) { $this->onLifecycle($event, __FUNCTION__); }

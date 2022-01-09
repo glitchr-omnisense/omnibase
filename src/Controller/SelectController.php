@@ -8,6 +8,7 @@ use Base\Model\FontAwesome;
 use Base\Service\BaseService;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
+use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,19 +22,21 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectController extends AbstractController
 {
+    use BaseTrait;
+
     /**
      * @var Paginator
      */
     protected $paginator;
 
-    public function __construct(CacheInterface $cache, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
+    public function __construct(CacheInterface $cache, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->hashIds = new Hashids();
+        $this->hashIds = new Hashids($this->getService()->getSalt());
+        
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->paginator = $paginator;
         $this->translator = $translator;
-        $this->baseService = $baseService;
         $this->cache = $cache;
     }
 

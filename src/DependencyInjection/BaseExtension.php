@@ -2,13 +2,13 @@
 
 namespace Base\DependencyInjection;
 
+use Base\Annotations\AnnotationInterface;
+use Base\Model\IconInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
-use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 
 use Symfony\Component\Config\Definition\Processor;
-use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 
 class BaseExtension extends Extension
@@ -20,7 +20,7 @@ class BaseExtension extends Extension
     {
         //
         // Load service declaration (includes services, controllers,..)
-        
+
         // Format XML
         $loader = new XmlFileLoader($container, new FileLocator(\dirname(__DIR__, 2).'/config'));
         $loader->load('services.xml');
@@ -38,6 +38,9 @@ class BaseExtension extends Extension
             $config["twig"]["form_themes"],
             $container->getParameter('twig.form.resources')
         ));
+
+        $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
+        $container->registerForAutoconfiguration(IconInterface::class)->addTag('base.icon');
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")

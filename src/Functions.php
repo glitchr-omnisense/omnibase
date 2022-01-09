@@ -27,6 +27,8 @@ function interpret_link($input)
 
     function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
+
+    function synopsis($object) { return class_synopsis($object); }
     function class_synopsis($object)
     {
         if (!$object) return dump("Object passed is null");
@@ -82,7 +84,7 @@ function interpret_link($input)
                 );
     }
 
-    function shorten_str(?string $str, int $length = 100, string $separator = " [..] "): ?string
+    function str_shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
     {
         $nChr = strlen($str);
 
@@ -108,10 +110,10 @@ function interpret_link($input)
     const  BINARY_PREFIX = array("", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");
     const DECIMAL_PREFIX = array("", "k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
 
-    function byte2bit(int $num): int { return 8*$num; } // LOL !
-    function bit2byte(int $num): int { return $num/8; } // LOL LOL !
-    function byte2str(int $num): string { dump($num); return dec2str($num/8, BINARY_PREFIX).BYTE_PREFIX[0]; }
-    function  bit2str(int $num): string { return dec2str($num).BIT_PREFIX[0]; }
+    function byte2bit(int $num): int { return 8*$num; } // LMFAO !
+    function bit2byte(int $num): int { return $num/8; } // LMFAO !
+    function byte2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num/8, $unitPrefix).BYTE_PREFIX[0]; }
+    function  bit2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix).BIT_PREFIX[0]; }
     function  dec2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string
     {
              if ($unitPrefix == DECIMAL_PREFIX) $divider = 1000;
@@ -129,12 +131,6 @@ function interpret_link($input)
         return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor]) : $num);
     }
 
-    function is_parent_of(mixed $object_or_class, string $class, bool $allow_string = true): bool
-    {
-        $object_or_class = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
-        return $object_or_class == $class || is_subclass_of($object_or_class, $class, $allow_string);
-    }
-    
     function str2dec(string $str): int
     {
         $val = trim($str);
@@ -145,7 +141,7 @@ function interpret_link($input)
         $unitPrefix = mb_strtolower(strrev($matches[2]));
         $units      = strrev($matches[1]);
 
-        if(in_array($units,  BIT_PREFIX)) $val *= 1; // LOL !
+        if(in_array($units,  BIT_PREFIX)) $val *= 1; // LMFAO !
         if(in_array($units, BYTE_PREFIX)) $val *= 8;
         if ($unitPrefix) {
 
@@ -154,8 +150,8 @@ function interpret_link($input)
             if( ! (($decFactor !== false) xor ($binFactor !== false)) )
                 throw new \Exception("Unexpected prefix unit \"$unitPrefix\" for \"".$str."\"");
 
-            if($decFactor !== false) $val *= 1000**($decFactor+1);
-            if($binFactor !== false) $val *= 1024**($binFactor+1);
+            if($decFactor !== false) $val *= 1000**($decFactor);
+            if($binFactor !== false) $val *= 1024**($binFactor);
         }
         
         return intval($val);
@@ -425,6 +421,11 @@ function interpret_link($input)
         return $array;
     }
 
+    function html_attributes(array $attributes =[])
+    {
+        return trim(implode(" ", array_map(fn($k,$v) => $k."=\"".$v."\"", $attributes)));
+    }
+
     function array_keys_delete($keys, array $array) 
     {
         if(!is_array($keys)) $keys = [$keys];
@@ -491,8 +492,8 @@ function interpret_link($input)
         return $newObject;
     }
 
-    function is_serialized($string) { return ($string == 'b:0;' || @unserialize($string) !== false); }
-    function is_serializable($object) 
+    function is_serialized($string): bool { return ($string == 'b:0;' || @unserialize($string) !== false); }
+    function is_serializable($object): bool
     {
         try { serialize($object); }
         catch (Exception $e) { return false; }

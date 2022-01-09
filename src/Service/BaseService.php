@@ -28,6 +28,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
+use Base\Traits\SingletonTrait;
 use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -52,7 +53,10 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 class BaseService implements RuntimeExtensionInterface
-{
+{   
+    use BaseTrait;
+    use BaseCommonTrait;
+
     /**
      * @var KernelInterface
      */
@@ -129,6 +133,8 @@ class BaseService implements RuntimeExtensionInterface
     {
         BaseController::$foundBaseService = true;
 
+        $this->setInstance($this);
+
         // Kernel and additional stopwatch
         $this->kernel      = $kernel;
         $this->container   = $kernel->getContainer();
@@ -160,13 +166,6 @@ class BaseService implements RuntimeExtensionInterface
         // EA provider
         $this->adminContextProvider = new AdminContextProvider($this->requestStack);
     }
-
-    /*
-     * Common variables between traits
-     */
-    use BaseTrait;
-    use BaseCommonTrait;
-
 
 
 
@@ -404,6 +403,8 @@ class BaseService implements RuntimeExtensionInterface
 
     public function getLocale(?string $locale = null) { return self::getLocaleProvider()->getLocale($locale); }
 
+    public function getSalt()   { return $this->getSecret(); }
+    public function getSecret() { return $this->getParameterBag("kernel.secret"); }
     public function getProfiler() { return $this->kernel->getContainer()->get('profiler'); }
     public function getProfile($response = null)
     {

@@ -7,15 +7,15 @@
         <defaults public="true" />
 
         <service id="base.service" alias="Base\Service\BaseService" />
-        <service id="base.settings" alias="Base\Service\BaseSettings" />
+        <service id="base.service.image" alias="Base\Service\ImageService" />
+        <service id="base.service.icon" alias="Base\Service\IconService" />
 
-        <service id="base.translator" alias="Base\Service\Translator" />
-        <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
-        <service id="twig.extension.base" alias="Base\Twig\Extension\BaseTwigExtension" />
+        <service id="base.settings" alias="Base\Service\BaseSettings" />
 
         <service id="base.notifier" alias="Base\Notifier\Notifier" />
         <service id="Base\Notifier\NotifierInterface" alias="base.notifier"/>
-
+        <service id="base.translator" alias="Base\Service\Translator" />
+        <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
         <service id="base.parameter_bag" alias="Base\Service\ParameterBag" />
         <service id="Base\Service\ParameterBagInterface" alias="base.parameter_bag"/>
         <service id="base.locale_provider" alias="Base\Service\LocaleProvider" />
@@ -32,6 +32,7 @@
         <service id="base.database.metadata_manipulator" alias="Base\Database\Factory\ClassMetadataManipulator" />
         <service id="base.database.annotation_reader" alias="Base\Annotations\AnnotationReader" />
 
+        <service id="twig.extension.base" alias="Base\Twig\Extension\BaseTwigExtension" />
         <service id="base.twig_loader"  alias="Base\Twig\Loader\FilesystemLoader" />
         <service id="base.twig.app_variable" alias="Base\Twig\AppVariable" />
 

@@ -145,7 +145,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Guess class option
             $options["class"]    = $this->formFactory->guessType($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-
+            
             // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
             $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
@@ -342,6 +342,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             /* Override options.. I couldn't done that without accessing data */
             $options["class"]         = $this->formFactory->guessType($form, $options);
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
+            $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
             $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $form->getData());
             $options["choices"]       = $this->formFactory->guessChoices($form, $options);

@@ -17,6 +17,14 @@ use Symfony\Component\Notifier\NotifierInterface;
 trait BaseCommonTrait {
 
     /**
+     * @var BaseService
+     */
+    protected static $instance = null;
+    public function hasInstance() { return !self::$instance; }
+    public function getInstance() { return  self::$instance; }
+    public function setInstance($instance) { self::$instance = $instance; }
+
+    /**
      * @var string
      */
     protected static $projectDir = null;

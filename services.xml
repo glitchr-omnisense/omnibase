@@ -38,7 +38,6 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Subscriber\BaseSubscriber">
@@ -211,10 +210,6 @@
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="base.locale_provider" />
         </service>
-        <service id="Base\DatabaseSubscriber\DiscriminatorSubscriber">
-            <tag name="doctrine.event_subscriber" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-        </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
             <tag name="doctrine.event_subscriber" />
@@ -227,13 +222,33 @@
             <argument type="service" id="base.service" />
         </service>
 
-
+        <service id="Base\Service\ImageService" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="liip_imagine.controller" />
+            <argument type="service" id="liip_imagine.cache.manager" />
+            <argument type="service" id="liip_imagine.data.manager" />
+            <argument type="service" id="liip_imagine.filter.manager" />
+        </service>
         <!--
-            DOCTRINE
+            <service id="Base\Filter\Loader\MyCustomFilter">
+                <tag name="liip_imagine.filter.loader" loader="webp" />
+            </service>
         -->
+
+        <service id="Base\Service\IconService" public="true">
+            <tag name="twig.runtime" />
+        </service>
+        <service id="Base\Model\FontAwesome">
+            <tag name="base.icon_provider" />
+            <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
+        </service>
+
+
+        <!-- DOCTRINE -->
         <service id="Base\Database\NamingStrategy"  public="true" />
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
-
         <service id="Doctrine\Persistence\Mapping\ClassMetadataFactory">
             <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />
         </service>
@@ -258,12 +273,7 @@
             <argument type="service" id="security.token_storage" />
         </service>
 
-        <!--
-
-            Twig declarations
-
-            -->
-
+        <!-- Twig declarations -->
         <service id="Base\Twig\Loader\FilesystemLoader">
             <tag name="twig.loader" />
             <argument type="service" id="twig" />
@@ -273,6 +283,7 @@
 
         <service id="Base\Service\TranslatorInterface" alias="Base\Service\Translator"/>
         <service id="Base\Service\Translator" decorates="translator" public="true">
+            <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
             <argument type="service" id="kernel" />
         </service>
@@ -288,6 +299,8 @@
             <argument type="service" id="translator" />
             <argument type="service" id="twig.extension.routing" />
             <argument type="service" id="twig.extension.assets" />
+            <argument type="service" id="base.service.icon" />
+            <argument type="service" id="base.service.image" />
        </service>
 
         <service id="Base\Twig\Extension\ClassTwigExtension" >
@@ -360,24 +373,21 @@
         <!--
             USER SECTION
         -->
-        <service id="Base\Controller\Client\Thread\SearchController">
-            <tag name="controller.service_arguments" />
-            <call method="setContainer"><argument type="service" id="service_container" /></call>
-            <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
-
         <service id="Base\Controller\Client\User\SearchController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
-
+        <service id="Base\Controller\Client\Thread\SearchController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
         <service id="Base\Controller\Client\User\ProfileController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
-
         <service id="Base\Controller\Client\User\SettingsController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>

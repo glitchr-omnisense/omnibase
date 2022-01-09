@@ -2,6 +2,8 @@
 
 namespace Base;
 
+use Base\DependencyInjection\Compiler\AnnotationPass;
+use Base\DependencyInjection\Compiler\IconProviderPass;
 use Doctrine\DBAL\Types\Type;
 use EasyCorp\Bundle\EasyAdminBundle\DependencyInjection\EasyAdminExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -12,16 +14,32 @@ use Symfony\Component\Asset\Packages;
 
 use Symfony\Component\Finder\Finder;
 
-use Symfony\Component\DependencyInjection\Loader\Configurator as Config;
-
 class BaseBundle extends Bundle
 {
     public const CACHE   = true;
     public const VERSION = '1.0.0';
 
-    public function boot()
+    public function boot() { $this->defineDoctrineType(); }
+    public function build(ContainerBuilder $container)
     {
-        $this->defineDoctrineType();
+        parent::build($container);
+
+        $container->addCompilerPass(new AnnotationPass());
+        $container->addCompilerPass(new IconProviderPass());
+
+        /* Register aliased repositories */
+        foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
+
+            $container->register($baseRepository)->addTag("doctrine.repository_service")
+                      ->addArgument(new Reference('doctrine'));
+
+            if($aliasedRepository) {
+
+                $container->register($aliasedRepository)
+                    ->addTag("doctrine.repository_service")
+                    ->addArgument(new Reference('doctrine'));
+            }
+        }
     }
 
     public function defineDoctrineType()
@@ -103,25 +121,6 @@ class BaseBundle extends Bundle
             "Base\\Entity\\" . $class              => "App\\Entity\\" . $class,
             "Base\\Entity\\" . $class . "Repository" => "App\\Entity\\" . $class . "Repository"
         ]);
-    }
-
-    public function build(ContainerBuilder $container)
-    {
-        parent::build($container);
-
-        /* Register aliased repositories */
-        foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
-
-            $container->register($baseRepository)->addTag("doctrine.repository_service")
-                      ->addArgument(new Reference('doctrine'));
-
-            if($aliasedRepository) {
-
-                $container->register($aliasedRepository)
-                    ->addTag("doctrine.repository_service")
-                    ->addArgument(new Reference('doctrine'));
-            }
-        }
     }
 
     public static function getAllClasses($path, $prefix = ""): array

@@ -54,17 +54,20 @@ class AnnotationReader
         $this->parameterBag = $parameterBag;
         $this->enabled = $parameterBag->get("base.annotations.use_custom_reader");
 
+        // Read from cache
+        $this->cache   = $cache;
+
+
         $paths = [];
+        $paths[] = __DIR__ . "/Annotation";
+        $paths[] = __DIR__ . "/../Database/Annotation";
         if ( ($matches = preg_grep('/^base.annotations.paths\.[0-9]*\.[.*]*$/', array_keys($parameterBag->all()))) )
             foreach ($matches as $match) $paths[] = $parameterBag->get($match);
 
         // Paths to look for annotations
-        $paths[] = __DIR__ . "/Annotation";
         foreach ($paths as $path)
             $this->addPath($path);
 
-        // Read from cache
-        $this->cache   = $cache;
 
         $cacheName = "base.annotation_reader." . hash('md5', self::class);
         $this->cachePool['familyAnnotations']   = $this->cache->getItem($cacheName . ".familyAnnotations");
@@ -85,13 +88,25 @@ class AnnotationReader
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function getUser() { return $this->tokenStorage->getUser(); }
-    public function getImpersonator() 
+    /**
+     * @var array
+     */
+    protected array $paths = [];
+    public function getPaths(): array { return $this->paths; }
+    public function addPath(string $path): self
     {
-        $token = $this->tokenStorage->getToken();
-        return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
+        if (in_array($path, $this->paths)) return $this;
+
+        if (!file_exists($path)) return $this;
+            //throw new Exception("Path not found: \"".$path."\"");
+
+        foreach ($this->getAllClasses("", $path) as $annotation)
+            $this->addAnnotation($annotation);
+
+        return $this;
     }
-    
+
+
     public function getAsset(string $url): string
     {
         $url = trim($url);
@@ -109,8 +124,14 @@ class AnnotationReader
 
         return $path;
     }
-
+    
     public function getProjectDir() { return dirname(__DIR__, 5); }
+    public function getUser() { return $this->tokenStorage->getUser(); }
+    public function getImpersonator() 
+    {
+        $token = $this->tokenStorage->getToken();
+        return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
+    }
 
     /**
      * @var EntityManager
@@ -158,24 +179,6 @@ class AnnotationReader
      */
     protected bool $enabled;
     public function isEnabled(): bool { return $this->enabled; }
-
-    /**
-     * @var array
-     */
-    protected array $paths = [];
-    public function getPaths(): array { return $this->paths; }
-    public function addPath(string $path): self
-    {
-        if (in_array($path, $this->paths)) return $this;
-
-        if (!file_exists($path)) return $this;
-            //throw new Exception("Path not found: \"".$path."\"");
-
-        foreach ($this->getAllClasses("", $path) as $class)
-            $this->addKnownAnnotations($class);
-
-        return $this;
-    }
 
     public static function getAllClasses($prefix, $path): array
     {
@@ -227,23 +230,23 @@ class AnnotationReader
     }
 
 
-    protected $knownAnnotations = [];
-    public function getKnownAnnotations() { return $this->knownAnnotations; }
-    public function addKnownAnnotations(string $annotationName)
+    protected $annotations = [];
+    public function getAnnotations() { return $this->annotations; }
+    public function addAnnotation(string $annotationName)
     {
         if (!is_subclass_of($annotationName, AbstractAnnotation::class))
             return $this;
 
-        if (!in_array($annotationName, $this->knownAnnotations))
-            $this->knownAnnotations[] = $annotationName;
+        if (!in_array($annotationName, $this->annotations))
+            $this->annotations[] = $annotationName;
 
         return $this;
     }
 
-    public function removeKnownAnnotations(string $annotationName)
+    public function removeAnnotation(string $annotationName)
     {
-        if (($pos = array_search($annotationName, $this->knownAnnotations)))
-            unset($this->knownAnnotations[$pos]);
+        if (($pos = array_search($annotationName, $this->annotations)))
+            unset($this->annotations[$pos]);
 
         return $this;
     }
@@ -315,13 +318,13 @@ class AnnotationReader
     public function getAncestorAnnotations($className, $annotationNames = null, $targets = [])
     {
         $ancestor = $this->getAncestor($className);
-        return $this->getAnnotations($ancestor, $annotationNames, $targets);
+        return $this->getAnnotationsFor($ancestor, $annotationNames, $targets);
     }
 
     public function getParentAnnotations($className, $annotationNames = null, $targets = [])
     {
         $parent = $this->getParent($className);
-        return $this->getAnnotations($parent, $annotationNames, $targets);
+        return $this->getAnnotationsFor($parent, $annotationNames, $targets);
     }
 
     public function getChildren($className)
@@ -346,7 +349,7 @@ class AnnotationReader
             $annotations = $this->array_append_recursive(
                 $annotations,
                 $this->array_append_recursive(
-                    $this->getAnnotations($child, $annotationNames, $targets),
+                    $this->getAnnotationsFor($child, $annotationNames, $targets),
                     $childrenAnnotations
                 )
             );
@@ -372,7 +375,7 @@ class AnnotationReader
             return $annotations[$ancestor];
 
         $annotations[$ancestor]  = $this->array_append_recursive(
-            $this->getAnnotations($ancestor, $annotationNames, $targets),
+            $this->getAnnotationsFor($ancestor, $annotationNames, $targets),
             $this->getChildrenAnnotations($ancestor, $annotationNames, $targets)
         );
 
@@ -391,7 +394,7 @@ class AnnotationReader
 
         // Find targets corresponding to the annotationNames specified
         if (empty($annotationNames))
-            $annotationNames = $this->getKnownAnnotations();
+            $annotationNames = $this->getAnnotations();
 
         // Compute target list
         if (empty($targets)) {
@@ -407,7 +410,7 @@ class AnnotationReader
             return [];
 
         if (empty($annotationNames))
-            $annotationNames = $this->getKnownAnnotations();
+            $annotationNames = $this->getAnnotations();
 
         if ($classNameOrMetadataOrRefl instanceof ReflectionClass)
             $reflClass = $classNameOrMetadataOrRefl;
@@ -418,7 +421,6 @@ class AnnotationReader
 
         // If annotation already computed
         $annotations = $this->cachePool['classAnnotations']->get() ?? [];
-
         if (!array_key_exists($reflClass->name, $annotations)) {
 
             // Compute the class annotations
@@ -429,7 +431,7 @@ class AnnotationReader
                 // Only look for AbstractAnnotation classes
                 if (!is_subclass_of($annotation, AbstractAnnotation::class))
                     continue;
-                if (!in_array(get_class($annotation), $this->getKnownAnnotations()))
+                if (!in_array(get_class($annotation), $this->getAnnotations()))
                     continue;
 
                 $annotations[$reflClass->name][] = $annotation;
@@ -439,7 +441,7 @@ class AnnotationReader
         }
 
         // Return the full set of annotations for a given class
-        if($annotationNames == $this->getKnownAnnotations())
+        if($annotationNames == $this->getAnnotations())
             return $annotations[$reflClass->name];
 
         // Filter them ask request by the $annontationNames
@@ -464,7 +466,7 @@ class AnnotationReader
 
         // Find targets corresponding to the annotationNames specified
         if (empty($annotationNames))
-            $annotationNames = $this->getKnownAnnotations();
+            $annotationNames = $this->getAnnotations();
 
         // Compute target list
         if (empty($targets)) {
@@ -492,7 +494,7 @@ class AnnotationReader
 
             // Compute the class annotations
             $annotations[$reflClass->name] = [];
-            foreach ($this->getKnownAnnotations() as $annotationName) {
+            foreach ($this->getAnnotations() as $annotationName) {
 
                 foreach ($reflClass->getMethods() as $reflMethod) {
 
@@ -505,7 +507,7 @@ class AnnotationReader
         }
 
         // Return the full set of annotations for a given class
-        if($annotationNames == $this->getKnownAnnotations())
+        if($annotationNames == $this->getAnnotations())
             return $annotations[$reflClass->name];
 
         // Filter them ask request by the $annontationNames
@@ -532,7 +534,7 @@ class AnnotationReader
 
         // Find targets corresponding to the annotationNames specified
         if (empty($annotationNames))
-            $annotationNames = $this->getKnownAnnotations();
+            $annotationNames = $this->getAnnotations();
 
         // Compute target list
         if (empty($targets)) {
@@ -560,7 +562,7 @@ class AnnotationReader
 
             // Force to get all known annotations when buffering
             $annotations[$reflClass->name] = [];
-            foreach ($this->getKnownAnnotations() as $annotationName) {
+            foreach ($this->getAnnotations() as $annotationName) {
 
                 foreach ($reflClass->getProperties() as $reflProperty) {
 
@@ -573,7 +575,7 @@ class AnnotationReader
         }
 
         // Return the full set of annotations for a given class
-        if($annotationNames == $this->getKnownAnnotations())
+        if($annotationNames == $this->getAnnotations())
             return $annotations[$reflClass->name];
 
         // Filter them ask request by the $annontationNames
@@ -589,7 +591,7 @@ class AnnotationReader
         return $filteredAnnotations;
     }
 
-    public function getAnnotations(?string $className, $annotationNames = null, array $targets = []): array
+    public function getAnnotationsFor(?string $className, $annotationNames = null, array $targets = []): array
     {
         // Termination
         if ($className == null) return [];
@@ -603,7 +605,7 @@ class AnnotationReader
 
         // Find targets corresponding to the annotationNames specified
         if (empty($annotationNames))
-            $annotationNames = $this->getKnownAnnotations();
+            $annotationNames = $this->getAnnotations();
 
         // Compute target list
         if (empty($targets)) {

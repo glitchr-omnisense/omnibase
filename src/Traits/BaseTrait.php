@@ -23,6 +23,7 @@ trait BaseTrait
     public static function getLogDir()        : string { return BaseService::getProjectDir() . "/var/log"; }
     public static function getDataDir()       : string { return BaseService::getProjectDir() . "/data"; }
 
+    public static function getService()       : ?BaseService             { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getService(); }
     public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
     public static function getSettings()      : ?BaseSettings            { return (self::class === BaseService::class) ? BaseService::$settings       : BaseService::getSettings(); }
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }

@@ -54,6 +54,7 @@ class Uploader extends AbstractAnnotation
         $this->keepNotFound = $data["keepNotFound"] ?? false;
         $this->config       = $data["config"] ?? [];
         $this->mimeTypes    = $data["mime"] ?? [];
+
         $this->maxSize      = str2dec($data["size"] ?? UploadedFile::getMaxFilesize());
     }
 
@@ -86,10 +87,10 @@ class Uploader extends AbstractAnnotation
     
     public static function getPublic($entity, $mapping)
     {
-        if(!self::hasAnnotation($entity, $mapping)) 
+        if(!self::hasAnnotations($entity, $mapping)) 
             return null;
         
-        $that = self::getAnnotation($entity, $mapping);
+        $that = self::getAnnotations($entity, $mapping);
         if(!$that) return null;
         
         if($that->public === null)
@@ -138,10 +139,10 @@ class Uploader extends AbstractAnnotation
 
     public static function getMimeTypes($entity, $mapping): array
     {
-        if(!self::hasAnnotation($entity, $mapping)) 
+        if(!self::hasAnnotations($entity, $mapping)) 
             return [];
         
-        $that = self::getAnnotation($entity, $mapping);
+        $that = self::getAnnotations($entity, $mapping);
         if(!$that) return [];
 
         return $that->mimeTypes;
@@ -149,10 +150,10 @@ class Uploader extends AbstractAnnotation
 
     public static function getMaxFilesize($entity, $mapping): int
     {
-        if(!self::hasAnnotation($entity, $mapping)) 
+        if(!self::hasAnnotations($entity, $mapping)) 
             return UploadedFile::getMaxFilesize();
         
-        $that = self::getAnnotation($entity, $mapping);
+        $that = self::getAnnotations($entity, $mapping);
         if(!$that) return UploadedFile::getMaxFilesize();
 
         return min($that->maxSize ?: \PHP_INT_MAX, UploadedFile::getMaxFilesize());
@@ -163,9 +164,9 @@ class Uploader extends AbstractAnnotation
     {
         if($entity === null) return null;
 
-        if(!self::hasAnnotation($entity, $mapping)) return null;
+        if(!self::hasAnnotations($entity, $mapping)) return null;
         
-        $that       = self::getAnnotation($entity, $mapping);
+        $that       = self::getAnnotations($entity, $mapping);
         if(!$that) return null;
 
         $config     = $that->config;

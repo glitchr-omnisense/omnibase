@@ -33,7 +33,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getRepository($className)                    { return AnnotationReader::getInstance()->getRepository($className); }
     public static function getAsset($url)                               { return AnnotationReader::getInstance()->getAsset($url);            }
 
-    public static function getAnnotation($entity, string $mapping)
+    public static function getAnnotations($entity, string $mapping)
     {
         $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
         if(!$classname) return null;
@@ -45,7 +45,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return end($annotations[$mapping]);
     }
 
-    public static function hasAnnotation($entity, string $mapping)
+    public static function hasAnnotations($entity, string $mapping)
     {
         $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
         if(!$classname) return null;

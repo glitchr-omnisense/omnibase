@@ -4,8 +4,8 @@
 
 {% set show = field.customOptions.get('show') %}
 
-{% set icon  = field.customOptions.get('icon')|fontAwesome({class: "fa-fw"})|default("") %}
-{% set icon2x  = field.customOptions.get('icon')|fontAwesome({class: "fa-fw fa-2x"})|default("") %}
+{% set icon  = field.customOptions.get('icon')|iconify({class: "fa-fw"})|default("") %}
+{% set icon2x  = field.customOptions.get('icon')|iconify({class: "fa-fw fa-2x"})|default("") %}
 {% set email = field.formattedValue %}
 
 {% if icon is empty %}

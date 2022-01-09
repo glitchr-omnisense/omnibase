@@ -184,7 +184,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $text = $this->translator->trans($crudTranslationPrefixWithAction.".text");
         if($text == $crudTranslationPrefixWithAction.".text") $text = $this->translator->trans($crudTranslationPrefix.".text");
         if($text == $crudTranslationPrefix.".text") $text = "";
-
+        
         $this->extension->setIcon($this->getEntityIcon() ?? "fas fa-question-circle");
         $this->extension->setTitle(mb_ucfirst($title));
         $this->extension->setHelp($help);
@@ -243,7 +243,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $entityLabel = $this->translator->trans($userClass.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
         if($entityLabel == $userClass.".plural") $entityLabel = null;
         else $extension->setTitle(mb_ucfirst($entityLabel));
-
+        
         $entityLabel = $entityLabel ?? $this->getEntityLabelInSingular() ?? "";
         $entityLabel = !empty($entityLabel) ? mb_ucfirst($entityLabel) : "";
 

@@ -5,7 +5,7 @@
 
 {% if field.value %}
 <span class="badge badge-secondary field-icon">
-    {{field.value|fontAwesome({class: "fa-fw", style: "color: "~color})|default('')|raw}}
+    {{field.value|iconify({class: "fa-fw", style: "color: "~color})|default('')|raw}}
 </span>
 {% else %}
 -

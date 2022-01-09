@@ -25,7 +25,7 @@
 
             {% set icon = null %}
             {% if formattedValue.icon is defined %}
-                {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+                {% set icon = formattedValue.icon|iconify({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
             {% endif %}
 
             <span class="badge badge-secondary">
@@ -84,7 +84,7 @@
 
             {% set icon = null %}
             {% if formattedValue.icon is defined %}
-                {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+                {% set icon = formattedValue.icon|iconify({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
             {% endif %}
 
             {% set fieldLink = formattedValue['url'] ?? null %}
@@ -132,7 +132,7 @@
 
         {% set icon = null %}
         {% if formattedValue.icon is defined %}
-            {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+            {% set icon = formattedValue.icon|iconify({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
         {% endif %}
 
         <span class="badge badge-secondary">
@@ -171,7 +171,7 @@
 
         {% set icon = null %}
         {% if formattedValue.icon is defined %}
-            {% set icon = formattedValue.icon|fontAwesome({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
+            {% set icon = formattedValue.icon|iconify({class:"fa-fw"})|default(formattedValue.icon|imagify)|default(null) %}
         {% endif %}
 
         <span class="badge badge-secondary">

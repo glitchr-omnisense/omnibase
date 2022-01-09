@@ -4,12 +4,9 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use ReflectionException;
-use ReflectionProperty;
 
 /**
  * @Annotation
@@ -24,9 +21,6 @@ use ReflectionProperty;
 
 class ColumnAlias extends AbstractAnnotation
 {
-    /** @Required */
-    private string $value;
-
     public function __construct(array $data)
     {
         $this->column = $data["column"] ?? "";
@@ -56,7 +50,7 @@ class ColumnAlias extends AbstractAnnotation
 
         $classMetadata->fieldNames[$alias] = $this->column;
     }
-    
+
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $alias  = $property ?? $this->alias;

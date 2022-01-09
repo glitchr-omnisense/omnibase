@@ -48,65 +48,49 @@
         {% endif %}
     {% endfor %}
 
-    {% if singleEntity %}
-
-        {% set entity = discriminatorMap|first|first %}
-
-        {% set icon    = static_call(entity|url_decode, "getEntityIcon")|default(null) %}
-        {% set label   = static_call(entity|url_decode, "getEntityLabelInSingular")|trans|capitalize %}
-        {% set linkUrl = action.linkUrl|replace({(rootEntity): entity}) %}
-
-        <a class="{{ action.cssClass }} single-entity" href="{{ linkUrl }}"
+    {% if isRootEntityAllowed %}
+    
+        <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
             {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
         </a>
 
-    {% else %} 
-    
-        {% if isRootEntityAllowed %}
-        
-            <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-                {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
-            </a>
+        {% if discriminatorMap|length > 0 %}
+        <button type="button" class="btn btn-primary dropdown-toggle root-allowed dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="visually-hidden"></span>
+        </button>
+        {% endif %}
 
-            {% if discriminatorMap|length > 0 %}
-            <button type="button" class="btn btn-primary dropdown-toggle root-allowed dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="visually-hidden"></span>
-            </button>
+    {% else %}
+        <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
+            {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
+            {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
+        </span>
+    {% endif %}
+
+    {% if discriminatorMap|length > 0 %}
+    <ul class="dropdown-menu dropdown-menu-end">
+        {% for group,entities in discriminatorMap %}
+            {% if entities|length != 1 %}
+                {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
+                {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans|capitalize }}</li>{% endif %}
             {% endif %}
 
-        {% else %}
-            <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
-                {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-                {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
-            </span>
-        {% endif %}
+            {% for entity in entities %}
 
-        {% if discriminatorMap|length > 1 %}
-        <ul class="dropdown-menu dropdown-menu-end">
-            {% for group,entities in discriminatorMap %}
-                {% if entities|length != 1 %}
-                    {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
-                    {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans|capitalize }}</li>{% endif %}
-                {% endif %}
+                {% set icon    = static_call(entity|urldecode, "getEntityIcon")|default(null) %}
+                {% set label   = static_call(entity|urldecode, "getEntityLabelInSingular")|trans|capitalize %}
+                {% set linkUrl = action.linkUrl|replace({(rootEntity): entity}) %}
 
-                {% for entity in entities %}
+                <li class="dropdown-item label-item"><a href="{{ linkUrl }}"
+                    {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                    {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
+                    {{label}}
+                </a></li>
 
-                    {% set icon    = static_call(entity|url_decode, "getEntityIcon")|default(null) %}
-                    {% set label   = static_call(entity|url_decode, "getEntityLabelInSingular")|trans|capitalize %}
-                    {% set linkUrl = action.linkUrl|replace({(rootEntity): entity}) %}
-
-                    <li class="dropdown-item label-item"><a href="{{ linkUrl }}"
-                        {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                        {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                        {{label}}
-                    </a></li>
-
-                {% endfor %}
             {% endfor %}
-        </ul>
-        {% endif %}
+        {% endfor %}
+    </ul>
     {% endif %}
 </span>
 

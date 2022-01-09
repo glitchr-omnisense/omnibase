@@ -2,9 +2,10 @@
 
 namespace Base\Model;
 
+use Base\Service\IconProviderInterface;
 use Symfony\Component\Yaml\Yaml;
 
-class FontAwesome
+class FontAwesome implements IconProviderInterface
 {
     public const STYLE_SOLID   = "fas";
     public const STYLE_REGULAR = "far";
@@ -15,13 +16,26 @@ class FontAwesome
     public function __construct(string $metadata)
     {
         $this->metadata = $metadata;
-        $this->load();
-    }
 
-    public function load()
-    {
         $this->getVersion();
         $this->getEntries();
+    }
+
+    public function supports(string $icon): bool
+    {
+        $styles = [self::STYLE_SOLID, self::STYLE_REGULAR, self::STYLE_LIGHT, self::STYLE_DUOTONE, self::STYLE_BRANDS];
+        $isAwesome = count(array_filter(explode(" ", $icon), fn($id) => in_array($id, $styles)));
+
+        return $isAwesome;
+    }
+
+    public function iconify(string $icon, array $attributes = []): string
+    {
+        $class = $attributes["class"] ?? "";
+        $class = trim($class." ".$icon);
+        if($attributes["class"] ?? false) unset($attributes["class"]);
+
+        return "<i ".html_attributes($attributes)." class='".$class."'></i>";
     }
 
     public function getChoices(string $term = ""): array

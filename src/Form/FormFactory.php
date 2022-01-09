@@ -3,22 +3,12 @@
 namespace Base\Form;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Entity\User\Notification;
-use Base\Form\Traits\FormFlowTrait;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
-use Base\Traits\SingletonTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,7 +17,7 @@ use Symfony\Component\Form\FormEvent;
 class FormFactory extends \Symfony\Component\Form\FormFactory
 {
     /**
-     * @var EntityMAnager
+     * @var EntityManager
      */
     protected $entityManager;
 
@@ -52,7 +42,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return parent::create($type, $data, $options);
     }
 
-    // THIS HAS TO BE REPLACED BY SYMFONY TYPE GUESSER...
     public const GUESS_FROM_FORM     = "GUESS_FROM_FORM";
     public const GUESS_FROM_PHPDOC   = "GUESS_FROM_PHPDOC";
     public const GUESS_FROM_DATA     = "GUESS_FROM_DATA";
@@ -209,7 +198,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         $options = $options ?? $form->getConfig()->getOptions();
         if($options["sortable"] === null) {
 
-            $options["sortable"] = false;
+            $options["sortable"] = true;
         }
 
         return $options["sortable"] ?? false;

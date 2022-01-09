@@ -295,7 +295,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         } else {
 
-            $this->setContent($this->getTwigExtension()->trans($content, $parameters, $domain, $locale) ?? "");
+            $this->setContent($this->getTranslator()->trans($content, $parameters, $domain, $locale) ?? "");
         }
     }
 

@@ -11,12 +11,15 @@ use Hashids\Hashids;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\TokenRepository;
+use Base\Traits\BaseTrait;
 
 /**
  * @ORM\Entity(repositoryClass=TokenRepository::class)
  */
 class Token implements IconizeInterface
 {
+    use BaseTrait;
+
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-drumstick-bite"]; } 
 
@@ -29,7 +32,7 @@ class Token implements IconizeInterface
         $this->expireAt = null;
         $this->allowAt = null;
 
-        $this->hashIds = new Hashids();
+        $this->hashIds = new Hashids($this->getService()->getSalt());
         $this->generate($expiry, $deadtime);
     }
 
@@ -201,7 +204,7 @@ class Token implements IconizeInterface
     public function getElapsedTime():int { return time() - $this->createdAt->getTimestamp(); }
     public function getLifetime():int { return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp()); }
     public function getRemainingTime():int { return $this->expireAt->getTimestamp() - time(); }
-    public function getRemainingTimeStr(): string { return BaseService::getTwigExtension()->time($this->getRemainingTime()); }
+    public function getRemainingTimeStr(): string { return $this->getTwigExtension()->time($this->getRemainingTime()); }
 
 
     /**
@@ -224,7 +227,7 @@ class Token implements IconizeInterface
 
     public function hasVeto():bool { return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt()); }
     public function getDeadtime():int { return $this->allowAt->getTimestamp() - time(); }
-    public function getDeadtimeStr(): string { return BaseService::getTwigExtension()->time($this->getRemainingTime()); }
+    public function getDeadtimeStr(): string { return $this->getTwigExtension()->time($this->getRemainingTime()); }
     public function setDeadtime(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
     public function hasDeadtime():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
     

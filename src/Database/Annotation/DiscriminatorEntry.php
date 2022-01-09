@@ -19,14 +19,9 @@ class DiscriminatorEntry extends AbstractAnnotation
     /** @Required */
     private string $value;
 
-    public function __construct( array $data ) {
+    public function __construct( array $data ) { $this->value = $data['value']; }
 
-        $this->value = $data['value'];
-    }
-
-    public function getValue(): string {
-        return $this->value;
-    }
+    public function getValue(): string { return $this->value; }
 
     public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
     {
@@ -43,9 +38,10 @@ class DiscriminatorEntry extends AbstractAnnotation
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
 
-            $annotations = $this->getAnnotationReader()->getAnnotations($className, $this);
-            $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
+            $annotations = $this->getAnnotationReader()->getAnnotationsFor($className, $this);
 
+            $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
+            
             foreach ($annotations as $annotation)
                 $discriminatorValues[$className] = $annotation->getValue();
         }

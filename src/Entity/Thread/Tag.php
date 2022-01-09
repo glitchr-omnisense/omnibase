@@ -29,28 +29,33 @@ class Tag implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; } 
     public static function __staticIconize() : ?array { return ["fas fa-tags"]; }
 
+    public function __toString() { return $this->getName() ?? $this->getSlug() ?? get_class($this); }
+
+    public function __construct(?string $name = null, ?string $slug = null)
+    {
+        $this->setName($name);
+        $this->slug = $slug;
+        
+        $this->threads = new ArrayCollection();
+    }
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
      */
     protected $id;
+    public function getId(): ?int { return $this->id; }
 
     /**
      * @ORM\Column(length=255, unique=true)
      * @Slugify(reference="translations.name")
      */
     protected $slug;
-
-    public function getSlug(): ?string
-    {
-        return $this->slug;
-    }
-
+    public function getSlug(): ?string { return $this->slug; }
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
-
         return $this;
     }
 
@@ -58,12 +63,7 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $icon;
-
-    public function getColor(): ?string
-    {
-        return $this->color;
-    }
-
+    public function getColor(): ?string { return $this->color; }
     public function setColor(?string $color): self
     {
         $this->color = $color;
@@ -74,12 +74,7 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\Column(type="string", length=9, nullable=true)
      */
     protected $color;
-
-    public function getIcon(): ?string
-    {
-        return $this->icon;
-    }
-
+    public function getIcon(): ?string { return $this->icon; }
     public function setIcon(?string $icon): self
     {
         $this->icon = $icon;
@@ -90,33 +85,7 @@ class Tag implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="tags")
      */
     protected $threads;
-
-    public function __construct(?string $name = null, ?string $slug = null)
-    {
-        $this->threads = new ArrayCollection();
-
-        $this->setName($name);
-        $this->slug = $slug;
-    }
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
-    public function __toString()
-    {
-        return $this->getName() ?? $this->getSlug() ?? get_class($this);
-    }
-
-    /**
-     * @return Collection|Thread[]
-     */
-    public function getThreads(): Collection
-    {
-        return $this->threads;
-    }
-
+    public function getThreads(): Collection { return $this->threads; }
     public function addThread(Thread $thread): self
     {
         if (!$this->threads->contains($thread)) {

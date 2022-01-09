@@ -77,7 +77,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
         $resolver->setNormalizer('form_type', function (Options $options, $value) {
 
-            if(is_parent_of($value, FileType::class)) return $value;
+            if(is_a($value, FileType::class, true)) return $value;
             throw new \Exception("Option \"form_type\" must inherit from FileType");
         });
 

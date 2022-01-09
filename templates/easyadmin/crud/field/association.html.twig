@@ -88,7 +88,7 @@
             {% set icon = field.formattedValue.first.__staticIconize()[0] ?? null %}
         {% endif %}
 
-        {% set icon  = icon|fontAwesome({class:"fa-fw"})|default(icon|imagify)|default(null) %}
+        {% set icon  = icon|iconify({class:"fa-fw"})|default(icon|imagify)|default(null) %}
         {% if icon is not null %}
             {% set label = "<span class='label'>"~(field.formattedValue.first|capitalize)~"</span>" %}
         {% else %}

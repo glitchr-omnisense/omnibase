@@ -303,7 +303,7 @@
     'data-file-sortable'              : form.vars.sortable,
     'data-file-ajax'                  : form.vars.ajax,
     'data-file-max-files'             : form.vars.max_files,
-    'data-file-href'                  : form.vars.href|default("")|url_decode,
+    'data-file-href'                  : form.vars.href|default("")|urldecode,
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
     'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
@@ -509,7 +509,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     {% if href is not empty and form.vars.value is not null and form.children is empty  %}
-                    <a class="accordion-button collapsed" href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}">
+                    <a class="accordion-button collapsed" href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {% else %}
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {% endif %}
@@ -527,7 +527,7 @@
                     <div class="form-collection-buttons">
                         {% if href is not empty and form.vars.value is not null %}
                         <button type="button" class="btn btn-link form-collection-link-button">
-                            <a href="{{form.vars.href|url_decode|replace({'{0}': form.vars.value.id})}}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
+                            <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
                         </button>
                         {% endif %}
                         {% if allows_deleting_items %}

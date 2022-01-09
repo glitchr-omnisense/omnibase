@@ -4,21 +4,21 @@ namespace Base\Twig\Extension;
 
 use Base\Service\BaseService;
 use Base\Controller\BaseController;
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Type\EnumType;
-use Base\Database\Type\SetType;
-use Base\Exception\NotFoundResourceException;
+use Base\Service\IconService;
+use Base\Service\ImageService;
+use Base\Service\LocaleProviderInterface;
+use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
 use Twig\TwigFunction;
 
@@ -40,11 +40,21 @@ final class BaseTwigExtension extends AbstractExtension
     protected $translator;
 
     /**
+     * @var ImageService
+     */
+    protected $imageService;
+
+    /**
+     * @var IconService
+     */
+    protected $iconService;
+
+    /**
      * @var string
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, AssetExtension $assetExtension) {
+    public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, AssetExtension $assetExtension, IconService $iconService, ImageService $imageService) {
 
         BaseController::$foundBaseTwigExtension = true;
 
@@ -54,6 +64,9 @@ final class BaseTwigExtension extends AbstractExtension
         
         $this->intlExtension            = new IntlExtension();
         $this->mimeTypes                = new MimeTypes();
+        
+        $this->iconService  = $iconService;
+        $this->imageService = $imageService;
     }
 
     public function setBase(BaseService $baseService) 
@@ -67,135 +80,88 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction("path",  [$this, "path"]),
-            new TwigFunction('asset', [$this, 'asset']),
-            new TwigFunction('exit',  [$this, 'exit']),
+            new TwigFunction('exit',  'exit'),
+
+            new TwigFunction("path",          [$this, "path"]),
+            new TwigFunction('image',         [$this, 'image'], ['needs_context' => true]),
             new TwigFunction('method_exists', [$this, 'method_exists']),
-            new TwigFunction('static_call', [$this, 'static_call'])
+            new TwigFunction('static_call',   [$this, 'static_call']),
+
+            new TwigFunction('asset',         [AssetExtension::class, 'getAssetUrl']),
         ];
     }
 
     public function getFilters() : array
     {
         return [
-            new TwigFilter('trans',           [$this, 'trans']),
-            new TwigFilter('preg_split',      [$this, 'preg_split']),
-            new TwigFilter('intval',          [$this, 'intval']),
-            new TwigFilter('strval',          [$this, 'strval']),
-            new TwigFilter('thumbnail',       [$this, 'thumbnail']),
-            new TwigFilter('webp',            [$this, 'webp']),
-            new TwigFilter('trans',           [$this, 'trans']),
+            new TwigFilter('preg_split',      'preg_split'),
+            new TwigFilter('str_shorten',     'str_shorten'),
+            new TwigFilter('intval',          'intval'),
+            new TwigFilter('strval',          'strval'),
+            new TwigFilter('urldecode',       'urldecode'),
+            new TwigFilter('synopsis',        'synopsis'),
+
             new TwigFilter('url',             [$this, 'url']),
-            new TwigFilter('joinIfExists',    [$this, 'joinIfExists']),
-            new TwigFilter('time',            [$this, 'time']),
+            new TwigFilter('join_if_exists',  [$this, 'joinIfExists']),
             new TwigFilter('mimetype',        [$this, 'mimetype']),
-            new TwigFilter('synopsis',        [$this, 'synopsis']),
             new TwigFilter('extension',       [$this, 'extension']),
             new TwigFilter('stringify',       [$this, 'stringify']),
-            new TwigFilter('shorten',         [$this, 'shorten']),
             new TwigFilter('highlight',       [$this, 'highlight']),
-            new TwigFilter('flatten_array',   [$this, 'flattenArray']),
-            new TwigFilter('url_decode',      [$this, 'url_decode']),
+            new TwigFilter('array_flatten',   [$this, 'array_flatten']),
             new TwigFilter('filesize',        [$this, 'filesize']),
-            new TwigFilter('singular',        [$this, 'singular']),
-            new TwigFilter('plural',          [$this, 'plural']),
-            new TwigFilter('lang',            [$this, 'lang']),
-            new TwigFilter('country',         [$this, 'country']),
-            new TwigFilter('fontAwesome',     [$this, 'fontAwesome']),
-            new TwigFilter('imagify',         [$this, 'imagify']),
-            new TwigFilter('image',           [$this, 'image'],       ['needs_environment' => true, 'needs_context' => true]),
             new TwigFilter('datetime',        [$this, 'datetime'],    ['needs_environment' => true]),
-            new TwigFilter('lessThan',        [$this, 'lessThan']),
-            new TwigFilter('greaterThan',     [$this, 'greaterThan'])
+            new TwigFilter('less_than',       [$this, 'less_than']),
+            new TwigFilter('greater_than',    [$this, 'greater_than']),
+
+            new TwigFilter('trans',           [Translator::class, 'trans']),
+            new TwigFilter('time',            [Translator::class, 'time']),
+            new TwigFilter('enum',            [Translator::class, 'enum']),
+            new TwigFilter('entity',          [Translator::class, 'entity']),
+
+            new TwigFilter('lang',            [LocaleProvider::class, 'lang']),
+            new TwigFilter('country',         [LocaleProvider::class, 'country']),
+
+            new TwigFilter('iconify',         [IconService::class, 'iconify']),
+
+            new TwigFilter('imagify',         [ImageService::class, 'imagify']),
+            new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail']),
+            new TwigFilter('webp',            [ImageService::class, 'webp']),
+            new TwigFilter('image',           [ImageService::class, 'image'])
         ];
     }
 
-    public function exit(int $code) { exit($code); }
-    public function synopsis($class) { return class_synopsis($class); }
-
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
-
-    public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) { return preg_split($pattern, $subject, $limit, $flags); }
-    public function strval(mixed $value):string { return strval($value); }
-    public function intval(mixed $value, int $base = 10):int { return intval($value, $base); }
 
     public function joinIfExists(?array $array, string $separator) 
     {
         if($array === null) return null;
         return implode($separator, array_filter($array));
     }
-
-    public function thumbnail(string $path): string
-    {
-        return $path;
-    }
-
-    public function webp(string $path): string
-    {
-        return $path;
-    }
-
-    public function fontAwesome(array|null|string $icon, array $attributes = []) 
-    {
-        if(!$icon) return $icon;
-        if(is_array($icon)) {
-
-            foreach($icon as $key => $_icon)
-                $icon[$key] = $this->fontAwesome($_icon);
-
-            return $icon;
-        } 
-
-        $ids = explode(" ", $icon);
-
-        $isAwesome = false;
-        foreach($ids as $id) {
-            $isAwesome = in_array($id, ["fa", "far", "fab", "fas", "fad", "fal"]);
-            if($isAwesome) break;
-        }
-
-        if($isAwesome) {
-
-            $class = $attributes["class"] ?? "";
-            $class = trim($class." ".$icon);
-            if($attributes["class"] ?? false) unset($attributes["class"]);
-
-            $htmlAttributes = "";
-            foreach($attributes as $name => $attribute)
-                $htmlAttributes .= $name."=\"".$attribute."\" ";
-
-            return "<i ".trim($htmlAttributes)." class='".$class."'></i>";
-        }
-        
-        return null;
-    }
-
-    public function imagify(array|null|string $src, array $attributes = []) 
+    
+    public function image(string $src, array $context = []) 
     { 
         if(!$src) return $src;
-        if(is_array($src)) {
+        if(is_array($src)) return array_map(fn($s) => $this->image($s), $src);
 
-            foreach($src as $key => $_src)
-                $src[$key] = $this->fontAwesome($_src);
+        // Context and public path
+        if(str_starts_with($src, "/")) $src = "@Public".$src;
+        try { $src = $this->twig->getLoader()->getSourceContext($src)->getPath(); }
+        catch(LoaderError $e) { throw new NotFoundResourceException("Image \"$src\" not found."); }
 
-            return $src;
-        }
-        
-        if (filter_var($src, FILTER_VALIDATE_URL) === FALSE) 
-            return null;
+        $email = $context["email"] ?? null;
+        if( $email instanceof WrappedTemplatedEmail )
+            return $email->image($src);
 
-        if($attributes["src"] ?? false) unset($attributes["src"]);
+        if (substr($src, 0, strlen($this->projectDir)) == $this->projectDir)
+            $src = substr($src, strlen($this->projectDir));
 
-        $htmlAttributes = "";
-        foreach($attributes as $name => $attribute)
-            $htmlAttributes .= $name."=\"".$attribute."\" ";
-
-        return "<img ".trim($htmlAttributes)." src='".$src."' />";
+        return $src;
     }
+    
+    public function mimetype($fileOrArray) {
 
-    public function shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
-    {
-          return shorten_str($str, $length, $separator);
+        if(is_array($fileOrArray)) return array_map(fn($f) => $this->mimetype($f), $fileOrArray);
+        return $fileOrArray ? $this->mimeTypes->guessMimeType($fileOrArray) : null;
     }
 
     public function extension($mimetypeOrArray)
@@ -214,19 +180,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $this->mimeTypes->getExtensions($mimetypeOrArray);
     }
 
-    public function mimetype($fileOrArray) {
-
-        if(!$fileOrArray) return null;
-        if(is_array($fileOrArray))
-            return array_map(function($file) { return $this->mimetype($file); }, $fileOrArray);
-
-        return $this->mimeTypes->guessMimeType($fileOrArray);
-    }
-
-    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string
-    {
-        return byte2str($size, $unitPrefix);
-    }
+    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }    
 
     function static_call($class, $method, ...$args) {
         if (!class_exists($class))
@@ -235,53 +189,6 @@ final class BaseTwigExtension extends AbstractExtension
             throw new \Exception("Cannot call static method $method on \"$class\": invalid method");
    
         return forward_static_call_array([$class, $method], $args);
-    }
-
-    public function flattenArray($array):    ?array { return array_flatten($array); }
-    public function lang(string $locale):    string { return substr($locale, 0, 2); }
-    public function country(string $locale): string { return substr($locale, 3, 2); }
-    public function time(int $time):         string { return $this->translator->time($time); }
-    public function url_decode(string $url): string { return urldecode($url); }
-
-    public function singular($entity) 
-    {
-        if( $entity = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", $entity) )
-            return $this->trans("@entities.".camel_to_snake(str_replace("\\", ".", $entity)).".singular");
-        if( $entity = preg_replace('/^(App|Base)\\\Enum\\\/', $prefix ?? "", $entity) )
-            return $this->trans("@enums.".camel_to_snake(str_replace("\\", ".", $entity)).".singular");
-
-        return $this->trans(camel_to_snake(class_basename($entity), " "));
-    }
-
-    public function plural($entity) 
-    {
-        if( $entity = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", $entity) )
-            return $this->trans("@entities.".camel_to_snake(str_replace("\\", ".", $entity)).".plural");
-        if( $entity = preg_replace('/^(App|Base)\\\Enum\\\/', $prefix ?? "", $entity) )
-            return $this->trans("@enums.".camel_to_snake(str_replace("\\", ".", $entity)).".plural");
-
-        return $this->trans(camel_to_snake(class_basename($entity), " "));
-    }
-
-    
-    public function image(Environment $env, array $context, $image): ?string
-    {
-        if(str_starts_with($image, "/")) $image = "@Public".$image;
-        if( ( ($context["email"] ?? null) instanceof WrappedTemplatedEmail) ) {
-
-            $email = $context["email"];
-            return $email->image($image);
-        }
-
-        try { $path = $env->getLoader()->getSourceContext($image)->getPath(); }
-        catch(LoaderError $e) {  // Image not found
-            throw new NotFoundResourceException("Image \"$image\" not found.");
-        }
-
-        if (substr($path, 0, strlen($this->projectDir)) == $this->projectDir)
-            $path = substr($path, strlen($this->projectDir));
-
-        return $path;
     }
 
     public function datetime(Environment $env, $date, string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): string
@@ -327,12 +234,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $baseDir . $this->routingExtension->getPath($name, $parameters, $relative);
     }
 
-    public function asset(string $path, string $packageName = null): string
-    {
-        return $this->assetExtension->getAssetUrl($path, $packageName);
-    }
-
-    public function lessThan($date, $diff): bool
+    public function less_than($date, $diff): bool
     {
         if(is_string($date)) $date = new \DateTime($date);
         if($date instanceof \DateTime) $date = $date->getTimestamp();
@@ -340,11 +242,10 @@ final class BaseTwigExtension extends AbstractExtension
         if($diff instanceof \DateTime) $diff = $diff->getTimestamp() - time();
       
         $deltaTime = time() - $date;
-
         return $deltaTime < $diff;
     }
 
-    public function greaterThan($date, int $diff): bool
+    public function greater_than($date, int $diff): bool
     {
         if(is_string($date)) $date = new \DateTime($date);
         if($date instanceof \DateTime) $date = $date->getTimestamp();
@@ -424,11 +325,6 @@ final class BaseTwigExtension extends AbstractExtension
         }
 
         return ( empty($highlightContent) ? null : $highlightContent );
-    }
-
-    public function trans(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, $recursive = true)
-    {
-        return $this->translator->trans($id, $parameters, $domain, $locale, $recursive);
     }
 
     public function stringify($value): string

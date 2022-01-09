@@ -86,7 +86,7 @@ class UserNotificationCommand extends Command
             foreach ($notifications as $key => $notification) {
 
                 $message = "";
-                $message .= "<info>Entry ID #" .($key+1) . "</info> / <red>User \"".$notification->getUser()."\"</red> / <ln>Notifications #" . $notification->getId()."</ln> : ". shorten_str($notification->getContent(), 50);
+                $message .= "<info>Entry ID #" .($key+1) . "</info> / <red>User \"".$notification->getUser()."\"</red> / <ln>Notifications #" . $notification->getId()."</ln> : ". str_shorten($notification->getContent(), 50);
 
                 if(in_array($notification, $notifications_toErase)) $message .= "<warning><<-- READY TO ERASE</warning>";
                 $output->section()->writeln($message);

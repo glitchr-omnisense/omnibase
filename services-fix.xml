@@ -7,6 +7,13 @@
 
         <defaults public="false" />
 
+        <!-- TWIG FIX -->
+
+        <service id="Symfony\Bridge\Twig\Extension\AssetExtension">
+            <tag name="twig.runtime" />
+            <argument type="service" id="assets.packages" />
+        </service>
+
         <!-- DOCTRINE FIX -->
         <service id="Doctrine\Bundle\DoctrineBundle\ConnectionFactory"  alias="doctrine.dbal.connection_factory"/>
 

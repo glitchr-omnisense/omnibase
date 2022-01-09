@@ -36,7 +36,7 @@ class TagTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=255)
      */
     protected $name;
     public function getName(): ?string { return $this->name; }

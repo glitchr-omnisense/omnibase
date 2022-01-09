@@ -40,7 +40,9 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
                 $annotationReader = new AnnotationReader();
                 $annotations = $annotationReader->getClassAnnotations(new \ReflectionClass($classNameWithNamespace));
                 while  ($annotation = array_pop($annotations)) {
+                    
                     if ($annotation instanceof Table && !empty($annotation->name)) {
+                        
                         $tableName = $annotation->name;
                         break;
                     }
@@ -78,6 +80,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
             throw new \Exception("Ambiguous table name \"".$tableName."\" found between \"".$this->uniqueTableName[$tableName]."\" and \"".$classNameWithNamespace."\"");
 
         $this->uniqueTableName[$tableName] = $classNameWithNamespace;
+
         return $tableName;
     }
 
