@@ -51,7 +51,6 @@
 
         "sensio/framework-extra-bundle": "^5.4",
         "scheb/2fa": "^6.0",
-        "scheb/2fa-qr-code": "^5.0",
 
 
         "easycorp/easyadmin-bundle": "^4.0",
