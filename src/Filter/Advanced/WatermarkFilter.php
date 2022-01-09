@@ -8,7 +8,7 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 
-class WatermarkFilterLoader implements FilterInterface
+class WatermarkFilter implements FilterInterface
 {
     /**
      * @var ImagineInterface

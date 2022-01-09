@@ -8,7 +8,7 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 
-class BackgroundFilterLoader implements FilterInterface
+class BackgroundFilter implements FilterInterface
 {
     /**
      * @var ImagineInterface

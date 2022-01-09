@@ -56,7 +56,6 @@ class DropzoneController extends AbstractController
         // Move.. with flysystem
         if( !($file = $request->files->get("file")) )
             return new Response($this->translator->trans("fileupload.error.too_many", [], "fields"), 500);
-        
  
         switch($file->getError()) {
 

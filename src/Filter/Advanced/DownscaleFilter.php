@@ -2,7 +2,7 @@
 
 namespace Base\Filter\Advanced;
 
-class DownscaleFilterLoader extends ScaleFilterLoader
+class DownscaleFilter extends ScaleFilter
 {
     public function __construct()
     {

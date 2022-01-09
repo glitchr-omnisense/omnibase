@@ -234,6 +234,10 @@
             <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="imagine" />
+            <argument type="service" id="base.filesystem" />
+        </service>
+
+        <service id="Base\Service\FilesystemProvider" public="true">
             <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
@@ -265,7 +269,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="cache.adapter" />
-            <argument type="service" id="flysystem.adapter.lazy.factory" />
+            <argument type="service" id="base.filesystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
         </service>

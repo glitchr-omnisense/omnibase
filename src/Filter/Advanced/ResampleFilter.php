@@ -11,7 +11,7 @@ use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ResampleFilterLoader implements FilterInterface
+class ResampleFilter implements FilterInterface
 {
     /**
      * @var ImagineInterface

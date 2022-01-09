@@ -7,7 +7,7 @@ use Imagine\Filter\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 
-class ResizeFilterLoader implements FilterInterface
+class ResizeFilter implements FilterInterface
 {
     public function __construct(?int $width = null, ?int $height = null)
     {

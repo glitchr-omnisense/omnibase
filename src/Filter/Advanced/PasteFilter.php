@@ -7,17 +7,12 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
 
-class PasteFilterLoader implements FilterInterface
+class PasteFilter implements FilterInterface
 {
     /**
      * @var ImagineInterface
      */
     protected $imagine;
-
-    /**
-     * @var string
-     */
-    protected $projectDir;
 
     public function __construct(ImageInterface $destination, int $x = 0, int $y = 0)
     {

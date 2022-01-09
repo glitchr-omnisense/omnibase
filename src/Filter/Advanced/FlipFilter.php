@@ -9,7 +9,7 @@ use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class FlipFilterLoader implements FilterInterface
+class FlipFilter implements FilterInterface
 {
     public function __construct(array $options = [])
     {

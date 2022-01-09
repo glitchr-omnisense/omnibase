@@ -7,22 +7,18 @@ use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
 use Base\Annotations\AbstractAnnotation;
+use Base\Service\FilesystemProvider;
 use Exception;
 
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use League\Flysystem\Filesystem;
 use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\FilesystemOperator;
-use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\PathPrefixer;
-use League\FlysystemBundle\Lazy\LazyFactory;
 use ReflectionClass;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -43,7 +39,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, LazyFactory $lazyFactory, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
+    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, FilesystemProvider $filesystemProvider, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -57,7 +53,6 @@ class AnnotationReader
         // Read from cache
         $this->cache   = $cache;
 
-
         $paths = [];
         $paths[] = __DIR__ . "/Annotation";
         $paths[] = __DIR__ . "/../Database/Annotation";
@@ -68,24 +63,16 @@ class AnnotationReader
         foreach ($paths as $path)
             $this->addPath($path);
 
-
         $cacheName = "base.annotation_reader." . hash('md5', self::class);
         $this->cachePool['familyAnnotations']   = $this->cache->getItem($cacheName . ".familyAnnotations");
         $this->cachePool['classAnnotations']    = $this->cache->getItem($cacheName . ".classAnnotations");
         $this->cachePool['methodAnnotations']   = $this->cache->getItem($cacheName . ".methodAnnotations");
         $this->cachePool['propertyAnnotations'] = $this->cache->getItem($cacheName . ".propertyAnnotations");
 
-        // Get entity manager for later use
-        $this->entityManager = $entityManager;
-
-        // Lazy factory for flysystem
-        $this->lazyFactory = $lazyFactory;
-
-        // Lazy factory for flysystem
-        $this->requestStack = $requestStack;
-
-        // Get token storage to access user information
-        $this->tokenStorage = $tokenStorage;
+        $this->entityManager      = $entityManager;
+        $this->requestStack       = $requestStack;
+        $this->tokenStorage       = $tokenStorage;
+        $this->filesystemProvider = $filesystemProvider;
     }
 
     /**
@@ -140,33 +127,15 @@ class AnnotationReader
     public function getEntityManager() { return $this->entityManager; }
     public function getRepository($entity) { return $this->entityManager->getRepository($entity); }
 
+    /**
+     * @var FilesystemProvider
+     */
+    protected $filesystemProvider = null;
+    public function getFilesystem(string $storage) { return $this->filesystemProvider->get($storage); }
+    public function getFilesystemPathPrefixer(string $storage): PathPrefixer { return $this->filesystemProvider->getPathPrefixer($storage); }
+    public function getFilesystemAdapter(string $storage): FilesystemAdapter { return $this->filesystemProvider->getAdapter($storage); }
+
     public function getParameterBag() { return $this->parameterBag; }
-
-    public function getFilesystem(string $storage) { return $this->lazyFactory->createStorage($storage, $storage); }
-    public function getFilesystemPathPrefixer($storage): PathPrefixer
-    {
-        $reflectionProperty = new \ReflectionProperty(LocalFilesystemAdapter::class, 'prefixer');
-        $reflectionProperty->setAccessible(true);
-
-        $adapter = $this->getFilesystemAdapter($storage);
-        if($adapter instanceof LocalFilesystemAdapter)
-            return $reflectionProperty->getValue($adapter);
-
-        return null;
-    }
-
-    public function getFilesystemAdapter($storage): FilesystemAdapter
-    {
-        $reflectionProperty = new \ReflectionProperty(Filesystem::class, 'adapter');
-        $reflectionProperty->setAccessible(true);
-
-        if($storage instanceof FilesystemOperator)
-            $filesystem = $storage;
-        else if(is_string($storage))
-            $filesystem = $this->getFilesystem($storage); 
-
-        return $reflectionProperty->getValue($filesystem);
-    }
 
     /**
      * @var SimpleAnnotationReader

@@ -5,7 +5,7 @@ namespace Base\Filter\Advanced;
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 
-class InterlaceFilterLoader implements FilterInterface
+class InterlaceFilter implements FilterInterface
 {
     public function __construct(string $mode = ImageInterface::INTERLACE_LINE)
     {

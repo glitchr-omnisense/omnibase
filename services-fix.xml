@@ -9,6 +9,7 @@
 
         <!-- ImagineInterface instances -->
         <service id="imagine" alias="imagine.gd" />
+        <service id="imagine.meta_data.reader" class="Imagine\Image\Metadata\ExifMetadataReader" public="false" />
 
         <service id="imagine.gd" class="Imagine\Gd\Imagine" public="false">
             <call method="setMetadataReader">

@@ -15,12 +15,12 @@ use Twig\Environment;
 
 class ImageService implements ImageServiceInterface
 {
-    public function __construct(Environment $twig, AssetExtension $assetExtension, ParameterBagInterface $parameterBag, ImagineInterface $imagine, LazyFactory $lazyFactory)
+    public function __construct(Environment $twig, AssetExtension $assetExtension, ParameterBagInterface $parameterBag, ImagineInterface $imagine, FilesystemProvider $filesystemProvider)
     {
         $this->twig               = $twig;
-        $this->assetExtension = $assetExtension;
-        $this->lazyFactory = $lazyFactory;
-        $this->imagine = $imagine;
+        $this->imagine            = $imagine;
+        $this->assetExtension     = $assetExtension;
+        $this->filesystemProvider = $filesystemProvider;
         
         $this->hashIds = new Hashids($parameterBag->get("kernel.secret"));
         $this->mimeTypes = new MimeTypes();
@@ -30,21 +30,21 @@ class ImageService implements ImageServiceInterface
     public function encode(array $array): string { return $this->hashIds->encodeHex(bin2hex(serialize($array))); }
     public function decode(string $hash): array  { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
-    public function resolve(array|string|null $path, array $config = []): array|string|null
+    public function resolve(array|string|null $path, array $filters = [], $options = []): array|string|null
     {
         if(!$path) return $path;
-        if(is_array($path)) return array_map(fn($p) => $this->resolve($p, $config), $path);
+        if(is_array($path)) return array_map(fn($p) => $this->resolve($p, $filters, $options), $path);
 
         $path = str_strip($path, $this->assetExtension->getAssetUrl(""));
-        $hash = $this->encode(["path" => $path, "filters" => $config]);
+        $options = array_merge($options, ["path" => $path, "filters" => $filters]);
 
-        return $hash;
+        return $this->encode($options);
     }
 
-    public function webp(array|string|null $path, array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("webp/").$this->resolve($path, $config); }
-    public function thumbnail(array|string|null $path, array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("thumbnails/").$this->resolve($path, $config); }
-    public function image(array|string|null $path, array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("images/").$this->resolve($path, $config); }
-    public function imagify(null|array|string $path, array $attributes = []) 
+    public function webp(array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("webp/").$this->resolve($path, $filters, $config); }
+    public function thumbnail(array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("thumbnails/").$this->resolve($path, $filters, $config); }
+    public function image(array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("images/").$this->resolve($path, $filters, $config); }
+    public function imagify(null|array|string $path, array $filters = [], array $attributes = []) 
     {
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($p) => $this->imagify($p), $path);

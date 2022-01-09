@@ -5,7 +5,7 @@ namespace Base\Filter\Advanced;
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 
-class RotateFilterLoader implements FilterInterface
+class RotateFilter implements FilterInterface
 {
     public function __construct(int $angle = 0)
     {

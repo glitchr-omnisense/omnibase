@@ -7,7 +7,7 @@ use Imagine\Filter\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 
-class ScaleFilterLoader implements FilterInterface
+class ScaleFilter implements FilterInterface
 {
     /**
      * @var string

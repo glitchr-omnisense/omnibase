@@ -8,7 +8,7 @@ use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
 
-class CropFilterLoader implements FilterInterface
+class CropFilter implements FilterInterface
 {
     public function __construct(int $x = 0, int $y = 0, ?int $width = null, ?int $height = null)
     {
