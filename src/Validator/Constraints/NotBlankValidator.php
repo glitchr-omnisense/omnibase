@@ -31,7 +31,7 @@ class NotBlankValidator extends ConstraintValidator
         if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray()))) {
 
             $this->context->buildViolation($constraint->message . ".property")
-                ->setParameter('{label}', $this->formatValue($object))
+                ->setParameter('{label}', is_object($object) ? $object->getMapping()["fieldName"] ?? "null" : "null")
                 ->setTranslationDomain('validators')
                 ->addViolation();
         }

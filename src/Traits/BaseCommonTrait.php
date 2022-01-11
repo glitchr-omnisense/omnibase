@@ -3,6 +3,8 @@
 namespace Base\Traits;
 
 use Base\Service\BaseSettings;
+use Base\Service\IconService;
+use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Twig\Extension\BaseTwigExtension;
@@ -56,6 +58,18 @@ trait BaseCommonTrait {
      */
     protected static $slugger = null;
     public static function setSlugger(?SluggerInterface $slugger) {  self::$slugger = $slugger; }
+
+    /**
+     * @var IconServiceInterface
+     */
+    protected static $iconService = null;
+    public static function setIconService(?IconService $iconService) {  self::$iconService = $iconService; }
+
+    /**
+     * @var ImageServiceInterface
+     */
+    protected static $imageService = null;
+    public static function setImageService(?ImageService $imageService) {  self::$imageService = $imageService; }
 
     /**
      * @var RouterInterface

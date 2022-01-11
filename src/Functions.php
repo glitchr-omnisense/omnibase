@@ -3,11 +3,8 @@
 namespace {
 
     use Base\BaseBundle;
-    use Doctrine\Common\Collections\ArrayCollection;
-    use Doctrine\Common\Collections\Collection;
-    use Doctrine\ORM\PersistentCollection;
 
-function interpret_link($input)
+    function interpret_link($input)
     {
         return preg_replace_callback(
             "@
@@ -157,8 +154,52 @@ function interpret_link($input)
         return intval($val);
     }
 
-    function str_strip(string $str, string $prefix = "", string $suffix = "") {
+    function path_suffix(string|array|null $path, $suffix, $separator = "_"): string
+    {
+        return $path;
+        if($path === null) return $path;
+     
+        if(!is_array($suffix)) $suffix = [$suffix];
+        $suffix = implode($separator, array_filter($suffix));
+     
+        if(is_array($path))
+            return array_map(fn($p) => path_suffix($p, $suffix, $separator), $path);
         
+        $path = pathinfo($path);
+        $path["dirname"] = $path["dirname"] ?? null;
+        if($path["dirname"]) $path["dirname"] .= "/";
+        $path["extension"] = $path["extension"] ?? null;
+        if($path["extension"]) $path["extension"] = ".".$path["extension"];
+
+        $filename = $path["filename"] ?? null;
+        $suffix = ($filename && $suffix) ? $separator.$suffix : $suffix;
+        return $path["dirname"].$path["filename"].$suffix.$path["extension"];
+    }
+    
+    function path_prefix(string|array|null $path, $prefix, $separator = "_")
+    {
+        if(!$path) return $path;
+
+        if(!is_array($prefix)) $prefix = [$prefix];
+        $prefix = implode($separator, array_filter($prefix));
+
+        if(is_array($path))
+            return array_map(fn($p) => path_prefix($p, $prefix, $separator), $path);
+        
+        $path = pathinfo($path);
+        $path["dirname"] = $path["dirname"] ?? null;
+        if($path["dirname"]) $path["dirname"] .= "/";
+        $path["extension"] = $path["extension"] ?? null;
+        if($path["extension"]) $path["extension"] = ".".$path["extension"];
+
+        $filename = $path["filename"] ?? null;
+        $prefix = ($filename && $prefix) ? $separator.$prefix : $prefix;
+
+        return $path["dirname"].$prefix.$path["filename"].$path["extension"];
+    }
+    
+    function str_strip(string $str, string $prefix = "", string $suffix = "")
+    {
         if(0 === strpos($str, $prefix)) 
             $str = substr($str, strlen($prefix));
         
@@ -181,66 +222,68 @@ function interpret_link($input)
     function is_html(?string $str)  { return $str != strip_tags($str); }
     function is_stringeable($value) { return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString'); }
 
-    function get_alias($class): string
+    function get_alias(array|object|string|null $arrayOrObjectOrClass): string
     {
-        $class = is_object($class) ? get_class($class) : $class;
-        if(!class_exists($class)) return false;
+        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
+        if(is_array($arrayOrObjectOrClass))
+            return array_map(fn($a) => get_alias($a), $arrayOrObjectOrClass);
 
-        return BaseBundle::getAlias($class);
+        $arrayOrObjectOrClass = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
+        if(!class_exists($arrayOrObjectOrClass)) return false;
+
+        return BaseBundle::getAlias($arrayOrObjectOrClass);
     }
 
-    function alias_exists($class): bool
+    function alias_exists(array|object|string|null $arrayOrObjectOrClass): bool
     {
-        $class = is_object($class) ? get_class($class) : $class;
+        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
+        if(is_array($arrayOrObjectOrClass))
+            return array_map(fn($a) => alias_exists($a), $arrayOrObjectOrClass);
+
+        $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
         if(!class_exists($class)) return false;
 
         return BaseBundle::getAlias($class) != $class;
     }
 
-    function class_implements_interface($objectOrClass, $interface)
+    function class_implements_interface(array|object|string|null $arrayOrObjectOrClass, $interface)
     {
-        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
+        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
+        if(is_array($arrayOrObjectOrClass))
+            return array_map(fn($a) => class_implements_interface($a, $interface), $arrayOrObjectOrClass);
+
+        $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
         if(!class_exists($class)) return false;
 
         $classImplements = class_implements($class); 
         return array_key_exists($interface, $classImplements);
     }
 
-    function class_basename($class)
+    function class_basename(array|object|string|null $arrayOrObjectOrClass)
     {
-        $class = is_object($class) ? get_class($class) : $class;
+        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
+        if(is_array($arrayOrObjectOrClass))
+            return array_map(fn($a) => class_basename($a), $arrayOrObjectOrClass);
+
+        $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
         return str_replace("/", "\\", basename(str_replace('\\', '/', $class)));
     }
 
-    function class_dirname($class)
+    function class_dirname(array|object|string|null $arrayOrObjectOrClass)
     {
-        $class = is_object($class) ? get_class($class) : $class;
+        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
+        if(is_array($arrayOrObjectOrClass))
+            return array_map(fn($a) => class_dirname($a), $arrayOrObjectOrClass);
+
+        $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
         $dirname = str_replace("/", "\\", dirname(str_replace('\\', '/', $class)));
         return $dirname == "." ? "" : $dirname;
     }
 
-    function mb_ucfirst(string $str, ?string $encoding = null): string
-    {
-        return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding);
-    }
-
-    function mb_ucwords(string $str, ?string $encoding = null): string
-    {
-        return mb_convert_case($str, MB_CASE_TITLE, $encoding);
-    }
-
-    function is_cli(): bool 
-    {
-        return (php_sapi_name() == "cli");
-    }
-
-    function array_is_nested($a)
-    {
-        $rv = array_filter($a, 'is_array');
-        if (count($rv) > 0) return true;
-        return false;
-    }
-
+    function is_cli(): bool { return (php_sapi_name() == "cli"); }
+    function mb_ucfirst(string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding); }
+    function mb_ucwords(string $str, ?string $encoding = null): string { return mb_convert_case($str, MB_CASE_TITLE, $encoding); }
+    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => $k."=\"".$attributes[$k]."\"", array_keys($attributes)))); }
     function browser_supports_webp() { return strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false; }
 
     function is_associative(array $arr): bool
@@ -252,6 +295,13 @@ function interpret_link($input)
             if(gettype($key) != "integer") return true;
 
         return $keys !== range(0, count($arr) - 1);
+    }
+
+    function array_is_nested($a)
+    {
+        $rv = array_filter($a, 'is_array');
+        if (count($rv) > 0) return true;
+        return false;
     }
 
     function array_replace_keys($array, array|string|int $old, array|string|int $new) {
@@ -419,37 +469,35 @@ function interpret_link($input)
 
         return $result;
     }
-
-    function array_keys_insert($keys, array $array, bool $unique = false) 
+    
+    function array_search_last(mixed $needle, array $haystack, bool $strict = false): string|int|false 
     {
-        if(!is_array($keys)) $keys = [$keys];
-        if (is_associative($keys))
-            throw new InvalidArgumentException("Provided keys must be either a single key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
+        $haystack = array_reverse($haystack);
+        if(is_associative($haystack)) 
+            return array_search($needle, $haystack, $strict);
 
-        foreach($keys as $key)
-            if(!in_array($key, $array) || $unique == false) $array[] = $key;
+        $position = array_search($needle, $haystack, $strict);
+        if($position === false) return false;
+
+        return count($haystack) - $position;
+    }
+
+    function array_keys_remove  (array $array, ...$keys  ) { return array_filter($array, fn($k) => !in_array($k, $keys), ARRAY_FILTER_USE_KEY); }
+    function array_values_remove(array $array, ...$values) { return array_filter($array, fn($v) => !in_array($v, $values)); }
+    function array_values_insert(array $array, ...$values) 
+    {
+        foreach($values as $value)
+            if(!in_array($value, $array)) $array[] = $value;
         
         return $array;
     }
 
-    function html_attributes(array $attributes =[])
+    function array_values_insert_any(array $array, ...$values) 
     {
-        return trim(implode(" ", array_map(fn($k,$v) => $k."=\"".$v."\"", $attributes)));
-    }
-
-    function array_keys_delete($keys, array $array) 
-    {
-        if(!is_array($keys)) $keys = [$keys];
-        if (is_associative($keys))
-            throw new InvalidArgumentException("Provided keys must be either a single key or an array (not associative): \"".preg_replace( "/\r|\n/", "", print_r($keys, true))."\"");
-
-        return array_filter($array, fn($k) => !in_array($k, $keys), ARRAY_FILTER_USE_KEY);
-    }
-
-    function array_value_delete($values, array $array)
-    {
-        if(!is_array($values)) $values = [$values];
-        return array_filter($array, fn($v) => !in_array($v, $values));
+        foreach($values as $value)
+            $array[] = $value;
+        
+        return $array;
     }
 
     function array_union(...$arrays) 

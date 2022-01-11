@@ -204,7 +204,7 @@ class Token implements IconizeInterface
     public function getElapsedTime():int { return time() - $this->createdAt->getTimestamp(); }
     public function getLifetime():int { return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp()); }
     public function getRemainingTime():int { return $this->expireAt->getTimestamp() - time(); }
-    public function getRemainingTimeStr(): string { return $this->getTwigExtension()->time($this->getRemainingTime()); }
+    public function getRemainingTimeStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
 
 
     /**
@@ -227,7 +227,7 @@ class Token implements IconizeInterface
 
     public function hasVeto():bool { return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt()); }
     public function getDeadtime():int { return $this->allowAt->getTimestamp() - time(); }
-    public function getDeadtimeStr(): string { return $this->getTwigExtension()->time($this->getRemainingTime()); }
+    public function getDeadtimeStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
     public function setDeadtime(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
     public function hasDeadtime():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
     

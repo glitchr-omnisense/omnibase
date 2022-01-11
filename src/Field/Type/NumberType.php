@@ -9,7 +9,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
 {
-    public function getBlockPrefix(): string { return 'number'; }
+    public function getBlockPrefix(): string { return 'number2'; }
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
@@ -18,8 +18,8 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
-        $view->vars["stepUp"]   = $options["stepUp"];
-        $view->vars["stepDown"] = $options["stepDown"];
+        $view->vars["stepUp"]   = $options["stepUp"] ?? $options["step"];
+        $view->vars["stepDown"] = $options["stepDown"] ?? $options["step"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-number.js");
     }
@@ -29,8 +29,9 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
-            'stepUp'  => 1,
-            'stepDown' => 1
+            'stepUp'  => null,
+            'stepDown' => null,
+            'step' => 1
         ]);
     }
     

@@ -224,9 +224,15 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
         else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
+        
+        if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 
-        if( $user->isDisabled() || $user->isDirty() ) $user->kick();
-        if( $user->isKicked()   ) {
+            $notification = new Notification("impersonator", [$user]);
+            $notification->send("warning");
+        }
+
+        if($user->isDirty()) $user->kick();
+        if($user->isKicked()) {
 
             $notification = new Notification("kickout", [$user]);
             $notification->send("warning");
@@ -236,12 +242,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $event->stopPropagation();
         }
 
-        $exceptions = [
-            "/^ux_/",
-            "/^maintenance(?:.*)$/",
-            "/^security(?:.*)$/",
-            "/^(?:app|base)_user(?:.*)$/"];
-
+        $exceptions = ["/^ux_/", "/^maintenance(?:.*)$/", "/^security(?:.*)$/", "/^(?:app|base)_user(?:.*)$/"];
         if (! $user->isVerified()) {
 
             $callbackFn = function () use ($user) {
@@ -274,10 +275,6 @@ class SecuritySubscriber implements EventSubscriberInterface
                     $notification->send("warning");
                 }]);
 
-            } else if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
-
-                $notification = new Notification("impersonator", [$user]);
-                $notification->send("warning");
             }
         }
 

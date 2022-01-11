@@ -9,7 +9,7 @@
 
 {% if field.value is iterable %}
 
-    {% if showFirst and field.formattedValue.count is defined %}
+    {% if showFirst %}
         {% set displayLimit = displayLimit > 0 ? displayLimit - 1 : displayLimit %}
     {% endif %}
 
@@ -68,7 +68,7 @@
             {% set formattedValue = formattedValues|first %}
             {%- set names = others|map(f => "#{f.text}") -%}
             <span class="badge badge-secondary" data-toggle="tooltip" data-placement="top" title="{{ names|join(', ')~stillMore }}">
-                {{sign}}{{ names|length }}
+                {{sign}}{{ formattedValues|length }}
             </span>
         {%- elseif not hasEntries -%}
             <span class="badge badge-secondary">0</span>

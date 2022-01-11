@@ -245,17 +245,16 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for default locale
+        if ($entityTranslation->getLocale() == $defaultLocale) 
+            return $value;
 
-        if ($entityTranslation->getLocale() != $defaultLocale) {
-
-            $entityTranslation = $this->translate($defaultLocale);
-            if(method_exists($entityTranslation, $property))
-                return $entityTranslation->{$property}();
-            else if(method_exists($entityTranslation, "get".mb_ucfirst($property)))
-                return $entityTranslation->{"get".mb_ucfirst($property)}();
-            else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property)) 
-                return $accessor->getValue($entityTranslation, $property);
-        }
+        $entityTranslation = $this->translate($defaultLocale);
+        if(method_exists($entityTranslation, $property))
+            return $entityTranslation->{$property}();
+        else if(method_exists($entityTranslation, "get".mb_ucfirst($property)))
+            return $entityTranslation->{"get".mb_ucfirst($property)}();
+        else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property)) 
+            return $accessor->getValue($entityTranslation, $property);
 
         // Exception for EA variables (cf. EA's FormField)
         if(!str_starts_with($property, "ea_"))

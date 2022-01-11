@@ -87,7 +87,8 @@
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.locale_provider" />
             <argument type="service" id="base.settings" />
-            <argument type="service" id="ea_extension" />
+            <argument type="service" id="base.service.image" />
+            <argument type="service" id="base.service.icon" />
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">
@@ -237,7 +238,7 @@
             <argument type="service" id="base.filesystem" />
         </service>
 
-        <service id="Base\Service\FilesystemProvider" public="true">
+        <service id="Base\Service\Filesystem" public="true">
             <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
@@ -272,6 +273,7 @@
             <argument type="service" id="base.filesystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
+            <argument type="service" id="service.image" />
         </service>
 
         <!-- Twig declarations -->

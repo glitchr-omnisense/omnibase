@@ -9,6 +9,7 @@ use Base\Field\SlugField;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController;
 use Base\Field\Type\QuillType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class PageCrudController extends WidgetCrudController
 {
@@ -24,6 +25,7 @@ class PageCrudController extends WidgetCrudController
 
                 yield SlugField::new('slug')->setTargetFieldName("translations.title");
                 yield TranslationField::new()->showOnIndex('title')->setFields([
+                    "excerpt" => ["form_type" => TextareaType::class],
                     "content" => ["form_type" => QuillType::class],
                 ]);
                 foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)

@@ -32,7 +32,6 @@ class SelectController extends AbstractController
     public function __construct(CacheInterface $cache, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->hashIds = new Hashids($this->getService()->getSalt());
-        
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->paginator = $paginator;
@@ -49,7 +48,7 @@ class SelectController extends AbstractController
     public function decode(string $hash): array
     {
         $hex = $this->hashIds->decodeHex($hash);
-        return unserialize(hex2bin($hex));
+        return $hex ? unserialize(hex2bin($hex)) : [];
     }
     
     /**
@@ -62,9 +61,9 @@ class SelectController extends AbstractController
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
         $class   = $dict["class"] ?? null;
-        $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+        $format  = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
-        $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
+        $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
         
             $term = mb_strtolower($request->get("term")) ?? "";
@@ -115,13 +114,13 @@ class SelectController extends AbstractController
         $token   = $dict["token"] ?? null;
         $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
-        $expectedMethod = $this->baseService->isDebug() ? "GET" : "POST";
+        $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
 
             $term = mb_strtolower($request->get("term")) ?? "";
             $page = $request->get("page") ?? 1;
 
-            $fa = new FontAwesome($this->baseService->getParameterBag("base.vendor.font_awesome.metadata"));
+            $fa = new FontAwesome($this->getService()->getParameterBag("base.vendor.font_awesome.metadata"));
             $entries = $fa->getChoices($term);
 
             $book = $this->paginator->paginate($entries, $page, $pageSize);

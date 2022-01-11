@@ -52,6 +52,10 @@ class SelectConfigurator implements FieldConfiguratorInterface
         if($this->classMetadataManipulator->isEntity($entityDto->getFqcn()) && $this->classMetadataManipulator->isToManySide($entityDto->getFqcn(), $field->getProperty()))
             $field->setSortable(false);
 
+        $showFirst = $field->getCustomOption(SelectField::OPTION_SHOW_FIRST);
+        $displayLimit = $field->getCustomOption(SelectField::OPTION_DISPLAY_LIMIT);
+        if($showFirst) $displayLimit--;
+        
         if ($values instanceof Collection) {
 
             foreach ($values as $key => $value) {
@@ -60,10 +64,14 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 $dataClass = $dataClass ?? $defaultClass;
             
                 $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
-                
-                $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
-                if ($formattedValues[$key] && $dataClassCrudController)
-                    $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
+
+                if($key > $displayLimit) $formattedValues[$key] = $value;
+                else {
+
+                    $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
+                    if ($formattedValues[$key] && $dataClassCrudController)
+                        $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
+                }
             }
 
         } else {

@@ -196,7 +196,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             $form = $form->getForm();
 
         $options = $options ?? $form->getConfig()->getOptions();
-        if($options["sortable"] === null) {
+        if ($options["sortable"] === null) {
 
             $options["sortable"] = true;
         }

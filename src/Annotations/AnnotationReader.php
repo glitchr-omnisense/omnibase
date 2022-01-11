@@ -7,13 +7,13 @@ use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Service\FilesystemProvider;
+use Base\Service\Filesystem;
+use Base\Traits\BaseTrait;
 use Exception;
 
 use Base\Traits\SingletonTrait;
+use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\PathPrefixer;
 use ReflectionClass;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -25,6 +25,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 
 class AnnotationReader
 {
+    use BaseTrait;
     use SingletonTrait;
 
     public const TARGET_CLASS    = "class";
@@ -39,7 +40,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, FilesystemProvider $filesystemProvider, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
+    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, Filesystem $filesystem, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -69,10 +70,10 @@ class AnnotationReader
         $this->cachePool['methodAnnotations']   = $this->cache->getItem($cacheName . ".methodAnnotations");
         $this->cachePool['propertyAnnotations'] = $this->cache->getItem($cacheName . ".propertyAnnotations");
 
-        $this->entityManager      = $entityManager;
-        $this->requestStack       = $requestStack;
-        $this->tokenStorage       = $tokenStorage;
-        $this->filesystemProvider = $filesystemProvider;
+        $this->entityManager = $entityManager;
+        $this->requestStack  = $requestStack;
+        $this->tokenStorage  = $tokenStorage;
+        $this->filesystem    = $filesystem;
     }
 
     /**
@@ -92,7 +93,6 @@ class AnnotationReader
 
         return $this;
     }
-
 
     public function getAsset(string $url): string
     {
@@ -128,12 +128,10 @@ class AnnotationReader
     public function getRepository($entity) { return $this->entityManager->getRepository($entity); }
 
     /**
-     * @var FilesystemProvider
+     * @var Filesystem
      */
-    protected $filesystemProvider = null;
-    public function getFilesystem(string $storage) { return $this->filesystemProvider->get($storage); }
-    public function getFilesystemPathPrefixer(string $storage): PathPrefixer { return $this->filesystemProvider->getPathPrefixer($storage); }
-    public function getFilesystemAdapter(string $storage): FilesystemAdapter { return $this->filesystemProvider->getAdapter($storage); }
+    protected $filesystem = null;
+    public function getFilesystem(string $storage):Filesystem { return $this->filesystem->set($storage); }
 
     public function getParameterBag() { return $this->parameterBag; }
 

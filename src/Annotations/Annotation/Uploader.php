@@ -5,21 +5,16 @@ namespace Base\Annotations\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Exception\MissingPublicPathException;
-use Base\Exception\NotDeletableException;
-use Base\Exception\NotReadableException;
-use Base\Exception\NotWritableException;
-
+use Base\Traits\BaseTrait;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
-use League\Flysystem\FilesystemOperator;
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
 
-//  *   @Attribute("thumbnails",   type = "array"),
 /**
  * Class Uploader
  * package Base\Annotations\Annotation\Uploader
@@ -38,12 +33,14 @@ use Symfony\Component\Uid\Uuid;
  */
 class Uploader extends AbstractAnnotation
 {
+    use BaseTrait;
+
     private string $storage;
     private string $pool;
 
     private array $config;
     private array $mimeTypes;
-    private int $maxSize;
+    private int   $maxSize;
 
     public function __construct( array $data )
     {
@@ -63,7 +60,7 @@ class Uploader extends AbstractAnnotation
     
     public function getStorage() { return $this->storage; }
     public function getStorageFilesystem() { return parent::getFilesystem($this->storage); }
-    
+
     public function getPool() { return $this->pool; }
     public function getPath($entity, ?string $uuid = null): ?string
     {
@@ -113,11 +110,11 @@ class Uploader extends AbstractAnnotation
                 
                 $path = $that->getPath($entity, $uuidOrFile);
                 if(!$path) $pathList[] = null;
-                else if(!$that->getStorageFilesystem()->fileExists($path)) $pathList[] = null;
+                else if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) $pathList[] = null;
                 else $pathList[] = rtrim($that->getAsset($that->public) . $path, ".");
             }
 
-            return $pathList;
+            return array_map(fn($p) => $this->getImageService()->imagine($p), $pathList);
 
         } else {
         
@@ -131,7 +128,7 @@ class Uploader extends AbstractAnnotation
             $path = $that->getPath($entity, strval($uuidOrFile));
             if(!$path) return null;
 
-            if(!$that->getStorageFilesystem()->fileExists($path)) 
+            if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) 
                 return null;
 
             return rtrim($that->getAsset($that->public) . $path, ".");
@@ -170,10 +167,10 @@ class Uploader extends AbstractAnnotation
         $that       = self::getAnnotations($entity, $mapping);
         if(!$that) return null;
 
-        $config     = $that->config;
-        $filesystem = $that->getStorageFilesystem();
-        $adapter    = $that->getAdapter($filesystem);
-        $pathPrefixer = $that->getPathPrefixer($that->storage);
+        $config       = $that->config;
+        $filesystem   = $that->getStorageFilesystem();
+        $adapter      = $that->getStorageFilesystem()->getAdapter();
+        $pathPrefixer = $that->getStorageFilesystem()->getPathPrefixer();
 
         $fieldValue = self::getFieldValue($entity, $mapping);
         if (!$fieldValue) return null;
@@ -197,7 +194,7 @@ class Uploader extends AbstractAnnotation
 
             if($adapter instanceof LocalFilesystemAdapter) {
 
-                if ($filesystem->fileExists($path))
+                if ($filesystem->getOperator()->fileExists($path))
                     $fileList[] = new File($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
 
                 continue;
@@ -215,34 +212,6 @@ class Uploader extends AbstractAnnotation
         if(count($fileList) < 1) return null;
         if(count($fileList) < 2) return $fileList[0];
         return $fileList;
-    }
-
-    protected function readFile(string $location, ?FilesystemOperator $filesystem = null): ?string
-    {
-        $filesystem = $filesystem ?? $this->getStorageFilesystem();
-        if(!$filesystem->fileExists($location))
-            return null;
-
-        try {
-            return $filesystem->read($location);
-        } catch (FilesystemError | UnableToReadFile $exception) {
-            throw new NotReadableException("Unable to read file \"$location\"");
-        }
-    }
-
-    protected function uploadFile(string $location, string $contents, ?FilesystemOperator $filesystem = null, array $config = [])
-    {
-        $filesystem = $filesystem ?? $this->getStorageFilesystem();
-        if ($filesystem->fileExists($location))
-            return false;
-
-        try {
-            $filesystem->write($location, $contents, $config);
-            return true;
-        } catch (FilesystemError | UnableToWriteFile $exception) {
-            throw new NotWritableException("Unable to write file \"$location\"..");
-            return false;
-        }
     }
 
     protected function uploadFiles($entity, $oldEntity, ?string $property = null)
@@ -307,31 +276,15 @@ class Uploader extends AbstractAnnotation
             //
             // Upload files
             $path         = $this->getPath($entity ?? $oldEntity ?? null);
-            $pathPrefixer = $this->getPathPrefixer($this->storage);
+            $pathPrefixer = $this->getStorageFilesystem()->getPathPrefixer($this->storage);
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
-            if ($this->uploadFile($path, $contents, $this->getStorageFilesystem()))
+            if ($this->getStorageFilesystem()->write($path, $contents))
                 $fileList[] = basename($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
         }
 
         $this->setFieldValue($entity, $property, !is_array($new) ? $fileList[0] ?? null : $fileList);
         return true;
-    }
-
-    protected function deleteFile(string $location, ?FilesystemOperator $filesystem = null)
-    {
-        $filesystem = $filesystem ?? $this->getStorageFilesystem();
-        if (!$filesystem->fileExists($location)) return false;
-
-        try {
-        
-            $filesystem->delete($location);
-            return true;
-        
-        } catch (FilesystemError | UnableToDeleteMetadata $exception) {
-
-            throw new NotDeletableException("Unable to delete file \"$location\"..");
-        }
     }
 
     protected function deleteFiles($entity, $oldEntity, string $property)
@@ -363,7 +316,7 @@ class Uploader extends AbstractAnnotation
             if($file instanceof File) $path = $file->getRealPath();
             else $path = $this->getPath($entity ?? $oldEntity ?? null, $file);
 
-            if($path) $this->deleteFile($path, $this->getStorageFilesystem());
+            if($path) $this->getStorageFilesystem()->delete($path);
         }
     }
 

@@ -77,7 +77,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('exit',  'exit'),
 
             new TwigFunction("path",          [$this, "path"]),
-            new TwigFunction('image',         [$this, 'image'], ['needs_context' => true]),
+            new TwigFunction('image',         [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('method_exists', [$this, 'method_exists']),
             new TwigFunction('static_call',   [$this, 'static_call']),
 
@@ -88,7 +88,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function getFilters() : array
     {
         return [
-            new TwigFilter('preg_split',      'preg_split'),
+            new TwigFilter('preg_split',      [$this,'preg_split']),
             new TwigFilter('str_shorten',     'str_shorten'),
             new TwigFilter('intval',          'intval'),
             new TwigFilter('strval',          'strval'),
@@ -97,8 +97,8 @@ final class BaseTwigExtension extends AbstractExtension
 
             new TwigFilter('url',             [$this, 'url']),
             new TwigFilter('join_if_exists',  [$this, 'joinIfExists']),
-            new TwigFilter('mimetype',        [$this, 'mimetype']),
-            new TwigFilter('extension',       [$this, 'extension']),
+            new TwigFilter('mimetype',        [ImageService::class, 'mimetype']),
+            new TwigFilter('extension',       [ImageService::class, 'extension']),
             new TwigFilter('stringify',       [$this, 'stringify']),
             new TwigFilter('highlight',       [$this, 'highlight']),
             new TwigFilter('array_flatten',   [$this, 'array_flatten']),
@@ -118,60 +118,40 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('iconify',         [IconService::class, 'iconify']),
             new TwigFilter('imagify',         [ImageService::class, 'imagify']),
 
-            new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail']),
+            new TwigFilter('imagine',         [ImageService::class, 'imagine']),
             new TwigFilter('webp',            [ImageService::class, 'webp']),
-            new TwigFilter('image',           [ImageService::class, 'image'])
+            new TwigFilter('image',           [ImageService::class, 'image']),
+            new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail'])
         ];
     }
 
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
-
+    public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) { return preg_split($pattern, $subject, $limit, $flags); }
+    
     public function joinIfExists(?array $array, string $separator) 
     {
         if($array === null) return null;
         return implode($separator, array_filter($array));
     }
-    
-    public function image(string $src, array $context = []) 
+
+    public function image(Environment $env, array $context, $src) 
     { 
         if(!$src) return $src;
-        if(is_array($src)) return array_map(fn($s) => $this->image($s), $src);
-
-        // Context and public path
-        if(str_starts_with($src, "/")) $src = "@Public".$src;
-        try { $src = $this->twig->getLoader()->getSourceContext($src)->getPath(); }
-        catch(LoaderError $e) { throw new NotFoundResourceException("Image \"$src\" not found."); }
+        if(is_array($src)) return array_map(fn($s) => $this->image($s, $context, $env), $src);
 
         $email = $context["email"] ?? null;
         if( $email instanceof WrappedTemplatedEmail )
             return $email->image($src);
 
+        // Context and public path
+        if(str_starts_with($src, "/")) $src = "@Public".$src;
+        try { $src = $env->getLoader()->getSourceContext($src)->getPath(); }
+        catch(LoaderError $e) { throw new NotFoundResourceException("Image \"$src\" not found."); }
+        
         if (substr($src, 0, strlen($this->projectDir)) == $this->projectDir)
             $src = substr($src, strlen($this->projectDir));
 
         return $src;
-    }
-    
-    public function mimetype($fileOrArray) {
-
-        if(is_array($fileOrArray)) return array_map(fn($f) => $this->mimetype($f), $fileOrArray);
-        return $fileOrArray ? $this->mimeTypes->guessMimeType($fileOrArray) : null;
-    }
-
-    public function extension($mimetypeOrArray)
-    {
-        if(!$mimetypeOrArray) return [];
-        if(is_array($mimetypeOrArray)) {
-
-            $extensions = [];
-            $extensionList = array_map(function($mimetype) { return $this->extension($mimetype); }, $mimetypeOrArray);
-            foreach ( $extensionList as $extension )
-                $extensions = array_merge($extensions,$extension);
-
-            return array_unique($extensions);
-        }
-
-        return $this->mimeTypes->getExtensions($mimetypeOrArray);
     }
 
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }    

@@ -668,8 +668,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isNewcomer(): bool { return in_array(UserState::NEWCOMER, $this->states); }
     public function isElder()   : bool { return !$this->isNewcomer(); }
     public function setIsNewcomer(bool $newState): self 
-    { 
-        $this->states = $newState ? array_keys_insert(UserState::NEWCOMER, $this->states, true) : array_keys_delete(UserState::NEWCOMER, $this->states);
+    {
+        $this->states = $newState ? array_values_insert($this->states, UserState::NEWCOMER) : array_values_remove($this->states, UserState::NEWCOMER);
         return $this;
     }
 
@@ -678,8 +678,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isApproved()   : bool { return in_array(UserState::APPROVED, $this->states); }
     public function isDisregarded(): bool { return !$this->isApproved(); }
     public function setIsApproved(bool $newState): self 
-    { 
-        $this->states = $newState ? array_keys_insert(UserState::APPROVED, $this->states, true) : array_keys_delete(UserState::APPROVED, $this->states);
+    {
+        $this->states = $newState ? array_values_insert($this->states, UserState::APPROVED) : array_values_remove($this->states, UserState::APPROVED);
         return $this;
     }
 
@@ -687,7 +687,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isVerified(): bool { return in_array(UserState::VERIFIED, $this->states); }
     public function setIsVerified(bool $newState) 
     {
-        $this->states = $newState ? array_keys_insert(UserState::VERIFIED, $this->states, true) : array_keys_delete(UserState::VERIFIED, $this->states);
+        $this->states = $newState ? array_values_insert($this->states, UserState::VERIFIED) : array_values_remove($this->states, UserState::VERIFIED);
         return $this;
     }
 
@@ -697,7 +697,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isDisabled(): bool { return !$this->isEnabled(); }
     public function setIsEnabled (bool $newState): self
     { 
-        $this->states = $newState ? array_keys_insert(UserState::ENABLED, $this->states, true) : array_keys_delete(UserState::ENABLED, $this->states);
+        $this->states = $newState ? array_values_insert($this->states, UserState::ENABLED) : array_values_remove($this->states, UserState::ENABLED);
         return $this;
     }
 
@@ -706,7 +706,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isLocked(): bool { return in_array(UserState::LOCKED, $this->states); }
     public function setIsLocked(bool $newState): self 
     {
-        $this->states = $newState ? array_keys_insert(UserState::LOCKED, $this->states, true) : array_keys_delete(UserState::LOCKED, $this->states);
+        $this->states = $newState ? array_values_insert($this->states, UserState::LOCKED) : array_values_remove($this->states, UserState::LOCKED);
         return $this;
     }
 
@@ -715,7 +715,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isBanned(): bool { return in_array(UserState::BANNED, $this->states); } // TO IMPLEMENT..
     public function setIsBanned(bool $newState = true): self
     { 
-        $this->states = $newState ? array_keys_insert(UserState::BANNED, $this->states, true) : array_keys_delete(UserState::BANNED, $this->states);
+        $this->states = $newState ? array_values_insert($this->states, UserState::BANNED) : array_values_remove($this->states, UserState::BANNED);
         return $this;
     }
 
@@ -724,7 +724,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isKicked(): bool { return in_array(UserState::KICKED, $this->states); }
     public function setIsKicked(bool $newState = true): self
     {
-        $this->states = $newState ? array_keys_insert(UserState::KICKED, $this->states, true) : array_keys_delete(UserState::KICKED, $this->states);
+        $this->states = $newState ? array_values_insert($this->states, UserState::KICKED) : array_values_remove($this->states, UserState::KICKED);
         return $this;
     }
 
@@ -732,7 +732,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isGhost(): bool { return in_array(UserState::GHOST, $this->states); }
     public function setIsGhost(bool $newState): self
     { 
-        $this->states = $newState ? array_keys_insert(UserState::GHOST, $this->states, true) : array_keys_delete(UserState::GHOST, $this->states);
+        $this->states = $newState ? array_values_insert($this->states, UserState::GHOST) : array_values_remove($this->states, UserState::GHOST);
         return $this;
     }
 

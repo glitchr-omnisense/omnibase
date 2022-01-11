@@ -4,8 +4,6 @@ namespace Base\Service;
 
 use App\Entity\User;
 use Base\Controller\BaseController;
-use Base\Service\Traits\BaseSecurityTrait;
-use Base\Service\Traits\BaseDoctrineTrait;
 use Base\Traits\BaseTrait;
 
 
@@ -28,7 +26,6 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
-use Base\Traits\SingletonTrait;
 use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
@@ -129,7 +126,10 @@ class BaseService implements RuntimeExtensionInterface
         NotifierInterface $notifier,
         FormFactoryInterface $formFactory,
         LocaleProviderInterface $localeProvider,
-        BaseSettings $settings)
+        
+        BaseSettings $settings,
+        ImageService $imageService,
+        IconService $iconService)
     {
         BaseController::$foundBaseService = true;
 
@@ -151,6 +151,8 @@ class BaseService implements RuntimeExtensionInterface
         $this->requestStack         = $requestStack;
 
         // Additional containers
+        $this->setImageService($imageService);
+        $this->setIconService($iconService);
         $this->setSettings($settings);
         $this->setLocaleProvider($localeProvider);
         $this->setTwig($twig);
@@ -681,7 +683,7 @@ class BaseService implements RuntimeExtensionInterface
         return false;
     }
 
-    public function getOriginalEntityData($eventOrEntity, bool $reopen = false)
+    public function getOriginalEntityData($eventOrEntity, bool $isWithinDoctrine = false, bool $reopen = false)
     { 
         $entity = $eventOrEntity->getObject();
         $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
@@ -692,7 +694,7 @@ class BaseService implements RuntimeExtensionInterface
             foreach($event->getEntityChangeSet() as $field => $data)
                 $originalEntityData[$field] = $data[0];
 
-        } else if($this->isWithinDoctrine()) {
+        } else if($isWithinDoctrine && $this->isWithinDoctrine()) {
 
             throw new \Exception("Achtung ! You are trying to access data object within a Doctrine method..".
                                 "Original entity might have already been updated.");
@@ -702,12 +704,12 @@ class BaseService implements RuntimeExtensionInterface
     }
 
     protected static $entitySerializer = null;
-    public function getOriginalEntity($eventOrEntity, bool $reopen = false)
+    public function getOriginalEntity($eventOrEntity, bool $isWithinDoctrine = false, bool $reopen = false)
     { 
         if(!self::$entitySerializer)
             self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
-        $data = $this->getOriginalEntityData($eventOrEntity, $reopen);
+        $data = $this->getOriginalEntityData($eventOrEntity, $isWithinDoctrine, $reopen);
 
         if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
         else $entity = $eventOrEntity->getObject();

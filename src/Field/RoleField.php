@@ -22,8 +22,8 @@ class RoleField extends SelectField implements FieldInterface
             ->setCustomOption(SelectField::OPTION_CLASS, UserRole::class)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
+            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setTextAlign(TextAlign::RIGHT)
-            ->setColumns(6)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig');
     }
 }

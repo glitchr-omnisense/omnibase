@@ -82,7 +82,6 @@ class UserCrudController extends AbstractCrudController
                 foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
                     yield $yield;
 
-                    
                 yield BooleanField::new("isApproved")->withConfirmation();
                 foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
                     yield $yield;

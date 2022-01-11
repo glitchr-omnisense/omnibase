@@ -13,24 +13,30 @@ use UnexpectedValueException;
 abstract class EnumType extends Type implements SelectInterface
 {
     public static function getIds(): array { return array_keys(self::getIcons()); }
+
+    protected static $icons = [];
     public static function getIcons(): array 
     {
         $class = static::class;
-        $icons = static::class::__staticIconize();
+        if(array_key_exists($class, self::$icons))
+            return self::$icons[$class];
 
+        $icons = static::class::__staticIconize();
         while($class) {
 
             if(class_implements_interface($class, IconizeInterface::class)) {
 
-                if( ($missingKeys = array_keys(array_keys_delete($class::getPermittedValues(false), $class::__staticIconize()))) )
+                if( ($missingKeys = array_keys(array_keys_remove($class::getPermittedValues(false), $class::__staticIconize()))) )
                     throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
 
                 $icons = array_union($icons, $class::__staticIconize());
+                self::$icons[$class] = $icons;
             }
-
+            
             $class = get_parent_class($class);
         }
-
+        
+        self::$icons[static::class] = $icons;
         return $icons;
     }
 

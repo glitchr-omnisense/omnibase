@@ -15,7 +15,7 @@ class IconService
 
     public function removeProvider(IconProviderInterface $provider): self
     {
-        array_value_delete($provider, $this->providers);
+        array_values_remove($this->providers, $provider);
         return $this;
     }
 

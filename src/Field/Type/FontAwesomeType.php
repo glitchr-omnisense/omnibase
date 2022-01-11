@@ -33,6 +33,8 @@ class FontAwesomeType extends SelectType implements SelectInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         self::$instance = new FontAwesome($this->baseService->getParameterBag("base.vendor.font_awesome.metadata"));
+        self::$instance->load();
+
         parent::configureOptions($resolver);
 
         $resolver->setDefaults([
@@ -44,7 +46,7 @@ class FontAwesomeType extends SelectType implements SelectInterface
         ]);
     }
 
-    public static function getIds(): array { return array_keys(self::$instance->getEntries()); }
+    public static function getIds(): array { return array_keys(self::$instance->getIcons()); }
     public static function getIcon(string $id, int $index = -1): ?string { return $id;  }
     public static function getText(string $id): ?string { return self::$instance->getLabel($id); }
     public static function getHtml(string $id): ?string { return null; }

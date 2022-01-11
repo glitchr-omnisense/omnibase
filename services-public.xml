@@ -11,7 +11,7 @@
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageInterface" alias="base.service.image"/>
 
-        <service id="base.filesystem" alias="Base\Service\FilesystemProvider" />
+        <service id="base.filesystem" alias="Base\Service\Filesystem" />
 
         <service id="base.settings" alias="Base\Service\BaseSettings" />
 

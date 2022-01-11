@@ -25,8 +25,13 @@ class UserChecker implements UserCheckerInterface
 
     public function checkPreAuth(UserInterface $user)
     {
-        if (!$user instanceof User)
-            throw new UnsupportedUserException(sprintf('Invalid user class "%s".', get_class($user)));
+        if ($user instanceof User) {
+
+            if ($user->isBanned())
+                throw new CustomUserMessageAccountStatusException("@notifications.login.banned", ["importance" => "danger"]);
+            if ($user->isLocked())
+                throw new CustomUserMessageAccountStatusException("@notifications.login.locked", ["importance" => "danger"]);
+        }
     }
 
     public function checkPostAuth(UserInterface $user)
@@ -34,39 +39,27 @@ class UserChecker implements UserCheckerInterface
         if (!$user instanceof User) return;
 
         if ($user->isDisabled()) {
+            
+            $welcomeBackToken = $user->getValidToken("welcome-back");
+            if( $welcomeBackToken ) {
 
-            if( ($welcomeBackToken = $user->getValidToken("welcome-back")) ) {
-
-                throw new CustomUserMessageAccountStatusException(
-                    "@notifications.accountWelcomeBack.foundToken", 
-                    [
-                        0 => $this->baseTwigExtension->time($welcomeBackToken->getRemainingTime()),
-                        "importance" => "danger"
-                    ]
-                );
-
-            } else {
-
-                // Remove expired tokens
-                $user->removeExpiredTokens();
-
-                $welcomeBackToken = new Token("welcome-back", 3600);
-                $welcomeBackToken->setUser($user);
-
-                $notification = new Notification("accountWelcomeBack.success", [$user]);
-                $notification->setUser($user);
-                $notification->setHtmlTemplate("@Base/security/email/account_welcomeBack.html.twig", ["token" => $welcomeBackToken]);
-                $notification->send("email");
-
-                $this->entityManager->flush();
-                throw new CustomUserMessageAccountStatusException("@notifications.login.disabled", ["importance" => "warning"]);
+                $user->enable();
+                return;
             }
+
+            // Remove expired tokens
+            $user->removeExpiredTokens();
+
+            $welcomeBackToken = new Token("welcome-back", 3600);
+            $welcomeBackToken->setUser($user);
+
+            $notification = new Notification("accountWelcomeBack.success", [$user]);
+            $notification->setUser($user);
+            $notification->setHtmlTemplate("@Base/security/email/account_welcomeBack.html.twig", ["token" => $welcomeBackToken]);
+            $notification->send("email");
+
+            $this->entityManager->flush();
+            throw new CustomUserMessageAccountStatusException("@notifications.login.disabled", ["importance" => "warning"]);
         }
-
-        if ($user->isBanned())
-            throw new CustomUserMessageAccountStatusException("@notifications.login.banned", ["importance" => "danger"]);
-        if ($user->isLocked())
-            throw new CustomUserMessageAccountStatusException("@notifications.login.locked", ["importance" => "danger"]);
-
     }
 }

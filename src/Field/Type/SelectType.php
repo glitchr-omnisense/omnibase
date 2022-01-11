@@ -54,7 +54,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->baseService = $baseService;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
-        $this->hashIds = new Hashids();
+        $this->hashIds = new Hashids($this->baseService->getSalt());
 
         $this->formFactory = $formFactory;
         $this->localeProvider = $localeProvider;
@@ -172,7 +172,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'choice_value'  => $options["choice_value"],
                 'multiple'      => $options["multiple"]
             ];
-            
+
             $form->add('choice', ChoiceType::class, $formOptions);
         });
 
@@ -317,12 +317,19 @@ class SelectType extends AbstractType implements DataMapperInterface
                 
             } else {
                 $choiceData = $classRepository->findOneById($choiceData);
-            }
+            }    
         }
+
+        $options["multiple"] = null;
+        $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if($viewData instanceof Collection) {
         
             $viewData->clear();
+
+            if(!is_iterable($choiceData))
+                 $choiceData = $choiceData ? [$choiceData] : [];
+
             foreach($choiceData as $data)
                 $viewData->add($data);
 
@@ -354,11 +361,11 @@ class SelectType extends AbstractType implements DataMapperInterface
             //
             // Prepare variables
             $array = [
-                "class" => $options["class"], 
-                "fields" => $options["autocomplete_fields"],
-                "filters" => $options["choice_filter"],
+                "class"      => $options["class"], 
+                "fields"     => $options["autocomplete_fields"],
+                "filters"    => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
-                "token" => $this->csrfTokenManager->getToken("select2")->getValue()
+                "token"      => $this->csrfTokenManager->getToken("select2")->getValue()
             ];
 
             $hash = $this->encode($array);
@@ -489,6 +496,15 @@ class SelectType extends AbstractType implements DataMapperInterface
         }
     }
 
+
+    protected static $icons = [];
+    public static function getIcons(): array 
+    {
+        $class = static::class;
+        if(array_key_exists(self::$icons, self::$icons))
+            return self::$icons[$class];
+    }
+    
     public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_SENTENCECASE) 
     {
         if($entry == null) return null;
@@ -523,10 +539,10 @@ class SelectType extends AbstractType implements DataMapperInterface
         } else if(class_implements_interface($class, SelectInterface::class)) {
 
             $id    = $entry;
-            $icon  = $class::getIcon($entry, 0);
-            $text  = $class::getText($entry, $translator);
-            $html  = $class::getHtml($entry);
-            $data  = $class::getData($entry);
+            $icon = $class::getIcon($entry, 0);
+            $text = $class::getText($entry, $translator);
+            $html = $class::getHtml($entry);
+            $data = $class::getData($entry);
 
         } else {
 

@@ -348,28 +348,27 @@ class SecurityController extends AbstractController
 
             if ($welcomeBackToken)
                 $welcomeBackToken->revoke();
-            
-            $notification = new Notification("accountWelcomeBack.invalidToken");  
+
+            $notification = new Notification("accountWelcomeBack.invalidToken");
             $notification->send("danger");
-            
+
             return $this->redirectToRoute($this->baseService->getRoute("/"));
-        
+
         } else if(!$user->isDisabled()) {
 
             $welcomeBackToken->revoke();
-            
-            $notification = new Notification("accountWelcomeBack.already");  
+
+            $notification = new Notification("accountWelcomeBack.already");
             $notification->send("warning");
 
             return $this->redirectToRoute($this->baseService->getRoute("/"));
 
-        
         } else if ($user->getValidToken("welcome-back")){
 
             $user->enable();
 
             $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
-            
+
             $this->entityManager->flush();
             return $authenticateUser;
         }

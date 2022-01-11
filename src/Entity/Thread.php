@@ -17,8 +17,6 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Hierarchify;
-use Base\Database\OrderableInterface;
-use Base\Database\Traits\OrderableTrait;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;

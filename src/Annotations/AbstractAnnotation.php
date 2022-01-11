@@ -3,6 +3,7 @@
 namespace Base\Annotations;
 
 use App\Entity\User;
+use Base\Service\Filesystem;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
@@ -17,17 +18,17 @@ use Exception;
 
 abstract class AbstractAnnotation implements AnnotationInterface
 {
-    public static function getAnnotationReader()          { return AnnotationReader::getInstance();                    }
-    public static function getProjectDir()                { return AnnotationReader::getInstance()->getProjectDir();   }
-    public static function getParameterBag()              { return AnnotationReader::getInstance()->getParameterBag(); }
-    public static function getFilesystem(string $storage) { return AnnotationReader::getInstance()->getFilesystem($storage);             }
-    public static function getAdapter($storage)           { return AnnotationReader::getInstance()->getFilesystemAdapter($storage);      }
-    public static function getPathPrefixer($storage)      { return AnnotationReader::getInstance()->getFilesystemPathPrefixer($storage); }
-    public static function getDoctrineReader()            { return AnnotationReader::getInstance()->getDoctrineReader(); }
-    public static function getEntityManager()             { return AnnotationReader::getInstance()->getEntityManager();  }
+    public static function getAnnotationReader() { return AnnotationReader::getInstance();                    }
+    public static function getService()          { return AnnotationReader::getInstance()->getService();   }
+    public static function getProjectDir()       { return AnnotationReader::getInstance()->getProjectDir();   }
+    public static function getParameterBag()     { return AnnotationReader::getInstance()->getParameterBag(); }
+    public static function getDoctrineReader()   { return AnnotationReader::getInstance()->getDoctrineReader(); }
+    public static function getEntityManager()    { return AnnotationReader::getInstance()->getEntityManager();  }
    
-    public static function getImpersonator():?User        { return AnnotationReader::getInstance()->getImpersonator(); }
-    public static function getUser():?User                { return AnnotationReader::getInstance()->getUser();         }
+    public static function getFilesystem(string $storage): Filesystem { return AnnotationReader::getInstance()->getFilesystem($storage);      }
+    
+    public static function getImpersonator():?User { return AnnotationReader::getInstance()->getImpersonator(); }
+    public static function getUser():?User         { return AnnotationReader::getInstance()->getUser();         }
 
     public static function getClassMetadata($className): ?ClassMetadata { return self::getEntityManager()->getClassMetadata($className);     }
     public static function getRepository($className)                    { return AnnotationReader::getInstance()->getRepository($className); }
