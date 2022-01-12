@@ -11,6 +11,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
+use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 
@@ -215,11 +216,12 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             $permittedValues = null;
             if($this->classMetadataManipulator->isEnumType($class)) 
                 $permittedValues = $class::getPermittedValuesByClass();
-            if($this->classMetadataManipulator->isSetType ($class)) 
+            else if($this->classMetadataManipulator->isSetType ($class)) 
                 $permittedValues = $class::getPermittedValuesByClass();
-
+            else if(array_key_exists("choice_loader", $options) && $options["choice_loader"] instanceof ChoiceLoaderInterface)
+                $permittedValues = $options["choice_loader"] ? $options["choice_loader"]->loadChoiceList()->getStructuredValues() : null;
+    
             if($permittedValues === null) return null;
-
             return count($permittedValues) == 1 ? begin($permittedValues) : $permittedValues;
         }
 

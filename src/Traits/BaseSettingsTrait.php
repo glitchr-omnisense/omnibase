@@ -223,6 +223,8 @@ trait BaseSettingsTrait
             $settings = $item->get() ?? [];
             $settings = is_array($settings) ? array_merge($settings, $settingsWithLocale) : $settingsWithLocale;
 
+            $settings = array_map_recursive(fn($i) => is_serializable($i) ? $i : null, $settings);
+
             $this->cache->save($item->set($settings));
         }
 

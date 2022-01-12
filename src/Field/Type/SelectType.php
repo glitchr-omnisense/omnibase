@@ -426,7 +426,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $formattedData = array_transforms(function ($key, $value, $i, $callback) use ($innerType, $dataset, &$options, &$selectedData) : ?array { 
 
                 // Recursive categories
-                if(is_array($value)) {
+                if(is_array($value) && is_associative($value)) {
 
                     $text = null;
                     if(class_exists($key)) {
@@ -446,6 +446,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $entry = self::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $entryFormat);
                 if(!$entry) return null;
 
+                // Special text formatting
+                if(is_string($key)) $entry["text"] = $entry["text"] ?? $key;
+
                 // Check if entry selected
                 $entry["selected"] = false;
                 foreach($dataset as $data)
@@ -453,12 +456,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             
                 if($entry["selected"])
                     $selectedData[]  = $entry["id"];
-
-                // Special display if no class/innerType found
-                if(!array_key_exists("text", $entry))
-                    $entry["text"] = $key;
-                if(!array_key_exists("text", $entry))
-                    $entry["icon"] = $value;
 
                 return [$i, $entry];
 
@@ -547,8 +544,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         } else {
 
             $id    = is_array($entry) ? $entry[0] : $entry;
-            $icon  = null;
-            $text  = is_array($entry) ? $entry[1] : $entry;
+            $text  = is_array($entry) ? $entry[1] : null;
+            $icon  = is_array($entry) ? $entry[2] : null;
             $html  = null;
             $data  = [];
         }
@@ -557,7 +554,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         [
             "id"   => $id ?? null,
             "icon" => $icon,
-            "text" => castcase($text, $format),
+            "text" => is_string($text) ? castcase($text, $format) : $text,
             "html" => $html,
             "data" => $data
         ];
