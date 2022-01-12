@@ -107,14 +107,14 @@ class Uploader extends AbstractAnnotation
                     $pathList[] = null;
                     continue;
                 }
-                
+
                 $path = $that->getPath($entity, $uuidOrFile);
                 if(!$path) $pathList[] = null;
                 else if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) $pathList[] = null;
                 else $pathList[] = rtrim($that->getAsset($that->public) . $path, ".");
             }
 
-            return array_map(fn($p) => self::getAnnotationReader()->getImageService()->imagine($p), $pathList);
+            return $pathList;
 
         } else {
         
@@ -131,7 +131,7 @@ class Uploader extends AbstractAnnotation
             if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) 
                 return null;
 
-            return self::getAnnotationReader()->getImageService()->imagine(rtrim($that->getAsset($that->public) . $path, "."));
+            return rtrim($that->getAsset($that->public) . $path, ".");
         }
     }
 

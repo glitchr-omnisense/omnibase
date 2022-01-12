@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Model;
+namespace Base\Model\Icon;
 
-use Base\Service\IconProviderInterface;
+use Base\Model\IconProviderInterface;
 use Symfony\Component\Yaml\Yaml;
 
 class FontAwesome implements IconProviderInterface
@@ -61,6 +61,7 @@ class FontAwesome implements IconProviderInterface
             if(!$termFound) continue;
             foreach ($styles as $style)
                 $choices[mb_ucfirst($style)." Style"][$label] = "fa".$style[0]." fa-".$key;
+
         }
 
         return $choices;
@@ -72,7 +73,7 @@ class FontAwesome implements IconProviderInterface
     {
         if (empty(self::$contents[$metadata])) {
 
-            self::$contents =
+            self::$contents[$metadata] =
                 (str_ends_with($metadata, "yml") ?
                     Yaml::parse(file_get_contents($metadata)) :
                 (str_ends_with($metadata, "yaml") ?
@@ -81,17 +82,22 @@ class FontAwesome implements IconProviderInterface
                     json_decode(file_get_contents($metadata), true) : [])));
         }
 
-        return self::$contents;
+        return self::$contents[$metadata];
     }
 
     /*
      * Available icons
      */
     protected $icons = [];
-    public function getIcons() { return self::$contents[$this->metadata] ?? []; }
+    public function getIcons() 
+    { 
+        if(empty(self::$contents[$this->metadata])) self::parse($this->metadata); 
+        return self::$contents[$this->metadata] ?? []; 
+    }
+
     public function getIcon(string $value = null): string 
     {
-        if(empty(self::$contents[$this->metadata])) $this->parse($this->metadata); 
+        if(empty(self::$contents[$this->metadata])) self::parse($this->metadata); 
         return self::$contents[$this->metadata][$value] ?? "";
     }
 
@@ -101,10 +107,10 @@ class FontAwesome implements IconProviderInterface
         if( !empty($this->version) )
             return $this->version;
 
-        if ( !preg_match('/.*\/([0-9.]*)\/metadata/', $this->metadata ?? "", $match) )
+        if ( !preg_match('/.*\/([0-9.]*)\/metadata/', $this->metadata ?? "", $matches) )
             return "unk.";
 
-        $this->version = $match[1];
+        $this->version = $matches[1];
         return $this->version;
     }
 
@@ -125,34 +131,34 @@ class FontAwesome implements IconProviderInterface
     public function getStyles(?string $name = null)
     {
         if ($name === null)
-            return array_map(function($icon) { return $icon["styles"]; }, self::$contents);
+            return array_map(function($icon) { return $icon["styles"]; }, self::$contents[$this->metadata]);
 
         $identifier = $this->getIdentifier($name);
-        if (!array_key_exists($identifier, self::$contents)) return [];
-        return self::$contents[$identifier]["styles"] . " " ;
+        if (!array_key_exists($identifier, self::$contents[$this->metadata])) return [];
+        return self::$contents[$this->metadata][$identifier]["styles"] . " " ;
     }
 
-    public function getValues() { return array_keys(self::$contents); }
+    public function getValues() { return array_keys(self::$contents[$this->metadata]); }
     public function getValue(string $name)
     {
         $identifier = $this->getIdentifier($name);
-        if (!array_key_exists($identifier, self::$contents)) return "";
+        if (!array_key_exists($identifier, self::$contents[$this->metadata])) return "";
         return $identifier;
     }
 
-    public function getLabels() { return array_map(function($icon) { return $icon["label"]; }, self::$contents); }
+    public function getLabels() { return array_map(function($icon) { return $icon["label"]; }, self::$contents[$this->metadata]); }
     public function getLabel(string $name)
     {
         $identifier = $this->getIdentifier($name);
-        if (!array_key_exists($identifier, self::$contents)) return "";
-        return self::$contents[$identifier]["label"];
+        if (!array_key_exists($identifier, self::$contents[$this->metadata])) return "";
+        return self::$contents[$this->metadata][$identifier]["label"];
     }
 
-    public function getUnicodes() { return array_map(function($icon) { return $icon["unicode"]; }, self::$contents); }
+    public function getUnicodes() { return array_map(function($icon) { return $icon["unicode"]; }, self::$contents[$this->metadata]); }
     public function getUnicode(string $name)
     {
         $identifier = $this->getIdentifier($name);
-        if (!array_key_exists($identifier, self::$contents)) return [];
-        return self::$contents[$identifier]["unicode"];
+        if (!array_key_exists($identifier, self::$contents[$this->metadata])) return [];
+        return self::$contents[$this->metadata][$identifier]["unicode"];
     }
 }

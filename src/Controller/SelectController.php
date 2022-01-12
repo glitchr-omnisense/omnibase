@@ -4,8 +4,7 @@ namespace Base\Controller;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\Type\SelectType;
-use Base\Model\FontAwesome;
-use Base\Service\BaseService;
+use Base\Model\Icon\FontAwesome;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Base\Traits\BaseTrait;
@@ -108,9 +107,10 @@ class SelectController extends AbstractController
     /**
      * @Route("/autocomplete/fa/{pageSize}/{hashid}", name="ux_autocomplete_fa")
      */
-    public function AutocompleteFontAwesome(Request $request, int $pageSize, string $hashid): Response
+    public function AutocompleteFontAwesomeIcons(Request $request, int $pageSize, string $hashid): Response
     {
         $dict    = $this->decode($hashid);
+
         $token   = $dict["token"] ?? null;
         $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
@@ -121,7 +121,7 @@ class SelectController extends AbstractController
             $page = $request->get("page") ?? 1;
 
             $fa = new FontAwesome($this->getService()->getParameterBag("base.vendor.font_awesome.metadata"));
-            $entries = $fa->getChoices($term);
+            $entries = $fa->getChoices($term); 
 
             $book = $this->paginator->paginate($entries, $page, $pageSize);
             $pagination = $book->getTotalPages() > $book->getPage();
@@ -142,5 +142,44 @@ class SelectController extends AbstractController
 
         $array = ["status" => "Invalid request"];
         return new JsonResponse($array, 500);
+    }
+
+    /**
+     * @Route("/autocomplete/bi/{pageSize}/{hashid}", name="ux_autocomplete_bi")
+     */
+    public function AutocompleteBootstrapIcons(Request $request, int $pageSize, string $hashid): Response
+    {
+        $dict    = $this->decode($hashid);
+        $token   = $dict["token"] ?? null;
+        $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+
+        // $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
+        // if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
+
+        //     $term = mb_strtolower($request->get("term")) ?? "";
+        //     $page = $request->get("page") ?? 1;
+
+        //     $fa = new FontAwesome($this->getService()->getParameterBag("base.vendor.font_awesome.metadata"));
+        //     $entries = $fa->getChoices($term);
+
+        //     $book = $this->paginator->paginate($entries, $page, $pageSize);
+        //     $pagination = $book->getTotalPages() > $book->getPage();
+        //     $array["pagination"] = ["more" => $pagination];
+        //     $results = $book->current();
+
+        //     $array["results"] = array_transforms(function($k,$v,$i,$callback) use ($format): ?array {
+                
+        //         if(is_array($v))
+        //             return [null, ["text" => $k, "children" => array_transforms($callback, $v)]];
+
+        //         return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $format)]];
+
+        //     }, !empty($results) ? $results : []);
+
+        //     return new JsonResponse($array);
+        // }
+
+        // $array = ["status" => "Invalid request"];
+        // return new JsonResponse($array, 500);
     }
 }

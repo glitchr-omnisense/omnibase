@@ -82,8 +82,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
             $fields = [];
             $fields["value"] = [];
 
-            $intlData = [];
             $unvData = [];
+            $intlData = [];
             foreach($settings as $formattedField => $setting) {
 
                 // Exclude requested fields
@@ -138,25 +138,25 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     }
                 }
 
-                if ($isTranslatable) $unvData[$formattedField] = $translations;
-                else $intlData[$formattedField] = $translations;
+                if ($isTranslatable) $intlData[$formattedField] = $translations;
+                else $unvData[$formattedField] = $translations;
             }
 
-            if($unvData) {
+            if($intlData) {
 
-                $form->add("unv", TranslationType::class, [
+                $form->add("intl", TranslationType::class, [
                     "multiple" => true,
                     "translation_class" => SettingTranslation::class,
                     "only_fields" => ["value"], 
                     "fields" => $fields,
                 ]);
 
-                $form->get("unv")->setData($unvData);
+                $form->get("intl")->setData($intlData);
             }
 
-            if($intlData) {
+            if($unvData) {
 
-                $form->add("intl", TranslationType::class, [
+                $form->add("unv", TranslationType::class, [
                     "multiple" => true,
                     "single_locale" => true,
                     "translation_class" => SettingTranslation::class,
@@ -164,7 +164,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                 ]);
 
-                $form->get("intl")->setData($intlData);
+                $form->get("unv")->setData($unvData);
             }
 
             if(count($fields) > 0) $form->add('valid', SubmitType::class);
@@ -178,7 +178,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
         foreach(iterator_to_array($forms) as $formName => $form)
         {
             if($formName == "valid") continue;
-            else if($formName == "unv" || $formName == "intl") {
+            else if($formName == "intl" || $formName == "unv") {
 
                 foreach($form->getData() as $formattedField => $translations) {
 

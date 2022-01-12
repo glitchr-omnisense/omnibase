@@ -26,10 +26,6 @@ class ImageType extends FileType
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.js"),
             'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.css"),
             
-            'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
-            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.js"),
-            'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.css"),
-
             'mime_types'  => ["image/*"]
         ]);
 
@@ -59,15 +55,6 @@ class ImageType extends FileType
             if(!array_key_exists('aspectRatio', $options["cropper"])) $options["cropper"]['aspectRatio'] = 1;
 
             $view->vars["cropper"]  = json_encode($options["cropper"]);
-        }
-
-        $view->vars["lightbox"] = null;
-        if(is_array($options["lightbox"])) {
-
-            $this->baseService->addHtmlContent("javascripts", $options["lightbox-js"]);
-            $this->baseService->addHtmlContent("stylesheets", $options["lightbox-css"]);
-
-            $view->vars["lightbox"]  = json_encode($options["lightbox"]);
         }
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");

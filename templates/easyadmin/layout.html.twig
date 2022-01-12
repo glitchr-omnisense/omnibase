@@ -242,6 +242,10 @@
                     margin:0;
                 }
 
+                .form-group label.form-check-label.required:after {
+                    content: "•";
+                }
+
                 .field-icon i  
                 {
                     text-shadow: var(--white) 1px 0 5px !important;
@@ -325,12 +329,6 @@
                     justify-content:center;
 
                     object-fit:cover;
-                }
-
-                .lightbox {
-                    top: 10% !important;
-                    max-height: 80% !important;
-                    position:fixed !important;
                 }
 
                 .datagrid tr:hover .lightbox-thumbnail image { border-color:transparent !important; }
@@ -674,9 +672,7 @@
                                 <nav class="navbar" role="navigation">
                                     {% block header_navbar %}
                                         <div id="header-logo">
-
                                             {% block header_logo %}
-
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
                                                     <div class="logo-custom">{{ ea.dashboardTitle|raw }}</div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>

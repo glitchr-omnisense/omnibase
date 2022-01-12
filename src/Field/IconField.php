@@ -2,12 +2,12 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\FontAwesomeType;
+use Base\Field\Type\IconType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-class FontAwesomeField extends SelectField implements FieldInterface
+class IconField extends SelectField implements FieldInterface
 {
     use FieldTrait;
 
@@ -19,8 +19,8 @@ class FontAwesomeField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(FontAwesomeType::class)
-            ->setTemplatePath('@EasyAdmin/crud/field/font_awesome.html.twig')
+            ->setFormType(IconType::class)
+            ->setTemplatePath('@EasyAdmin/crud/field/icon.html.twig')
             ->setTextAlign(TextAlign::CENTER);
     }
 

@@ -6,7 +6,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\ArrayField;
 use Base\Field\AssociationField;
 use Base\Field\DiscriminatorField;
-use Base\Field\FontAwesomeField;
+use Base\Field\IconField;
 use Base\Field\SelectField;
 use Base\Field\SlugField;
 use Base\Field\TranslationField;
@@ -42,7 +42,7 @@ class AbstractAttributeCrudController extends AbstractCrudController
 
         yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
 
-        yield FontAwesomeField::new('icon')->setTextAlign(TextAlign::LEFT)->setColumns(6);
+        yield IconField::new('icon')->setTextAlign(TextAlign::LEFT)->setColumns(6);
         foreach ( ($callbacks["icon"] ?? $defaultCallback)() as $yield)
             yield $yield;
 

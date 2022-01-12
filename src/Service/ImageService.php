@@ -52,8 +52,8 @@ class ImageService implements ImageServiceInterface
     public function encode(array $array): string { return $this->hashIds->encodeHex(bin2hex(serialize($array))); }
     public function decode(string $hash): mixed  { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
-    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("webp/").$this->resolve($path, $filters, $config); }
-    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("images/").$this->resolve($path, $filters, $config); }
+    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("webp", $path, $filters, $config); }
+    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("images", $path, $filters, $config); }
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null { return browser_supports_webp() ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config); }
 
     public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null 
@@ -69,10 +69,10 @@ class ImageService implements ImageServiceInterface
     }
 
     public static $i = 0;
-    public function resolve(array|string|null $source, array $filters = [], array $config = []): array|string|null
+    public function resolve(string $prefix, array|string|null $source, array $filters = [], array $config = []): array|string|null
     {
         if(!$source) return $source;
-        if(is_array($source)) return array_map(fn($s) => $this->resolve($s, $filters, $config), $source);
+        if(is_array($source)) return array_map(fn($s) => $this->resolve($prefix, $s, $filters, $config), $source);
 
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
 
@@ -88,7 +88,7 @@ class ImageService implements ImageServiceInterface
             $config["filters"] = ($sourceConfig["filters"] ?? [])+($config["filters"] ?? []);
         }
 
-        return $this->encode($config);
+        return $this->assetExtension->getAssetUrl($prefix."/").$this->encode($config);
     }
 
     public function filter(string $path, array $filters = []): Response

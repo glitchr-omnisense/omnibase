@@ -2,6 +2,8 @@
 
 namespace Base\Service;
 
+use Base\Model\IconProviderInterface;
+
 class IconService
 {
     public function __construct() {}

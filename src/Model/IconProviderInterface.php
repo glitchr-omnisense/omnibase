@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Service;
+namespace Base\Model;
 
 interface IconProviderInterface
 {

@@ -2,28 +2,15 @@
 
 namespace Base\Field\Type;
 
-use Base\Entity\Thread;
-use Base\Field\Traits\SelectTypeInterface;
-use Base\Field\Traits\SelectTypeTrait;
-use Base\Model\FontAwesome;
+use Base\Model\Icon\FontAwesome;
 use Base\Model\SelectInterface;
-use Base\Service\BaseService;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Yaml\Yaml;
-use Symfony\Component\Json\Json;
-
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
 
 //https://codepen.io/peiche/pen/mRBGmR
 //https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.yml
 
-class FontAwesomeType extends SelectType implements SelectInterface
+class IconType extends SelectType implements SelectInterface
 {
     /**
      * @var FontAwesome

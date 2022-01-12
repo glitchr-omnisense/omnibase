@@ -4,42 +4,28 @@ namespace Base\Field\Type;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Entity\User;
-use Base\Field\Transformer\StringToFileTransformer;
+
 use Base\Service\BaseService;
 use Base\Validator\Constraints\FileMimeType;
 use Base\Validator\Constraints\FileSize;
-use InvalidArgumentException;
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\FileUploadError;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class FileType extends AbstractType implements DataMapperInterface
 {
-    public const KIB_BYTES = 1024;
-    public const MIB_BYTES = 1048576;
-    public const SUFFIXES = [
-        1 => 'bytes',
-        self::KIB_BYTES => 'KiB',
-        self::MIB_BYTES => 'MiB',
-    ];
-
     protected $baseService;
     protected $translator;
 
@@ -80,6 +66,10 @@ class FileType extends AbstractType implements DataMapperInterface
             'sortable'     => true,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.js"),
 
+            'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
+            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.js"),
+            'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.css"),
+
             'thumbnailWidth'     => null,
             'thumbnailHeight'    => 120,
             'max_filesize'       => null,
@@ -100,9 +90,9 @@ class FileType extends AbstractType implements DataMapperInterface
         $allowDelete = $options["allow_delete"];
         $isDropzone  = $options["dropzone"];
         $multiple    = $options["multiple"];
+        $required    = $options["required"];
 
         $builder->add('file', HiddenType::class);
-        $entity = $builder->getData();
 
         $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $builder->getName());
         if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
@@ -150,6 +140,15 @@ class FileType extends AbstractType implements DataMapperInterface
         $parent = $form->getParent();
         $entity = $parent->getData();
 
+        $view->vars["lightbox"] = null;
+        if(is_array($options["lightbox"])) {
+
+            $this->baseService->addHtmlContent("javascripts", $options["lightbox-js"]);
+            $this->baseService->addHtmlContent("stylesheets", $options["lightbox-css"]);
+
+            $view->vars["lightbox"]  = json_encode($options["lightbox"]);
+        }
+        
         if($this->classMetadataManipulator->isEntity($entity)) {
 
             $files = Uploader::get($entity, $form->getName());

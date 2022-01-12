@@ -543,7 +543,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $text = $class::getText($entry, $translator);
             $html = $class::getHtml($entry);
             $data = $class::getData($entry);
-
+            
         } else {
 
             $id    = is_array($entry) ? $entry[0] : $entry;

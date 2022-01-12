@@ -243,10 +243,15 @@
         </service>
 
         <service id="Base\Service\IconService" public="true"><tag name="twig.runtime" /></service>
-        <service id="Base\Model\FontAwesome">
+        <service id="Base\Model\Icon\FontAwesome">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
         </service>
+        <service id="Base\Model\Icon\BootstrapTwitter">
+            <tag name="base.icon_provider" />
+            <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
+        </service>
+
 
         <!-- DOCTRINE -->
         <service id="Base\Database\NamingStrategy"  public="true" />
@@ -455,7 +460,7 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Field\Type\FontAwesomeType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
         
         <service id="Base\Field\Type\AssociationType">
@@ -608,7 +613,7 @@
         <service id="Base\Field\Configurator\RoleConfigurator"          parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\StateConfigurator"         parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\CountryConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\FontAwesomeConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\IconConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DiscriminatorConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\AttributeConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
 

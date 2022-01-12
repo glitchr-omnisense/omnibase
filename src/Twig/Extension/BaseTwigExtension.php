@@ -106,6 +106,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('less_than',       [$this, 'less_than']),
             new TwigFilter('greater_than',    [$this, 'greater_than']),
 
+            new TwigFilter('is_uuid',         [Translator::class, 'is_uuid']),
             new TwigFilter('trans',           [Translator::class, 'trans']),
             new TwigFilter('time',            [Translator::class, 'time']),
             new TwigFilter('enum',            [Translator::class, 'enum']),
