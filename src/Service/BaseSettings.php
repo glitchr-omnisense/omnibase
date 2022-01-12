@@ -43,9 +43,11 @@ class BaseSettings
         return $domain;
     }
 
-    public function logo     (?string $locale = null) : ?string   { return $this->getScalar("base.settings.logo",      $locale); }
-    public function title    (?string $locale = null) : ?string   { return $this->getScalar("base.settings.title",     $locale); }
-    public function slogan   (?string $locale = null) : ?string   { return $this->getScalar("base.settings.slogan",    $locale); }
+    public function logo       (?string $locale = null) : ?string { return $this->getScalar("base.settings.logo",        $locale); }
+    public function title      (?string $locale = null) : ?string { return $this->getScalar("base.settings.title",       $locale); }
+    public function slogan     (?string $locale = null) : ?string { return $this->getScalar("base.settings.slogan",      $locale); }
+    public function keywords   (?string $locale = null) : ?string { return $this->getScalar("base.settings.keywords",    $locale); }
+    public function description(?string $locale = null) : ?string { return $this->getScalar("base.settings.description", $locale); }
     public function birthdate(?string $locale = null) : DateTime 
     { 
         $birthdate = $this->getScalar("base.settings.birthdate", $locale);
