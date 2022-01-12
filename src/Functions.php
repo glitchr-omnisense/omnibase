@@ -156,7 +156,6 @@ namespace {
 
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string
     {
-        return $path;
         if($path === null) return $path;
      
         if(!is_array($suffix)) $suffix = [$suffix];
@@ -178,8 +177,8 @@ namespace {
     
     function path_prefix(string|array|null $path, $prefix, $separator = "_")
     {
-        if(!$path) return $path;
-
+        if($path === null) return $path;
+     
         if(!is_array($prefix)) $prefix = [$prefix];
         $prefix = implode($separator, array_filter($prefix));
 

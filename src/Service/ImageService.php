@@ -38,8 +38,7 @@ class ImageService implements ImageServiceInterface
     public function __construct(Environment $twig, AssetExtension $assetExtension, ParameterBagInterface $parameterBag, ImagineInterface $imagine, Filesystem $filesystem)
     {
         $this->projectDir = dirname(__FILE__, 6);
-        $this->publicDir  = $this->projectDir . "/public";
-
+        $this->publicDir  = $this->projectDir."/public";
         $this->twig           = $twig;
         $this->imagine        = $imagine;
         $this->assetExtension = $assetExtension;
@@ -51,7 +50,7 @@ class ImageService implements ImageServiceInterface
 
     protected $hashIds;
     public function encode(array $array): string { return $this->hashIds->encodeHex(bin2hex(serialize($array))); }
-    public function decode(string $hash): array  { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
+    public function decode(string $hash): mixed  { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
     public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("webp/").$this->resolve($path, $filters, $config); }
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->assetExtension->getAssetUrl("images/").$this->resolve($path, $filters, $config); }
@@ -66,19 +65,28 @@ class ImageService implements ImageServiceInterface
         );
 
         $config = array_keys_remove($config, "width", "height", "mode", "resampling");
-        return $this->assetExtension->getAssetUrl("images/").$this->resolve($path, $filters, $config); 
+        return $this->imagine($path, $filters, $config); 
     }
 
+    public static $i = 0;
     public function resolve(array|string|null $source, array $filters = [], array $config = []): array|string|null
     {
         if(!$source) return $source;
         if(is_array($source)) return array_map(fn($s) => $this->resolve($s, $filters, $config), $source);
 
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
-        $config["path"] = $path;
 
+        $config["path"] = $path;
         if(!empty($filters))
             $config["filters"] = $filters;
+
+        // Config convolution
+        while ( ($sourceConfig = $this->decode(basename($source))) ) {
+
+            $source = $sourceConfig["path"] ?? $source;
+            $config["path"] = $source;
+            $config["filters"] = ($sourceConfig["filters"] ?? [])+($config["filters"] ?? []);
+        }
 
         return $this->encode($config);
     }
@@ -104,6 +112,7 @@ class ImageService implements ImageServiceInterface
 
             $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $filters+[$lastFilter]);
             $pathSource = $this->publicDir."/".str_strip($path, "imagine/");
+
             $path = path_suffix($path, $pathSuffixes);
 
             if(!$this->filesystem->getOperator()->fileExists($path)) {
@@ -151,15 +160,8 @@ class ImageService implements ImageServiceInterface
     public static function extension(null|string|array $mimetypeOrFileOrArray):null|string|array 
     {
         if(!$mimetypeOrFileOrArray) return [];
-        if(is_array($mimetypeOrFileOrArray)) {
-
-            $extensions = [];
-            $extensionList = array_map(function($mimetype) { return self::extension($mimetype); }, $mimetypeOrFileOrArray);
-            foreach ( $extensionList as $extension )
-                $extensions = array_merge($extensions,$extension);
-
-            return array_unique($extensions);
-        }
+        if(is_array($mimetypeOrFileOrArray))
+            return array_map(function($mimetype) { return self::extension($mimetype); }, $mimetypeOrFileOrArray);
 
         if(file_exists($mimetypeOrFileOrArray)) {
 
@@ -168,6 +170,22 @@ class ImageService implements ImageServiceInterface
         }
 
         return self::$mimeTypes->getExtensions($mimetypeOrFileOrArray)[0] ?? null;
+    }
+
+    public static function extensions(null|string|array $mimetypeOrArray):null|string|array 
+    {
+        if(!$mimetypeOrArray) return [];
+        if(is_array($mimetypeOrArray)) {
+
+            $extensions = [];
+            $extensionList = array_map(function($mimetype) { return self::extensions($mimetype); }, $mimetypeOrArray);
+            foreach ( $extensionList as $extension )
+                $extensions = array_merge($extensions,$extension);
+
+            return array_unique($extensions);
+        }
+
+        return self::$mimeTypes->getExtensions($mimetypeOrArray);
     }
 
     public function imagify(null|array|string $path, array $attributes = []) 

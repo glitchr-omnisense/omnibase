@@ -76,7 +76,8 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFunction('exit',  'exit'),
 
-            new TwigFunction("path",          [$this, "path"]),
+            new TwigFunction('synopsis',              'synopsis'),
+            new TwigFunction("path",          [$this, 'path']),
             new TwigFunction('image',         [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('method_exists', [$this, 'method_exists']),
             new TwigFunction('static_call',   [$this, 'static_call']),
@@ -97,8 +98,6 @@ final class BaseTwigExtension extends AbstractExtension
 
             new TwigFilter('url',             [$this, 'url']),
             new TwigFilter('join_if_exists',  [$this, 'joinIfExists']),
-            new TwigFilter('mimetype',        [ImageService::class, 'mimetype']),
-            new TwigFilter('extension',       [ImageService::class, 'extension']),
             new TwigFilter('stringify',       [$this, 'stringify']),
             new TwigFilter('highlight',       [$this, 'highlight']),
             new TwigFilter('array_flatten',   [$this, 'array_flatten']),
@@ -118,6 +117,9 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('iconify',         [IconService::class, 'iconify']),
             new TwigFilter('imagify',         [ImageService::class, 'imagify']),
 
+            new TwigFilter('mimetype',        [ImageService::class, 'mimetype']),
+            new TwigFilter('extension',       [ImageService::class, 'extension']),
+            new TwigFilter('extensions',      [ImageService::class, 'extensions']),
             new TwigFilter('imagine',         [ImageService::class, 'imagine']),
             new TwigFilter('webp',            [ImageService::class, 'webp']),
             new TwigFilter('image',           [ImageService::class, 'image']),

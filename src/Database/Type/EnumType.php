@@ -26,7 +26,7 @@ abstract class EnumType extends Type implements SelectInterface
 
             if(class_implements_interface($class, IconizeInterface::class)) {
 
-                if( ($missingKeys = array_keys(array_keys_remove($class::getPermittedValues(false), $class::__staticIconize()))) )
+                if( ($missingKeys = array_keys(array_keys_remove($class::__staticIconize(), ...$class::getPermittedValues(false)))) )
                     throw new UnexpectedValueException("The following keys \"".implode(",", $missingKeys)."\" are missing in the list of the available icons on class \"".get_called_class()."\".");
 
                 $icons = array_union($icons, $class::__staticIconize());

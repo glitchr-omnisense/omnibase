@@ -354,6 +354,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
 
             ->add(Crud::PAGE_EDIT, Action::INDEX) // Adding return button..
+            ->add(Crud::PAGE_EDIT, Action::DETAIL)
+            ->update(Crud::PAGE_EDIT, Action::DETAIL,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-search')->setLabel(""))
             ->update(Crud::PAGE_EDIT, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
             ->update(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,

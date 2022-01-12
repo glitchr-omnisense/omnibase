@@ -114,7 +114,7 @@ class Uploader extends AbstractAnnotation
                 else $pathList[] = rtrim($that->getAsset($that->public) . $path, ".");
             }
 
-            return array_map(fn($p) => $this->getImageService()->imagine($p), $pathList);
+            return array_map(fn($p) => self::getAnnotationReader()->getImageService()->imagine($p), $pathList);
 
         } else {
         
@@ -131,7 +131,7 @@ class Uploader extends AbstractAnnotation
             if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) 
                 return null;
 
-            return rtrim($that->getAsset($that->public) . $path, ".");
+            return self::getAnnotationReader()->getImageService()->imagine(rtrim($that->getAsset($that->public) . $path, "."));
         }
     }
 

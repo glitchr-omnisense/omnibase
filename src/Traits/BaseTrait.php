@@ -26,8 +26,8 @@ trait BaseTrait
     public static function getDataDir()       : string { return BaseService::getProjectDir() . "/data"; }
 
     public static function getService()       : ?BaseService             { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getService(); }
-    public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getImageService(); }
-    public static function getIconService()   : ?IconService             { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getIconService(); }
+    public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
+    public static function getIconService()   : ?IconService             { return (self::class === BaseService::class) ? BaseService::$iconService    : BaseService::getIconService(); }
     public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
     public static function getSettings()      : ?BaseSettings            { return (self::class === BaseService::class) ? BaseService::$settings       : BaseService::getSettings(); }
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }

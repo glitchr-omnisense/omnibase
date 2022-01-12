@@ -251,6 +251,7 @@
 {% set attr = attr|merge({
     'data-image-field'         : form.vars.id,
     'data-image-cropper'       : form.vars.cropper,
+    'data-image-lightbox'       : form.vars.lightbox,
     'data-image-thumbnail'     : form.vars.thumbnail,
     'data-image-ajax'      : form.vars.ajax,
 }) %}
@@ -259,7 +260,7 @@
 
     {% if not multiple %}
         <figure>
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | default(thumbnail) }}" />
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(200,200) | default(thumbnail) }}" />
             <figcaption id="{{id}}_figcaption">
                 <i class="fas fa-plus-circle fa-3x"></i>
             </figcaption>
@@ -341,7 +342,7 @@
     <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_file"|trans([form.vars.max_filesize|filesize])}}</div>
     {% endif %}
     
-    {% set exts = form.vars.accept|extension %}
+    {% set exts = form.vars.accept|extensions %}
     {% if exts is not empty %}
     <div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>
     {% endif %}

@@ -273,7 +273,6 @@
             <argument type="service" id="base.filesystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
-            <argument type="service" id="service.image" />
         </service>
 
         <!-- Twig declarations -->
