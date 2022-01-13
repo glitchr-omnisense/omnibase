@@ -28,10 +28,10 @@ class QuillType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'highlight-js'  => $this->baseService->getParameterBag("base.vendor.highlight.js"),
-            'highlight-css' => $this->baseService->getParameterBag("base.vendor.highlight.css"),
-            'quill-js'      => $this->baseService->getParameterBag("base.vendor.quill.js"),
-            'quill-css'     => $this->baseService->getParameterBag("base.vendor.quill.css"),
+            'highlight-js'  => $this->baseService->getParameterBag("base.vendor.highlight.javascript"),
+            'highlight-css' => $this->baseService->getParameterBag("base.vendor.highlight.stylesheet"),
+            'quill-js'      => $this->baseService->getParameterBag("base.vendor.quill.javascript"),
+            'quill-css'     => $this->baseService->getParameterBag("base.vendor.quill.stylesheet"),
             'empty_data', null,
 
             'theme' => $this->baseService->getParameterBag("base.vendor.quill.theme"),

@@ -12,8 +12,6 @@ use UnexpectedValueException;
 
 abstract class EnumType extends Type implements SelectInterface
 {
-    public static function getIds(): array { return array_keys(self::getIcons()); }
-
     protected static $icons = [];
     public static function getIcons(): array 
     {

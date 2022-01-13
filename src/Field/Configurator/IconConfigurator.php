@@ -3,6 +3,7 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\IconField;
+use Base\Field\Type\IconType;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
@@ -10,6 +11,13 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class IconConfigurator extends SelectConfigurator
 {
+    protected $iconService;
+    public function __construct(...$args)
+    {
+        $this->iconService = array_pop($args);
+        parent::__construct(...$args);
+    }
+
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return IconField::class === $field->getFieldFqcn();
@@ -23,6 +31,15 @@ class IconConfigurator extends SelectConfigurator
         if( null !== $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME))
             $icon = $propertyAccessor->getValue($entityDto->getInstance(), $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME));
 
+        $provider = $field->getFormTypeOption("provider");
+        $iconProvider = $this->iconService->getProvider($provider);
+        foreach($iconProvider->getAssets() as $asset) {
+
+            $relationship = pathinfo_relationship($asset);
+            $location = $relationship == "javascript" ? "javascripts" : "stylesheets";
+            $this->baseService->addHtmlContent($location, $asset);
+        }
+        
         $field->setCustomOption("iconColor", $icon);
     }
 }

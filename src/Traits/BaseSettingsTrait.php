@@ -3,7 +3,7 @@
 namespace Base\Traits;
 
 use Base\BaseBundle;
-use Base\Entity\Sitemap\Setting;
+use Base\Entity\Layout\Setting;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
 

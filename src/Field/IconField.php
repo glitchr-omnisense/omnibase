@@ -3,6 +3,7 @@
 namespace Base\Field;
 
 use Base\Field\Type\IconType;
+use Base\Model\IconProviderInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
@@ -27,6 +28,12 @@ class IconField extends SelectField implements FieldInterface
     public function setTargetColor(string $fieldName)
     {
         $this->setCustomOption(self::OPTION_TARGET_FIELD_NAME, $fieldName);
+        return $this;
+    }
+
+    public function setProvider(IconProviderInterface|string $objectOrClass) 
+    {
+        $this->setFormTypeOption("provider", is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);
         return $this;
     }
 }

@@ -2,10 +2,7 @@
 
 namespace Base\Model\Icon;
 
-use Base\Model\IconProviderInterface;
-use Symfony\Component\Yaml\Yaml;
-
-class FontAwesome implements IconProviderInterface
+class FontAwesome extends AbstractIconProvider
 {
     public const STYLE_SOLID   = "fas";
     public const STYLE_REGULAR = "far";
@@ -13,17 +10,22 @@ class FontAwesome implements IconProviderInterface
     public const STYLE_DUOTONE = "fad";
     public const STYLE_BRANDS  = "fab";
 
-    public function __construct(string $metadata)
+    public function __construct(string $metadata, string $javascript, string $stylesheet)
     {
-        $this->metadata = $metadata;
+        $this->metadata   = $metadata;
+        $this->javascript = $javascript;
+        $this->stylesheet = $stylesheet;
         $this->getVersion();
     }
 
-    public function load(): array
-    {
-        return self::parse($this->metadata);
-    }
+    public static function getName(): string { return "fa"; }
+    public static function getOptions(): array { return ["class" => "fa-fw"]; }
 
+    public function getAssets(): array
+    {
+        return [$this->javascript, $this->stylesheet];
+    }
+    
     public function supports(string $icon): bool
     {
         $styles = [self::STYLE_SOLID, self::STYLE_REGULAR, self::STYLE_LIGHT, self::STYLE_DUOTONE, self::STYLE_BRANDS];
@@ -32,19 +34,10 @@ class FontAwesome implements IconProviderInterface
         return $isAwesome;
     }
 
-    public function iconify(string $icon, array $attributes = []): string
-    {
-        $class = $attributes["class"] ?? "";
-        $class = trim($class." ".$icon);
-        if($attributes["class"] ?? false) unset($attributes["class"]);
-
-        return "<i ".html_attributes($attributes)." class='".$class."'></i>";
-    }
-
     public function getChoices(string $term = ""): array
     {
         $choices = [];
-        foreach($this->getIcons() as $key => $icon)
+        foreach($this->getEntries() as $key => $icon)
         {
             $label  = $icon["label"];
             $styles = $icon["styles"];
@@ -60,58 +53,11 @@ class FontAwesome implements IconProviderInterface
 
             if(!$termFound) continue;
             foreach ($styles as $style)
-                $choices[mb_ucfirst($style)." Style"][$label] = "fa".$style[0]." fa-".$key;
+                $choices[mb_ucfirst($style)." Style"][$label] = $this->getName()."".$style[0]." ".$this->getName()."-".$key;
 
         }
 
         return $choices;
-    }
-
-    protected static $contents = [];
-    public function getContents() { return $this->contents; }
-    public static function parse(string $metadata): array
-    {
-        if (empty(self::$contents[$metadata])) {
-
-            self::$contents[$metadata] =
-                (str_ends_with($metadata, "yml") ?
-                    Yaml::parse(file_get_contents($metadata)) :
-                (str_ends_with($metadata, "yaml") ?
-                    Yaml::parse(file_get_contents($metadata)) :
-                (str_ends_with($metadata, "json") ?
-                    json_decode(file_get_contents($metadata), true) : [])));
-        }
-
-        return self::$contents[$metadata];
-    }
-
-    /*
-     * Available icons
-     */
-    protected $icons = [];
-    public function getIcons() 
-    { 
-        if(empty(self::$contents[$this->metadata])) self::parse($this->metadata); 
-        return self::$contents[$this->metadata] ?? []; 
-    }
-
-    public function getIcon(string $value = null): string 
-    {
-        if(empty(self::$contents[$this->metadata])) self::parse($this->metadata); 
-        return self::$contents[$this->metadata][$value] ?? "";
-    }
-
-    protected $version;
-    public function getVersion()
-    {
-        if( !empty($this->version) )
-            return $this->version;
-
-        if ( !preg_match('/.*\/([0-9.]*)\/metadata/', $this->metadata ?? "", $matches) )
-            return "unk.";
-
-        $this->version = $matches[1];
-        return $this->version;
     }
 
     public function getStyle(string $name)

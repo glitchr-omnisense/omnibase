@@ -42,7 +42,7 @@ thread:
     singular: "j'aime"
     plural: "j'aime"
 
-sitemap:
+layout:
   widget:
     singular: "personnalisation"
     plural: "personnalisations"

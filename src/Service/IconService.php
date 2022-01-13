@@ -6,12 +6,25 @@ use Base\Model\IconProviderInterface;
 
 class IconService
 {
-    public function __construct() {}
-
     protected $providers = [];
+    public function getProviders() { return $this->providers; }
+    public function getProvider(string $idOrClass): ?IconProviderInterface 
+    {
+        if(class_exists($idOrClass))
+            return $this->providers[$idOrClass] ?? null;
+
+        foreach($this->providers as $provider) {
+
+            if ($provider->supports($idOrClass))
+                return $provider;
+        }
+
+        return null;
+    }
+
     public function addProvider(IconProviderInterface $provider): self
     {
-        $this->providers[] = $provider;
+        $this->providers[get_class($provider)] = $provider;
         return $this;
     }
 

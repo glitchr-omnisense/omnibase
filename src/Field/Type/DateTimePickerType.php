@@ -33,9 +33,9 @@ class DateTimePickerType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'moment-js'    => $this->baseService->getParameterBag("base.vendor.moment.js"),
-            'datetimepicker-js'    => $this->baseService->getParameterBag("base.vendor.datetimepicker.js"),
-            'datetimepicker-css'   => $this->baseService->getParameterBag("base.vendor.datetimepicker.css"),
+            'moment-js'    => $this->baseService->getParameterBag("base.vendor.moment.javascript"),
+            'datetimepicker-js'    => $this->baseService->getParameterBag("base.vendor.datetimepicker.javascript"),
+            'datetimepicker-css'   => $this->baseService->getParameterBag("base.vendor.datetimepicker.stylesheet"),
 
             // PHP Datetime format:
             // This format is replacing the shitty HTML5_FORMAT :-)

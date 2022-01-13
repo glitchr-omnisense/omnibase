@@ -117,22 +117,37 @@ class ImageService implements ImageServiceInterface
 
             if(!$this->filesystem->getOperator()->fileExists($path)) {
 
-                $this->filesystem->mkdir(dirname($path));
-
                 /**
                  * @var ImageInterface
                  */
-                $image = $this->imagine->open($pathSource);
-                foreach($filters+[$lastFilter] as $filter)
-                    $image = $filter->apply($image);
+                try {
 
-                $content = $image->get(self::extension($lastFilter->getPath()));
-                $content = $this->filesystem->write($path, $content);
+                    $image = $this->imagine->open($pathSource."xx");
+                    foreach($filters+[$lastFilter] as $filter)
+                        $image = $filter->apply($image);
+
+                    $this->filesystem->mkdir(dirname($path));
+
+                    $content = $image->get(self::extension($lastFilter->getPath()));
+                    $content = $this->filesystem->write($path, $content);
+
+                } catch (\Exception $e) { 
+
+                    $path = $pathSource;
+                }
             }
         }
 
-        $content = $this->filesystem->read($path);
-        $mimetype = self::mimetype($this->filesystem->getPathPrefixer()->prefixPath($path));
+        if($path == $pathSource) {
+
+            $content = file_get_contents($pathSource); 
+            $mimetype = self::mimetype($path);
+            
+        } else {
+
+            $content = $this->filesystem->read($path);
+            $mimetype = self::mimetype($this->filesystem->getPathPrefixer()->prefixPath($path));
+        }
 
         $response = new Response();
         $response->setContent($content);
@@ -154,7 +169,7 @@ class ImageService implements ImageServiceInterface
             return self::$mimeTypes->guessMimeType($fileOrArray);
 
         $imagetype = exif_imagetype($fileOrArray);
-        return $imagetype ? image_type_to_mime_type($imagetype) :null;
+        return $imagetype ? image_type_to_mime_type($imagetype) : self::$mimeTypes->guessMimeType($fileOrArray);
     }
 
     public static function extension(null|string|array $mimetypeOrFileOrArray):null|string|array 
@@ -166,7 +181,7 @@ class ImageService implements ImageServiceInterface
         if(file_exists($mimetypeOrFileOrArray)) {
 
             $imagetype = exif_imagetype($mimetypeOrFileOrArray);
-            return $imagetype ? substr(image_type_to_extension($imagetype), 1) :null;
+            return $imagetype ? substr(image_type_to_extension($imagetype), 1) : null;
         }
 
         return self::$mimeTypes->getExtensions($mimetypeOrFileOrArray)[0] ?? null;

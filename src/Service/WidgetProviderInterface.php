@@ -2,8 +2,8 @@
 
 namespace Base\Service;
 
-use Base\Entity\Sitemap\Widget;
-use Base\Entity\Sitemap\Widget\Slot;
+use Base\Entity\Layout\Widget;
+use Base\Entity\Layout\Widget\Slot;
 
 interface WidgetProviderInterface
 {

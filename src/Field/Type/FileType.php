@@ -56,19 +56,19 @@ class FileType extends AbstractType implements DataMapperInterface
             'class'        => null,
 
             'dropzone'     => [],
-            'dropzone-js'  => $this->baseService->getParameterBag("base.vendor.dropzone.js"),
-            'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.css"),
+            'dropzone-js'  => $this->baseService->getParameterBag("base.vendor.dropzone.javascript"),
+            'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.stylesheet"),
 
             'allow_delete' => true,
             'multiple'     => false,
             'href' => null,
-            
+
             'sortable'     => true,
-            'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.js"),
+            'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
-            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.js"),
-            'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.css"),
+            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
+            'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.stylesheet"),
 
             'thumbnailWidth'     => null,
             'thumbnailHeight'    => 120,
@@ -87,33 +87,35 @@ class FileType extends AbstractType implements DataMapperInterface
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $allowDelete = $options["allow_delete"];
-        $isDropzone  = $options["dropzone"];
-        $multiple    = $options["multiple"];
-        $required    = $options["required"];
+        $builder->setDataMapper($this);
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
-        $builder->add('file', HiddenType::class);
+            $form = $event->getForm();
+            $data = $event->getData();
 
-        $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $builder->getName());
-        if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
-            $maxFilesize = min($maxFilesize, $options["max_filesize"]);
+            $form->add('file', HiddenType::class, ["required" => $options["required"]]);
 
-        $constraints = [new FileSize(["max" => $maxFilesize])];
-        if($options["mime_types"])
-            $constraints[] = new FileMimeType(["type" => $options["mime_types"]]);
+            $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+            if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
+                $maxFilesize = min($maxFilesize, $options["max_filesize"]);
 
-        if(!$isDropzone || !$multiple)
-            $builder->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
-                "required" => false,
-                "multiple" => $multiple,
-                "constraints" => $constraints
-        ]);
+            $constraints = [new FileSize(["max" => $maxFilesize])];
+            if($options["mime_types"])
+                $constraints[] = new FileMimeType(["type" => $options["mime_types"]]);
 
-        if($allowDelete)
-            $builder->add('delete', CheckboxType::class, ['required' => false]);
+            if(!$options["dropzone"] || !$options["multiple"])
+                $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+                    "required" => $options["required"] && ($data === null),
+                    "multiple" => $options["multiple"],
+                    "constraints" => $constraints
+            ]);
+
+            if($options["allow_delete"])
+                $form->add('delete', CheckboxType::class, ['required' => false]);
+        });
 
         // Process the uploaded file on submission
-        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($options) {
+        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
 
             $data = $event->getData();
             if(is_string($data)) {
@@ -131,8 +133,6 @@ class FileType extends AbstractType implements DataMapperInterface
             if(empty($data)) $data = null;
             $event->setData($data);
         });
-
-        $builder->setDataMapper($this);
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

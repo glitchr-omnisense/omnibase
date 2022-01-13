@@ -283,8 +283,23 @@ namespace {
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
     function mb_ucfirst(string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding); }
     function mb_ucwords(string $str, ?string $encoding = null): string { return mb_convert_case($str, MB_CASE_TITLE, $encoding); }
-    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => $k."=\"".$attributes[$k]."\"", array_keys($attributes)))); }
+    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".$attributes[$k]."\"", array_keys($attributes)))); }
     function browser_supports_webp() { return strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false; }
+
+    function pathinfo_relationship(string $path)
+    {
+        $extension = pathinfo(parse_url($path, PHP_URL_PATH), PATHINFO_EXTENSION);
+        if(empty($extension)) return null;
+        
+        switch($extension) {
+
+            case "ico": return "icon";
+            case "css": return "stylesheet";
+            case "js": return "javascript";
+
+            default: return "preload";
+        }
+    }
 
     function is_associative(array $arr): bool
     {
@@ -480,6 +495,18 @@ namespace {
         if($position === false) return false;
 
         return count($haystack) - $position;
+    }
+
+    function array_search_recursive(mixed $needle, array $haystack):array|false {
+
+        foreach ($haystack as $key => $value) {
+
+            if($value === $needle) return [$key];
+            if( is_array($value) && ($current = array_search_recursive($needle, $value)) )
+                return  array_merge([$key], $current);
+        }
+
+        return false;
     }
 
     function array_keys_remove  (array $array, ...$keys  ) { return array_filter($array, fn($k) => !in_array($k, $keys), ARRAY_FILTER_USE_KEY); }

@@ -41,7 +41,7 @@ thread:
     singular: "like"
     plural: "likes"
 
-sitemap:
+layout:
   widget:
     singular: "widget"
     plural: "widgets"

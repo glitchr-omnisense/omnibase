@@ -3,21 +3,15 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Entity\Sitemap\Attribute;
-use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
-use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttributeInterface;
-use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttributeTranslation;
-use Base\Entity\Sitemap\AttributeTranslation;
+use Base\Entity\Layout\Attribute;
+use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
+use Base\Entity\Layout\AttributeTranslation;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use InvalidArgumentException;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -102,7 +96,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form->add("choice", SelectType::class, [
                 "class"               => $options["class"],
                 "autocomplete_fields" => ["code" => $options["filter_code"]], 
+
                 "multiple"            => $options["multiple"],
+                
                 "sortable"            => $options["sortable"],
                 "dropdownCssClass"    => "field-attribute-dropdown",
                 "containerCssClass"   => "field-attribute-selection"

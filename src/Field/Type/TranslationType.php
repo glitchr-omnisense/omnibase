@@ -76,7 +76,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         ]);
 
         $resolver->setNormalizer('required_locales', function (Options $options, $requiredLocales) {
-            return array_intersect($requiredLocales, $options['available_locales']);
+           return array_intersect($requiredLocales, $options['available_locales']);
         });
 
         $resolver->setNormalizer('only_fields', function (Options $options, $fields) {
@@ -119,6 +119,8 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                 if($locale == $defaultLocale || in_array($locale, $options['required_locales'], true))
                     $entityOptions["required"] = true;
+                else if(!empty($options['required_locales'])) // /!\ Telling required locales explicitely makes all subfields optionals
+                    $entityOptions["required"] = in_array($locale, $options['required_locales'], true);
 
                 if($options["multiple"]) {
 

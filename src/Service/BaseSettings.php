@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Entity\Sitemap\Setting;
+use Base\Entity\Layout\Setting;
 use Base\Traits\BaseSettingsTrait;
 use Symfony\Component\Asset\Packages;
 use Symfony\Contracts\Cache\CacheInterface;

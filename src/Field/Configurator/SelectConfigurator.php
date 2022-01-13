@@ -6,6 +6,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\SelectField;
 use Base\Field\Type\SelectType;
+use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,11 +22,12 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator, BaseService $baseService)
     {
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->baseService = $baseService;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool

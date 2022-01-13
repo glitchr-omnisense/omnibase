@@ -32,7 +32,7 @@ final class ColorType extends AbstractType
     {
         $resolver->setDefaults([
             'jscolor'     => [],
-            'jscolor-js'  => $this->baseService->getParameterBag("base.vendor.jscolor.js"),
+            'jscolor-js'  => $this->baseService->getParameterBag("base.vendor.jscolor.javascript"),
             'is_nullable' => true
         ]);
     }

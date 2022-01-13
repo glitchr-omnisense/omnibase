@@ -23,8 +23,8 @@ class ImageType extends FileType
             'thumbnail'   => "bundles/base/images.svg",
 
             'cropper'     => null,
-            'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.js"),
-            'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.css"),
+            'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
+            'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
             
             'mime_types'  => ["image/*"]
         ]);

@@ -307,7 +307,7 @@ class BaseService implements RuntimeExtensionInterface
             return $this;
         }
 
-        $relationship = $this->getFileRelationship($contentOrArrayOrFile);
+        $relationship = pathinfo_relationship($contentOrArrayOrFile);
         if(!$relationship) {
 
             $content = $contentOrArrayOrFile;
@@ -316,21 +316,22 @@ class BaseService implements RuntimeExtensionInterface
 
             // Compute options
             $relationship = $options["rel"] ?? $relationship;
-            unset($options["rel"]);
+            array_values_remove($options, "rel");
 
-            $attributes = "";
-            foreach($options as $attribute => $value)
-                $attributes .= " ".trim($attribute)."='".$value."'";
+            $attributes = html_attributes($options);
 
             // Convert into html tag
             switch($relationship) {
 
                 case "javascript":
-                    $content = "<script src='".$this->getAsset($contentOrArrayOrFile)."' ".trim($attributes)."></script>";
+                    $content = "<script src='".$this->getAsset($contentOrArrayOrFile)."' ".$attributes."></script>";
                     break;
 
+                case "icon":
+                case "preload":
+                case "stylesheet":
                 default:
-                    $content = "<link rel='".$relationship."' href='".$this->getAsset($contentOrArrayOrFile)."' ".trim($attributes).">";
+                    $content = "<link rel='".$relationship."' href='".$this->getAsset($contentOrArrayOrFile)."' ".$attributes.">";
                     break;
             }
         }
@@ -341,27 +342,6 @@ class BaseService implements RuntimeExtensionInterface
         $this->htmlContent[$location][] = $content;
 
         return $this;
-    }
-
-    public function getFileRelationship(string $file)
-    {
-        $extension = pathinfo(parse_url($file, PHP_URL_PATH), PATHINFO_EXTENSION);
-        if(empty($extension)) return null;
-        
-        switch($extension)
-        {
-            case "ico": 
-                return "icon";
-            
-            case "css": 
-                return "stylesheet";
-
-            case "js": 
-                return "javascript";
-
-            default:
-                return "preload";
-        }
     }
 
 

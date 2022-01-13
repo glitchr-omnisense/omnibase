@@ -2,10 +2,10 @@
 
 namespace Base\Service;
 
-use Base\Entity\Sitemap\Widget;
-use Base\Entity\Sitemap\Widget\Slot;
-use Base\Repository\Sitemap\Widget\SlotRepository as WidgetSlotRepository;
-use Base\Repository\Sitemap\WidgetRepository;
+use Base\Entity\Layout\Widget;
+use Base\Entity\Layout\Widget\Slot;
+use Base\Repository\Layout\Widget\SlotRepository as WidgetSlotRepository;
+use Base\Repository\Layout\WidgetRepository;
 
 class WidgetProvider implements WidgetProviderInterface
 {

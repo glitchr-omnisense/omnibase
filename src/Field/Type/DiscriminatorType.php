@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Controller\Dashboard\AbstractDashboardController;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Entity\Sitemap\AttributeInterface;
+use Base\Entity\Layout\AttributeInterface;
 use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Model\IconizeInterface;

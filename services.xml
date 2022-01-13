@@ -7,11 +7,7 @@
 
         <defaults public="false" />
 
-        <!--
-
-            Base features
-
-            -->
+        <!-- Base features -->
         <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
         <service id="Base\Form\FormProxy" public="true" />
 
@@ -36,7 +32,7 @@
             <argument type="service" id="base.service.image" />
         </service>
 
-        <service id="Base\Controller\SelectController">
+        <service id="Base\Controller\Field\SelectController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="cache.adapter" />
@@ -108,8 +104,8 @@
         </service>
 
         <service id="Base\Service\WidgetProvider" public="true">
-            <argument type="service" id="App\Repository\Sitemap\WidgetRepository" />
-            <argument type="service" id="App\Repository\Sitemap\Widget\SlotRepository" />
+            <argument type="service" id="App\Repository\Layout\WidgetRepository" />
+            <argument type="service" id="App\Repository\Layout\Widget\SlotRepository" />
         </service>
 
         <service id="Base\Form\Extension\FormTypeFlowExtension" >
@@ -124,10 +120,7 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <!--
-            Commands
-        -->
-
+        <!-- Commands -->
         <service id="Base\Command\MappingCommand">
             <tag name="console.command" />
         </service>
@@ -154,9 +147,7 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <!--
-            Controllers
-        -->
+        <!-- Controllers -->
         <service id="Base\Controller\ErrorController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
@@ -172,28 +163,20 @@
             <argument type="service" id="App\Repository\User\TokenRepository" />
             <argument type="service" id="base.service" />
         </service>
-        <service id="Base\Controller\MaintenanceController">
+        <service id="Base\Controller\Client\MaintenanceController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="base.service" />
         </service>
 
-        <!--
-
-            Type declaration
-
-            -->
+        <!-- Type declaration -->
         <service id="Base\Form\FormProcessor">
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="request_stack" />
         </service>
 
-        <!--
-
-            Subscriber
-
-            -->
+        <!-- Subscriber -->
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.locale_provider" />
@@ -246,10 +229,13 @@
         <service id="Base\Model\Icon\FontAwesome">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
+            <bind key="$javascript">%base.vendor.font_awesome.javascript%</bind>
+            <bind key="$stylesheet">%base.vendor.font_awesome.stylesheet%</bind>
         </service>
         <service id="Base\Model\Icon\BootstrapTwitter">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
+            <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
         </service>
 
 
@@ -433,11 +419,11 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Form\Type\Sitemap\SettingListType">
+        <service id="Base\Form\Type\Layout\SettingListType">
             <tag name="form.type" />
             <argument type="service" id="base.settings" />
         </service>
-        <service id="Base\Form\Type\Sitemap\WidgetListType">
+        <service id="Base\Form\Type\Layout\WidgetListType">
             <tag name="form.type" />
             <argument type="service" id="base.widget_provider" />
         </service>
@@ -497,7 +483,7 @@
         <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\SlugType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         
-        <service id="Base\Controller\DropzoneController">
+        <service id="Base\Controller\Field\DropzoneController">
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
@@ -507,12 +493,12 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Controller\PageController">
+        <service id="Base\Controller\Client\Layout\PageController">
             <tag name="controller.service_arguments" />
             <call method="setContainer">
                 <argument type="service" id="service_container" />
             </call>
-            <argument type="service" id="App\Repository\Sitemap\Widget\PageRepository" />
+            <argument type="service" id="App\Repository\Layout\Widget\PageRepository" />
         </service>
 
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType">
@@ -609,14 +595,19 @@
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="base.service" />
         </service>
+
         <service id="Base\Field\Configurator\RoleConfigurator"          parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\StateConfigurator"         parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\CountryConfigurator"       parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\IconConfigurator"   parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DiscriminatorConfigurator" parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\AttributeConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
-
+        <service id="Base\Field\Configurator\IconConfigurator"          parent="Base\Field\Configurator\SelectConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.service.icon" />
+        </service>
+        
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Dashboard\AbstractDashboardController">
             <tag name="controller.service_arguments" />
@@ -661,26 +652,26 @@
         <service id="Base\Controller\Dashboard\Crud\User\PermissionCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController"      parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /> </service>
         
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\SettingCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\SettingCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\SlotCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\MenuCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\AttachmentCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\SlotCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\MenuCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\AttachmentCrudController" parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Sitemap\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /></service>
         
     </services>
 </container>

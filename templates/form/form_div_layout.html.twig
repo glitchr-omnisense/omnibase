@@ -329,7 +329,7 @@
 
         {{ form_widget(form.file, { attr: form.file.vars.attr, value: value }) }}
         {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept|join(',') }) }) }}
-    
+
         {% if allow_delete %}
         <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
             <span style="cursor:pointer;">&#x2715;</span>

@@ -15,12 +15,12 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use App\Entity\Thread\Tag;
 
-use App\Entity\Sitemap\Setting;
-use App\Entity\Sitemap\Widget;
+use App\Entity\Layout\Setting;
+use App\Entity\Layout\Widget;
 use App\Entity\User\Notification;
-use App\Entity\Sitemap\Widget\Attachment;
-use App\Entity\Sitemap\Widget\Menu;
-use App\Entity\Sitemap\Widget\Page;
+use App\Entity\Layout\Widget\Attachment;
+use App\Entity\Layout\Widget\Menu;
+use App\Entity\Layout\Widget\Page;
 
 use App\Controller\Dashboard\Crud\UserCrudController;
 use Base\Config\WidgetItem;
@@ -30,8 +30,8 @@ use Base\Field\Type\RoleType;
 use App\Enum\UserRole;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
-use Base\Form\Type\Sitemap\SettingListType;
-use Base\Form\Type\Sitemap\WidgetListType;
+use Base\Form\Type\Layout\SettingListType;
+use Base\Form\Type\Layout\WidgetListType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -40,9 +40,9 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
-use Base\Entity\Sitemap\Attribute\Abstract\AbstractAttribute;
-use Base\Entity\Sitemap\Widget\Link;
-use Base\Entity\Sitemap\Widget\Slot;
+use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
+use Base\Entity\Layout\Widget\Link;
+use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -418,13 +418,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ]);
         }
 
-        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('SITEMAP', null, 1));
+        $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
         if ($this->isGranted('ROLE_SUPERADMIN')) {
 
-            $section = $this->getSectionWidgetItem($widgets, "SITEMAP");
+            $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
             if($section) $section->setWidth(2);
 
-            $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+            $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
                 WidgetItem::linkToCrud(Setting::class  ),
                 WidgetItem::linkToCrud(Widget::class   ),
                 WidgetItem::linkToCrud(Slot::class     ),
@@ -432,7 +432,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ]);
         }
 
-        $widgets = $this->addWidgetItem($widgets, "SITEMAP", [
+        $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
             WidgetItem::linkToCrud(Menu::class      ),
             WidgetItem::linkToCrud(Attachment::class),
             WidgetItem::linkToCrud(Page::class      ),
