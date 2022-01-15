@@ -11,13 +11,13 @@ use Base\Annotations\AbstractAnnotation;
  * @Annotation
  * @Target({"METHOD"})
  * @Attributes({
- * 
+ *   @Attribute("priority", type = "float"),
  * })
  */
 class Sitemap extends AbstractAnnotation
 {
-    protected static array $loc = [];
-    public static function getStaticLoc() { return self::$loc; }
+    protected static array $urls = [];
+    public static function getUrls() { return self::$urls; }
 
     public function __construct(array $data)
     {

@@ -17,6 +17,12 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
+        <service id="Base\Component\HttpFoundation\Referrer">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="router.default" />
+            <argument type="service" id="twig.extension.assets" />
+        </service>
+
         <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
         <service id="Base\Service\ParameterBag" parent="parameter_bag" public="true" />
 
@@ -24,6 +30,12 @@
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Controller\LocaleController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="locale_provider" />
         </service>
 
         <service id="Base\Controller\ImageController">
@@ -50,7 +62,7 @@
         <service id="Base\Service\BaseSettings" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
         </service>
@@ -63,7 +75,7 @@
             <argument type="service" id="cache.adapter" />
             <argument type="service" id="base.parameter_bag" />
             <argument type="service" id="translator" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.settings" />
         </service>
 
@@ -81,7 +93,7 @@
             <argument type="service" id="base.parameter_bag" />
             <argument type="service" id="base.notifier" />
             <argument type="service" id="base.form.factory" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.settings" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
@@ -155,6 +167,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Controller\SitemapController">
+            <tag name="controller.service_arguments" />
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
+        </service>
+
         <service id="Base\Controller\SecurityController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
@@ -179,7 +196,7 @@
         <!-- Subscriber -->
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="translator" />
         </service>
 
@@ -198,7 +215,7 @@
         </service>
         <service id="Base\DatabaseSubscriber\TranslatableSubscriber">
             <tag name="doctrine.event_subscriber" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
         </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
@@ -431,7 +448,7 @@
         <service id="Base\Field\Type\TranslationType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -442,7 +459,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -566,7 +583,7 @@
         <service id="Base\Field\Configurator\TranslationConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.locale_provider" />
+            <argument type="service" id="locale_provider" />
         </service>
 
         <service id="Base\Field\Configurator\BooleanConfigurator">

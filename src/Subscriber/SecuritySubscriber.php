@@ -76,6 +76,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
         }
+
+        $this->exceptions = [
+            "/^locale_/", 
+            "/^ux_/", 
+            "/^maintenance(?:.*)$/", 
+            "/^security(?:.*)$/", 
+            "/^(?:app|base)_user(?:.*)$/"
+        ];
     }
 
     public static function getSubscribedEvents(): array
@@ -242,7 +250,6 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $event->stopPropagation();
         }
 
-        $exceptions = ["/^ux_/", "/^maintenance(?:.*)$/", "/^security(?:.*)$/", "/^(?:app|base)_user(?:.*)$/"];
         if (! $user->isVerified()) {
 
             $callbackFn = function () use ($user) {
@@ -263,13 +270,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             $response    = $event->getResponse();
             $redirection = $response && $response->getStatusCode() == 302;
             if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
-            else $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
+            else $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $this->exceptions, "callback" => $callbackFn]);
 
         } else {
 
             if (! $user->isApproved()) {
 
-                $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
+                $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $this->exceptions, "callback" => function() {
 
                     $notification = new Notification("login.pending");
                     $notification->send("warning");

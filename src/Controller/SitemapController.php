@@ -2,6 +2,7 @@
 
 namespace Base\Controller;
 
+use Base\Annotations\Annotation\Sitemap;
 use Base\Component\HttpFoundation\XmlResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -21,15 +22,16 @@ class SitemapController extends AbstractController
     {
         $urls = [];
         $hostname = $request->getSchemeAndHttpHost();
- 
+        dump(Sitemap::getUrls());
+
         // add static urls
-        $urls[] = ['loc' => $this->generateUrl('home')];
-        $urls[] = ['loc' => $this->generateUrl('contact_us')];
-        $urls[] = ['loc' => $this->generateUrl('privacy_policy')];
+        // $urls[] = ['loc' => $this->generateUrl('app_home')];
+        // $urls[] = ['loc' => $this->generateUrl('app_contact_us')];
+        // $urls[] = ['loc' => $this->generateUrl('app_privacy_policy')];
          
         // add static urls with optional tags
-        $urls[] = ['loc' => $this->generateUrl('fos_user_security_login'), 'changefreq' => 'monthly', 'priority' => '1.0'];
-        $urls[] = ['loc' => $this->generateUrl('cookie_policy'), 'lastmod' => '2018-01-01'];
+        // $urls[] = ['loc' => $this->generateUrl('fos_user_security_login'), 'changefreq' => 'monthly', 'priority' => '1.0'];
+        // $urls[] = ['loc' => $this->generateUrl('cookie_policy'), 'lastmod' => '2018-01-01'];
          
         // // add dynamic urls, like blog posts from your DB
         // foreach ($em->getRepository('BlogBundle:post')->findAll() as $post) {
@@ -54,7 +56,7 @@ class SitemapController extends AbstractController
        
  
         // return response in XML format
-        return new XmlResponse($this->renderView('sitemap/sitemap.html.twig', [
+        return new XmlResponse($this->renderView('sitemap.xml.twig', [
             'urls' => $urls, 
             'hostname' => $hostname
         ]));

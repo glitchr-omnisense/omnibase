@@ -8,11 +8,11 @@
 
         <service id="base.service" alias="Base\Service\BaseService" />
         <service id="base.service.icon" alias="Base\Service\IconService" />
+
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageInterface" alias="base.service.image"/>
 
         <service id="base.filesystem" alias="Base\Service\Filesystem" />
-
         <service id="base.settings" alias="Base\Service\BaseSettings" />
 
         <service id="base.notifier" alias="Base\Notifier\Notifier" />
@@ -21,14 +21,15 @@
         <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
         <service id="base.parameter_bag" alias="Base\Service\ParameterBag" />
         <service id="Base\Service\ParameterBagInterface" alias="base.parameter_bag"/>
-        <service id="base.locale_provider" alias="Base\Service\LocaleProvider" />
-        <service id="Base\Service\LocaleProviderInterface" alias="base.locale_provider"/>
         <service id="base.widget_provider" alias="Base\Service\WidgetProvider" />
         <service id="Base\Service\WidgetProviderInterface" alias="base.widget_provider"/>
         <service id="base.paginator" alias="Base\Service\Paginator" />
         <service id="Base\Service\PaginatorInterface" alias="base.paginator"/>
         <service id="base.breadgrinder" alias="Base\Service\Breadgrinder" />
         <service id="Base\Service\BreadgrinderInterface" alias="base.breadgrinder"/>
+
+        <service id="locale_provider" alias="Base\Service\LocaleProvider" />
+        <service id="Base\Service\LocaleProviderInterface" alias="locale_provider"/>
 
         <service id="base.database.naming_strategy" alias="Base\Database\NamingStrategy" />
         <service id="base.database.metadata_factory" alias="Doctrine\Persistence\Mapping\ClassMetadataFactory" />

@@ -413,7 +413,8 @@ class BaseService implements RuntimeExtensionInterface
             catch (RouteNotFoundException $e) { return $route; }
         }
 
-        return ( ($request = $this->getRequest()) ? self::$router->generate($request->get('_route')) : null);
+        $request = $this->getRequest();
+        return $request ? self::$router->generate($request->get('_route')) : null;
     }
 
     public function getCurrentRoute(): ?string {

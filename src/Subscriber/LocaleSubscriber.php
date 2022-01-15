@@ -34,7 +34,7 @@ class LocaleSubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        $locale = $event->getRequest()->getSession()->get("locale") 
+        $locale = $event->getRequest()->getSession()->get("_locale") 
                ?? User::getCookie("locale")
                ?? $this->localeProvider->getLocale();
 
