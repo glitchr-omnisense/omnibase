@@ -17,7 +17,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Component\HttpFoundation\Referrer">
+        <service id="Base\Component\HttpFoundation\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router.default" />
             <argument type="service" id="twig.extension.assets" />
@@ -427,6 +427,7 @@
             <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="referrer" />
         </service>
 
         <service id="Base\EntitySubscriber\UserSubscriber">

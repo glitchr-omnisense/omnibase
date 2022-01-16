@@ -6,6 +6,8 @@
 
         <defaults public="true" />
 
+        <service id="referrer" alias="Base\Component\HttpFoundation\Referrer" />
+
         <service id="base.service" alias="Base\Service\BaseService" />
         <service id="base.service.icon" alias="Base\Service\IconService" />
 

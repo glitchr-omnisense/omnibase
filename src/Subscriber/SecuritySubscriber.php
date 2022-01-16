@@ -2,6 +2,7 @@
 
 namespace Base\Subscriber;
 
+use Base\Component\HttpFoundation\Referrer;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Base\Entity\User;
@@ -61,14 +62,16 @@ class SecuritySubscriber implements EventSubscriberInterface
         TokenStorageInterface $tokenStorage,
         ServiceLocator $dispatcherLocator,
         TranslatorInterface $translator,
-        BaseService $baseService) {
+        BaseService $baseService,
+        Referrer $referrer) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
         $this->entityManager = $entityManager;
         $this->baseService = $baseService;
-    
+        $this->referrer = $referrer;
+        
         foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
             $dispatcher = $dispatcherLocator->get($dispatcherId);
@@ -92,7 +95,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onRefererRequest', 2], ['onKernelRequest', 1]],
+            RequestEvent::class    => [['onReferrerRequest', 2], ['onKernelRequest', 1]],
             ResponseEvent::class   => ['onKernelResponse'],
             TerminateEvent::class  => ['onKernelTerminate'],
             ExceptionEvent::class  => ['onKernelException', -1024],
@@ -189,20 +192,13 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
 
-    public function onRefererRequest(RequestEvent $event) 
+    public function onReferrerRequest(RequestEvent $event) 
     {
         if(!$event->isMainRequest()) return;
-        if($this->baseService->isProfiler()) return;
+        if($this->baseService->isProfiler()) return null;
 
-        $targetPath = $event->getRequest()->get("referer");
-        if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_target_path');
-        if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.main.target_path');
-        if(!$targetPath) $targetPath = $event->getRequest()->getSession()->get('_security.account.target_path');
-    
-        $targetRoute = $this->baseService->getRoute($event->getRequest()->request->get("referer"));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_target_path'));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_security.main.target_path'));
-        if(!$targetRoute) $targetRoute = $this->baseService->getRoute($event->getRequest()->getSession()->get('_security.account.target_path'));
+        $targetPath = strval($this->referrer);
+        $targetRoute = $this->baseService->getRoute($this->referrer);
 
         $event->getRequest()->getSession()->remove('_security.main.target_path');
         $event->getRequest()->getSession()->remove('_security.account.target_path');

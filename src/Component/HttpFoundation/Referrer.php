@@ -23,11 +23,11 @@ class Referrer
         $this->assetExtension = $assetExtension;
     }
 
-    public function getRouteName(): string
+    public function getRoute(?string $path = null): string
     {
-        $uri = strval($this);
-
-        try { $routeMatch = $this->router->match($uri); }
+        if($path === null) return "";
+        
+        try { $routeMatch = $this->router->match($path); }
         catch (ResourceNotFoundException $e) { return ''; }
 
         $route = $routeMatch['_route'] ?? "";
@@ -39,8 +39,32 @@ class Referrer
         $request = $this->requestStack->getMainRequest();
         if (null === $request) return "";
 
-        $uri = (string) $request->headers->get('referer'); // Yes, with the legendary misspelling.
-        return empty($uri) ? $this->assetExtension->getAssetUrl("") : $uri;
-    }
+        // Default referrer
+        $targetPath = $request->headers->get("referer"); // Yes, with the legendary misspelling.
+        $targetRoute = $this->getRoute($targetPath);
 
+        // Form target path fallback
+        if(!$targetRoute) {
+            $targetPath = $request->getSession()->get('_target_path');
+            $targetRoute = $this->getRoute($targetPath);
+        }
+
+        // Form security target path fallbacks
+        if(!$targetRoute) {
+            $targetPath = $request->getSession()->get('_security.main.target_path');
+            $targetRoute = $this->getRoute($targetPath);
+        }
+
+        if(!$targetRoute) {
+            $targetPath = $request->getSession()->get('_security.account.target_path');
+            $targetRoute = $this->getRoute($targetPath);
+        }
+
+        if(!$targetRoute) {
+            $targetPath = $this->assetExtension->getAssetUrl("");
+            $targetRoute = $this->getRoute($targetPath);
+        }
+
+        return $targetPath;
+    }
 }
