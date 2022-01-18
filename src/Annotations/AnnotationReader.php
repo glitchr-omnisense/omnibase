@@ -7,16 +7,17 @@ use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
 use Base\Annotations\AbstractAnnotation;
+use Base\Annotations\Event\AnnotationEvent;
 use Base\Service\Filesystem;
 use Base\Traits\BaseTrait;
 use Exception;
 
 use Base\Traits\SingletonTrait;
-use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -40,7 +41,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, Filesystem $filesystem, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
+    public function __construct(EventDispatcherInterface $eventDispatcher, EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, Filesystem $filesystem, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -70,10 +71,11 @@ class AnnotationReader
         $this->cachePool['methodAnnotations']   = $this->cache->getItem($cacheName . ".methodAnnotations");
         $this->cachePool['propertyAnnotations'] = $this->cache->getItem($cacheName . ".propertyAnnotations");
 
-        $this->entityManager = $entityManager;
-        $this->requestStack  = $requestStack;
-        $this->tokenStorage  = $tokenStorage;
-        $this->filesystem    = $filesystem;
+        $this->entityManager   = $entityManager;
+        $this->requestStack    = $requestStack;
+        $this->tokenStorage    = $tokenStorage;
+        $this->filesystem      = $filesystem;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**

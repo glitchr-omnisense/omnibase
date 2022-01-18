@@ -9,6 +9,14 @@ paginator:
     last: "Dernière page"
     page: "Page {0}"
 
+locale:
+    lang:
+        singular: Langue
+        plural: Langues
+    country:
+        singular: Pays
+        plural: Pays
+
 dashboard:
     title: "Administration"
 

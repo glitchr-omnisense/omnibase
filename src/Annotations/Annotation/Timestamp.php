@@ -31,8 +31,8 @@ class Timestamp extends AbstractAnnotation
      */
     private $value;
 
-    public function __construct( array $data ) {
-
+    public function __construct( array $data )
+    {
         $this->context = array_map("mb_strtolower", $data['on']);
         $this->fields = $data['fields'] ?? [];
         $this->value = $data['value'] ?? "";
@@ -54,7 +54,7 @@ class Timestamp extends AbstractAnnotation
         return $this->value;
     }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if(!empty($this->fields) && !in_array($targetValue, $this->fields)) return false;
 

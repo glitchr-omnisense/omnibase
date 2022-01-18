@@ -160,6 +160,7 @@ class ClassMetadataManipulator
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "class" => get_class($setType)];
         }
         
+        $fields = array_map(fn($f) => is_array($f) ? $f : ["form_type" => $f], $fields);
         foreach($fields as $fieldName => $field) {
 
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName]))

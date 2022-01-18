@@ -22,11 +22,11 @@ final class BreadgrinderTwigExtension extends AbstractExtension
         ];
     }
 
-    public function renderBreadcrumb(string $name, array $parameters = []): ?string
+    public function renderBreadcrumb(string $name, array $options = []): ?string
     {
-        $breadcrumb = $this->breadgrinder->get($name);
+        $breadcrumb = $this->breadgrinder->grind($name, $options);
         if($breadcrumb === null) 
-            throw new \Exception("Breadcrumb \"$name\" not found in grinder machine.");
+            throw new \Exception("Breadcrumb \"$name\" not found in the grinder machine.");
 
         return $this->twig->render($breadcrumb->getTemplate(), ["breadcrumb" => $breadcrumb]);
     }

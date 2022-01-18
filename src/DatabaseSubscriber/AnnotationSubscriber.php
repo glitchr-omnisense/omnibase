@@ -24,6 +24,7 @@ class AnnotationSubscriber implements EventSubscriber {
     public function getSubscribedEvents(): array
     {
         return [
+            
             Events::loadClassMetadata,
             Events::postLoad,
 
@@ -49,7 +50,7 @@ class AnnotationSubscriber implements EventSubscriber {
             if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
                 continue;
 
-            if (!$entry->supports($classMetadata, AnnotationReader::TARGET_CLASS, $className))
+            if (!$entry->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata))
                 continue;
 
             $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_CLASS, $className);
@@ -63,7 +64,7 @@ class AnnotationSubscriber implements EventSubscriber {
                 if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getTargets($entry)))
                     continue;
 
-                if (!$entry->supports($classMetadata, AnnotationReader::TARGET_METHOD, $method))
+                if (!$entry->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata))
                     continue;
 
                 $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_METHOD, $method);
@@ -78,7 +79,7 @@ class AnnotationSubscriber implements EventSubscriber {
                 if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
                     continue;
 
-                if (!$entry->supports($classMetadata, AnnotationReader::TARGET_PROPERTY, $property))
+                if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata))
                     continue;
 
                 $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
@@ -115,7 +116,7 @@ class AnnotationSubscriber implements EventSubscriber {
                 if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
                     continue;
 
-                if (!$entry->supports($classMetadata, AnnotationReader::TARGET_CLASS, $className, $entity))
+                if (!$entry->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
                     continue;
 
                 $entry->onFlush($event, $classMetadata, $entity);
@@ -133,7 +134,7 @@ class AnnotationSubscriber implements EventSubscriber {
                     if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
                         continue;
 
-                    if (!$entry->supports($classMetadata, AnnotationReader::TARGET_PROPERTY, $property, $entity))
+                    if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
                         continue;
 
                     $entry->onFlush($event, $classMetadata, $entity, $property);
@@ -159,7 +160,7 @@ class AnnotationSubscriber implements EventSubscriber {
             if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
                 continue;
 
-            if (!$entry->supports($classMetadata, AnnotationReader::TARGET_CLASS, $className, $entity))
+            if (!$entry->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
                 continue;
 
             $entry->{$eventName}($event, $classMetadata, $entity);
@@ -173,7 +174,7 @@ class AnnotationSubscriber implements EventSubscriber {
                 if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
                     continue;
 
-                if (!$entry->supports($classMetadata, AnnotationReader::TARGET_PROPERTY, $property, $entity))
+                if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
                     continue;
 
                 $entry->{$eventName}($event, $classMetadata, $entity, $property);

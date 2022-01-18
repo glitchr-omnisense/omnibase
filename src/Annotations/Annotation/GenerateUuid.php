@@ -79,7 +79,7 @@ class GenerateUuid extends AbstractAnnotation
         return null;
     }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }

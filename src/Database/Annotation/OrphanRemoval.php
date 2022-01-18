@@ -28,7 +28,7 @@ class OrphanRemoval extends AbstractAnnotation
         $this->value  = $data["value"]  ?? "";
     }
 
-    public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
+    public function supports(string $target, ?string $targetValue = null, $entity = null):bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }

@@ -283,8 +283,93 @@ namespace {
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
     function mb_ucfirst(string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding); }
     function mb_ucwords(string $str, ?string $encoding = null): string { return mb_convert_case($str, MB_CASE_TITLE, $encoding); }
-    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".$attributes[$k]."\"", array_keys($attributes)))); }
-    function browser_supports_webp() { return strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false; }
+    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".$attributes[$k]."\"", array_keys(array_filter($attributes))))); }
+
+    function browser_name()    : string { return get_browser2()["name"]; }
+    function browser_platform(): string { return get_browser2()["platform"]; }
+    function browser_version() : string { return get_browser2()["version"]; } 
+
+    function get_browser2(?string $userAgent = null)
+    {
+        $userAgent = $userAgent ?? $_SERVER['HTTP_USER_AGENT'];
+        
+        $platform = "unknown";
+        if (preg_match('/android/i', $userAgent))
+            $platform = 'android';
+        elseif (preg_match('/linux/i', $userAgent))
+            $platform = 'linux';
+        elseif (preg_match('/macintosh|mac os x/i', $userAgent))
+            $platform = 'apple';
+        elseif (preg_match('/windows|win32/i', $userAgent))
+            $platform = 'windows';
+
+        $name = "Unknown";
+        if(preg_match('/MSIE/i',$userAgent) && !preg_match('/Opera/i',$userAgent))
+            $name = "MSIE";
+        else if(preg_match('/Firefox/i',$userAgent))
+            $name = "Firefox";
+        else if(preg_match('/OPR/i',$userAgent))
+            $name = "Opera";
+        else if(preg_match('/Chrome/i',$userAgent) && !preg_match('/Edge/i',$userAgent))
+            $name = "Chrome";
+        else if(preg_match('/Safari/i',$userAgent) && !preg_match('/Edge/i',$userAgent))
+            $name = "Safari";
+        else if(preg_match('/Netscape/i',$userAgent))
+            $name = "Netscape";
+        else if(preg_match('/Edge/i',$userAgent))
+            $name = "Edge";
+        else if(preg_match('/Trident/i',$userAgent))
+            $name = "MSIE";
+
+        $device = "computer";
+        if (preg_match('/tablet|ipad/i', $userAgent))
+            $device = 'tablet';
+        else if (preg_match('/mobile|iphone|ipod/i', $userAgent))
+            $device = 'mobile';
+
+
+        $known = implode("|", ['Version', $name, 'other']);
+        preg_match_all('#(?<browser>' . $known .')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#', $userAgent, $matches);
+
+        $version = "";
+        if (count($matches['browser']) == 1) $version = $matches['version'][0];
+        else {
+
+            //we will have two since we are not using 'other' argument yet
+            //see if version is before or after the name
+            if (strripos($userAgent,"Version") < strripos($userAgent,$name)) $version = $matches['version'][0];
+            else $version = $matches['version'][1];
+        }
+
+        if (!$version) $version = "?";
+
+        return [
+            'user_agent' => $userAgent,
+            'name'       => $name,
+            'version'    => $version,
+            'device'     => $device,
+            'platform'   => $platform
+        ];
+    }
+
+    function browser_supports_webp(): bool
+    {
+        if(strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false)
+            return true;
+
+        if(browser_name() == "Safari" && version_compare("14.0", browser_version()) < 0)
+            return true;
+        if(browser_name() == "Chrome" && version_compare("23.0", browser_version()) < 0)
+            return true;
+        if(browser_name() == "Firefox" && version_compare("65.0", browser_version()) < 0)
+            return true;
+        if(browser_name() == "Edge" && version_compare("1809", browser_version()) < 0)
+            return true;
+        if(browser_name() == "Opera" && version_compare("12.1", browser_version()) < 0)
+            return true;
+
+        return false;
+    }
 
     function pathinfo_relationship(string $path)
     {

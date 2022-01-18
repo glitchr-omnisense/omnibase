@@ -10,6 +10,9 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Controller\Dashboard\Crud\Layout\WidgetCrudController;
 use Base\Field\SelectField;
 use Base\Field\SlugField;
+use Base\Field\Type\QuillType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class MenuCrudController extends WidgetCrudController
 {
@@ -29,7 +32,12 @@ class MenuCrudController extends WidgetCrudController
                 foreach ( ($callbacks["path"] ?? $defaultCallback)() as $yield)
                     yield $yield;
     
-                yield TranslationField::new()->showOnIndex('title');
+                yield TranslationField::new()->showOnIndex('title')->setFields([
+                    "title"   => TextType::class,
+                    "excerpt" => TextareaType::class,
+                    "content" => QuillType::class,
+                ]);
+
                 foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
                     yield $yield;
         }]);

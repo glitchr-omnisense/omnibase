@@ -20,8 +20,8 @@ class OrderColumn extends AbstractAnnotation
 {
     protected ?string $referenceColumn;
 
-    public function __construct( array $data ) {
-
+    public function __construct( array $data )
+    {
         $this->referenceColumn = $data['reference'] ?? null;
         $this->disable = $data['disable'] ?? null;
     }
@@ -31,7 +31,7 @@ class OrderColumn extends AbstractAnnotation
         return $this->referenceColumn;
     }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $entity = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }

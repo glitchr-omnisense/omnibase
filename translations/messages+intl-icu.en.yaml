@@ -9,6 +9,14 @@ paginator:
     last: "Last page"
     page: "Page {0}"
 
+locale:
+    lang:
+        singular: Language
+        plural: Languages
+    country:
+        singular: Country
+        plural: Countries
+
 dashboard:
     title: "Go to dashboard"
 

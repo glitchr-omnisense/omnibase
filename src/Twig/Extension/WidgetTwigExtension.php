@@ -32,7 +32,6 @@ final class WidgetTwigExtension extends AbstractExtension
     function render_widget(string $slot, int $position = 0, array $widgetOptions = []): string
     {
         $widgetSlot = $this->widgetProvider->getSlot($slot);
-        
         if(!$widgetSlot) return "";
 
         $widgets = $widgetSlot->getWidgets();
@@ -41,7 +40,7 @@ final class WidgetTwigExtension extends AbstractExtension
 
         $widgetOptions["class"]      = $widgetOptions["class"]      ?? $widgetSlot->getAttribute("class");
         $widgetOptions["class_item"] = $widgetOptions["class_item"] ?? $widgetSlot->getAttribute("class_item");
-        $widgetOptions["widget"] = $widget;
+        $widgetOptions["widget"]     = $widget;
 
         return $this->twig->render($widget->getTemplate(), $widgetOptions);
     }

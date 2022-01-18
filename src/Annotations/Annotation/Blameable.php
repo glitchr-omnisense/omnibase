@@ -27,8 +27,8 @@ class Blameable extends AbstractAnnotation
     private array $fields;
     private array $context;
 
-    public function __construct( array $data ) {
-
+    public function __construct( array $data )
+    {
         $this->context = array_map("mb_strtolower", $data['on']);
         $this->fields = $data['fields'] ?? [];
         $this->impersonator = $data['impersonator'] ?? false;
@@ -37,7 +37,7 @@ class Blameable extends AbstractAnnotation
     public function getContext(): array { return $this->context; }
     public function getFields(): array { return $this->fields; }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         if(!empty($this->fields) && !in_array($targetValue, $this->fields)) return false;
 

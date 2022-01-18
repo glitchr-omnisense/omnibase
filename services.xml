@@ -112,6 +112,7 @@
 
         <service id="Base\Service\Breadgrinder" public="true">
             <argument type="service" id="router.default" />
+            <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -170,6 +171,8 @@
         <service id="Base\Controller\SitemapController">
             <tag name="controller.service_arguments" />
             <call method="setContainer"><argument type="service" id="service_container" /></call>
+            <argument type="service" id="annotation_reader" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Controller\SecurityController">
@@ -271,10 +274,11 @@
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.database.annotation_reader" />
+            <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\Annotations\AnnotationReader" public="true">
+            <argument type="service" id="event_dispatcher" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="cache.adapter" />
@@ -302,6 +306,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
             <argument type="service" id="base.settings" />
+            <argument type="service" id="referrer" />
         </service>
 
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
@@ -345,6 +350,12 @@
             <tag name="twig.extension" />
             <argument type="service" id="twig" />
             <argument type="service" id="base.breadgrinder" />
+       </service>
+
+        <service id="Base\Twig\Extension\LocaleTwigExtension" >
+            <tag name="twig.extension" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="locale_provider" />
        </service>
 
         <service id="Base\Twig\Extension\PaginatorTwigExtension">

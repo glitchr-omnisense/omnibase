@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Model\Breadcrumb;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
 class Breadgrinder implements BreadgrinderInterface
@@ -10,16 +11,17 @@ class Breadgrinder implements BreadgrinderInterface
     protected $breadcrumbs = [];
 
     protected $router;
-    public function __construct(RouterInterface $router, BaseService $baseService)
+    public function __construct(RouterInterface $router, TranslatorInterface $translator, BaseService $baseService)
     {
         $this->router = $router;
+        $this->translator = $translator;
         $this->baseService = $baseService;
     }
 
     public function has(string $name): bool { return array_key_exists($name, $this->breadcrumbs); }
     public function grind(string $name, array $options = [], ?string $template = null): Breadcrumb
     {
-        // Some default parameters
+        // Some default parameters (if not created yet)
         if(!$this->has($name)) {
 
             $options["class"]      = $options["class"]      ?? $this->baseService->getParameterBag("base.breadcrumb.class");
@@ -27,10 +29,11 @@ class Breadgrinder implements BreadgrinderInterface
             $options["separator"]  = $options["separator"]  ?? $this->baseService->getParameterBag("base.breadcrumb.separator");
         }
 
-        $this->breadcrumbs[$name] = $this->breadcrumbs[$name] ?? new Breadcrumb($this->router);
-        if($template) $this->breadcrumbs[$name]->setTemplate($template);
+        // Prepare object
+        $this->breadcrumbs[$name] = $this->breadcrumbs[$name] ?? new Breadcrumb($this->router, $this->translator);
         if($options)  $this->breadcrumbs[$name]->addOptions($options);
-        
+        if($template) $this->breadcrumbs[$name]->setTemplate($template);
+
         return ($this->breadcrumbs[$name]);
     }
 }

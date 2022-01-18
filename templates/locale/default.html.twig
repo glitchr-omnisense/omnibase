@@ -1,0 +1,8 @@
+<ul class="locale">
+{% for locale in available_locales %}
+    {% set current = (locale == current_locale) ? "active" : null %}
+    <li><a href="{{ path(switch_route, {locale: locale}) }}" {{ html_attributes({"class":current}) }}>
+        <img class="country-flag" src="{{asset('bundles/base/flags/'~(locale|country)~'.png')}}">
+    </a></li>
+{% endfor %}
+</ul>

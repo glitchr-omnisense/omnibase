@@ -27,7 +27,7 @@ class Hierarchify extends AbstractAnnotation
         $this->separator = $data["separator"]  ?? null;
     }
 
-    public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_CLASS);
     }

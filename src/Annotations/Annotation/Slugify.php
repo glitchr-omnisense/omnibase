@@ -42,8 +42,8 @@ class Slugify extends AbstractAnnotation
 
     protected string $separator;
 
-    public function __construct( array $data ) {
-
+    public function __construct( array $data )
+    {
         $this->referenceColumn = $data['reference'] ?? null;
 
         $this->updatable = $data['updatable'] ?? false; // TODO: IMPLEMENT
@@ -128,7 +128,7 @@ class Slugify extends AbstractAnnotation
         return $slug;
     }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }

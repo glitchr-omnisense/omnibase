@@ -1,1 +1,13 @@
-DEFAULT BREADCRUMB
+<div class="{{ breadcrumb.option('class') }}">
+    <ul class="breadcrumb-list">
+        {% for item in breadcrumb %}
+        <li class="{{breadcrumb.option('class_item')}}">
+            {% if item.url is not null %}
+                <a class="breadcrumb-link" href="{{item.url}}">{{item.label}}</a>
+            {% else %}
+                {{item.label}}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+</div>

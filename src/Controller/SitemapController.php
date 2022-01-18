@@ -3,6 +3,7 @@
 namespace Base\Controller;
 
 use Base\Annotations\Annotation\Sitemap;
+use Base\Annotations\AnnotationReader;
 use Base\Component\HttpFoundation\XmlResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -10,6 +11,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RouterInterface;
 
 class SitemapController extends AbstractController
 {
@@ -18,43 +20,33 @@ class SitemapController extends AbstractController
     /**
      * @Route("/sitemap.xml", name="base_sitemap")
      */
-    public function Sitemap(Request $request): XmlResponse
+    public function Sitemap(Request $request, AnnotationReader $annotationReader, RouterInterface $router): XmlResponse
     {
         $urls = [];
         $hostname = $request->getSchemeAndHttpHost();
-        dump(Sitemap::getUrls());
 
-        // add static urls
-        // $urls[] = ['loc' => $this->generateUrl('app_home')];
-        // $urls[] = ['loc' => $this->generateUrl('app_contact_us')];
-        // $urls[] = ['loc' => $this->generateUrl('app_privacy_policy')];
-         
-        // add static urls with optional tags
-        // $urls[] = ['loc' => $this->generateUrl('fos_user_security_login'), 'changefreq' => 'monthly', 'priority' => '1.0'];
-        // $urls[] = ['loc' => $this->generateUrl('cookie_policy'), 'lastmod' => '2018-01-01'];
-         
-        // // add dynamic urls, like blog posts from your DB
-        // foreach ($em->getRepository('BlogBundle:post')->findAll() as $post) {
-        //     $urls[] = array(
-        //         'loc' => $this->generateUrl('blog_single_post', array('post_slug' => $post->getPostSlug()))
-        //     );
-        // }
- 
-        // add image urls
-        // $products = $em->getRepository('AppBundle:products')->findAll();
-        // foreach ($products as $item) {
-        //     $images = array(
-        //         'loc' => $item->getImagePath(), // URL to image
-        //         'title' => $item->getTitle()    // Optional, text describing the image
-        //     );
- 
-        //     $urls[] = array(
-        //         'loc' => $this->generateUrl('single_product', array('slug' => $item->getProductSlug())),
-        //         'image' => $images              // set the images for this product url
-        //     );
-        // }
-       
- 
+        foreach($router->getRouteCollection() as $name => $route)
+        {
+            $controller = $route->getDefault("_controller");
+            if($controller === null) continue;
+
+            list($class, $method) = explode("::", $controller);
+            if(!class_exists($class)) continue;
+
+            $annotations = $annotationReader->getAnnotationsFor($class, Sitemap::class, [AnnotationReader::TARGET_METHOD]);
+            $annotations = $annotations[AnnotationReader::TARGET_METHOD][$class][$method] ?? [];
+
+            $annotation = end($annotations);
+            if(!$annotation) continue;
+
+            $urls[] = [
+                "loc" => $hostname.$router->generate($name, $route->getDefaults()),
+                "priority" => $annotation->getPriority(),
+                "lastmod" => $annotation->getLastMod(),
+                "changefreq" => $annotation->getChangeFreq(),
+            ];
+        }
+
         // return response in XML format
         return new XmlResponse($this->renderView('sitemap.xml.twig', [
             'urls' => $urls, 

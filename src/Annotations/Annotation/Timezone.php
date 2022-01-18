@@ -49,7 +49,7 @@ class Timezone extends AbstractAnnotation
         return $value;
     }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return in_array("update", $this->context) || in_array("create", $this->context);
     }

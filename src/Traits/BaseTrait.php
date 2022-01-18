@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use Base\Annotations\AnnotationReader;
 use Base\Notifier\NotifierInterface;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
@@ -16,6 +17,8 @@ use Twig\Environment;
 
 trait BaseTrait
 {
+    public static function getAnnotationReader() : ?AnnotationReader     { return AnnotationReader::getInstance(); }
+
     public static function getEnvironment()   : string { return BaseService::$environment; }
     public static function getProjectDir()    : string { return BaseService::$projectDir; }
     public static function getPublicDir()     : string { return BaseService::getProjectDir() . "/public"; }

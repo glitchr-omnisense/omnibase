@@ -5,6 +5,8 @@ namespace Base\Service;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Intl\Countries;
+use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 
 class LocaleProvider implements LocaleProviderInterface
@@ -90,6 +92,7 @@ class LocaleProvider implements LocaleProviderInterface
         return array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales ?? []));
     }
     
+    public static function getLangName(?string $locale = null): string { return Languages::getName(self::getLang($locale)); }
     public static function getLang(?string $locale = null): string
     {
         $lang = substr($locale,0,2);
@@ -99,6 +102,7 @@ class LocaleProvider implements LocaleProviderInterface
         return $lang;
     }
 
+    public static function getCountryName(?string $locale = null): string { return Countries::getName(self::getCountry($locale)); }
     public static function getCountry(?string $locale = null): string
     {
         $defaultCountry     = substr(self::getDefaultLocale(),3,2);

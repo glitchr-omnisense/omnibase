@@ -9,13 +9,13 @@ use Symfony\Component\Routing\RouterInterface;
 
 class Referrer
 {
-
     /** @var RequestStack */
     private $requestStack;
 
     /** @var RouterInterface */
     private $router;
 
+    public function __toString() : string { return $this->getUrl(); }
     public function __construct(RequestStack $requestStack, RouterInterface $router, AssetExtension $assetExtension)
     {
         $this->requestStack = $requestStack;
@@ -34,7 +34,7 @@ class Referrer
         return $route;
     }
 
-    public function __toString() : string
+    public function getUrl() : string 
     {
         $request = $this->requestStack->getMainRequest();
         if (null === $request) return "";

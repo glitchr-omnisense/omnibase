@@ -122,7 +122,7 @@ class ImageService implements ImageServiceInterface
                  */
                 try {
 
-                    $image = $this->imagine->open($pathSource."xx");
+                    $image = $this->imagine->open($pathSource);
                     foreach($filters+[$lastFilter] as $filter)
                         $image = $filter->apply($image);
 

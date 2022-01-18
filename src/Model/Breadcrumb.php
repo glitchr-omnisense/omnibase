@@ -2,10 +2,13 @@
 
 namespace Base\Model;
 
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Base\Service\TranslatorInterface;
+use Base\Traits\BaseTrait;
+use Iterator;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
-class Breadcrumb implements BreadcrumbInterface
+class Breadcrumb implements BreadcrumbInterface, Iterator
 {
     protected array $items   = [];
     protected array $options = [];
@@ -13,17 +16,44 @@ class Breadcrumb implements BreadcrumbInterface
     protected $router = null;
     protected $template = "@Base/breadcrumb/default.html.twig";
 
-    public function __construct(RouterInterface $router, array $options = [], ?string $template = null)
+    protected $iterator  = 0;
+
+    public function rewind(): void { $this->iterator = 0; }
+    public function next(): void   { $this->iterator++; }
+    public function key()          { return $this->iterator; }
+    public function valid(): bool  { return $this->getLength() > $this->iterator; }
+    public function current()      { return $this->getItem($this->iterator); }
+
+    public function __construct(RouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
     {
         $this->router = $router;
+        $this->translator = $translator;
         $this->options = $options;
-        if($template) $this->template = $template;
+        if($template) 
+            $this->template = $template;
+    }
+
+    public function compute(Request $request)
+    {
+        $route      = $request->attributes->get('_route');
+        $controller = $request->attributes->get('_controller');
+        $params     = $request->attributes->get('_route_params');
+
+        dump($route, $controller, $params, $this->getRouter());
+        return $this;
     }
 
     public function getRouter(): RouterInterface { return $this->router; }
     public function setRouter(RouterInterface $router)
     {
         $this->router = $router;
+        return $this;
+    }
+
+    public function getTranslator(): TranslatorInterface { return $this->translator; }
+    public function setTranslator(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
         return $this;
     }
 
@@ -37,7 +67,7 @@ class Breadcrumb implements BreadcrumbInterface
     public function getOptions(): array { return $this->options; }
     public function addOptions(array $options)
     {
-        foreach($options as $key=> $option)
+        foreach($options as $key => $option)
             $this->addOption($key, $option);
     }
 
@@ -46,15 +76,17 @@ class Breadcrumb implements BreadcrumbInterface
         $this->options = $options;
         return $this;
     }
+
+    public function getOption(string $name) { return $this->options[$name]; }
     public function addOption(string $name, $value)
     {
         $this->options[$name] = $value;
         return $this;
     }
+    
     public function removeOption(string $name)
     {
-        if(array_key_exists($name, $this->options))
-            unset($this->options[$name]);
+        if(array_key_exists($name, $this->options)) unset($this->options[$name]);
         return $this;
     }
 
@@ -62,10 +94,7 @@ class Breadcrumb implements BreadcrumbInterface
     {
         return [
             "label"      => $label,
-            "url"        => ($route ? $this->router->generate($route, $routeParameters) : null),
-            "separator"  => $this->getOptions()["separator"]  ?? null,
-            "class"      => $this->getOptions()["class"]      ?? null,
-            "item_class" => $this->getOptions()["item_class"] ?? null,
+            "url"        => ($route ? $this->router->generate($route, $routeParameters) : null)
         ];
     }
 
@@ -90,5 +119,4 @@ class Breadcrumb implements BreadcrumbInterface
     {
         return $this->items[$index] ?? null;
     }
-
 }

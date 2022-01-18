@@ -37,8 +37,8 @@ class Countify extends AbstractAnnotation
     public const COUNT_WORDS     = 1;
     public const COUNT_SENTENCES = 2;
     public const COUNT_BLOCKS    = 3;
-    public function __construct( array $data ) {
-
+    public function __construct( array $data )
+    {
         $this->referenceColumn = $data['reference'] ?? null;
         
         switch($data["type"]) 
@@ -71,7 +71,7 @@ class Countify extends AbstractAnnotation
         return $this->referenceColumn;
     }
 
-    public function supports($classMetadata, string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }

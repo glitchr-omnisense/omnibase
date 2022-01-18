@@ -29,7 +29,7 @@ class ColumnAlias extends AbstractAnnotation
         $this->alias  = $data["alias"]  ?? "";
     }
 
-    public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
+    public function supports(string $target, ?string $targetValue = null, $object = null):bool
     {
         return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }

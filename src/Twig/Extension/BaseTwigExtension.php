@@ -76,11 +76,12 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFunction('exit',  'exit'),
 
-            new TwigFunction('synopsis',              'synopsis'),
-            new TwigFunction("path",          [$this, 'path']),
-            new TwigFunction('image',         [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFunction('method_exists', [$this, 'method_exists']),
-            new TwigFunction('static_call',   [$this, 'static_call']),
+            new TwigFunction('synopsis',                'synopsis'),
+            new TwigFunction("path",            [$this, 'path']),
+            new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
+            new TwigFunction('method_exists',   [$this, 'method_exists']),
+            new TwigFunction('static_call',     [$this, 'static_call']),
+            new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
 
             new TwigFunction('asset',         [AssetExtension::class, 'getAssetUrl']),
         ];
@@ -113,7 +114,9 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('entity',          [Translator::class, 'entity']),
 
             new TwigFilter('lang',            [LocaleProvider::class, 'getLang']),
+            new TwigFilter('lang_name',       [LocaleProvider::class, 'getLangName']),
             new TwigFilter('country',         [LocaleProvider::class, 'getCountry']),
+            new TwigFilter('country_name',    [LocaleProvider::class, 'getCountryName']),
 
             new TwigFilter('iconify',         [IconService::class, 'iconify']),
             new TwigFilter('imagify',         [ImageService::class, 'imagify']),

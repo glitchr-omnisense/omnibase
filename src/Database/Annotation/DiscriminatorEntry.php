@@ -19,12 +19,22 @@ class DiscriminatorEntry extends AbstractAnnotation
     /** @Required */
     private string $value;
 
-    public function __construct( array $data ) { $this->value = $data['value']; }
+    public function __construct( array $data ) 
+    { 
+        $this->value = $data['value'];
+    }
 
     public function getValue(): string { return $this->value; }
 
-    public function supports(ClassMetadata $classMetadata, string $target, ?string $targetValue = null, $entity = null):bool
+    public function supports(string $target, ?string $targetValue = null, $object = null):bool
     {
+        if($object === null) return false;
+
+        $classMetadata = null;
+        if($object instanceof ClassMetadata)
+            $classMetadata = $object;
+
+        if($classMetadata === null) return false;
         if(empty($classMetadata->discriminatorMap) || empty($classMetadata->discriminatorColumn))
             throw new \Exception("@DiscriminatorEntry \"".$this->value."\" found for \"".$classMetadata->getName()."\", but missing discriminator mapping");
 
