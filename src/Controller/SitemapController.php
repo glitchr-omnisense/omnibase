@@ -33,7 +33,7 @@ class SitemapController extends AbstractController
             list($class, $method) = explode("::", $controller);
             if(!class_exists($class)) continue;
 
-            $annotations = $annotationReader->getAnnotationsFor($class, Sitemap::class, [AnnotationReader::TARGET_METHOD]);
+            $annotations = $annotationReader->getAnnotations($class, Sitemap::class, [AnnotationReader::TARGET_METHOD]);
             $annotations = $annotations[AnnotationReader::TARGET_METHOD][$class][$method] ?? [];
 
             $annotation = end($annotations);

@@ -61,11 +61,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __staticIconize() : ?array { return ["fas fa-user"]; } 
 
-    // DEPRECATED: These two methods should soon be removed  in S6.0
-    public function getUsername() : ?string { return $this->getUserIdentifier(); }
-    public function getSalt(): ?string { return null; }
-    // DEPRECATED-END
-
     public const __ACTIVE_TIME__ = 60;
     public const __ONLINE_TIME__ = 60*5;
     private const __DEFAULT_IDENTIFIER__ = "email";

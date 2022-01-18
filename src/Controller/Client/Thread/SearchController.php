@@ -45,28 +45,28 @@ class SearchController extends AbstractController
         $formSearchbar = $formSearchbar ?? $this->createForm(SearchbarType::class, new SearchData());
         $formSearchbar->handleRequest($request);
 
-        $formSearchattedData = null;
+        $formattedData = null;
         if ($formSearchbar->isSubmitted() && $formSearchbar->isValid()) {
 
-            $formSearchattedData = clone $formSearchbar->getData();
-            $formSearchattedData->content = $formSearchattedData->generic;
-            $formSearchattedData->title   = $formSearchattedData->generic;
-            $formSearchattedData->excerpt = $formSearchattedData->generic;
+            $formattedData = clone $formSearchbar->getData();
+            $formattedData->content = $formattedData->generic;
+            $formattedData->title   = $formattedData->generic;
+            $formattedData->excerpt = $formattedData->generic;
 
         } else if ($formSearch->isSubmitted() && $formSearch->isValid()) {
 
-            $formSearchattedData = clone $formSearch->getData();
-            $formSearchattedData->content = $formSearchattedData->content ?? $formSearchattedData->generic;
-            $formSearchattedData->title   = $formSearchattedData->title   ?? $formSearchattedData->generic;
-            $formSearchattedData->excerpt = $formSearchattedData->excerpt ?? $formSearchattedData->generic;
+            $formattedData = clone $formSearch->getData();
+            $formattedData->content = $formattedData->content ?? $formattedData->generic;
+            $formattedData->title   = $formattedData->title   ?? $formattedData->generic;
+            $formattedData->excerpt = $formattedData->excerpt ?? $formattedData->generic;
         }
 
-        if($formSearchattedData) {
+        if($formattedData) {
             
             $data = new SearchData();
-            $data->content = "%" . ($formSearchattedData->content ?? $formSearchattedData->generic) . "%";
-            $data->title   = "%" . ($formSearchattedData->title   ?? $formSearchattedData->generic ?? $formSearchattedData->content) . "%";
-            $data->excerpt = "%" . ($formSearchattedData->excerpt ?? $formSearchattedData->generic ?? $formSearchattedData->content) . "%";
+            $data->content = "%" . ($formattedData->content ?? $formattedData->generic) . "%";
+            $data->title   = "%" . ($formattedData->title   ?? $formattedData->generic ?? $formattedData->content) . "%";
+            $data->excerpt = "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%";
             $data->generic = null;
 
             $entityManager = $this->entityManager;
@@ -78,7 +78,7 @@ class SearchController extends AbstractController
 
         return $this->render('@Base/client/thread/search.html.twig', [
             "form" => $formSearch->createView(),
-            "form_data" => $formSearchattedData ?? new SearchData(),
+            "form_data" => $formattedData ?? new SearchData(),
             "threads" => $threads
         ]);
     }

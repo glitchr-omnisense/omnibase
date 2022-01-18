@@ -18,10 +18,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
 {
-    // DEPRECATED: These two methods should soon be removed  in S6.0
-    public function loadUserByUsername(string $email) : ?UserInterface { return $this->loadUserByIdentifier($email); }
-    // DEPRECATED-END
-
     public function findByRoles(string $role)
     {
         $qb = $this->_em->createQueryBuilder();
@@ -45,7 +41,7 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
             ->getOneOrNullResult();
     }
 
-    public function upgradePassword(UserInterface $user, string $newHashedPassword): void
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         // set the new hashed password on the User object
         $user->setPassword($newHashedPassword);

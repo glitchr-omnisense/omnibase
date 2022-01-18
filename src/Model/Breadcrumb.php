@@ -2,10 +2,14 @@
 
 namespace Base\Model;
 
+use Base\Annotations\Annotation\Iconize;
+use Base\Annotations\AnnotationReader;
 use Base\Service\TranslatorInterface;
-use Base\Traits\BaseTrait;
+
 use Iterator;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
 class Breadcrumb implements BreadcrumbInterface, Iterator
@@ -29,18 +33,86 @@ class Breadcrumb implements BreadcrumbInterface, Iterator
         $this->router = $router;
         $this->translator = $translator;
         $this->options = $options;
+        
+        $this->annotationReader = AnnotationReader::getInstance();
+
         if($template) 
             $this->template = $template;
     }
 
     public function compute(Request $request)
     {
-        $route      = $request->attributes->get('_route');
-        $controller = $request->attributes->get('_controller');
-        $params     = $request->attributes->get('_route_params');
+        // $controller = $request->attributes->get('_controller');
+        // $params     = $request->attributes->get('_route_params');
+        // $route      = $request->attributes->get('_route');
 
-        dump($route, $controller, $params, $this->getRouter());
+        $path = $request->getPathInfo();
+        $route = $this->getRoute($path);
+        $controller = $this->getController($path);
+
+        while($path != "/") {
+
+            if($route) {
+
+                list($class, $method) = explode("::", $controller);
+                $reflClass = $this->annotationReader->getReflClass($class);
+                $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? null;
+
+                $position = array_class_last(Iconize::class, $annotations);
+                $iconize  = $position !== false ? $annotations[$position] : null;
+            }
+
+            $icon = $iconize ? $iconize->getIcon() : null;
+
+            $path = dirname($path);
+            $route = $this->getRoute($path);
+            $controller = $this->getController($path);
+        }
+        dump($path, $route);
+
+        // dump($icon, $route);
+        // dump($this->getRoute($request->getPathInfo()));
+        // dump($this->getRoute("/showcase"));
+        // dump($request->getPathInfo());
+        // dump($route->getPath());
+        // dump($route->getDefaults());
+        // dump($route->getOptions());
+
+        exit(1);
+
         return $this;
+    }
+
+    public function getRoute(?string $url = null): string
+    {
+        if($url === null) return "";
+        
+        $baseDir = $this->getRouter()->getContext()->getBaseUrl();
+        $path = parse_url($url, PHP_URL_PATH);
+        if ($baseDir && strpos($path, $baseDir) === 0)
+            $path = substr($path, strlen($baseDir));
+
+        try { $routeMatch = $this->router->match($path); }
+        catch (ResourceNotFoundException $e) { return ''; }
+
+        $route = $routeMatch['_route'] ?? "";
+        return $route;
+    }
+
+    public function getController(?string $url = null): string
+    {
+        if($url === null) return "";
+        
+        $baseDir = $this->getRouter()->getContext()->getBaseUrl();
+        $path = parse_url($url, PHP_URL_PATH);
+        if ($baseDir && strpos($path, $baseDir) === 0)
+            $path = substr($path, strlen($baseDir));
+
+        try { $routeMatch = $this->router->match($path); }
+        catch (ResourceNotFoundException $e) { return ''; }
+
+        $route = $routeMatch['_controller'] ?? "";
+        return $route;
     }
 
     public function getRouter(): RouterInterface { return $this->router; }

@@ -48,7 +48,7 @@ class DiscriminatorEntry extends AbstractAnnotation
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
 
-            $annotations = $this->getAnnotationReader()->getAnnotationsFor($className, $this);
+            $annotations = $this->getAnnotationReader()->getAnnotations($className, $this);
 
             $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
             

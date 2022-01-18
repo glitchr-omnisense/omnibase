@@ -5,18 +5,11 @@ use Base\Service\BaseService;
 
 use Base\Entity\User\Notification;
 use Exception;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\ErrorHandler\ErrorRenderer\ErrorRendererInterface;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
-use Symfony\Component\HttpKernel\Log\DebugLoggerInterface;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Controller\ErrorController as EE;
-use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Error\RuntimeError;
 
 class ErrorController extends AbstractController
 {
@@ -39,7 +32,7 @@ class ErrorController extends AbstractController
             throw new Exception("Twig rendering engine failed (".trim($fatalException->getMessage(), ".").") following a first exception. (see below)", 500, $exception);
             $response = $this->rescue($exception);
         }
-dump("xxx");
+
         $notification = new Notification($exception);
         if ($this->baseService->isDevelopment()) $notification->send("danger");
         if ($this->baseService->isDevelopment()) dump($exception);

@@ -12,13 +12,10 @@ use Symfony\Component\Security\Core\User\UserProviderInterface;
 use HWI\Bundle\OAuthBundle\Security\Core\User\OAuthAwareUserProviderInterface;
 use HWI\Bundle\OAuthBundle\OAuth\Response\UserResponseInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, OAuthAwareUserProviderInterface
 {
-    // DEPRECATED: These two methods should soon be removed  in S6.0
-    public function loadUserByUsername($response) : UserInterface { return $this->loadUserByIdentifier($response); }
-    // DEPRECATED-END
-
     /**
      * {@inheritdoc}
      */
@@ -89,7 +86,7 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
     /**
      * Upgrades the encoded password of a user, typically for using a better hash algorithm.
      */
-    public function upgradePassword(UserInterface $user, string $newHashedPassword): void
+    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
     {
         // set the new hashed password on the User object
         $user->setPassword($newHashedPassword);

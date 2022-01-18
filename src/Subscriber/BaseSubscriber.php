@@ -25,7 +25,7 @@ class BaseSubscriber implements EventSubscriberInterface
     {
         return [
             ConsoleEvents::COMMAND => ['onConsoleCommand'],
-            KernelEvents::REQUEST  => ['onKernelRequest'],
+            KernelEvents::REQUEST  => ['onKernelRequest', 128],
             KernelEvents::RESPONSE => ['onKernelResponse'],
             KernelEvents::EXCEPTION => ['onKernelException'],
         ];

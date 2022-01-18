@@ -9,6 +9,7 @@ use Imagine\Image\ImageInterface;
 class ImageFilter implements LastFilterInterface
 {
     protected array $filters;
+    protected array $options;
     
     public function __toString()
     {
@@ -16,10 +17,11 @@ class ImageFilter implements LastFilterInterface
         return path_suffix("", $pathSuffixes);
     }
 
-    public function __construct(?string $path = null, array $filters = [])
+    public function __construct(?string $path = null, array $filters = [], array $options = [])
     {
         $this->path    = $path;
         $this->filters = $filters;
+        $this->options  = $options;
     }
 
     protected ?string $path;
@@ -39,6 +41,6 @@ class ImageFilter implements LastFilterInterface
         foreach($this->filters as $filter)
             $image = $filter->apply($image);
 
-        return $this->path === null ? $image : $image->save($this->path);
+        return $this->path === null ? $image : $image->save($this->path, $this->options);
     }
 }

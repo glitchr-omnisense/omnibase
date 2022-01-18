@@ -8,20 +8,18 @@ use Imagine\Image\ImageInterface;
 
 class WebpFilter extends WebOptimization implements LastFilterInterface
 {
-    protected array $config = [];
-
     public function __toString()
     {
         $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
     }
 
-    public function __construct(?string $path = null, array $filters = [], array $config = [])
+    public function __construct(?string $path = null, array $filters = [], array $options = [])
     {
         $this->path    = $path.".webp";
         $this->filters = $filters;
 
-        parent::__construct($this->path, $config);
+        parent::__construct($this->path, $options);
     }
 
     protected string $path;

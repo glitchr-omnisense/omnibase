@@ -57,7 +57,6 @@ class OrderColumn extends AbstractAnnotation
     
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
     {
-        $this->getAnnotations($classMetadata->getName(), $targetValue);
         $reflProperty = $classMetadata->getReflectionClass()->getProperty($targetValue);
         if($reflProperty->getDeclaringClass()->getName() == $classMetadata->getName()) {
 

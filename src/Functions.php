@@ -352,6 +352,35 @@ namespace {
         ];
     }
 
+    function array_append_recursive()
+    {
+        $arrays = func_get_args();
+        $base = array_shift($arrays);
+
+        if (!is_array($base)) $base = empty($base) ? array() : array($base);
+
+        foreach ($arrays as $append) {
+            if (!is_array($append)) $append = array($append);
+            foreach ($append as $key => $value) {
+
+                if (!array_key_exists($key, $base) and !is_numeric($key)) {
+                    $base[$key] = $append[$key];
+                    continue;
+                }
+
+                if (is_array($value) or is_array($base[$key])) {
+                    $base[$key] = array_append_recursive($base[$key], $append[$key]);
+                } else if (is_numeric($key)) {
+                    if (!in_array($value, $base)) $base[] = $value;
+                } else {
+                    $base[$key] = $value;
+                }
+            }
+        }
+
+        return $base;
+    }
+
     function browser_supports_webp(): bool
     {
         if(strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false)
@@ -569,7 +598,28 @@ namespace {
 
         return $result;
     }
-    
+ 
+    function array_class($objectOrClass, array $haystack): string|int|false 
+    {
+        $className = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
+        foreach($haystack as $key => $item)
+            if($item instanceof $className) return $key;
+
+        return false;
+    }
+
+    function array_class_last($objectOrClass, array $haystack): string|int|false 
+    {
+        $haystack = array_reverse($haystack);
+        if(is_associative($haystack)) 
+            return array_class($objectOrClass, $haystack);
+
+        $position = array_class($objectOrClass, $haystack);
+        if($position === false) return false;
+
+        return count($haystack) - $position - 1;
+    }
+
     function array_search_last(mixed $needle, array $haystack, bool $strict = false): string|int|false 
     {
         $haystack = array_reverse($haystack);
@@ -579,7 +629,7 @@ namespace {
         $position = array_search($needle, $haystack, $strict);
         if($position === false) return false;
 
-        return count($haystack) - $position;
+        return count($haystack) - $position - 1;
     }
 
     function array_search_recursive(mixed $needle, array $haystack):array|false {

@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
  * Constraint for the Unique Entity validator.
  *
  * @Annotation
- * @Target({"PROPERTY", "METHOD", "ANNOTATION"})
+ * @Target({"CLASS", "PROPERTY", "METHOD", "ANNOTATION"})
  *
  */
 class NotBlank extends Constraint

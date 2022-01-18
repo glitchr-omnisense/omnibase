@@ -42,7 +42,7 @@ class AnnotationSubscriber implements EventSubscriber {
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
         
-        $annotations = $this->annotationReader->getAnnotationsFor($className);
+        $annotations = $this->annotationReader->getAnnotations($className);
 
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {
@@ -108,7 +108,7 @@ class AnnotationSubscriber implements EventSubscriber {
             if (in_array($className, $this->subscriberHistory)) return;
             $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
-            $annotations = $this->annotationReader->getAnnotationsFor($className);
+            $annotations = $this->annotationReader->getAnnotations($className);
 
             $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
             foreach ($classAnnotations as $entry) {
@@ -152,7 +152,7 @@ class AnnotationSubscriber implements EventSubscriber {
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 
-        $annotations    = $this->annotationReader->getAnnotationsFor($className);
+        $annotations    = $this->annotationReader->getAnnotations($className);
         
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {

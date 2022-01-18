@@ -25,13 +25,12 @@ use Base\Traits\BaseTrait;
 use Throwable;
 use Exception;
 use UnexpectedValueException;
-use Base\Service\LocaleProvider;
+use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
-use Base\Notifier\Recipient\LocaleRecipientInterface;
-use Symfony\Component\Notifier\Recipient\RecipientInterface;
+
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)

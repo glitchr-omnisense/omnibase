@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
-
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class ImageController extends AbstractController
@@ -35,10 +35,13 @@ class ImageController extends AbstractController
      */
     public function Image(Request $request, $hashid = null): Response
     {
+        
         $args = $this->imageService->decode($hashid);
         $path = stream_get_meta_data(tmpfile())['uri'];
 
-        return $this->imageService->filter($args["path"], [new ImageFilter($path, $args["filters"] ?? [], $args["config"] ?? [])]);
+        return $this->imageService->filter($args["path"], [
+            new ImageFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
+        ]);
     }
 
     /**
@@ -46,9 +49,14 @@ class ImageController extends AbstractController
      */
     public function Webp(Request $request, $hashid = null): Response
     {
+        if(!$this->imageService->isWebpEnabled())
+            return $this->redirectToRoute("base_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+
         $args = $this->imageService->decode($hashid);
         $path = stream_get_meta_data(tmpfile())['uri'];
 
-        return $this->imageService->filter($args["path"], [new WebpFilter($path, $args["filters"] ?? [], $args["config"] ?? [])]);
+        return $this->imageService->filter($args["path"], [
+            new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
+        ]);
     }
 }

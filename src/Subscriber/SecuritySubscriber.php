@@ -9,12 +9,10 @@ use Base\Entity\User;
 
 use Base\Service\BaseService;
 use Base\Entity\User\Log;
-
-use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Base\Security\LoginFormAuthenticator;
 
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\Config\Definition\Exception\Exception;
-
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
@@ -22,17 +20,15 @@ use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
+
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
-
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
-
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
@@ -167,7 +163,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         $this->baseService->getEntityManager()->flush();
-        $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event]);
+        $this->baseService->redirectToRoute("base_user_profile", [], 302);
     }
 
     public function onApproval(UserEvent $event)
@@ -217,7 +213,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ($targetPath && 
             $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
             $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE ) 
-            return $this->baseService->redirect($targetPath, [], 302, ["event" => $event]);
+        return $this->baseService->redirect($targetPath, [], 302);
     }
 
     public function onKernelRequest(RequestEvent $event)

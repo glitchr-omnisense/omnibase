@@ -6,7 +6,6 @@ use App\Entity\User;
 use Base\Controller\BaseController;
 use Base\Traits\BaseTrait;
 
-
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;

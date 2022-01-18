@@ -44,9 +44,15 @@ class ImageService implements ImageServiceInterface
         $this->assetExtension = $assetExtension;
         $this->filesystem     = $filesystem->set("local.cache");
 
+        $this->maxQuality = $parameterBag->get("base.image.max_quality") ?? 1;
+        $this->enableWebp     = $parameterBag->get("base.image.enable_webp") ?? true;
+
         $this->hashIds = new Hashids($parameterBag->get("kernel.secret"));
         self::$mimeTypes = new MimeTypes();
     }
+
+    public function getMaximumQuality() { return $this->maxQuality; } 
+    public function isWebpEnabled() { return $this->enableWebp; }
 
     protected $hashIds;
     public function encode(array $array): string { return $this->hashIds->encodeHex(bin2hex(serialize($array))); }
@@ -77,15 +83,16 @@ class ImageService implements ImageServiceInterface
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
 
         $config["path"] = $path;
-        if(!empty($filters))
-            $config["filters"] = $filters;
+        $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
+        if(!empty($filters)) $config["filters"] = $filters;
 
         // Config convolution
         while ( ($sourceConfig = $this->decode(basename($source))) ) {
 
             $source = $sourceConfig["path"] ?? $source;
             $config["path"] = $source;
-            $config["filters"] = ($sourceConfig["filters"] ?? [])+($config["filters"] ?? []);
+            $config["filters"] = ($sourceConfig["filters"] ?? []) + ($config["filters"] ?? []);
+            $config["options"] = ($sourceConfig["options"] ?? []) + ($config["options"] ?? []);
         }
 
         return $this->assetExtension->getAssetUrl($prefix."/").$this->encode($config);
