@@ -143,7 +143,7 @@ final class PaginatorTwigExtension extends AbstractExtension
         return $array;
     }
 
-    public function getLast(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label): ?string
+    public function getLast(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
         if($pagination->getPage() >= $pagination->getTotalPages()) return "";
         

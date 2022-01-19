@@ -23,7 +23,11 @@ class Page extends Widget implements IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __staticIconize() : ?array { return ["fas fa-file-alt"]; } 
 
-    public function __toString() { return $this->getTitle(); }
+    public function __toString() 
+    {
+        $path = $this->getTwigExtension()->getRoutingExtension()->getPath("widget_page", ["slug" => $this->getSlug()]);
+        return "<a href='".$path."'>".$this->getTitle()."</a>";
+    }
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)

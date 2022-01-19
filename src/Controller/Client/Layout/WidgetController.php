@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Http\Discovery\Exception\NotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 
-class PageController extends AbstractController
+class WidgetController extends AbstractController
 {
     public function __construct(PageRepository $pageRepository)
     {
@@ -19,7 +19,7 @@ class PageController extends AbstractController
     /**
      * @Route("/page/{slug}", name="widget_page")
      */
-    public function Page(Request $request, $slug = null): Response
+    public function Page($slug = null): Response
     {
         $page = $this->pageRepository->findOneBySlug($slug);
         

@@ -680,6 +680,12 @@ namespace {
         return $matches;
     }
 
+    function array_unique_end($array) 
+    {
+        $len = count($array);
+        return array_transforms(fn($k,$v):array => [$len-$k-1,$v], array_unique(array_reverse($array)));
+    }
+
     function array_unique_map(callable $callback, array $array, int $flags = SORT_STRING): array
     {
         $arrayMask = array_fill_keys(array_keys(array_unique(array_map($callback, $array), $flags)), null);

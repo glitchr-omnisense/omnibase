@@ -71,6 +71,9 @@ final class BaseTwigExtension extends AbstractExtension
         return $this;
     }
 
+    public function getIntlExtension()   :IntlExtension    { return $this->intlExtension;    }
+    public function getRoutingExtension():RoutingExtension { return $this->routingExtension; }
+
     public function getFunctions(): array
     {
         return [

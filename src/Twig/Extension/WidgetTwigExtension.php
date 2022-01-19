@@ -25,7 +25,7 @@ final class WidgetTwigExtension extends AbstractExtension
     public function getFunctions() : array
     {
         return [
-            new TwigFunction("render_widget", [$this, 'render_widget'])
+            new TwigFunction("render_widget", [$this, 'render_widget'], ['is_safe' => ['all']])
         ];
     }
 

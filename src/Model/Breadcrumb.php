@@ -5,14 +5,14 @@ namespace Base\Model;
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
 use Base\Service\TranslatorInterface;
-
+use Countable;
 use Iterator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
-class Breadcrumb implements BreadcrumbInterface, Iterator
+class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
 {
     protected array $items   = [];
     protected array $options = [];
@@ -22,6 +22,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator
 
     protected $iterator  = 0;
 
+    public function count() : int  { return $this->getLength(); }
     public function rewind(): void { $this->iterator = 0; }
     public function next(): void   { $this->iterator++; }
     public function key()          { return $this->iterator; }
@@ -42,48 +43,72 @@ class Breadcrumb implements BreadcrumbInterface, Iterator
 
     public function compute(Request $request)
     {
-        // $controller = $request->attributes->get('_controller');
-        // $params     = $request->attributes->get('_route_params');
-        // $route      = $request->attributes->get('_route');
+        $icons = [];
+        $path = null;
+        while($path !== "") {
 
-        $path = $request->getPathInfo();
-        $route = $this->getRoute($path);
-        $controller = $this->getController($path);
-
-        while($path != "/") {
-
-            if($route) {
-
-                list($class, $method) = explode("::", $controller);
-                $reflClass = $this->annotationReader->getReflClass($class);
-                $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? null;
-
-                $position = array_class_last(Iconize::class, $annotations);
-                $iconize  = $position !== false ? $annotations[$position] : null;
-            }
-
-            $icon = $iconize ? $iconize->getIcon() : null;
-
-            $path = dirname($path);
-            $route = $this->getRoute($path);
+            $path = rtrim($path === null ? $request->getPathInfo() : dirname($path), "/");
             $controller = $this->getController($path);
+            if(!$controller) continue;
+            
+            list($class, $method) = explode("::", $controller);
+            $reflClass   = $this->annotationReader->getReflClass($class);
+            $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? [];
+
+            $position = array_class_last(Iconize::class, $annotations);
+            $iconize  = $position !== false ? $annotations[$position] : null;
+            $icon     = $iconize ? $iconize->getIcon() : null;
+            
+            $position = array_class_last(Route::class, $annotations);
+            $route  = $position !== false ? $annotations[$position] : null;
+            $routeName          = $route ? $this->getRouteName($path) : null;
+            $routeParameters    = $route ? array_filter($this->getRouteParameters($path, rtrim($route->getPath(), "/")) ?? []) : [];
+            $routeParameterKeys = array_keys($routeParameters);
+
+            $transPath = implode("_", array_merge([$routeName], $routeParameterKeys));
+            $transParameters = array_transforms(fn($k, $v):array => [$k, 
+                $k == "id"   ? "#".$v : (
+                $k == "slug" ? ucwords(str_replace(["-","_"], " ", $v)) : $v
+            )], $routeParameters);
+
+            $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
+
+            if($route) $this->prependItem($label, $routeName, $routeParameters ?? []);
+            
+            $icons[] = $icon;
         }
-        dump($path, $route);
 
-        // dump($icon, $route);
-        // dump($this->getRoute($request->getPathInfo()));
-        // dump($this->getRoute("/showcase"));
-        // dump($request->getPathInfo());
-        // dump($route->getPath());
-        // dump($route->getDefaults());
-        // dump($route->getOptions());
-
-        exit(1);
-
+        $this->addOption("icons", array_unique_end($icons));
         return $this;
     }
 
-    public function getRoute(?string $url = null): string
+    public function getRouteParameters(?string $url = null, ?string $urlPattern = null)
+    {
+        if(!$urlPattern) return null; // No pattern
+
+        $urlParts        = explode("/", rtrim($url, "/"));
+        $urlPatternParts = explode("/", rtrim($urlPattern, "/"));
+        if(count($urlParts) > count($urlPatternParts)) 
+            return null; // Url not matching pattern
+        
+        $routeParameters = [];
+        foreach($urlPatternParts as $key => $pattern) {
+
+            if(str_starts_with($pattern, "{") && str_ends_with($pattern, "}")) {
+
+                $pattern = substr($pattern, 1, -1);
+                $routeParameters[$pattern] = $urlParts[$key] ?? null;
+                continue;
+            }
+
+            if($pattern !== $urlParts[$key]) 
+                return null; // Url not matching pattern
+        }
+
+        return $routeParameters;
+    }
+
+    public function getRouteName(?string $url = null): string
     {
         if($url === null) return "";
         
@@ -149,7 +174,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator
         return $this;
     }
 
-    public function getOption(string $name) { return $this->options[$name]; }
+    public function getOption(string $name) { return $this->options[$name] ?? null; }
     public function addOption(string $name, $value)
     {
         $this->options[$name] = $value;
@@ -165,8 +190,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator
     protected function getFormattedItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         return [
-            "label"      => $label,
-            "url"        => ($route ? $this->router->generate($route, $routeParameters) : null)
+            "label" => $label,
+            "url"   => ($route ? $this->router->generate($route, $routeParameters) : null),
+            "route" => $route
         ];
     }
 

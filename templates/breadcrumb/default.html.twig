@@ -2,10 +2,12 @@
     <ul class="breadcrumb-list">
         {% for item in breadcrumb %}
         <li class="{{breadcrumb.option('class_item')}}">
-            {% if item.url is not null %}
-                <a class="breadcrumb-link" href="{{item.url}}">{{item.label}}</a>
+
+            {% set icon = breadcrumb.option('icons')[loop.revindex0] ?? null %}
+            {% if item.url is not null and not loop.last %}
+                <a class="breadcrumb-link" href="{{item.url}}">{{ icon|iconify|raw }} {{item.label}}</a>
             {% else %}
-                {{item.label}}
+                <span>{{ icon|iconify|raw }} {{item.label}}</span>
             {% endif %}
         </li>
         {% endfor %}

@@ -6,7 +6,6 @@ use Base\Entity\User;
 
 use Base\Database\Type\UTCDateTimeType;
 use Symfony\Bundle\FrameworkBundle\HttpCache\HttpCache;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 use Doctrine\DBAL\Types\Type;
 

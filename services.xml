@@ -522,20 +522,14 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Controller\Client\Layout\PageController">
+        <service id="Base\Controller\Client\Layout\WidgetController">
             <tag name="controller.service_arguments" />
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
+            <call method="setContainer"><argument type="service" id="service_container" /></call>
             <argument type="service" id="App\Repository\Layout\Widget\PageRepository" />
         </service>
 
-        <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType">
-            <tag name="form.type" />
-        </service>
-        <service id="Base\Field\Type\ImageType" parent="Base\Field\Type\FileType">
-            <tag name="form.type" />
-        </service>
+        <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\ImageType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />

@@ -13,6 +13,7 @@ use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Repository\Layout\WidgetRepository;
+use Base\Traits\BaseTrait;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -24,6 +25,7 @@ use Base\Repository\Layout\WidgetRepository;
 
 class Widget implements TranslatableInterface, IconizeInterface
 {
+    use BaseTrait;
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return null; } 

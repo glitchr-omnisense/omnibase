@@ -72,7 +72,7 @@ class BaseBundle extends Bundle
         return dirname((new \ReflectionClass(self::__ROOT__))->getFileName()) . "/";
     }
 
-    public static function setMapping(string $location = "./", string $inputNamespace, string $outputNamespace)
+    public static function setMapping(string $location = "./", string $inputNamespace = "", string $outputNamespace = "")
     {
         $classList = BaseBundle::getAllClasses(self::getBundleLocation() . $location, $inputNamespace);
 

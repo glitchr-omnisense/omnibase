@@ -2,21 +2,18 @@
 
 namespace Base\Entity\Layout\Widget;
 
-use Base\Database\Annotation\ColumnAlias;
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
 
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\SlotRepository;
-use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
