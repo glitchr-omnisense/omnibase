@@ -2,7 +2,7 @@
     <button class="btn dropdown-toggle" type="button" id="dropdown-locale" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fa fa-globe"></i> {{ "@messages.locale.lang.singular"|trans }}
     </button>
-    <ul class="dropdown-menu {{ class }}" aria-labelledby="dropdown-locale">
+    <ul class="dropdown-menu {{ class|default("") }}" aria-labelledby="dropdown-locale">
     {% for locale in available_locales %}
         {% set current = (locale == current_locale) ? "active" : null %}
         <li><a href="{{ path(switch_route, {locale: locale}) }}" {{ html_attributes({"class": "dropdown-item "~current}) }}>
