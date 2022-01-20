@@ -1,0 +1,31 @@
+
+base_controller:
+    resource: "@BaseBundle/Controller"
+    type: annotation
+    prefix: /
+
+# OAuth routes
+oauth_facebook:
+    path: /connect/facebook
+oauth_google:
+    path: /connect/google
+oauth_instagram:
+    path: /connect/instagram
+oauth_paypal:
+    path: /connect/paypal
+oauth_spotify:
+    path: /connect/spotify
+oauth_twitter:
+    path: /connect/twitter
+oauth_twitch:
+    path: /connect/twitch
+
+# 2fa_login:
+#     path: /login/2fa
+#     defaults:
+#         # "scheb_two_factor.form_controller" references the controller service provided by the bundle.
+#         # You don't HAVE to use it, but - except you have very special requirements - it is recommended.
+#         _controller: "scheb_two_factor.form_controller:form"
+
+# 2fa_login_check:
+#     path: /login/2fa/check
