@@ -17,15 +17,19 @@ trait ProxyTrait
         if(!$this->hasProxy())
             throw new \Exception("Proxy not available.. did you forgot to call self::setProxy(Object) ?");
 
+        // Getter from proxy
         if(method_exists(get_class($this->_proxy), $methodOrProperty))
             return $this->_proxy->{$methodOrProperty}(...$arguments);
         if(method_exists(get_class($this->_proxy), "get".mb_ucfirst($methodOrProperty)))
             return $this->_proxy->{"get".mb_ucfirst($methodOrProperty)}(...$arguments);
 
+        // Proxy variable
         $accessor = PropertyAccess::createPropertyAccessor();
         if ($accessor->isReadable($this->_proxy, $methodOrProperty))
             return $accessor->getValue($this->_proxy, $methodOrProperty);
-        
-        throw new \BadMethodCallException("Method (or property accessor) \"$methodOrProperty\" not found in ". get_class($this->_proxy));
+
+        // Fallback
+        return $this->getGlobals()[$methodOrProperty] 
+                ?? throw new \BadMethodCallException("Variable \"".$methodOrProperty."\" does not exist.");
     }
 }

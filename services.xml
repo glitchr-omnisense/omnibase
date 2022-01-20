@@ -317,6 +317,7 @@
             <argument type="service" id=".inner"/>
             <argument type="service" id="base.settings" />
             <argument type="service" id="referrer" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
