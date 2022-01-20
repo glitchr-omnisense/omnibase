@@ -29,7 +29,12 @@ trait ProxyTrait
             return $accessor->getValue($this->_proxy, $methodOrProperty);
 
         // Fallback
-        return $this->getGlobals()[$methodOrProperty] 
-                ?? throw new \BadMethodCallException("Variable \"".$methodOrProperty."\" does not exist.");
+        if(method_exists(get_class($this), "getGlobals")) {
+        
+            $global = $this->getGlobals()[$methodOrProperty] ?? null;
+            if($global !== null) return $global;
+        }
+
+        throw new \BadMethodCallException("Variable \"".$methodOrProperty."\" does not exist.");
     }
 }
