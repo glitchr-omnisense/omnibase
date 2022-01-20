@@ -8,6 +8,6 @@
 
     <p>{{page.content|raw}}</p>
 
-    <a href="{{ app.referrer.getUrl() }}">Retour à la page précédente</a>
+    <div class="page-referer">{{ '@messages.base.return'|trans([app.referrer.getUrl()])|raw }}<p>
 </article>
 {% endblock %}

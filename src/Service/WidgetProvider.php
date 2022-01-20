@@ -33,7 +33,7 @@ class WidgetProvider implements WidgetProviderInterface
         if($this->uuidByPath[$path] ?? null)
             $slot = $this->widgets[$this->uuidByPath[$path]] ?? null;
 
-        $slot = $slot ?? $this->widgetSlotRepository->findOneByPath($path);
+        $slot = $slot ?? $this->widgetSlotRepository->cacheOneByPath($path);
         $this->uuidByPath[$path] = $slot ? $slot->getUuid() : null;
         $uuid = $this->uuidByPath[$path] ?? null;
 

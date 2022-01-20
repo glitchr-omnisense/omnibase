@@ -25,7 +25,7 @@ class LoginType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => User::class,
-            'username' => null, // to pass variable from controller to Type
+            'identifier' => null, // to pass variable from controller to Type
             'allow_extra_fields' => true
         ]);
     }
@@ -33,11 +33,10 @@ class LoginType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('username', TextType::class, [
-                'label' => "Username",
+            ->add('email', TextType::class, [
                 'attr'  => [
                     'id' => "inputUsername",  // used in Symfony kernel
-                    'value' => $options["username"] ?? $options["email"] ?? ""
+                    'value' => $options["identifier"] ?? ""
                 ]
             ])
             ->add('password', PasswordType::class, [

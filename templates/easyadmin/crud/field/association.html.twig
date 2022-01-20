@@ -88,7 +88,7 @@
             {% set icon = field.formattedValue.first.__staticIconize()[0] ?? null %}
         {% endif %}
 
-        {% set icon  = icon|iconify({class:"fa-fw"})|default(icon|imagify)|default(null) %}
+        {% set icon  = icon|iconify|default(null) %}
         {% if icon is not null %}
             {% set label = "<span class='label'>"~(field.formattedValue.first|capitalize)~"</span>" %}
         {% else %}
@@ -97,17 +97,17 @@
 
         <span class="badge badge-secondary">
             {% if field.customOptions.get('relatedUrl') is not null %}
-            <a href="{{ field.customOptions.get('relatedUrl') }}">{{ label|raw }}{{icon|raw}}</a>
+            <a href="{{ field.customOptions.get('relatedUrl') }}">{{ label|striptags }}{{icon|raw}}</a>
             {% else %}
             <div>
                 {% if showFirst == 1 %}
-                    {{ label|raw }}
+                    {{ label|striptags }}
                 {% elseif showFirst == 2 %}
                     {{icon|raw}}
                 {% elseif field.textAlign == "left" %}
-                    {{icon|raw}}{{ label|raw }}
+                    {{icon|raw}}{{ label|striptags }}
                 {% else %}
-                    {{ label|raw }}{{icon|raw}}
+                    {{ label|striptags }}{{icon|raw}}
                 {% endif %}
             </div>
             {% endif %}

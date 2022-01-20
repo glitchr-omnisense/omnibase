@@ -33,7 +33,7 @@ class LocaleController extends AbstractController
             $request->getSession()->remove('_locale');
         else if (in_array($locale, $this->localeProvider->getAvailableLocales()))
             $request->getSession()->set('_locale', $locale);
-        
+
         return $this->redirect($referrer);
     }
 }

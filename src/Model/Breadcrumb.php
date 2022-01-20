@@ -50,8 +50,10 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
             $path = rtrim($path === null ? $request->getPathInfo() : dirname($path), "/");
             $controller = $this->getController($path);
             if(!$controller) continue;
-            
+
             list($class, $method) = explode("::", $controller);
+            if(!class_exists($class)) continue;
+
             $reflClass   = $this->annotationReader->getReflClass($class);
             $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? [];
 
@@ -72,9 +74,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
             )], $routeParameters);
 
             $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
+            if(!$route || $label == "@controllers.".$transPath.".title") continue;
 
-            if($route) $this->prependItem($label, $routeName, $routeParameters ?? []);
-            
+            $this->prependItem($label, $routeName, $routeParameters ?? []);
             $icons[] = $icon;
         }
 

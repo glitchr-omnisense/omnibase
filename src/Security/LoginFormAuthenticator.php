@@ -62,7 +62,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): Passport
     {
-        $identifier = $request->get('login')["username"] ?? $request->get("username") ?? "";
+        $identifier = $request->get('login')["email"] ?? $request->get("email") ?? "";
         $password   = $request->get('login')["password"] ?? $request->get("password") ?? "";
         $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 

@@ -132,7 +132,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $fields = array_merge([
             "base.settings.logo"                 => ["form_type" => ImageType::class],
-            "base.settings.logo.backoffice"      => ["form_type" => ImageType::class],
+            "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
             "base.settings.title"                => [],
             "base.settings.slogan"               => [],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],

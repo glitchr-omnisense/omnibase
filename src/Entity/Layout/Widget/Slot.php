@@ -17,6 +17,8 @@ use Base\Repository\Layout\Widget\SlotRepository;
 
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * 
  * @DiscriminatorEntry( value = "slot" )
  *
  * @AssertBase\UniqueEntity(fields={"path"}, groups={"new", "edit"})

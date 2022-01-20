@@ -23,15 +23,15 @@ class ImageController extends AbstractController
     }
 
     /**
-     * @Route("/images/{hashid}.webp", name="base_image_webp")
+     * @Route("/images/{hashid}.webp", name="ux_image_webp")
      */
     public function ImageWebp(Request $request, $hashid): Response
     {
-        return $this->redirectToRoute("base_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        return $this->redirectToRoute("ux_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
     }
     
     /**
-     * @Route("/images/{hashid}", name="base_image")
+     * @Route("/images/{hashid}", name="ux_image")
      */
     public function Image(Request $request, $hashid = null): Response
     {
@@ -45,12 +45,12 @@ class ImageController extends AbstractController
     }
 
     /**
-     * @Route("/webp/{hashid}", name="base_webp")
+     * @Route("/webp/{hashid}", name="ux_webp")
      */
     public function Webp(Request $request, $hashid = null): Response
     {
         if(!$this->imageService->isWebpEnabled())
-            return $this->redirectToRoute("base_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->redirectToRoute("ux_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $args = $this->imageService->decode($hashid);
         $path = stream_get_meta_data(tmpfile())['uri'];

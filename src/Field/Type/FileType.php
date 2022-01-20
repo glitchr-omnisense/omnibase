@@ -54,6 +54,7 @@ class FileType extends AbstractType implements DataMapperInterface
     {
         $resolver->setDefaults([
             'class'        => null,
+            'empty_data'   => null,
 
             'dropzone'     => [],
             'dropzone-js'  => $this->baseService->getParameterBag("base.vendor.dropzone.javascript"),
@@ -105,8 +106,8 @@ class FileType extends AbstractType implements DataMapperInterface
 
             if(!$options["dropzone"] || !$options["multiple"])
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
-                    "required" => $options["required"] && ($data === null),
-                    "multiple" => $options["multiple"],
+                    "required"    => $options["required"] && ($data === null),
+                    "multiple"    => $options["multiple"],
                     "constraints" => $constraints
             ]);
 
@@ -115,7 +116,7 @@ class FileType extends AbstractType implements DataMapperInterface
         });
 
         // Process the uploaded file on submission
-        $builder->addEventListener(FormEvents::PRE_SUBMIT, function (FormEvent $event) use ($options) {
+        $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event) use ($options) {
 
             $data = $event->getData();
             if(is_string($data)) {
@@ -248,5 +249,6 @@ class FileType extends AbstractType implements DataMapperInterface
         $processedData = $childForm['file']->getData() ?? null;
 
         $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
+        dump($viewData);
     }
 }

@@ -18,7 +18,7 @@ class SitemapController extends AbstractController
     use BaseTrait;
 
     /**
-     * @Route("/sitemap.xml", name="base_sitemap")
+     * @Route("/sitemap.xml", name="ux_sitemap")
      */
     public function Sitemap(Request $request, AnnotationReader $annotationReader, RouterInterface $router): XmlResponse
     {

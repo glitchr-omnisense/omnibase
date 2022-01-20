@@ -16,6 +16,23 @@ class ServiceEntityParser
     protected $method;
     protected $args;
 
+    public const REQUEST_FIND      = "find";
+    public const REQUEST_CACHE     = "cache";
+    public const REQUEST_COUNT     = "count";
+    public const REQUEST_DISTINCT  = "distinctCount";
+    public const REQUEST_LENGTH    = "lengthOf";
+
+    public const SPECIAL_ALL    = "All";
+    public const SPECIAL_ONE    = "One";
+    public const SPECIAL_ATMOST = "AtMost";
+    public const SPECIAL_LAST   = "Last";
+    public const SPECIAL_RAND   = "Randomly";
+    protected static function getSpecials(): array 
+    { 
+        return [self::SPECIAL_ALL, self::SPECIAL_ONE, self::SPECIAL_ATMOST, self::SPECIAL_LAST, self::SPECIAL_RAND]; 
+    }
+
+    
     // Default options
     public const OPTION_EQUAL         = "EqualTo";
     public const OPTION_NOT_EQUAL     = "NotEqualTo";
@@ -48,8 +65,9 @@ class ServiceEntityParser
     
     // Separators
     public const SEPARATOR     = ":"; // Field separator
-    public const SEPARATOR_OR   = "Or";
-    public const SEPARATOR_AND  = "And";
+    public const SEPARATOR_OR  = "Or";
+    public const SEPARATOR_AND = "And";
+    public const SEPARATOR_FOR = "For";
     public const SEPARATOR_BY  = "By";
 
     // Count options
@@ -58,6 +76,7 @@ class ServiceEntityParser
 
     protected $operator = null;
     protected $column = null;
+    protected bool $cacheable = false;
     protected array $criteria = [];
     protected array $options  = [];
 
@@ -72,18 +91,40 @@ class ServiceEntityParser
         $this->criteria = [];
         $this->options = [];
         $this->operator = null;
+
+        foreach(self::getSpecials() as $special) {
+
+            if($special == self::SPECIAL_ALL) continue;
+            $specialMethod = "__".self::REQUEST_FIND.$special.self::SEPARATOR_BY;
+
+            if(!method_exists($this, $specialMethod))
+                throw new Exception("Special \"$special\" option is missing its find method : ".$specialMethod);
+        }
     }
 
+    protected function __findAll        (                      $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->getQueryBuilder(       [], $orderBy, $groupBy, $limit, $offset)->getQuery();   }
+    protected function __findBy         (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();   }
+    protected function __findRandomlyBy (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { $orderBy = array_merge(["id" => "rand"], $orderBy ?? []); return $this->__findBy($criteria, $orderBy, $groupBy, $limit, $offset);   }
+
+    protected function __findOneBy      (array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findBy   ($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
+    protected function __findLastBy     (array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
+    protected function __findAtMostBy   (array $criteria = [], $orderBy = null, $groupBy = null) { $limit = array_unshift($criteria); return $this->__findBy($criteria, $orderBy, $groupBy, $limit, null)->getResult(); }
+
+    protected function __lengthOf     (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null) {  return $this->getQueryBuilderWithLength($criteria, $orderBy, $groupBy, $limit, $offset); }
+    protected function __count        (array $criteria, ?string $mode = self::COUNT_ALL, ?array $orderBy = null, $groupBy = null) {  return $this->getQueryBuilderWithCount($criteria, $mode, $orderBy, $groupBy); }
+    protected function __distinctCount(array $criteria, $groupBy = null): int {  return $this->__count($criteria, self::COUNT_DISTINCT, $groupBy); }
+    
     public function parse($method, $arguments) : mixed
     {
         // Parse method and call it
         list($method, $arguments) = $this->__parse($method, $arguments);
         $ret = $this->$method(...$arguments);
-
+        
         // Reset internal variables
         $this->criteria = [];
         $this->options = [];
         $this->operator = null;
+        $this->cacheable = false;
 
         return $ret;
     }
@@ -158,6 +199,8 @@ class ServiceEntityParser
 
     protected function __parse($method, $arguments)
     {
+        $method = str_strip($method, "__");
+
         // Head parameters (depends on the method name) + default ones
         // Default parameters:
         // - "MAGIC ARGUMENTS"
@@ -202,7 +245,6 @@ class ServiceEntityParser
 
                 str_contains($field, self::SEPARATOR_AND      )  ||
                 str_contains($field, self::SEPARATOR_OR       )  ||
-                str_contains($field, self::SEPARATOR_BY       )  ||
                 str_contains($field, self::SEPARATOR         ))
 
                 throw new Exception(
@@ -251,19 +293,46 @@ class ServiceEntityParser
         }
 
         // Extract method name and extra parameters
-        if (preg_match('/^(find(?:One|Randomly|AtMost|Last)?(?:By)?)(.*)/', $method, $matches)) {
+        $findRequest = self::REQUEST_CACHE."|".self::REQUEST_FIND;
+        $countRequest = self::REQUEST_DISTINCT."|".self::REQUEST_COUNT;
+        $lengthRequest = self::REQUEST_LENGTH;
+        $specials = implode("|", self::getSpecials());
+
+        $by = self::SEPARATOR_BY;
+        $for = self::SEPARATOR_FOR;
+
+        if (preg_match('/^((?:'.$findRequest.')(?:'.$specials.')?'.$by.')(.*)/', $method, $matches)) {
 
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[2];
 
-        } else if (preg_match('/^(distinctCount|count)(?:For([^By]*))?(?:By)?(.*)/', $method, $matches)) {
+        } else if (preg_match('/^((?:'.$findRequest.')(?:'.$specials.')?)(.*)/', $method, $matches)) {
+
+            $magicFn = $matches[1] ?? "";
+            $byNames = $matches[2];
+
+        } else if (preg_match('/^('.$countRequest.')(?:'.$for.'([^'.$by.']*))?'.$by.'(.*)/', $method, $matches)) {
             
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
 
-        } else if (preg_match('/^(lengthOf)([^By]+)(?:By)?(.*)/', $method, $matches)) {
+        } else if (preg_match('/^('.$countRequest.')(?:'.$for.'([^'.$by.']*))?(.*)/', $method, $matches)) {
+            
+            $magicFn = $matches[1] ?? "";
+            $byNames = $matches[3] ?? "";
+
+            $this->setColumn(lcfirst($matches[2]) ?? null);
+
+        } else if (preg_match('/^('.$lengthRequest.')([^'.$by.']+)'.$by.'(.*)/', $method, $matches)) {
+            
+            $magicFn = $matches[1] ?? "";
+            $byNames = $matches[3] ?? "";
+
+            $this->setColumn(lcfirst($matches[2]) ?? null);
+
+        } else if (preg_match('/^('.$lengthRequest.')([^'.$by.']+)(.*)/', $method, $matches)) {
             
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[3] ?? "";
@@ -274,7 +343,7 @@ class ServiceEntityParser
 
             throw new Exception(sprintf(
                 'Undefined method "%s". The method name must start with ' .
-                'either findBy, findOne, findOneBy, findRandomly, findRandomlyBy, findAtMost, findAtMostBy, findLast, findLastBy, distinctCount, count, lengthOf!',
+                'either cache[One|Randomly|AtMost|Last|All][By], find[One|Randomly|AtMost|Last][By], distinctCount, count, lengthOf!',
                 $method
             ));
         }
@@ -535,9 +604,26 @@ class ServiceEntityParser
         foreach($arguments as $i => $arg) 
             $magicArgs[$i] = $arg; // +1 because of array shift
 
+        // Mark as cacheable (to be used in self::getQueryBuilder)
+        if(str_starts_with($magicFn, self::REQUEST_CACHE)) {
+
+            $magicFn = self::REQUEST_FIND.substr($magicFn, strlen(self::REQUEST_CACHE));
+            $this->cacheable = true;
+        }
+
+        if(str_starts_with($magicFn, self::REQUEST_FIND.self::SPECIAL_ALL)) {
+            
+            if(str_ends_with($magicFn, self::SEPARATOR_BY))
+                $magicFn = substr($magicFn, 0, -strlen(self::SEPARATOR_BY));
+
+        } else if(!str_ends_with($magicFn, self::SEPARATOR_BY)) { // "Find" method without "By" must include a criteria to call __findBy
+
+            $magicFn .= self::SEPARATOR_BY;
+            array_unshift($magicArgs);
+        }
+
         $magicFn = "__".$magicFn;
         $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []);
-
         return [$magicFn, $magicArgs];
     }
 
@@ -546,7 +632,7 @@ class ServiceEntityParser
         $fieldName = $this->getAlias($field[0]);
         $fieldID   = implode("_", $field);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
-        
+
         $isInstanceOf  = $this->findCustomOption($fieldRoot, self::OPTION_INSTANCEOF);
         $isPartial     = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
         $isInsensitive = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
@@ -702,7 +788,8 @@ class ServiceEntityParser
         $qb = $this->serviceEntity
                    ->createQueryBuilder('t')
                    ->setMaxResults($limit ?? null)
-                   ->setFirstResult($offset ?? null);
+                   ->setFirstResult($offset ?? null)
+                   ->setCacheable($this->cacheable);
 
         $this->innerJoinList[spl_object_hash($qb)] = [];
 
@@ -885,20 +972,4 @@ class ServiceEntityParser
 
         return $qb;
     }
-
-    protected function __findBy        (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset)->getQuery();   }
-    protected function __find          (                      $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->__findBy       ([], $orderBy, $groupBy, $limit, $offset);   }
-    protected function __findRandomlyBy(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { $orderBy = array_merge(["id" => "rand"], $orderBy ?? []); return $this->__findBy($criteria, $orderBy, $groupBy, $limit, $offset);   }
-    protected function __findRandomly  (                      $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { $orderBy = array_merge(["id" => "rand"], $orderBy ?? []); return $this->__find  ($orderBy, $groupBy, $limit, $offset);   }
-
-    protected function __findOneBy   (array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findBy   ($criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
-    protected function __findOne     (                      $orderBy = null, $groupBy = null) { return $this->__find     ($orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
-    protected function __findLastBy  (array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
-    protected function __findLast    (                      $orderBy = null, $groupBy = null) { return $this->__findOne  (array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
-    protected function __findAtMostBy(array $criteria = [], $orderBy = null, $groupBy = null) { $limit = array_unshift($criteria); return $this->__findBy($criteria, $orderBy, $groupBy, $limit, null)->getResult(); }
-    protected function __findAtMost  (                      $orderBy = null, $groupBy = null) { $limit = array_unshift($criteria); return $this->__find  ($criteria, $orderBy, $groupBy, $limit, null)->getResult(); }
-
-    protected function __lengthOf     (array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null) {  return $this->getQueryBuilderWithLength($criteria, $orderBy, $groupBy, $limit, $offset); }
-    protected function __count        (array $criteria, ?string $mode = self::COUNT_ALL, ?array $orderBy = null, $groupBy = null) {  return $this->getQueryBuilderWithCount($criteria, $mode, $orderBy, $groupBy); }
-    protected function __distinctCount(array $criteria, $groupBy = null): int {  return $this->__count($criteria, self::COUNT_DISTINCT, $groupBy); }
 }

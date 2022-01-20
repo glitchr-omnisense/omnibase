@@ -31,7 +31,7 @@ login:
 
 base:
     csrfToken: "Jeton CSRF invalide. Merci de recommencer."
-    return: "Page précédente"
+    return: "<a href=\"{0}\">Go back to previous page</a>"
     years: "{0, plural,
                 =0 { }
                 =1 {# an }

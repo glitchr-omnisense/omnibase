@@ -33,7 +33,8 @@ class Link extends Widget implements IconizeInterface
         return $this;
     }
 
-    // public function getIcon()      { return $this->getAttribute()->getIcon(); }
-    // public function generateHtml() { return $this->getAttribute()->getValue(); }
-    // public function generateUrl()  { return $this->getAttribute()->getValue(); }
+    public function __toString() 
+    {
+        return "<a href='".$this->getHyperlink()->generateUrl()."'>".$this->getTitle()."</a>";
+    }
 }

@@ -23,10 +23,33 @@ class Referrer
         $this->assetExtension = $assetExtension;
     }
 
+    public function getAsset(string $url): string
+    {
+        $url = trim($url);
+        $parseUrl = parse_url($url);
+        if($parseUrl["scheme"] ?? false)
+            return $url;
+
+        $request = $this->requestStack->getCurrentRequest();
+        $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
+
+        $path = trim($parseUrl["path"]);
+        if($path == "/") return $baseDir;
+        else if(!str_starts_with($path, "/"))
+            $path = $baseDir."/".$path;
+
+        return $path;
+    }
+
     public function getRoute(?string $path = null): string
     {
         if($path === null) return "";
         
+        $baseDir = $this->getAsset("/");
+        $path = parse_url($path, PHP_URL_PATH);
+        if ($baseDir && strpos($path, $baseDir) === 0)
+            $path = substr($path, strlen($baseDir));
+
         try { $routeMatch = $this->router->match($path); }
         catch (ResourceNotFoundException $e) { return ''; }
 

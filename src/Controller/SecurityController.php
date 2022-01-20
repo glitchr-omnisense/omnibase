@@ -92,14 +92,14 @@ class SecurityController extends AbstractController
 
         // Generate form
         $user = new User();
-        $form = $this->createForm(LoginType::class, $user, ["username" => $lastUsername]);
+        $form = $this->createForm(LoginType::class, $user, ["identifier" => $lastUsername]);
         $form->handleRequest($request);
 
         // Remove expired tokens
         $user->removeExpiredTokens();
 
         return $this->render('@Base/security/login.html.twig', [
-            "username" => $lastUsername,
+            "identifier" => $lastUsername,
             "form" => $form->createView()
         ]);
     }

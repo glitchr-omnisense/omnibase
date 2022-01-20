@@ -29,8 +29,8 @@ logout:
 login:
     title: "Sign In"
 
-base: 
-    return: "Go back to previous page"
+base:
+    return: "<a href=\"{0}\">Go back to previous page</a>"
     csrfToken: "Invalid CSRF token. Please try again"
     years: "{0, plural,
                 =0 { }

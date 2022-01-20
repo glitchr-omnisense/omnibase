@@ -1,53 +1,57 @@
-exception:
-    title: "Oops! An Error Occurred !"
-    description: "Something is broken and this is an unexcepted error.<br/>
-          Please <a href=\"mailto:{0}\">let us</a> know what you were doing when this error occurred.<br/>
-          We will fix it as soon as possible. Sorry for any inconvenience caused."
-    return: "Return to the <a href=\"{0}\">home page</a>."
 
-    unknown: "Unknown Error"
-    400: "Bad Request"
-    401: "Not Authorized"
-    402: "Payment Required"
-    403: "Forbidden Access"
-    404: "Page Not Found"
-
-    500: "Internal Server"
-    501: "Not Implemented"
-    502: "Bad Gateway"
-    503: "Service Unavailable"
-
-maintenance:
-    title: "Temporarily down for maintenance!"
-    description: "{downtime, plural,
-            =0 {}
-            other {We're currently under maintenance since {0} at {1}. We will soon be back with you.}
-          }"
-
-    estimate: "{uptime, plural,
-                  =0 {There is no time estimate at the moment. Please, check back with us later.}
-                  other {The remaining downtime is estimated to be approximately {0} {1} {2}.}
-                }"
-    days: "{0, plural,
-              =0 {}
-              =1 {# day}
-              other {# days}
-            }"
-    hours: "{0, plural,
-              =0 {}
-              =1 {# hour}
-              other {# hours}
-            }"
-    minutes: "{0, plural,
-                =1 {# minute}
-                other {# minutes}
-              }"
-    progress: "Progression {0}%"
-
-security_register:
-    validation_required: This account requires to be verified
+widget_page_slug:
+  title: "{slug}"
 
 base_thread_search:
+  title: "Find in the title field"
   content: "Find in content box.."
   excerpt: "Find in the excerpt"
-  title: "Find in the title field"
+
+exception:
+  title: "Oops! An Error Occurred !"
+  description: "Something is broken and this is an unexcepted error.<br/>
+        Please <a href=\"mailto:{0}\">let us</a> know what you were doing when this error occurred.<br/>
+        We will fix it as soon as possible. Sorry for any inconvenience caused."
+  return: "Return to the <a href=\"{0}\">home page</a>."
+
+  unknown: "Unknown Error"
+  400: "Bad Request"
+  401: "Not Authorized"
+  402: "Payment Required"
+  403: "Forbidden Access"
+  404: "Page Not Found"
+
+  500: "Internal Server"
+  501: "Not Implemented"
+  502: "Bad Gateway"
+  503: "Service Unavailable"
+
+maintenance:
+  title: "Temporarily down for maintenance!"
+  description: "{downtime, plural,
+          =0 {}
+          other {We're currently under maintenance since {0} at {1}. We will soon be back with you.}
+        }"
+
+  estimate: "{uptime, plural,
+                =0 {There is no time estimate at the moment. Please, check back with us later.}
+                other {The remaining downtime is estimated to be approximately {0} {1} {2}.}
+              }"
+  days: "{0, plural,
+            =0 {}
+            =1 {# day}
+            other {# days}
+          }"
+  hours: "{0, plural,
+            =0 {}
+            =1 {# hour}
+            other {# hours}
+          }"
+  minutes: "{0, plural,
+              =1 {# minute}
+              other {# minutes}
+            }"
+  progress: "Progression {0}%"
+
+security_register:
+  validation_required: This account requires to be verified

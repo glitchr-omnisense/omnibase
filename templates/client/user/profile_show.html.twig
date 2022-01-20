@@ -1,6 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}Member #{{ user.id }}: {{ user.username }}{% endblock %}
+{% block title %}Member #{{ user.id }}: {{ user }}{% endblock %}
 {% block content %}
 
     {% if user is defined %}

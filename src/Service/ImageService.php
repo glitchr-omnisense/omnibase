@@ -119,7 +119,6 @@ class ImageService implements ImageServiceInterface
 
             $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $filters+[$lastFilter]);
             $pathSource = $this->publicDir."/".str_strip($path, "imagine/");
-
             $path = path_suffix($path, $pathSuffixes);
 
             if(!$this->filesystem->getOperator()->fileExists($path)) {

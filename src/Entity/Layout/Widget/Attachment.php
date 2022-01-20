@@ -36,6 +36,12 @@ class Attachment extends Widget implements IconizeInterface
         return $this;
     }
 
+    public function __toString() 
+    {
+        $path = $this->getTwigExtension()->getRoutingExtension()->getPath("widget_attachment", ["slug" => $this->getSlug()]);
+        return "<a href='".$path."'>".$this->getTitle()."</a>";
+    }
+    
     /**
      * @ORM\Column(type="text")
      * @Uploader(storage="local.storage", public="/storage", size="4096K")
