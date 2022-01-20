@@ -22,13 +22,13 @@ final class LocaleTwigExtension extends AbstractExtension
         ];
     }
 
-    public function renderLocale(string $switchRoute, string $template = "@Base/locale/dropdown.html.twig"): ?string
+    public function renderLocale(string $switchRoute, array $options = [], string $template = "@Base/locale/dropdown.html.twig"): ?string
     {
-        return $this->twig->render($template, [
+        return $this->twig->render($template, array_merge($options, [
                     "switch_route" => $switchRoute,
                     "available_locales" => $this->localeProvider->getAvailableLocales(), 
-                    "current_locale"    => $this->localeProvider->getLocale(), 
-        ]);
+                    "current_locale"    => $this->localeProvider->getLocale() 
+        ]));
     }
 
     public function getName()

@@ -69,6 +69,9 @@
                     .text-right { text-align:left !important; }
                 }
 
+                .navbar-custom-menu {
+                    display:flex !important;
+                }
                 .dropdown-menu { min-width: 200px;}
                 .dropdown-item.label-group:hover { background-color: transparent;  }
                 .dropdown-item.label-group
@@ -91,6 +94,24 @@
                 .d-inline .dropdown-menu
                 {
                     transform:translate3d(39px, 10px, 0px);
+                }
+
+                .locale-dropdown .dropdown-toggle:after
+                {
+                    display:none;
+                }
+                .locale-dropdown .dropdown-toggle i
+                {
+                    margin:0;
+                }
+
+                .locale-dropdown .dropdown-toggle
+                {
+                    font-size:32pt;
+                    margin:0 !important;
+                    border:none !important;
+                    background:none !important;
+                    box-shadow:none !important;
                 }
 
                 .dropdown .actions .action-icon { top: 0 !important;}
@@ -312,12 +333,18 @@
                 {
                     height:125px;
                 }
-                
-            
-                .content-wrapper
-                {
-                    margin-top:2.5em !important;
+
+                .content-wrapper { margin-top:2.5em !important; }
+
+                .user-menu-wrapper 
+                { 
+                    display:flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    margin:0.25em !important;
                 }
+
                 .user-menu-wrapper .user-details .user-name { margin-left: 15px; }
 
                 .user-avatar, .thumbnail-avatar { border-radius:50% !important; }
@@ -733,8 +760,12 @@
                             </div>
 
                             <div class="navbar-custom-menu">
+                                <div class=" user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                                    {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }} 
+                                </div>
                                 {% block header_custom_menu %}
-                                    <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                                <div class=" user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                                    <div class="dropdown">
                                         <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
                                             {{ user_menu_avatar }}
                                             {% if ea.userMenu.isNameDisplayed %}
@@ -744,6 +775,7 @@
 
                                         {{ user_menu_dropdown }}
                                     </div>
+                                </div>
                                 {% endblock header_custom_menu %}
                             </div>
                         {% endblock content_top_header %}
