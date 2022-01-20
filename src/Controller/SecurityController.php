@@ -26,6 +26,7 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Base\Entity\User\Token;
 use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
+use Base\Component\HttpFoundation\Referrer;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Doctrine\ORM\EntityManager;
@@ -45,7 +46,7 @@ class SecurityController extends AbstractController
     /**
      * @Route("/login", name="security_login")
      */
-    public function Login(Request $request, AuthenticationUtils $authenticationUtils): Response
+    public function Login(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
         if($this->baseService->isMaintenance()) {
@@ -70,20 +71,21 @@ class SecurityController extends AbstractController
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        $targetPath = strval($referrer);
+        $targetRoute = $this->baseService->getRoute($targetPath);
+
         // Redirect to the right page when access denied
         if ( ($user = $this->getUser()) && $user->isPersistent() ) {
 
             if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
 
                 // Check if target path provided via $_POST..
-                $targetPath = $request->request->get("_target_path");
-                $targetRoute = $this->baseService->getRoute($request->request->get("_target_path"));
-                if ($targetPath &&
-                    $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
-                    $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )
+                $targetPath = strval($referrer);
+                $targetRoute = $this->baseService->getRoute($targetPath);
+                if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
                     return $this->baseService->redirect($targetPath);
 
-                return $this->redirectToRoute($request->isMethod('POST') ? "base_user_settings" : $this->baseService->getRoute("/"));
+                return $this->redirectToRoute($request->isMethod('POST') ? "user_settings" : $this->baseService->getRoute("/"));
             }
 
             $notification = new Notification("login.partial");
@@ -160,7 +162,7 @@ class SecurityController extends AbstractController
 
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent())
-            return $this->redirectToRoute('base_user_profile');
+            return $this->redirectToRoute('user_profile');
 
         // Prepare registration form
         $newUser = new User();
@@ -214,7 +216,7 @@ class SecurityController extends AbstractController
 
                 $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getDeadtimeStr()]);
                 $notification->send("danger");
-            
+
             } else {
 
                 $verifyEmailToken = new Token("verify-email", 24*3600);
@@ -228,7 +230,7 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
-        return $this->redirectToRoute('base_user_profile');
+        return $this->redirectToRoute('user_profile');
     }
 
     /**
@@ -270,7 +272,7 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
-        return $this->redirectToRoute('base_user_profile');
+        return $this->redirectToRoute('user_profile');
     }
 
     /**
@@ -306,7 +308,7 @@ class SecurityController extends AbstractController
         }
 
         $this->entityManager->flush();
-        return $this->redirectToRoute('base_user_profile');
+        return $this->redirectToRoute('user_profile');
     }
 
     /**
@@ -382,7 +384,7 @@ class SecurityController extends AbstractController
     public function ResetPasswordRequest(Request $request): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent())
-            return $this->redirectToRoute('base_user_profile');
+            return $this->redirectToRoute('user_profile');
 
         $form = $this->createForm(ResetPasswordType::class);
         $form->handleRequest($request);
@@ -423,7 +425,7 @@ class SecurityController extends AbstractController
     public function ResetPasswordResponse(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
         if (($user = $this->getUser()) && $user->isPersistent())
-            return $this->redirectToRoute('base_user_profile');
+            return $this->redirectToRoute('user_profile');
             
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {

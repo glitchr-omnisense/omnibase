@@ -23,7 +23,7 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @Route("/profile/edit", name="base_user_profileEdit")
+     * @Route("/profile/edit", name="user_profileEdit")
      */
     public function Edit()
     {
@@ -34,8 +34,8 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @Route("/profile", name="base_user_profile")
-     * @Route("/profile/{id}", name="base_user_profileId")
+     * @Route("/profile", name="user_profile")
+     * @Route("/profile/{id}", name="user_profileId")
      */
     public function Show($id = -1)
     {

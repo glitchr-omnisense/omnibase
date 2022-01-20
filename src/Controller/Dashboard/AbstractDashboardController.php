@@ -387,7 +387,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setAvatarUrl($avatar)
             ->addMenuItems([
                 MenuItem::linkToUrl('My Profile', 'fas fa-fw fa-id-card', $this->baseService->getUrl("base_profile")),
-                MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("base_user_settings"))
+                MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("user_settings"))
             ])->setAvatarUrl($avatar);
     }
 

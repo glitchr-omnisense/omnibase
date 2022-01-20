@@ -1,3 +1,14 @@
+widget_page_slug:
+  title: "{slug}"
+
+search:
+  content: "Rechercher dans le contenu"
+  excerpt: "Rechercher dans l'extrait"
+  title: "Rechercher dans le titre"
+
+security_login:
+  title: "Se Connecter"
+
 exception:
     title: "Oups! Une erreur s'est produite !"
     description: "Cette erreur est inattendue, mais on travaille à la réparer !<br/>
@@ -41,8 +52,3 @@ maintenance:
                 other {# minutes}
               }"
     progress: "Progression {0}%"
-
-search:
-  content: "Rechercher dans le contenu"
-  excerpt: "Rechercher dans l'extrait"
-  title: "Rechercher dans le titre"

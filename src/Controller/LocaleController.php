@@ -34,6 +34,7 @@ class LocaleController extends AbstractController
         else if (in_array($locale, $this->localeProvider->getAvailableLocales()))
             $request->getSession()->set('_locale', $locale);
 
-        return $this->redirect($referrer);
+        $referrerUrl = strval($referrer);
+        return $this->redirect($referrerUrl ? $referrerUrl : $request->getBasePath());
     }
 }

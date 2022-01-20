@@ -96,10 +96,6 @@
                     transform:translate3d(39px, 10px, 0px);
                 }
 
-                .locale-dropdown .dropdown-toggle:after
-                {
-                    display:none;
-                }
                 .locale-dropdown .dropdown-toggle i
                 {
                     margin:0;
@@ -107,7 +103,7 @@
 
                 .locale-dropdown .dropdown-toggle
                 {
-                    font-size:32pt;
+                    font-size:18pt;
                     margin:0 !important;
                     border:none !important;
                     background:none !important;
@@ -760,9 +756,6 @@
                             </div>
 
                             <div class="navbar-custom-menu">
-                                <div class=" user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
-                                    {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }} 
-                                </div>
                                 {% block header_custom_menu %}
                                 <div class=" user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
                                     <div class="dropdown">
@@ -777,6 +770,9 @@
                                     </div>
                                 </div>
                                 {% endblock header_custom_menu %}
+                                <div class=" user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+                                    {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }} 
+                                </div>
                             </div>
                         {% endblock content_top_header %}
                     </aside>

@@ -22,9 +22,7 @@ use Endroid\QrCode\ErrorCorrectionLevel\ErrorCorrectionLevelHigh;
 use Endroid\QrCode\RoundBlockSizeMode\RoundBlockSizeModeMargin;
 use Endroid\QrCode\Writer\PngWriter;
 
-use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface as GoogleAuthenticatorTwoFactorInterface;
 use Scheb\TwoFactorBundle\Model\Totp\TwoFactorInterface as TotpTwoFactorInterface;
-use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticatorInterface;
 use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInterface;
 
 class SettingsController extends AbstractController
@@ -67,7 +65,7 @@ class SettingsController extends AbstractController
     }
 
     /**
-     * @Route("/settings", name="base_user_settings")
+     * @Route("/settings", name="user_settings")
      */
     public function Settings()
     {
@@ -76,7 +74,7 @@ class SettingsController extends AbstractController
     }
 
     /**
-     * @Route("/settings/2fa", name="base_user_settings_2fa")
+     * @Route("/settings/2fa", name="user_settings_2fa")
      */
     public function TwoFactorAuthentification(Request $request)
     {
@@ -129,7 +127,7 @@ class SettingsController extends AbstractController
     }
 
      /**
-     * @Route("/settings/2fa/qr-code", name="base_user_settings_2fa_qrcode")
+     * @Route("/settings/2fa/qr-code", name="user_settings_2fa_qrcode")
      */
     public function TwoFactorAuthentification_QrCode()
     {

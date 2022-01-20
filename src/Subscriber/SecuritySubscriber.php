@@ -80,8 +80,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             "/^locale_/", 
             "/^ux_/", 
             "/^maintenance(?:.*)$/", 
-            "/^security(?:.*)$/", 
-            "/^(?:app|base)_user(?:.*)$/"
+            "/^security(?:.*)$/",
         ];
     }
 
@@ -163,7 +162,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         $this->baseService->getEntityManager()->flush();
-        $this->baseService->redirectToRoute("base_user_profile", [], 302);
+        $this->baseService->redirectToRoute("user_profile", [], 302);
     }
 
     public function onApproval(UserEvent $event)
@@ -188,20 +187,32 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
 
+    public function isException($route)
+    {
+        $exceptions = is_string($this->exceptions) ? [$this->exceptions] : $this->exceptions;
+        foreach($exceptions as $pattern) 
+            if (preg_match($pattern, $route)) return true;
+
+        return false;
+    }
+
     public function onReferrerRequest(RequestEvent $event) 
     {
         if(!$event->isMainRequest()) return;
-        if($this->baseService->isProfiler()) return null;
+        if($this->baseService->isProfiler()) return;
 
         $targetPath = strval($this->referrer);
-        $targetRoute = $this->baseService->getRoute($this->referrer);
+        $targetRoute = $this->baseService->getRoute($targetPath);
 
+        $currentRoute = $this->getCurrentRoute($event);
+        if($this->isException($currentRoute)) return;
+        
         $event->getRequest()->getSession()->remove('_security.main.target_path');
         $event->getRequest()->getSession()->remove('_security.account.target_path');
-        $currentRoute = $this->getCurrentRoute($event);
+
         if ($currentRoute != $targetRoute &&
             $currentRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
-            $currentRoute != LoginFormAuthenticator::LOGIN_ROUTE ) {
+            $currentRoute != LoginFormAuthenticator::LOGIN_ROUTE) {
 
             $event->getRequest()->getSession()->set('_target_path', null);
 
@@ -225,6 +236,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
         else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
         
+        $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 
             $notification = new Notification("impersonator", [$user]);
@@ -262,13 +274,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             $response    = $event->getResponse();
             $redirection = $response && $response->getStatusCode() == 302;
             if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
-            else $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $this->exceptions, "callback" => $callbackFn]);
+            else $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
 
         } else {
 
             if (! $user->isApproved()) {
 
-                $this->baseService->redirectToRoute("base_user_profile", [], 302, ["event" => $event, "exceptions" => $this->exceptions, "callback" => function() {
+                $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
 
                     $notification = new Notification("login.pending");
                     $notification->send("warning");

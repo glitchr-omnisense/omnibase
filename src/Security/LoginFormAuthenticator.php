@@ -3,7 +3,7 @@
 namespace Base\Security;
 
 use App\Entity\User;
-
+use Base\Component\HttpFoundation\Referrer;
 use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -40,8 +40,9 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     private $csrfTokenManager;
     private $router;
 
-    public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
+    public function __construct(Referrer $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
     {
+        $this->referrer = $referrer;
         $this->entityManager = $entityManager;
         $this->userRepository = $entityManager->getRepository(User::class);
 
@@ -98,13 +99,12 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         }
 
         // Check if target path provided via $_POST..
-        $targetPath = $request->getSession()->get("_target_path");
-        $targetRoute = $this->baseService->getRoute($request->getSession()->get("_target_path"));
+        $targetPath = $this->referrer;
+        $targetRoute = $this->baseService->getRoute($targetPath);
 
-        $targetPath = $request->getSession()->remove("_target_path");
-        if ($targetPath &&
-            $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
-            $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE )
+        $request->getSession()->remove("_target_path");
+
+        if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
             return $this->baseService->redirectToRoute($targetPath);
 
         return $this->baseService->redirectToRoute($this->baseService->getRoute("/"));

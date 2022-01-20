@@ -255,7 +255,11 @@
             <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
-        <service id="Base\Service\IconService" public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Service\IconService" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="base.service.image" />
+        </service>
+        
         <service id="Base\Model\Icon\FontAwesome">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
@@ -441,6 +445,7 @@
 
         <service id="Base\Security\UserProvider"           />
         <service id="Base\Security\LoginFormAuthenticator">
+            <argument type="service" id="referrer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="router.default" />
             <argument type="service" id="security.csrf.token_manager" />

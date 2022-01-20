@@ -7,6 +7,9 @@ base_thread_search:
   content: "Find in content box.."
   excerpt: "Find in the excerpt"
 
+security_login:
+  title: "Login"
+
 exception:
   title: "Oops! An Error Occurred !"
   description: "Something is broken and this is an unexcepted error.<br/>

@@ -121,8 +121,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('country',         [LocaleProvider::class, 'getCountry']),
             new TwigFilter('country_name',    [LocaleProvider::class, 'getCountryName']),
 
-            new TwigFilter('iconify',         [$this, 'iconify']),
-            new TwigFilter('imagify',         [ImageService::class, 'imagify']),
+            new TwigFilter('iconify',         [IconService::class, 'iconify'], ["is_safe" => ['all']]),
+            new TwigFilter('imagify',         [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
 
             new TwigFilter('mimetype',        [ImageService::class, 'mimetype']),
             new TwigFilter('extension',       [ImageService::class, 'extension']),
@@ -132,11 +132,6 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('image',           [ImageService::class, 'image']),
             new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail'])
         ];
-    }
-
-    public function iconify(null|string|array $icon, array $attributes = []) 
-    {
-        return $this->iconService->iconify($icon, $attributes) ?? $this->imageService->imagify($icon, $attributes);
     }
 
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }

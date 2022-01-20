@@ -74,7 +74,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
             )], $routeParameters);
 
             $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
-            if(!$route || $label == "@controllers.".$transPath.".title") continue;
+            if($label == "@controllers.".$transPath.".title") $label = "";
+
+            if(!$route ) continue;
 
             $this->prependItem($label, $routeName, $routeParameters ?? []);
             $icons[] = $icon;

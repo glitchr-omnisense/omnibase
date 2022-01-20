@@ -2,19 +2,13 @@
 
 namespace Base\Controller\Client\User;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
 
-use App\Form\User\ProfileEditType;
-use App\Form\User\ProfileSearchType;
 use Base\Entity\Thread;
 use Base\Form\Type\Thread\SearchType;
-use Endroid\QrCode\QrCode;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SearchController extends AbstractController
 {
@@ -24,7 +18,7 @@ class SearchController extends AbstractController
     }
 
     /**
-     * @Route("/profile/search", name="base_user_search")
+     * @Route("/profile/search", name="user_search")
      */
     public function Index(Request $request)
     {

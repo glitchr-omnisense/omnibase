@@ -2,10 +2,16 @@
 
 namespace Base\Service;
 
+use Base\Model\IconizeInterface;
 use Base\Model\IconProviderInterface;
 
 class IconService
 {
+    public function __construct(ImageService $imageService)
+    {
+        $this->imageService = $imageService;
+    }
+
     protected $providers = [];
     public function getProviders() { return $this->providers; }
     public function getProvider(string $idOrClass): ?IconProviderInterface 
@@ -34,10 +40,11 @@ class IconService
         return $this;
     }
 
-    public function iconify(null|string|array $icon, array $attributes = []) : ?string
+    public function iconify(null|string|array|IconizeInterface $icon, array $attributes = []) : null|string|array
     {
         if(!$icon) return $icon;
 
+        $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $icon;
         if(is_array($icon)) 
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 
@@ -47,6 +54,6 @@ class IconService
                 return $provider->iconify($icon, $attributes);
         }
 
-        return null;
+        return $this->imageService->imagify($icon, $attributes);
     }
 }
