@@ -30,7 +30,7 @@ trait ProxyTrait
 
         // Fallback
         if(method_exists(get_class($this), "getGlobals")) {
-        
+
             $global = $this->getGlobals()[$methodOrProperty] ?? null;
             if($global !== null) return $global;
         }
