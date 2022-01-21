@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller;
+namespace Base\Controller\UX;
 
 use Base\Annotations\Annotation\Sitemap;
 use Base\Annotations\AnnotationReader;

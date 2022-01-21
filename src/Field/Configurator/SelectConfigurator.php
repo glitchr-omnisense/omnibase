@@ -6,6 +6,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\SelectField;
 use Base\Field\Type\SelectType;
+use Base\Model\Autocomplete;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -70,7 +71,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 if($key > $displayLimit) $formattedValues[$key] = $value;
                 else {
 
-                    $formattedValues[$key] = SelectType::getFormattedValues($value, $dataClass, $this->translator);
+                    $formattedValues[$key] = Autocomplete::getFormattedValues($value, $dataClass, $this->translator);
                     if ($formattedValues[$key] && $dataClassCrudController)
                         $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
                 }
@@ -86,7 +87,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
             $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
 
-            $formattedValues = SelectType::getFormattedValues($field->getValue(), $dataClass, $this->translator);
+            $formattedValues = Autocomplete::getFormattedValues($field->getValue(), $dataClass, $this->translator);
             if ($formattedValues && $dataClassCrudController)
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
         }

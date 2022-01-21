@@ -2,8 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Model\Icon\FontAwesome;
-use Base\Model\IconProviderInterface;
+use Base\Model\IconProvider\FontAwesome;
 use Base\Model\SelectInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller;
+namespace Base\Controller\UX;
 
 use Base\Filter\Base\ImageFilter;
 use Base\Filter\Base\WebpFilter;
@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class ImageController extends AbstractController

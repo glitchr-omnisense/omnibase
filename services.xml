@@ -260,13 +260,13 @@
             <argument type="service" id="base.service.image" />
         </service>
         
-        <service id="Base\Model\Icon\FontAwesome">
+        <service id="Base\Model\IconProvider\FontAwesome">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
             <bind key="$javascript">%base.vendor.font_awesome.javascript%</bind>
             <bind key="$stylesheet">%base.vendor.font_awesome.stylesheet%</bind>
         </service>
-        <service id="Base\Model\Icon\BootstrapTwitter">
+        <service id="Base\Model\IconProvider\BootstrapTwitter">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
@@ -549,7 +549,7 @@
             <bind key="$cacheDir">%kernel.cache_dir%</bind>
         </service>
 
-        <service id="Base\Controller\Field\SelectController">
+        <service id="Base\Controller\Field\AutocompleteController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>

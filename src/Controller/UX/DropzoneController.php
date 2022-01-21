@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Field;
+namespace Base\Controller\UX;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 

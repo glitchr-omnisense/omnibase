@@ -4,9 +4,6 @@ namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
-use Base\Model\AutocompleteInterface;
-use Base\Model\IconizeInterface;
-use Base\Model\SelectInterface;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
@@ -27,7 +24,6 @@ use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
@@ -59,6 +55,14 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public function encode(array $array) : string { return $this->hashIds->encodeHex(bin2hex(serialize($array)));  }
     public function decode(string $hash): array   { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
+
+    protected static $icons = [];
+    public static function getIcons(): array 
+    {
+        $class = static::class;
+        if(array_key_exists(self::$icons, self::$icons))
+            return self::$icons[$class];
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -489,80 +493,5 @@ class SelectType extends AbstractType implements DataMapperInterface
             $this->baseService->addHtmlContent("stylesheets", $options["select2-css"]);
             $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
-    }
-
-
-    protected static $icons = [];
-    public static function getIcons(): array 
-    {
-        $class = static::class;
-        if(array_key_exists(self::$icons, self::$icons))
-            return self::$icons[$class];
-    }
-    
-    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_SENTENCECASE) 
-    {
-        if($entry == null) return null;
-        if(is_object($entry) && $class !== null) {
-
-            $accessor = PropertyAccess::createPropertyAccessor();
-            $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
-
-            $autocomplete     = null;
-            $autocompleteData = [];
-            if(class_implements_interface($entry, AutocompleteInterface::class)) {
-                $autocomplete = $entry->__autocomplete() ?? null;
-                $autocompleteData = $entry->__autocompleteData() ?? []; 
-            }
-
-            $className = get_class($entry);
-            if($translator) $className = $translator->entity($className, Translator::TRANSLATION_SINGULAR);
-
-            $html = is_html($autocomplete) ? $autocomplete : null;
-            $text = is_html($autocomplete) ? null          : $autocomplete;
-            $data = $autocompleteData;
-
-            if(!$text)
-                $text = is_stringeable($entry) ? strval($entry) : $className . " #".$entry->getId();
-
-            $icons = $entry->__iconize() ?? [];
-            if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
-                $icons = $entry::__staticIconize();
-
-            $icon = begin($icons);
-
-        } else if(is_a($class, IconType::class)) {
-
-            $id   = $entry;
-            $icon = $class::getIcon($entry, 0);
-            $text = $class::getText($entry, $translator);
-            $html = $class::getHtml($entry);
-            $data = $class::getData($entry);
-            
-        }else if(class_implements_interface($class, SelectInterface::class)) {
-
-            $id   = $entry;
-            $icon = $class::getIcon($entry, 0);
-            $text = $class::getText($entry, $translator);
-            $html = $class::getHtml($entry);
-            $data = $class::getData($entry);
-            
-        } else {
-
-            $id    = is_array($entry) ? $entry[0] : $entry;
-            $text  = is_array($entry) ? $entry[1] : null;
-            $icon  = is_array($entry) ? $entry[2] : null;
-            $html  = null;
-            $data  = [];
-        }
-
-        return
-        [
-            "id"   => $id ?? null,
-            "icon" => $icon,
-            "text" => is_string($text) ? castcase($text, $format) : $text,
-            "html" => $html,
-            "data" => $data
-        ];
     }
 }

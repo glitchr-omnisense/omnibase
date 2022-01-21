@@ -1,11 +1,10 @@
 <?php
 
-namespace Base\Controller\Field;
+namespace Base\Controller\Ux;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Field\Type\SelectType;
-use Base\Model\Icon\BootstrapTwitter;
-use Base\Model\Icon\FontAwesome;
+use Base\Model\Autocomplete;
+
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Base\Traits\BaseTrait;
@@ -56,13 +55,12 @@ class AutocompleteController extends AbstractController
      */
     public function Autocomplete(Request $request, string $hashid): Response
     {
-        $dict     = $this->decode($hashid);
-        $callback = "SelectType::getFormattedValues";
-        $token    = $dict["token"] ?? null;
-        $fields   = $dict["fields"] ?? null;
-        $filters  = $dict["filters"] ?? null;
-        $class    = $dict["class"] ?? null;
-        $format   = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+        $dict    = $this->decode($hashid);
+        $token   = $dict["token"] ?? null;
+        $fields  = $dict["fields"] ?? null;
+        $filters = $dict["filters"] ?? null;
+        $class   = $dict["class"] ?? null;
+        $format  = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
@@ -85,13 +83,13 @@ class AutocompleteController extends AbstractController
                 $pagination = $book->getTotalPages() > $book->getPage();
 
                 foreach($book as $i => $entry)
-                    $results[] = ${callback}($entry, $class, $this->translator, $format);
+                    $results[] = Autocomplete::getFormattedValues($entry, $class, $this->translator, $format);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = ${callback}($value, $class, $this->translator, $format);
+                    $results[] = Autocomplete::getFormattedValues($value, $class, $this->translator, $format);
             }
 
             $array = [];

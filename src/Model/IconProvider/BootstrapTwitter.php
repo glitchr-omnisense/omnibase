@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Model\Icon;
+namespace Base\Model\IconProvider;
 
 class BootstrapTwitter extends AbstractIconProvider
 {
