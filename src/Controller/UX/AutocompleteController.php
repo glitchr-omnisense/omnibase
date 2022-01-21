@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Ux;
+namespace Base\Controller\UX;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\Autocomplete;
