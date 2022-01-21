@@ -6,7 +6,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 
-use Base\Entity\Layout\Widget;
+use App\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Doctrine\Common\Collections\Collection;
@@ -24,7 +24,6 @@ use Base\Repository\Layout\Widget\SlotRepository;
  * @AssertBase\UniqueEntity(fields={"path"}, groups={"new", "edit"})
  * 
  */
-
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
 {   
     public        function __iconize()       : ?array { return null; } 

@@ -6,7 +6,6 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
-use Base\Model\IconProviderInterface;
 use Base\Model\SelectInterface;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
@@ -130,6 +129,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
+            $options = $form->getConfig()->getOptions();
 
             // Guess class without data in the first place..
             // To make sure the form can return something in the worst case

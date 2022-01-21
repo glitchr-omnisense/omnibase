@@ -23,7 +23,7 @@ class IconType extends SelectType implements SelectInterface
 
     public function configureOptions(OptionsResolver $resolver)
     {
-
+        parent::configureOptions($resolver);
         $resolver->setDefaults([
             'class'   => null,
             'provider'   => FontAwesome::class,

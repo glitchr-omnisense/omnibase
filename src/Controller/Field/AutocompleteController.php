@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-class SelectController extends AbstractController
+class AutocompleteController extends AbstractController
 {
     use BaseTrait;
 
@@ -56,12 +56,13 @@ class SelectController extends AbstractController
      */
     public function Autocomplete(Request $request, string $hashid): Response
     {
-        $dict    = $this->decode($hashid);
-        $token   = $dict["token"] ?? null;
-        $fields  = $dict["fields"] ?? null;
-        $filters = $dict["filters"] ?? null;
-        $class   = $dict["class"] ?? null;
-        $format  = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+        $dict     = $this->decode($hashid);
+        $callback = "SelectType::getFormattedValues";
+        $token    = $dict["token"] ?? null;
+        $fields   = $dict["fields"] ?? null;
+        $filters  = $dict["filters"] ?? null;
+        $class    = $dict["class"] ?? null;
+        $format   = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
@@ -84,13 +85,13 @@ class SelectController extends AbstractController
                 $pagination = $book->getTotalPages() > $book->getPage();
 
                 foreach($book as $i => $entry)
-                    $results[] = SelectType::getFormattedValues($entry, $class, $this->translator, $format);
+                    $results[] = ${callback}($entry, $class, $this->translator, $format);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = SelectType::getFormattedValues($value, $class, $this->translator, $format);
+                    $results[] = ${callback}($value, $class, $this->translator, $format);
             }
 
             $array = [];

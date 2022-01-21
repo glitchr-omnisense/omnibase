@@ -42,12 +42,12 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
 
     public function __autocomplete():?string { return $this->translate()->getLabel(); }
     public function __autocompleteData():array { return ["pattern" => $this->getPattern()]; }
-    public function __construct(?string $code = null, ?string $icon = null)
+    public function __construct(?string $code = null)
     {
         $this->attributes = new ArrayCollection();
 
         $this->setCode($code);
-        $this->setIcon($icon ?? get_called_class()::__staticIconize()[0]);
+        $this->setIcon(get_called_class()::__staticIconize()[0]);
     }
 
     /**

@@ -285,6 +285,9 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
+        <service id="Base\DatabaseSubscriber\EnumSubscriber">
+            <tag name="doctrine.event_subscriber" />
+        </service>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />

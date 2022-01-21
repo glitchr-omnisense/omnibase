@@ -739,7 +739,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
 
     /**
-     * @ORM\Column(type="datetime", nullable=true)
+     * @ORM\Column(type="datetime")
      * @Timestamp(on={"create", "update"})
      */
     protected $updatedAt;

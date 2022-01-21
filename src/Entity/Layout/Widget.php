@@ -19,7 +19,7 @@ use Base\Traits\BaseTrait;
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * 
- * @ORM\DiscriminatorColumn( name = "class", type = "string" )
+ * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
 

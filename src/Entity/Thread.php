@@ -45,6 +45,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
     public static function __staticIconize() : ?array { return ["fas fa-box"]; } 
 
+    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags = new ArrayCollection();
@@ -61,14 +62,6 @@ class Thread implements TranslatableInterface, IconizeInterface
         $this->slug = $slug;
         
         $this->setState(ThreadState::DRAFT);
-    }
-
-    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
-
-    public static function whoAmI(): string
-    {
-        $array = explode('\\', get_called_class());
-        return lcfirst(end($array));
     }
 
     /**

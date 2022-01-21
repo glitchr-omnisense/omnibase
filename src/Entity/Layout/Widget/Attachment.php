@@ -9,8 +9,10 @@ use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\AttachmentRepository;
+
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
  * @DiscriminatorEntry( value = "attachment" )

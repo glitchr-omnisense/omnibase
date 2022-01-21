@@ -25,6 +25,9 @@ class UserChecker implements UserCheckerInterface
 
     public function checkPreAuth(UserInterface $user)
     {
+        if (class_implements_interface($user, LoginRestrictionInterface::class))
+            throw new CustomUserMessageAccountStatusException("@notifications.login.restricted", ["importance" => "danger"]);
+
         if ($user instanceof User) {
 
             if ($user->isBanned())

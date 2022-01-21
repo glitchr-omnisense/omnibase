@@ -2,13 +2,18 @@
 
 namespace Base\Entity\User;
 
+use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\AddressRepository;
 
 /**
  * @ORM\Entity(repositoryClass=AddressRepository::class)
- */
+ * @ORM\InheritanceType( "JOINED" )
+ * @ORM\DiscriminatorColumn( name = "class", type = "string" )
+ *     @DiscriminatorEntry( value = "default" )
+*/
+
 class Address implements IconizeInterface
 {
     public        function __iconize(): ?array { return null; }
