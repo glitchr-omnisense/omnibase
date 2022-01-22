@@ -10,6 +10,7 @@ use Base\Field\AvatarField;
 use Base\Field\PasswordField;
 use Base\Field\RoleField;
 use Base\Field\BooleanField;
+use Base\Field\DiscriminatorField;
 use Base\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;

@@ -54,6 +54,7 @@ use App\Repository\UserRepository;
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */
+
 class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUserInterface, IconizeInterface
 {
     use BaseTrait;
@@ -86,7 +87,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function __toString() { return $this->getUserIdentifier(); }
     public function equals($other): bool { return ($other->getId() == $this->getId()); }
 
-    // The purpose of this method is to detect is user is dirty
+    // The purpose of this method is to detect if user is dirty
     // It means: not in the database anymore, but user session still active..
     public function isDirty() {
 
@@ -110,7 +111,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function __construct()
     {
-        $this->roles  = [UserRole::USER];
+        $role = strtoupper(class_basename(get_called_class()));
+        if(UserRole::hasKey($role)) $role = UserRole::getValue($role);
+        else $role = UserRole::USER; // Default role
+
+        $this->roles  = [$role];
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();

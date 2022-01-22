@@ -3,6 +3,8 @@
 namespace Base\Annotations\Annotation;
 
 use App\Entity\Blog\Comment;
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
+use App\Entity\Marketplace\Product\Extra\WallpaperSample;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 
@@ -11,6 +13,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use ReflectionProperty;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
@@ -83,8 +86,12 @@ class Slugify extends AbstractAnnotation
         $invalidSlugs = [];
         foreach ($candidateEntities as $entity2) {
 
-            if($entity === $entity2) continue;
-            if(!is_a($entity, get_class($entity2))) continue;
+            if($entity === $entity2) break; // FIFO
+            if(!property_exists($entity2, $property)) continue;
+
+            $propertyDeclarer  = property_declarer($entity , $property);
+            $propertyDeclarer2 = property_declarer($entity2, $property);
+            if($propertyDeclarer != $propertyDeclarer2 && !is_a($propertyDeclarer, $propertyDeclarer2)) continue;
 
             $invalidSlugs[] = $this->getFieldValue($entity2, $property);
         }
@@ -95,7 +102,6 @@ class Slugify extends AbstractAnnotation
             $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
-        dump(get_class($entity), $property, $invalidSlugs);
         return $invalidSlugs;
     }
     
@@ -123,9 +129,6 @@ class Slugify extends AbstractAnnotation
         $slug = $defaultSlug;
         if(!$this->unique) return $slug;
         
-        dump("-------");
-        dump(get_class($entity), $property, $defaultInput);
-        dump(get_class($repository));
         for($i = 1; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
 
@@ -151,8 +154,8 @@ class Slugify extends AbstractAnnotation
         $classMetadata = $this->getClassMetadata(get_class($entity));
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
-        $defaultInput = $this->getFieldValue($entity, $property);
-        $slug = $this->getSlug($entity, $property, $defaultInput, $invalidSlugs);
+        $input = $this->getFieldValue($entity, $property);
+        $slug = $this->getSlug($entity, $property, $input, $invalidSlugs);
         $this->setFieldValue($entity, $property, $slug);
 
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);

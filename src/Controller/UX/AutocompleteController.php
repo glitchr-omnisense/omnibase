@@ -49,7 +49,7 @@ class AutocompleteController extends AbstractController
         $hex = $this->hashIds->decodeHex($hash);
         return $hex ? unserialize(hex2bin($hex)) : [];
     }
-    
+
     /**
      * @Route("/autocomplete/{hashid}", name="ux_autocomplete")
      */
@@ -64,16 +64,16 @@ class AutocompleteController extends AbstractController
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
-        
+
             $term = mb_strtolower($request->get("term")) ?? "";
             $page = $request->get("page") ?? 1;
 
             $results = [];
             $pagination = false;
             if($this->classMetadataManipulator->isEntity($class)) {
-                
+
                 $repository = $this->entityManager->getRepository($class);
-                
+
                 if(!is_associative($fields))
                     $fields = array_fill_keys($fields, $term);
 

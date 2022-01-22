@@ -28,7 +28,12 @@ class EnumSubscriber implements EventSubscriber
 
         /** @var \Doctrine\DBAL\Schema\Column $column */
         foreach ($columns as $column) {
-            $column->setComment(trim(sprintf('%s (%s)', $column->getComment(), implode(',', $column->getType()::getPermittedValues()))));
+
+            /**
+             * @var EnumType
+             */
+            $enum = $column->getType();
+            $column->setComment(trim(sprintf('%s (%s)', $column->getComment(), implode(',', $enum::getPermittedValues()))));
         }
     }
 }

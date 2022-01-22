@@ -2,6 +2,7 @@
 
 namespace Base\Database\Type;
 
+use ArrayAccess;
 use Base\Model\IconizeInterface;
 use Base\Model\SelectInterface;
 use Base\Service\Translator;
@@ -49,35 +50,40 @@ abstract class EnumType extends Type implements SelectInterface
         return camel_to_snake(end($array));
     }
 
-    public static function getPermittedValuesByClass()
+    public static function hasKey  (string $key,   bool $inheritance = true) { return array_key_exists($key, self::getPermittedValues($inheritance, true)); }
+    public static function hasValue(string $value, bool $inheritance = true) { return array_search($value, self::getPermittedValues($inheritance, true)) !== false; }
+
+    public static function getValue(string $key,   bool $inheritance = true) { return self::getPermittedValues($inheritance, true)[$key] ?? null; }
+    public static function getPermittedValues(bool $inheritance = true, bool $preserve_keys = false) { 
+
+        $refl = new \ReflectionClass(get_called_class());
+        if($inheritance) $values = $refl->getConstants();
+        else $values = array_diff($refl->getConstants(),$refl->getParentClass()->getConstants());
+
+        if(!$preserve_keys) $values = array_values($values);
+
+        if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values)
+            throw new \Exception("\"".get_called_class()."\" is empty");
+
+        return $values;
+    }
+    public static function getPermittedValuesByClass(bool $preserve_keys = false)
     {
         $refl = new \ReflectionClass(get_called_class());
         if(in_array($refl->getName(), [EnumType::class, SetType::class])) return [];
 
-        $permittedValues = [$refl->getName() => $refl->getName()::getPermittedValues(false)];
+        $values = [$refl->getName() => $refl->getName()::getPermittedValues(false, $preserve_keys)];
         while(($refl = $refl->getParentClass()) && !in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class)
-            $permittedValues[$refl->getName()] = $refl->getName()::getPermittedValues(false);
+            $values[$refl->getName()] = $refl->getName()::getPermittedValues(false, $preserve_keys);
 
-        return $permittedValues;
+        return $values;
     }
-    
-    public static function getPermittedValues(bool $inheritance = true) { 
 
-        $refl = new \ReflectionClass(get_called_class());
-        if($inheritance) $permittedValues = array_values($refl->getConstants());
-        else $permittedValues = array_values(array_diff($refl->getConstants(),$refl->getParentClass()->getConstants()));
-
-        if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$permittedValues)
-            throw new \Exception("\"".get_called_class()."\" is empty");
-
-        return $permittedValues;
-    }
-    
     public function requiresSQLCommentHint(AbstractPlatform $platform) : bool { return true; }
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
-        $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
-        return "ENUM(".implode(", ", $permittedValues).")";
+        $values = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
+        return "ENUM(".implode(", ", $values).")";
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform) : mixed { return $value; }

@@ -69,8 +69,6 @@ class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInter
         return $this;
     }
 
-
-
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @AssertBase\NotBlank(groups={"new", "edit"})

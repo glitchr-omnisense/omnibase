@@ -264,7 +264,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw";
-            
+
             $url = $this->adminUrlGenerator
                 ->unsetAll()
                 ->setController(UserCrudController::class)

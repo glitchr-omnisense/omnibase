@@ -155,6 +155,22 @@ namespace {
         return intval($val);
     }
 
+    function property_declarer($object_or_class, string $property): ?string 
+    {
+        $class = is_object($object_or_class) ? get_class($object_or_class): $object_or_class;
+
+        $reflProperty = new ReflectionProperty($class, $property);
+        return $reflProperty->getDeclaringClass()->getName();
+    }
+
+    function method_declarer($object_or_class, string $method): ?string 
+    {
+        $class = is_object($object_or_class) ? get_class($object_or_class): $object_or_class;
+        
+        $reflMethod = new ReflectionMethod($class, $method);
+        return $reflMethod->getDeclaringClass()->getName();
+    }
+
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string
     {
         if($path === null) return $path;

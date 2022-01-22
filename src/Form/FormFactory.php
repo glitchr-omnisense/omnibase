@@ -214,13 +214,13 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             $class = $options["class"];
 
             $permittedValues = null;
-            if($this->classMetadataManipulator->isEnumType($class)) 
+            if($this->classMetadataManipulator->isEnumType($class))
                 $permittedValues = $class::getPermittedValuesByClass();
-            else if($this->classMetadataManipulator->isSetType ($class)) 
+            else if($this->classMetadataManipulator->isSetType ($class))
                 $permittedValues = $class::getPermittedValuesByClass();
             else if(array_key_exists("choice_loader", $options) && $options["choice_loader"] instanceof ChoiceLoaderInterface)
                 $permittedValues = $options["choice_loader"] ? $options["choice_loader"]->loadChoiceList()->getStructuredValues() : null;
-    
+
             if($permittedValues === null) return null;
             return count($permittedValues) == 1 ? begin($permittedValues) : $permittedValues;
         }

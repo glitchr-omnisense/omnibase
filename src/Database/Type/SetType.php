@@ -8,16 +8,16 @@ abstract class SetType extends EnumType
 {
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
-        $permittedValues = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
-        return "SET(".implode(", ", $permittedValues).")";
+        $values = array_map(fn($val) => "'".$val."'", $this->getPermittedValues());
+        return "SET(".implode(", ", $values).")";
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform) : mixed
-    { 
+    {
         $values = explode(",", $value);
         return array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
     }
-    
+
     public function convertToDatabaseValue($values, AbstractPlatform $platform) : mixed
     {
         $values = array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
