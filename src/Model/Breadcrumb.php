@@ -43,6 +43,11 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
 
     public function compute(Request $request)
     {
+        $this->clear();
+
+        $pageTitle = $this->getOption("page_title");
+        if($pageTitle) $this->appendItem($pageTitle);
+
         $icons = [];
         $path = null;
         while($path !== "") {
@@ -211,6 +216,8 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
         $this->items[] = $this->getFormattedItem($label, $route, $routeParameters);
         return $this;
     }
+
+    public function clear() { $this->items = []; }
 
     public function getLength() { return count($this->items); }
     public function getItems() { return $this->items; }

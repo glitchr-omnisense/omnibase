@@ -95,6 +95,7 @@ class Slugify extends AbstractAnnotation
             $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
+        dump(get_class($entity), $property, $invalidSlugs);
         return $invalidSlugs;
     }
     
@@ -122,6 +123,9 @@ class Slugify extends AbstractAnnotation
         $slug = $defaultSlug;
         if(!$this->unique) return $slug;
         
+        dump("-------");
+        dump(get_class($entity), $property, $defaultInput);
+        dump(get_class($repository));
         for($i = 1; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
 
@@ -143,12 +147,6 @@ class Slugify extends AbstractAnnotation
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
-
-        $candidateEntities = [];
-        foreach ($uow->getScheduledEntityInsertions() as $entity2)
-            $candidateEntities[] = $entity2;
-        foreach ($uow->getScheduledEntityUpdates() as $entity2)
-            $candidateEntities[] = $entity2;
 
         $classMetadata = $this->getClassMetadata(get_class($entity));
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
