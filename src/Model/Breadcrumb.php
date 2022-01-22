@@ -2,6 +2,7 @@
 
 namespace Base\Model;
 
+use ArrayAccess;
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
 use Base\Service\TranslatorInterface;
@@ -12,15 +13,24 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
-class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
+class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
     protected array $items   = [];
     protected array $options = [];
+    protected $request = null;
 
     protected $router = null;
     protected $template = "@Base/breadcrumb/default.html.twig";
 
     protected $iterator  = 0;
+
+    public function offsetExists(mixed $offset): bool { return isset($this->items[$offset]); }
+    public function offsetUnset(mixed $offset): void  { $this->removeItem($offset);     }
+    public function offsetGet(mixed $offset):mixed    { return $this->getItem($offset); }
+    public function offsetSet(mixed $offset, mixed $value = []): void {
+        if (is_null($offset)) $this->prependItem(...$value);
+        else $this->prependItem($offset, ...$value);
+    }
 
     public function count() : int  { return $this->getLength(); }
     public function rewind(): void { $this->iterator = 0; }
@@ -36,19 +46,25 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
         $this->options = $options;
         
         $this->annotationReader = AnnotationReader::getInstance();
-
-        if($template) 
-            $this->template = $template;
+        if($template) $this->template = $template;
     }
 
-    public function compute(Request $request)
+    public function getRequest(): ?Request { return $this->request; }
+    public function setRequest(Request $request): self
     {
+        $this->request = $request;
+        return $this;
+    }
+
+    public function compute(?Request $request = null)
+    {
+        if($request) $this->setRequest($request);
+        $request = $this->getRequest();
+
         $this->clear();
-
-        $pageTitle = $this->getOption("page_title");
-        if($pageTitle) $this->appendItem($pageTitle);
-
         $icons = [];
+
+        $first = true;
         $path = null;
         while($path !== "") {
 
@@ -81,8 +97,19 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
             $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
             if($label == "@controllers.".$transPath.".title") $label = "";
 
-            if(!$route ) continue;
+            if($first) {
 
+                $pageTitle = $this->getOption("page_title");
+                if($pageTitle && !$label) {
+                    
+                    $this->appendItem($pageTitle);
+                    $icons[] = null;
+                }
+
+                $first = false;
+            }
+
+            if(!$route ) continue;
             $this->prependItem($label, $routeName, $routeParameters ?? []);
             $icons[] = $icon;
         }
@@ -205,6 +232,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable
         ];
     }
 
+    public function removeItem(string $offset) { unset($this->items[$offset]); }
     public function prependItem(string $label, ?string $route = null, array $routeParameters = []) 
     {
         array_unshift($this->items, $this->getFormattedItem($label, $route, $routeParameters));

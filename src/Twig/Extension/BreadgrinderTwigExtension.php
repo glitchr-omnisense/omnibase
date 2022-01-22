@@ -25,6 +25,8 @@ final class BreadgrinderTwigExtension extends AbstractExtension
     public function renderBreadcrumb(string $name, array $options = []): ?string
     {
         $breadcrumb = $this->breadgrinder->grind($name, $options);
+        $breadcrumb->compute();
+        
         if($breadcrumb === null) 
             throw new \Exception("Breadcrumb \"$name\" not found in the grinder machine.");
 

@@ -34,6 +34,6 @@ class Breadgrinder implements BreadgrinderInterface
         if($options)  $this->breadcrumbs[$name]->addOptions($options);
         if($template) $this->breadcrumbs[$name]->setTemplate($template);
 
-        return ($this->breadcrumbs[$name]);
+        return $this->breadcrumbs[$name];
     }
 }
