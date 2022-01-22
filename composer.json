@@ -58,7 +58,7 @@
         "easycorp/easyadmin-bundle": "^4.0",
         "league/flysystem-bundle": "^2.0",
 
-        "nelmio/security-bundle": "dev-master",
+        "nelmio/security-bundle": "^2.0",
         "hashids/hashids": "^4.1",
 
         "doctrine/annotations": "^1.0",
