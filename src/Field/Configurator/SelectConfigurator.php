@@ -92,8 +92,8 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
         }
 
-        $field->setFormattedValue(!empty($formattedValues) ? $formattedValues : null);
-
+        $field->setFormattedValue(!empty($formattedValues) && !is_associative($formattedValues) ? $formattedValues : null);
+        
         // Set default value
         if ($field->getValue() == null)
             $field->setValue($this->getDefault($field));

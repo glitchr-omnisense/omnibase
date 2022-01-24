@@ -126,13 +126,52 @@ class BaseBundle extends Bundle
 
     public static function getAllClasses($path, $prefix = ""): array
     {
+        $classes = [];
+
+        $filenames = self::getFilenames($path);
+        foreach ($filenames as $filename) {
+
+            if(filesize($filename) == 0) continue;
+            if(str_ends_with($filename, "Interface")) continue;
+
+            $classes[] = self::getFullNamespace($filename, $prefix) . self::getClassname($filename);
+        }
+
+        return $classes;
+    }
+
+    public static function getAllNamespaces($path, $prefix = ""): array
+    {
         $namespaces = [];
 
         $filenames = self::getFilenames($path);
-        foreach ($filenames as $filename)
-            $namespaces[] = self::getFullNamespace($filename, $prefix) . self::getClassname($filename);
+        foreach ($filenames as $filename) {
 
-        return $namespaces;
+            if(filesize($filename) == 0) continue;
+
+            $namespaces[] = rtrim(self::getFullNamespace($filename, $prefix),"\\");
+        }
+        return array_unique($namespaces);
+    }
+
+    public static function getAllNamespacesAndClasses($path, $prefix = ""): array
+    {
+        $namespacesAndClasses = [];
+
+        $filenames = self::getFilenames($path);
+        foreach ($filenames as $filename) {
+
+            if(filesize($filename) == 0) continue;
+
+            $namespace = self::getFullNamespace($filename, $prefix);
+            $className = self::getClassname($filename);
+            if(str_ends_with($className, "Interface")) continue;
+
+            $namespacesAndClasses[] = rtrim($namespace, "\\");
+            $namespacesAndClasses[] = $namespace . $className;
+        }
+
+        return array_unique($namespacesAndClasses);
     }
 
     public static function getClassname($filename)
@@ -166,9 +205,9 @@ class BaseBundle extends Bundle
 
         $finderFiles = Finder::create()->files()->in($path)->name('*.php');
         $filenames = [];
-        foreach ($finderFiles as $finderFile) {
+        foreach ($finderFiles as $finderFile)
             $filenames[] = $finderFile->getRealpath();
-        }
+
         return $filenames;
     }
 }

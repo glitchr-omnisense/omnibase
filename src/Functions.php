@@ -220,7 +220,7 @@ namespace {
             $str = substr($str, strlen($prefix));
         
         if(strlen($str) === strpos($str, $suffix)+strlen($suffix)) 
-            $str = substr($str, 0, strlen($str)-strlen($prefix));
+            $str = substr($str, 0, strlen($str)-strlen($suffix));
 
         return $str;
     }
@@ -232,7 +232,7 @@ namespace {
     }
 
     function head(object|array &$array):mixed { return array_slice($array, 0, 1)[0] ?? null; }
-    function tail(object|array &$array):array  { return array_slice($array, 1   ); }
+    function tail(object|array &$array, int $offset = 1):array  { return array_slice($array, $offset   ); }
 
     function closest(array $array, $position = -1) { return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array)); }
     function is_html(?string $str)  { return $str != strip_tags($str); }
@@ -275,6 +275,7 @@ namespace {
         return array_key_exists($interface, $classImplements);
     }
 
+    function class_name(array|object|string|null $arrayOrObjectOrClass) { return class_basename($arrayOrObjectOrClass); }
     function class_basename(array|object|string|null $arrayOrObjectOrClass)
     {
         if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
@@ -285,6 +286,7 @@ namespace {
         return str_replace("/", "\\", basename(str_replace('\\', '/', $class)));
     }
 
+    function class_namespace(array|object|string|null $arrayOrObjectOrClass) { return class_dirname($arrayOrObjectOrClass); }
     function class_dirname(array|object|string|null $arrayOrObjectOrClass)
     {
         if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;

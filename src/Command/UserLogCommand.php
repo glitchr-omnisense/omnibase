@@ -3,26 +3,22 @@
 namespace Base\Command;
 
 use App\Entity\User;
-use Base\Entity\Thread;
 use Base\Entity\User\Log;
-use Base\Repository\ThreadRepository;
-use Base\Repository\User\LogRepository;
+
 use Base\Service\BaseService;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Input\InputArgument;
+
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
-use Symfony\Component\HttpFoundation\Request;
+use Base\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 
 class UserLogCommand extends Command
 {
     protected static $defaultName = 'user:log';
 
-    public function __construct(EntityManager $entityManager, BaseService $baseService)
+    public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
     {
         $this->entityManager = $entityManager;
         $this->baseService = $baseService;
@@ -45,14 +41,6 @@ class UserLogCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$output instanceof ConsoleOutputInterface)
-            throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
-    
-        $output->getFormatter()->setStyle('info', new OutputFormatterStyle('green', null, ['bold']));
-        $output->getFormatter()->setStyle('warning', new OutputFormatterStyle('yellow', null, ['bold']));
-        $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, ['bold']));
-        $output->getFormatter()->setStyle('ln', new OutputFormatterStyle('cyan', null, ['bold']));
-
         $event                  = $input->getOption('event');
 
         $userIdentifier         = $input->getOption('user');

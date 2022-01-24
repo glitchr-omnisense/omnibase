@@ -7,10 +7,10 @@ use Base\Model\IconizeInterface;
 
 class SpamScore extends EnumType implements IconizeInterface
 {
-    const NO_TEXT      = -1;
-    const NOT_SPAM     =  0;
-    const MAYBE_SPAM   =  1;
-    const BLATANT_SPAM =  2;
+    const NO_TEXT      = "NO_TEXT";
+    const NOT_SPAM     = "NOT_SPAM";
+    const MAYBE_SPAM   = "MAYBE_SPAM";
+    const BLATANT_SPAM = "BLATANT_SPAM";
 
     public function __iconize(): ?array { return null; }
     public static function __staticIconize(): ?array
@@ -20,6 +20,16 @@ class SpamScore extends EnumType implements IconizeInterface
             self::NOT_SPAM     => ["fas fa-file-alt"],
             self::MAYBE_SPAM   => ["fas fa-question-circle"],
             self::BLATANT_SPAM => ["fas fa-exclamation-circle"],
+        ];
+    }
+
+    public static function __toInt()
+    {
+        return [
+            self::NO_TEXT      => -1,
+            self::NOT_SPAM     =>  0,
+            self::MAYBE_SPAM   =>  1,
+            self::BLATANT_SPAM =>  2
         ];
     }
 }

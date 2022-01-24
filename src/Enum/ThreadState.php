@@ -23,17 +23,17 @@ class ThreadState extends EnumType implements IconizeInterface
     public static function __staticIconize(): ?array
     {
         return [
-            self::PUBLISHED => "fas fa-book",
-            self::DRAFT     => "fas fa-drafting-compass",
-            self::FUTURE    => "fas fa-stopwatch",
-            self::SECRET    => "fas fa-eye-slash",
-            self::ARCHIVED  => "fas fa-archive",
+            self::PUBLISHED => ["fas fa-book"],
+            self::DRAFT     => ["fas fa-drafting-compass"],
+            self::FUTURE    => ["fas fa-stopwatch"],
+            self::SECRET    => ["fas fa-eye-slash"],
+            self::ARCHIVED  => ["fas fa-archive"],
             
-            self::APPROVED  => "fas fa-check-circle",
-            self::SUSPENDED => "fas fa-exclamation-circle",
-            self::PENDING   => "fas fa-pause-circle",
-            self::REJECTED  => "fas fa-times-circle",
-            self::DELETED   => "fas fa-trash-alt",
+            self::APPROVED  => ["fas fa-check-circle"],
+            self::SUSPENDED => ["fas fa-exclamation-circle"],
+            self::PENDING   => ["fas fa-pause-circle"],
+            self::REJECTED  => ["fas fa-times-circle"],
+            self::DELETED   => ["fas fa-trash-alt"],
         ];
     }
 }

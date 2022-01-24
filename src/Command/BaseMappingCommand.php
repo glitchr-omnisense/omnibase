@@ -3,28 +3,22 @@
 namespace Base\Command;
 
 use Base\BaseBundle;
-
+use Base\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-
-class MappingCommand extends Command
+class BaseMappingCommand extends Command
 {
     protected static $defaultName = 'base:mapping';
 
+    protected static $defaultDescription = "
+        This command gives access to the mapping applied from \\Base to \\App namespace'
+        
+        This is meant to avoid rewriting Base classes
+        and use customized \\App classes extending from Base classes"; 
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$output instanceof ConsoleOutputInterface)
-            throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
-
-        $output->getFormatter()->setStyle('info', new OutputFormatterStyle('green', null, ['bold']));
-        $output->getFormatter()->setStyle('warning', new OutputFormatterStyle('yellow', null, ['bold']));
-        $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, ['bold']));
-        $output->getFormatter()->setStyle('ln', new OutputFormatterStyle('cyan', null, ['bold']));
-
         $appList = BaseBundle::getAllClasses("./src", "App");
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $baseList = array_merge(
@@ -33,13 +27,6 @@ class MappingCommand extends Command
             BaseBundle::getAllClasses($baseLocation."/Entity", "Base"),
             BaseBundle::getAllClasses($baseLocation."/Repository", "Base")
         );
-
-        $output->section()->writeln('');
-        $output->section()->writeln('This command gives access to the mapping applied from \\Base to \\App namespace');
-        $output->section()->writeln('');
-        $output->section()->writeln('This is meant to avoid rewriting Base classes');
-        $output->section()->writeln('and use customized \\App classes extending from Base classes');
-        $output->section()->writeln('');
 
         $nAlias     = 0;
         $nException = 0;
@@ -64,7 +51,7 @@ class MappingCommand extends Command
         $output->section()->writeln('');
         $output->section()->writeln('Summary:');
         $output->section()->writeln('- ' . $nAlias . ' alias(es) from \\Base to \\App applied.');
-        $output->section()->writeln('- There is/are '.$nException.' exception(s). Exception list below:');
+        $output->section()->writeln('- There is/are '.$nException.' overriding exception(s). Exception list below:');
         foreach ($appList as $class) {
             $app  = "App\\$class";
             $base = "Base\\$class";

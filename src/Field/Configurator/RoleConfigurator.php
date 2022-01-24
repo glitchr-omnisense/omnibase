@@ -26,7 +26,8 @@ class RoleConfigurator extends SelectConfigurator
         foreach($formattedValues as $key => $formattedValue) {
 
             $role = $formattedValue["id"] ?? null;
-            
+            if(!$role) continue; 
+
             $url = $this->adminUrlGenerator
                         ->unsetAll()
                         ->setController(UserCrudController::class)

@@ -2,32 +2,23 @@
 
 namespace Base\Command;
 
-use App\Entity\User;
 use Base\Annotations\Annotation\Uploader;
-use Base\Annotations\AnnotationInterface;
 use Base\Annotations\AnnotationReader;
-use Base\BaseBundle;
-use Base\Entity\Thread;
-use Base\Entity\User\Log;
-use Base\Repository\ThreadRepository;
-use Base\Repository\User\LogRepository;
+
 use Base\Service\BaseService;
-use Doctrine\ORM\EntityManager;
+
 use League\Flysystem\FileAttributes;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Input\InputArgument;
+use Base\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
-use Symfony\Component\HttpFoundation\Request;
 
 class UploaderEntitiesCommand extends Command
 {
     protected static $defaultName = 'uploader:entities';
 
-    public function __construct(EntityManager $entityManager, BaseService $baseService)
+    public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
     {
         $this->entityManager = $entityManager;
         $this->baseService = $baseService;
@@ -36,8 +27,8 @@ class UploaderEntitiesCommand extends Command
 
     protected function configure(): void
     {
-        $this->addOption('entity',   null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific entity ? (prefix: App\\Entity)');
-        $this->addOption('property', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific entity property ?');
+        $this->addOption('entity',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific entity ?');
+        $this->addOption('property', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific property ?');
         $this->addOption('uuid', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific uuid ?');
 
         $this->addOption('show',   false, InputOption::VALUE_NONE, 'Do you want to list entities using "Uploader" annotation ?');
@@ -49,15 +40,7 @@ class UploaderEntitiesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$output instanceof ConsoleOutputInterface)
-            throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
-    
-        $output->getFormatter()->setStyle('info', new OutputFormatterStyle('green', null, ['bold']));
-        $output->getFormatter()->setStyle('warning', new OutputFormatterStyle('yellow', null, ['bold']));
-        $output->getFormatter()->setStyle('red', new OutputFormatterStyle('red', null, ['bold']));
-        $output->getFormatter()->setStyle('ln', new OutputFormatterStyle('cyan', null, ['bold']));
-
-        $this->entity        = $input->getOption('entity');
+        $this->entityName    = str_strip($input->getOption('entity'), "App\\Entity\\");
         $this->property      = $input->getOption('property');
         $this->uuid          = $input->getOption('uuid');
 
@@ -67,12 +50,12 @@ class UploaderEntitiesCommand extends Command
         $this->showOrphans   = $input->getOption('show-orphans');
         $this->deleteOrphans = $input->getOption('delete-orphans');
 
-        $this->appEntities = "App\\Entity\\".$this->entity;
+        $this->appEntities = "App\\Entity\\".$this->entityName;
         $appAnnotations = $this->getUploaderAnnotations($this->appEntities);
         if(!$appAnnotations)
             $output->section()->write("<warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
 
-        $this->baseEntities = "Base\\Entity\\".$this->entity;
+        $this->baseEntities = "Base\\Entity\\".$this->entityName;
         $baseAnnotations = $this->getUploaderAnnotations($this->baseEntities);
         if(!$baseAnnotations)
             $output->section()->write("<warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
@@ -84,7 +67,7 @@ class UploaderEntitiesCommand extends Command
 
                 if($this->property && $field != $this->property) continue;
 
-                $output->section()->write("<info>Processing entity $class..</info>");
+                $output->section()->write("<info>Processing entityName $class..</info>");
                 if(count($annotation) > 1)
                     throw new \LogicException("Unexpected \"Uploader\" annotation found twice in $class..");
 

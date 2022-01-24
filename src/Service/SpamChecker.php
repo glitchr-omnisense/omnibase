@@ -72,8 +72,9 @@ class SpamChecker
      */
     public function getScore(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {
+        $enum = SpamScore::__toInt();
         if(empty($candidate->getSpamText()))
-            return SpamScore::NO_TEXT;
+            return $enum[SpamScore::NO_TEXT];
 
         $request = $this->requestStack->getCurrentRequest();
         switch($api) {
@@ -105,14 +106,14 @@ class SpamChecker
                 $response = $this->client->request('POST', $this->getEndpoint($api), $options);
 
                 $headers = $response->getHeaders();
-                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = SpamScore::BLATANT_SPAM;
+                if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = $enum[SpamScore::BLATANT_SPAM];
                 else {
 
                     $content = $response->getContent();
                     if (isset($headers['x-akismet-debug-help'][0]))
                         throw new \RuntimeException(sprintf('Unable to check for spam: %s (%s).', $content, $headers['x-akismet-debug-help'][0]));
 
-                    $score = ($content === "true" ? SpamScore::MAYBE_SPAM : SpamScore::NOT_SPAM);
+                    $score = ($content === "true" ? $enum[SpamScore::MAYBE_SPAM] : $enum[SpamScore::NOT_SPAM]);
                 }
         }
 

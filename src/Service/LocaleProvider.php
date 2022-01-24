@@ -29,6 +29,8 @@ class LocaleProvider implements LocaleProviderInterface
             self::$locales = [];
             foreach(Locales::getLocales() as $locale) {
 
+                // NB:
+                // Only keep xx-YY locale format
                 if(!preg_match('/[a-z]{2}.[A-Z]{2}/', $locale)) continue;
                 
                 $lang    = substr($locale,0,2);

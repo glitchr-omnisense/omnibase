@@ -32,12 +32,12 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         else $this->prependItem($offset, ...$value);
     }
 
-    public function count() : int  { return $this->getLength(); }
-    public function rewind(): void { $this->iterator = 0; }
-    public function next(): void   { $this->iterator++; }
-    public function key()          { return $this->iterator; }
-    public function valid(): bool  { return $this->getLength() > $this->iterator; }
-    public function current()      { return $this->getItem($this->iterator); }
+    public function count() : int    { return $this->getLength(); }
+    public function rewind(): void   { $this->iterator = 0; }
+    public function next(): void     { $this->iterator++; }
+    public function key(): mixed     { return $this->iterator; }
+    public function valid(): bool    { return $this->getLength() > $this->iterator; }
+    public function current(): mixed { return $this->getItem($this->iterator); }
 
     public function __construct(RouterInterface $router, TranslatorInterface $translator, array $options = [], ?string $template = null)
     {

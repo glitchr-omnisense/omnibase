@@ -327,20 +327,20 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     //
     // NB: DON'T USE addRole or removeRole, it seems to be changing ChoiceType behavior
     //
-    // public function addRole(string $role): self
-    // {
-    //     if (!in_array($role, $this->roles))
-    //         $this->roles[] = $role;
-    //     return $this;
-    // }
+    public function addRole(string $role): self
+    {
+        if (!in_array($role, $this->roles))
+            $this->roles[] = $role;
+        return $this;
+    }
 
-    // public function removeRole(string $role): self
-    // {
-    //     if ( ($pos = array_search($role, $this->roles)) )
-    //         unset($this->roles[$pos]);
+    public function removeRole(string $role): self
+    {
+        if ( ($pos = array_search($role, $this->roles)) )
+            unset($this->roles[$pos]);
 
-    //     return $this;
-    // }
+        return $this;
+    }
 
     /**
      * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})

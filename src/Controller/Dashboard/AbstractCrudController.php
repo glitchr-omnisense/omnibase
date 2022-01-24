@@ -176,7 +176,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title");
         if($title == $crudTranslationPrefix.".title") $title = $this->translator->trans($crudTranslationPrefix.".plural");
         if($title == $crudTranslationPrefix.".plural") $title = $entityLabelInPlural ?? camel_to_snake(class_basename($this->getEntityFqcn()), " ");
-
+        
         $help = $this->translator->trans($crudTranslationPrefixWithAction.".help");
         if($help == $crudTranslationPrefixWithAction.".help") $help = $this->translator->trans($crudTranslationPrefix.".help");
         if($help == $crudTranslationPrefix.".help") $help = "";
@@ -184,7 +184,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $text = $this->translator->trans($crudTranslationPrefixWithAction.".text");
         if($text == $crudTranslationPrefixWithAction.".text") $text = $this->translator->trans($crudTranslationPrefix.".text");
         if($text == $crudTranslationPrefix.".text") $text = "";
-        
+
         $this->extension->setIcon($this->getEntityIcon() ?? "fas fa-question-circle");
         $this->extension->setTitle(mb_ucfirst($title));
         $this->extension->setHelp($help);

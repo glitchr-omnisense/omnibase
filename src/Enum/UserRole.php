@@ -17,9 +17,9 @@ class UserRole extends SetType implements IconizeInterface
     {
         return [
             self::SUPERADMIN => ["fas fa-cog", "fas fa-user-cog"],
-            self::ADMIN => ["fas fa-crown", "fas fa-user-check"],
-            self::USER => ["fas fa-user", "fas fa-user-tag"],
-            self::SOCIAL => ["fas fa-user-friends"],
+            self::ADMIN      => ["fas fa-crown", "fas fa-user-check"],
+            self::USER       => ["fas fa-user", "fas fa-user-tag"],
+            self::SOCIAL     => ["fas fa-user-friends"],
         ];
     }
 }

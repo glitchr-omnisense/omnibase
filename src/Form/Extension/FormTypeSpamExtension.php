@@ -45,7 +45,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
     {
         $this->spamChecker      = $spamChecker;
         $this->defaultEnabled   = $defaultEnabled;
-        $this->baseService      = $baseService; 
+        $this->baseService      = $baseService;
     }
 
     /**
@@ -77,19 +77,20 @@ class FormTypeSpamExtension extends AbstractTypeExtension
         $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
 
             $form = $event->getForm();
-            $data = $event->getData(); 
+            $data = $event->getData();
 
             $score = $this->spamChecker->getScore($data);
             $data->getSpamCallback($score);
 
+            $enum = SpamScore::__toInt();
             switch($score) {
 
                 default:
-                case SpamScore::NOT_SPAM:
-                case SpamScore::MAYBE_SPAM:
+                case $enum[SpamScore::NOT_SPAM]:
+                case $enum[SpamScore::MAYBE_SPAM]:
                     break;
 
-                case SpamScore::BLATANT_SPAM:
+                case $enum[SpamScore::BLATANT_SPAM]:
                     $form->addError(new FormError('Blatant spam, go away!'));
             }
         });

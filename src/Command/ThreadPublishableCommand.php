@@ -2,23 +2,20 @@
 
 namespace Base\Command;
 
+use Base\Component\Console\Command\Command;
 use Base\Entity\Thread;
 use Base\Enum\ThreadState;
-use Base\Repository\ThreadRepository;
 
-use Doctrine\ORM\EntityManager;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class ThreadPublishableCommand extends Command
 {
     protected static $defaultName = 'thread:publishable';
 
-    public function __construct(EntityManager $entityManager)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
         parent::__construct();
@@ -32,9 +29,6 @@ class ThreadPublishableCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!$output instanceof ConsoleOutputInterface)
-            throw new \LogicException('This command accepts only an instance of "ConsoleOutputInterface".');
-
         $actionPublish = $input->getOption('publish');
         $actionShow    = $input->getOption('show');
 
