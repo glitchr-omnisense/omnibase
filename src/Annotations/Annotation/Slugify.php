@@ -142,8 +142,8 @@ class Slugify extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $defaultInput = $this->getFieldValue($entity, $property);
-        $slug = $this->getSlug($entity, $property, $defaultInput);
+        $currentSlug = $this->getFieldValue($entity, $property);
+        $slug = $this->getSlug($entity, $property, $currentSlug);
         $this->setFieldValue($entity, $property, $slug);
     }
 
@@ -154,8 +154,8 @@ class Slugify extends AbstractAnnotation
         $classMetadata = $this->getClassMetadata(get_class($entity));
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
-        $input = $this->getFieldValue($entity, $property);
-        $slug = $this->getSlug($entity, $property, $input, $invalidSlugs);
+        $currentSlug = $this->getFieldValue($entity, $property);
+        $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
         $this->setFieldValue($entity, $property, $slug);
 
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);

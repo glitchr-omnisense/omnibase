@@ -306,8 +306,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function isSocial(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
     public function isPersistent(): bool { return (!$this->isSocial() || $this->id > 0); }
-    public function getRoles(): array { 
-        
+    public function getRoles(): array
+    { 
         if(empty($roles))
             $roles[] = UserRole::USER;
 

@@ -181,6 +181,9 @@ trait TranslatableTrait
         if($parentClass && method_exists($parentClass,"__call")) 
             return parent::__call($method, $arguments);
 
+        if(!method_exists($className,$method))
+            throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+
         return null;
     }
 
@@ -210,6 +213,11 @@ trait TranslatableTrait
             $accessor->setValue($entityTranslation, $property, $argument);
             return $this;
         }
+
+        if(!str_starts_with($property, "ea_"))
+            throw new \BadMethodCallException("Can't get a way to write property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+
+        return $this;
     }
     
     public function __get($property)

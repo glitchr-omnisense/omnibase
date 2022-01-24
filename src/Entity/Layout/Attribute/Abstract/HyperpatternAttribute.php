@@ -31,8 +31,6 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
 
         $this->translate(LocaleProvider::getDefaultLocale())->setLabel(ucfirst($code));
         $this->setPattern($pattern);
-
-        $this->hyperlinks = new ArrayCollection();
     }
 
     /**

@@ -150,7 +150,8 @@ class Thread implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    public function isScheduled(): bool { return $this->publishedAt && !$this->isPublishable(); }
+    public function isScheduled(): bool { return $this->publishedAt && !$this->isPublished(); }
+    public function isPublished(): bool { return in_array($this->state, [ThreadState::PUBLISHED, ThreadState::APPROVED]); }
     public function isPublishable(): bool
     {
         if(!$this->publishedAt) return false;
