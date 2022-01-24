@@ -10,18 +10,15 @@ use Base\Field\AvatarField;
 use Base\Field\PasswordField;
 use Base\Field\RoleField;
 use Base\Field\BooleanField;
-use Base\Field\DiscriminatorField;
+
 use Base\Field\EmailField;
+use Base\Field\IdField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 
 class UserCrudController extends AbstractCrudController
 {
@@ -57,49 +54,22 @@ class UserCrudController extends AbstractCrudController
         return $extension;
     }
 
-    public function configureFilters(Filters $filters): Filters 
-    { 
-        return $filters->add('roles'); 
-    }
-    
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFilters(Filters $filters): Filters { return $filters->add('roles'); }
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, function() {
 
-        return parent::configureFields($pageName, [
+            yield IdField::new('id')->hideOnDetail();
+            // yield AvatarField::new('avatar')->hideOnDetail();
 
-            "id" => function() use ($defaultCallback, $callbacks) {
-    
+            // yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
+            // yield EmailField::new('email')->setColumns(5);
+            // yield BooleanField::new("isApproved")->withConfirmation();
 
-                yield AvatarField::new('avatar')->hideOnDetail();
-                foreach ( ($callbacks["avatar"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-
-                yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
-                foreach ( ($callbacks["roles"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-                    
-                yield EmailField::new('email')->setColumns(5);
-                foreach ( ($callbacks["email"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-
-                yield BooleanField::new("isApproved")->withConfirmation();
-                foreach ( ($callbacks["isApproved"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-
-                yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
-                foreach ( ($callbacks["plainPassword"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-
-                yield DateTimeField::new('updatedAt')->onlyOnDetail();
-                foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-        
-                yield DateTimeField::new('createdAt')->onlyOnDetail();
-                foreach ( ($callbacks["createdAt"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-            }
-        ]);
+            // yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
+            // yield DateTimeField::new('updatedAt')->onlyOnDetail();
+            // yield DateTimeField::new('createdAt')->onlyOnDetail();
+        }, $args);
     }
 
     public function configureActions(Actions $actions): Actions

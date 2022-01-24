@@ -36,52 +36,28 @@ class ThreadCrudController extends AbstractCrudController
                 ->setPermission($approveThread, 'ROLE_SUPERADMIN');
     }
 
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
-
-        yield IdField::new('id')->hideOnForm();
-        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield DiscriminatorField::new('id')->hideOnForm()->showColumnLabel();
-        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield TextField::new('title')->setTextAlign(TextAlign::RIGHT)->hideOnDetail()->hideOnForm();
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield SelectField::new('owners')->showFirst()->setTextAlign(TextAlign::LEFT);
-        foreach ( ($callbacks["owners"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        return parent::configureFields($pageName, function() {
             
-        yield StateField::new('state')->setColumns(6);
-        foreach ( ($callbacks["state"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-        
-        yield DateTimePickerField::new('publishedAt')->setFormat("dd MMM yyyy");
-        foreach ( ($callbacks["publishedAt"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+            yield IdField::new('id')->hideOnForm();
 
-        yield SlugField::new('slug')->setTargetFieldName("translations.title");
-        foreach ( ($callbacks["slug"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-    
-        yield TranslationField::new()->setFields([
-            "excerpt" => ["form_type" => TextareaType::class],
-            "content" => ["form_type" => QuillType::class]
-        ]);
-        foreach ( ($callbacks[""] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield DateTimePickerField::new('updatedAt')->onlyOnDetail();
-        foreach ( ($callbacks["updatedAt"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+            yield DiscriminatorField::new('id')->hideOnForm()->showColumnLabel();
+            yield TextField::new('title')->setTextAlign(TextAlign::RIGHT)->hideOnDetail()->hideOnForm();
+            yield SelectField::new('owners')->showFirst()->setTextAlign(TextAlign::LEFT);
+            yield StateField::new('state')->setColumns(6);
             
-        yield DateTimePickerField::new('createdAt')->onlyOnDetail();
-        foreach ( ($callbacks["createdAt"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+            yield DateTimePickerField::new('publishedAt')->setFormat("dd MMM yyyy");
+
+            yield SlugField::new('slug')->setTargetFieldName("translations.title");
+            yield TranslationField::new()->setFields([
+                "excerpt" => ["form_type" => TextareaType::class],
+                "content" => ["form_type" => QuillType::class]
+            ]);
+
+            yield DateTimePickerField::new('updatedAt')->onlyOnDetail();
+            yield DateTimePickerField::new('createdAt')->onlyOnDetail();
+        });
     }
 
     public function approveThreads(BatchActionDto $batchActionDto)

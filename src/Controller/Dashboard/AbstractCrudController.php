@@ -288,15 +288,23 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return parent::configureResponseParameters($responseParameters);
     }
 
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
-        
-        foreach ( ($callbacks[""] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        foreach ($this->yields($args) as $yields) {
 
-        yield IdField::new('id')->hideOnForm()->hideOnDetail();
-        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+            foreach ($yields as $yield)
+                yield $yield;
+        }
+    }
+
+    public function yields(array &$args, ?string $yield = null): array
+    {
+        return array_map(
+                fn($v) => is_callable($v) ? $v() : $v, 
+                array_flatten(array_filter_recursive($args, 
+                    fn($v, $k) => ($yield === null || $k == $yield) && !empty($v), 
+                    ARRAY_FILTER_USE_BOTH)
+                )
+            );
     }
 }

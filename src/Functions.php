@@ -370,6 +370,8 @@ namespace {
         ];
     }
 
+    function array_clear(array &$arr) { while(array_pop($arr)) {} }
+
     function array_append_recursive()
     {
         $arrays = func_get_args();
@@ -568,26 +570,22 @@ namespace {
         return $tArray;
     }
 
-    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) 
-    {
-        return array_transforms(function($k,$v,$i,$_) use ($callback, $mode):?array {
-            return [$k, is_array($v) ? array_transforms($_, array_filter($v, $callback, $mode)) : $v];
-        }, $array);
-    }
-
+    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) { return array_transforms(fn($k,$v,$i,$_):?array => [$k, is_array($v) ? array_transforms($_, array_filter($v, $callback, $mode)) : $v], $array); }
     function array_slice_recursive(array $array, int $offset, ?int $length, bool $preserve_keys = false): array
     {
         $offsetCounter = 0;
         $lengthCounter = 0;
-        return array_transforms(function($k, $v, $i, $callback) use (&$offsetCounter, $offset, &$lengthCounter, $length):?array {
+
+        return array_transforms(function($k, $v, $i, $callback) use ($preserve_keys, &$offsetCounter, $offset, &$lengthCounter, $length):?array {
 
             if(is_array($v)) {
+
                 $v = array_transforms($callback, $v);
-                $array = empty($v) ? null : [$k, $v];
+                $array = empty($v) ? null : [$preserve_keys ? $k : $i, $v];
                 return $array;
             }
 
-            $array = ($offsetCounter < $offset || ($lengthCounter >= $length)) ? null : [$k,$v];
+            $array = ($offsetCounter < $offset || ($lengthCounter >= $length)) ? null : [$preserve_keys ? $k : $i, $v];
             if($array !== null) $lengthCounter++;
 
             $offsetCounter++;

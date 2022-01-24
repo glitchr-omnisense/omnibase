@@ -13,20 +13,13 @@ class TagCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon() : ?string { return null; } 
     
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
-
-        yield IdField::new('id')->hideOnForm();
-        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield DiscriminatorField::new('id')->hideOnForm()->showColumnLabel();
-        foreach ( ($callbacks["id"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield TranslationField::new()->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
-        foreach ( ($callbacks["translations"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+        return parent::configureFields($pageName, function() {
+            
+            yield IdField::new('id')->hideOnForm();
+            yield DiscriminatorField::new('id')->hideOnForm()->showColumnLabel();
+            yield TranslationField::new()->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
+        });
     }
 }
