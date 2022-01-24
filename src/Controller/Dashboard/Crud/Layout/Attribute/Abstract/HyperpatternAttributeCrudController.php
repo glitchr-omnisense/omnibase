@@ -10,20 +10,11 @@ class HyperpatternAttributeCrudController extends AbstractAttributeCrudControlle
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
-    
-        return parent::configureFields($pageName, array_merge($callbacks, [
-            "id" => function () use ($defaultCallback) {
-                yield TextField::new('pattern')->onlyOnForms()->setColumns(12);
-            },
-            "translations" => function () use ($defaultCallback) {
-
-                yield TextField::new('pattern')->hideOnForm();
-                foreach ( ($callbacks["pattern"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-            }
-        ]));
+        return parent::configureFields($pageName, [
+            fn() => yield TextField::new('pattern')->onlyOnForms()->setColumns(12),
+            "translations" => fn() => yield TextField::new('pattern')->hideOnForm()
+        ], $args);
     }
 }

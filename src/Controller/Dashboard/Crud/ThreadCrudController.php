@@ -57,7 +57,8 @@ class ThreadCrudController extends AbstractCrudController
 
             yield DateTimePickerField::new('updatedAt')->onlyOnDetail();
             yield DateTimePickerField::new('createdAt')->onlyOnDetail();
-        });
+
+        }, $args);
     }
 
     public function approveThreads(BatchActionDto $batchActionDto)

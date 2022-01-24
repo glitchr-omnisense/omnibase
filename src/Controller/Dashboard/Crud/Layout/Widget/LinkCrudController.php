@@ -14,23 +14,16 @@ class LinkCrudController extends WidgetCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }
 
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
-        return parent::configureFields($pageName, [
-            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
+        return parent::configureFields($pageName, function () {
 
-                yield AttributeField::new('hyperlink')->setClass(HyperpatternAttribute::class);
-                foreach ( ($callbacks["hyperlink"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-
-                yield TranslationField::new()->showOnIndex('title')->setFields([
-                    "title" => [],
-                    "excerpt" => ["form_type" => TextareaType::class],
-                    "content" => ["form_type" => QuillType::class],
-                ]);
-                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-        }]);
+            yield AttributeField::new('hyperlink')->setClass(HyperpatternAttribute::class);
+            yield TranslationField::new()->showOnIndex('title')->setFields([
+                "title" => [],
+                "excerpt" => ["form_type" => TextareaType::class],
+                "content" => ["form_type" => QuillType::class],
+            ]);
+        }, $args);
     }
 }

@@ -13,20 +13,16 @@ class HyperlinkCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }
 
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
+        return parent::configureFields($pageName, function () {
 
-        yield SelectField::new('hyperpattern');
-        foreach ( ($callbacks["hyperpattern"] ?? $defaultCallback)() as $yield)
-            yield $yield;
-
-        yield TranslationField::new()->showOnIndex('title')->setFields([
-            "title" => [],
-            "excerpt" => ["form_type" => TextareaType::class],
-            "content" => ["form_type" => QuillType::class],
-        ]);
-        foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-            yield $yield;
+            yield SelectField::new('hyperpattern');
+            yield TranslationField::new()->showOnIndex('title')->setFields([
+                "title" => [],
+                "excerpt" => ["form_type" => TextareaType::class],
+                "content" => ["form_type" => QuillType::class],
+            ]);
+        },$args);
     }
 }

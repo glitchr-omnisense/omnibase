@@ -69,6 +69,7 @@ class UserCrudController extends AbstractCrudController
             // yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
             // yield DateTimeField::new('updatedAt')->onlyOnDetail();
             // yield DateTimeField::new('createdAt')->onlyOnDetail();
+
         }, $args);
     }
 

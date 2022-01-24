@@ -10,7 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
-use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Controller\Dashboard\Crud\Layout\WidgetCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -45,23 +44,15 @@ class AttachmentCrudController extends WidgetCrudController
         return parent::configureActions($actions)->add(Crud::PAGE_INDEX, $downloadAction);
     }
 
-    public function configureFields(string $pageName, array $callbacks = []): iterable
+    public function configureFields(string $pageName, ...$args): iterable
     {
-        $defaultCallback = function() { return []; };
-        return parent::configureFields($pageName, [
-            "id" => function () use ($defaultCallback, $callbacks, $pageName) {
+        return parent::configureFields($pageName, function () {
 
-                $defaultCallback = function() { return []; };
+            yield FileField::new('file')->setPreferredDownloadName("slug");                
+            yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
 
-                yield FileField::new('file')->setPreferredDownloadName("slug");
-                foreach ( ($callbacks["file"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-                    
-                yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
+            yield TranslationField::new()->showOnIndex('title');
 
-                yield TranslationField::new()->showOnIndex('title');
-                foreach ( ($callbacks["title"] ?? $defaultCallback)() as $yield)
-                    yield $yield;
-        }]);
+        }, $args);
     }
 }

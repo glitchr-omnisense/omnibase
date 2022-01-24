@@ -7,7 +7,6 @@ use Base\Field\DiscriminatorField;
 use Base\Field\IdField;
 use Base\Field\TranslationField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class TagCrudController extends AbstractCrudController
 {
