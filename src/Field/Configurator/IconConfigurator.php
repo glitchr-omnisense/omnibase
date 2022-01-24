@@ -33,6 +33,7 @@ class IconConfigurator extends SelectConfigurator
 
         $provider = $field->getFormTypeOption("provider");
         $iconProvider = $this->iconService->getProvider($provider);
+
         foreach($iconProvider->getAssets() as $asset) {
 
             $relationship = pathinfo_relationship($asset);

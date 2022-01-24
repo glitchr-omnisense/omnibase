@@ -4,6 +4,7 @@ namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
 use Base\Model\IconInterface;
+use Base\Model\IconProviderInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -40,7 +41,7 @@ class BaseExtension extends Extension
         ));
 
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
-        $container->registerForAutoconfiguration(IconInterface::class)->addTag('base.icon');
+        $container->registerForAutoconfiguration(IconProviderInterface::class)->addTag('base.icon_provider');
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")
