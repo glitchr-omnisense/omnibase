@@ -8,6 +8,7 @@ use App\Repository\UserRepository;
 
 use App\Form\User\ProfileEditType;
 use App\Form\User\ProfileSearchType;
+use Base\Annotations\Annotation\Iconize;
 use Endroid\QrCode\QrCode;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,6 +37,7 @@ class ProfileController extends AbstractController
     /**
      * @Route("/profile", name="user_profile")
      * @Route("/profile/{id}", name="user_profileId")
+     * @Iconize("fas fa-fw fa-id-card")
      */
     public function Show($id = -1)
     {
@@ -47,7 +49,7 @@ class ProfileController extends AbstractController
         } else {
 
             if (!($user = $this->getUser()) || !$user->isPersistent())
-                return $this->redirectToRoute('base_search');
+                return $this->redirectToRoute('user_search');
         }
 
         return $this->render('@Base/client/user/profile_show.html.twig', ['user' => $user]);

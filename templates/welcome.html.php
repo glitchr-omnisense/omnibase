@@ -76,24 +76,17 @@
                 <span class="check">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
                 </span>
-                <span><?= $projectDir; ?></span>
+                <span>Base <?php echo $baseVersion; ?> on top !</span>
             </code>
         </div>
-        <div class="state" style="margin-top:-2em;">
-            <?php
-            foreach($BaseFound as $key => $found) {
-
-                if($found) {
-                    echo '<code>
-                        <span class="check">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        </span>
-                        <span>'.mb_ucfirst($key).'</span></code> ';
-                }
-            }
-            ?>
-
-            <p class="state-ready">Your application is now ready and you can start working on it.</p>
+        <div class="state">
+            <code>
+                <span class="check">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                </span>
+                <span><?= $projectDir; ?></span>
+            </code>
+            <p class="state-ready" style="margin-top:0.25em">Your application is now ready and you can start working on it.</p>
         </div>
 
         <div class="footer">

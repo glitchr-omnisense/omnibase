@@ -18,11 +18,6 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     /**
     * @var string
     */
-    private $lockPath;
-
-    /**
-    * @var string
-    */
     private $homepageRoute;
     /**
     * @var array
@@ -41,13 +36,14 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
         $this->homepageRoute = $baseService->getParameterBag("base.maintenance.homepage");
         $this->maintenanceRoute = $baseService->getParameterBag("base.maintenance.redirect");
-
     }
 
     public static function getSubscribedEvents(): array
     {
         return [ RequestEvent::class => ['onRequestEvent'] ];
     }
+
+    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
 
     public function onRequestEvent(RequestEvent $event)
     {
@@ -57,7 +53,6 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         // Exception triggered
         if( empty($this->getCurrentRoute($event)) ) return;
 
-        // Check if lock file is found or not..
         if(!$this->baseService->isMaintenance()) {
 
             if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event)))
@@ -66,7 +61,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
             return;
         }
 
-        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_SUPERADMIN")) {
+        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_EDITOR")) {
 
             $notification = new Notification("maintenance.banner");
             $notification->send("warning");
@@ -87,6 +82,4 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         // Stopping page execution
         $event->stopPropagation();
     }
-
-    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
 }

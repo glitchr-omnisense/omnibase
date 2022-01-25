@@ -26,7 +26,7 @@
         <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
         <service id="Base\Service\ParameterBag" parent="parameter_bag" public="true" />
 
-        <service id="Base\Controller\BaseController">
+        <service id="Base\Controller\MainController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
@@ -244,13 +244,6 @@
             <argument type="service" id="App\Repository\User\TokenRepository" />
             <argument type="service" id="base.service" />
         </service>
-        <service id="Base\Controller\Client\MaintenanceController">
-            <tag name="controller.service_arguments" />
-            <tag name="container.service_subscriber" />
-            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            
-            <argument type="service" id="base.service" />
-        </service>
 
         <!-- Type declaration -->
         <service id="Base\Form\FormProcessor">
@@ -311,6 +304,8 @@
         <service id="Base\Service\IconService" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="base.service.image" />
+            <argument type="service" id="cache.adapter" />
+            <argument type="service" id="router.default" />
         </service>
         
         <service id="Base\Model\IconProvider\FontAwesome">
@@ -728,6 +723,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="router.default" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 

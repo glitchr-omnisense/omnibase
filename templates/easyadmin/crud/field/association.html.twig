@@ -84,8 +84,8 @@
             {% set icon = field.formattedValue.first.__iconize()[0] ?? null %}
         {% endif %}
 
-        {% if icon is null and method_exists(field.formattedValue.first, "__staticIconize") %}
-            {% set icon = field.formattedValue.first.__staticIconize()[0] ?? null %}
+        {% if icon is null and method_exists(field.formattedValue.first, "__iconizeStatic") %}
+            {% set icon = field.formattedValue.first.__iconizeStatic()[0] ?? null %}
         {% endif %}
 
         {% set icon  = icon|iconify|default(null) %}

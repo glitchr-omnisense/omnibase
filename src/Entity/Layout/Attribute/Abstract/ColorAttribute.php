@@ -16,7 +16,7 @@ use Base\Repository\Layout\Attribute\Abstract\ColorAttributeRepository;
 
 class ColorAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __staticIconize() : ?array { return ["fas fa-tint"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-tint"]; }
 
     public static function getType(): string { return ColorType::class; }
     public function getOptions(): array { return []; }

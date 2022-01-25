@@ -16,7 +16,7 @@ use Base\Repository\Layout\Attribute\Abstract\ArrayAttributeRepository;
 
 class ArrayAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __staticIconize() : ?array { return ["fas fa-clipboard-list"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-clipboard-list"]; }
 
     public static function getType(): string { return ArrayType::class; }
     public function getOptions(): array { return []; }

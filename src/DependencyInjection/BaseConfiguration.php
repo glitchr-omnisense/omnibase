@@ -100,7 +100,7 @@ class BaseConfiguration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('admin_role')
                             ->info('Administrators receiving notifications')
-                            ->defaultValue("ROLE_SUPERADMIN")
+                            ->defaultValue("ROLE_EDITOR")
                         ->end()
                     ->end()
 

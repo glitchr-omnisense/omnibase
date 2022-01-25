@@ -2,7 +2,7 @@
 
 namespace Base\Subscriber;
 
-use Base\Controller\BaseController;
+use Base\Controller\MainController as BaseController;
 use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\ConsoleEvents;
@@ -36,8 +36,6 @@ class BaseSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        BaseController::$foundBaseSubscriber = true;
-
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.stylesheet")));
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.stylesheet")));
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));

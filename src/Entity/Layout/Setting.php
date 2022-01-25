@@ -22,7 +22,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     }
 
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-tools"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-tools"]; }
 
     /**
      * @ORM\Id

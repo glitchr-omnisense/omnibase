@@ -16,7 +16,7 @@ use Base\Repository\Layout\Attribute\Abstract\NumberAttributeRepository;
 
 class NumberAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __staticIconize() : ?array { return ["fas fa-calculator"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-calculator"]; }
 
     public static function getType(): string { return NumberType::class; }
     public function getOptions(): array { return []; }

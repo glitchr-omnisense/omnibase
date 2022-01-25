@@ -80,8 +80,8 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
             $position = array_class_last(Iconize::class, $annotations);
             $iconize  = $position !== false ? $annotations[$position] : null;
-            $icon     = $iconize ? $iconize->getIcon() : null;
-            
+            $icon     = $iconize ? $iconize->getIcons()[0] ?? null : null;
+
             $position = array_class_last(Route::class, $annotations);
             $route  = $position !== false ? $annotations[$position] : null;
             $routeName          = $route ? $this->getRouteName($path) : null;

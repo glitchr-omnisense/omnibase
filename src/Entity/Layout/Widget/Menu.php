@@ -16,7 +16,7 @@ use Base\Repository\Layout\Widget\MenuRepository;
 class Menu extends Slot implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-compass"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-compass"]; } 
 
     public function __toString() { return $this->getTitle(); }
 }

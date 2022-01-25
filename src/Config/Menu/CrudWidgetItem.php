@@ -89,7 +89,6 @@ final class CrudWidgetItem implements MenuItemInterface
 
     public function generateUrl()
     {
-        //
         if (WidgetItem::$adminUrlGenerator == null)
             throw new Exception("AdminUrlGenerator is missing");
         if (WidgetItem::$adminContextProvider == null)

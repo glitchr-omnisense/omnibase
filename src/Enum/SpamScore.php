@@ -13,7 +13,7 @@ class SpamScore extends EnumType implements IconizeInterface
     const BLATANT_SPAM = "BLATANT_SPAM";
 
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::NO_TEXT      => ["fas fa-file"],

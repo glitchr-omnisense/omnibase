@@ -20,7 +20,7 @@ class ThreadState extends EnumType implements IconizeInterface
     const DELETED    = "STATE_DELETED";
 
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::PUBLISHED => ["fas fa-book"],

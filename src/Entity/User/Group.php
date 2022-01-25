@@ -18,7 +18,7 @@ use App\Repository\User\GroupRepository;
 class Group implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-users"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-users"]; } 
 
     /**
      * @ORM\Id

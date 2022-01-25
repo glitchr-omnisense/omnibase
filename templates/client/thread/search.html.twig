@@ -27,13 +27,13 @@
                 <div class="card card-body">
                 <div class="d-flex justify-content-center align-items-center flex-row flex-wrap">
                     <div class="input-group w-auto m-1">
-                        {{ form_widget(form.title  , {'attr': {'placeholder': '@controllers.base_thread_search.title'|trans}, value: form.vars.value.title|trim("%") }) }}
+                        {{ form_widget(form.title  , {'attr': {'placeholder': '@controllers.thread_search.title'|trans}, value: form.vars.value.title|trim("%") }) }}
                     </div> ou
                     <div class="input-group w-auto m-1">
-                        {{ form_widget(form.excerpt, {'attr': {'placeholder': '@controllers.base_thread_search.excerpt'|trans}, value: form.vars.value.excerpt|trim("%") }) }}
+                        {{ form_widget(form.excerpt, {'attr': {'placeholder': '@controllers.thread_search.excerpt'|trans}, value: form.vars.value.excerpt|trim("%") }) }}
                     </div> ou
                     <div class="input-group w-auto m-1">
-                        {{ form_widget(form.content, {'attr': {'placeholder': '@controllers.base_thread_search.content'|trans}, value: form.vars.value.content|trim("%") }) }}
+                        {{ form_widget(form.content, {'attr': {'placeholder': '@controllers.thread_search.content'|trans}, value: form.vars.value.content|trim("%") }) }}
                     </div>
                 </div>
                 </div>

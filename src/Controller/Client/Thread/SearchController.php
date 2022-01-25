@@ -34,7 +34,7 @@ class SearchController extends AbstractController
     }
 
     /**
-     * @Route("/search", name="base_thread_search")
+     * @Route("/search", name="thread_search")
      */
     public function Main(Request $request, ?FormInterface $formSearch = null, ?FormInterface $formSearchbar = null)
     {

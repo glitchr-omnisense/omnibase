@@ -60,7 +60,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     use BaseTrait;
 
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
-    public static function __staticIconize() : ?array { return ["fas fa-user"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-user"]; } 
 
     public const __ACTIVE_TIME__ = 60;
     public const __ONLINE_TIME__ = 60*5;
@@ -324,9 +324,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    //
-    // NB: DON'T USE addRole or removeRole, it seems to be changing ChoiceType behavior
-    //
     public function addRole(string $role): self
     {
         if (!in_array($role, $this->roles))
@@ -338,6 +335,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         if ( ($pos = array_search($role, $this->roles)) )
             unset($this->roles[$pos]);
+
+        if(empty($this->roles))
+            $this->roles[] = UserRole::USER;
 
         return $this;
     }

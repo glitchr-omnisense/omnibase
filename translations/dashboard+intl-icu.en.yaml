@@ -1,14 +1,4 @@
 # Dashboard controllers
-controllers:
-  settings:
-    empty: "No settings to configure, you can return from where you come from."
-    success: "Settings have been successfully modified."
-    failed: "Failed to modify settings."
-  widgets:
-    empty: "No widgets to configure, you can return from where you come from."
-    success: "Widget slots have been successfully updated."
-    failed: "Failed to update widget slots."
-
 
 # MENU controller
 # My Settings: Mes paramètres

@@ -39,7 +39,7 @@ class UserCrudController extends AbstractCrudController
             $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
             
             $impersonate = null;
-            if($this->isGranted("ROLE_SUPERADMIN") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+            if($this->isGranted("ROLE_EDITOR") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $impersonate = $entity->getUserIdentifier();
                 $impersonate = '<a class="impersonate" href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>';
             }
@@ -60,15 +60,15 @@ class UserCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function() {
 
             yield IdField::new('id')->hideOnDetail();
-            // yield AvatarField::new('avatar')->hideOnDetail();
+            yield AvatarField::new('avatar')->hideOnDetail();
 
-            // yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
-            // yield EmailField::new('email')->setColumns(5);
-            // yield BooleanField::new("isApproved")->withConfirmation();
+            yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
+            yield EmailField::new('email')->setColumns(5);
+            yield BooleanField::new("isApproved")->withConfirmation();
 
-            // yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
-            // yield DateTimeField::new('updatedAt')->onlyOnDetail();
-            // yield DateTimeField::new('createdAt')->onlyOnDetail();
+            yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(6);
+            yield DateTimeField::new('updatedAt')->onlyOnDetail();
+            yield DateTimeField::new('createdAt')->onlyOnDetail();
 
         }, $args);
     }
@@ -82,7 +82,7 @@ class UserCrudController extends AbstractCrudController
         return parent::configureActions($actions)
 
             ->addBatchAction($approveUser)
-            ->setPermission($approveUser, 'ROLE_SUPERADMIN');
+            ->setPermission($approveUser, 'ROLE_EDITOR');
     }
 
     public function approveUsers(BatchActionDto $batchActionDto)

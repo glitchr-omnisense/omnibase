@@ -2,6 +2,7 @@
 
 namespace Base\Controller;
 
+use Base\BaseBundle;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -9,7 +10,7 @@ use Symfony\Component\HttpKernel\Kernel;
 
 use  Base\Service\BaseService;
 
-class BaseController extends AbstractController
+class MainController extends AbstractController
 {
     public static $foundBaseService       = false;
     public static $foundBaseSubscriber    = false;
@@ -24,19 +25,14 @@ class BaseController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/", name="base_homepage")
+     * @Route("/", name="index")
      */
-    public function Main(): Response
+    public function Index(): Response
     {
         $version = Kernel::VERSION;
-        $projectDir = \dirname(__DIR__);
+        $projectDir = \dirname(__DIR__, 5);
         $docVersion = substr(Kernel::VERSION, 0, 3);
-
-        $BaseFound = [
-            "service" => BaseController::$foundBaseService,
-            "subscriber" => BaseController::$foundBaseSubscriber,
-            "twig" => BaseController::$foundBaseTwigExtension
-        ];
+        $baseVersion = BaseBundle::VERSION;
 
         ob_start();
         include \dirname(__DIR__).'/Resources/views/welcome.html.php';

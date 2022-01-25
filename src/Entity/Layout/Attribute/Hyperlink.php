@@ -19,7 +19,7 @@ use Base\Repository\Layout\Attribute\HyperlinkRepository;
 class Hyperlink extends Attribute implements IconizeInterface
 {
     public        function __iconize()       : ?array { return $this->getHyperpattern() ? [$this->getHyperpattern()->getIcon()] : null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-link"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-link"]; } 
 
     /**
       * @ColumnAlias(column = "attributePattern")

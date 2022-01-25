@@ -55,7 +55,7 @@ class IconControllersCommand extends Command
             }
 
             $icon = $icon ?? null;
-            $iconize = $icon ? "<warning>(implements ".Iconize::class.")</warning>: \"$icon\"" : "<red>(no icon found)</red>";
+            $iconize = $icon ? "<warning>(implements ".IconizeInterface::class.")</warning>: \"$icon\"" : "<red>(no icon found)</red>";
             $output->section()->writeln(" * <info>".trim($controller)."</info> ".$iconize);
         }
 

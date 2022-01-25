@@ -29,7 +29,7 @@ class Widget implements TranslatableInterface, IconizeInterface
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-cube"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
     protected string $template = "";
     public function getTemplate()

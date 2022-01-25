@@ -38,7 +38,7 @@ class UserVoter extends Voter
         switch($attribute) {
 
             case self::EDIT_ROLES:
-                return ($this->security->isGranted("ROLE_SUPERADMIN")) ? self::ACCESS_GRANTED : self::ACCESS_DENIED;
+                return ($this->security->isGranted("ROLE_EDITOR")) ? self::ACCESS_GRANTED : self::ACCESS_DENIED;
         }
 
         return self::ACCESS_ABSTAIN;

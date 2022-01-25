@@ -35,15 +35,18 @@ class IdConfigurator implements FieldConfiguratorInterface
             $maxLength = Crud::PAGE_INDEX === $context->getCrud()->getCurrentPage() ? 7 : -1;
 
         // Check access rights and context to impersonate
-        if(!$entityDto->getInstance() instanceof User || !$this->authorizationChecker->isGranted('ROLE_SUPERADMIN'))
+        if(!$entityDto->getInstance() instanceof User || !$this->authorizationChecker->isGranted('ROLE_EDITOR'))
             $field->setCustomOption(IdField::OPTION_IMPERSONATE, false);
 
         // Formatted data
         $field->setValue($entityDto->getInstance());
         $accessor = PropertyAccess::createPropertyAccessor();
-        $value = $accessor->isReadable($field->getValue(), $field->getProperty()) 
-               ? $accessor->getValue  ($field->getValue(), $field->getProperty()) : null;
 
+        if($field->getValue() === null) return;
+
+        $value = $accessor->isReadable($field->getValue(), $field->getProperty()) 
+            ? $accessor->getValue  ($field->getValue(), $field->getProperty()) : null;
+    
         $hashtag = gettype($value) == "integer" ?  "#" : "";
         $value   = $hashtag . ($maxLength !== -1 ? u($value)->truncate($maxLength, '…')->toString() : $value);
 
@@ -57,10 +60,6 @@ class IdConfigurator implements FieldConfiguratorInterface
                 ->generateUrl();
         }
         
-        if (null !== $field->getValue()) {
-            
-            $field->setFormattedValue( ($url ? "<a href='".$url."'>".$value."</a>" : $value));
-
-        }
+        $field->setFormattedValue( ($url ? "<a href='".$url."'>".$value."</a>" : $value));
     }
 }

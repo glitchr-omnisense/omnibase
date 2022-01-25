@@ -40,7 +40,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     use BaseTrait;
 
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-bell"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-bell"]; } 
 
     // Default notification
     public const IMPORTANCE_DEFAULT = "default";

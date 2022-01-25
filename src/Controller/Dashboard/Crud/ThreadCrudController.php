@@ -33,7 +33,7 @@ class ThreadCrudController extends AbstractCrudController
 
         return parent::configureActions($actions)
                 ->addBatchAction($approveThread)
-                ->setPermission($approveThread, 'ROLE_SUPERADMIN');
+                ->setPermission($approveThread, 'ROLE_EDITOR');
     }
 
     public function configureFields(string $pageName, ...$args): iterable

@@ -2,14 +2,51 @@
 
 namespace Base\Service;
 
+use Base\Annotations\Annotation\Iconize;
+use Base\Annotations\AnnotationReader;
 use Base\Model\IconizeInterface;
 use Base\Model\IconProviderInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class IconService
 {
-    public function __construct(ImageService $imageService)
+    protected $routeIcons = [];
+
+    public function __construct(ImageService $imageService, CacheInterface $cache, RouterInterface $router)
     {
         $this->imageService = $imageService;
+
+        // Turn icon annotation into cache
+        $cacheName = "base.icon_service." . hash('md5', self::class);
+        $cacheRouteIcons = $cache->getItem($cacheName."route_icons");
+
+        $this->routeIcons = $cacheRouteIcons->get();
+        if($this->routeIcons === null) {
+
+            $this->routeIcons = array_transforms(function($route, $controller):?array {
+
+                $controller = $controller->getDefault("_controller");
+                if(!$controller) return null;
+
+                list($class, $method) = explode("::", $controller);
+                if(!class_exists($class)) return null;
+
+                $iconAnnotations = AnnotationReader::getInstance()->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
+                if(!$iconAnnotations) return null;
+
+                return [$route, end($iconAnnotations)->getIcons()];
+
+            }, $router->getRouteCollection()->all());
+
+            if(!is_cli()) $cache->save($cacheRouteIcons->set($this->routeIcons));
+        }
+    }
+
+    public function getRouteIcons(string $route)
+    {
+        // dump($this->routeIcons, $route);
+        return $this->routeIcons[$route] ?? null;
     }
 
     protected $providers = [];
@@ -44,8 +81,8 @@ class IconService
     {
         if(!$icon) return $icon;
 
-        $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $icon;
-        if(is_array($icon)) 
+        $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $this->getRrouteIcons[$icon] ?? $icon;
+        if(is_array($icon))
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 
         foreach($this->providers as $provider) {

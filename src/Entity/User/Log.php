@@ -18,7 +18,7 @@ use Base\Repository\User\LogRepository;
 class Log implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-info-circle"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-info-circle"]; } 
 
     /**
      * @ORM\Id

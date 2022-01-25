@@ -130,9 +130,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         return $actions
                 ->update(Crud::PAGE_INDEX, Action::NEW ,    fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
-                ->setPermission(Action::NEW, 'ROLE_SUPERADMIN')
-                ->setPermission(Action::EDIT, 'ROLE_SUPERADMIN')
-                ->setPermission(Action::DELETE, 'ROLE_SUPERADMIN');
+                ->setPermission(Action::NEW, 'ROLE_EDITOR')
+                ->setPermission(Action::EDIT, 'ROLE_EDITOR')
+                ->setPermission(Action::DELETE, 'ROLE_EDITOR');
     }
 
     public function configureExtension(Extension $extension) : Extension
@@ -152,7 +152,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getEntityIcon()
     {
         $icon = get_called_class()::getPreferredIcon() ?? null;
-        return $icon ?? class_implements_interface(self::getEntityFqcn(), IconizeInterface::class) ? self::getEntityFqcn()::__staticIconize()[0] : null;
+        return $icon ?? class_implements_interface(self::getEntityFqcn(), IconizeInterface::class) ? self::getEntityFqcn()::__iconizeStatic()[0] : null;
     }
 
     public function configureCrud(Crud $crud): Crud
@@ -278,9 +278,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         $this->entityDto        = $responseParameters->get("entity");
         $this->entityCollection = $responseParameters->get("entities");
-        $this->entityCollection = $this->configureEntityCollectionWithResponseParameters($this->entityCollection, $responseParameters);
+        $this->entityCollection = $this->configureEntityCollectionWithResponseParameters(
+            $this->entityCollection, 
+            $responseParameters
+        );
+
         $this->entityCollection = $responseParameters->set("entities", $this->entityCollection);
-        
         if($this->entityCollection)
             $this->responseParameters->set("entities", $this->entityCollection);
 
@@ -290,21 +293,41 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        foreach ($this->yields($args) as $yields) {
+        $yields = $this->yield($args);
+        $simpleYields      = array_filter($yields, fn($k) => !is_string($k), ARRAY_FILTER_USE_KEY);
+        $associativeYields = array_filter($yields, fn($k) =>  is_string($k), ARRAY_FILTER_USE_KEY);
 
-            foreach ($yields as $yield)
-                yield $yield;
+        foreach ($simpleYields as $__) foreach($__ as $_) foreach($_ as $yield) {
+
+            yield $yield;
+
+            $property = $yield->getAsDto()->getProperty();
+            if(array_key_exists($property, $associativeYields)) {
+
+                foreach($associativeYields[$property] as $_) foreach($_ as $yield)
+                    yield $yield;
+
+                unset($associativeYields[$property]);
+            }
         }
+
+        foreach($associativeYields as $__) foreach($__ as $_) foreach($_ as $yield) yield $yield;
     }
 
-    public function yields(array &$args, ?string $yield = null): array
+    public function yield(array &$args, ?string $field = null): array
     {
-        return array_map(
+        $args = array_map_recursive(
                 fn($v) => is_callable($v) ? $v() : $v, 
                 array_flatten(array_filter_recursive($args, 
-                    fn($v, $k) => ($yield === null || $k == $yield) && !empty($v), 
+                    fn($v, $k) => ($field === null || $k == $field) && !empty($v), 
                     ARRAY_FILTER_USE_BOTH)
-                )
+                , true)
             );
+
+        $yields = [];
+        foreach($args as $field2 => $yield)
+            if($field === null || $field == $field2) $yields[$field2] = $yield;
+
+        return $yields;
     }
 }

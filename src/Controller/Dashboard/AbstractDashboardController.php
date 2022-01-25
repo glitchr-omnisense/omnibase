@@ -24,10 +24,11 @@ use App\Entity\Layout\Widget\Page;
 
 use App\Controller\Dashboard\Crud\UserCrudController;
 use Base\Config\WidgetItem;
+use Base\Config\MenuItem;
 use Base\Service\BaseService;
-use Base\Field\Type\RoleType;
 
 use App\Enum\UserRole;
+use Base\Annotations\Annotation\Iconize;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Layout\SettingListType;
@@ -37,7 +38,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
-use EasyCorp\Bundle\EasyAdminBundle\Config\MenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Config\Extension;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
@@ -56,6 +56,7 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Base\Config\Traits\WidgetTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -86,8 +87,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->adminContextProvider  = $adminContextProvider;
 
         $this->translator = $translator;
+        MenuItem::$iconService = $baseService->getIconService();
+        MenuItem::$translator = $translator;
         WidgetItem::$translator = $translator;
-
+    
         $this->baseService           = $baseService;
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
         $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
@@ -106,7 +109,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/dashboard", name="base_dashboard")
+     * @Route("/dashboard", name="dashboard")
+     * @Iconize({"fas fa-fw fa-toolbox", "fas fa-fw fa-home"})
      */
     public function index(): Response
     {
@@ -116,7 +120,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/dashboard/ga", name="base_dashboard_ga")
+     * @Route("/dashboard/ga", name="dashboard_ga")
      */
     public function GoogleAnalytics(): Response
     {
@@ -126,7 +130,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/dashboard/settings", name="base_dashboard_settings")
+     * @Route("/dashboard/settings", name="dashboard_settings")
+     * @Iconize("fas fa-fw fa-tools")
      */
     public function Settings(Request $request, array $fields = []): Response
     {
@@ -189,7 +194,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/dashboard/widgets", name="base_dashboard_widgets")
+     * @Route("/dashboard/widgets", name="dashboard_widgets")
+     * @Iconize("fas fa-fw fa-th-large")
      */
     public function Widgets(Request $request, array $widgetSlots = []): Response
     {
@@ -257,13 +263,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function addRoles(array &$menu, string $class)
     {
-        $roles = $class::getPermittedValues(false);
-        foreach ($roles as $i => $role) {
+        foreach ($class::getPermittedValuesByGroup(false)["ROLE"] as $values) {
 
-            if ($role == UserRole::USER) continue;
+            if ($values == UserRole::USER) continue;
+
+            if(!is_array($values)) $values = ["_self" => $values];
+            $role = array_key_pop("_self", $values);
 
             $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
-            $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw";
+            $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
                 ->unsetAll()
@@ -272,10 +280,38 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->set("role", $role)
                 ->set("filters[roles][comparison]", "like")
                 ->set("filters[roles][value]", $role)
-                ->set("menuIndex", count($menu))
+                ->set(EA::MENU_INDEX, count($menu))
                 ->generateUrl();
 
-            $menu[] = MenuItem::linkToUrl($label, $icon, $url);
+            if(empty($values)) $item = MenuItem::linkToUrl($label, $icon, $url);
+            else {
+                
+                $item = MenuItem::subMenu($label, $icon);
+
+                $subItems = [];
+                foreach($values as $role)  {
+
+                    $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
+                    $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
+
+                    $url = $this->adminUrlGenerator
+                        ->unsetAll()
+                        ->setController(UserCrudController::class)
+                        ->setAction(Action::INDEX)
+                        ->set("role", $role)
+                        ->set("filters[roles][comparison]", "like")
+                        ->set("filters[roles][value]", $role)
+                        ->set(EA::MENU_INDEX, count($menu))
+                        ->set(EA::SUBMENU_INDEX, count($subItems))
+                        ->generateUrl();
+
+                    $subItems[] = MenuItem::linkToUrl($label, $icon, $url);
+                }
+
+                $item->setSubItems($subItems);
+            }
+
+            $menu[] = $item;
         }
 
         return $menu;
@@ -284,22 +320,22 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function configureMenuItems(): iterable
     {
         $menu   = [];
-        $menu[] = MenuItem::section(false);
-        $menu[] = MenuItem::linkToUrl('Home', 'fas fa-fw fa-home', $this->baseService->getUrl("base_dashboard"));
-        $menu[] = MenuItem::linkToUrl('Settings', 'fas fa-fw fa-tools', $this->baseService->getUrl("base_dashboard_settings"));
-        $menu[] = MenuItem::linkToUrl('Widgets', 'fas fa-fw fa-th-large', $this->baseService->getUrl("base_dashboard_widgets"));
-        $menu[] = MenuItem::linkToUrl('Back to website', 'fas fa-fw fa-door-open', $this->baseService->getAsset("/"));
+        $menu[] = MenuItem::section();
+        $menu[] = MenuItem::linkToController("dashboard", [], "Home");
+        $menu[] = MenuItem::linkToController("dashboard_settings");
+        $menu[] = MenuItem::linkToController("dashboard_widgets");
+        $menu[] = MenuItem::linkToController("app_index", [], 'Back to website', 'fas fa-fw fa-door-open');
 
         $menu[] = MenuItem::section('BUSINESS CARD');
         if(UserRole::class != \Base\Enum\UserRole::class)
             $menu   = $this->addRoles($menu, UserRole::class);
 
-        if ($this->isGranted('ROLE_SUPERADMIN')) {
+        if ($this->isGranted('ROLE_EDITOR')) {
 
             $menu[] = MenuItem::section('MEMBERSHIP');
             $menu   = $this->addRoles($menu, \Base\Enum\UserRole::class);
-            $menu[] = MenuItem::linkToCrud('All users', 'fas fa-fw fa-tags', User::class);
-            $menu[] = MenuItem::linkToCrud('Add user', 'fas fa-fw fa-plus-circle', User::class)->setPermission('ROLE_SUPERADMIN')
+            $menu[] = MenuItem::linkToCrud(User::class, "All users", 'fas fa-fw fa-tags', );
+            $menu[] = MenuItem::linkToCrud(User::class, 'Add user', 'fas fa-fw fa-plus-circle')->setPermission('ROLE_EDITOR')
                 ->setAction('new');
         }
     
@@ -320,7 +356,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                 $url = $this->adminUrlGenerator
                     ->unsetAll()
-                    ->setRoute("base_dashboard_ga")
+                    ->setRoute("dashboard_ga")
                     ->set("menuIndex", count($menu))
                     ->set("show", $key)
                     ->generateUrl();
@@ -386,8 +422,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)
             ->addMenuItems([
-                MenuItem::linkToUrl('My Profile', 'fas fa-fw fa-id-card', $this->baseService->getUrl("base_profile")),
-                MenuItem::linkToUrl('My Settings', 'fas fa-fw fa-user-cog', $this->baseService->getUrl("user_settings"))
+                MenuItem::linkToController("user_profile"),
+                MenuItem::linkToController("user_settings")
             ])->setAvatarUrl($avatar);
     }
 
@@ -396,7 +432,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);
 
-        if ($this->isGranted('ROLE_SUPERADMIN')) {
+        if ($this->isGranted('ROLE_EDITOR')) {
 
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
             $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
@@ -419,7 +455,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
-        if ($this->isGranted('ROLE_SUPERADMIN')) {
+        if ($this->isGranted('ROLE_EDITOR')) {
 
             $section = $this->getSectionWidgetItem($widgets, "LAYOUT");
             if($section) $section->setWidth(2);

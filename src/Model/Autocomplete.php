@@ -40,7 +40,7 @@ class Autocomplete
 
             $icons = $entry->__iconize() ?? [];
             if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
-                $icons = $entry::__staticIconize();
+                $icons = $entry::__iconizeStatic();
 
             $icon = begin($icons);
 

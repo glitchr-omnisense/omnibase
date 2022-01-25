@@ -27,7 +27,7 @@ use Base\Repository\Layout\Widget\SlotRepository;
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
 {   
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-th"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
     public function __construct(?string $path = null)

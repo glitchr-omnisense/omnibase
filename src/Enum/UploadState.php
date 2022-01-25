@@ -12,7 +12,7 @@ class UploadState extends SetType implements IconizeInterface
     const UPLOAD_MIMETYPE  = "UPLOAD_MIMETYPE";
 
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::UPLOAD_ERROR => ["fas fa-exclamation-triangle"],

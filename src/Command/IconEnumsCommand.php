@@ -44,7 +44,7 @@ class IconEnumsCommand extends Command
 
             $output->section()->writeln(" * <info>".$enum."</info>");
 
-            $iconize = $enum::__staticIconize();
+            $iconize = $enum::__iconizeStatic();
             $permittedValues = $enum::getPermittedValues(false);
 
             $maxLength = 0;

@@ -19,7 +19,7 @@ use Base\Repository\Layout\Widget\LinkRepository;
 class Link extends Widget implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-share-square"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; } 
 
     /**
      * @ORM\ManyToOne(targetEntity=Hyperlink::class)

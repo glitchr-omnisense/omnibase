@@ -79,7 +79,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->exceptions = [
             "/^locale_/", 
             "/^ux_/", 
-            "/^maintenance(?:.*)$/", 
+            "/^user(?:.*)$/", 
             "/^security(?:.*)$/",
         ];
     }

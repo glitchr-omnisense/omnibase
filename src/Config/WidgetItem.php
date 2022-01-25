@@ -49,7 +49,7 @@ class WidgetItem
         if($label == $entityTranslationPrefix.".plural") $label = camel_to_snake(class_basename($entityFqcn), " ");
 
         if(!$icon) {
-            $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__staticIconize()[0] : null;
+            $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__iconizeStatic()[0] : null;
             $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
         }
 

@@ -10,7 +10,7 @@ class SpamApi extends EnumType implements IconizeInterface
     const AKISMET      = "AKISMET";
     
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::AKISMET => ["fas fa-backspace"]

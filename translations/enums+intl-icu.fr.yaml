@@ -2,9 +2,9 @@ user_role:
   singular: "générique"
   plural: "génériques"
 
-  role_superadmin: 
-    singular: "super administrateur"
-    plural: "super administrateur"
+  role_editor: 
+    singular: "éditeur"
+    plural: "éditeurs"
 
   role_admin: 
     singular: "administrateur"

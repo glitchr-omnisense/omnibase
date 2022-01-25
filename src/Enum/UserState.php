@@ -17,7 +17,7 @@ class UserState extends SetType implements IconizeInterface
     const ENABLED  = "USER_ENABLED";
 
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::NEWCOMER => ["fas fa-user-plus"],

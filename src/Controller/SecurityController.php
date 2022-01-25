@@ -26,6 +26,7 @@ use Symfony\Component\Notifier\NotifierInterface;
 use Base\Entity\User\Token;
 use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
+use Base\Annotations\Annotation\Iconize;
 use Base\Component\HttpFoundation\Referrer;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
@@ -45,6 +46,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/login", name="security_login")
+     * @Iconize("fas fa-fw fa-sign-in-alt")
      */
     public function Login(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
     {
@@ -52,7 +54,7 @@ class SecurityController extends AbstractController
         if($this->baseService->isMaintenance()) {
 
             if ( ($user = $this->getUser()) && $user->isPersistent() )
-                return $this->redirectToRoute("base_dashboard");
+                return $this->redirectToRoute("dashboard");
 
             $lastUsername = $authenticationUtils->getLastUsername();
 
@@ -61,7 +63,7 @@ class SecurityController extends AbstractController
                 'last_username' => $lastUsername,
                 'translation_domain' => 'forms',
                 'csrf_token_intention' => 'authenticate',
-                'target_path' => $this->baseService->getUrl('base_dashboard'),
+                'target_path' => $this->baseService->getUrl('dashboard'),
                 'username_label' => 'login.identifier',
                 'password_label' => 'login.password',
                 'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
@@ -109,6 +111,7 @@ class SecurityController extends AbstractController
 
     /**
      * @Route("/logout", name="security_logout")
+     * @Iconize("fas fa-fw fa-sign-out-alt")
      */
     public function Logout(Request $request) {
 
@@ -459,5 +462,46 @@ class SecurityController extends AbstractController
 
             return $this->render('@Base/security/reset_password.html.twig', ['form' => $form->createView()]);
         }
+    }
+
+    /**
+     * Link to this controller to start the maintenance
+     *
+     * @Route("/m", name="security_maintenance")
+     */
+    public function Main(): Response
+    {
+        $downtime = $uptime = 0;
+
+        $fname = $this->baseService->getParameterBag("base.maintenance.lockpath");
+        if ( ($f = @fopen($fname, "r")) ) {
+
+            $downtime = trim(fgets($f, 4096));
+            if(!feof($f)) $uptime = trim(fgets($f, 4096));
+
+            fclose($f);
+
+        } else {
+
+            $downtime = $this->baseService->getSettings()->get("base.settings.maintenance_downtime")["_self"] ?? null;
+            $uptime   = $this->baseService->getSettings()->get("base.settings.maintenance_uptime")["_self"] ?? null;
+        }
+
+        $downtime = $downtime ? strtotime($downtime) : 0;
+        $uptime = $uptime ? strtotime($uptime) : 0;
+
+        $remainingTime = $uptime - time();
+        if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;
+        if (  $uptime-time() < 0 || $uptime < 1) $uptime = 0;
+
+        if( !$downtime || ($uptime-$downtime <= 0) || ($uptime-time() <= 0) ) $percentage = -1;
+        else $percentage = round(100 * (time()-$downtime)/($uptime-$downtime));
+
+        return $this->render('@Base/security/maintenance.html.twig', [
+            'remainingTime' => $remainingTime,
+            'percentage' => $percentage,
+            'downtime'   => $downtime,
+            'uptime'     => $uptime
+        ]);
     }
 }

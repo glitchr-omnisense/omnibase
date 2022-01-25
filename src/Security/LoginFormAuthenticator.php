@@ -3,6 +3,7 @@
 namespace Base\Security;
 
 use App\Entity\User;
+use App\Enum\UserRole;
 use Base\Component\HttpFoundation\Referrer;
 use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
@@ -90,12 +91,15 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         // Update client information
         if( ($user = $token->getUser()) ) {
 
+            $permittedRoles = UserRole::getPermittedValues();
+            foreach($user->getRoles() as $role)
+                if(!in_array($role, $permittedRoles)) $user->removeRole($role);
+
             $user->setTimezone();
             $user->setLocale();
             $user->kick(0);
 
             $this->entityManager->flush();
-            $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGIN_ROUTE);
         }
 
         // Check if target path provided via $_POST..

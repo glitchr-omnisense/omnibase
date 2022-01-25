@@ -23,7 +23,7 @@ use Base\Repository\Layout\Widget\AttachmentRepository;
 class Attachment extends Widget implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-paperclip"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; } 
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)

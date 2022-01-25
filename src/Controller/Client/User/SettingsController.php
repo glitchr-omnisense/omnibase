@@ -7,6 +7,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 
 use App\Form\User\Login2FAType;
+use Base\Annotations\Annotation\Iconize;
 use Base\Entity\User\Notification;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -33,7 +34,6 @@ class SettingsController extends AbstractController
         $this->baseService     = $baseService;
         $this->userRepository  = $userRepository;
     }
-
 
     /**
      * @Route("/members/qr/totp", name="qr_code_totp")
@@ -66,6 +66,7 @@ class SettingsController extends AbstractController
 
     /**
      * @Route("/settings", name="user_settings")
+     * @Iconize("fas fa-fw fa-user-cog")
      */
     public function Settings()
     {

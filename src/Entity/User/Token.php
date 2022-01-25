@@ -21,7 +21,7 @@ class Token implements IconizeInterface
     use BaseTrait;
 
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-drumstick-bite"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-drumstick-bite"]; } 
 
     public const SEPARATOR = ";";
     public const DEADTIME = 3*60; /* time before next request */

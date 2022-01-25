@@ -40,7 +40,14 @@ class TranslationControllersCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $controllers = array_transforms(fn($k, $v):?array => str_starts_with($v->getDefault("_controller"), "App") ? [$k, $v->getDefault("_controller")] : null, $this->router->getRouteCollection()->all());
+        $controllers = array_transforms(function($k, $v):?array {
+
+            if(str_starts_with($v->getDefault("_controller"), "App"))  return [$k, $v->getDefault("_controller")];
+            if(str_starts_with($v->getDefault("_controller"), "Base")) return [$k, $v->getDefault("_controller")];
+            return null;
+
+        }, $this->router->getRouteCollection()->all());
+
         $controllerRestriction = $input->getOption('controller') ?? "";
 
         $maxLength = 0;
@@ -73,8 +80,8 @@ class TranslationControllersCommand extends Command
                     $space = str_repeat(" ", max($maxLength-strlen($controller), 0));
                 }
 
-                $translationPath = "@controllers.".camel_to_snake($path).".".$suffix;
-                $translationPathStr = $prefix."@controllers[$currentLocale].<ln>".camel_to_snake($path).".".$suffix."</ln>";
+                $translationPath = "@controllers.".$path.".".$suffix;
+                $translationPathStr = $prefix."@controllers[$currentLocale].<ln>".$path.".".$suffix."</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                 if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";

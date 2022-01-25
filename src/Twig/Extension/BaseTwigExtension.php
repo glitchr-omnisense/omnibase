@@ -3,7 +3,6 @@
 namespace Base\Twig\Extension;
 
 use Base\Service\BaseService;
-use Base\Controller\BaseController;
 use Base\Service\IconService;
 use Base\Service\ImageService;
 use Base\Service\LocaleProvider;
@@ -51,14 +50,12 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, IconService $iconService, ImageService $imageService) {
 
-        BaseController::$foundBaseTwigExtension = true;
-
         $this->translator               = $translator;
         $this->routingExtension         = $routingExtension;
-        
+
         $this->intlExtension            = new IntlExtension();
         $this->mimeTypes                = new MimeTypes();
-        
+
         $this->iconService  = $iconService;
         $this->imageService = $imageService;
     }
@@ -79,14 +76,16 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFunction('exit',  'exit'),
 
-            new TwigFunction('synopsis',                'synopsis'),
-            new TwigFunction("path",            [$this, 'path']),
+            new TwigFunction('synopsis',        'synopsis'),
+            new TwigFunction("path",            [$this, 'path'   ]),
+            new TwigFunction('title',           [$this, 'title'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('method_exists',   [$this, 'method_exists']),
-            new TwigFunction('static_call',     [$this, 'static_call']),
+            new TwigFunction('static_call',     [$this, 'static_call'  ]),
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
 
-            new TwigFunction('asset',         [AssetExtension::class, 'getAssetUrl']),
+            new TwigFunction('iconify',         [IconService::class, 'iconify'], ["is_safe" => ['all']]),
+            new TwigFunction('asset',           [AssetExtension::class, 'getAssetUrl']),
         ];
     }
 
@@ -215,6 +214,12 @@ final class BaseTwigExtension extends AbstractExtension
         }
 
         return $baseDir . $this->routingExtension->getPath($name, $parameters, $relative);
+    }
+
+    public function title(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
+    {
+        $ret = $this->translator->trans($name.".title", $parameters, $domain, $locale);
+        return $ret == $name.".title" ? "@controllers.".$ret : $ret;
     }
 
     public function less_than($date, $diff): bool

@@ -13,7 +13,7 @@ class Gender extends EnumType implements IconizeInterface
     const GENDERLESS = "GENDERLESS";
     
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::MALE       => ["fa fa-fw fa-mars"],

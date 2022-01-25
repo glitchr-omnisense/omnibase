@@ -1,13 +1,53 @@
-widget_page_slug:
-  title: "{slug}"
+widget_page:
+  slug:
+    title: "{slug}"
 
-search:
+thread_search:
   content: "Rechercher dans le contenu"
   excerpt: "Rechercher dans l'extrait"
   title: "Rechercher dans le titre"
 
 security_login:
   title: "Se Connecter"
+security_logout:
+  title: "Se Déconnecter"
+security_maintenance:
+  title: "Maintenance en cours !"
+  description: "{downtime, plural,
+          =0 {}
+          other {Nous sommes actuellement en maintenance depuis le {0} à {1}. De retour très bientôt !}
+        }"
+  estimate: "{uptime, plural,
+                =0 {Il n'y a pas encore d'estimation. Merci de revenir plus tard.}
+                other {Le temps de maintenance restant est estimé à {0} {1} {2}.}
+              }"
+  days: "{0, plural,
+            =0 {}
+            =1 {# jour}
+            other {# jours}
+          }"
+  hours: "{0, plural,
+            =0 {}
+            =1 {# heure}
+            other {# heures}
+          }"
+  minutes: "{0, plural,
+              =1 {# minute}
+              other {# minutes}
+            }"
+  progress: "Progression {0}%"
+
+dashboard:
+  title: "Administration"
+dashboard_settings:
+  title: "Paramètres du site"
+dashboard_widgets:
+  title: "Personnalisations"
+
+user_profile:
+  title: "Mon profil"
+user_settings:
+  title: "Mes paramètres"
 
 exception:
     title: "Oups! Une erreur s'est produite !"
@@ -26,29 +66,3 @@ exception:
     501: "Pas Implémenté"
     502: "Passerelle Indisponible"
     503: "Service Indisponible"
-
-maintenance:
-    title: "Maintenance en cours !"
-    description: "{downtime, plural,
-            =0 {}
-            other {Nous sommes actuellement en maintenance depuis le {0} à {1}. De retour très bientôt !}
-          }"
-    estimate: "{uptime, plural,
-                  =0 {Il n'y a pas encore d'estimation. Merci de revenir plus tard.}
-                  other {Le temps de maintenance restant est estimé à {0} {1} {2}.}
-                }"
-    days: "{0, plural,
-              =0 {}
-              =1 {# jour}
-              other {# jours}
-            }"
-    hours: "{0, plural,
-              =0 {}
-              =1 {# heure}
-              other {# heures}
-            }"
-    minutes: "{0, plural,
-                =1 {# minute}
-                other {# minutes}
-              }"
-    progress: "Progression {0}%"

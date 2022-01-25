@@ -17,7 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class TextareaAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __staticIconize() : ?array { return ["fas fa-align-left"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-align-left"]; }
 
     public static function getType(): string { return TextareaType::class; }
     public function getOptions(): array { return []; }

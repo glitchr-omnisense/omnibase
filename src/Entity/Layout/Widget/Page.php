@@ -21,7 +21,7 @@ use Base\Repository\Layout\Widget\PageRepository;
 class Page extends Widget implements IconizeInterface
 {
     public        function __iconize()       : ?array { return null; } 
-    public static function __staticIconize() : ?array { return ["fas fa-file-alt"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; } 
 
     public function __toString() 
     {

@@ -595,26 +595,31 @@ namespace {
 
     }
 
-    function array_flatten($array = null)
+    function array_flatten(?array $array = null, bool $preserve_duplicates = false)
     {
-        $result = array();
-
-        if (!\is_array($array)) {
-            $array = func_get_args();
-        }
+        $result = [];
+        if (!is_array($array)) $array = func_get_args();
 
         foreach ($array as $key => $value) {
-
-            if (\is_array($value)) {
-                $result = array_merge($result, array_flatten($value));
+        
+            $flattenValues = is_array($value) ? array_flatten($value) : [$key => $value];
+            if(!$preserve_duplicates) {
+                
+                $result = array_merge($result, $flattenValues);
+                
             } else {
-                $result = array_merge($result, array($key => $value));
+
+                foreach($flattenValues as $key2 => $flattenValue) {
+
+                    if(!array_key_exists($key2, $result)) $result[$key2] = [$flattenValue];
+                    else $result[$key2][] = $flattenValue;
+                }
             }
         }
 
         return $result;
     }
- 
+
     function array_class($objectOrClass, array $haystack): string|int|false 
     {
         $className = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
@@ -660,7 +665,24 @@ namespace {
         return false;
     }
 
-    function array_keys_remove  (array $array, ...$keys  ) { return array_filter($array, fn($k) => !in_array($k, $keys), ARRAY_FILTER_USE_KEY); }
+    function array_key_pop(mixed $key, array &$array): mixed 
+    {
+        if(empty($array)) return null;
+
+        $entry = $array[$key] ?? null;
+        $array = array_keys_remove($array, $key);
+
+        return $entry;
+    }
+
+    function array_keys_remove  (array $array, ...$keys  ) 
+    { 
+        foreach($keys as $key) 
+            unset($array[$key]);
+
+        return $array;
+    }
+
     function array_values_remove(array $array, ...$values) { return array_filter($array, fn($v) => !in_array($v, $values)); }
     function array_values_insert(array $array, ...$values) 
     {

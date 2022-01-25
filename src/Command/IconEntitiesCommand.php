@@ -75,7 +75,7 @@ class IconEntitiesCommand extends Command
             if($entities) $output->section()->writeln("Entity list: ".$entityClass);
             foreach($entities as $entity) {
             
-                $icons = $entity::__staticIconize();
+                $icons = $entity::__iconizeStatic();
                 $output->section()->writeln(" * <info>".$entity."</info>: [".implode(",", $icons ?? [])."]");
             }
         }

@@ -20,7 +20,7 @@ use Base\Service\LocaleProvider;
 
 class HyperpatternAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __staticIconize() : ?array { return ["fas fa-share-alt"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
     public static function getType(): string { return ArrayType::class; }
     public function getOptions(): array { return ["pattern" => $this->getPattern(), "placeholder" => $this->getPlaceholder()]; }

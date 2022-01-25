@@ -3,7 +3,6 @@
 namespace Base\Service;
 
 use App\Entity\User;
-use Base\Controller\BaseController;
 use Base\Traits\BaseTrait;
 
 use Base\Service\ParameterBagInterface;
@@ -125,12 +124,11 @@ class BaseService implements RuntimeExtensionInterface
         NotifierInterface $notifier,
         FormFactoryInterface $formFactory,
         LocaleProviderInterface $localeProvider,
-        
+
         BaseSettings $settings,
         ImageService $imageService,
         IconService $iconService)
     {
-        BaseController::$foundBaseService = true;
 
         $this->setInstance($this);
 
@@ -139,7 +137,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->container   = $kernel->getContainer();
         $this->setProjectDir($kernel->getProjectDir());
         $this->setStartTime();
-        
+
         self::$twigExtension       = $baseTwigExtension->setBase($this);
 
         // Symfony basics

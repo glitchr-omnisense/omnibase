@@ -13,7 +13,7 @@ class LogLevel extends EnumType implements IconizeInterface
     const CRITICAL = "CRITICAL";
 
     public function __iconize(): ?array { return null; }
-    public static function __staticIconize(): ?array
+    public static function __iconizeStatic(): ?array
     {
         return [
             self::INFO     => ["fas fa-info-circle"       , "fas fa-info-triangle", "fas fa-info"              ],

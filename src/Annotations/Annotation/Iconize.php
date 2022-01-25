@@ -13,10 +13,13 @@ use Base\Annotations\AbstractAnnotation;
  */
 class Iconize extends AbstractAnnotation
 {
-    protected string $src;
+    protected $icons;
+    public function __construct(array $data) 
+    {
+        $icons = $data["value"] ?? [];
+        $this->icons = !is_array($icons) ? [$icons] : $icons; 
+    }
 
-    public function __construct(array $data) { $this->src = $data["value"] ?? ""; }
     public function supports(string $target, ?string $targetValue = null, $object = null): bool { return true; }
-
-    public function getIcon() { return $this->src; }
+    public function getIcons() { return $this->icons; }
 }
