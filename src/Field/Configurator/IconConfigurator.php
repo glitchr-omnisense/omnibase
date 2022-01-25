@@ -31,7 +31,7 @@ class IconConfigurator extends SelectConfigurator
         if( null !== $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME))
             $icon = $propertyAccessor->getValue($entityDto->getInstance(), $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME));
 
-        $provider = $field->getFormTypeOption("provider");
+        $provider = $field->getFormTypeOption("provider") ?? $this->baseService->getParameterBag("base.icon_provider.default_provider");
         $iconProvider = $this->iconService->getProvider($provider);
 
         foreach($iconProvider->getAssets() as $asset) {

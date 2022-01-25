@@ -34,7 +34,7 @@ class AbstractAttributeCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function () {
 
             yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
-            yield IconField::new('icon')->setProvider(BootstrapTwitter::class)->setTextAlign(TextAlign::LEFT)->setColumns(6);
+            yield IconField::new('icon')->setTextAlign(TextAlign::LEFT)->setColumns(6);
             yield SlugField::new('code')->setColumns(6)->setTargetFieldName("translations.label");
 
             yield TranslationField::new("label");

@@ -122,7 +122,7 @@ class AutocompleteController extends AbstractController
 
             $iconProvider = $this->getIconService()->getProvider($provider);
             $entries = $iconProvider->getChoices($term);
-
+    
             $book = $this->paginator->paginate($entries, $page, $pageSize);
             $pagination = $book->getTotalPages() > $book->getPage();
             $array["pagination"] = ["more" => $pagination];

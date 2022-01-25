@@ -48,7 +48,7 @@ abstract class AbstractIconProvider implements IconProviderInterface
         if( !empty($this->version) )
             return $this->version;
 
-        if ( !preg_match('/.*\/([0-9.]*)\//', $this->metadata ?? "", $matches) )
+        if ( !preg_match('/.*\/([0-9.]*(?:[-_]{1}[a-zA-Z0-9]*)?)\//', $this->metadata ?? "", $matches) )
             return "unk.";
 
         $this->version = $matches[1];

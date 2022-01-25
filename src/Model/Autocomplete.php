@@ -52,7 +52,7 @@ class Autocomplete
             $html = $class::getHtml($entry);
             $data = $class::getData($entry);
             
-        }else if(class_implements_interface($class, SelectInterface::class)) {
+        } else if(class_implements_interface($class, SelectInterface::class)) {
 
             $id   = $entry;
             $icon = $class::getIcon($entry, 0);

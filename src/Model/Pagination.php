@@ -125,19 +125,9 @@ class Pagination implements PaginationInterface, Iterator
         if($this->page > $this->getTotalPages())
             throw new InvalidPageException("Page not found.");
 
-        if($this->isQuery()) {
+        if($this->isQuery())
+            return $this->lastResult = $this->instance->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults ($this->pageSize)->getResult();
 
-            return $this->lastResult = $this->instance
-                                            ->getQuery()
-                                            ->setFirstResult($this->pageSize * ($this->page-1))
-                                            ->setMaxResults ($this->pageSize)->getResult();
-
-        }
-        
-        return $this->lastResult =  array_slice_recursive(
-                                        $this->get(), 
-                                        $this->pageSize * ($this->page-1), 
-                                        $this->pageSize
-                                    );
+        return $this->lastResult =  array_slice_recursive($this->get(), $this->pageSize * ($this->page-1), $this->pageSize, true /*Always preserve keys*/);
     } 
 }

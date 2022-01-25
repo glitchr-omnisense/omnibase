@@ -84,7 +84,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $identifier; 
     }
 
-    public function __toString() { return $this->getUserIdentifier(); }
     public function equals($other): bool { return ($other->getId() == $this->getId()); }
 
     // The purpose of this method is to detect if user is dirty
@@ -109,13 +108,19 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return false;
     }
 
+    public function __toString() { return $this->getUserIdentifier(); }
     public function __construct()
     {
         $role = strtoupper(class_basename(get_called_class()));
+
+        dump(get_called_class());
+        dump($role, UserRole::hasKey($role), UserRole::getValue($role));
+
         if(UserRole::hasKey($role)) $role = UserRole::getValue($role);
         else $role = UserRole::USER; // Default role
 
         $this->roles  = [$role];
+
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();

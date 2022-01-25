@@ -2,7 +2,6 @@
 
 namespace Base\Field\Type;
 
-use Base\Model\IconProvider\FontAwesome;
 use Base\Model\SelectInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\Options;
@@ -25,7 +24,7 @@ class IconType extends SelectType implements SelectInterface
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             'class'   => null,
-            'provider'   => FontAwesome::class,
+            'provider'   => $this->baseService->getParameterBag("base.icon_provider.default_provider"),
 
             "autocomplete" => true,
             "autocomplete_endpoint" => null,

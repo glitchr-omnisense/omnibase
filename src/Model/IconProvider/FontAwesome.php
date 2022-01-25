@@ -4,11 +4,13 @@ namespace Base\Model\IconProvider;
 
 class FontAwesome extends AbstractIconProvider
 {
-    public const STYLE_SOLID   = "fas";
-    public const STYLE_REGULAR = "far";
-    public const STYLE_LIGHT   = "fal";
-    public const STYLE_DUOTONE = "fad";
-    public const STYLE_BRANDS  = "fab";
+    public const STYLE_SOLID   = "solid";
+    public const STYLE_REGULAR = "regular";
+    public const STYLE_LIGHT   = "light";
+    public const STYLE_THIN    = "thin";
+    public const STYLE_DUOTONE = "duotone";
+    public const STYLE_BRANDS  = "brands";
+    public const STYLE_KIT     = "kit";
 
     public function __construct(string $metadata, string $javascript, string $stylesheet)
     {
@@ -23,17 +25,35 @@ class FontAwesome extends AbstractIconProvider
 
     public function getAssets(): array
     {
-        return [$this->javascript, $this->stylesheet];
+        return [
+            
+            "<script type='text/javascript'>window.FontAwesomeConfig = { autoReplaceSvg: false }</script>", 
+            $this->javascript, 
+            $this->stylesheet
+        ];
     }
     
     public function supports(string $icon): bool
     {
-        $styles = [self::STYLE_SOLID, self::STYLE_REGULAR, self::STYLE_LIGHT, self::STYLE_DUOTONE, self::STYLE_BRANDS];
-        $isAwesome = count(array_filter(explode(" ", $icon), fn($id) => in_array($id, $styles)));
+        $knownPrefix = array_merge([$this->getName()], array_map(
+            fn($s) => $this->getClass($s), 
+            [self::STYLE_SOLID, self::STYLE_REGULAR, self::STYLE_LIGHT, self::STYLE_THIN, self::STYLE_DUOTONE, self::STYLE_BRANDS, self::STYLE_KIT]
+        ));
 
+        $isAwesome = count(array_filter(explode(" ", $icon), fn($id) => in_array($id, $knownPrefix)));
         return $isAwesome;
     }
 
+    public function getClass(string $style)
+    {
+        if(version_compare($this->getVersion(), 5, ">=")) 
+            return $this->getName().$style[0];
+        if(version_compare($this->getVersion(), 6, ">="))
+            return $this->getName()."-".$style;
+
+        throw new \Exception("Version ". $this->getVersion()." is not supported.");
+    }
+    
     public function getChoices(string $term = ""): array
     {
         $choices = [];
@@ -53,7 +73,7 @@ class FontAwesome extends AbstractIconProvider
 
             if(!$termFound) continue;
             foreach ($styles as $style)
-                $choices[mb_ucfirst($style)." Style"][$label] = $this->getName()."".$style[0]." ".$this->getName()."-".$key;
+                $choices[mb_ucfirst($style)." Style"][$label] = $this->getClass($style)." ".$this->getName()."-".$key;
 
         }
 
@@ -62,14 +82,14 @@ class FontAwesome extends AbstractIconProvider
 
     public function getStyle(string $name)
     {
-        $styles = [self::STYLE_BRANDS, self::STYLE_DUOTONE, self::STYLE_LIGHT, self::STYLE_REGULAR, self::STYLE_SOLID];
+        $styles = [self::STYLE_BRANDS, self::STYLE_DUOTONE, self::STYLE_LIGHT, self::STYLE_REGULAR, self::STYLE_SOLID, self::STYLE_THIN, self::STYLE_KIT];
         return array_filter(explode(" ", $name), fn($n) => in_array($n, $styles))[0] ?? null;
     }
 
     public function getIdentifier(string $name)
     {
         return array_transforms(
-            fn($k, $v, $i):?array => preg_match("/fa-(.*)/", $v, $matches) ? [$i, $matches[1]] : null, 
+            fn($k, $v, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null, 
             explode(" ", $name)
         )[0];
     }
