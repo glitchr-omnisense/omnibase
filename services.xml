@@ -166,53 +166,46 @@
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
-            <argument type="service" id="base.service" />
         </service>
         <service id="Base\Command\TranslationEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.service" />
         </service>
         <service id="Base\Command\TranslationCrudCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.service" />
         </service>
         <service id="Base\Command\TranslationEnumsCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.service" />
+        </service>
+        <service id="Base\Command\TranslationSettingsCommand">
+            <tag name="console.command" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="locale_provider" />
+            <argument type="service" id="base.settings" />
         </service>
 
 
+        <service id="Base\Command\IconCrudCommand"><tag name="console.command" /></service>
+        <service id="Base\Command\IconEnumsCommand"><tag name="console.command" /></service>
         <service id="Base\Command\IconControllersCommand">
             <tag name="console.command" />
             <argument type="service" id="router" />
-            <argument type="service" id="base.service" />
         </service>
         <service id="Base\Command\IconEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Command\IconCrudCommand">
-            <tag name="console.command" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Command\IconEnumsCommand">
-            <tag name="console.command" />
-            <argument type="service" id="base.service" />
         </service>
         
         <service id="Base\Command\AutocompleteEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.service" />
         </service>
 
         <!-- Controllers -->
@@ -601,11 +594,19 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="cache.adapter" />
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Controller\UX\AutovalidateController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="translator" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="validator" />
         </service>
 
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>

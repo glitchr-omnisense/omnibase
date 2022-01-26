@@ -13,13 +13,14 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class SpamChecker
 {
     private $client;
-    private $endpoint;
 
     public function __construct(RequestStack $requestStack, HttpClientInterface $client, BaseService $baseService)
     {
         $this->requestStack = $requestStack;
-        $this->client = $client;
-        $this->baseService = $baseService;
+        $this->client       = $client;
+
+        $this->baseService  = $baseService;
+        $this->baseSettings = $baseService->getSettings();
     }
 
     public function getLang()
@@ -46,7 +47,7 @@ class SpamChecker
         switch($api) {
 
             case SpamApi::AKISMET:
-                return $this->baseService->getParameterBag("base.spam.akismet");
+                return $this->baseSettings->getScalar("api.key.akismet") ?? $this->baseService->getParameterBag("base.spam.akismet");
 
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");

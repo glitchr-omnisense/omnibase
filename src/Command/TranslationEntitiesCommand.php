@@ -16,12 +16,10 @@ class TranslationEntitiesCommand extends Command
 {
     protected static $defaultName = 'translation:entities';
 
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, BaseService $baseService)
+    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider)
     {
         $this->translator = $translator;
         $this->localeProvider = $localeProvider;
-
-        $this->baseService = $baseService;
         parent::__construct();
     }
 
@@ -71,7 +69,7 @@ class TranslationEntitiesCommand extends Command
             if(!str_starts_with($entity, $entityRestriction)) continue;
 
             $isClass = class_exists($entity) ? " <info>& class</info>" : "";
-            $entityStr = $entity . (in_array($entity, $namespaces) ? " (is namespace".$isClass.")" : null);
+            $entityStr = $entity . (in_array($entity, $namespaces) ? " (namespace".$isClass.")" : null);
             $color = in_array($entity, $namespaces) ? "magenta" : "info";
 
             $trans = "";
@@ -84,15 +82,14 @@ class TranslationEntitiesCommand extends Command
                 $path = explode("\\", $entity);
                 $path = implode(".", tail($path, 2));
                 $translationPath = "@entities.".camel_to_snake($path, ".").".".$suffix;
-                $translationPathStr = $prefix."@entities[$currentLocale].<ln>".camel_to_snake($path).".".$suffix."</ln>";
+                $translationPathStr = $prefix."@entities[$currentLocale].<ln>".camel_to_snake($path, ".").".".$suffix."</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                 if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
                 else $trans .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
             }
 
-            $carriageReturn = in_array($entity, $namespaces) ? "\n" : "";
-            $output->section()->writeln($carriageReturn." * <".$color.">".trim($entityStr)."</".$color."> ".$space.": $trans");
+            $output->section()->writeln(" * <".$color.">".trim($entityStr)."</".$color."> ".$space.": $trans");
         }
 
 

@@ -22,8 +22,10 @@ trait BaseSettingsTrait
         return true;
     }
 
-    protected function read(string $name, array $normSettings)
+    protected function read(?string $name, array $normSettings)
     {
+        if($name === null) return $normSettings;
+
         $nameArray = explode(".", $name);
         foreach ($nameArray as $index => $key) {
 
@@ -39,21 +41,25 @@ trait BaseSettingsTrait
         return $normSettings;
     }
 
-    protected function normalize(string $name, array $settings) {
+    public function normalize(?string $path, array $settings) {
 
         $values = [];
 
         // Generate default structure
         $array = &$values;
-        
-        $nameArray = explode(".", $name);
-        foreach ($nameArray as $index => $key) {
-        
-            if($key == "_self" && $index != count($nameArray)-1)
-                throw new \Exception("Failed to normalize \"$name\": \"_self\" key can only be used as tail parameter");
 
-            if(!array_key_exists($key, $array)) $array[$key] = ["_self" => null];
-            $array = &$array[$key];
+        if($path !== null) {
+
+            $el = explode(".", $path);
+            $last = count($el)-1;
+            foreach ($el as $index => $key) {
+            
+                if($key == "_self" && $index != $last)
+                    throw new \Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
+
+                if(!array_key_exists($key, $array)) $array[$key] = ["_self" => null];
+                $array = &$array[$key];
+            }
         }
 
         // Fill it with settings
@@ -62,17 +68,45 @@ trait BaseSettingsTrait
             $array = &$values;
             foreach (explode(".", $setting->getName()) as $key)
                 $array = &$array[$key];
-            
+
             $array["_self"] = $setting;
         }
 
         return $values;
     }
-    
-    public function getRaw($name, ?string $locale = null)
-    {
-        if(!$name) return []; // Empty name is always returning empty data..
 
+    public function denormalize(array $settings, ?string $path = null) {
+
+        if($path) {
+
+            foreach(explode(".", $path) as $value)
+                $settings = $settings[$value];
+        }
+
+        $settings = array_transforms(
+            fn($k, $v):?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v], 
+            array_flatten($settings, ARRAY_FLATTEN_PRESERVE_KEYS)
+        );
+
+        foreach($settings as $key => $setting) {
+
+            $matches = [];
+            if(preg_match("/(.*)[0-9]+$/", $key, $matches)) {
+
+                $path = $matches[1];
+                if(!array_key_exists($path, $settings))
+                    $settings[$path] = [];
+
+                $settings[$path][] = $setting;
+                unset($settings[$key]);
+            }
+        }
+
+        return array_filter($settings);
+    }
+    
+    public function getRaw(null|string|array $name = null, ?string $locale = null)
+    {
         if(is_array($names = $name)) {
             
             $settings = [];
@@ -85,17 +119,26 @@ trait BaseSettingsTrait
         if(array_key_exists($name, $this->settings))
             $this->settings[$name] = !empty($this->settings[$name]) ? $this->settings[$name] : null;
 
-        try { $this->settings[$name] = $this->settings[$name] ?? $this->settingRepository->findByInsensitiveNameStartingWith($name)->getResult(); } 
-        catch(TableNotFoundException $e) { return []; }
+        try {
+
+            $this->settings[$name] = $this->settings[$name] ?? [];
+            if($this->settings[$name] === []) {
+
+                if(!$name) $this->settings[$name] = $this->settingRepository->cacheAll()->getResult();
+                else $this->settings[$name] = $this->settingRepository->cacheByInsensitiveNameStartingWith($name)->getResult();
+
+            }
+
+        } catch(TableNotFoundException $e) { return []; }
 
         $values = $this->normalize($name, $this->settings[$name]);
         $values = $this->read($name, $values); // get formatted values
         $this->applyCache($name, $locale, $values);
-        
+
         return $values;
     }
     
-    public function getRawScalar($name, ?string $locale = null)
+    public function getRawScalar(null|string|array $name = null, ?string $locale = null)
     {
         if(is_array($names = $name)) {
             
@@ -109,7 +152,7 @@ trait BaseSettingsTrait
         return $this->getRaw($name, $locale)["_self"] ?? null;
     }
 
-    public function getScalar($name, ?string $locale = null): string|array|object|null
+    public function getScalar(null|string|array $name, ?string $locale = null): string|array|object|null
     {
         if(is_array($names = $name)) {
             
@@ -123,7 +166,7 @@ trait BaseSettingsTrait
         return $this->get($name, $locale)["_self"] ?? null;
     }
 
-    public function get($name, ?string $locale = null): array
+    public function get(null|string|array $name = null, ?string $locale = null): array
     {
         if(is_array($names = $name)) {
 
@@ -182,7 +225,7 @@ trait BaseSettingsTrait
         return $this;
     }
 
-    protected function getCache(string $name, ?string $locale) : ?array
+    protected function getCache(?string $name, ?string $locale) : ?array
     {
         if(!$this->isCacheEnabled()) return null;
 
@@ -196,7 +239,7 @@ trait BaseSettingsTrait
         return $settings[$locale] ?? null;
     }
 
-    protected function applyCache(string $name, ?string $locale, array $settings)
+    protected function applyCache(?string $name, ?string $locale, array $settings)
     {
         if(!$settings) return false;
 

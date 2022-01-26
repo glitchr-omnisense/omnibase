@@ -21,6 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 /**
  * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )

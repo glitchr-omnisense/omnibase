@@ -213,16 +213,26 @@ namespace {
 
         return $path["dirname"].$prefix.$path["filename"].$path["extension"];
     }
-    
-    function str_strip(string $str, string $prefix = "", string $suffix = "")
-    {
-        if(0 === strpos($str, $prefix)) 
-            $str = substr($str, strlen($prefix));
-        
-        if(strlen($str) === strpos($str, $suffix)+strlen($suffix)) 
-            $str = substr($str, 0, strlen($str)-strlen($suffix));
 
-        return $str;
+    function str_strip(string $haystack, string $lneedle = " ", string $rneedle = " ", bool $recursive = true) { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
+    function str_rstrip(string $haystack, string $needle = " ", bool $recursive = true)
+    {
+        while(!empty($needle) && strlen($haystack) === strrpos($haystack, $needle)+strlen($needle)) {
+            $haystack = substr($haystack, 0, strlen($haystack)-strlen($needle));
+            if(!$recursive) break;
+        }
+
+        return $haystack;
+    }
+
+    function str_lstrip(string $haystack, string $needle = " ", bool $recursive = true)
+    {
+        while(!empty($needle) && 0 === strpos($haystack, $needle)) {
+            $haystack = substr($haystack, strlen($needle));
+            if(!$recursive) break;
+        }
+
+        return $haystack;
     }
 
     function begin(object|array &$array) 
@@ -595,25 +605,40 @@ namespace {
 
     }
 
-    function array_flatten(?array $array = null, bool $preserve_duplicates = false)
+    define('ARRAY_FLATTEN_PRESERVE_KEYS', 1);
+    define('ARRAY_FLATTEN_PRESERVE_DUPLICATES', 2);
+    function array_flatten(?array $array = null, int $mode = 0)
     {
         $result = [];
         if (!is_array($array)) $array = func_get_args();
 
         foreach ($array as $key => $value) {
         
-            $flattenValues = is_array($value) ? array_flatten($value) : [$key => $value];
-            if(!$preserve_duplicates) {
-                
-                $result = array_merge($result, $flattenValues);
-                
-            } else {
+            switch($mode) {
 
-                foreach($flattenValues as $key2 => $flattenValue) {
+                case ARRAY_FLATTEN_PRESERVE_KEYS:
+                    $flattenValues = is_array($value) ? array_flatten($value, $mode) : $value;
+                    if(!is_array($flattenValues)) $result[$key] = $value;
+                    else {
+                        
+                        foreach($flattenValues as $key2 => $flattenValue)
+                            $result[$key.".".$key2] = $flattenValue;
+                    }
 
-                    if(!array_key_exists($key2, $result)) $result[$key2] = [$flattenValue];
-                    else $result[$key2][] = $flattenValue;
-                }
+                    break;
+
+                case ARRAY_FLATTEN_PRESERVE_DUPLICATES:
+                    $flattenValues = is_array($value) ? array_flatten($value) : [$key => $value];
+                    foreach($flattenValues as $key2 => $flattenValue) {
+
+                        if(!array_key_exists($key2, $result)) $result[$key2] = [$flattenValue];
+                        else $result[$key2][] = $flattenValue;
+                    }
+                    break;
+
+                default: case 0: 
+                    $flattenValues = is_array($value) ? array_flatten($value) : [$key => $value];
+                    $result = array_merge($result, $flattenValues);
             }
         }
 

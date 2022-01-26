@@ -19,10 +19,9 @@ class IconControllersCommand extends Command
 {
     protected static $defaultName = 'icon:controllers';
 
-    public function __construct(RouterInterface $router, BaseService $baseService)
+    public function __construct(RouterInterface $router)
     {
         $this->router = $router;
-        $this->baseService = $baseService;
         parent::__construct();
     }
 

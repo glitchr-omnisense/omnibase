@@ -13,8 +13,6 @@ use DateTime;
 
 class BaseSettings
 {
-    /* FOR DEVELOPMENT: FORCE DISABLING CACHE */
-    private const __CACHE__ = true;
     use BaseSettingsTrait;
 
     public function __construct(EntityManager $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache)
@@ -27,7 +25,7 @@ class BaseSettings
         $this->localeProvider    = $localeProvider;
     }
 
-    public function all        (?string $locale = null) : array   { return $this->get("base.settings", $locale); }
+    public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
     public function mail       (?string $locale = null) : ?string { return $this->getScalar("base.settings.mail",      $locale); }
     public function mail_name  (?string $locale = null) : ?string { return $this->getScalar("base.settings.mail.name", $locale); }
     public function protocol   (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.https",    $locale)) ? "https" : "http"; }

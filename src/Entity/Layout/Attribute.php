@@ -14,6 +14,7 @@ use Base\Repository\Layout\AttributeRepository;
 /**
  * @ORM\Entity(repositoryClass=AttributeRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
  *     @DiscriminatorEntry( value = "generic" )

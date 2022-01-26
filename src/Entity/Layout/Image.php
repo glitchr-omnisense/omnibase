@@ -14,6 +14,7 @@ use App\Repository\Layout\ImageRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Image
 {

@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Model\AutovalidateInterface;
 use Base\Service\BaseService;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -12,7 +13,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 /**
  * @author Jonathan Scheiber <contact@jmsche.fr>
  */
-final class SlugType extends AbstractType
+final class SlugType extends AbstractType implements AutovalidateInterface
 {
     public function __construct(BaseService $baseService) {
 

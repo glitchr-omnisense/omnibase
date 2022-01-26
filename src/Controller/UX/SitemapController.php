@@ -20,7 +20,7 @@ class SitemapController extends AbstractController
     /**
      * @Route("/sitemap.xml", name="ux_sitemap")
      */
-    public function Sitemap(Request $request, AnnotationReader $annotationReader, RouterInterface $router): XmlResponse
+    public function Main(Request $request, AnnotationReader $annotationReader, RouterInterface $router): XmlResponse
     {
         $urls = [];
         $hostname = $request->getSchemeAndHttpHost();

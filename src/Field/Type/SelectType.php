@@ -50,6 +50,8 @@ class SelectType extends AbstractType implements DataMapperInterface
 
         $this->formFactory = $formFactory;
         $this->localeProvider = $localeProvider;
+
+        $this->autocomplete = new Autocomplete($this->translator);
     }
 
     public function getBlockPrefix(): string { return 'select2'; }
@@ -216,7 +218,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     // Format values
                     $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                    $entry = Autocomplete::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $entryFormat);
+                    $entry = $this->autocomplete->resolve($value, $options["class"] ?? $innerType, $entryFormat);
                     if($entry === null) return null;
 
                     if(!$options["class"]) $entry["text"] = $key;
@@ -260,7 +262,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     // Format values
                     $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                    $entry = Autocomplete::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $entryFormat);
+                    $entry = $this->autocomplete->resolve($value, $options["class"] ?? $innerType, $entryFormat);
 
                     if(!$options["class"]) $entry["text"] = $key;
                     return [$entry["id"], $entry["text"]];
@@ -446,7 +448,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 // Format values
                 $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                $entry = Autocomplete::getFormattedValues($value, $options["class"] ?? $innerType, $this->translator, $entryFormat);
+                $entry = $this->autocomplete->resolve($value, $options["class"] ?? $innerType, $entryFormat);
                 if(!$entry) return null;
 
                 // Special text formatting

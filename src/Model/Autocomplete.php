@@ -8,69 +8,61 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class Autocomplete
 {
-    public function __construct()
-    {
-        
+    public function __construct(TranslatorInterface $translator = null)
+    {   
+        $this->translator = $translator;
     }
 
-    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_SENTENCECASE) 
+    public function resolve($data, $class = null, $format = FORMAT_SENTENCECASE) 
     {
-        if($entry == null) return null;
-        if(is_object($entry) && $class !== null) {
+        if($data == null) return null;
+        if(is_object($data) && $class !== null) {
 
             $accessor = PropertyAccess::createPropertyAccessor();
-            $id = $accessor->isReadable($entry, "id") ? strval($accessor->getValue($entry, "id")) : null;
+            $id = $accessor->isReadable($data, "id") ? strval($accessor->getValue($data, "id")) : null;
 
             $autocomplete     = null;
             $autocompleteData = [];
-            if(class_implements_interface($entry, AutocompleteInterface::class)) {
-                $autocomplete = $entry->__autocomplete() ?? null;
-                $autocompleteData = $entry->__autocompleteData() ?? []; 
+            if(class_implements_interface($data, AutocompleteInterface::class)) {
+                $autocomplete = $data->__autocomplete() ?? null;
+                $autocompleteData = $data->__autocompleteData() ?? []; 
             }
 
-            $className = get_class($entry);
-            if($translator) $className = $translator->entity($className, Translator::TRANSLATION_SINGULAR);
+            $className = get_class($data);
+            $className = $this->translator ? $this->translator->entity($className, Translator::TRANSLATION_SINGULAR) : $className;
 
             $html = is_html($autocomplete) ? $autocomplete : null;
             $text = is_html($autocomplete) ? null          : $autocomplete;
             $data = $autocompleteData;
 
             if(!$text)
-                $text = is_stringeable($entry) ? strval($entry) : $className . " #".$entry->getId();
+                $text = is_stringeable($data) ? strval($data) : $className . " #".$data->getId();
 
-            $icons = $entry->__iconize() ?? [];
-            if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
-                $icons = $entry::__iconizeStatic();
+            $icons = $data->__iconize() ?? [];
+            if(empty($icons) && class_implements_interface($data, IconizeInterface::class)) 
+                $icons = $data::__iconizeStatic();
 
             $icon = begin($icons);
 
-        } else if(is_a($class, IconType::class)) {
-
-            $id   = $entry;
-            $icon = $class::getIcon($entry, 0);
-            $text = $class::getText($entry, $translator);
-            $html = $class::getHtml($entry);
-            $data = $class::getData($entry);
-            
         } else if(class_implements_interface($class, SelectInterface::class)) {
 
-            $id   = $entry;
-            $icon = $class::getIcon($entry, 0);
-            $text = $class::getText($entry, $translator);
-            $html = $class::getHtml($entry);
-            $data = $class::getData($entry);
-            
+            $id   = $data;
+            $icon = $class::getIcon($data, 0);
+            $text = $class::getText($data, $this->translator);
+            $html = $class::getHtml($data);
+            $data = $class::getData($data);
+
         } else {
 
-            $id    = is_array($entry) ? $entry[0] : $entry;
-            $text  = is_array($entry) ? $entry[1] : null;
-            $icon  = is_array($entry) ? $entry[2] : null;
+            $id    = is_array($data) ? $data[0] : $data;
+            $text  = is_array($data) ? $data[1] : null;
+            $icon  = is_array($data) ? $data[2] : null;
             $html  = null;
             $data  = [];
         }
 
-        return
-        [
+        return [
+
             "id"   => $id ?? null,
             "icon" => $icon,
             "text" => is_string($text) ? castcase($text, $format) : $text,

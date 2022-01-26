@@ -80,8 +80,8 @@ layout:
       plural: attributs
 
       abstract_attribute:
-        singular: attribute
-        plural: attributes
+        singular: attribut
+        plural: attributs
       hyperpattern_attribute:
         singular: "modèle de liens"
         plural: "modèles de liens"

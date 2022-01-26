@@ -29,6 +29,8 @@ class SelectConfigurator implements FieldConfiguratorInterface
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->baseService = $baseService;
+
+        $this->autocomplete = new Autocomplete($this->translator);
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -71,7 +73,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
                 if($key > $displayLimit) $formattedValues[$key] = $value;
                 else {
 
-                    $formattedValues[$key] = Autocomplete::getFormattedValues($value, $dataClass, $this->translator);
+                    $formattedValues[$key] = $this->autocomplete->resolve($value, $dataClass);
                     if ($formattedValues[$key] && $dataClassCrudController)
                         $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
                 }
@@ -87,7 +89,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
             $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
 
-            $formattedValues = Autocomplete::getFormattedValues($field->getValue(), $dataClass, $this->translator);
+            $formattedValues = $this->autocomplete->resolve($field->getValue(), $dataClass);
             if ($formattedValues && $dataClassCrudController)
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
         }

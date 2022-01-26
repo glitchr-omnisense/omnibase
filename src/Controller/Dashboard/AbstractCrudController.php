@@ -300,7 +300,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         foreach ($simpleYields as $__) foreach($__ as $_) foreach($_ as $yield) {
 
             yield $yield;
-
+            
             $property = $yield->getAsDto()->getProperty();
             if(array_key_exists($property, $associativeYields)) {
 
@@ -311,17 +311,18 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             }
         }
 
-        foreach($associativeYields as $__) foreach($__ as $_) foreach($_ as $yield) yield $yield;
+        foreach($associativeYields as $__) foreach($__ as $_) foreach($_ as $yield) 
+            yield $yield;
     }
 
     public function yield(array &$args, ?string $field = null): array
     {
         $args = array_map_recursive(
-                fn($v) => is_callable($v) ? $v() : $v, 
-                array_flatten(array_filter_recursive($args, 
-                    fn($v, $k) => ($field === null || $k == $field) && !empty($v), 
+                fn($v) => is_callable($v) ? $v() : $v,
+                array_flatten(array_filter_recursive($args,
+                    fn($v, $k) => ($field === null || $k == $field) && !empty($v),
                     ARRAY_FILTER_USE_BOTH)
-                , true)
+                , ARRAY_FLATTEN_PRESERVE_DUPLICATES)
             );
 
         $yields = [];

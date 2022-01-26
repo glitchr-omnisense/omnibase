@@ -22,12 +22,11 @@ class TranslationControllersCommand extends Command
 {
     protected static $defaultName = 'translation:controllers';
 
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router, BaseService $baseService)
+    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router)
     {
         $this->translator = $translator;
         $this->localeProvider = $localeProvider;
         $this->router = $router;
-        $this->baseService = $baseService;
         parent::__construct();
     }
 

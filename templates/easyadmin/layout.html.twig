@@ -17,7 +17,7 @@
         <meta name="generator" content="EasyAdmin" />
     {% endblock head_metas %}
 
-    <title>{% block page_title %}{{ _content_title|striptags|raw }}{% endblock %}</title>
+    <title>{{ [base.settings.get("base.settings.title.backoffice")["_self"] ?? null, block('page_title') ?? _content_title|striptags|raw]|join_if_exists(" - ") }}</title>
 
     {% block head_stylesheets %}
         <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
@@ -850,9 +850,9 @@
                                             {% endif %}
                                             </h1>
 
-                                            {% set _content_text = block('content_text') ?? null %}
-                                            {% if _content_text is not empty %}
-                                                <span>{{ _content_text|raw }}</span>
+                                            {% set _content_excerpt = block('content_excerpt') ?? null %}
+                                            {% if _content_excerpt is not empty %}
+                                                <span>{{ _content_excerpt|raw }}</span>
                                             {% else %}
                                                 <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
                                             {% endif %}

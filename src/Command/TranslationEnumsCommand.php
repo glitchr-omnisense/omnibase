@@ -16,12 +16,10 @@ class TranslationEnumsCommand extends Command
 {
     protected static $defaultName = 'translation:enums';
 
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, BaseService $baseService)
+    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider)
     {
         $this->translator = $translator;
         $this->localeProvider = $localeProvider;
-
-        $this->baseService = $baseService;
         parent::__construct();
     }
 

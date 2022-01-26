@@ -747,8 +747,11 @@
 {%- endblock -%}
 
 {%- block password_row -%}
+
+    {# TODO.. #}
     {%- set row_attr = row_attr|merge({'class': 'col-md-6 form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {{form_row(form, {row_attr:row_attr})}}
+
 {%- endblock -%}
 
 {%- block money_widget -%}

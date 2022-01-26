@@ -19,11 +19,10 @@ class AutocompleteEntitiesCommand extends Command
 {
     protected static $defaultName = 'autocomplete:entities';
 
-    public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
+    public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->baseService = $baseService;
         parent::__construct();
     }
 

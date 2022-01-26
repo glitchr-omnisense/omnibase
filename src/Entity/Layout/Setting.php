@@ -10,6 +10,7 @@ use Base\Repository\Layout\SettingRepository;
 
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Setting implements TranslatableInterface, IconizeInterface
 {

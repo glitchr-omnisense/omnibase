@@ -28,14 +28,13 @@ class AutocompleteController extends AbstractController
      */
     protected $paginator;
 
-    public function __construct(CacheInterface $cache, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->hashIds = new Hashids($this->getService()->getSalt());
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->paginator = $paginator;
-        $this->translator = $translator;
-        $this->cache = $cache;
+        $this->autocomplete = new Autocomplete($translator);
     }
 
     public function encode(array $array) : string
@@ -53,7 +52,7 @@ class AutocompleteController extends AbstractController
     /**
      * @Route("/autocomplete/{hashid}", name="ux_autocomplete")
      */
-    public function Autocomplete(Request $request, string $hashid): Response
+    public function Main(Request $request, string $hashid): Response
     {
         $dict    = $this->decode($hashid);
         $token   = $dict["token"] ?? null;
@@ -83,13 +82,13 @@ class AutocompleteController extends AbstractController
                 $pagination = $book->getTotalPages() > $book->getPage();
 
                 foreach($book as $i => $entry)
-                    $results[] = Autocomplete::getFormattedValues($entry, $class, $this->translator, $format);
+                    $results[] = $this->autocomplete->resolve($entry, $class, $format);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = Autocomplete::getFormattedValues($value, $class, $this->translator, $format);
+                    $results[] = $this->autocomplete->resolve($value, $class, $format);
             }
 
             $array = [];
@@ -107,7 +106,7 @@ class AutocompleteController extends AbstractController
     /**
      * @Route("/autocomplete/{provider}/{pageSize}/{hashid}", name="ux_autocomplete_icons")
      */
-    public function AutocompleteIcons(Request $request, string $provider, int $pageSize, string $hashid): Response
+    public function Icons(Request $request, string $provider, int $pageSize, string $hashid): Response
     {
         $dict    = $this->decode($hashid);
 

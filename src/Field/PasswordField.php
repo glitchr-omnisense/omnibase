@@ -17,23 +17,18 @@ final class PasswordField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setFormType(RepeatedType::class)
-            ->addCssClass('field-password')
-            ->setFormTypeOptions([
-                    'type' => PasswordType::class,
-                    'first_options' => [
-                        'label' => "New Password",
-                        'attr' => [
-                            "autocomplete" => "new-password"
-                        ]
+            ->setFormType(PasswordType::class)
+            ->addCssClass('field-password');
+    }
 
-                    ],
-                    'second_options' => [
-                        'label' => "Confirm New Password",
-                        'attr' => [
-                            "autocomplete" => "new-password"
-                        ]
-                    ]
-                ]);
+    public function setRevealer(string $revealer): self
+    {
+        $this->setFormTypeOption("revealer", $revealer);
+        return $this;
+    }
+    public function setRepeater(string $repeater): self
+    {
+        $this->setFormTypeOption("repeater", $repeater);
+        return $this;
     }
 }

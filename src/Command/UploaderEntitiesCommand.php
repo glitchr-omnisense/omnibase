@@ -159,7 +159,7 @@ class UploaderEntitiesCommand extends Command
     public function getOrphanFiles(string $class, string $field, Uploader $annotation)
     {
         $fileList = $this->getFileList($class, $field, $annotation);
-        
+
         $classMetadata = $this->entityManager->getClassMetadata($class);
         $fileListInDatabase = array_map(function($entity) use ($classMetadata, $field, $annotation) { 
 
@@ -168,7 +168,7 @@ class UploaderEntitiesCommand extends Command
             else return $annotation->getPath($entity, $uuid);
 
         }, $this->getEntries($class));
-        
+
         return array_values(array_diff($fileList, array_flatten($fileListInDatabase)));
     }
 

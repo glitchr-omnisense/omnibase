@@ -16,12 +16,6 @@ class IconCrudCommand extends Command
 {
     protected static $defaultName = 'icon:crud';
 
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('crud',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific CRUD controller ?');

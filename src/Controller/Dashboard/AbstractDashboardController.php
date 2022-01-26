@@ -140,6 +140,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
             "base.settings.title"                => ["translatable" => true],
+            "base.settings.title.backoffice"     => ["translatable" => true],
             "base.settings.slogan"               => ["translatable" => true],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
@@ -172,7 +173,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->settingRepository->flush();
 
-            $notification = new Notification("@dashboard.controllers.settings.success");
+            $notification = new Notification("@controllers.dashboard_settings.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -216,7 +217,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->settingRepository->flush();
 
-            $notification = new Notification("@dashboard.controllers.api.success");
+            $notification = new Notification("@controllers.dashboard_apikey.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -259,7 +260,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->slotRepository->flush();
 
-            $notification = new Notification("@dashboard.controllers.widgets.success");
+            $notification = new Notification("@controllers.dashboard_widgets.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 

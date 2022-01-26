@@ -18,6 +18,7 @@ use Base\Traits\BaseTrait;
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
