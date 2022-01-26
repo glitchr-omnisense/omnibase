@@ -51,13 +51,36 @@ security_maintenance:
 
 dashboard:
   title: "Administration"
+  excerpt: ""
+
 dashboard_settings:
   title: "Settings"
+  excerpt: "Configurable elements"
+
+  empty: "There are no settings !"
+  success: "Settings have been successfully updated."
+  failed: "Failed to update website settings."
+  valid: Check and save parameters
+
 dashboard_widgets:
   title: "Widgets"
+  excerpt: "Widget slot connected to website template"
+  valid: Update widget slots
+
+  empty: "There are no widgets to configure for !"
+  success: "Widgets have been successfully updated"
+  failed: "Failed to update website widgets."
+
+dashboard_apikey:
+  title: "API Keys"
+  excerpt: "Sensitive information allowing to connect external API"
+  empty: "There are no API keys to configure !"
+  success: "API keys have been successfully updated"
+  failed: "Failed to update API keys"
 
 exception:
   title: "Oops! An Error Occurred !"
+  excerpt: "Something is broken.."
   description: "Something is broken and this is an unexcepted error.<br/>
         Please <a href=\"mailto:{0}\">let us</a> know what you were doing when this error occurred.<br/>
         We will fix it as soon as possible. Sorry for any inconvenience caused."

@@ -522,6 +522,10 @@
                     align-content   : center;
                 }
 
+                .content-header-icon i {
+                    font-size:3em;
+                }
+
                 .logo-custom img
                 {
                     margin-left: auto;
@@ -799,7 +803,7 @@
 
                                         <div class="content-header-icon">
                                         {% set url = ea.crud is not null and ea.crud.paginator.pageNumber != 1 ? ea_url().setController(ea.crud.controllerFqcn).setAction('index').generateUrl() : null %}
-                                        
+
                                         {% set _content_icon = block('content_icon') ?? null %}
                                         {% if _content_icon is not empty %}
                                             {{ _content_icon|raw }}
@@ -848,7 +852,7 @@
 
                                             {% set _content_text = block('content_text') ?? null %}
                                             {% if _content_text is not empty %}
-                                                {{ _content_text|raw }}
+                                                <span>{{ _content_text|raw }}</span>
                                             {% else %}
                                                 <span>{{ ea_extra.text(ea.crud.getCurrentPage() ?? null)|raw }}</span>
                                             {% endif %}

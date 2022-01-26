@@ -1,20 +1,5 @@
 # Dashboard controllers
 
-# MENU controller
-# My Settings: Mes paramètres
-# My Profile: Mon profil
-
-# Home: Accueil
-# Settings: Paramètres
-# Widgets: Widgets
-# Back to website: Retour au site
-
-# MEMBERSHIP: "MEMBERSHIP"
-# Super Administrator: Super Administrateur
-# Administrator: Administrateur
-# All users: "Tous les utilisateurs"
-# Add user: Ajouter un utilisateur
-
 STATISTICS: STATISTICS
 users: "{0, plural,
           =0 {no visit}

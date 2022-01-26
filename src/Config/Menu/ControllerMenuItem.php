@@ -27,7 +27,9 @@ class ControllerMenuItem implements MenuItemInterface
         $this->dto->setType(MenuItemDto::TYPE_ROUTE);
 
         $this->dto->setIcon($icon);
-        if($icon === null && MenuItem::$iconService != null) 
-            $this->dto->setIcon(closest(MenuItem::$iconService->getRouteIcons($routeName), 1) ?? null);
+        if($icon === null && MenuItem::$iconService != null) {
+            $icons = MenuItem::$iconService->getRouteIcons($routeName);
+            if($icons) $this->dto->setIcon(closest($icons, 1) ?? null);
+        }
     }
 }

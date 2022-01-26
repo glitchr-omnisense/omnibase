@@ -46,10 +46,10 @@ class FontAwesome extends AbstractIconProvider
 
     public function getClass(string $style)
     {
-        if(version_compare($this->getVersion(), 5, ">=")) 
-            return $this->getName().$style[0];
         if(version_compare($this->getVersion(), 6, ">="))
             return $this->getName()."-".$style;
+        if(version_compare($this->getVersion(), 5, ">=")) 
+            return $this->getName().$style[0];
 
         throw new \Exception("Version ". $this->getVersion()." is not supported.");
     }

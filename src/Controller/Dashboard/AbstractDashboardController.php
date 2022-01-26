@@ -57,6 +57,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Base\Config\Traits\WidgetTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -136,10 +137,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_merge([
-            "base.settings.logo"                 => ["form_type" => ImageType::class],
+            "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
-            "base.settings.title"                => [],
-            "base.settings.slogan"               => [],
+            "base.settings.title"                => ["translatable" => true],
+            "base.settings.slogan"               => ["translatable" => true],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
@@ -148,19 +149,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.domain"               => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
             "base.settings.domain.base_dir"      => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
             "base.settings.mail"                 => ["form_type" => EmailType::class],
-            "base.settings.mail.name"            => [],
+            "base.settings.mail.name"            => ["translatable" => true],
         ], $fields);
 
-        $singleLocale = array_keys($fields);
-        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.logo");
-        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.title");
-        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.slogan");
-        $singleLocale = array_filter($singleLocale, fn($v) => $v != "base.settings.mail.name");
-        
-        $form = $this->createForm(SettingListType::class, null, [
-            "fields" => $fields,
-            "fields[single_locale]" => $singleLocale
-        ]);
+        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
+
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
@@ -187,6 +180,50 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         return $this->render('dashboard/settings.html.twig', [
+            "form" => $form->createView()
+        ]);
+    }
+
+    /**
+     * @Route("/dashboard/apikey", name="dashboard_apikey")
+     * @Iconize({"fas fa-fw fa-fingerprint", "fas fa-fw fa-key"})
+     */
+    public function ApiKey(Request $request, array $fields = []): Response
+    {
+        $fields = array_merge([
+            "api.key.akismet"            => [],
+        ], $fields);
+
+        foreach($fields as $key => $field)
+            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
+
+        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+
+            $data     = array_filter($form->getData(), fn($value) => !is_null($value));
+            $fields   = array_keys($form->getConfig()->getOption("fields"));
+
+            $settings = array_transforms(function($k, $s): ?array {
+                if($s === null) return null;
+                return [$s->getName(), $s];
+            }, $this->baseService->getSettings()->getRawScalar($fields));
+
+            $settings = array_filter($settings, fn($value) => !is_null($value));
+            foreach(array_diff_key($data, $settings) as $name => $setting)
+                $this->settingRepository->persist($setting);
+
+            $this->settingRepository->flush();
+
+            $notification = new Notification("@dashboard.controllers.api.success");
+            $notification->setUser($this->getUser());
+            $notification->send("success");
+
+            return $this->baseService->refresh();
+        }
+
+        return $this->render('dashboard/apikey.html.twig', [
             "form" => $form->createView()
         ]);
     }
@@ -268,7 +305,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if ($values == UserRole::USER) continue;
 
             if(!is_array($values)) $values = ["_self" => $values];
-            $role = array_key_pop("_self", $values);
+            $role = array_pop_key("_self", $values);
 
             $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
@@ -322,6 +359,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $menu   = [];
         $menu[] = MenuItem::section();
         $menu[] = MenuItem::linkToController("dashboard", [], "Home");
+        $menu[] = MenuItem::linkToController("dashboard_apikey");
         $menu[] = MenuItem::linkToController("dashboard_settings");
         $menu[] = MenuItem::linkToController("dashboard_widgets");
         $menu[] = MenuItem::linkToController("app_index", [], 'Back to website', 'fas fa-fw fa-door-open');

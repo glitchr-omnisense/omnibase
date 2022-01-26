@@ -665,7 +665,7 @@ namespace {
         return false;
     }
 
-    function array_key_pop(mixed $key, array &$array): mixed 
+    function array_pop_key(mixed $key, array &$array): mixed 
     {
         if(empty($array)) return null;
 

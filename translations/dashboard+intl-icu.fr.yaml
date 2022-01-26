@@ -1,29 +1,13 @@
-# Dashboard controllers
-controllers:
-  settings:
-    empty: "Il n'y a pas de paramètre à configurer sur ce site, tu peux repartir de là où tu viens !"
-    success: "Les paramètres du site ont correctement été modifiés."
-    failed: "Échec de modification des paramètres."
-  widgets:
-    empty: "Il n'y a pas de widget à configurer sur ce site, tu peux repartir de là où tu viens !"
-    success: "Les widgets du site ont correctement été mis à jour."
-    failed: "Échec de la mise à jour des widgets."
-
 # MENU controller
-My Settings: Mes paramètres
-My Profile: Mon profil
-
 Home: Accueil
-Settings: Paramètres
-Widgets: Widgets
 Back to website: Retour au site
+Valid: Valider
 
 MARKETPLACES: BOUTIQUE EN LIGNE
 LAYOUT: MISE EN FORME
 BUSINESS CARD: "FICHES MÉTIERS"
 MEMBERSHIP: "ESPACE MEMBRE"
-Super Administrator: Super Administrateur
-Administrator: Administrateur
+
 All users: "Tous les utilisateurs"
 Add user: Ajouter un utilisateur
 

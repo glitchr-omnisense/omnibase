@@ -249,6 +249,5 @@ class FileType extends AbstractType implements DataMapperInterface
         $processedData = $childForm['file']->getData() ?? null;
 
         $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
-        dump($viewData);
     }
 }

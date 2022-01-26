@@ -79,6 +79,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('synopsis',        'synopsis'),
             new TwigFunction("path",            [$this, 'path'   ]),
             new TwigFunction('title',           [$this, 'title'  ], ['is_safe' => ['all']]),
+            new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('method_exists',   [$this, 'method_exists']),
             new TwigFunction('static_call',     [$this, 'static_call'  ]),
@@ -108,6 +109,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('datetime',        [$this, 'datetime'],    ['needs_environment' => true]),
             new TwigFilter('less_than',       [$this, 'less_than']),
             new TwigFilter('greater_than',    [$this, 'greater_than']),
+
+            new TwigFilter('closest',         [$this, 'closest']),
 
             new TwigFilter('is_uuid',         [Translator::class, 'is_uuid']),
             new TwigFilter('trans',           [Translator::class, 'trans']),
@@ -141,6 +144,8 @@ final class BaseTwigExtension extends AbstractExtension
         if($array === null) return null;
         return implode($separator, array_filter($array));
     }
+
+    public function closest(array $array, int $position = -1) { return closest($array, $position); }
 
     public function image(Environment $env, array $context, $src) 
     { 
@@ -219,7 +224,13 @@ final class BaseTwigExtension extends AbstractExtension
     public function title(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
     {
         $ret = $this->translator->trans($name.".title", $parameters, $domain, $locale);
-        return $ret == $name.".title" ? "@controllers.".$ret : $ret;
+        return $ret == $name.".title" ? "@".$domain.".".$ret : $ret;
+    }
+
+    public function excerpt(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
+    {
+        $ret = $this->translator->trans($name.".excerpt", $parameters, $domain, $locale);
+        return $ret == $name.".excerpt" ? "@".$domain.".".$ret : $ret;
     }
 
     public function less_than($date, $diff): bool

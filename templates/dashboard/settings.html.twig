@@ -1,11 +1,15 @@
 {% extends "@EasyAdmin/layout.html.twig" %}
+
+{% block content_icon %}{{ iconify("dashboard_settings")|closest(1)|raw  }}{% endblock %}
+{% block content_title %}{{ title("dashboard_settings") }}{% endblock %}
+{% block content_excerpt  %}{{ excerpt("dashboard_settings") }}{% endblock %}
 {% block content %}
 
 {% if form.children|length > 1 %}
     {{ form(form) }}
 {% else %}
     <div class="text-center">
-    {{"@dashboard.controllers.settings.empty"|trans}}
+    {{ "@controllers.dashboard_settings.empty"|trans }}
     </div>
 {% endif %}
 

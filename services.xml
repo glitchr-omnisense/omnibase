@@ -723,7 +723,6 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="router.default" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 

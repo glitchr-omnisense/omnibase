@@ -69,7 +69,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($options) {
 
-            $form = $event->getForm();
+            $settings = [];
 
             $formattedFields = $this->getFormattedData($options["fields"]);
             foreach($formattedFields as $formattedField => $fieldOptions) {
@@ -80,8 +80,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"]) ?? new Setting($field);
             }
 
-            $fields = [];
-            $fields["value"] = [];
+            $fields = ["value" => []];
 
             $unvData = [];
             $intlData = [];
@@ -114,9 +113,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 //
                 // Check if expected to be translatable
-                $isTranslatable = !in_array($field, $options["fields[single_locale]"]);
-                if(array_key_exists("single_locale", $fieldOptions))
-                    unset($fieldOptions["single_locale"]);
+                $isTranslatable = $fieldOptions["translatable"] ?? false;
+                $fieldOptions = array_keys_remove($fieldOptions, "translatable");
 
                 $fields["value"][$formattedField] = $fieldOptions;
 
@@ -143,6 +141,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 else $unvData[$formattedField] = $translations;
             }
 
+            $form = $event->getForm();
             if($intlData) {
 
                 $form->add("intl", TranslationType::class, [
@@ -169,7 +168,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $form->get("unv")->setData($unvData);
             }
 
-            if(count($fields) > 0) $form->add('valid', SubmitType::class);
+            if(count($fields) > 0)
+                $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "dashboard_settings.valid"]);
         });
     }
 

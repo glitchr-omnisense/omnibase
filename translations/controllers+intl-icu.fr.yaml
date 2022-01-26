@@ -39,10 +39,33 @@ security_maintenance:
 
 dashboard:
   title: "Administration"
+  excerpt: ""
+
 dashboard_settings:
   title: "Paramètres du site"
+  excerpt: "Élements configurable du site"
+
+  empty: "Il n'y a pas de paramètre à configurer sur ce site, tu peux repartir de là où tu viens !"
+  success: "Les paramètres du site ont correctement été modifiés."
+  failed: "Échec de modification des paramètres."
+  valid: Vérifier et sauvegarder les nouveaux paramètres
+
 dashboard_widgets:
   title: "Personnalisations"
+  excerpt: "Emplacements de widgets pré-définis"
+  valid: Mettre à jour les emplacements
+
+  empty: "Il n'y a pas de widget à configurer sur ce site, tu peux repartir de là où tu viens !"
+  success: "Les widgets du site ont correctement été mis à jour."
+  failed: "Échec de la mise à jour des widgets."
+
+dashboard_apikey:
+  title: "Clés API"
+  excerpt: "Informations sensibles permettant la connexion aux API de services"
+
+  empty: "Il n'y a pas de clef API à configurer sur ce site !"
+  success: "Les clefs ont correctement été mises à jour."
+  failed: "Échec de la mise à jour des clefs API."
 
 user_profile:
   title: "Mon profil"

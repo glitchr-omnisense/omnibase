@@ -112,15 +112,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function __construct()
     {
         $role = strtoupper(class_basename(get_called_class()));
-
-        dump(get_called_class());
-        dump($role, UserRole::hasKey($role), UserRole::getValue($role));
-
-        if(UserRole::hasKey($role)) $role = UserRole::getValue($role);
-        else $role = UserRole::USER; // Default role
-
-        $this->roles  = [$role];
-
+        $this->roles  = [UserRole::hasKey($role) ? UserRole::getValue($role) : UserRole::USER];
         $this->states = [UserState::ENABLED, UserState::NEWCOMER];
 
         $this->tokens = new ArrayCollection();

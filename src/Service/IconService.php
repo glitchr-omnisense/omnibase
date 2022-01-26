@@ -12,6 +12,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 class IconService
 {
     protected $routeIcons = [];
+    public function getRouteIcons(string $route) { return $this->routeIcons[$route] ?? null; }
 
     public function __construct(ImageService $imageService, CacheInterface $cache, RouterInterface $router)
     {
@@ -41,12 +42,6 @@ class IconService
 
             if(!is_cli()) $cache->save($cacheRouteIcons->set($this->routeIcons));
         }
-    }
-
-    public function getRouteIcons(string $route)
-    {
-        // dump($this->routeIcons, $route);
-        return $this->routeIcons[$route] ?? null;
     }
 
     protected $providers = [];
@@ -81,7 +76,7 @@ class IconService
     {
         if(!$icon) return $icon;
 
-        $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $this->getRrouteIcons[$icon] ?? $icon;
+        $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $this->getRouteIcons($icon) ?? $icon;
         if(is_array($icon))
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 
