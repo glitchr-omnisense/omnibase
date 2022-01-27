@@ -10,6 +10,7 @@ use Base\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\AttributeRepository;
+use Base\Traits\BaseTrait;
 
 /**
  * @ORM\Entity(repositoryClass=AttributeRepository::class)
@@ -22,14 +23,16 @@ use Base\Repository\Layout\AttributeRepository;
 
 class Attribute implements TranslatableInterface, IconizeInterface
 {
+    use BaseTrait;
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return $this->attributePattern ? $this->attributePattern->__iconize() : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __construct(AbstractAttribute $attributePattern)
+    public function __construct(AbstractAttribute $attributePattern, mixed $value = null)
     {
         $this->setAttributePattern($attributePattern);
+        $this->setValue($value);
     }
 
     /**
@@ -53,8 +56,9 @@ class Attribute implements TranslatableInterface, IconizeInterface
     }
 
     public function getType(): ?string { return get_class($this->getAttributePattern()); }
-    public function getFormattedValue(?string $locale = null): ?string 
+    public function getOptions(): array { return $this->getAttributePattern()->getOptions(); }
+    public function resolve(?string $locale = null): mixed 
     {
-        return $this->attributePattern->getFormattedValue($this->translate($locale)->getValue());
+        return $this->attributePattern->resolve($this->translate($locale)->getValue()) ?? "";
     }
 }

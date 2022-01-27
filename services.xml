@@ -235,6 +235,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="App\Repository\User\TokenRepository" />
+            <argument type="service" id="referrer" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -317,8 +318,8 @@
         <!-- DOCTRINE -->
         <service id="Base\Database\NamingStrategy"  public="true" />
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
-        <service id="Doctrine\Persistence\Mapping\ClassMetadataFactory">
-            <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />
+        <service id="Base\Database\Factory\EntityHydrator"  public="true">
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
@@ -343,6 +344,7 @@
             <argument type="service" id="base.filesystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
+            <argument type="service" id="base.database.entity_hydrator" />
         </service>
 
         <!-- Twig declarations -->
@@ -660,6 +662,12 @@
             <argument type="service" id="translator" />
         </service>
 
+
+        <service id="Base\Normalizer\EntityNormalizer">
+            <tag name="serializer.normalizer" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
         <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FileConfigurator">
@@ -734,12 +742,10 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.settings" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="ea_extension" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="ea_extension" />
             <argument type="service" id="translator" />
         </service>
       

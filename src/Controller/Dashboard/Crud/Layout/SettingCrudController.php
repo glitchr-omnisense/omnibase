@@ -6,6 +6,8 @@ use Base\Field\TranslationField;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Field\Type\QuillType;
+use EasyCorp\Bundle\EasyAdminBundle\Form\Type\TextEditorType;
 
 class SettingCrudController extends AbstractCrudController
 {
@@ -17,8 +19,10 @@ class SettingCrudController extends AbstractCrudController
 
             yield TextField::new('name');
 
-            yield TranslationField::new("label");
-            yield TranslationField::new()->showOnIndex("help")->setRequired(false)->setExcludedFields("value");
+            yield TranslationField::new("label")->renderAsHtml();
+            yield TranslationField::new("help" )->renderAsHtml()->setRequired(false)
+                    ->setFields(["help" => ["form_type" => QuillType::class]])
+                    ->setExcludedFields("value");
 
         }, $args);
     }

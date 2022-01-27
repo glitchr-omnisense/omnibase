@@ -249,6 +249,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification = new Notification("kickout", [$user]);
             $notification->send("warning");
 
+            $this->referrer->setUrl($event->getRequest()->getUri());
+            dump($event->getRequest());
             $event->setResponse($this->baseService->redirectToRoute("security_logoutRequest"));
             return $event->stopPropagation();
         }

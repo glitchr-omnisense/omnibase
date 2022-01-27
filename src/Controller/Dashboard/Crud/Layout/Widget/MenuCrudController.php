@@ -2,12 +2,15 @@
 
 namespace Base\Controller\Dashboard\Crud\Layout\Widget;
 
-use Base\Field\TranslationField;
-
 use Base\Controller\Dashboard\Crud\Layout\WidgetCrudController;
+use Base\Entity\Layout\Widget\Menu;
+use Base\Entity\Layout\Widget\Slot;
+use Base\Field\DiscriminatorField;
 use Base\Field\SelectField;
 use Base\Field\SlugField;
+use Base\Field\TranslationField;
 use Base\Field\Type\QuillType;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -17,15 +20,13 @@ class MenuCrudController extends WidgetCrudController
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function () {
+        yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
+        yield SlugField::new('path')->setSeparator("-")->hideOnIndex()->setColumns(6)->setTargetFieldName("translations.title");
+        yield TranslationField::new('title')->setExcludedFields("content")->setFields([
+            "title"   => ["form_type" => TextType::class],
+            "excerpt" => ["form_type" => TextareaType::class]
+        ]);
 
-            yield SelectField::new('widgets')->turnVertical();
-            yield SlugField::new('path')->setSeparator("-")->setTargetFieldName("translations.title");
-            yield TranslationField::new()->showOnIndex('title')->setFields([
-                "title"   => TextType::class,
-                "excerpt" => TextareaType::class,
-                "content" => QuillType::class,
-            ]);
-        }, $args);
+        yield SelectField::new('widgets')->turnVertical()->setColumns(6)->setFilter("^".Menu::class, "^".Slot::class);
     }
 }

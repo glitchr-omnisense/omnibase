@@ -58,8 +58,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
     public function compute(?Request $request = null)
     {
-        if($request) $this->setRequest($request);
-        $request = $this->getRequest();
+        $request = $request ?? $this->getRequest();
+        if($request === null) return;
+        else $this->setRequest($request);
 
         $this->clear();
         $icons = [];

@@ -7,6 +7,7 @@ use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 
 use App\Entity\Layout\Widget;
+use Base\Database\Annotation\ColumnAlias;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Doctrine\Common\Collections\Collection;
@@ -46,20 +47,6 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public function setPath(string $path): self
     {
         $this->path = $path;
-        return $this;
-    }
-
-    public function getLabel(): ?string { return $this->translate()->getTitle(); }
-    public function setLabel(string $label)
-    {
-        $this->translate()->setTitle($label);
-        return $this;
-    }
-
-    public function getHelp(): ?string { return $this->translate()->getExcerpt(); }
-    public function setHelp(string $help) 
-    {
-        $this->translate()->setExcerpt($help);
         return $this;
     }
 

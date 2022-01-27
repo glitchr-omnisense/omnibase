@@ -97,14 +97,8 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function setFilter($filter)
+    public function setFilter(...$filter)
     {
-        if(!$filter) $filter = [];
-        if(!is_array($filter)) $filter = [$filter];
-
-        if(count($filter) == 1)
-            $this->setFormTypeOptionIfNotSet(self::OPTION_CLASS, $filter[0]);
-        
         $this->setFormTypeOptionIfNotSet(self::OPTION_FILTER, $filter);
         return $this;
     }

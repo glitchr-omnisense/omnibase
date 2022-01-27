@@ -31,6 +31,9 @@
 
         <!-- DOCTRINE FIX -->
         <service id="Doctrine\Bundle\DoctrineBundle\ConnectionFactory"  alias="doctrine.dbal.connection_factory"/>
+        <service id="Doctrine\Persistence\Mapping\ClassMetadataFactory">
+            <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />
+        </service>
 
         <!-- EASYADMIN FIXES (Using crud controller inside bundles -->
         <service id="EasyCorp\Bundle\EasyAdminBundle\Factory\FilterFactory"    public="true">

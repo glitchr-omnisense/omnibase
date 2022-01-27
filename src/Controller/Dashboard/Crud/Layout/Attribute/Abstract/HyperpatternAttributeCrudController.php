@@ -2,9 +2,8 @@
 
 namespace Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract;
 
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-
-use Base\Field\AssociationField;
 
 class HyperpatternAttributeCrudController extends AbstractAttributeCrudController
 {
@@ -12,9 +11,11 @@ class HyperpatternAttributeCrudController extends AbstractAttributeCrudControlle
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, [
-            fn() => yield TextField::new('pattern')->onlyOnForms()->setColumns(12),
-            "translations" => fn() => yield TextField::new('pattern')->hideOnForm()
-        ], $args);
+        return parent::configureFields($pageName, ["code" =>
+            function() {
+                
+                yield TextField::new('pattern')->setColumns(4)->onlyOnForms();
+
+            }], $args);
     }
 }

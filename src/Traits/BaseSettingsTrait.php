@@ -22,18 +22,18 @@ trait BaseSettingsTrait
         return true;
     }
 
-    protected function read(?string $name, array $normSettings)
+    protected function read(?string $path, array $normSettings)
     {
-        if($name === null) return $normSettings;
+        if($path === null) return $normSettings;
 
-        $nameArray = explode(".", $name);
-        foreach ($nameArray as $index => $key) {
+        $pathArray = explode(".", $path);
+        foreach ($pathArray as $index => $key) {
 
-            if($key == "_self" && $index != count($nameArray)-1)
-                throw new \Exception("Failed to read \"$name\": _self can only be used as tail parameter");
+            if($key == "_self" && $index != count($pathArray)-1)
+                throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
 
             if(!array_key_exists($key, $normSettings))
-                throw new \Exception("Failed to read \"$name\": key not found");
+                throw new \Exception("Failed to read \"$path\": key not found");
 
             $normSettings = &$normSettings[$key];
         }
@@ -66,7 +66,7 @@ trait BaseSettingsTrait
         foreach($settings as $setting) {
 
             $array = &$values;
-            foreach (explode(".", $setting->getName()) as $key)
+            foreach (explode(".", $setting->getPath()) as $key)
                 $array = &$array[$key];
 
             $array["_self"] = $setting;
@@ -105,98 +105,98 @@ trait BaseSettingsTrait
         return array_filter($settings);
     }
     
-    public function getRaw(null|string|array $name = null, ?string $locale = null)
+    public function getRaw(null|string|array $path = null, ?string $locale = null)
     {
-        if(is_array($names = $name)) {
+        if(is_array($paths = $path)) {
             
             $settings = [];
-            foreach($names as $name)
-                $settings[] = $this->getRaw($name, $locale);
+            foreach($paths as $path)
+                $settings[] = $this->getRaw($path, $locale);
 
             return $settings;
         }
 
-        if(array_key_exists($name, $this->settings))
-            $this->settings[$name] = !empty($this->settings[$name]) ? $this->settings[$name] : null;
+        if(array_key_exists($path, $this->settings))
+            $this->settings[$path] = !empty($this->settings[$path]) ? $this->settings[$path] : null;
 
         try {
 
-            $this->settings[$name] = $this->settings[$name] ?? [];
-            if($this->settings[$name] === []) {
+            $this->settings[$path] = $this->settings[$path] ?? [];
+            if($this->settings[$path] === []) {
 
-                if(!$name) $this->settings[$name] = $this->settingRepository->cacheAll()->getResult();
-                else $this->settings[$name] = $this->settingRepository->cacheByInsensitiveNameStartingWith($name)->getResult();
+                if(!$path) $this->settings[$path] = $this->settingRepository->findAll()->getResult();
+                else $this->settings[$path] = $this->settingRepository->findByInsensitivePathStartingWith($path)->getResult();
 
             }
 
         } catch(TableNotFoundException $e) { return []; }
 
-        $values = $this->normalize($name, $this->settings[$name]);
-        $values = $this->read($name, $values); // get formatted values
-        $this->applyCache($name, $locale, $values);
+        $values = $this->normalize($path, $this->settings[$path]);
+        $values = $this->read($path, $values); // get formatted values
+        $this->applyCache($path, $locale, $values);
 
         return $values;
     }
     
-    public function getRawScalar(null|string|array $name = null, ?string $locale = null)
+    public function getRawScalar(null|string|array $path = null, ?string $locale = null)
     {
-        if(is_array($names = $name)) {
+        if(is_array($paths = $path)) {
             
             $settings = [];
-            foreach($names as $name)
-                $settings[] = $this->getRawScalar($name, $locale);
+            foreach($paths as $path)
+                $settings[] = $this->getRawScalar($path, $locale);
 
             return $settings;
         }
 
-        return $this->getRaw($name, $locale)["_self"] ?? null;
+        return $this->getRaw($path, $locale)["_self"] ?? null;
     }
 
-    public function getScalar(null|string|array $name, ?string $locale = null): string|array|object|null
+    public function getScalar(null|string|array $path, ?string $locale = null): string|array|object|null
     {
-        if(is_array($names = $name)) {
+        if(is_array($paths = $path)) {
             
             $settings = [];
-            foreach($names as $name)
-                $settings[] = $this->getScalar($name, $locale);
+            foreach($paths as $path)
+                $settings[] = $this->getScalar($path, $locale);
 
             return $settings;
         }
 
-        return $this->get($name, $locale)["_self"] ?? null;
+        return $this->get($path, $locale)["_self"] ?? null;
     }
 
-    public function get(null|string|array $name = null, ?string $locale = null): array
+    public function get(null|string|array $path = null, ?string $locale = null): array
     {
-        if(is_array($names = $name)) {
+        if(is_array($paths = $path)) {
 
             $settings = [];
-            foreach($names as $name)
-                $settings[$name] = $this->get($name, $locale);
+            foreach($paths as $path)
+                $settings[$path] = $this->get($path, $locale);
 
             return $settings;
         }
 
-        if(($cacheValues = $this->getCache($name, $locale)))
+        if(($cacheValues = $this->getCache($path, $locale)))
             return $cacheValues;
 
-        $values = $this->getRaw($name, $locale) ?? [];
-        $this->applyCache($name, $locale, $values);
+        $values = $this->getRaw($path, $locale) ?? [];
+        $this->applyCache($path, $locale, $values);
         
         return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() : $v), $values);
     }
 
-    public function set(string $name, $value, ?string $locale = null)
+    public function set(string $path, $value, ?string $locale = null)
     {
         // Delete cache
-        $this->removeCache($name);
+        $this->removeCache($path);
 
         // Compute new value or create setting if missing
         $locale = $this->localeProvider->getLocale($locale);
-        $setting = $this->getRaw($name, $locale)["_self"];
+        $setting = $this->getRaw($path, $locale)["_self"];
         if(!$setting instanceof Setting) {
         
-            $setting = new Setting($name);
+            $setting = new Setting($path);
             $this->entityManager->persist($setting);
         }
 
@@ -206,30 +206,70 @@ trait BaseSettingsTrait
         return $this;
     }
 
-    public function has(string $name, ?string $locale = null)
+    public function setLabel(string $path, ?string $label = null, ?string $locale = null)
     {
-        return $this->get($name, $locale) !== null;
+        // Delete cache
+        $this->removeCache($path);
+
+        // Compute new label or create setting if missing
+        $locale = $this->localeProvider->getLocale($locale);
+        $setting = $this->getRaw($path, $locale)["_self"];
+        if(!$setting instanceof Setting) {
+        
+            $setting = new Setting($path);
+            $this->entityManager->persist($setting);
+        }
+
+        $setting->translate($locale)->setLabel($label);
+        $this->entityManager->flush();
+
+        return $this;
+    }
+
+    public function setHelp(string $path, ?string $help = null, ?string $locale = null)
+    {
+        // Delete cache
+        $this->removeCache($path);
+
+        // Compute new help or create setting if missing
+        $locale = $this->localeProvider->getLocale($locale);
+        $setting = $this->getRaw($path, $locale)["_self"];
+        if(!$setting instanceof Setting) {
+        
+            $setting = new Setting($path);
+            $this->entityManager->persist($setting);
+        }
+
+        $setting->translate($locale)->setHelp($help);
+        $this->entityManager->flush();
+
+        return $this;
+    }
+
+    public function has(string $path, ?string $locale = null)
+    {
+        return $this->get($path, $locale) !== null;
     }
     
-    public function remove(string $name)
+    public function remove(string $path)
     {
-        $this->removeCache($name);
+        $this->removeCache($path);
 
-        $this->settings[$name] = $this->settings[$name] ?? $this->settingRepository->findOneByInsensitiveName($name);
-        if($this->settings[$name] instanceof Setting) {
+        $this->settings[$path] = $this->settings[$path] ?? $this->settingRepository->findOneByInsensitivePath($path);
+        if($this->settings[$path] instanceof Setting) {
 
-            $this->entityManager->remove($this->settings[$name]);
+            $this->entityManager->remove($this->settings[$path]);
             $this->entityManager->flush();    
         }
 
         return $this;
     }
 
-    protected function getCache(?string $name, ?string $locale) : ?array
+    protected function getCache(?string $path, ?string $locale) : ?array
     {
         if(!$this->isCacheEnabled()) return null;
 
-        $item = $this->cache->getItem($name);
+        $item = $this->cache->getItem($path);
         if(!$item) return null;
 
         $settings = $item->get();
@@ -239,7 +279,7 @@ trait BaseSettingsTrait
         return $settings[$locale] ?? null;
     }
 
-    protected function applyCache(?string $name, ?string $locale, array $settings)
+    protected function applyCache(?string $path, ?string $locale, array $settings)
     {
         if(!$settings) return false;
 
@@ -248,7 +288,7 @@ trait BaseSettingsTrait
 
             if($key == "_self") continue;
             else if(array_key_exists("_self", $setting))
-                $this->applyCache($name.".".$key, $locale, $setting);
+                $this->applyCache($path.".".$key, $locale, $setting);
         }
 
         // Process current node
@@ -258,7 +298,7 @@ trait BaseSettingsTrait
 
         if($this->isCacheEnabled()) {
 
-            $item = $this->cache->getItem($name);
+            $item = $this->cache->getItem($path);
 
             $locale = $this->localeProvider->getLocale($locale);
 
@@ -274,13 +314,13 @@ trait BaseSettingsTrait
         return true;
     }
     
-    public function removeCache(string $name)
+    public function removeCache(string $path)
     {
-        unset($this->settings[$name]);
-        foreach(array_reverse(explode(".", $name)) as $last) {
+        unset($this->settings[$path]);
+        foreach(array_reverse(explode(".", $path)) as $last) {
 
-            $this->cache->delete($name);
-            $name = substr($name, 0, strlen($name) - strlen($last) - 1);
+            $this->cache->delete($path);
+            $path = substr($path, 0, strlen($path) - strlen($last) - 1);
         }
 
         return $this;

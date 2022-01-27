@@ -191,10 +191,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      */
     public function ApiKey(Request $request, array $fields = []): Response
     {
-        $fields = array_merge([
-            "api.key.akismet"            => [],
-        ], $fields);
-
         foreach($fields as $key => $field)
             if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
 

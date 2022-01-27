@@ -3,9 +3,6 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\ArrayField;
-use Base\Field\Type\CollectionType;
-use Doctrine\ORM\PersistentCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -15,6 +12,8 @@ use Symfony\Component\Form\Extension\Core\Type\CurrencyType;
 use Symfony\Component\Form\Extension\Core\Type\LanguageType;
 use Symfony\Component\Form\Extension\Core\Type\LocaleType;
 use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+
 use function Symfony\Component\String\u;
 
 class ArrayConfigurator implements FieldConfiguratorInterface
@@ -40,7 +39,6 @@ class ArrayConfigurator implements FieldConfiguratorInterface
 
         $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(ArrayField::OPTION_ALLOW_ADD));
         $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(ArrayField::OPTION_ALLOW_DELETE));
-        $field->setFormTypeOptionIfNotSet('by_reference', false);
         $field->setFormTypeOptionIfNotSet('delete_empty', true);
 
         // TODO: check why this label (hidden by default) is not working properly
@@ -57,8 +55,32 @@ class ArrayConfigurator implements FieldConfiguratorInterface
 
             $field->setCustomOption(ArrayField::OPTION_ENTRY_IS_COMPLEX, $isComplexEntry);
         }
+        
+        if (null !== $patternFieldName = $field->getCustomOptions()->get(ArrayField::OPTION_PATTERN_FIELD_NAME)) {
+        
+            $entity = $entityDto->getInstance();
+            foreach(explode(".", $patternFieldName) as $propertyPath){
 
-        $field->setFormattedValue($this->formatCollection($field, $context));
+                if(is_object($entity)) $entity = PropertyAccess::createPropertyAccessor()->getValue($entity, $propertyPath);
+                else throw new \Exception("Invalid property path for \"".get_class($entity)."\": ".$patternFieldName);
+            }
+
+            $field->setFormattedValue($this->resolve($entity, ...PropertyAccess::createPropertyAccessor()->getValue($entityDto->getInstance(), $field->getProperty())));
+
+        } else {
+
+            $field->setFormattedValue($this->formatCollection($field, $context));
+        }
+    }
+
+    public function resolve(string $pattern, ...$replace): string
+    {
+        $search = [];
+        foreach($replace as $index => $_)
+            $search[] = "{".$index."}";
+
+        $url = str_replace($search, $replace, $pattern);
+        return preg_replace('/\{[0-9]*\}/', '', $url); // Remove missing entries
     }
 
     private function formatCollection(FieldDto $field, AdminContext $context)

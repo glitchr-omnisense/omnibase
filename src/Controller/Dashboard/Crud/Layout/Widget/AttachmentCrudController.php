@@ -46,13 +46,12 @@ class AttachmentCrudController extends WidgetCrudController
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function () {
+        return parent::configureFields($pageName, [
+            "id" => function () {
 
-            yield FileField::new('file')->setPreferredDownloadName("slug");                
-            yield SlugField::new('slug')->hideOnIndex()->setTargetFieldName("translations.title");
+                yield FileField::new('file')->setColumns(6)->setPreferredDownloadName("slug");                
+                yield SlugField::new('slug')->setColumns(6)->hideOnIndex()->setTargetFieldName("translations.title");
 
-            yield TranslationField::new()->showOnIndex('title');
-
-        }, $args);
+            }], $args);
     }
 }

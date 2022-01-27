@@ -16,14 +16,14 @@ class LinkCrudController extends WidgetCrudController
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function () {
+        return parent::configureFields($pageName, ["id" => function () {
 
             yield AttributeField::new('hyperlink')->setClass(HyperpatternAttribute::class);
-            yield TranslationField::new()->showOnIndex('title')->setFields([
+            yield TranslationField::new('title')->setFields([
                 "title" => [],
                 "excerpt" => ["form_type" => TextareaType::class],
                 "content" => ["form_type" => QuillType::class],
             ]);
-        }, $args);
+        }], $args);
     }
 }

@@ -7,30 +7,19 @@ use Base\Database\Type\SetType;
 use Base\Field\Type\ArrayType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\AssociationType;
-use Base\Field\Type\RelationType;
-use Base\Field\Type\RoleType;
 use Base\Field\Type\SelectType;
-use Base\Field\Type\SlugType;
 use Base\Field\Type\TranslationType;
-use Base\Service\BaseService;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
-use Doctrine\DBAL\Types\TextType;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
-use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Doctrine\Persistence\Mapping\ClassMetadataFactory;
-use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 
 class ClassMetadataManipulator
@@ -153,6 +142,10 @@ class ClassMetadataManipulator
                 $validFields[$fieldName] = ["form_type" => ArrayType::class];
             else if($this->getTypeOfField($class, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
+            else if($this->getTypeOfField($class, $fieldName) == "string")
+                $validFields[$fieldName] = ["form_type" => TextType::class];
+            else if($this->getTypeOfField($class, $fieldName) == "text")
+                $validFields[$fieldName] = ["form_type" => TextareaType::class];
 
             else if( ($enumType = $this->getDoctrineType($this->getTypeOfField($class, $fieldName))) instanceof EnumType)
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "class" => get_class($enumType)];

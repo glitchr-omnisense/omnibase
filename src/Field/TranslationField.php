@@ -12,6 +12,10 @@ class TranslationField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_MAX_LENGTH = 'maxLength';
+    public const OPTION_RENDER_AS_HTML = 'renderAsHtml';
+    public const OPTION_STRIP_TAGS = 'stripTags';
+
     public static function new(string $propertyName = null, ?string $label = null): self
     {
         $field = (new self())
@@ -28,13 +32,38 @@ class TranslationField implements FieldInterface
         return $field;
     }
 
+    public function setMaxLength(int $length): self
+    {
+        if ($length < 1) {
+            throw new \InvalidArgumentException(sprintf('The argument of the "%s()" method must be 1 or higher (%d given).', __METHOD__, $length));
+        }
+
+        $this->setCustomOption(self::OPTION_MAX_LENGTH, $length);
+
+        return $this;
+    }
+
+    public function renderAsHtml(bool $asHtml = true): self
+    {
+        $this->setCustomOption(self::OPTION_RENDER_AS_HTML, $asHtml);
+
+        return $this;
+    }
+
+    public function stripTags(bool $stripTags = true): self
+    {
+        $this->setCustomOption(self::OPTION_STRIP_TAGS, $stripTags);
+
+        return $this;
+    }
+    
     public function setFields(array $fields): self
     {
         $this->setFormTypeOption("fields", $fields);
         return $this;
     }
 
-    public function showOnIndex(?string $field): self
+    public function showOnIndex(?string $field = null): self
     {
         if($field) {
 

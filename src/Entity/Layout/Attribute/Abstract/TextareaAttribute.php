@@ -21,4 +21,5 @@ class TextareaAttribute extends AbstractAttribute implements IconizeInterface
 
     public static function getType(): string { return TextareaType::class; }
     public function getOptions(): array { return []; }
+    public function resolve(mixed $value): mixed { return $value; }
 }

@@ -21,6 +21,8 @@ class Hyperlink extends Attribute implements IconizeInterface
     public        function __iconize()       : ?array { return $this->getHyperpattern() ? [$this->getHyperpattern()->getIcon()] : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-link"]; } 
 
+    public function __toString() { return $this->getHyperpattern()." : ".$this->generateUrl(); }
+
     /**
       * @ColumnAlias(column = "attributePattern")
       */
@@ -32,6 +34,6 @@ class Hyperlink extends Attribute implements IconizeInterface
         return $this;
     }
 
-    public function generateHtml(?string $locale = null) { return $this->getHyperpattern()->generateHtml($this->translate($locale)->getValue()); }
-    public function generateUrl(?string $locale = null)  { return $this->getHyperpattern()->generateUrl($this->translate($locale)->getValue()); }
+    public function generateHtml(?string $locale = null) { return $this->getHyperpattern()->generateHtml(...$this->translate($locale)->getValue()); }
+    public function generateUrl(?string $locale = null)  { return $this->getHyperpattern()->generateUrl(...$this->translate($locale)->getValue()); }
 }

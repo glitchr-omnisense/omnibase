@@ -7,5 +7,5 @@ interface AbstractAttributeInterface
     public static function getType(): string;
     public function getOptions(): array;
 
-    public function getFormattedValue(string $value);
+    public function resolve(mixed $value): mixed;
 }

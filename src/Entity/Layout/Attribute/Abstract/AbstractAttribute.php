@@ -28,27 +28,23 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
  * 
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
-class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
+abstract class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return $this->icon ? [$this->icon] : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __toString() { return $this->getLabel(). " #".$this->getId() . "[".$this->getCode()."]"; }
+    public function __toString() { return $this->getLabel(). " #".$this->getId(); }
 
-    public static function getType(): string { return HiddenType::class; }
-    public function getOptions(): array { return []; }
-    public function getFormattedValue(string $value): mixed { return $value; }
-
-    public function __autocomplete():?string { return $this->translate()->getLabel(); }
-    public function __autocompleteData():array { return ["pattern" => $this->getPattern()]; }
-    public function __construct(?string $code = null)
+    public function __autocomplete():?string { return $this->getLabel(); }
+    public function __autocompleteData():array { return $this->getOptions(); }
+    public function __construct(string $label = "", ?string $icon = null)
     {
         $this->attributes = new ArrayCollection();
 
-        $this->setCode($code);
-        $this->setIcon(get_called_class()::__iconizeStatic()[0]);
+        $this->setLabel($label);
+        $this->setIcon($icon ?? get_called_class()::__iconizeStatic()[0]);
     }
 
     /**

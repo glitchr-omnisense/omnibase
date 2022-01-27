@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AutocompleteController extends AbstractController
@@ -73,10 +72,9 @@ class AutocompleteController extends AbstractController
 
                 $repository = $this->entityManager->getRepository($class);
 
-                if(!is_associative($fields))
-                    $fields = array_fill_keys($fields, $term);
-
+                if(!is_associative($fields)) $fields = array_fill_keys($fields, $term);
                 $fields = array_filter($fields);
+
                 $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
                 $book = $this->paginator->paginate($entries, $page);
                 $pagination = $book->getTotalPages() > $book->getPage();

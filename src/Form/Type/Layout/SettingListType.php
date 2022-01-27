@@ -50,11 +50,11 @@ class SettingListType extends AbstractType implements DataMapperInterface
         } else if( is_subclass_of($data, BaseSettings::class)) {
 
             foreach($data->all() as $setting)
-                $newData[str_replace($from, $to, $setting->getName())] = $setting->getValue();
+                $newData[str_replace($from, $to, $setting->getPath())] = $setting->getValue();
 
         } else if( is_subclass_of($data, Setting::class)) {
 
-            $newData[str_replace($from, $to, $data->getName())] = $data->getValue();
+            $newData[str_replace($from, $to, $data->getPath())] = $data->getValue();
 
         } else {
 

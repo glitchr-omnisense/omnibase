@@ -6,7 +6,10 @@ use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\DiscriminatorField;
+use Base\Field\Type\QuillType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class WidgetCrudController extends AbstractCrudController
 {
@@ -17,8 +20,12 @@ class WidgetCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function () {
 
             yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
-            yield TranslationField::new()->showOnIndex("title");
-        
+            yield TranslationField::new('title')->setFields([
+                "title"   => TextType::class,
+                "excerpt" => TextareaType::class,
+                "content" => QuillType::class,
+            ]);
+                    
         }, $args);
     }
 }

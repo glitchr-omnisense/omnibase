@@ -24,7 +24,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getParameterBag()     { return AnnotationReader::getInstance()->getParameterBag(); }
     public static function getDoctrineReader()   { return AnnotationReader::getInstance()->getDoctrineReader(); }
     public static function getEntityManager()    { return AnnotationReader::getInstance()->getEntityManager();  }
-   
+    public static function getEntityHydrator()   { return AnnotationReader::getInstance()->getEntityHydrator();  }
+
     public static function getFilesystem(string $storage): Filesystem { return AnnotationReader::getInstance()->getFilesystem($storage);      }
     
     public static function getImpersonator():?User { return AnnotationReader::getInstance()->getImpersonator(); }
@@ -109,13 +110,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $fields  = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        $entity = self::getSerializer()->deserialize(json_encode($fieldNames), $classname, 'json');
-        foreach ($fields as $property => $data)
-            self::setFieldValue($entity, $property, $data);
-
-        foreach($associations as $property => $data)
-            self::setFieldValue($entity, $property, $data);
-
+        $entity = AnnotationReader::getInstance()->getEntityHydrator()->hydrate($classname, array_merge($fields, $associations));
         return $entity;
     }
 

@@ -20,10 +20,11 @@ class NumberAttribute extends AbstractAttribute implements IconizeInterface
 
     public static function getType(): string { return NumberType::class; }
     public function getOptions(): array { return []; }
+    public function resolve(mixed $value): mixed { return $value; }
 
-    public function __construct(?string $code = null, ?string $icon = null, ?int $minimum = null, ?int $maximum = null)
+    public function __construct(string $label, ?string $icon = null, ?int $minimum = null, ?int $maximum = null)
     {
-        parent::__construct($code, $icon);
+        parent::__construct($label, $icon);
         $this->setMinimum($minimum);
         $this->setMaximum($maximum);
     }

@@ -17,7 +17,7 @@
 {% endblock %}
 
 {# Overloaded form template.. #}
-{%- block form2_label  -%}{{- form_label(form)  -}}{%- endblock -%}
+{%- block form2_label  -%}{{- form_label(form, null, {'label_html': true})  -}}{%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
 {%- block form2_errors -%}
 {%- set row_attr = row_attr|merge({'class': 'form-errors' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
@@ -29,7 +29,7 @@
 {%- block form2_help   -%}
     {% if help is not empty %}
     <span class="data-help">
-        <i class="far fa-question-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
+        <i class="far fa-question-circle" data-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
     </span>
     {% endif %}
 {%- endblock -%}
@@ -85,7 +85,7 @@
 
 {%- block select2_row -%}
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{form_row(form)}}    
+    {{form_row(form)}}
 {%- endblock -%}
 
 {%- block select2_widget -%}
@@ -509,8 +509,9 @@
         <div class="accordion form-collection-item">
             <div class="accordion-item">
                 <h2 class="accordion-header">
-                    {% if href is not empty and form.vars.value is not null and form.children is empty  %}
-                    <a class="accordion-button collapsed" href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}">
+                    {% set _href = href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
+                    {% if _href is not empty and form.vars.value is not null and form.children is empty %}
+                    <a class="accordion-button collapsed" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {% else %}
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {% endif %}
@@ -523,12 +524,12 @@
                     {% else %}
                     </button>
                     {% endif %}
-                    
 
                     <div class="form-collection-buttons">
-                        {% if href is not empty and form.vars.value is not null %}
+                        {% set _href = href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
+                        {% if _href is not empty and form.vars.value is not null and form.children is empty %}
                         <button type="button" class="btn btn-link form-collection-link-button">
-                            <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
+                            <a href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
                         </button>
                         {% endif %}
                         {% if allows_deleting_items %}

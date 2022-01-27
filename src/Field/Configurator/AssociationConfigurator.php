@@ -5,7 +5,7 @@ namespace Base\Field\Configurator;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\AssociationField;
-
+use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
@@ -38,7 +38,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $propertyName = $field->getProperty();
-        
+
         if (!$this->classMetadataManipulator->hasAssociation($entityDto->getFqcn(), $propertyName)) {
             throw new \RuntimeException(sprintf('The "%s" field is not a Doctrine association, so it cannot be used as an association field.', $propertyName));
         }
@@ -51,16 +51,23 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_DELETE));
         $field->setFormattedValue($field->getValue());
 
-        $crudController = AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"));
-        if($crudController) {
+        $href = [$field->getFormTypeOption("class") => AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"))];
+        
+        $fieldValue = $field->getValue();
+        $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn($e) => get_class($e))->toArray()) : [get_class($fieldValue)];
+        foreach($classList as $classname) {
+        
+            $crudController = AbstractCrudController::getCrudControllerFqcn($classname);
 
-            $field->setFormTypeOption("href", $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setController($crudController)
-                    ->setAction(Action::EDIT)
-                    ->setEntityId("{0}")
-                    ->generateUrl());
+            $href[$classname] = $crudController ?
+                $this->adminUrlGenerator
+                            ->unsetAll()
+                            ->setController($crudController)
+                            ->setAction(Action::EDIT)
+                            ->setEntityId("{0}")
+                            ->generateUrl() : null;
         }
+        $field->setFormTypeOption("href", $href);
 
         if ($this->classMetadataManipulator->isToOneSide($entityDto->getFqcn(), $propertyName)) {
             $this->configureToOneAssociation($field);

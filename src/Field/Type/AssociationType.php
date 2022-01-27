@@ -15,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PercentType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -151,16 +152,16 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     if($options["recursive"] && array_key_exists($form->getName(), $field))
                     $field = $field[$form->getName()];
 
-                    $fieldType = $field['form_type'] ?? (!empty($field['data']) ? HiddenType::class : null);
+                    $fieldType = $field['form_type'] ?? null;
                     unset($field['form_type']);
 
                     $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
                     $field['required'] = !$isNullable && ($field['required'] ?? true);
 
-                    $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"];
+                    $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"] ?? false;
                     unset($field['allow_entity']);
 
-                    if ($fieldEntity !== null || ($fieldType !== null && $fieldType != AssociationType::class))
+                    if ($fieldEntity || ($fieldType !== null && $fieldType != AssociationType::class))
                         $form->add($fieldName, $fieldType, $field);
                 }
             }
@@ -186,7 +187,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $childForms = iterator_to_array($forms);
             foreach($childForms as $fieldName => $childForm) {
-
+            
                 $value = null;
                 if($classMetadata->hasField($fieldName))
                     $value = $classMetadata->getFieldValue($entity, $fieldName);
@@ -194,7 +195,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if(empty($value)) $value = null;
 
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
+
                 switch($childFormType) {
+                    case ArrayType::class:
+                        if(is_serialized($value)) $value = unserialize($value);
+                        else $value = $value !== null && !is_array($value) ? [$value] : $value;
+                        break;
+
                     case IntegerType::class:
                     case NumberType::class:
                     case PercentType::class:

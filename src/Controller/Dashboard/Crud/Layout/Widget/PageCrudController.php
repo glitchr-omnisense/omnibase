@@ -19,12 +19,8 @@ class PageCrudController extends WidgetCrudController
         return parent::configureFields($pageName, function () {
 
             yield ImageField::new('thumbnail');
-
             yield SlugField::new('slug')->setTargetFieldName("translations.title");
-            yield TranslationField::new()->showOnIndex('title')->setFields([
-                "excerpt" => ["form_type" => TextareaType::class],
-                "content" => ["form_type" => QuillType::class],
-            ]);
+
         }, $args);
     }
 }

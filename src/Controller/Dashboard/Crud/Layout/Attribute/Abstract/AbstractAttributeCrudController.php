@@ -34,13 +34,13 @@ class AbstractAttributeCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function () {
 
             yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
-            yield IconField::new('icon')->setTextAlign(TextAlign::LEFT)->setColumns(6);
-            yield SlugField::new('code')->setColumns(6)->setTargetFieldName("translations.label");
+            yield IconField::new('icon')->setTextAlign(TextAlign::LEFT)->setColumns(4);
+            yield SlugField::new('code')->setColumns(4)->setTargetFieldName("translations.label");
 
             yield TranslationField::new("label");
             yield TranslationField::new()->showOnIndex("help");
             yield AssociationField::new("attributes")->justDisplay();
-        
+
         }, $args);
     }
 }

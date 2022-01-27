@@ -16,8 +16,8 @@ class HyperpatternAttributeTranslation extends AbstractAttributeTranslation
      * @ORM\Column(type="array")
      */
     protected $placeholder;
-    public function getPlaceholder():array     { return $this->placeholder; }
-    public function setPlaceholder(array $placeholder): self
+    public function getPlaceholder():?array     { return $this->placeholder; }
+    public function setPlaceholder(?array $placeholder): self
     {
         $this->placeholder = $placeholder;
         return $this;

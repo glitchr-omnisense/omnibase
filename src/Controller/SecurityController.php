@@ -36,12 +36,13 @@ class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService)
+    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, Referrer $referrer, BaseService $baseService)
     {
         $this->baseService = $baseService;
         $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
         $this->entityManager = $entityManager;
+        $this->referrer = $referrer;
     }
 
     /**
@@ -142,12 +143,7 @@ class SecurityController extends AbstractController
         }
 
         // Redirect to previous page
-        $targetPath = $request->request->get("_target_path");
-        $targetRoute = $this->baseService->getRoute($request->request->get("_target_path"));
-        if ($targetPath && $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE)
-            return $this->baseService->redirect($targetPath);
-
-        return $this->redirectToRoute($this->baseService->getRoute("/"));
+        return $this->redirect($this->referrer->getUrl());
     }
 
     /**

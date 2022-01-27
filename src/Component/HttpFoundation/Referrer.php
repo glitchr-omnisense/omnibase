@@ -55,6 +55,12 @@ class Referrer
         return $route;
     }
 
+    public function setUrl(string $url)
+    {
+        
+        return $this;
+    }
+
     public function getUrl() : ?string 
     {
         $request = $this->requestStack->getMainRequest();
@@ -63,6 +69,11 @@ class Referrer
         // Target path fallbacks
         $targetPath = $request->request->get('_target_path');
         $targetRoute = $this->getRoute($targetPath);
+
+        if(!$targetRoute) {
+            $targetPath = $request->getSession()->get('_target_path');
+            $targetRoute = $this->getRoute($targetPath);
+        }
 
         // Security fallbacks
         if(!$targetRoute) {

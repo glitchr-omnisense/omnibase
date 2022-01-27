@@ -26,7 +26,8 @@ final class IdField implements FieldInterface
             ->addCssClass('field-id')
             ->setCustomOption(self::OPTION_MAX_LENGTH, null)
             ->setCustomOption(self::OPTION_IMPERSONATE, true)
-            ->setCustomOption(self::OPTION_ADD_LINK, true);
+            ->setCustomOption(self::OPTION_ADD_LINK, true)
+            ->hideOnForm();
     }
 
     /**

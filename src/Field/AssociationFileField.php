@@ -10,7 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class AssociationFileField extends SelectField implements FieldInterface
+final class AssociationFileField implements FieldInterface
 {
     use FieldTrait;
 
@@ -30,7 +30,6 @@ final class AssociationFileField extends SelectField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/entity')
             ->setFormType(AssociationFileType::class)
-            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->addCssClass('field-entity')
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/association.html.twig')
@@ -42,6 +41,12 @@ final class AssociationFileField extends SelectField implements FieldInterface
     public function setMultipleFiles(bool $multipleFiles = true): self
     {
         $this->setFormTypeOption("multiple", $multipleFiles);
+        return $this;
+    }
+
+    public function allowDelete(bool $allow = true)
+    {
+        $this->setFormTypeOption("allow_delete", $allow);
         return $this;
     }
 

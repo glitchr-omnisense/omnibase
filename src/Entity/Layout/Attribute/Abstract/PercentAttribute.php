@@ -20,10 +20,11 @@ class PercentAttribute extends AbstractAttribute implements IconizeInterface
 
     public static function getType(): string { return PercentType::class; }
     public function getOptions(): array { return []; }
+    public function resolve(mixed $value): mixed { return $value; }
 
-    public function __construct(?string $code = null, ?string $icon = null, int $epsilon = 4, int $scale = 2)
+    public function __construct(string $label, ?string $icon = null, int $epsilon = 4, int $scale = 2)
     {
-        parent::__construct($code, $icon);
+        parent::__construct($label, $icon);
         $this->setPrecision($epsilon);
         $this->setScale($scale);
     }

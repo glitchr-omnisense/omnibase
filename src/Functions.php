@@ -246,7 +246,7 @@ namespace {
 
     function closest(array $array, $position = -1) { return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array)); }
     function is_html(?string $str)  { return $str != strip_tags($str); }
-    function is_stringeable($value) { return (!is_object($value) && !is_array($value)) || method_exists($value, '__toString'); }
+    function is_stringeable($value) { return (!is_object($value) && !is_array($value)) || ((is_string($value) || is_object($value)) && method_exists($value, '__toString')); }
 
     function get_alias(array|object|string|null $arrayOrObjectOrClass): string
     {
@@ -309,8 +309,16 @@ namespace {
     }
 
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
-    function mb_ucfirst(string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding); }
-    function mb_ucwords(string $str, ?string $encoding = null): string { return mb_convert_case($str, MB_CASE_TITLE, $encoding); }
+    function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_strtoupper(mb_substr($string, 0, 1, $encoding)).mb_substr($string, 1, null, $encoding); }
+    function mb_ucwords(string $string, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string 
+    { 
+        $separators = str_split($separators);
+        foreach($separators as $separator)  
+            $string = implode($separator, array_map(fn($s) => mb_ucfirst($s, $encoding), explode($separator, $string)));
+
+        return $string;
+    }
+
     function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".$attributes[$k]."\"", array_keys(array_filter($attributes))))); }
 
     function browser_name()    : string { return get_browser2()["name"]; }
@@ -380,8 +388,10 @@ namespace {
         ];
     }
 
-    function array_clear(array &$arr) { while(array_pop($arr)) {} }
+    function array_clear(array &$array) { while(array_pop($array)) {} }
 
+    function array_prepend(array &$array, ...$value):int { return array_unshift($array, ...array_map(fn($v) => $v !== null && !is_array($v) ? [$v] : $v, $value)); }
+    function array_append(array &$array, ...$value):int { return array_push($array, ...array_map(fn($v) => $v !== null && !is_array($v) ? [$v] : $v, $value)); }
     function array_append_recursive()
     {
         $arrays = func_get_args();
@@ -782,7 +792,7 @@ namespace {
         return $newObject;
     }
 
-    function is_serialized($string): bool { return ($string == 'b:0;' || @unserialize($string) !== false); }
+    function is_serialized($string): bool { return is_string($string) && ($string == 'b:0;' || @unserialize($string) !== false); }
     function is_serializable($object): bool
     {
         try { serialize($object); }

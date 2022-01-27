@@ -6,6 +6,7 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
 use Base\Annotations\AbstractAnnotation;
+use Base\Database\Factory\EntityHydrator;
 use Base\Service\Filesystem;
 use Base\Traits\BaseTrait;
 use Exception;
@@ -39,7 +40,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher, EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, Filesystem $filesystem, RequestStack $requestStack, TokenStorageInterface $tokenStorage)
+    public function __construct(EventDispatcherInterface $eventDispatcher, EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, Filesystem $filesystem, RequestStack $requestStack, TokenStorageInterface $tokenStorage, EntityHydrator $entityHydrator)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -70,6 +71,7 @@ class AnnotationReader
         $this->cachePool['propertyAnnotations'] = $this->cache->getItem($cacheName . ".propertyAnnotations");
 
         $this->entityManager   = $entityManager;
+        $this->entityHydrator   = $entityHydrator;
         $this->requestStack    = $requestStack;
         $this->tokenStorage    = $tokenStorage;
         $this->filesystem      = $filesystem;
@@ -127,6 +129,12 @@ class AnnotationReader
     public function getEntityManager() { return $this->entityManager; }
     public function getRepository($entity) { return $this->entityManager->getRepository($entity); }
 
+    /**
+     * @var EntityHydrator
+     */
+    protected $entityHydrator = null;
+    public function getEntityHydrator() { return $this->entityHydrator; }
+    
     /**
      * @var Filesystem
      */

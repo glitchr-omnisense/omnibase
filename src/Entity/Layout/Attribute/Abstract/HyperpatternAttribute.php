@@ -3,15 +3,11 @@
 namespace Base\Entity\Layout\Attribute\Abstract;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Traits\TranslationTrait;
-use Base\Database\TranslationInterface;
 use Base\Field\Type\ArrayType;
 use Base\Model\IconizeInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\HyperpatternAttributeRepository;
-use Base\Service\LocaleProvider;
 
 /**
  * @ORM\Entity(repositoryClass=HyperpatternAttributeRepository::class)
@@ -23,13 +19,15 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
     public static function getType(): string { return ArrayType::class; }
-    public function getOptions(): array { return ["pattern" => $this->getPattern(), "placeholder" => $this->getPlaceholder()]; }
+    public function resolve(mixed $value): mixed { return unserialize($value); }
+    public function getOptions(): array { return [
+        "pattern" => $this->getPattern(), 
+        "placeholder" => $this->getPlaceholder() ?? []
+    ]; }
 
-    public function __construct(?string $code = "website", ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
+    public function __construct(string $label, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
     {
-        parent::__construct($code, $icon);
-
-        $this->translate(LocaleProvider::getDefaultLocale())->setLabel(ucfirst($code));
+        parent::__construct($label, $icon);
         $this->setPattern($pattern);
     }
 
@@ -44,7 +42,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
         return $this;
     }
 
-    public function getFormattedValue(string $value): mixed { return unserialize($value); }
+
     public function getNumberOfArguments():int { return preg_match_all('/\{[0-9]*\}/i', $this->getPattern()); }
     public function generateUrl(...$replace): string
     {
@@ -54,7 +52,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
 
         $subject = $this->getPattern();
         $url = str_replace($search, $replace, $subject);
-        return preg_replace('\{[0-9]*\}', '', $url); // Remove missing entries
+        return preg_replace('/\{[0-9]*\}/', '', $url); // Remove missing entries
     }
 
     public function generateHtml(...$replace): string

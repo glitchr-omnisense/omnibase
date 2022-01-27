@@ -4,9 +4,9 @@ namespace Base\Controller\Dashboard;
 
 use Base\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Factory\EntityHydrator;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
-use Base\Service\BaseSettings;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
@@ -16,7 +16,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 
-use EasyCorp\Bundle\EasyAdminBundle\Factory\ActionFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -30,21 +29,20 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      */
     protected $classMetadataManipulator;
 
-    /**
-     * @var ActionFactory
-     */
-    protected $actionFactory;
-
-    public function __construct(AdminUrlGenerator $adminUrlGenerator, ActionFactory $actionFactory, ClassMetadataManipulator $classMetadataManipulator, BaseSettings $baseSettings, EntityManagerInterface $entityManager, Extension $extension, RequestStack $requestStack, TranslatorInterface $translator)
+    public function __construct(
+        AdminUrlGenerator $adminUrlGenerator,
+        ClassMetadataManipulator $classMetadataManipulator, 
+        EntityManagerInterface $entityManager, 
+        RequestStack $requestStack,
+        Extension $extension, 
+        TranslatorInterface $translator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
-        $this->actionFactory = $actionFactory;
         $this->entityManager = $entityManager;
         $this->requestStack = $requestStack;
         $this->extension = $extension;
         $this->translator = $translator;
-        $this->baseSettings = $baseSettings;
         $this->adminUrlGenerator = $adminUrlGenerator;
         
         $this->crud = null;
@@ -62,6 +60,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getCrudControllerFqcn($entity): ?string
     {
         $entityFqcn = is_object($entity) ? get_class($entity) : (class_exists($entity) ? $entity : null);
+        if($entityFqcn === null) return null;
+
         if(array_key_exists($entityFqcn, self::$crudController))
             return self::$crudController[$entityFqcn];
         
@@ -79,7 +79,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         }
 
         return (class_exists($appCrudController)  ? $appCrudController :
-               (class_exists($baseCrudController) ? $baseCrudController : null));
+               (class_exists($baseCrudController) ? $baseCrudController : self::getCrudControllerFqcn(get_parent_class($entity))));
     }
 
     public static function getCrudTranslationPrefix()   { return "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".self::getTranslationPrefix("Crud\\"); }
@@ -293,9 +293,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function configureFields(string $pageName, ...$args): iterable
     {
+        array_prepend($args, fn() => yield IdField::new());
+
         $yields = $this->yield($args);
-        $simpleYields      = array_filter($yields, fn($k) => !is_string($k), ARRAY_FILTER_USE_KEY);
-        $associativeYields = array_filter($yields, fn($k) =>  is_string($k), ARRAY_FILTER_USE_KEY);
+        $simpleYields      = array_filter_recursive(array_filter($yields, fn($k) => !is_string($k), ARRAY_FILTER_USE_KEY));
+        $associativeYields = array_filter_recursive(array_filter($yields, fn($k) =>  is_string($k), ARRAY_FILTER_USE_KEY));
 
         foreach ($simpleYields as $__) foreach($__ as $_) foreach($_ as $yield) {
 

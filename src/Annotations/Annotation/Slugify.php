@@ -108,12 +108,8 @@ class Slugify extends AbstractAnnotation
     public function slug($entity, ?string $input = null, string $suffix = ""): string
     {
         // Check if field already set.. get field value or by default class name
-        $className = explode("\\", get_class($entity));
-
-        if(!$input && $this->referenceColumn) 
-            $input = $this->getFieldValue($entity, $this->referenceColumn);
-        if(!$input) 
-            $input = end($className);
+        if(!$input && $this->referenceColumn) $input = $this->getFieldValue($entity, $this->referenceColumn);
+        if(!$input) $input = camel_to_snake(class_basename($entity), "-");
 
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 

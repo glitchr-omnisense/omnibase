@@ -714,11 +714,18 @@ class ServiceEntityParser
             // Cast to array
             if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
 
-            $expr = [];
-            foreach ($fieldValue as $entryID => $entry)
-                $expr[] = $qb->expr()->isInstanceOf($tableColumn, "$entry");
+               $instanceOf = [];
+            $notInstanceOf = [];
+            foreach ($fieldValue as $value) {
 
-            return $qb->expr()->orX(...$expr);
+                if( str_starts_with($value, "^") )
+                    $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^")));
+                else 
+                    $instanceOf[]    = $qb->expr()->isInstanceOf($tableColumn, $value);
+            }
+
+            if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
+            return $qb->expr()->orX(...$instanceOf);
 
         } else {
 

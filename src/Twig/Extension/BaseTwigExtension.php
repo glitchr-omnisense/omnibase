@@ -81,6 +81,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('title',           [$this, 'title'  ], ['is_safe' => ['all']]),
             new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
+            new TwigFunction('get_class',   [$this, 'get_class']),
             new TwigFunction('method_exists',   [$this, 'method_exists']),
             new TwigFunction('static_call',     [$this, 'static_call'  ]),
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
@@ -136,6 +137,7 @@ final class BaseTwigExtension extends AbstractExtension
         ];
     }
 
+    public function get_class($object, $method) { return class_exists($object) ? get_class($object, $method) : null; }
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
     public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) { return preg_split($pattern, $subject, $limit, $flags); }
     

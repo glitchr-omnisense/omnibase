@@ -3,11 +3,13 @@
 namespace Base\Controller\Dashboard\Crud\Layout\Attribute;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;
+use Base\Field\ArrayField;
+use Base\Field\AssociationField;
 use Base\Field\TranslationField;
 
 use Base\Field\SelectField;
-use Base\Field\Type\QuillType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 
 class HyperlinkCrudController extends AbstractCrudController
 {
@@ -17,12 +19,10 @@ class HyperlinkCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function () {
 
-            yield SelectField::new('hyperpattern');
-            yield TranslationField::new()->showOnIndex('title')->setFields([
-                "title" => [],
-                "excerpt" => ["form_type" => TextareaType::class],
-                "content" => ["form_type" => QuillType::class],
-            ]);
+            yield SelectField::new('hyperpattern')->setTextAlign(TextAlign::RIGHT)->setFilter(HyperpatternAttribute::class);
+            
+            yield ArrayField::new('value')->setPatternFieldName("hyperpattern.pattern");
+
         },$args);
     }
 }

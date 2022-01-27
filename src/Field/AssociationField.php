@@ -9,7 +9,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Base\Field\Type\AssociationType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-final class AssociationField extends SelectField implements FieldInterface
+final class AssociationField implements FieldInterface
 {
     use FieldTrait;
 
@@ -33,7 +33,6 @@ final class AssociationField extends SelectField implements FieldInterface
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/association.html.twig')
             ->setTextAlign(TextAlign::CENTER)
-            ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setFormTypeOptionIfNotSet("class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
             ->setCustomOption(self::OPTION_CRUD_CONTROLLER, null)

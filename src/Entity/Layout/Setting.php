@@ -10,7 +10,6 @@ use Base\Repository\Layout\SettingRepository;
 
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Setting implements TranslatableInterface, IconizeInterface
 {
@@ -25,6 +24,17 @@ class Setting implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-tools"]; }
 
+    public function __toString() { return $this->getPath() ?? ""; }
+    public function __construct(string $path, $value = null, $locale = null)
+    {
+        $this->setPath($path);
+
+        if($value !== null)
+            $this->translate($locale)->setValue($value);
+    }
+
+
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -36,22 +46,13 @@ class Setting implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      */
-    protected $name;
+    protected $path;
 
-    public function getName(): string { return $this->name; }
-    public function setName(string $name)
+    public function getPath(): string { return $this->path; }
+    public function setPath(string $path)
     {
-        $this->name = $name;
+        $this->path = $path;
         return $this;
     }
 
-    public function __construct(string $name, $value = null, $locale = null)
-    {
-        $this->setName($name);
-
-        if($value !== null)
-            $this->translate($locale)->setValue($value);
-    }
-
-    public function __toString() { return $this->getName() ?? ""; }
 }

@@ -20,6 +20,7 @@ class TextAttribute extends AbstractAttribute implements IconizeInterface
 
     public static function getType(): string { return TextType::class; }
     public function getOptions(): array { return []; }
+    public function resolve(mixed $value): mixed { return $value; }
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -31,10 +32,5 @@ class TextAttribute extends AbstractAttribute implements IconizeInterface
     {
         $this->length = $length;
         return $this;
-    }
-
-    public function getFormattedValue($value): mixed
-    {
-        return $value;
     }
 }

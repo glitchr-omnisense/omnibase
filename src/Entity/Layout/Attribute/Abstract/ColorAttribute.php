@@ -20,4 +20,6 @@ class ColorAttribute extends AbstractAttribute implements IconizeInterface
 
     public static function getType(): string { return ColorType::class; }
     public function getOptions(): array { return []; }
+    public function resolve(mixed $value): mixed { return $value; }
+
 }
