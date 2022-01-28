@@ -12,7 +12,7 @@ use Base\Field\RoleField;
 use Base\Field\BooleanField;
 
 use Base\Field\EmailField;
-use Base\Field\IdField;
+
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -59,7 +59,6 @@ class UserCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function() {
 
-            yield IdField::new('id')->hideOnDetail();
             yield AvatarField::new('avatar')->hideOnDetail();
 
             yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);

@@ -56,7 +56,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'class'        => null,
             'recursive'    => false,
             "multiple"     => null,
-            'filter_code'  => null, 
+            'filter'       => null, 
+            'filter_code'  => null,
             'sortable'     => null, 
 
             'allow_add'    => true,
@@ -96,7 +97,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form->add("choice", SelectType::class, [
                 "class"               => $options["class"],
                 "autocomplete_fields" => ["code" => $options["filter_code"]], 
-
+                "choice_filter"       => $options["filter"],
                 "multiple"            => $options["multiple"],
                 
                 "sortable"            => $options["sortable"],

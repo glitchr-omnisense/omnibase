@@ -14,7 +14,20 @@ final class AssociationField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_RENDER_FORMAT   = "renderFormat";
+    public const OPTION_ICONS   = 'icons';
+    public const OPTION_CLASS   = 'class';
+
     public const OPTION_CRUD_CONTROLLER = 'crudControllerFqcn';
+    public const OPTION_DISPLAY_LIMIT = 'displayLimit';
+    public const OPTION_ICON_ALIGN    = 'iconAlign';
+
+    public const OPTION_SHOW_FIRST      = 'showFirst';
+    public const OPTION_SHOW            = 'show';
+
+    public const NO_SHOW        = 0;
+    public const SHOW_NAME_ONLY = 1;
+    public const SHOW_ICON_ONLY = 2;
+    public const SHOW_ALL       = 3;
 
     public const OPTION_ALLOW_ADD = 'allowAdd';
     public const OPTION_ALLOW_DELETE = 'allowDelete';
@@ -42,18 +55,6 @@ final class AssociationField implements FieldInterface
 
     public function justDisplay(): self { return $this->allowDelete(false)->allowAdd(false)->autoload(false); }
 
-    public function allowDelete(bool $allowDelete = true): self
-    {
-        $this->setFormTypeOption("allow_delete", $allowDelete);
-        return $this;
-    }
-
-    public function allowAdd(bool $allowAdd = true): self
-    {
-        $this->setFormTypeOption("allow_add", $allowAdd);
-        return $this;
-    }
-
     public function autoload($autoload = true): self
     {
         $this->setFormTypeOption("autoload", $autoload);
@@ -65,4 +66,84 @@ final class AssociationField implements FieldInterface
         $this->setFormTypeOption("fields", $fields);
         return $this;
     }
+
+    public function allowAdd(bool $allowAdd = true): self
+    {
+        $this->setFormTypeOption("allow_add", $allowAdd);
+        return $this;
+    }
+
+    public function setTextAlign(string $textAlign)
+    {
+        $this->setIconAlign($textAlign);
+        $this->dto->setTextAlign($textAlign);
+        return $this;
+    }
+
+    public function setIconAlign(string $iconAlign)
+    {
+        $this->setCustomOption(self::OPTION_ICON_ALIGN, $iconAlign);
+        return $this;
+    }
+
+    public function allowMultipleChoices(bool $allow = true)
+    {
+        $this->setFormTypeOptionIfNotSet("multiple", $allow);
+        return $this;
+    }
+
+    public function allowDelete(bool $allow = true)
+    {
+        $this->setFormTypeOption("allow_delete", $allow);
+        return $this;
+    }
+
+    public function turnHorizontal(bool $horizontal) { return $this->turnVertical(!$horizontal); }
+    public function turnVertical(bool $vertical = true)
+    {
+        return $this->setFormTypeOption("vertical", $vertical);
+    }
+
+    public function setDisplayLimit(int $limit = 2)
+    {
+        $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
+        return $this;
+    }
+
+    public function setIcons(array $icons)
+    {
+        $this->setCustomOption(self::OPTION_ICONS, $icons);
+        return $this;
+    }
+
+    public function setClass(?string $class = null)
+    {
+        $this->setFormTypeOption(self::OPTION_CLASS, $class);
+        return $this;
+    }
+
+    public function showFirst(int $show = self::SHOW_ALL)
+    {
+        $this->setCustomOption(self::OPTION_SHOW_FIRST, $show);
+        return $this;
+    }
+
+    public function show(int $show = self::SHOW_ALL)
+    {
+        $this->setCustomOption(self::OPTION_SHOW, $show);
+        return $this;
+    }
+
+    public function renderAsCount()
+    {
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
+        return $this;
+    }
+
+    public function renderAsText()
+    {
+        $this->setCustomOption(self::OPTION_RENDER_FORMAT, "text");
+        return $this;
+    }
+
 }

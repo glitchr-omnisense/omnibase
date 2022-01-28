@@ -3,16 +3,13 @@
 namespace Base\Field\Type;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -44,11 +41,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     
     public function getBlockPrefix(): string { return 'associationfile'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->entityHydrator = $entityHydrator;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -58,7 +55,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'form_type' => FileType::class,
 
             'entity_file' => null,
-            'entity_values'     => [],
+            'entity_data'     => [],
 
             "multiple"     => null,
             'allow_delete' => true,
@@ -171,8 +168,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                 if($file instanceof File) {
 
-                    $entityValues = is_callable($options["entity_values"]) ? null : $options["entity_values"];
-                    $entity = self::getSerializer()->deserialize(json_encode($entityValues ?? []), $options["data_class"], 'json');
+                    $entityData = is_callable($options["entity_data"]) ? null : $options["entity_data"];
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityData ?? []);
 
                     $fieldName = $classMetadata->getFieldName($fieldName);
                     $classMetadata->setFieldValue($entity, $fieldName, $file);
@@ -212,7 +209,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             } else $viewData = $data;
 
             foreach($viewData as $key => $data)
-                $viewData[$key] = is_callable($options["entity_values"]) ? $options["entity_values"]($data) : $data;
+                $viewData[$key] = is_callable($options["entity_data"]) ? $options["entity_data"]($data) : $data;
 
         } else $viewData = $data->first();
     }

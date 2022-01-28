@@ -294,26 +294,28 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function configureFields(string $pageName, ...$args): iterable
     {
         array_prepend($args, fn() => yield IdField::new());
-
+        
         $yields = $this->yield($args);
-        $simpleYields      = array_filter_recursive(array_filter($yields, fn($k) => !is_string($k), ARRAY_FILTER_USE_KEY));
-        $associativeYields = array_filter_recursive(array_filter($yields, fn($k) =>  is_string($k), ARRAY_FILTER_USE_KEY));
+        $simpleYields      = array_filter_recursive(array_filter($yields, fn($k) => preg_match("/^[0-9.]+$/", $k), ARRAY_FILTER_USE_KEY));
+        $associativeYields = array_diff_key($yields, $simpleYields);
 
-        foreach ($simpleYields as $__) foreach($__ as $_) foreach($_ as $yield) {
+        $simpleYields      = array_values($simpleYields);
+        foreach ($simpleYields as $_) foreach($_ as $yield) {
 
             yield $yield;
             
             $property = $yield->getAsDto()->getProperty();
-            if(array_key_exists($property, $associativeYields)) {
+            foreach($associativeYields as $path => $_) {
 
-                foreach($associativeYields[$property] as $_) foreach($_ as $yield)
-                    yield $yield;
+                if($property != preg_replace("/^[0-9.]+/", "",$path))
+                    continue;
 
-                unset($associativeYields[$property]);
+                foreach($_ as $yield) yield $yield;
+                unset($associativeYields[$path]);
             }
         }
-
-        foreach($associativeYields as $__) foreach($__ as $_) foreach($_ as $yield) 
+        
+        foreach($associativeYields as $_) foreach($_ as $yield) 
             yield $yield;
     }
 
@@ -324,7 +326,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 array_flatten(array_filter_recursive($args,
                     fn($v, $k) => ($field === null || $k == $field) && !empty($v),
                     ARRAY_FILTER_USE_BOTH)
-                , ARRAY_FLATTEN_PRESERVE_DUPLICATES)
+                , ARRAY_FLATTEN_PRESERVE_KEYS)
             );
 
         $yields = [];

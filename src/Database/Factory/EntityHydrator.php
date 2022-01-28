@@ -112,10 +112,6 @@ class EntityHydrator
         $reflectionObject = new \ReflectionObject($entity);
 
         $metaData = $this->entityManager->getClassMetadata(get_class($entity));
-        
-        $platform = $this->entityManager->getConnection()
-                                        ->getDatabasePlatform();
-
         $skipFields = $this->hydrateId ? [] : $metaData->identifier;
 
         foreach ($metaData->fieldNames as $fieldName => $_) {
@@ -124,14 +120,6 @@ class EntityHydrator
 
             if (array_key_exists($dataKey, $data) && !in_array($fieldName, $skipFields, true)) {
                 $value = $data[$dataKey];
-
-                if (array_key_exists('type', $metaData->fieldMappings[$fieldName])) {
-                    $fieldType = $metaData->fieldMappings[$fieldName]['type'];
-
-                    $type = Type::getType($fieldType);
-                    if($fieldType != "array") 
-                        $value = $type->convertToPHPValue($value, $platform);
-                }
 
                 $entity = $this->setProperty($entity, $fieldName, $value, $reflectionObject);
             }

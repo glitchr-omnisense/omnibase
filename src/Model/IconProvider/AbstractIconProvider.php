@@ -57,9 +57,10 @@ abstract class AbstractIconProvider implements IconProviderInterface
 
     public function iconify(string $icon, array $attributes = []): string
     {
-        $class = $attributes["class"] ?? "";
-        $class = trim($class." ".$icon);
-        if($attributes["class"] ?? false) unset($attributes["class"]);
+        $options = $this->getOptions();
+
+        $class = implode(" ", [$attributes["class"] ?? null, $options["class"] ?? null, $icon]);
+        array_keys_remove($attributes, "class");
 
         return "<i ".html_attributes($attributes)." class='".$class."'></i>";
     }

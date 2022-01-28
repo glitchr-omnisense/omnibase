@@ -101,6 +101,9 @@ layout:
       array_attribute:
         singular: "array"
         plural: "arrays"
+      image_attribute:
+        singular: "image"
+        plural: "images"
 
   setting:
     singular: "setting"

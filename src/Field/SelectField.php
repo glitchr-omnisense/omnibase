@@ -11,14 +11,16 @@ class SelectField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
+    public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
+
     public const OPTION_AUTOCOMPLETE = 'autocomplete';
+    public const OPTION_DEFAULT_CHOICE = "default_choice";
+    public const OPTION_CLASS          = 'class';
     
     public const OPTION_CHOICES = 'choices';
     public const OPTION_ICONS   = 'icons';
     public const OPTION_FILTER  = 'choice_filter';
-
-    public const OPTION_DEFAULT_CHOICE = "default_choice";
-    public const OPTION_CLASS          = 'class';
 
     public const OPTION_DISPLAY_LIMIT = 'displayLimit';
     public const OPTION_ICON_ALIGN    = 'iconAlign';
@@ -26,9 +28,6 @@ class SelectField implements FieldInterface
     public const OPTION_RENDER_FORMAT   = "renderFormat";
     public const OPTION_SHOW_FIRST      = 'showFirst';
     public const OPTION_SHOW            = 'show';
-
-    public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
-    public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
 
     public const NO_SHOW        = 0;
     public const SHOW_NAME_ONLY = 1;
@@ -153,7 +152,7 @@ class SelectField implements FieldInterface
         $this->setCustomOption(self::OPTION_DEFAULT_CHOICE, $defaultChoices);
         return $this;
     }
-    
+
     public function withConfirmation(bool $onCheck = true, bool $onUncheck = true): self
     {
         $this->setCustomOption(self::OPTION_CONFIRMATION_MODAL_ON_CHECK, $onCheck);

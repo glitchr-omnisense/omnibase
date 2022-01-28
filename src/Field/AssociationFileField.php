@@ -15,6 +15,7 @@ final class AssociationFileField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_SHOWFIRST = "showFirst";
+    public const OPTION_ICONS   = 'icons';
 
     public const OPTION_RENDER_FORMAT   = "renderFormat";
     public const OPTION_CRUD_CONTROLLER = 'crudControllerFqcn';
@@ -22,6 +23,17 @@ final class AssociationFileField implements FieldInterface
     public const OPTION_RELATED_URL = 'relatedUrl';
     public const OPTION_DOCTRINE_ASSOCIATION_TYPE = 'associationType';
     public const OPTION_CLASS          = 'class';
+
+    public const OPTION_DISPLAY_LIMIT = 'displayLimit';
+    public const OPTION_ICON_ALIGN    = 'iconAlign';
+
+    public const OPTION_SHOW_FIRST      = 'showFirst';
+    public const OPTION_SHOW            = 'show';
+
+    public const NO_SHOW        = 0;
+    public const SHOW_NAME_ONLY = 1;
+    public const SHOW_ICON_ONLY = 2;
+    public const SHOW_ALL       = 3;
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -36,18 +48,6 @@ final class AssociationFileField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("class", null)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
-    }
-
-    public function setMultipleFiles(bool $multipleFiles = true): self
-    {
-        $this->setFormTypeOption("multiple", $multipleFiles);
-        return $this;
-    }
-
-    public function allowDelete(bool $allow = true)
-    {
-        $this->setFormTypeOption("allow_delete", $allow);
-        return $this;
     }
 
     public function setClass(?string $class = null)
@@ -90,9 +90,59 @@ final class AssociationFileField implements FieldInterface
         return $this;
     }
 
-    public function setFieldValues(array|callable $fieldValues): self
+    public function setFieldData(array|callable $data): self
     {
-        $this->setFormTypeOption("entity_values", $fieldValues);
+        $this->setFormTypeOption("entity_data", $data);
         return $this;
     }
+
+    public function setTextAlign(string $textAlign)
+    {
+        $this->setIconAlign($textAlign);
+        $this->dto->setTextAlign($textAlign);
+        return $this;
+    }
+
+    public function setIconAlign(string $iconAlign)
+    {
+        $this->setCustomOption(self::OPTION_ICON_ALIGN, $iconAlign);
+        return $this;
+    }
+
+    public function allowMultipleChoices(bool $allow = true)
+    {
+        $this->setFormTypeOptionIfNotSet("multiple", $allow);
+        return $this;
+    }
+
+    public function allowDelete(bool $allow = true)
+    {
+        $this->setFormTypeOption("allow_delete", $allow);
+        return $this;
+    }
+
+    public function setDisplayLimit(int $limit = 2)
+    {
+        $this->setCustomOption(self::OPTION_DISPLAY_LIMIT, $limit);
+        return $this;
+    }
+
+    public function setIcons(array $icons)
+    {
+        $this->setCustomOption(self::OPTION_ICONS, $icons);
+        return $this;
+    }
+
+    public function showFirst(int $show = self::SHOW_ALL)
+    {
+        $this->setCustomOption(self::OPTION_SHOW_FIRST, $show);
+        return $this;
+    }
+
+    public function show(int $show = self::SHOW_ALL)
+    {
+        $this->setCustomOption(self::OPTION_SHOW, $show);
+        return $this;
+    }
+
 }

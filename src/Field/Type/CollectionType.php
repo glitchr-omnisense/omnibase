@@ -7,6 +7,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
@@ -75,13 +77,24 @@ class CollectionType extends AbstractType
             $builder->setAttribute('prototype', $prototype->getForm());
         }
         
+        // Resize collection according to length option
+        if($options["length"] > 0) {
+        
+            $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
+
+                $data = $event->getData() ?? [];
+
+                $data = array_pad($data, $options["length"], null);
+                $event->setData($data);
+            });
+        }
+
         $builder->addEventSubscriber(new ResizeFormListener(
             $options['entry_type'],
             $options['entry_options'],
             $options['allow_add'],
             $options['allow_delete'],
-            $options['delete_empty'],
-            $options['length']
+            $options['delete_empty']
         ));
     }
 

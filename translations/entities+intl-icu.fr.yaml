@@ -106,6 +106,9 @@ layout:
       array_attribute:
         singular: "groupe"
         plural: "groupes"
+      image_attribute:
+        singular: "image"
+        plural: "images"
 
   setting:
     singular: "paramètre"

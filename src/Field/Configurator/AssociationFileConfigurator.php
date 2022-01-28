@@ -4,14 +4,9 @@ namespace Base\Field\Configurator;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Field\AssociationField;
+
 use Base\Field\AssociationFileField;
-use Base\Field\SelectField;
-use Base\Field\Type\SelectType;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -20,7 +15,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AssociationFileConfigurator implements FieldConfiguratorInterface
 {

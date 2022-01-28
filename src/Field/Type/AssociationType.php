@@ -64,7 +64,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'fields' => [],
             'only_fields' => [],
             'excluded_fields' => [],
-            
+
             'recursive' => false,
             "multiple" => false,
             'inline' => false,
