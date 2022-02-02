@@ -32,9 +32,8 @@ class BaseSettings
     public function url($url, $packages = null) { return $this->packages->getUrl($url, $packages); }
     public function domain     (int $level = 0, ?string $locale = null) : ?string
     {
-        $domain = $this->getScalar("base.settings.domain",       $locale);
-        while($level-- > 0)
-            $domain = preg_replace("/^(\w+)./i", "", $domain);
+        $domain = $this->getScalar("base.settings.domain", $locale);
+        while($level-- > 0) $domain = preg_replace("/^(\w+)./i", "", $domain);
 
         return $domain;
     }
@@ -50,8 +49,8 @@ class BaseSettings
         return $birthdate instanceof DateTime ? $birthdate : new DateTime($birthdate);
     }
 
-    public function age(?string $locale = null) : string {
-
+    public function age(?string $locale = null) : string
+    {
         $birthdate = $this->birthdate($locale)->format("Y");
         return (date("Y") <= $birthdate) ? date("Y") : date("$birthdate-Y");
     }
