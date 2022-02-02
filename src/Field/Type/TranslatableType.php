@@ -17,8 +17,8 @@ class TranslatableType extends AbstractType
             'translation_field_name' => "translations",
             'translation_class' => null,
 
+            'autoload' => true,
             'fields' => [],
-            'only_fields' => [],
             'excluded_fields' => [],
 
             "single_locale" => null,
@@ -38,8 +38,8 @@ class TranslatableType extends AbstractType
 
         if($options["fields"])
             $translationOptions['fields'] = $options["fields"];
-        if($options["only_fields"])
-            $translationOptions['only_fields'] = $options["only_fields"];
+        if($options["autoload"])
+            $translationOptions['autoload'] = $options["autoload"];
         if($options["excluded_fields"])
             $translationOptions['excluded_fields'] = $options["excluded_fields"];
 

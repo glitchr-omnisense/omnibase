@@ -43,7 +43,6 @@ class AnnotationSubscriber implements EventSubscriber {
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
         
         $annotations = $this->annotationReader->getAnnotations($className);
-
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {
 

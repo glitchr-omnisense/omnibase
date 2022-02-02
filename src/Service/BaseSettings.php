@@ -5,7 +5,6 @@ namespace Base\Service;
 use Base\Entity\Layout\Setting;
 use Base\Traits\BaseSettingsTrait;
 use Symfony\Component\Asset\Packages;
-use Symfony\Contracts\Cache\CacheInterface;
 
 use Doctrine\ORM\EntityManager;
 
@@ -15,13 +14,12 @@ class BaseSettings
 {
     use BaseSettingsTrait;
 
-    public function __construct(EntityManager $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache)
+    public function __construct(EntityManager $entityManager, LocaleProviderInterface $localeProvider, Packages $packages)
     {
         $this->entityManager     = $entityManager;
         $this->settingRepository = $entityManager->getRepository(Setting::class);
 
         $this->packages          = $packages;
-        $this->cache             = $cache;
         $this->localeProvider    = $localeProvider;
     }
 

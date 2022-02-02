@@ -89,7 +89,7 @@ class FontAwesome extends AbstractIconProvider
     public function getIdentifier(string $name)
     {
         return array_transforms(
-            fn($k, $v, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null, 
+            fn($k, $v, $callback, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null, 
             explode(" ", $name)
         )[0];
     }

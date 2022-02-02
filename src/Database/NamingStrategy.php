@@ -2,21 +2,12 @@
 
 namespace Base\Database;
 
-use Base\Service\BaseService;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\Table;
 
-/**
- * Custom Naming Strategy
- *
- * @author Marco Meyer <marco.meyerconde@gmail.com>
- */
 class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 {
     public const TABLE_NAME_SIZE = 64;
-
-    public static function camelToSnakeCase($input): string { return mb_strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input)); }
-    public static function snakeToCamelCase($input): string { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace('_', ' ', $input)))); }
 
     /**
      * {@inheritdoc}
@@ -63,10 +54,10 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
             }
 
             $tableName = str_replace("\\", "", $tableName);
-            $tableName = explode("_",self::camelToSnakeCase($tableName));
+            $tableName = explode("_", camel_to_snake($tableName));
             $tableName = array_unique($tableName);
 
-            $tableName = self::snakeToCamelCase(implode("_", $tableName));
+            $tableName = snake_to_camel(implode("_", $tableName));
             $tableName = lcfirst($tableName);
             $tableName = preg_replace('/Translation$/', 'Intl', $tableName);
         }

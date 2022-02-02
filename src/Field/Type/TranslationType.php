@@ -67,10 +67,10 @@ class TranslationType extends AbstractType implements DataMapperInterface
             'by_reference' => false,
             'empty_data' => fn(FormInterface $form) => new ArrayCollection,
             
+            'autoload' => true,
             'fields' => [],
-            'only_fields' => [],
             'excluded_fields' => [],
-
+            
             'translation_class' => null,
             'multiple' => false
         ]);
@@ -79,10 +79,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
            return array_intersect($requiredLocales, $options['available_locales']);
         });
 
-        $resolver->setNormalizer('only_fields', function (Options $options, $fields) {
-            if(is_associative($fields)) return array_keys($fields);
-            return $fields;
-        });
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -99,17 +95,17 @@ class TranslationType extends AbstractType implements DataMapperInterface
             $dataLocale = $data instanceof Collection ? $data->getKeys() : [$options["locale"]];
 
             $translationClass = $this->getTranslationClass($form);
-            $fields = $this->getTranslationFields($translationClass, $options);
+            $translationFields = $this->getTranslationFields($translationClass, $options);
             
             foreach ($locales as $key => $locale) {
 
-                if (!isset($fields[$locale]))
+                if (!isset($translationFields[$locale]))
                     continue;
 
                 $entityOptions = [
-                    'fields' => $fields[$locale],
-                    'only_fields' => $options["only_fields"],
                     'class' => $translationClass,
+                    'autoload' => $options["autoload"],
+                    'fields' => $translationFields[$locale],
                     'excluded_fields' => $options['excluded_fields'],
                 ];
 
@@ -189,31 +185,28 @@ class TranslationType extends AbstractType implements DataMapperInterface
     public function getTranslationFields(string $translationClass, array $options): array
     {
         // Check excluded fields exists.. (for dev sanity)
-        $metadata = $this->classMetadataManipulator->getClassMetadata($translationClass);
+        $classMetadata = $this->classMetadataManipulator->getClassMetadata($translationClass);
         $excludedFields = $options["excluded_fields"] ?? [];
         foreach($excludedFields as $field) {
 
-            if(!$metadata->hasField($field) && !$metadata->hasAssociation($field))
+            if(!property_exists($classMetadata->getName(),$field))
                 throw new \Exception("Field \"".$field."\" requested for exclusion doesn't exist in \"".$translationClass."\"");
         }
 
         // Prepare raw fields
-        $rawFields = $this->classMetadataManipulator->getFields($translationClass, $options["fields"], $options["excluded_fields"]);
-        if(( $onlyFields = $options["only_fields"] )) {
-
-            foreach($rawFields as $fieldName => $field)
-                if(!in_array($fieldName, $onlyFields)) unset($rawFields[$fieldName]);
-        }
+        $fields = $this->classMetadataManipulator->getFields($translationClass, $options["fields"], $options["excluded_fields"]);
+        if(!$options["autoload"])
+            $fields = array_filter($fields, fn($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
 
         // Compute fields including locale information
-        $fields = [];
-        foreach ($rawFields as $fieldName => $fieldConfig) {
+        $translationFields = [];
+        foreach ($fields as $fieldName => $fieldConfig) {
 
             // Simplest case: General options for all locales
             if (!isset($fieldConfig['locale_options'])) {
 
                 foreach ($options['available_locales'] as $locale) 
-                    $fields[$locale][$fieldName] = $fieldConfig;
+                    $translationFields[$locale][$fieldName] = $fieldConfig;
 
                 continue;
             }
@@ -226,11 +219,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
                 $localeFieldOptions = $localesFieldOptions[$locale] ?? [];
                 if (!isset($localeFieldOptions['display']) || (true === $localeFieldOptions['display']))
-                    $fields[$locale][$fieldName] = $localeFieldOptions + $fieldConfig;
+                    $translationFields[$locale][$fieldName] = $localeFieldOptions + $fieldConfig;
             }
         }
 
-        return $fields;
+        return $translationFields;
     }
 
     private function getTranslationClass(FormInterface $form): string

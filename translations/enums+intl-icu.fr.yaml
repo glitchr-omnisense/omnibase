@@ -38,35 +38,39 @@ thread_state:
   singular: "statut"
   plural: "statut"
 
-  state_published: 
-    singular: "publié"
-    plural: "publiés"
   state_draft: 
     singular: "brouillon"
     plural: "brouillons"
   state_future: 
     singular: "planifié"
     plural: "planifiés"
-  state_secret: 
+  state_publish: 
+    singular: "publié"
+    plural: "publiés"
+  state_publish_secret: 
     singular: "invisible"
     plural: "invisibles"
-  state_archived: 
-    singular: "archive"
-    plural: "archives"
-  
-  state_approved: 
+  state_publish_archive: 
+    singular: "archivé"
+    plural: "archivés"
+  state_publish_password: 
+    singular: "protégé"
+    plural: "protégés"
+
+thread_workflow:
+  workflow_approved: 
     singular: "approuvé"
     plural: "approuvés"
-  state_pending: 
+  workflow_pending: 
     singular: "en attente"
     plural: "en attente"
-  state_rejected: 
+  workflow_rejected: 
     singular: "refusé"
     plural: "refusés"
-  state_suspended: 
+  workflow_suspended: 
     singular: "suspendu"
     plural: "suspendus"
-  state_deleted: 
+  workflow_deleted: 
     singular: "supprimé"
     plural: "supprimés"
     

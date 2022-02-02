@@ -2,10 +2,12 @@
 
 namespace Base\Service;
 
+use Base\BaseBundle;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Repository\Layout\Widget\SlotRepository as WidgetSlotRepository;
 use Base\Repository\Layout\WidgetRepository;
+use Symfony\Component\Uid\Uuid;
 
 class WidgetProvider implements WidgetProviderInterface
 {
@@ -15,30 +17,19 @@ class WidgetProvider implements WidgetProviderInterface
         $this->widgetSlotRepository = $widgetSlotRepository;
     }
 
-    protected $uuidByPath = [];
-    public function getUuidByPath(string $path) { return $this->uuidByPath[$path] ?? null; }
-    
     protected $widgets = [];
     public function get(string $uuid): ?Widget { return $this->getWidget($uuid); }
-    public function getWidget(string $uuid): ?Widget
-    {
-        $this->widgets[$uuid] = $this->widgets[$uuid] ?? $this->widgetRepository->findOneByUuid($uuid);
-        return $this->widgets[$uuid];
+    public function getWidget(string $uuid, bool $useCache = BaseBundle::CACHE): ?Widget 
+    { 
+        $fn = $useCache && !is_cli() ? "cacheOneByPath" : "findOneByPath";
+        return $this->widgetRepository->$fn($uuid);
     }
 
     public function getSlot(string $path): ?Slot { return $this->getWidgetSlot($path); }
-    public function getWidgetSlot(string $path): ?Slot
+    public function getWidgetSlot(string $path, bool $useCache = BaseBundle::CACHE): ?Slot
     {
-        $slot = null;
-        if($this->uuidByPath[$path] ?? null)
-            $slot = $this->widgets[$this->uuidByPath[$path]] ?? null;
-
-        $slot = $slot ?? $this->widgetSlotRepository->cacheOneByPath($path);
-        $this->uuidByPath[$path] = $slot ? $slot->getUuid() : null;
-        $uuid = $this->uuidByPath[$path] ?? null;
-
-        $this->widgets[$uuid] = $slot;
-        return $this->widgets[$uuid];
+        $fn = $useCache && !is_cli() ? "cacheOneByPath" : "findOneByPath";
+        return $this->widgetSlotRepository->$fn($path);
     }
 
 }

@@ -1,28 +1,16 @@
 <?php
 
-/*
- * This file is part of the Symfony package.
- *
- * (c) Fabien Potencier <fabien@symfony.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace Base\Validator\Constraints;
 
 use Base\Validator\ConstraintEntity;
 
 /**
- * Constraint for the Unique Entity validator.
+ * Constraint for the StringCase Entity validator.
  *
  * @Annotation
  * @Target({"CLASS", "ANNOTATION"})
  *
- * @author Benjamin Eberlei <kontakt@beberlei.de>
- * @author Marco Meyer <marco.meyerconde@gmail.com>
  */
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
 class UniqueEntity extends ConstraintEntity
 {
     public const NOT_UNIQUE_ERROR = '23bd9dbf-6b9b-41cd-a99e-4844bcf3077f';

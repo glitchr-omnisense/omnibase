@@ -5,7 +5,6 @@ namespace Base\Annotations\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -86,13 +85,13 @@ class GenerateUuid extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if ($this->getFieldValue($entity, $property) === null)
-            $this->setFieldValue($entity, $property, $this->getUuid($entity));
+        if ($this->getPropertyValue($entity, $property) === null)
+            $this->setPropertyValue($entity, $property, $this->getUuid($entity));
     }
 
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if ($this->getFieldValue($entity, $property) === null)
-            $this->setFieldValue($entity, $property, $this->getUuid($entity));
+        if ($this->getPropertyValue($entity, $property) === null)
+            $this->setPropertyValue($entity, $property, $this->getUuid($entity));
     }
 }

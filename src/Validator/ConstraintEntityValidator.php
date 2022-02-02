@@ -2,6 +2,7 @@
 
 namespace Base\Validator;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 
@@ -79,7 +80,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $uow->getEntityChangeSet($entity);
     }
 
-    public function getClassMetadata($entityName)
+    public function getClassMetadata($entityName): ClassMetadata
     {
         if (is_object($entityName)) $class = get_class($entityName);
         else $class = $entityName;

@@ -10,7 +10,6 @@ use Base\Validator\ConstraintEntity;
  * @Annotation
  * @Target({"CLASS", "ANNOTATION"})
  *
- * @author Marco Meyer <marco.meyerconde@gmail.com>
  */
 class StringCaseEntity extends ConstraintEntity
 {

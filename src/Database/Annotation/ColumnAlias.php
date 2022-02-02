@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -13,20 +14,19 @@ use Exception;
  * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
  *   @Attribute("column",     type = "string"),
- *   @Attribute("inversedBy", type = "string"),
- *   @Attribute("mappedBy",   type = "string"),
  *   @Attribute("alias" ,     type = "string")
  * })
  */
 
 class ColumnAlias extends AbstractAnnotation
 {
+    public $alias;
+    public $column;
+
     public function __construct(array $data)
     {
-        $this->column = $data["column"] ?? "";
-        $this->inversedBy = $data["inversedBy"] ?? "";
-        $this->mappedBy = $data["mappedBy"] ?? "";
         $this->alias  = $data["alias"]  ?? "";
+        $this->column = $data["column"] ?? "";
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null):bool
@@ -43,26 +43,54 @@ class ColumnAlias extends AbstractAnnotation
             throw new Exception("Invalid alias property \"$alias\" provided in annotation of class ".$classMetadata->getName());
         else if(!property_exists($classMetadata->getName(), $this->column)) 
             throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
-        else if($classMetadata->hasAssociation($alias) /*&& !isset($classMetadata->associationMappings[$alias]["alias"])*/)
+        else if($classMetadata->hasAssociation($alias))
             throw new Exception("Alias variable \"$alias\" cannot be used, association mapping already found.");
-        else if($classMetadata->hasField($alias) /*&& !isset($classMetadata->fieldMappings[$alias]["alias"])*/)
+        else if($classMetadata->hasField($alias))
             throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
 
         $classMetadata->fieldNames[$alias] = $this->column;
     }
 
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function bind($entity, $column, $alias)
     {
-        $alias  = $property ?? $this->alias;
-        $column = $this->column;
-
         $fn = function() use ($alias, $column) {
 
-            $this->$alias =& $this->$column; // Bind variable together..
+            $aliasValue  = $this->$alias;
+
+            $columnValue = $this->$column;
+            if($aliasValue instanceof ArrayCollection && $columnValue instanceof ArrayCollection)
+                $aliasValue = new ArrayCollection($columnValue->toArray() + $aliasValue->toArray()); 
+            else if($columnValue !== null)
+                $aliasValue = $columnValue;
+
+            $this->$alias = &$this->$column; // Bind variable together..
+            $this->$alias = $aliasValue;
+
             return $this;
         };
 
         $fnClosure = \Closure::bind($fn, $entity, get_class($entity));
         $fnClosure();
+    }
+
+    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    {
+        $column = $this->column;
+        $alias  = $property ?? $this->alias;
+        $this->bind($entity, $column, $alias);
+    }
+
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $column = $this->column;
+        $alias  = $property ?? $this->alias;
+        $this->bind($entity, $column, $alias);
+    }
+
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $column = $this->column;
+        $alias  = $property ?? $this->alias;
+        $this->bind($entity, $column, $alias);
     }
 }

@@ -2,18 +2,13 @@
 
 namespace Base\Annotations\Annotation;
 
-use App\Entity\Blog\Comment;
-use App\Entity\Marketplace\Product\Extra\Wallpaper;
-use App\Entity\Marketplace\Product\Extra\WallpaperSample;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Exception;
-use ReflectionProperty;
+
 use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
@@ -93,12 +88,12 @@ class Slugify extends AbstractAnnotation
             $propertyDeclarer2 = property_declarer($entity2, $property);
             if($propertyDeclarer != $propertyDeclarer2 && !is_a($propertyDeclarer, $propertyDeclarer2)) continue;
 
-            $invalidSlugs[] = $this->getFieldValue($entity2, $property);
+            $invalidSlugs[] = $this->getPropertyValue($entity2, $property);
         }
 
         $firstEntity = begin($candidateEntities);
         if($firstEntity === $entity) {
-            $firstSlug = $this->getFieldValue($entity, $property);
+            $firstSlug = $this->getPropertyValue($entity, $property);
             $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
@@ -108,7 +103,7 @@ class Slugify extends AbstractAnnotation
     public function slug($entity, ?string $input = null, string $suffix = ""): string
     {
         // Check if field already set.. get field value or by default class name
-        if(!$input && $this->referenceColumn) $input = $this->getFieldValue($entity, $this->referenceColumn);
+        if(!$input && $this->referenceColumn) $input = $this->getPropertyValue($entity, $this->referenceColumn);
         if(!$input) $input = camel_to_snake(class_basename($entity), "-");
 
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
@@ -138,9 +133,9 @@ class Slugify extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $currentSlug = $this->getFieldValue($entity, $property);
+        $currentSlug = $this->getPropertyValue($entity, $property);
         $slug = $this->getSlug($entity, $property, $currentSlug);
-        $this->setFieldValue($entity, $property, $slug);
+        $this->setPropertyValue($entity, $property, $slug);
     }
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
@@ -150,9 +145,9 @@ class Slugify extends AbstractAnnotation
         $classMetadata = $this->getClassMetadata(get_class($entity));
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
-        $currentSlug = $this->getFieldValue($entity, $property);
+        $currentSlug = $this->getPropertyValue($entity, $property);
         $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
-        $this->setFieldValue($entity, $property, $slug);
+        $this->setPropertyValue($entity, $property, $slug);
 
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }

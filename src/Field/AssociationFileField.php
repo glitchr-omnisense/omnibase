@@ -96,6 +96,12 @@ final class AssociationFileField implements FieldInterface
         return $this;
     }
 
+    public function setFieldInheritance(bool $b): self
+    {
+        $this->setFormTypeOption("entity_inherit", $b);
+        return $this;
+    }
+
     public function setTextAlign(string $textAlign)
     {
         $this->setIconAlign($textAlign);

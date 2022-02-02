@@ -9,7 +9,7 @@ use Base\Form\FormFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -22,10 +22,6 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class AssociationFileType extends AbstractType implements DataMapperInterface
 {
@@ -46,6 +42,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator = $entityHydrator;
+
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -54,8 +52,9 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'class' => null,
             'form_type' => FileType::class,
 
-            'entity_file' => null,
-            'entity_data'     => [],
+            'entity_file'    => null,
+            'entity_inherit' => false,
+            'entity_data'    => [],
 
             "multiple"     => null,
             'allow_delete' => true,
@@ -147,8 +146,9 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
-        $options = $parentForm->getConfig()->getOptions();
+        $parentEntity = $parentForm->getParent() ? $parentForm->getParent()->getData() : null;
 
+        $options = $parentForm->getConfig()->getOptions();
         $options["data_class"] = $options["data_class"] ?? $this->formFactory->guessType($parentForm, $options);
         $options["multiple"]   = $options["multiple"]   ?? $this->formFactory->guessMultiple($parentForm, $options);
 
@@ -168,19 +168,22 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                 if($file instanceof File) {
 
+                    $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
                     $entityData = is_callable($options["entity_data"]) ? null : $options["entity_data"];
-                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityData ?? []);
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? []);
+                    $entity = $this->entityHydrator->hydrate($entity, $entityData ?? []);
 
-                    $fieldName = $classMetadata->getFieldName($fieldName);
-                    $classMetadata->setFieldValue($entity, $fieldName, $file);
+                    $this->propertyAccessor->setValue($entity, $fieldName, $file);
+
                     $newData[] = $entity;
 
                 } else {
 
-                    $filteredData = $viewData->filter(fn($e) => $classMetadata->getFieldValue($e, $fieldName) == $file);
+                    $filteredData = $viewData->filter(fn($e) => $this->propertyAccessor->setValue($e, $fieldName) == $file);
                     $entity = $filteredData instanceof ArrayCollection ? $filteredData->first() : null;
                 }
 
+                $entity = is_callable($options["entity_data"]) ? $options["entity_data"]($entity, $parentEntity) : $entity;
                 $data[$key] = $entity;
             }
         }
@@ -196,51 +199,18 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 if(!$isOwningSide) {
 
                     foreach($viewData as $entry)
-                        $this->setFieldValue($entry, $mappedBy, null);
+                        $this->propertyAccessor->setValue($entry, $mappedBy, null);
                 }
 
                 $viewData->clear();
                 foreach($data as $entry) {
 
                     if(!$isOwningSide) 
-                        $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
+                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
 
             } else $viewData = $data;
 
-            foreach($viewData as $key => $data)
-                $viewData[$key] = is_callable($options["entity_data"]) ? $options["entity_data"]($data) : $data;
-
         } else $viewData = $data->first();
-    }
-
-    protected static $entitySerializer = null;
-
-    public static function getSerializer()
-    {
-        if(!self::$entitySerializer)
-            self::$entitySerializer = new Serializer([new DateTimeNormalizer(), new ObjectNormalizer()], [new JsonEncoder()]);
-
-        return self::$entitySerializer;
-    }
-
-    public function setFieldValue($entity, string $property, $value)
-    {
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-        if($classMetadata->hasField($property))
-            return $classMetadata->setFieldValue($entity, $property, $value);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->setValue($entity, $property, $value);
-    }
-
-    public function getFieldValue($entity, string $property)
-    {
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-        if($classMetadata->hasField($property))
-            return $classMetadata->getFieldValue($entity, $property);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->getValue($entity, $property);
     }
 }

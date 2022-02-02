@@ -3,15 +3,12 @@
 namespace Base;
 
 use Base\DependencyInjection\Compiler\AnnotationPass;
-use Base\DependencyInjection\Compiler\FilterConfigurationPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
 use Doctrine\DBAL\Types\Type;
-use EasyCorp\Bundle\EasyAdminBundle\DependencyInjection\EasyAdminExtension;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
-use Symfony\Component\Asset\Packages;
 
 use Symfony\Component\Finder\Finder;
 

@@ -43,6 +43,12 @@ class TranslationField implements FieldInterface
         return $this;
     }
 
+    public function autoload($autoload = true): self
+    {
+        $this->setFormTypeOption("autoload", $autoload);
+        return $this;
+    }
+
     public function renderAsHtml(bool $asHtml = true): self
     {
         $this->setCustomOption(self::OPTION_RENDER_AS_HTML, $asHtml);
@@ -87,12 +93,6 @@ class TranslationField implements FieldInterface
     {
         if(!is_array($excludedFields)) $excludedFields = [$excludedFields];
         $this->setFormTypeOption("excluded_fields", $excludedFields);
-        return $this;
-    }
-    public function onlyShowFields($onlyFields): self
-    {
-        if(!is_array($onlyFields)) $onlyFields = [$onlyFields];
-        $this->setFormTypeOption("only_fields", $onlyFields);
         return $this;
     }
     public function setTranslationClass($translationClass): self

@@ -9,18 +9,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 
 trait BaseSettingsTrait
 {
-    protected $cache = null;
     protected $settingRepository = null;
-    protected $settings = [];
-
-    protected function isCacheEnabled()
-    {
-        if(!BaseBundle::CACHE) return false; /* MUST BE DEFINED */
-        if(!$this->cache)    return false;
-        if(is_cli())   return false;
-
-        return true;
-    }
 
     protected function read(?string $path, array $normSettings)
     {
@@ -116,25 +105,18 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        if(array_key_exists($path, $this->settings))
-            $this->settings[$path] = !empty($this->settings[$path]) ? $this->settings[$path] : null;
-
         try {
 
-            $this->settings[$path] = $this->settings[$path] ?? [];
-            if($this->settings[$path] === []) {
+            $fn = $path ? (BaseBundle::CACHE && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
+                          (BaseBundle::CACHE && !is_cli() ? "cacheAll" : "findAll");
 
-                if(!$path) $this->settings[$path] = $this->settingRepository->findAll()->getResult();
-                else $this->settings[$path] = $this->settingRepository->findByInsensitivePathStartingWith($path)->getResult();
-
-            }
+            $settings = $this->settingRepository->$fn($path)->getResult();
 
         } catch(TableNotFoundException $e) { return []; }
 
-        $values = $this->normalize($path, $this->settings[$path]);
+        $values = $this->normalize($path, $settings);
         $values = $this->read($path, $values); // get formatted values
-        $this->applyCache($path, $locale, $values);
-
+        
         return $values;
     }
     
@@ -155,7 +137,7 @@ trait BaseSettingsTrait
     public function getScalar(null|string|array $path, ?string $locale = null): string|array|object|null
     {
         if(is_array($paths = $path)) {
-            
+
             $settings = [];
             foreach($paths as $path)
                 $settings[] = $this->getScalar($path, $locale);
@@ -177,25 +159,18 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        if(($cacheValues = $this->getCache($path, $locale)))
-            return $cacheValues;
-
         $values = $this->getRaw($path, $locale) ?? [];
-        $this->applyCache($path, $locale, $values);
-        
-        return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() : $v), $values);
+
+        return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
     }
 
     public function set(string $path, $value, ?string $locale = null)
     {
-        // Delete cache
-        $this->removeCache($path);
-
         // Compute new value or create setting if missing
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRaw($path, $locale)["_self"];
         if(!$setting instanceof Setting) {
-        
+
             $setting = new Setting($path);
             $this->entityManager->persist($setting);
         }
@@ -208,9 +183,6 @@ trait BaseSettingsTrait
 
     public function setLabel(string $path, ?string $label = null, ?string $locale = null)
     {
-        // Delete cache
-        $this->removeCache($path);
-
         // Compute new label or create setting if missing
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRaw($path, $locale)["_self"];
@@ -228,14 +200,11 @@ trait BaseSettingsTrait
 
     public function setHelp(string $path, ?string $help = null, ?string $locale = null)
     {
-        // Delete cache
-        $this->removeCache($path);
-
         // Compute new help or create setting if missing
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRaw($path, $locale)["_self"];
         if(!$setting instanceof Setting) {
-        
+
             $setting = new Setting($path);
             $this->entityManager->persist($setting);
         }
@@ -253,74 +222,11 @@ trait BaseSettingsTrait
     
     public function remove(string $path)
     {
-        $this->removeCache($path);
+        $settings = $this->settingRepository->findOneByInsensitivePath($path);
+        if($settings instanceof Setting) {
 
-        $this->settings[$path] = $this->settings[$path] ?? $this->settingRepository->findOneByInsensitivePath($path);
-        if($this->settings[$path] instanceof Setting) {
-
-            $this->entityManager->remove($this->settings[$path]);
+            $this->entityManager->remove($settings);
             $this->entityManager->flush();    
-        }
-
-        return $this;
-    }
-
-    protected function getCache(?string $path, ?string $locale) : ?array
-    {
-        if(!$this->isCacheEnabled()) return null;
-
-        $item = $this->cache->getItem($path);
-        if(!$item) return null;
-
-        $settings = $item->get();
-        if(!is_array($settings)) return null;
-
-        $locale = $this->localeProvider->getLocale($locale);
-        return $settings[$locale] ?? null;
-    }
-
-    protected function applyCache(?string $path, ?string $locale, array $settings)
-    {
-        if(!$settings) return false;
-
-        // Broadcast cache storage
-        foreach  ($settings as $key => $setting) {
-
-            if($key == "_self") continue;
-            else if(array_key_exists("_self", $setting))
-                $this->applyCache($path.".".$key, $locale, $setting);
-        }
-
-        // Process current node
-        $settings = array_map_recursive(
-            fn($v) => $v instanceof Setting ? $v->translate($locale)->getValue() : $v, 
-            $settings);
-
-        if($this->isCacheEnabled()) {
-
-            $item = $this->cache->getItem($path);
-
-            $locale = $this->localeProvider->getLocale($locale);
-
-            $settingsWithLocale = [$locale => $settings];
-            $settings = $item->get() ?? [];
-            $settings = is_array($settings) ? array_merge($settings, $settingsWithLocale) : $settingsWithLocale;
-
-            $settings = array_map_recursive(fn($i) => is_serializable($i) ? $i : null, $settings);
-
-            $this->cache->save($item->set($settings));
-        }
-
-        return true;
-    }
-    
-    public function removeCache(string $path)
-    {
-        unset($this->settings[$path]);
-        foreach(array_reverse(explode(".", $path)) as $last) {
-
-            $this->cache->delete($path);
-            $path = substr($path, 0, strlen($path) - strlen($last) - 1);
         }
 
         return $this;

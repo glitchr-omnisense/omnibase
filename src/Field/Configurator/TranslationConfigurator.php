@@ -31,15 +31,13 @@ class TranslationConfigurator implements FieldConfiguratorInterface
     {
         $required = $field->getCustomOption("required");
         $field->setFormTypeOption("required", $required);
-
         $field->setSortable(false);
-        
+
         // Show formatted value
         if( ($fieldName = $field->getCustomOption("show_field")) ) {
-            
+
             if(!PropertyAccess::createPropertyAccessor()->isReadable($entityDto->getInstance(), $field->getProperty())) 
                 throw new \Exception("Failed to access \"$fieldName\" in \"".$entityDto->getName()."\".");
-
 
             $field->setLabel($field->getLabel() == mb_ucfirst($fieldName) ? $field->getLabel() : mb_ucfirst($fieldName));
             $field->setFormattedValue("-");
@@ -47,14 +45,14 @@ class TranslationConfigurator implements FieldConfiguratorInterface
             $childField = $field->getValue();
             if($childField instanceof PersistentCollection) {
 
-                $classMetadata = $childField->getTypeClass();
-                if ($classMetadata->hasField($fieldName)) {
+                $typeClass = $childField->getTypeClass()->getName();
+                if($this->classMetadataManipulator->hasField($typeClass, $fieldName)) {
 
                     $entity = $childField->get($this->localeProvider->getLocale());
                     if (!$entity) $entity = $childField->get($this->localeProvider->getDefaultLocale());
 
-                    $value = ($entity ? $childField->getTypeClass()->getFieldValue($entity, $fieldName) : null);
-                    
+                    $value = ($entity ? $this->classMetadataManipulator->getFieldValue($entity, $fieldName) : null);
+
                     $renderAsHtml = $field->getCustomOption(TranslationField::OPTION_RENDER_AS_HTML);
                     $stripTags = $field->getCustomOption(TranslationField::OPTION_STRIP_TAGS);
                     if ($renderAsHtml) {
@@ -64,7 +62,7 @@ class TranslationConfigurator implements FieldConfiguratorInterface
                     } else {
                         $formattedValue = htmlspecialchars((string) $value, \ENT_NOQUOTES, null, false);
                     }
-            
+
                     $configuredMaxLength = $field->getCustomOption(TranslationField::OPTION_MAX_LENGTH);
                     // when contents are rendered as HTML, "max length" option is ignored to prevent
                     // truncating contents in the middle of an HTML tag, which messes the entire backend

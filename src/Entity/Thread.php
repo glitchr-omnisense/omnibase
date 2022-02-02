@@ -21,6 +21,7 @@ use Base\Enum\ThreadState;
 use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
+use Base\Enum\ThreadWorkflow;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
@@ -144,17 +145,17 @@ class Thread implements TranslatableInterface, IconizeInterface
     public function setState($state): self
     {
         $this->state = $state;
-        if(in_array($this->state, [ThreadState::PUBLISHED, ThreadState::APPROVED]) && !$this->getPublishedAt())
+        if ($this->isPublished() && !$this->getPublishedAt())
             $this->setPublishedAt(new \DateTime("now"));
 
         return $this;
     }
 
     public function isScheduled(): bool { return $this->publishedAt && !$this->isPublished(); }
-    public function isPublished(): bool { return in_array($this->state, [ThreadState::PUBLISHED, ThreadState::APPROVED]); }
+    public function isPublished(): bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
     public function isPublishable(): bool
     {
-        if(!$this->publishedAt) return false;
+        if($this->state == ThreadState::FUTURE && !$this->publishedAt) return false;
         return time() - $this->publishedAt->getTimestamp() >= 0;
     }
 

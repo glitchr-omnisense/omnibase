@@ -22,9 +22,9 @@ class PercentAttribute extends AbstractAttribute implements IconizeInterface
     public function getOptions(): array { return []; }
     public function resolve(mixed $value): mixed { return $value; }
 
-    public function __construct(string $label, ?string $icon = null, int $epsilon = 4, int $scale = 2)
+    public function __construct(string $label, ?string $code = null, int $epsilon = 4, int $scale = 2)
     {
-        parent::__construct($label, $icon);
+        parent::__construct($label, $code);
         $this->setPrecision($epsilon);
         $this->setScale($scale);
     }

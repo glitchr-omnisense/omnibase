@@ -110,7 +110,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
                 $first = false;
             }
 
-            if(!$route ) continue;
+            if(!$route) continue;
             $this->prependItem($label, $routeName, $routeParameters ?? []);
             $icons[] = $icon;
         }

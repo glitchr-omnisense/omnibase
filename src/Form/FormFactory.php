@@ -248,7 +248,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $options["autocomplete"] ?? false;
     }
 
-    public function guessChoiceFilter(FormInterface|FormBuilderInterface $form, ?array $options = null, $data)
+    public function guessChoiceFilter(FormInterface|FormBuilderInterface $form, ?array $options = null, $data = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
 
@@ -256,8 +256,8 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         if ($options["choice_filter"] === null) {
 
             $options["choice_filter"] = [];
-            if($options["choice_exclusive"]) {
-                
+            if($data) {
+
                 if($data instanceof Collection || is_array($data)) {
 
                     foreach($data as $entry)

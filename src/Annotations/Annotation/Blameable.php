@@ -49,7 +49,7 @@ class Blameable extends AbstractAnnotation
         if(!in_array("create", $this->getContext())) return;
 
         $user = ($this->impersonator ? $this->getImpersonator() : null) ?? $this->getUser();
-        $this->setFieldValue($entity, $property, $user);
+        $this->setPropertyValue($entity, $property, $user);
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
@@ -57,6 +57,6 @@ class Blameable extends AbstractAnnotation
         if (!in_array("update", $this->getContext())) return;
 
         $user = ($this->impersonator ? $this->getImpersonator() : null) ?? $this->getUser();
-        $this->setFieldValue($entity, $property, $user);
+        $this->setPropertyValue($entity, $property, $user);
     }
 }

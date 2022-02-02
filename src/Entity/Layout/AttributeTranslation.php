@@ -31,5 +31,4 @@ class AttributeTranslation implements TranslationInterface
         $this->value = $value;
         return $this;
     }
-
 }

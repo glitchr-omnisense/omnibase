@@ -94,6 +94,7 @@
         'data-select2-field'   : form.vars.id~"_choice",
         'data-select2-options' : select2,
         'data-select2-sortable': form.vars["select2-sortable"],
+        'data-tabulation'      : form.vars["tabulation"],
     }) %}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
@@ -209,7 +210,7 @@
     {{ block('form_widget') }}
     <div class="input-group-append">
         <button class="input-group-text" type="button">
-            <i class="fas fa-lock fa-fw"></i>
+            <i class="fas {{ target is not empty ? "fa-lock" : "fa-unlock" }} fa-fw"></i>
         </button>
     </div>
 </div>

@@ -120,7 +120,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $primaryKey = self::getPrimaryKey($entity); // primaryKey information missing
 
         $entityData =self::getUnitOfWork()->getOriginalEntityData($entity);
-        $entityData[$primaryKey] = self::getFieldValue($entity, $primaryKey);
+        $entityData[$primaryKey] = self::getPropertyValue($entity, $primaryKey);
 
         return $entityData;
     }
@@ -134,40 +134,41 @@ abstract class AbstractAnnotation implements AnnotationInterface
         //   It happens that "original" entity data doesn't mean,
         //   original value before form submission
         $entityData = self::getOriginalEntityData($entity);
-        foreach($entityData as $key => $dummy)
+        foreach($entityData as $key => $_)
             if(array_key_exists($key, $changeSet)) $entityData[$key] = $changeSet[$key][0];
 
         return $entityData;
     }
 
+    public static function hasField($entity, string $property) { return self::getClassMetadata(get_class($entity))->hasField($property); }
     public static function getPrimaryKey($entity) { return self::getClassMetadata(get_class($entity))->getSingleIdentifierFieldName(); }
-    public static function hasField($entity, string $property) { return property_exists($entity, $property); }
     public static function getTypeOfField($entity, string $property)
     {
         if(!$entity || !is_object($entity)) return null;
-
+        
         $classMetadata = self::getClassMetadata(get_class($entity));
         if( ($dot = strpos($property, ".")) > 0 ) {
-        
+            
             $field    = trim(substr($property, 0, $dot));
             $property = trim(substr($property,    $dot+1));
             
             if(!$classMetadata->hasAssociation($field))
-                throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
-
+            throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
+            
             $entity = self::getTypeOfField($entity, $field);
             if ($entity instanceof ArrayCollection)
-                $entity = $entity->first();
+            $entity = $entity->first();
             else if(is_array($entity))
-                $entity = current($entity) ?? null;
+            $entity = current($entity) ?? null;
             
             return self::getTypeOfField($entity, $property);
         }
         
         return ($classMetadata->hasField($property) ? $classMetadata->getTypeOfField($property) : null);
     }
-
-    public static function getFieldValue($entity, string $property)
+    
+    public static function hasProperty($entity, string $property) { return property_exists($entity, $property); }
+    public static function getPropertyValue($entity, string $property)
     {
         if(!$entity) return null;
 
@@ -180,30 +181,33 @@ abstract class AbstractAnnotation implements AnnotationInterface
             if(!$classMetadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
 
-            $entity = self::getFieldValue($entity, $field);
+            $entity = self::getPropertyValue($entity, $field);
             if ($entity instanceof ArrayCollection)
                 $entity = $entity->first();
             else if(is_array($entity))
                 $entity = current($entity) ?? null;
 
-            return self::getFieldValue($entity, $property);
+            return self::getPropertyValue($entity, $property);
         }
 
-        if ($classMetadata->hasField($property))
+        $fieldName = $classMetadata->getFieldName($property);
+        if ($classMetadata->hasField($property) || $classMetadata->hasAssociation($property))
             return $classMetadata->getFieldValue($entity, $property);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->getValue($entity, $property);
+        return $propertyAccessor->getValue($entity, $fieldName);
     }
 
-    public static function setFieldValue($entity, string $property, $value)
+    public static function setPropertyValue($entity, string $property, $value)
     {
         $classMetadata = self::getClassMetadata(get_class($entity));
-        if($classMetadata->hasField($property))
-            return $classMetadata->setFieldValue($entity, $property, $value);
+        
+        $fieldName = $classMetadata->getFieldName($property);
+        if ($classMetadata->hasField($fieldName) || $classMetadata->hasAssociation($fieldName))
+            return $classMetadata->setFieldValue($entity, $fieldName, $value);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->setValue($entity, $property, $value);
+        return $propertyAccessor->setValue($entity, $fieldName, $value);
     }
 
     abstract public function supports(string $target, ?string $targetValue = null, mixed $object = null): bool;

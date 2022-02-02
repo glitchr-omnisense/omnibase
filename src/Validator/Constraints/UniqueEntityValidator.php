@@ -16,13 +16,6 @@ use Base\Validator\ConstraintEntityValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-use Base\Validator\Constraints\UniqueEntity;
-
-/**
- * Unique Entity Validator checks if one or a set of fields contain unique values.
- *
- * @author Benjamin Eberlei <kontakt@beberlei.de>
- */
 class UniqueEntityValidator extends ConstraintEntityValidator
 {
     /**
@@ -39,18 +32,18 @@ class UniqueEntityValidator extends ConstraintEntityValidator
         if (!$em)
             throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
 
-        $class = $this->getClassMetadata($entity);
+        $classMetadata = $this->getClassMetadata($entity);
 
         $criteria = [];
         $hasNullValue = false;
 
-        $fields = (array) $constraint->fields;
+        $fields = array_map(fn($f) => $classMetadata->getFieldName($f), $constraint->fields);
         foreach ($fields as $fieldName) {
-            if (!$class->hasField($fieldName) && !$class->hasAssociation($fieldName)) {
+            if (!$classMetadata->hasField($fieldName) && !$classMetadata->hasAssociation($fieldName)) {
                 throw new ConstraintDefinitionException(sprintf('The field "%s" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
             }
 
-            $fieldValue = $class->reflFields[$fieldName]->getValue($entity);
+            $fieldValue = $classMetadata->reflFields[$fieldName]->getValue($entity);
 
             if (null === $fieldValue) {
                 $hasNullValue = true;
@@ -62,7 +55,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
 
             $criteria[$fieldName] = $fieldValue;
 
-            if (null !== $criteria[$fieldName] && $class->hasAssociation($fieldName)) {
+            if (null !== $criteria[$fieldName] && $classMetadata->hasAssociation($fieldName)) {
                 /* Ensure the Proxy is initialized before using reflection to
                  * read its identifiers. This is necessary because the wrapped
                  * getter methods in the Proxy are being bypassed.
@@ -91,7 +84,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             $supportedClass = $repository->getClassName();
 
             if (!$entity instanceof $supportedClass)
-                throw new ConstraintDefinitionException(sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $class->getName(), $supportedClass));
+                throw new ConstraintDefinitionException(sprintf('The "%s" entity repository does not support the "%s" entity. The entity should be an instance of or extend "%s".', $constraint->entityClass, $classMetadata->getName(), $supportedClass));
 
         } else {
             $repository = $em->getRepository(\get_class($entity));

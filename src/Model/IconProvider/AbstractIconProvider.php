@@ -59,9 +59,9 @@ abstract class AbstractIconProvider implements IconProviderInterface
     {
         $options = $this->getOptions();
 
-        $class = implode(" ", [$attributes["class"] ?? null, $options["class"] ?? null, $icon]);
-        array_keys_remove($attributes, "class");
-
+        $class = trim(implode(" ", [$attributes["class"] ?? null, $options["class"] ?? null, $icon]));
+        $attributes = array_key_removes($attributes, "class");
+        
         return "<i ".html_attributes($attributes)." class='".$class."'></i>";
     }
 }

@@ -2,22 +2,17 @@
 
 namespace Base\Annotations\Annotation;
 
-use BaconQrCode\Encoder\Encoder;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use DateTime;
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use ReflectionObject;
 
-use Symfony\Component\PasswordHasher\PasswordEncoderInterface;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactory;
-use Symfony\Component\PasswordHasher\Hasher\MessageDigestPasswordHasher;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 use Doctrine\Common\Util\ClassUtils;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+
 /**
  * Class Hashify
  * package Base\Annotations\Annotation\Hashify
@@ -86,7 +81,7 @@ class Hashify extends AbstractAnnotation
         if($plainMessage)
             return $this->getMessageHasher($entity)->hash($plainMessage);
 
-        return ($property ? $this->getFieldValue($entity, $property) : null);
+        return ($property ? $this->getPropertyValue($entity, $property) : null);
     }
 
     public function needsRehash($entity, string $hashedMessage): bool
@@ -106,7 +101,10 @@ class Hashify extends AbstractAnnotation
         if($that->needsRehash($entity, $hashedMessage))
             throw new Exception("Password in @Hashify annotation in \"$property\" for $className needs to be rehashed");
         
-        return $that->getMessageHasher($entity)->verify($that->getHashedMessage($entity, $property), $value);
+        return $that->getMessageHasher($entity)->verify(
+                    $that->getHashedMessage($entity, $property), 
+                    $that->getPropertyValue($entity, $property)
+                );
     }
 
     private function getPlainMessage($entity): ?string
@@ -114,8 +112,8 @@ class Hashify extends AbstractAnnotation
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
 
-        if ($this->hasField($entity, $this->referenceColumn))
-            return $this->getFieldValue($entity, $this->referenceColumn);
+        if (property_exists($entity, $this->referenceColumn))
+            return $this->getPropertyValue($entity, $this->referenceColumn);
     }
 
     private function erasePlainMessage($entity)
@@ -123,7 +121,7 @@ class Hashify extends AbstractAnnotation
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"plain\" missing for @Hashify in " . ClassUtils::getClass($entity));
 
-        return $this->setFieldValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
+        return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
@@ -134,13 +132,13 @@ class Hashify extends AbstractAnnotation
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
-        if($value) $this->setFieldValue($entity, $property, $value);
+        if($value) $this->setPropertyValue($entity, $property, $value);
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
-        if($value) $this->setFieldValue($entity, $property, $value);
+        if($value) $this->setPropertyValue($entity, $property, $value);
     }
 
     public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

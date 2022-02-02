@@ -143,7 +143,7 @@ class SecurityController extends AbstractController
         }
 
         // Redirect to previous page
-        return $this->redirect($this->referrer->getUrl());
+        return $this->redirect($this->referrer->getUrl() ?? $this->baseService->getAsset("/"));
     }
 
     /**

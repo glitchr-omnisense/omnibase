@@ -119,17 +119,24 @@ class AutocompleteController extends AbstractController
 
             $iconProvider = $this->getIconService()->getProvider($provider);
             $entries = $iconProvider->getChoices($term);
-    
+
             $book = $this->paginator->paginate($entries, $page, $pageSize);
             $pagination = $book->getTotalPages() > $book->getPage();
             $array["pagination"] = ["more" => $pagination];
             $results = $book->current();
 
-            $array["results"] = array_transforms(function($k,$v,$i,$callback) use ($format): ?array {
+            $array["results"] = array_transforms(function($k,$v,$callback,$i,$d) use ($format): ?array {
 
-                if(is_array($v))
-                    return [null, ["text" => $k, "children" => array_transforms($callback, $v)]];
-
+                if(is_array($v)) {
+               
+                    $children = array_transforms($callback, $v, ++$d);
+    
+                    $group = array_pop_key("_self", $children);
+                    $group["text"] = $k;
+                    $group["children"] = $children;
+                    return [null, $group];
+                }
+                
                 return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $format)]];
 
             }, !empty($results) ? $results : []);

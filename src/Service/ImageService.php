@@ -70,7 +70,7 @@ class ImageService implements ImageServiceInterface
             $config["resampling"] ?? ImageInterface::FILTER_UNDEFINED
         );
 
-        $config = array_keys_remove($config, "width", "height", "mode", "resampling");
+        $config = array_key_removes($config, "width", "height", "mode", "resampling");
         return $this->imagine($path, $filters, $config); 
     }
 

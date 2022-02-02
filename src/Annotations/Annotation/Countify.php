@@ -82,7 +82,7 @@ class Countify extends AbstractAnnotation
             throw new Exception("Attribute \"reference\" missing for @Countify in " . get_class($entity));
 
         // Check if field already set.. (it needs to be checked)
-        $value = $this->getFieldValue($entity, $this->referenceColumn) ?? "";
+        $value = $this->getPropertyValue($entity, $this->referenceColumn) ?? "";
         
         switch($this->type) 
         {
@@ -111,21 +111,21 @@ class Countify extends AbstractAnnotation
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $nWords = $this->getFieldValue($entity, $property);
+        $nWords = $this->getPropertyValue($entity, $property);
         if($nWords) return;
 
         $slug = $this->getCount($entity);
-        $this->setFieldValue($entity, $property, $slug);
+        $this->setPropertyValue($entity, $property, $slug);
     }
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $slug = $this->getCount($entity);
-        $this->setFieldValue($entity, $property, $slug);
+        $this->setPropertyValue($entity, $property, $slug);
     }
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $slug = $this->getCount($entity);
-        $this->setFieldValue($entity, $property, $slug);
+        $this->setPropertyValue($entity, $property, $slug);
     }
 }

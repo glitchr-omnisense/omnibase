@@ -30,11 +30,9 @@ class SlugConfigurator implements FieldConfiguratorInterface
 
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
-        if (null === $targetFieldName = $field->getCustomOption(SlugField::OPTION_TARGET_FIELD_NAME)) {
-            throw new \RuntimeException(sprintf('The "%s" field must define the name of the field whose contents are used for the slug using the "setTargetFieldName()" method.', $field->getProperty()));
-        }
-        
+        $targetFieldName = $field->getCustomOption(SlugField::OPTION_TARGET_FIELD_NAME);
         $field->setFormTypeOption('target', $targetFieldName);
+
         if (null !== $unlockConfirmationMessage = $field->getCustomOption(SlugField::OPTION_UNLOCK_CONFIRMATION_MESSAGE)) {
             $field->setFormTypeOption('attr.data-confirm-text', $this->translator->trans($unlockConfirmationMessage, [], $context->getI18n()->getTranslationDomain()));
         }

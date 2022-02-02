@@ -14,7 +14,7 @@ class HyperpatternAttributeCrudController extends AbstractAttributeCrudControlle
         return parent::configureFields($pageName, ["code" =>
             function() {
                 
-                yield TextField::new('pattern')->setColumns(4)->onlyOnForms();
+                yield TextField::new('pattern')->setColumns(4)->hideOnIndex();
 
             }], $args);
     }

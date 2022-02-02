@@ -44,7 +44,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->extension = $extension;
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
-        
+
         $this->crud = null;
     }
 

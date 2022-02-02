@@ -22,9 +22,9 @@ class NumberAttribute extends AbstractAttribute implements IconizeInterface
     public function getOptions(): array { return []; }
     public function resolve(mixed $value): mixed { return $value; }
 
-    public function __construct(string $label, ?string $icon = null, ?int $minimum = null, ?int $maximum = null)
+    public function __construct(string $label, ?string $code = null, ?int $minimum = null, ?int $maximum = null)
     {
-        parent::__construct($label, $icon);
+        parent::__construct($label, $code);
         $this->setMinimum($minimum);
         $this->setMaximum($maximum);
     }

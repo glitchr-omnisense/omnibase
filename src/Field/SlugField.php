@@ -23,6 +23,7 @@ final class SlugField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
+            ->setTemplatePath('@EasyAdmin/crud/field/slug.html.twig')
             ->setFormType(SlugType::class)
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
             ->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, null)

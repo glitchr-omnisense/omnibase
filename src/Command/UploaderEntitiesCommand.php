@@ -13,6 +13,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class UploaderEntitiesCommand extends Command
 {
@@ -20,9 +21,11 @@ class UploaderEntitiesCommand extends Command
 
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
     {
+        parent::__construct();
+
         $this->entityManager = $entityManager;
         $this->baseService = $baseService;
-        parent::__construct();
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();        
     }
 
     protected function configure(): void
@@ -160,10 +163,9 @@ class UploaderEntitiesCommand extends Command
     {
         $fileList = $this->getFileList($class, $field, $annotation);
 
-        $classMetadata = $this->entityManager->getClassMetadata($class);
-        $fileListInDatabase = array_map(function($entity) use ($classMetadata, $field, $annotation) { 
+        $fileListInDatabase = array_map(function($entity) use ($field, $annotation) { 
 
-            $uuid = $classMetadata->getFieldValue($entity, $field);
+            $uuid = $this->propertyAccessor->getValue($entity, $field);
             if(is_array($uuid)) return array_map(fn($uuid) => $annotation->getPath($entity, $uuid), $uuid);
             else return $annotation->getPath($entity, $uuid);
 

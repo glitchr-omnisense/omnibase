@@ -1,11 +1,11 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
-{% set color = field.getCustomOption("iconColor") %}
-
+{% set color = field.getCustomOption("iconColor") ?? "inherit" %}
+{% set attr = color ? {"style": "color"~color} : {} %}
 {% if field.value %}
 <span class="badge badge-secondary field-icon">
-    {{field.value|iconify({tag: "i", class: "fa-fw", style: "color: "~color})|default('')|raw}}
+    {{field.value|iconify(attr)}}
 </span>
 {% else %}
 -

@@ -41,7 +41,7 @@ class ThreadPublishableCommand extends Command
             if (!$thread->isPublishable()) return false;
 
             if ($actionPublish)
-                $thread->setState(ThreadState::PUBLISHED);
+                $thread->setState(ThreadState::PUBLISH);
 
             return true;
         });

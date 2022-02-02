@@ -64,13 +64,17 @@ class EntityHydrator
      * @return mixed|object
      * @throws Exception
      */
-    public function hydrate($entity, array $data)
+    public function hydrate($entity, $data)
     {
         if (is_string($entity) && class_exists($entity)) {
             $entity = new $entity;
         }
         elseif (!is_object($entity)) {
             throw new Exception('Entity passed to ArrayHydrator::hydrate() must be a class name or entity object');
+        }
+
+        if(is_object($data)) {
+            $data = [];
         }
 
         $entity = $this->hydrateProperties($entity, $data);
@@ -115,13 +119,10 @@ class EntityHydrator
         $skipFields = $this->hydrateId ? [] : $metaData->identifier;
 
         foreach ($metaData->fieldNames as $fieldName => $_) {
-            
+
             $dataKey = $this->hydrateBy === self::HYDRATE_BY_FIELD ? $fieldName : $metaData->getColumnName($fieldName);
-
             if (array_key_exists($dataKey, $data) && !in_array($fieldName, $skipFields, true)) {
-                $value = $data[$dataKey];
-
-                $entity = $this->setProperty($entity, $fieldName, $value, $reflectionObject);
+                $entity = $this->setProperty($entity, $fieldName, $data[$dataKey], $reflectionObject);
             }
         }
 
@@ -138,6 +139,7 @@ class EntityHydrator
         $metaData = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($metaData->associationMappings as $fieldName => $mapping) {
             $associationData = $this->getAssociatedId($fieldName, $mapping, $data);
+            
             if (!empty($associationData)) {
                 if (in_array($mapping['type'], [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE])) {
                     $entity = $this->hydrateToOneAssociation($entity, $fieldName, $mapping, $associationData);
@@ -163,10 +165,8 @@ class EntityHydrator
      */
     protected function getAssociatedId($fieldName, $mapping, $data)
     {
-        if ($this->hydrateBy === self::HYDRATE_BY_FIELD) {
-
+        if ($this->hydrateBy === self::HYDRATE_BY_FIELD)
             return isset($data[$fieldName]) ? $data[$fieldName] : null;
-        }
 
         // from this point it is self::HYDRATE_BY_COLUMN
         // we do not support compound foreign keys (yet)

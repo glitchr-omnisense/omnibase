@@ -6,17 +6,15 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Entity\Layout\Attribute;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
-
 use Base\Validator\Constraints as AssertBase;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\AbstractAttributeRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Base\Entity\Layout\Attribute;
 
 /**
  * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
@@ -39,12 +37,13 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
 
     public function __autocomplete():?string { return $this->getLabel(); }
     public function __autocompleteData():array { return $this->getOptions(); }
-    public function __construct(string $label = "", ?string $icon = null)
+    public function __construct(string $label = "", ?string $code = null)
     {
         $this->attributes = new ArrayCollection();
 
         $this->setLabel($label);
-        $this->setIcon($icon ?? get_called_class()::__iconizeStatic()[0]);
+        $this->setCode($code);
+        $this->setIcon(get_called_class()::__iconizeStatic()[0]);
     }
 
     /**

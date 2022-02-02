@@ -18,9 +18,9 @@ class ArrayAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-clipboard-list"]; }
 
-    public function __construct(string $label, ?string $icon = null, ?int $length = null)
+    public function __construct(string $label, ?string $path = null, ?int $length = null)
     {
-        parent::__construct($label, $icon);
+        parent::__construct($label, $path);
         $this->setLength($length);
     }
 

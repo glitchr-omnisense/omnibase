@@ -69,7 +69,7 @@ class OrderColumn extends AbstractAnnotation
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         // dump("POST LOAD SORTING.. ".$property);
-        // dump($entity, $property, $classMetadata->getFieldValue($entity, $classMetadata->getFieldName($property)));
+        // dump($entity, $property, $classMetadata->getPropertyValue($entity, $classMetadata->getFieldName($property)));
         // $iterator = $collection->getIterator();
         // $iterator->uasort(function ($a, $b) {
         //     return ($a->getPropery() < $b->getProperty()) ? -1 : 1;

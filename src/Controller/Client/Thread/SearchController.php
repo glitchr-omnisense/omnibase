@@ -70,7 +70,7 @@ class SearchController extends AbstractController
             $data->generic = null;
 
             $entityManager = $this->entityManager;
-            $threads = $this->threadRepository->findByStateAndInsensitivePartialModel([ThreadState::PUBLISHED, ThreadState::APPROVED], $data)->getResult();
+            $threads = $this->threadRepository->findByStateAndInsensitivePartialModel(ThreadState::PUBLISH, $data)->getResult();
             usort($threads, function ($a, $b) use ($entityManager) {
                 return $entityManager->getRepository(get_class($a))->getHierarchy() < $entityManager->getRepository(get_class($b))->getHierarchy() ? -1 : 1;
             });

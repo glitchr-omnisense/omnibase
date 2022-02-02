@@ -59,6 +59,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /* "abstract" (remove because of routes) */
@@ -79,6 +80,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         TranslatorInterface $translator,
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
+        RouterInterface $router,
         BaseService $baseService,
         ?GaService $gaService = null) {
 
@@ -88,10 +90,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->adminContextProvider  = $adminContextProvider;
 
         $this->translator = $translator;
-        MenuItem::$iconService = $baseService->getIconService();
-        MenuItem::$translator = $translator;
         WidgetItem::$translator = $translator;
-    
+        MenuItem::$translator = $translator;
+
+        MenuItem::$router = $router;
+        MenuItem::$iconService = $baseService->getIconService();
+
         $this->baseService           = $baseService;
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
         $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
@@ -297,7 +301,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function addRoles(array &$menu, string $class)
     {
-        foreach ($class::getPermittedValuesByGroup(false)["ROLE"] as $values) {
+        foreach ($class::getPermittedValuesByGroup(false) as $values) {
 
             if ($values == UserRole::USER) continue;
 
@@ -320,8 +324,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if(empty($values)) $item = MenuItem::linkToUrl($label, $icon, $url);
             else {
                 
-                $item = MenuItem::subMenu($label, $icon);
-
+                $item = MenuItem::subMenu($label, $icon, $url);
+                
                 $subItems = [];
                 foreach($values as $role)  {
 
@@ -355,11 +359,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $menu   = [];
         $menu[] = MenuItem::section();
-        $menu[] = MenuItem::linkToController("dashboard", [], "Home");
-        $menu[] = MenuItem::linkToController("dashboard_apikey");
-        $menu[] = MenuItem::linkToController("dashboard_settings");
-        $menu[] = MenuItem::linkToController("dashboard_widgets");
-        $menu[] = MenuItem::linkToController("app_index", [], 'Back to website', 'fas fa-fw fa-door-open');
+        $menu[] = MenuItem::linkToRoute("dashboard", [], "Home");
+        $menu[] = MenuItem::linkToRoute("dashboard_apikey");
+        $menu[] = MenuItem::linkToRoute("dashboard_settings");
+        $menu[] = MenuItem::linkToRoute("dashboard_widgets");
+        $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fas fa-fw fa-door-open');
 
         $menu[] = MenuItem::section('BUSINESS CARD');
         if(UserRole::class != \Base\Enum\UserRole::class)
@@ -427,9 +431,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
 
             ->add(Crud::PAGE_EDIT, Action::INDEX) // Adding return button..
+            ->add(Crud::PAGE_EDIT, Action::DELETE)
             ->add(Crud::PAGE_EDIT, Action::DETAIL)
             ->update(Crud::PAGE_EDIT, Action::DETAIL,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-search')->setLabel(""))
+            ->update(Crud::PAGE_EDIT, Action::DELETE,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt')->setLabel(""))
             ->update(Crud::PAGE_EDIT, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
             ->update(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,
@@ -457,8 +464,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)
             ->addMenuItems([
-                MenuItem::linkToController("user_profile"),
-                MenuItem::linkToController("user_settings")
+                MenuItem::linkToRoute("user_profile"),
+                MenuItem::linkToRoute("user_settings")
             ])->setAvatarUrl($avatar);
     }
 

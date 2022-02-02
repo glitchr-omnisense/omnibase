@@ -321,23 +321,24 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function addRole(string $role): self
-    {
-        if (!in_array($role, $this->roles))
-            $this->roles[] = $role;
-        return $this;
-    }
+    // ISSUE WHEN ADDING ROLE.....
+    // public function addRole(string $role): self
+    // {
+    //     if (!in_array($role, $this->roles))
+    //         $this->roles[] = $role;
+    //     return $this;
+    // }
 
-    public function removeRole(string $role): self
-    {
-        if ( ($pos = array_search($role, $this->roles)) )
-            unset($this->roles[$pos]);
+    // public function removeRole(string $role): self
+    // {
+    //     if ( ($pos = array_search($role, $this->roles)) )
+    //         unset($this->roles[$pos]);
 
-        if(empty($this->roles))
-            $this->roles[] = UserRole::USER;
+    //     if(empty($this->roles))
+    //         $this->roles[] = UserRole::USER;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     /**
      * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})

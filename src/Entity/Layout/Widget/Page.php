@@ -29,6 +29,12 @@ class Page extends Widget implements IconizeInterface
         return "<a href='".$path."'>".$this->getTitle()."</a>";
     }
 
+    public function __construct(string $title = "", ?string $slug = null)
+    {
+        parent::__construct($title);
+        $this->setSlug($slug);
+    }
+
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Slugify(reference="translations.title")

@@ -543,15 +543,12 @@ namespace {
         }
     }
 
-    function array_transforms(callable $callback, array $array, bool $checkReturnType = true): array {
+    function array_transforms(callable $callback, array $array, int $depth = 0): array {
 
         $reflection = new ReflectionFunction($callback);
-        if($checkReturnType) {
-
-            if (!$reflection->getReturnType() || $reflection->getReturnType()->getName() != 'array') 
-                throw new \Exception('Callable function must use "array" return type');
-        }
-
+        if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['array', 'Generator'])) 
+            throw new \Exception('Callable function must use "array" or "Generator" return type');
+    
         $tArray = [];
         $counter = 0;
         foreach($array as $key => $entry) {
@@ -569,18 +566,31 @@ namespace {
                     break;
 
                 case 3:
-                    $ret = call_user_func($callback, $key, $entry, $counter);
+                    $ret = call_user_func($callback, $key, $entry, $callback);
                     break;
 
                 case 4:
-                    $ret = call_user_func($callback, $key, $entry, $counter, $callback);
+                    $ret = call_user_func($callback, $key, $entry, $callback, $counter);
                     break;
 
+                case 5:
+                    $ret = call_user_func($callback, $key, $entry, $callback, $counter, $depth);
+                    break;
+            
                 default:
                     throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
             }
 
+            if($ret instanceof Generator) {
+
+                foreach($ret as $key => $yield)
+                    $tArray[!empty($key) ? $key : count($tArray)] = $yield;
+               
+                $ret = $ret->getReturn();
+            }
+
             if($ret === null) continue;
+
             list($tKey, $tEntry) = [$ret[0] ?? count($tArray), $ret[1] ?? $entry];
             $tArray[$tKey] = $tEntry;
 
@@ -590,13 +600,13 @@ namespace {
         return $tArray;
     }
 
-    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) { return array_transforms(fn($k,$v,$i,$_):?array => [$k, is_array($v) ? array_transforms($_, array_filter($v, $callback, $mode)) : $v], $array); }
+    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) { return array_transforms(fn($k,$v,$fn):?array => [$k, is_array($v) ? array_transforms($fn, array_filter($v, $callback, $mode)) : $v], $array); }
     function array_slice_recursive(array $array, int $offset, ?int $length, bool $preserve_keys = false): array
     {
         $offsetCounter = 0;
         $lengthCounter = 0;
 
-        return array_transforms(function($k, $v, $i, $callback) use ($preserve_keys, &$offsetCounter, $offset, &$lengthCounter, $length):?array {
+        return array_transforms(function($k, $v, $callback, $i) use ($preserve_keys, &$offsetCounter, $offset, &$lengthCounter, $length):?array {
 
             if(is_array($v)) {
 
@@ -705,12 +715,12 @@ namespace {
         if(empty($array)) return null;
 
         $entry = $array[$key] ?? null;
-        $array = array_keys_remove($array, $key);
+        $array = array_key_removes($array, $key);
 
         return $entry;
     }
 
-    function array_keys_remove  (array $array, ...$keys  ) 
+    function array_key_removes  (array $array, string ...$keys  ) 
     { 
         foreach($keys as $key) 
             unset($array[$key]);

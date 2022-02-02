@@ -6,8 +6,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 
-use App\Entity\Layout\Widget;
-use Base\Database\Annotation\ColumnAlias;
+use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Doctrine\Common\Collections\Collection;
@@ -26,13 +25,16 @@ use Base\Repository\Layout\Widget\SlotRepository;
  * 
  */
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
-{   
+{
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
-    public function __construct(?string $path = null)
+    public function __construct(?string $path = null, ?string $label = "", ?string $help = null)
     {
+        $this->setLabel($label);
+        $this->setHelp($help);
+
         $this->widgets = new ArrayCollection();
         $this->path    = $path;
     }
@@ -54,10 +56,6 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=Widget::class)
      */
     protected $widgets;
-
-    /**
-     * @return Collection|Widget[]
-     */
     public function getWidgets(): Collection { return $this->widgets; }
     public function addWidget(Widget $widget): self
     {
@@ -67,7 +65,6 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
 
         return $this;
     }
-
     public function removeWidget(Widget $widget): self
     {
         $this->widgets->removeElement($widget);

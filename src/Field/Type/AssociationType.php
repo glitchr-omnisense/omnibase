@@ -3,19 +3,18 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\PercentType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -26,10 +25,6 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class AssociationType extends AbstractType implements DataMapperInterface
 {
@@ -45,10 +40,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
     
     public function getBlockPrefix(): string { return 'association'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->entityHydrator   = $entityHydrator;
+
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();  
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -62,7 +60,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'href'      => null,
 
             'fields' => [],
-            'only_fields' => [],
             'excluded_fields' => [],
 
             'recursive' => false,
@@ -78,10 +75,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
             if($options["multiple"]) return null;
             return $value ?? null;
-        });
-
-        $resolver->setNormalizer('autoload', function (Options $options, $value) {
-            return !empty($options["only_fields"]) ? false : $value;
         });
     }
 
@@ -137,17 +130,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
                         'Unable to get "class" or compute "data_class" from form "'.$form->getName().'" or any of its parents. '.
                         'Please define "class" option in the main AssociationType you defined or make sure there is a way to guess the expected output information');
 
-                $fields = $options["fields"];
-                if($options["autoload"])
-                    $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
-
+                $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
+                if(!$options["autoload"])
+                    $fields = array_filter($fields, fn($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
+        
                 foreach ($fields as $fieldName => $field) {
 
-                    // Fields to be excluded (in case autoload is disabled)
-                    if($options["only_fields"] && !in_array($fieldName, $options["only_fields"]))
-                        continue;
-                    if(in_array($fieldName, $options["excluded_fields"]))
-                        continue;
 
                     if($options["recursive"] && array_key_exists($form->getName(), $field))
                     $field = $field[$form->getName()];
@@ -183,15 +171,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
         } else if(is_object($entity = $data)) {
 
-            $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-
             $childForms = iterator_to_array($forms);
             foreach($childForms as $fieldName => $childForm) {
-            
-                $value = null;
-                if($classMetadata->hasField($fieldName))
-                    $value = $classMetadata->getFieldValue($entity, $fieldName);
 
+                $value = $this->propertyAccessor->getValue($entity, $fieldName);
                 if(empty($value)) $value = null;
 
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
@@ -231,17 +214,16 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["class"]);
             if(!$classMetadata)
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
-            
-            $fieldNames  = $classMetadata->getFieldNames();
+
+            $fieldNames  = array_values($classMetadata->getFieldNames());
             $fields = array_intersect_key($data->toArray(), array_flip($fieldNames));
             $associations = array_diff_key($data->toArray(), array_flip($fieldNames));
-        
-            $viewData = is_object($viewData) ? $viewData : self::getSerializer()->deserialize(json_encode($fieldNames), $options["class"], 'json');
 
+            $viewData = is_object($viewData) ? $viewData : $this->entityHydrator->hydrate($options["class"], []);
             foreach ($fields as $property => $value)
-                $this->setFieldValue($viewData, $property, $value);
+                $this->propertyAccessor->setValue($viewData, $property, $value);
             foreach($associations as $property => $value)
-                $this->setFieldValue($viewData, $property, $value);
+                $this->propertyAccessor->setValue($viewData, $property, $value);
 
         } else if($viewData instanceof PersistentCollection) {
 
@@ -253,15 +235,17 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
                 $child = $data[$fieldName];
                 if(!$isOwningSide) {
+
                     foreach($viewData as $entry)
-                        $this->setFieldValue($entry, $mappedBy, null);
+                        $this->propertyAccessor->setValue($entry, $mappedBy, null);
                 }
 
                 $viewData->clear();
                 foreach($child as $entry) {
 
                     $viewData->add($entry);
-                    if(!$isOwningSide) $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
+                    if(!$isOwningSide) 
+                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
 
@@ -280,23 +264,4 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
     }
 
-    protected static $entitySerializer = null;
-
-    public static function getSerializer()
-    {
-        if(!self::$entitySerializer)
-            self::$entitySerializer = new Serializer([new DateTimeNormalizer(), new ObjectNormalizer()], [new JsonEncoder()]);
-
-        return self::$entitySerializer;
-    }
-
-    public function setFieldValue($entity, string $property, $value)
-    {
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-        if($classMetadata->hasField($property))
-            return $classMetadata->setFieldValue($entity, $property, $value);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->setValue($entity, $property, $value);
-    }
 }

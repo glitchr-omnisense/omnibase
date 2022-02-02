@@ -25,9 +25,10 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
         "placeholder" => $this->getPlaceholder() ?? []
     ]; }
 
-    public function __construct(string $label, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
+    public function __construct(string $label, ?string $path = null, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
     {
-        parent::__construct($label, $icon);
+        parent::__construct($label, $path);
+        $this->setIcon($icon);
         $this->setPattern($pattern);
     }
 
@@ -44,7 +45,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
 
 
     public function getNumberOfArguments():int { return preg_match_all('/\{[0-9]*\}/i', $this->getPattern()); }
-    public function generateUrl(...$replace): string
+    public function generateUrl(...$replace): ?string
     {
         $search = [];
         foreach($replace as $index => $_)
@@ -52,15 +53,16 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
 
         $subject = $this->getPattern();
         $url = str_replace($search, $replace, $subject);
-        return preg_replace('/\{[0-9]*\}/', '', $url); // Remove missing entries
+
+        return preg_match('/\{[0-9]*\}/', $url) ? null : $url; // Return null if missing entries
     }
 
-    public function generateHtml(...$replace): string
+    public function generateHtml(...$replace): ?string
     {
         $url = $this->generateUrl($replace);
         $icon = $this->getIcon();
         $class = $this->getAttribute("class");
         
-        return "<a class='".$class."' href='".$url."'><i class='".$icon."'></a>";
+        return $url ? "<a class='".$class."' href='".$url."'><i class='".$icon."'></a>" : null;
     }
 }

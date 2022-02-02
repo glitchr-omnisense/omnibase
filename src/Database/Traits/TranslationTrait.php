@@ -16,10 +16,7 @@ trait TranslationTrait
      */
     protected $id;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getId(): ?int { return $this->id;}
 
     /**
      * Translatable related methods

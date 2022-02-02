@@ -38,15 +38,6 @@ use ReflectionException;
 
 use const Base\Database\Traits\__TRANSLATION_SUFFIX__;
 
-use function array_map;
-use function class_exists;
-use function count;
-use function end;
-use function explode;
-use function is_subclass_of;
-use function strpos;
-use function mb_strtolower;
-
 /**
  *
  * Custom class metadata factory

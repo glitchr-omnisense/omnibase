@@ -3,6 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Factory\EntityHydrator;
 use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\AttributeTranslation;
@@ -22,10 +23,6 @@ use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 class AttributeType extends AbstractType implements DataMapperInterface
 {
@@ -46,6 +43,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $this->baseService   = $baseService;
         $this->formFactory   = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
+
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();  
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -113,10 +112,10 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(!empty($fields)) {
 
                     $form->add("intl", TranslationType::class, [
-                        "translation_class" => AttributeTranslation::class,
                         "multiple" => true,
-                        "only_fields" => ["value"],
-                        "fields" => ["value" => $fields]
+                        "autoload" => false,
+                        "fields"   => ["value" => $fields],
+                        "translation_class" => AttributeTranslation::class,
                     ]);
 
                     $form->get("intl")->setData($intlData);
@@ -172,35 +171,15 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(!$isOwningSide) {
 
                     foreach($viewData as $entry)
-                        $this->setFieldValue($entry, $mappedBy, $viewData->getOwner());
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
 
         } else {
-            
+
             if ($viewData->getAttributePattern() === $choiceData)
                 $viewData->add(new ($attributeClass)($choiceData));
         }
 
-    }
-
-    protected static $entitySerializer = null;
-
-    public static function getSerializer()
-    {
-        if(!self::$entitySerializer)
-            self::$entitySerializer = new Serializer([new DateTimeNormalizer(), new ObjectNormalizer()], [new JsonEncoder()]);
-
-        return self::$entitySerializer;
-    }
-
-    public function setFieldValue($entity, string $property, $value)
-    {
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata(get_class($entity));
-        if($classMetadata->hasField($property))
-            return $classMetadata->setFieldValue($entity, $property, $value);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        return $propertyAccessor->setValue($entity, $property, $value);
     }
 }

@@ -67,7 +67,7 @@ class Autocomplete
             "icon" => $icon,
             "text" => is_string($text) ? castcase($text, $format) : $text,
             "html" => $html,
-            "data" => $data
+            "data" => $data,
         ];
     }
 

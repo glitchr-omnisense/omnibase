@@ -73,14 +73,14 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         }
     }
 
-    public function resolve(string $pattern, ...$replace): string
+    public function resolve(string $pattern, ...$replace): ?string
     {
         $search = [];
         foreach($replace as $index => $_)
             $search[] = "{".$index."}";
 
         $url = str_replace($search, $replace, $pattern);
-        return preg_replace('/\{[0-9]*\}/', '', $url); // Remove missing entries
+        return preg_match('/\{[0-9]*\}/', $url) ? null : $url; // Return null if missing entries
     }
 
     private function formatCollection(FieldDto $field, AdminContext $context)

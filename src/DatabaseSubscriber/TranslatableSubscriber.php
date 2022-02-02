@@ -6,10 +6,11 @@ use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\Mapping\ClassMetadata;
 
 class TranslatableSubscriber implements EventSubscriber
 {
@@ -26,8 +27,9 @@ class TranslatableSubscriber implements EventSubscriber
         return [Events::loadClassMetadata, Events::prePersist, Events::preUpdate];
     }
 
-    public function __construct(LocaleProviderInterface $localeProvider)
+    public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider)
     {
+        $this->entityManager  = $entityManager;
         $this->localeProvider = $localeProvider;
     }
 
@@ -76,36 +78,34 @@ class TranslatableSubscriber implements EventSubscriber
         if (is_int($fetchMode))
             return $fetchMode;
 
-        if ($fetchMode === 'EAGER') return ClassMetadataInfo::FETCH_EAGER;
-        if ($fetchMode === 'EXTRA_LAZY') return ClassMetadataInfo::FETCH_EXTRA_LAZY;
-        return ClassMetadataInfo::FETCH_LAZY;
+        switch($fetchMode) {
+            case 'EAGER':
+                return ClassMetadata::FETCH_EAGER;
+            
+            case 'EXTRA_LAZY':
+                return ClassMetadata::FETCH_EXTRA_LAZY;
+
+            default: 
+            case 'LAZY':
+                return ClassMetadata::FETCH_LAZY;
+        }
     }
 
-    private function mapTranslatable(ClassMetadataInfo $classMetadataInfo): void
+    private function mapTranslatable(ClassMetadata $classMetadata): void
     {
-        if($classMetadataInfo->hasAssociation('translations')) {
+        $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslationEntityClass')->invoke(null);
+        if($classMetadata->hasAssociation('translations')) {
         
-            $mapping = $classMetadataInfo->getAssociationMapping("translations");
-            $targetEntity = $mapping["targetEntity"] ?? null;
+            $mapping = $classMetadata->getAssociationMapping("translations");
+            if(is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
 
-            $preferredTargetEntity = $classMetadataInfo->getReflectionClass()
-            ->getMethod('getTranslationEntityClass')
-            ->invoke(null);
-
-            if(is_subclass_of($preferredTargetEntity, $targetEntity)) {
-                $classMetadataInfo->associationMappings["translations"]["targetEntity"] = $preferredTargetEntity;
-                $classMetadataInfo->associationMappings["translations"]["sourceEntity"] = $classMetadataInfo->getName();
-                $classMetadataInfo->associationMappings["translations"]["declared"] = $classMetadataInfo->getName();
+                $classMetadata->associationMappings["translations"]["targetEntity"] = $targetEntity;
+                $classMetadata->associationMappings["translations"]["sourceEntity"] = $classMetadata->getName();
             }
 
         } else {
-        
-        
-            $targetEntity = $classMetadataInfo->getReflectionClass()
-                                                ->getMethod('getTranslationEntityClass')
-                                                ->invoke(null);
 
-            $classMetadataInfo->mapOneToMany([
+            $classMetadata->mapOneToMany([
                 'fieldName' => 'translations',
                 'mappedBy' => 'translatable',
                 'indexBy' => self::LOCALE,
@@ -117,26 +117,23 @@ class TranslatableSubscriber implements EventSubscriber
         }
     }
 
-    private function mapTranslation(ClassMetadataInfo $classMetadataInfo): void
+    private function mapTranslation(ClassMetadata $classMetadata): void
     {
-        if($classMetadataInfo->hasAssociation('translatable')) {
+        $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslatableEntityClass')->invoke(null);
+        $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
 
-            $mapping = $classMetadataInfo->getAssociationMapping("translatable");
-            $targetEntity = $mapping["targetEntity"] ?? null;
+        if($classMetadata->hasAssociation('translatable')) {
 
-            $preferredTargetEntity = $classMetadataInfo->getReflectionClass()
-            ->getMethod('getTranslatableEntityClass')
-            ->invoke(null);
+            $mapping = $classMetadata->getAssociationMapping("translatable");
+            if(is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
 
-            if(is_subclass_of($preferredTargetEntity, $targetEntity)) {
-                $classMetadataInfo->associationMappings["translatable"]["targetEntity"] = $preferredTargetEntity;
-                $classMetadataInfo->associationMappings["translatable"]["sourceEntity"] = $classMetadataInfo->getName();
-                $classMetadataInfo->associationMappings["translatable"]["declared"] = $classMetadataInfo->getName();
+                $classMetadata->associationMappings["translatable"]["targetEntity"] = $targetEntity;
+                $classMetadata->associationMappings["translatable"]["sourceEntity"] = $classMetadata->getName();
             }
 
         } else {
 
-            $classMetadataInfo->mapManyToOne([
+            $classMetadata->mapManyToOne([
                 'fieldName'   => 'translatable',
                 'inversedBy'  => 'translations',
                 'cascade'     => ['persist', 'merge'],
@@ -146,32 +143,27 @@ class TranslatableSubscriber implements EventSubscriber
                     'referencedColumnName' => 'id',
                     'onDelete' => 'CASCADE',
                 ]],
-                'targetEntity' => $classMetadataInfo->getReflectionClass()
+                'targetEntity' => $classMetadata->getReflectionClass()
                     ->getMethod('getTranslatableEntityClass')
                     ->invoke(null),
             ]);
         }
 
-        $name = $classMetadataInfo->getTableName() . '_unique_translation';
-        if (!$this->hasUniqueTranslationConstraint($classMetadataInfo, $name) &&
-            $classMetadataInfo->getName() == $classMetadataInfo->rootEntityName) {
-            $classMetadataInfo->table['uniqueConstraints'][$name] = [
-                'columns' => ['translatable_id', self::LOCALE]
-            ];
-        }
+        $classMetadata->cache = $targetClassMetadata->cache;
+        if(array_key_exists("region", $classMetadata->cache ?? []))
+            $classMetadata->cache["region"] .= "_translation";
 
-        if (! $classMetadataInfo->hasField(self::LOCALE) && ! $classMetadataInfo->hasAssociation(self::LOCALE)) {
-            $classMetadataInfo->mapField([
-                'fieldName' => self::LOCALE,
-                'type' => 'string',
-                'length' => 5,
-            ]);
-        }
+        $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
+        $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
+        if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
+            $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
+        
+        if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))
+            $classMetadata->mapField(['fieldName' => self::LOCALE, 'type' => 'string', 'length' => 5]);
     }
 
-    private function hasUniqueTranslationConstraint(ClassMetadataInfo $classMetadataInfo, string $name): bool
+    private function hasUniqueTranslationConstraint(ClassMetadata $classMetadata, string $name): bool
     {
-        if  (! isset($classMetadataInfo->table['uniqueConstraints'])) return false;
-        return isset($classMetadataInfo->table['uniqueConstraints'][$name]);
+        return isset($classMetadata->table['uniqueConstraints'][$name]);
     }
 }

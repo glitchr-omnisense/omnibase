@@ -11,7 +11,7 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-
+use Generator;
 use Hashids\Hashids;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -85,7 +85,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             'choices'          => null,
             'choice_loader'    => null,
             'choice_filter'    => false,
-            'choice_exclusive' => true,
 
             'choice_value'     => function($value)              { return $value; },   // Return key code
             'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
@@ -103,6 +102,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'multiple'           => null,
             'vertical'           => false,
             'maximum'            => 0,
+            'tabulation'         => "1.75em",
             'tags'               => false,
             'minimumInputLength' => 0,
             'tokenSeparators'    => [' ', ',', ';'],
@@ -151,12 +151,11 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
-            $multipleExpected = $data !== null || $data instanceof Collection || is_array($data);
+            $multipleExpected = $data === null || $data instanceof Collection || is_array($data);
             if($options["multiple"] && !$multipleExpected)
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
-            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $data);
-
+            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
             if(!$options["choices"] && $options["choice_loader"] === null) {
 
                 $options["choices"] = $this->formFactory->guessChoices($form, $options);
@@ -189,47 +188,57 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["class"]          = $this->formFactory->guessType($event, $options);
 
             $dataChoice = $data["choice"] ?? null;
-            $choiceData = $options["multiple"] ? $dataChoice ?? [] : [];
-            if(!$options["multiple"] && $dataChoice) $choiceData[] = $dataChoice;
+            $choicesData = $options["multiple"] ? $dataChoice ?? [] : [];
+            if(!$options["multiple"] && $dataChoice) $choicesData[] = $dataChoice;
 
             if ($options["class"]) {
 
                 $innerType = get_class($form->getConfig()->getType()->getInnerType());
                 $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
-                $formattedData = array_transforms(function ($key, $value, $i, $callback) use ($innerType, &$options) : ?array {
+                $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options) : Generator {
 
-                    if($value === null) return null;
+                    if($choices === null) return null;
 
                     // Recursive categories
-                    if(is_array($value)) {
+                    if(is_array($choices)) {
 
-                        $text = null;
-                        if(class_exists($key)) {
-
-                            $text = null;
-                            if($this->classMetadataManipulator->isEntity($key)  ) $text = $this->translator->entity($key, Translator::TRANSLATION_PLURAL); 
-                            if($this->classMetadataManipulator->isEnumType($key)) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
-                            if($this->classMetadataManipulator->isSetType($key) ) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
-                        }
-
+                        list($class, $text) = array_pad(explode("::", $key), 2, null);
+    
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL); 
+                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+    
                         $text = empty($text) ? $key : $text;
-                        return [null, ["text" => $text, "children" => array_transforms($callback, $value)]];
+                        $self = array_pop_key("_self", $choices);
+    
+                        if(! $self) yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
+                        else {
+                    
+                            $yields = $callback(null, $self, $callback, $i, $d++);
+                            foreach($yields as $yield)
+                                yield null => $yield;
+    
+                            foreach(array_transforms($callback, $choices, $d) as $yield)
+                                yield null => $yield;
+                        }
+    
+                    } else {
+
+                        // Format values
+                        $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                        $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
+                        if($entry === null) return null;
+
+                        if(!$options["class"]) $entry["text"] = $key;
+                        yield $entry["id"] => $entry["text"];
                     }
-
-                    // Format values
-                    $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                    $entry = $this->autocomplete->resolve($value, $options["class"] ?? $innerType, $entryFormat);
-                    if($entry === null) return null;
-
-                    if(!$options["class"]) $entry["text"] = $key;
-                    return [$entry["id"], $entry["text"]];
-
+                    
                 }, $dataset ?? []);
 
                 // Search missing information
                 $missingData = [];
                 $knownData = array_keys($formattedData);
-                foreach($choiceData as $data) {
+                foreach($choicesData as $data) {
 
                     if(!in_array($data, $knownData))
                         $missingData[] = $data;
@@ -242,48 +251,58 @@ class SelectType extends AbstractType implements DataMapperInterface
                 }
 
                 $innerType = $form->getConfig()->getType()->getInnerType();
-                $formattedData += array_transforms(function ($key, $value, $i, $callback) use ($innerType, &$options) : array { 
+                $formattedData += array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options): Generator { 
 
                     // Recursive categories
-                    if(is_array($value)) {
+                    if(is_array($choices)) {
 
-                        $text = null;
-                        if(class_exists($key)) {
-
-                            $text = null;
-                            if($this->classMetadataManipulator->isEntity($key)  ) $text = $this->translator->entity($key, Translator::TRANSLATION_PLURAL); 
-                            if($this->classMetadataManipulator->isEnumType($key)) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
-                            if($this->classMetadataManipulator->isSetType($key) ) $text = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
-                        }
-
+                        list($class, $text) = array_pad(explode("::", $key), 2, null);
+    
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL); 
+                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+    
                         $text = empty($text) ? $key : $text;
-                        return [null, ["text" => $text, "children" => array_transforms($callback, $value)]];
+                        $self = array_pop_key("_self", $choices);
+    
+                        if(! $self) yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
+                        else {
+                    
+                            $yields = $callback(null, $self, $callback, $i, $d++);
+                            foreach($yields as $yield)
+                                yield null => $yield;
+    
+                            foreach(array_transforms($callback, $choices, $d) as $yield)
+                                yield null => $yield;
+                        }
+    
+                    } else {
+
+                        // Format values
+                        $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                        $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
+
+                        if(!$options["class"]) $entry["text"] = $key;
+                        yield $entry["id"] => $entry["text"];
                     }
-
-                    // Format values
-                    $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                    $entry = $this->autocomplete->resolve($value, $options["class"] ?? $innerType, $entryFormat);
-
-                    if(!$options["class"]) $entry["text"] = $key;
-                    return [$entry["id"], $entry["text"]];
 
                 }, $missingData ?? []);
 
                 //
                 // Compute in choice list format
-                $choices = array_filter(array_transforms(function($key, $value) use($formattedData) : ?array {
+                $choices = array_filter(array_transforms(function($key, $choices) use($formattedData) : ?array {
 
-                    $id    = $value;
+                    $id    = $choices;
                     $label = $formattedData[$id] ?? null;
                     if($label === null) return null;
 
-                    return [$label, $value];
+                    return [$label, $choices];
 
-                }, $choiceData));
+                }, $choicesData));
 
             } else {
 
-                $choices = $choiceData;
+                $choices = $choicesData;
             }
 
             //
@@ -301,64 +320,69 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
-        $choiceType = current(iterator_to_array($forms));
-        $choiceData = $choiceType->getViewData();
+        $choicesType = current(iterator_to_array($forms));
+        $choicesData = $choicesType->getViewData();
 
-        $options = $choiceType->getConfig()->getOptions();
-        $options["class"] = $this->formFactory->guessType($choiceType->getParent());
+        $options = $choicesType->getConfig()->getOptions();
+        $options["class"] = $this->formFactory->guessType($choicesType->getParent());
 
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
-            $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
+            $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choicesType->getParent(), $options);
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
 
-                $orderBy = array_flip($choiceData);
+                $orderBy = array_flip($choicesData);
                 $default = count($orderBy);
-                $choiceData = $classRepository->findById($choiceData, [])->getResult();
-                usort($choiceData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+                $choicesData = $classRepository->findById($choicesData, [])->getResult();
+                usort($choicesData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
 
             } else {
-                $choiceData = $classRepository->findOneById($choiceData);
+
+                $choicesData = $classRepository->findOneById($choicesData);
             }
         }
 
         $options["multiple"] = null;
-        $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
+        $options["multiple"] = $this->formFactory->guessMultiple($choicesType->getParent(), $options);
 
         if($viewData instanceof Collection) {
 
             $viewData->clear();
 
-            if(!is_iterable($choiceData))
-                 $choiceData = $choiceData ? [$choiceData] : [];
+            if(!is_iterable($choicesData))
+                 $choicesData = $choicesData ? [$choicesData] : [];
 
-            foreach($choiceData as $data)
+            foreach($choicesData as $data)
                 $viewData->add($data);
 
         } else if($options["multiple"]) {
 
             $viewData = [];
-            foreach($choiceData as $data)
+            foreach($choicesData as $data)
                 $viewData[] = $data;
 
-        } else $viewData = $choiceData;
+        } else $viewData = $choicesData;
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        
+        /* Override options.. I couldn't done that without accessing data */
+        $options["class"]         = $this->formFactory->guessType($form, $options);
+        $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
+        $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
+        $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
+        $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
+        $options["choices"]       = $this->formFactory->guessChoices($form, $options);
+
+        // Tabulation
+        $view->vars["tabulation"] = $options["tabulation"];
+
         if($options["select2"] !== null) {
 
-            /* Override options.. I couldn't done that without accessing data */
-            $options["class"]         = $this->formFactory->guessType($form, $options);
-            $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
-            $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
-            $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
-            $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options, $form->getData());
-            $options["choices"]       = $this->formFactory->guessChoices($form, $options);
-
-            $multipleExpected = $form->getData() instanceof Collection || is_array($form->getData());
+            $multipleExpected = $form->getData() === null || $form->getData() instanceof Collection || is_array($form->getData());
             if($options["multiple"] && !$multipleExpected)
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
@@ -427,47 +451,53 @@ class SelectType extends AbstractType implements DataMapperInterface
             $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
 
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
-            $formattedData = array_transforms(function ($key, $value, $i, $callback) use ($innerType, $dataset, &$options, &$selectedData) : ?array { 
+            $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, $dataset, &$options, &$selectedData) : Generator { 
 
-                // Recursive categories
-                $specialChoices = false;
-                if(class_exists($key)) {
+                if(is_array($choices)) {
 
-                    if($this->classMetadataManipulator->isEntity($key)  ) $specialChoices = $this->translator->entity(      $key, Translator::TRANSLATION_PLURAL); 
-                    if($this->classMetadataManipulator->isEnumType($key)) $specialChoices = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
-                    if($this->classMetadataManipulator->isSetType($key) ) $specialChoices = $this->translator->enum  (null, $key, Translator::TRANSLATION_PLURAL);
+                    list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                    if($specialChoices !== null) $specialType = true;
+                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL); 
+                    else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+                    else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+
+                    $text = empty($text) ? $key : $text;
+                    $self = array_pop_key("_self", $choices);
+
+                    if(! $self) yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
+                    else {
+                
+                        $yields = $callback(null, $self, $callback, $i, $d++);
+                        foreach($yields as $yield)
+                            yield null => $yield;
+
+                        foreach(array_transforms($callback, $choices, $d) as $yield)
+                            yield null => $yield;
+                    }
+
+                } else {
+
+                    // Format values
+                    $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                    $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
+                    if(!$entry) return null;
+
+                    // Special text formatting
+                    if(is_string($key)) $entry["text"] = $entry["text"] ?? $key;
+
+                    // Check if entry selected
+                    $entry["depth"] = $d;
+                    $entry["selected"] = false;
+                    foreach($dataset as $data)
+                        $entry["selected"] |= ($choices === $data);
+
+                    if($entry["selected"])
+                        $selectedData[]  = $entry["id"];
+
+                    yield $i => $entry;
                 }
-
-                if(!empty($specialChoices)) {
-                    
-                    $specialChoices = empty($specialChoices) ? $key : $specialChoices;
-                    return [null, ["text" => $specialChoices, "children" => array_transforms($callback, $value)]];
-                }
-
-                // Format values
-                $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                $entry = $this->autocomplete->resolve($value, $options["class"] ?? $innerType, $entryFormat);
-                if(!$entry) return null;
-
-                // Special text formatting
-                if(is_string($key)) $entry["text"] = $entry["text"] ?? $key;
-
-                // Check if entry selected
-                $entry["selected"] = false;
-                foreach($dataset as $data)
-                    $entry["selected"] |= ($value === $data);
-            
-                if($entry["selected"])
-                    $selectedData[]  = $entry["id"];
-
-                return [$i, $entry];
 
             }, $options["choices"] ?? $dataset ?? []);
-
-            if(count($formattedData) == 1 && array_key_exists("children", $formattedData))
-                $formattedData = $formattedData["children"];
 
             $selectOpts["data"]     = $formattedData;
             $selectOpts["selected"] = $selectedData;

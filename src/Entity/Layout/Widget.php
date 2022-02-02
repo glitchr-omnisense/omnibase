@@ -32,6 +32,11 @@ class Widget implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
+    public function __construct(string $title = "")
+    {
+        $this->setTitle($title);
+    }
+
     protected string $template = "";
     public function getTemplate()
     {

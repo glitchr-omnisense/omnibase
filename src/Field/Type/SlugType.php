@@ -29,7 +29,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
     {
         $resolver
             ->setRequired(['target'])
-            ->setAllowedTypes('target', ['string'])
+            ->setAllowedTypes('target', ['string', 'null'])
             ->setDefaults([
                 "separator" => "-"
             ]);
@@ -37,26 +37,26 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $targetPath = explode(".", $options["target"]);
-        $view->vars['target'] = $targetPath;
-
-        // Check if child exists.. this just trigger an exception..
         $target = $form->getParent();
+        $targetPath = $options["target"] ? explode(".", $options["target"]) : [];
+        $view->vars['target'] = $targetPath;
+        
+        // Check if child exists.. this just trigger an exception..
         foreach($targetPath as $path) {
-
+            
             if(!$target->has($path))
-                throw new \Exception("Child path \"$path\" doesn't exists in \"".get_class($target->getViewData())."\".");
-
+            throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+            
             $target = $target->get($path);
             $targetType = $target->getConfig()->getType()->getInnerType();
-
+            
             if($targetType instanceof TranslationType) {
                 $availableLocales = array_keys($target->all());
                 $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
                 $target = $target->get($locale);
             }
         }
-
+        
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
     }
 
