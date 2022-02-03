@@ -3,25 +3,21 @@
 namespace Base\Entity\Layout\Widget;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
+use Base\Annotations\Annotation\Slugify;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\SlotRepository;
 
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- * 
  * @DiscriminatorEntry( value = "slot" )
- *
- * @AssertBase\UniqueEntity(fields={"path"}, groups={"new", "edit"})
+ * 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  */
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
@@ -30,19 +26,17 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
-    public function __construct(?string $path = null, ?string $label = "", ?string $help = null)
+    public function __construct(string $path, string $label, ?string $help = null)
     {
+        $this->path    = $path;
         $this->setLabel($label);
         $this->setHelp($help);
-
-        $this->widgets = new ArrayCollection();
-        $this->path    = $path;
     }
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(reference="translations.title", separator=".")
+     * @Slugify(reference="translations.title", separator=".", exception="_")
      */
     protected $path;
     public function getPath(): string { return $this->path; }
@@ -53,22 +47,14 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Widget::class)
+     * @ORM\ManyToOne(targetEntity=Widget::class, cascade={"persist"})
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
-    protected $widgets;
-    public function getWidgets(): Collection { return $this->widgets; }
-    public function addWidget(Widget $widget): self
-    {
-        if(!$this->widgets->contains($widget)) {
-            $this->widgets[] = $widget;
-        }
-
-        return $this;
-    }
-    public function removeWidget(Widget $widget): self
-    {
-        $this->widgets->removeElement($widget);
-
+    protected $widget;
+    public function getWidget(): ?Widget { return $this->widget; }
+    public function setWidget(?Widget $widget): self 
+    { 
+        $this->widget = $widget;
         return $this;
     }
 }

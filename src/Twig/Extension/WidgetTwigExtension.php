@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Service\WidgetProvider;
 use Base\Service\WidgetProviderInterface;
 
 use Twig\Environment;
@@ -25,22 +26,35 @@ final class WidgetTwigExtension extends AbstractExtension
     public function getFunctions() : array
     {
         return [
-            new TwigFunction("render_widget", [$this, 'render_widget'], ['is_safe' => ['all']])
+            new TwigFunction("render_widget",     [$this, 'render_widget'], ['is_safe' => ['all']]),
+            new TwigFunction("all_slots",   [WidgetProvider::class, 'allSlots'], ['is_safe' => ['all']]),
+            new TwigFunction("all_widgets", [WidgetProvider::class, 'all'], ['is_safe' => ['all']])
         ];
     }
 
-    function render_widget(string $slot, int $position = 0, array $widgetOptions = []): string
+    function render_widget(string $slot, array $widgetOptions = [], ?string $template = null): string
     {
         $widgetSlot = $this->widgetProvider->getSlot($slot);
         if(!$widgetSlot) return "";
 
-        $widgets = $widgetSlot->getWidgets();
-        $widget  = $widgets->containsKey($position) ? $widgets->get($position) : null;
+        $widget = $widgetSlot->getWidget();
         if(!$widget) return "";
+        
+        $widgetOptions["widget"]   = $widget;
+        
+        $widget->setTemplate($template);
+        $entityClass = camel_to_snake(class_basename($widget), "-");
+        $templateClass = camel_to_snake(str_strip(basename($widget->getTemplate()), "", ".html.twig"), "-");
+        
+        $widgetOptions["row_attr"] = $widgetOptions["row_attr"] ?? [];
+        $widgetOptions["row_attr"]["class"]  = $widgetOptions["row_attr"]["class"] ?? "";
+        $widgetOptions["row_attr"]["class"] .= " widget-".$entityClass;
+        $widgetOptions["row_attr"]["class"] .= ($templateClass != $entityClass) ? " widget-".$templateClass : "";
 
-        $widgetOptions["class"]      = $widgetOptions["class"]      ?? $widgetSlot->getAttribute("class");
-        $widgetOptions["class_item"] = $widgetOptions["class_item"] ?? $widgetSlot->getAttribute("class_item");
-        $widgetOptions["widget"]     = $widget;
+        $widgetOptions["attr"] = $widgetOptions["attr"] ?? [];
+        $widgetOptions["attr"]["class"] = $widgetOptions["attr"]["class"] ?? "";
+
+        $widgetOptions["label"] = $widgetOptions["label"] ?? $widget->getTitle();
 
         return $this->twig->render($widget->getTemplate(), $widgetOptions);
     }

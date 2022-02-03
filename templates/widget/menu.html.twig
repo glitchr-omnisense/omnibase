@@ -1,7 +1,8 @@
 <div class="widget-menu">
-    <span class="widget-title">{{widget.getName()}}</span>
-    <ul>
+    <h1 class="label">{{ label }}</h1>
+    <ul class="items">
         {% for item in widget.widgets %}
         <li>{{item|raw}}</li>
         {% endfor %}
     </ul>
+</div>

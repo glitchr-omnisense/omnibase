@@ -11,6 +11,7 @@ final class AttributeField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_CLASS          = 'class';
     public const OPTION_CHOICES = 'choices';
     public const OPTION_ICONS   = 'icons';
     public const OPTION_FILTER  = 'filter';
@@ -44,6 +45,12 @@ final class AttributeField implements FieldInterface
     public function setFilterCode(?string $filter = null): self
     {
         $this->setFormTypeOption(self::OPTION_FILTER_CODE, $filter);
+        return $this;
+    }
+
+    public function setClass(?string $class = null)
+    {
+        $this->setFormTypeOption(self::OPTION_CLASS, $class);
         return $this;
     }
 

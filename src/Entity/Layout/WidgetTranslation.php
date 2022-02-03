@@ -19,12 +19,10 @@ class WidgetTranslation implements TranslationInterface
      * @ORM\Column(type="string", length=255)
      */
     protected $title;
-
-    public function getTitle(): ?string { return $this->title; }
-    public function setTitle(?string $title): self
+    public function getTitle(): string { return $this->title; }
+    public function setTitle(string $title): self
     {
         $this->title = $title;
-
         return $this;
     }
 
@@ -32,12 +30,10 @@ class WidgetTranslation implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $excerpt;
-
     public function getExcerpt(): ?string { return $this->excerpt; }
     public function setExcerpt(?string $excerpt): self
     {
         $this->excerpt = $excerpt;
-
         return $this;
     }
 
@@ -45,12 +41,10 @@ class WidgetTranslation implements TranslationInterface
      * @ORM\Column(type="text", nullable=true)
      */
     protected $content;
-
     public function getContent(): ?string { return $this->content; }
     public function setContent(?string $content): self
     {
         $this->content = $content;
-
         return $this;
     }
 }

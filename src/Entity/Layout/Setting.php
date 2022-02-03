@@ -5,6 +5,9 @@ namespace Base\Entity\Layout;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
+use Base\Validator\Constraints as AssertBase;
+use Base\Annotations\Annotation\Slugify;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\SettingRepository;
 
@@ -44,6 +47,8 @@ class Setting implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true)
+     * @AssertBase\NotBlank(groups={"new", "edit"})
+     * @Slugify(reference="translations.title", separator=".", exception="_")
      */
     protected $path;
 

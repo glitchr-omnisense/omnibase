@@ -319,7 +319,7 @@ namespace {
         return $string;
     }
 
-    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".$attributes[$k]."\"", array_keys(array_filter($attributes))))); }
+    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k])."\"", array_keys(array_filter($attributes))))); }
 
     function browser_name()    : string { return get_browser2()["name"]; }
     function browser_platform(): string { return get_browser2()["platform"]; }

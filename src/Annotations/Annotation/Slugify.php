@@ -25,10 +25,11 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  *   @Attribute("length",     type = "integer"),
  *   @Attribute("zeros",     type = "integer"),
  * 
- *   @Attribute("locale",    type = "string"),
- *   @Attribute("map",       type = "array"),
- *   @Attribute("separator", type = "string"),
- *   @Attribute("lowercase", type = "bool")
+ *   @Attribute("locale",     type = "string"),
+ *   @Attribute("map",        type = "array"),
+ *   @Attribute("separator",  type = "string"),
+ *   @Attribute("exception",  type = "string"),
+ *   @Attribute("lowercase",  type = "bool")
  * })
  */
 class Slugify extends AbstractAnnotation
@@ -51,6 +52,7 @@ class Slugify extends AbstractAnnotation
         $this->length = $data['length'] ?? null; // TODO: IMPLEMENT
 
         $this->separator = $data['separator'] ?? '-';
+        $this->exception = $data['exception'] ?? null;
         $this->lowercase = $data['lowercase'] ?? true;
         $this->slugger   = new AsciiSlugger(
             $data["locale"] ?? null,
@@ -108,8 +110,11 @@ class Slugify extends AbstractAnnotation
 
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
-        $slug = $this->slugger->slug($input, $this->separator);
-        return ($this->lowercase ? $slug->lower() : $slug);
+        $slug = $this->exception
+            ? implode($this->exception, array_map(fn($i) => $this->slugger->slug($i, $this->separator), explode($this->exception, $input)))
+            : $this->slugger->slug($input, $this->separator);
+
+        return ($this->lowercase ? strtolower($slug) : $slug);
     }
     
     public function getSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): string

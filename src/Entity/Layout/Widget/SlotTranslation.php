@@ -17,8 +17,8 @@ class SlotTranslation extends WidgetTranslation
      * @ColumnAlias(column = "title")
      */
     protected $label;
-    public function getLabel(): string { return $this->label; }
-    public function setLabel(string $label): self
+    public function getLabel(): ?string { return $this->label; }
+    public function setLabel(?string $label): self
     {
         $this->label = $label;
         return $this;

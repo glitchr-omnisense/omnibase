@@ -1,0 +1,50 @@
+<?php
+
+namespace Base\Entity\Layout\Widget;
+
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Layout\Attribute\Hyperlink;
+use Base\Entity\Layout\Widget;
+use Base\Model\IconizeInterface;
+
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\Layout\Widget\LinkRepository;
+
+/**
+ * @ORM\Entity(repositoryClass=LinkRepository::class)
+ * @DiscriminatorEntry( value = "linkset" )
+ */
+class Linkset extends Widget implements IconizeInterface
+{
+    public        function __iconize()       : ?array { return null; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-layer-group"]; } 
+
+    public function __construct(string $title, array $hyperlinks = [])
+    {
+        $this->hyperlinks = new ArrayCollection($hyperlinks);
+        parent::__construct($title);
+    }
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Hyperlink::class, orphanRemoval=true, cascade={"persist"})
+     */
+    protected $hyperlinks;
+    public function getHyperlinks(): Collection { return $this->hyperlinks; }
+    public function addHyperlink(Hyperlink $hyperlink): self
+    {
+        if (!$this->hyperlinks->contains($hyperlink)) {
+            $this->hyperlinks[] = $hyperlink;
+        }
+
+        return $this;
+    }
+
+    public function removeHyperlink(Hyperlink $hyperlink): self
+    {
+        $this->hyperlinks->removeElement($hyperlink);
+        return $this;
+    }
+}

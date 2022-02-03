@@ -3,12 +3,9 @@
 namespace Base\Controller\Dashboard\Crud\Layout\Widget;
 
 use Base\Field\ImageField;
-use Base\Field\TranslationField;
 use Base\Field\SlugField;
 
 use Base\Controller\Dashboard\Crud\Layout\WidgetCrudController;
-use Base\Field\Type\QuillType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class PageCrudController extends WidgetCrudController
 {

@@ -285,7 +285,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 $form->setData($newViewData);
             }
         }
-
     }
 
     public function mapFormsToData(Traversable $forms, &$viewData)

@@ -6,6 +6,7 @@ attribute:
 
 select:
   placeholder: Choose your selection..
+  token_separator: "Tags are split using: {0}"
 
 collection:
   empty: Empty

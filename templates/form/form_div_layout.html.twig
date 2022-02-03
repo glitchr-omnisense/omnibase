@@ -85,7 +85,7 @@
 
 {%- block select2_row -%}
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{form_row(form)}}
+    {{form_row(form, {attr:attr})}}
 {%- endblock -%}
 
 {%- block select2_widget -%}
@@ -98,7 +98,11 @@
     }) %}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
-        
+
+    {% if form.vars["tokenSeparators"] is defined %}
+    <div class="form-filesize form-text text-muted">{{"@fields.select.token_separator"|trans(["'"~form.vars["tokenSeparators"]|join("' '")~"'"])}}</div>
+    {% endif %}
+
 {% endblock select2_widget %}
 
 {%- block discriminator_row -%}

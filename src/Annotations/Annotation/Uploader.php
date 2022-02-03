@@ -114,7 +114,8 @@ class Uploader extends AbstractAnnotation
                 else $pathList[] = rtrim($that->getAsset($that->public) . $path, ".");
             }
 
-            return $pathList;
+            $pathList = array_filter($pathList);
+            return empty($pathList) ? null : $pathList;
 
         } else {
         

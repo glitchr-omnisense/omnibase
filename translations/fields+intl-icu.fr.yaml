@@ -6,6 +6,7 @@ attribute:
 
 select:
   placeholder: Faites votre selection..
+  token_separator: "Les étiquettes peuvent être séparées à l'aide des caractères : {0}"
 
 collection:
   empty: Vide

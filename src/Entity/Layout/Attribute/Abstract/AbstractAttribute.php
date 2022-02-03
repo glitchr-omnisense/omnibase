@@ -19,6 +19,7 @@ use Base\Entity\Layout\Attribute;
 /**
  * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
@@ -56,6 +57,8 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
 
     /**
      * @ORM\OneToMany(targetEntity=Attribute::class, mappedBy="attributePattern")
+     *
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }

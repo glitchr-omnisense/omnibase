@@ -55,9 +55,11 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 
 use Base\Config\Traits\WidgetTrait;
+use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -145,6 +147,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
             "base.settings.title"                => ["translatable" => true],
             "base.settings.title.backoffice"     => ["translatable" => true],
+            "base.settings.description"          => ["form_type" => TextareaType::class, "translatable" => true],
+            "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
@@ -158,20 +162,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ], $fields);
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
-
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
 
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
+            $settings = array_transforms(
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
+                $this->baseService->getSettings()->getRawScalar($fields)
+            );
 
-            $settings = array_transforms(function($k, $s): ?array {
-                if($s === null) return null;
-                return [$s->getName(), $s];
-            }, $this->baseService->getSettings()->getRawScalar($fields));
-
-            $settings = array_filter($settings, fn($value) => !is_null($value));
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
@@ -205,13 +206,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
+            $settings = array_transforms(
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
+                $this->baseService->getSettings()->getRawScalar($fields)
+            );
 
-            $settings = array_transforms(function($k, $s): ?array {
-                if($s === null) return null;
-                return [$s->getName(), $s];
-            }, $this->baseService->getSettings()->getRawScalar($fields));
-
-            $settings = array_filter($settings, fn($value) => !is_null($value));
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 

@@ -1,0 +1,7 @@
+<div {{ html_attributes(row_attr) }}>
+    <ul {{ html_attributes(attr) }}>
+        {% for item in widget.hyperlinks %}
+        <li><a href="{{ item.generate() }}">{{ item|iconify|first|raw }}</a></li>
+        {% endfor %}
+    </ul>
+</div>

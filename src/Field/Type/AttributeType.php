@@ -134,7 +134,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $choiceForm = iterator_to_array($forms)["choice"];
         if ($viewData instanceof PersistentCollection)
             $choiceForm->setData($viewData->map(fn($e) => $e->getAttributePattern()));
-        else if(is_object($entity = $viewData))
+        else if($viewData instanceof Attribute)
             $choiceForm->setData($viewData->getAttributePattern());
     }
 

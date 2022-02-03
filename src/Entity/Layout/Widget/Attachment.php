@@ -25,6 +25,12 @@ class Attachment extends Widget implements IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; } 
 
+    public function __toString() 
+    {
+        $path = $this->getTwigExtension()->getRoutingExtension()->getPath("widget_attachment", ["slug" => $this->getSlug()]);
+        return "<a href='".$path."'>".$this->getTitle()."</a>";
+    }
+    
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @Slugify(reference="translations.title")
@@ -38,22 +44,15 @@ class Attachment extends Widget implements IconizeInterface
         return $this;
     }
 
-    public function __toString() 
-    {
-        $path = $this->getTwigExtension()->getRoutingExtension()->getPath("widget_attachment", ["slug" => $this->getSlug()]);
-        return "<a href='".$path."'>".$this->getTitle()."</a>";
-    }
-    
     /**
      * @ORM\Column(type="text")
      * @Uploader(storage="local.storage", public="/storage", size="4096K")
      * @AssertBase\FileSize(max="4096K", groups={"new", "edit"})
      */
-    protected $file;
-
-    public function getPath() { return Uploader::getPublic($this, "file"); }
-    public function getFile() { return Uploader::get($this, "file"); }
-    public function setFile($file)
+    protected $download;
+    public function getDownload() { return Uploader::getPublic($this, "download"); }
+    public function getDownloadFile() { return Uploader::get($this, "download"); }
+    public function setDownload($file)
     {
         $this->file = $file;
         return $this;

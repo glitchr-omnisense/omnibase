@@ -8,6 +8,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\PageRepository;
 
@@ -29,7 +30,7 @@ class Page extends Widget implements IconizeInterface
         return "<a href='".$path."'>".$this->getTitle()."</a>";
     }
 
-    public function __construct(string $title = "", ?string $slug = null)
+    public function __construct(string $title, ?string $slug = null)
     {
         parent::__construct($title);
         $this->setSlug($slug);
@@ -42,7 +43,7 @@ class Page extends Widget implements IconizeInterface
      */
     protected $slug;
     public function getSlug(): ?string { return $this->slug; }
-    public function setSlug(string $slug): self
+    public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
         return $this;

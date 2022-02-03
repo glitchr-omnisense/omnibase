@@ -11,6 +11,7 @@ use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
 use Base\Twig\Extension\BaseTwigExtension;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Security;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;

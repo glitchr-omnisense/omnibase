@@ -55,6 +55,10 @@ layout:
       singular: "lien"
       plural: "liens"
 
+    linkset:
+      singular: "jeu de liens"
+      plural: "jeux de liens"
+
     attachment:
       singular: "pièce jointe"
       plural: "pièces jointes"

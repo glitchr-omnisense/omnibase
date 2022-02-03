@@ -310,12 +310,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                 if($property != preg_replace("/^[0-9.]+/", "",$path))
                     continue;
 
-                foreach($_ as $yield) yield $yield;
+                foreach($_ ?? [] as $yield) yield $yield;
                 unset($associativeYields[$path]);
             }
         }
         
-        foreach($associativeYields as $_) foreach($_ as $yield) 
+        foreach($associativeYields as $_) foreach($_ ?? [] as $yield) 
             yield $yield;
     }
 

@@ -42,11 +42,11 @@ class Pagination implements PaginationInterface, Iterator
         $this->router = $router;
     }
 
-    public function rewind(): void { $this->pageIter = 0; }
-    public function next(): void   { $this->pageIter++; }
-    public function key()          { return ($this->page-1)*$this->pageSize + $this->pageIter+1;    }
-    public function valid(): bool  { return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0; }
-    public function current()      { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
+    public function rewind(): void   { $this->pageIter = 0; }
+    public function next(): void     { $this->pageIter++; }
+    public function key(): mixed     { return ($this->page-1)*$this->pageSize + $this->pageIter+1;    }
+    public function valid(): bool    { return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0; }
+    public function current(): mixed { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
 
     public function get() { return $this->instance; }
     public function getQuery() { $this->isQuery() ? $this->instance->getQuery() : null; }

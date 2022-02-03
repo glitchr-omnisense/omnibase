@@ -163,7 +163,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 /* Override options.. I couldn't done that without accessing data */
                 // It might be good to get read of that and be able to use normalizer.. as expected
-                if(!$options["choices"] && !$options["autocomplete"])
+                if(!$options["tags"] && !$options["choices"] && !$options["autocomplete"])
                     throw new \Exception("No choices, or autocomplete option, could be guessed without using data information for \"".$form->getName()."\"");
             }
 
@@ -317,7 +317,6 @@ class SelectType extends AbstractType implements DataMapperInterface
     }
 
     public function mapDataToForms($viewData, Traversable $forms) { }
-
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choicesType = current(iterator_to_array($forms));
@@ -368,7 +367,6 @@ class SelectType extends AbstractType implements DataMapperInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        
         /* Override options.. I couldn't done that without accessing data */
         $options["class"]         = $this->formFactory->guessType($form, $options);
         $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
@@ -376,10 +374,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
         $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
         $options["choices"]       = $this->formFactory->guessChoices($form, $options);
-
-        // Tabulation
-        $view->vars["tabulation"] = $options["tabulation"];
-
+        
         if($options["select2"] !== null) {
 
             $multipleExpected = $form->getData() === null || $form->getData() instanceof Collection || is_array($form->getData());
@@ -423,9 +418,19 @@ class SelectType extends AbstractType implements DataMapperInterface
             if(!array_key_exists("dropdownCssClass", $selectOpts) && $options["dropdownCssClass"] !== null)
                      $selectOpts["dropdownCssClass"]  = $options["dropdownCssClass"];
 
-            $selectOpts["containerCssClass"] = "";
+            $selectOpts["containerCssClass"] = $selectOpts["containerCssClass"] ?? "";
+            $selectOpts["dropdownCssClass"] = $selectOpts["dropdownCssClass"] ?? "";
             if($options["vertical"] != false)
                 $selectOpts["containerCssClass"] .= " select2-selection--vertical";
+
+            if($options["tags"] && !$options["autocomplete"] && empty($options["choices"])) {
+                $selectOpts["containerCssClass"] .= " select2-selection--wrap";
+                $selectOpts["dropdownCssClass"]  .= " select2-selection--hide";
+            }
+
+            if($options["tags"]) {
+                $view->vars["tokenSeparators"] = $options["tokenSeparators"];
+            }
 
             if(!array_key_exists("placeholder", $selectOpts) && $options["placeholder"] !== null)
                      $selectOpts["placeholder"] = $this->translator->trans($options["placeholder"] ?? "", [], "@fields");
@@ -461,7 +466,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
                     else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
 
-                    $text = empty($text) ? $key : $text;
+                    $text = is_string($key) ? $key : $text;
                     $self = array_pop_key("_self", $choices);
 
                     if(! $self) yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
@@ -483,7 +488,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if(!$entry) return null;
 
                     // Special text formatting
-                    if(is_string($key)) $entry["text"] = $entry["text"] ?? $key;
+                    $entry["text"] = is_string($key) ? $key : $entry["text"];
 
                     // Check if entry selected
                     $entry["depth"] = $d;
@@ -520,6 +525,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Default select2 initialializer
             $view->vars["select2"] = json_encode($selectOpts);
             $view->vars["select2-sortable"] = $options["sortable"];
+            $view->vars["tabulation"] = $options["tabulation"];
+    
 
             // Import select2
             $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);

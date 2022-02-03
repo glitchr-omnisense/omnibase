@@ -18,7 +18,7 @@ use Base\Traits\BaseTrait;
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * 
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
@@ -32,12 +32,16 @@ class Widget implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
-    public function __construct(string $title = "")
+    public function __toString() { return $this->getTitle(); }
+
+    public function __construct(string $title, ?string $excerpt = null, ?string $content = null)
     {
         $this->setTitle($title);
+        $this->setExcerpt($excerpt);
+        $this->setContent($content);
     }
 
-    protected string $template = "";
+    protected ?string $template;
     public function getTemplate()
     {
         if($this->template) return $this->template;
@@ -48,13 +52,11 @@ class Widget implements TranslatableInterface, IconizeInterface
         return $defaultTemplate;
     }
 
-    public function setTemplate(string $template)
+    public function setTemplate(?string $template)
     {
         $this->template = $template;
         return $this;
     }
-
-    public function __toString() { return class_basename(get_called_class()) ." [".$this->getId()." - ".$this->getUuid()."]"; }
 
     /**
      * @ORM\Id

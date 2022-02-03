@@ -36,11 +36,10 @@ class IsNullable extends AbstractAnnotation
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
         if(!property_exists($classMetadata->getName(), $this->column)) throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
-        
-        $associationMapping = $classMetadata->getAssociationMapping($this->column);
-        $associationMapping["nullable"] = $this->value;
 
-        if(array_key_exists($this->column,  $classMetadata->associationMappings))
-            $classMetadata->associationMappings[$this->column] = $associationMapping;
+        $mapping = $classMetadata->associationMappings[$classMetadata->getFieldName($this->column)] ?? 
+                   $classMetadata->fieldMappings[$classMetadata->getFieldName($this->column)];
+
+        $mapping["nullable"] = $this->value;
     }
 }

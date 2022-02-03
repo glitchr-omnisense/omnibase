@@ -14,6 +14,8 @@ use Base\Repository\Layout\Attribute\HyperlinkRepository;
 /**
  * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
  * @DiscriminatorEntry( value = "hyperlink" )
+ * 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
 class Hyperlink extends Attribute implements IconizeInterface
@@ -23,14 +25,15 @@ class Hyperlink extends Attribute implements IconizeInterface
 
     public function __toString() 
     {
-      $url = $this->generateUrl();
-      $url = $url != "" ? ":" . $url : $url;
+      $url = $this->generate();
+      $url = $url != "" ? ": " . $url : $url;
 
       return $this->getHyperpattern().$url; 
     }
 
     /**
       * @ColumnAlias(column = "attributePattern")
+      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
       */
     protected $hyperpattern;
     public function getHyperpattern(): HyperpatternAttribute { return $this->hyperpattern; }
@@ -40,6 +43,5 @@ class Hyperlink extends Attribute implements IconizeInterface
         return $this;
     }
 
-    public function generateHtml(?string $locale = null) { return $this->getHyperpattern()->generateHtml(...$this->translate($locale)->getValue()); }
-    public function generateUrl(?string $locale = null)  { return $this->getHyperpattern()->generateUrl(...$this->translate($locale)->getValue()); }
+    public function generate(?string $locale = null) { return $this->getHyperpattern()->generate(...$this->translate($locale)->getValue()); }
 }

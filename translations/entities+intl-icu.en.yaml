@@ -52,6 +52,9 @@ layout:
     link:
       singular: "link"
       plural: "links"
+    linkset:
+      singular: "linkset"
+      plural: "linkset"
     attachment:
       singular: "attachment"
       plural: "attachments"

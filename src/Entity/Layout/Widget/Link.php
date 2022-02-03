@@ -18,16 +18,18 @@ use Base\Repository\Layout\Widget\LinkRepository;
 
 class Link extends Widget implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; } 
 
+    public function __construct(Hyperlink $hyperlink) { $this->setHyperlink($hyperlink); }
+
     /**
-     * @ORM\ManyToOne(targetEntity=Hyperlink::class)
+     * @ORM\ManyToOne(targetEntity=Hyperlink::class, cascade={"persist"})
      * @ORM\JoinColumn(nullable=false)
      */
-    private $hyperlink;
-    public function getHyperlink(): ?Hyperlink { return $this->hyperlink; }
-    public function setHyperlink(?Hyperlink $hyperlink): self
+    protected $hyperlink;
+    public function getHyperlink(): Hyperlink { return $this->hyperlink; }
+    public function setHyperlink(Hyperlink $hyperlink)
     {
         $this->hyperlink = $hyperlink;
         return $this;
@@ -35,6 +37,7 @@ class Link extends Widget implements IconizeInterface
 
     public function __toString() 
     {
-        return "<a href='".$this->getHyperlink()->generateUrl()."'>".$this->getTitle()."</a>";
+        $title = $this->getTitle() ?? $this->getHyperlink()->getTitle() ?? $this->__iconize();
+        return "<a href='".$this->getHyperlink()->generateUrl()."'>".$title."</a>";
     }
 }

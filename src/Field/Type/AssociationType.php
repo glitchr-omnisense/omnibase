@@ -164,6 +164,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         $data = $viewData;
+
         if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));

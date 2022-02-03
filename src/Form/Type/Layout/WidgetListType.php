@@ -3,6 +3,7 @@
 namespace Base\Form\Type\Layout;
 
 use Base\Entity\Layout\Widget;
+use Base\Entity\Layout\Widget\Slot;
 use Base\Field\Type\SelectType;
 use Base\Service\WidgetProvider;
 use Base\Service\WidgetProviderInterface;
@@ -28,9 +29,8 @@ class WidgetListType extends AbstractType implements DataMapperInterface
         $resolver->setDefaults([
             'widgets' => [],
             'sortable' => true,
-            'multiple' => false,
             'excluded_widgets' => [],
-            'locale' => null
+            'locale' => null,
         ]);
     }
 
@@ -69,13 +69,10 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
 
                 $widgetSlot = str_replace("-", ".", $formattedWidget);
-                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot);
+                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot) ?? new Slot($formattedWidget, "");
             }
 
             foreach($widgetSlots as $formattedWidget => $slot) {
-
-                $slotLabel = ($slot ? $slot->getLabel() : null);
-                $slotHelp  = ($slot ? $slot->getHelp()  : null);
 
                 // Exclude requested widgets
                 $widget = str_replace("-", ".", $formattedWidget);
@@ -85,7 +82,6 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 // Set widget options
                 $widgetOptions = $options["widgets"][$widget];
                 $widgetOptions["attr"] = $opts["attr"] ?? [];
-                $widgetOptions["multiple"] = $options["widgets"][$widget]["multiple"] ?? false;
 
                 $widgetOptions["data_class"] = null;
                 $widgetOptions["required"]   = $options["widgets"][$widget]["required"] ?? false;
@@ -97,15 +93,14 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 // Set default label
                 if(!array_key_exists("label", $widgetOptions)) {
                     $label = explode("-", $formattedWidget);
-                    $widgetOptions["label"] = $slotLabel ?? mb_ucwords(str_replace("_", " ", camel_to_snake(end($label))));
+                    $widgetOptions["label"] = $slot->getLabel() ?? mb_ucwords(str_replace("_", " ", camel_to_snake(end($label))));
                 }
 
                 if(!array_key_exists("help", $widgetOptions))
-                    $widgetOptions["help"] = $slotHelp ?? "";
+                    $widgetOptions["help"] = $slot->getHelp() ?? "";
 
-                $widgets = $slot ? $slot->getWidgets()->toArray() : [];
                 $form->add($formattedWidget, SelectType::class, $widgetOptions);
-                $form->get($formattedWidget)->setData($widgetOptions["multiple"] ? $widgets : begin($widgets) ?? null);
+                $form->get($formattedWidget)->setData($slot->getWidget() ?? null);
             }
 
             if(count($options["widgets"]) > 0)
@@ -123,9 +118,9 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $newViewData[$name] = $child->getData();
 
         $newViewData = $this->getFormattedData($newViewData, "-", ".");
-        
+
         foreach($newViewData as $widget => $value) {
-            
+
             if($widget == "valid") continue;
 
             $formattedWidget = str_replace(".", "-", $widget);

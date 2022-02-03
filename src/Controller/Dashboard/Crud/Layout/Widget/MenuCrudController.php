@@ -9,7 +9,6 @@ use Base\Field\DiscriminatorField;
 use Base\Field\SelectField;
 use Base\Field\SlugField;
 use Base\Field\TranslationField;
-use Base\Field\Type\QuillType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
