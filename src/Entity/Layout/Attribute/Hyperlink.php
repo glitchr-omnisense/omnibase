@@ -25,10 +25,7 @@ class Hyperlink extends Attribute implements IconizeInterface
 
     public function __toString() 
     {
-      $url = $this->generate();
-      $url = $url != "" ? ": " . $url : $url;
-
-      return $this->getHyperpattern().$url; 
+      return "<b>".$this->getHyperpattern()."</b>: ".implode(", ", $this->getValue()); 
     }
 
     /**
@@ -44,4 +41,5 @@ class Hyperlink extends Attribute implements IconizeInterface
     }
 
     public function generate(?string $locale = null) { return $this->getHyperpattern()->generate(...$this->translate($locale)->getValue()); }
+    public function getLabel(): string { return $this->getHyperpattern()->getLabel(); }
 }

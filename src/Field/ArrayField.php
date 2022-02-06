@@ -11,6 +11,7 @@ class ArrayField extends CollectionField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_ASSOCIATIVE        = 'associative';
     public const OPTION_LENGTH             = 'length';
     public const OPTION_PATTERN_FIELD_NAME = 'pattern';
     public const OPTION_PLACEHOLDER        = 'placeholder';
@@ -41,6 +42,12 @@ class ArrayField extends CollectionField implements FieldInterface
     public function setLength(int $length): self 
     {
         $this->setFormTypeOption(self::OPTION_LENGTH, min(0, $length));
+        return $this;
+    }
+
+    public function useAssociativeKeys(bool $use_associative = true): self 
+    {
+        $this->setFormTypeOption(self::OPTION_ASSOCIATIVE, $use_associative);
         return $this;
     }
 

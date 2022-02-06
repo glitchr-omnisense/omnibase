@@ -70,6 +70,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         while($path !== "") {
 
             $path = rtrim($path === null ? $request->getPathInfo() : dirname($path), "/");
+            
             $controller = $this->getController($path);
             if(!$controller) continue;
 
@@ -89,7 +90,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             $routeParameters    = $route ? array_filter($this->getRouteParameters($path, rtrim($route->getPath(), "/")) ?? []) : [];
             $routeParameterKeys = array_keys($routeParameters);
 
-            $transPath = implode("_", array_merge([$routeName], $routeParameterKeys));
+            $transPath = implode(".", array_merge([$routeName], $routeParameterKeys));
             $transParameters = array_transforms(fn($k, $v):array => [$k, 
                 $k == "id"   ? "#".$v : (
                 $k == "slug" ? ucwords(str_replace(["-","_"], " ", $v)) : $v
@@ -98,21 +99,24 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             $label = $routeName ? $this->translator->trans("@controllers.".$transPath.".title", $transParameters) : null;
             if($label == "@controllers.".$transPath.".title") $label = "";
 
+            $pageTitle = null;
             if($first) {
 
                 $pageTitle = $this->getOption("page_title");
-                if($pageTitle && !$label) {
+                if($pageTitle) {
                     
                     $this->appendItem($pageTitle);
                     $icons[] = null;
+
                 }
 
                 $first = false;
             }
 
-            if(!$route) continue;
+            if($pageTitle !== null || !$route) continue;
             $this->prependItem($label, $routeName, $routeParameters ?? []);
-            $icons[] = $icon;
+            $icons[] = $this->getOption("icons") !== false ? $icon : null;
+
         }
 
         $this->addOption("icons", array_unique_end($icons));

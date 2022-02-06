@@ -250,7 +250,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
 
             $this->referrer->setUrl($event->getRequest()->getUri());
-            dump($event->getRequest());
+
             $event->setResponse($this->baseService->redirectToRoute("security_logoutRequest"));
             return $event->stopPropagation();
         }

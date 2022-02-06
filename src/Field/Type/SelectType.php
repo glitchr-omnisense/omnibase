@@ -2,6 +2,8 @@
 
 namespace Base\Field\Type;
 
+use App\Enum\UserRole;
+use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Model\Autocomplete;
@@ -11,6 +13,8 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Generator;
 use Hashids\Hashids;
 use Symfony\Component\OptionsResolver\Options;
@@ -39,7 +43,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var FormFactory */
     protected $formFactory;
 
-    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, BaseService $baseService)
+    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator, BaseService $baseService)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
@@ -50,6 +54,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
         $this->formFactory = $formFactory;
         $this->localeProvider = $localeProvider;
+        $this->adminUrlGenerator = $adminUrlGenerator;
 
         $this->autocomplete = new Autocomplete($this->translator);
     }
@@ -111,6 +116,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             'minimumResultsForSearch' => 0,
             "dropdownCssClass"   => null,
             "containerCssClass"  => null,
+
+            'href'               => null,
+            'repeater'           => false,
 
             // Autocomplete
             'autocomplete'          => null,
@@ -465,8 +473,8 @@ class SelectType extends AbstractType implements DataMapperInterface
                          if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL); 
                     else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
                     else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
+                    else $text = is_string($key) ? $key : $text;
 
-                    $text = is_string($key) ? $key : $text;
                     $self = array_pop_key("_self", $choices);
 
                     if(! $self) yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
@@ -483,13 +491,15 @@ class SelectType extends AbstractType implements DataMapperInterface
                 } else {
 
                     // Format values
+                    $entry = $choices;
                     $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                    $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
+                    $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, $entryFormat);
                     if(!$entry) return null;
 
                     // Special text formatting
-                    $entry["text"] = is_string($key) ? $key : $entry["text"];
-
+                    $fallback = is_string($key) ? $key : (is_string($choices) ? castcase($choices, $entryFormat) : $choices);
+                    $entry["text"] = $entry["text"] ?? $fallback;
+                    
                     // Check if entry selected
                     $entry["depth"] = $d;
                     $entry["selected"] = false;
@@ -521,12 +531,27 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
             }
 
+            // 
+            // Set controller url
+            $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
+            
+            $href = null;
+            if($options["href"] === null && $crudController && $this->baseService->isGranted(UserRole::ADMIN)) {
+
+                $href = $this->adminUrlGenerator
+                        ->unsetAll()
+                        ->setController($crudController)
+                        ->setAction(Action::EDIT)
+                        ->setEntityId("{0}")
+                        ->generateUrl();
+            }
+
             //
             // Default select2 initialializer
-            $view->vars["select2"] = json_encode($selectOpts);
+            $view->vars["select2"]          = json_encode($selectOpts);
             $view->vars["select2-sortable"] = $options["sortable"];
-            $view->vars["tabulation"] = $options["tabulation"];
-    
+            $view->vars["select2-href"]     = $href;
+            $view->vars["tabulation"]       = $options["tabulation"];
 
             // Import select2
             $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);

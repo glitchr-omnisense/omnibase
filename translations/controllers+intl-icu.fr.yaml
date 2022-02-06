@@ -1,4 +1,5 @@
 widget_page:
+  title: "Pages"
   slug:
     title: "{slug}"
 

@@ -3,6 +3,7 @@
 namespace Base\Controller\Dashboard\Crud\Layout\Widget;
 
 use Base\Controller\Dashboard\Crud\Layout\WidgetCrudController;
+use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Field\DiscriminatorField;
 use Base\Field\SelectField;
@@ -21,11 +22,11 @@ class SlotCrudController extends WidgetCrudController
     {
         yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
         yield SlugField::new('path')->setColumns(6)->setTargetFieldName("translations.label");
-        yield SelectField::new("widgets")->setColumns(6)->setFilter("^".Slot::class);
+        yield SelectField::new("widgets")->setColumns(6)->setClass(Widget::class)->setFilter("^".Slot::class);
         
         yield TranslationField::new('label')->autoload(false)->setFields([
-            "label"   => TextType::class,
-            "help" => QuillType::class,
+            "label" => TextType::class,
+            "help"  => QuillType::class,
         ]);
     }
 }

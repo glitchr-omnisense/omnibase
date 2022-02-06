@@ -8,7 +8,7 @@ use Base\Field\DiscriminatorField;
 use Base\Field\IconField;
 use Base\Field\SlugField;
 use Base\Field\TranslationField;
-use Base\Model\IconProvider\BootstrapTwitter;
+
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;

@@ -73,6 +73,8 @@ class CollectionType extends AbstractType
             if (null !== $options['entry_required'])
                 $prototypeOptions['required'] = $options['entry_required'];
 
+            $prototypeOptions['attr']['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->baseService->getTranslator()->trans("@fields.array.value");
+
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
             $builder->setAttribute('prototype', $prototype->getForm());
         }
@@ -83,8 +85,8 @@ class CollectionType extends AbstractType
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
                 $data = $event->getData() ?? [];
-
                 $data = array_pad($data, $options["length"], null);
+
                 $event->setData($data);
             });
         }

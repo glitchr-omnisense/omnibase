@@ -12,6 +12,8 @@ collection:
   empty: Vide
 
 array:
+  key: "Variable"
+  value: "Valeur"
   empty: Vide
 
 fileupload:

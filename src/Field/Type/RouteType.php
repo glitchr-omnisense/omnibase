@@ -1,35 +1,39 @@
 <?php
 
-namespace Base\Field;
+namespace Base\Field\Type;
 
 use Base\Field\Type\SelectType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\ChoiceList\ChoiceList;
-use Symfony\Component\Form\ChoiceList\Loader\IntlCallbackChoiceLoader;
-use Symfony\Component\Form\Exception\LogicException;
-use Symfony\Component\Intl\Currencies;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Routing\RouterInterface;
 
-class CurrencyType extends AbstractType
+class RouteType extends AbstractType
 {
     public function getParent() { return SelectType::class; }
-    public function getBlockPrefix() { return 'currency'; }
+    public function getBlockPrefix() { return 'route'; }
+
+    public function __construct(RouterInterface $router) {
+
+        $this->router = $router;
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'choice_loader' => function (Options $options) {
-                if (!class_exists(Intl::class)) {
-                    throw new LogicException(sprintf('The "symfony/intl" component is required to use "%s". Try running "composer require symfony/intl".', static::class));
-                }
 
-                $choiceTranslationLocale = $options['choice_translation_locale'];
+                $routeList = [];
+                return ChoiceList::loader($this, new CallbackChoiceLoader(function () {
 
-                return ChoiceList::loader($this, new IntlCallbackChoiceLoader(function () use ($choiceTranslationLocale) {
-                    return array_flip(Currencies::getNames($choiceTranslationLocale));
-                }), $choiceTranslationLocale);
+                    return array_flip(array_transforms(
+                        fn($k, $r):array => [$k, "<b>Name:</b> ".$k." | <b>Path:</b> ".$r->getPath()], 
+                        $this->router->getRouteCollection()->all(),
+                    ));
+
+                }), $routeList);
             },
             'choice_translation_domain' => false,
             'choice_translation_locale' => null,

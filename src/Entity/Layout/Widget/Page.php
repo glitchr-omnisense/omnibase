@@ -14,6 +14,7 @@ use Base\Repository\Layout\Widget\PageRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "page" )
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})

@@ -25,9 +25,9 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
         "placeholder" => $this->getPlaceholder() ?? []
     ]; }
 
-    public function __construct(string $label, ?string $path = null, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
+    public function __construct(string $label, ?string $code = null, ?string $icon = "fas fa-laptop", string $pattern = "https://{0}")
     {
-        parent::__construct($label, $path);
+        parent::__construct($label, $code);
         $this->setIcon($icon);
         $this->setPattern($pattern);
     }

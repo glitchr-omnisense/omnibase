@@ -2,14 +2,16 @@
 
 namespace Base\Subscriber;
 
-use Base\Controller\MainController as BaseController;
 use Base\Service\BaseService;
-use Base\Service\TranslatorInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
+use EasyCorp\Bundle\EasyAdminBundle\Exception\ForbiddenActionException;
+use InvalidArgumentException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -18,7 +20,8 @@ class BaseSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
-        $this->autoAppend = $this->baseService->getParameterBag("base.twig.autoappend");
+
+        $this->autoAppend  = $this->baseService->getParameterBag("base.twig.autoappend");
     }
 
     public static function getSubscribedEvents(): array
@@ -27,7 +30,6 @@ class BaseSubscriber implements EventSubscriberInterface
             ConsoleEvents::COMMAND => ['onConsoleCommand'],
             KernelEvents::REQUEST  => ['onKernelRequest', 128],
             KernelEvents::RESPONSE => ['onKernelResponse'],
-            KernelEvents::EXCEPTION => ['onKernelException'],
         ];
     }
 
@@ -63,8 +65,6 @@ class BaseSubscriber implements EventSubscriberInterface
         
         return true;
     }
-
-    public function onKernelException(ExceptionEvent $e) { $e->stopPropagation(); }
 
     public function onKernelResponse(ResponseEvent $event)
     {

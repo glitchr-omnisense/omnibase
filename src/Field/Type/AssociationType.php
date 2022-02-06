@@ -8,7 +8,7 @@ use Base\Form\FormFactory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 
@@ -222,9 +222,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $viewData = is_object($viewData) ? $viewData : $this->entityHydrator->hydrate($options["class"], []);
             foreach ($fields as $property => $value)
-                $this->propertyAccessor->setValue($viewData, $property, $value);
+                try { $this->propertyAccessor->setValue($viewData, $property, $value); } catch(Exception $e) {}
             foreach($associations as $property => $value)
-                $this->propertyAccessor->setValue($viewData, $property, $value);
+                try { $this->propertyAccessor->setValue($viewData, $property, $value); } catch(Exception $e) {}
 
         } else if($viewData instanceof PersistentCollection) {
 

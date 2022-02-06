@@ -232,10 +232,10 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
-        
+
         if($options["choices"]) return false;
         if($options["autocomplete"] === null && $options["class"]) {
-            
+
             $target = $options["class"];
             if($this->classMetadataManipulator->isEntity($target))
                 return true;

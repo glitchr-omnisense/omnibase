@@ -1,1 +1,7 @@
-URL
+<div {{ html_attributes(row_attr) }}>
+    {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
+    {% set url = hyperlink.generate() %}
+    {% if url is not empty %}
+        <a href="{{ url }}">{{ item|iconify|first|raw }} {{ item.getLabel() }}</a>
+    {% endif %}
+</div>

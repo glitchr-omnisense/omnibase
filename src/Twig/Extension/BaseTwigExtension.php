@@ -195,7 +195,7 @@ final class BaseTwigExtension extends AbstractExtension
 
             $path = $url;
 
-            $https      = $_SERVER['HTTPS']       ?? $this->baseService->getSettings()->protocol();
+            $https      = $_SERVER['HTTPS']       ?? $this->baseService->getSettings()->scheme();
             $serverName = $_SERVER['SERVER_NAME'] ?? $this->baseService->getSettings()->domain();
             $baseDir    = $_SERVER['BASE']        ?? $_SERVER["CONTEXT_PREFIX"] ?? $this->baseService->getSettings()->base_dir();
             $baseDir    = "/".trim($baseDir, "/");

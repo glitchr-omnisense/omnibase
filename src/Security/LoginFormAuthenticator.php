@@ -109,7 +109,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $request->getSession()->remove("_target_path");
 
         if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
-            return $this->baseService->redirectToRoute($targetPath);
+            return $this->baseService->redirect($targetPath);
 
         return $this->baseService->redirectToRoute($this->baseService->getRoute("/"));
     }

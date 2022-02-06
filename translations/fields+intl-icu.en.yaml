@@ -12,6 +12,8 @@ collection:
   empty: Empty
   
 array:
+  key: "Key"
+  value: "Value"
   empty: Empty
   
 fileupload:

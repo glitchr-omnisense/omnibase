@@ -26,7 +26,7 @@ class BaseSettings
     public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
     public function mail       (?string $locale = null) : ?string { return $this->getScalar("base.settings.mail",      $locale); }
     public function mail_name  (?string $locale = null) : ?string { return $this->getScalar("base.settings.mail.name", $locale); }
-    public function protocol   (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.https",    $locale)) ? "https" : "http"; }
+    public function scheme     (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.scheme",    $locale)) ? "https" : "http"; }
     public function maintenance(?string $locale = null) : bool    { return filter_var($this->getScalar("base.settings.maintenance",     $locale)); }
     public function base_dir   (?string $locale = null) : string  { return $this->getScalar("base.settings.domain.base_dir", $locale) ?? "/"; }
     public function url($url, $packages = null) { return $this->packages->getUrl($url, $packages); }

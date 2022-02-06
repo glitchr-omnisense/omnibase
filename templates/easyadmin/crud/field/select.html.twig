@@ -146,8 +146,10 @@
                 {{ iconAlign == "left" ? icon|raw : "" }}
                 {% if icon is not null %}
                     <span class="label">{{formattedValue.text|striptags|default("-")}}</span>
-                {% else %}
+                {% elseif formattedValue is iterable %}
                     {{formattedValue.text|striptags|default("-")}}
+                {% else %}
+                    {{formattedValue|striptags|default("-")}}
                 {% endif %}
                 {{ iconAlign != "left" ? icon|raw : "" }}
             </span>

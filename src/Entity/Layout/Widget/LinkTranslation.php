@@ -4,7 +4,6 @@ namespace Base\Entity\Layout\Widget;
 
 use Doctrine\ORM\Mapping as ORM;
 
-use Base\Database\Annotation\ColumnAlias;
 use Base\Database\Annotation\IsNullable;
 use Base\Entity\Layout\WidgetTranslation;
 

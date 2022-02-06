@@ -46,27 +46,25 @@ layout:
   widget:
     singular: "personnalisation"
     plural: "personnalisations"
-
+    
     page:
       singular: "page"
       plural: "pages"
-
     link:
       singular: "lien"
       plural: "liens"
-
     linkset:
       singular: "jeu de liens"
       plural: "jeux de liens"
-
     attachment:
       singular: "pièce jointe"
       plural: "pièces jointes"
-
+    route:
+      singular: "route"
+      plural: "routes"
     menu:
       singular: "menu"
       plural: "menu"
-
     slot:
       singular: emplacement
       plural: "emplacements"

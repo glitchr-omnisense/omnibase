@@ -13,6 +13,7 @@ use Base\Repository\Layout\Widget\LinkRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LinkRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "hyperlink" )
  */
 
@@ -25,6 +26,7 @@ class Link extends Widget implements IconizeInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Hyperlink::class, cascade={"persist"})
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
      * @ORM\JoinColumn(nullable=false)
      */
     protected $hyperlink;

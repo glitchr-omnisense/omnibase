@@ -17,6 +17,22 @@ class AttributeTranslation implements TranslationInterface
 {
     use TranslationTrait;
 
+    public function isEmpty(): bool
+    {
+        foreach (get_object_vars($this) as $var => $value) {
+
+            if (in_array($var, ['id', 'translatable', 'locale'], true))
+                continue;
+
+            if(is_array($value)) 
+                $value = array_filter($value);
+
+            if (!empty($value)) return false;
+        }
+        
+        return true;
+    }
+
     /**
      * @ORM\Column(type="array")
      * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})

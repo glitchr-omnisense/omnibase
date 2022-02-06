@@ -57,8 +57,15 @@
         </service>
 
         <service id="Base\Subscriber\BaseSubscriber">
-            <tag name="kernel.event_subscriber" />            
+            <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Subscriber\EasyAdminSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
         <service id="Base\Service\BaseSettings" public="true">
@@ -321,6 +328,7 @@
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
         <service id="Base\Database\Factory\EntityHydrator"  public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
@@ -535,6 +543,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Type\RouteType">
+            <tag name="form.type" />
+            <argument type="service" id="router.default" />
+        </service>
+
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
             <argument type="service" id="base.form.factory" />
@@ -543,6 +556,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="locale_provider" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -657,7 +671,9 @@
         <service id="Base\Field\Configurator\EmailConfigurator"         ><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DateTimePickerConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\CollectionConfigurator"    ><tag name="ea.field_configurator" /></service>
-        <service id="Base\Field\Configurator\ArrayConfigurator" parent="Base\Field\Configurator\CollectionConfigurator"><tag name="ea.field_configurator" /></service>
+        <service id="Base\Field\Configurator\ArrayConfigurator" parent="Base\Field\Configurator\CollectionConfigurator">
+            <tag name="ea.field_configurator" />
+        </service>
 
         <service id="Base\Field\Configurator\SlugConfigurator">
             <tag name="ea.field_configurator" />
@@ -775,6 +791,7 @@
         <service id="Base\Controller\Dashboard\Crud\Layout\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Layout\Widget\LinksetCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Layout\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\RouteCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
         <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 

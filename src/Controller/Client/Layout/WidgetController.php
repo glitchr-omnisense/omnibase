@@ -24,7 +24,7 @@ class WidgetController extends AbstractController
     /**
      * @Route("/page/{slug}", name="widget_page")
      */
-    public function Page($slug = null): Response
+    public function Page($slug): Response
     {
         $page = $this->pageRepository->findOneBySlug($slug);
         if($page === null)
@@ -36,7 +36,7 @@ class WidgetController extends AbstractController
     /**
      * @Route("/attachment/{slug}", name="widget_attachment")
      */
-    public function Attachment($slug = null): BinaryFileResponse
+    public function Attachment($slug): BinaryFileResponse
     {
         $attachment = $this->attachmentRepository->findOneBySlug($slug);
         if($attachment === null)

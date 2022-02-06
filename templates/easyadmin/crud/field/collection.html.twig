@@ -6,6 +6,6 @@
     {% if field is iterable %}
         {{ field.formattedValue|length }}
     {% else %}
-        {{ field.formattedValue|default("0") }}
+        {{ field.formattedValue|default("0")|raw }}
     {% endif %}
 </span>

@@ -55,7 +55,7 @@ class Autocomplete
         } else {
 
             $icon  = is_array($entry) ? $entry[2] ?? $entry[1] ?? $entry[0] : null;
-            $text  = is_array($entry) ?              $entry[1] ?? $entry[0] : $entry;
+            $text  = is_array($entry) ?              $entry[1] ?? $entry[0] : null;
             $id    = is_array($entry) ?                           $entry[0] : $entry;
             $html  = null;
             $data  = [];

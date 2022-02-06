@@ -93,6 +93,7 @@
     {% set attr = attr|merge({
         'data-select2-field'   : form.vars.id~"_choice",
         'data-select2-options' : select2,
+        'data-select2-href'    : form.vars["select2-href"]|default("")|urldecode,
         'data-select2-sortable': form.vars["select2-sortable"],
         'data-tabulation'      : form.vars["tabulation"],
     }) %}
@@ -465,7 +466,7 @@
                returns an empty string, "is empty" returns true even if it's not a collection #}
 
     {% set isEmptyCollection = value is null or (value is iterable and value is empty) %}
-    {% if  isEmptyCollection %}
+    {% if isEmptyCollection %}
         {{ block('collection2_empty') }}
     {% else %}
         {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
@@ -514,27 +515,26 @@
         <div class="accordion form-collection-item">
             <div class="accordion-item">
                 <h2 class="accordion-header">
-                    {% set _href = href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
-                    {% if _href is not empty and form.vars.value is not null and form.children is empty %}
-                    <a class="accordion-button collapsed" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
-                    {% else %}
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
-                    {% endif %}
 
-                    <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-                    {{ form_parent(form).vars.entry_label|default(value)|stringify }}
-                    
-                    {% if href is not empty and form.vars.value is not null and form.children is empty %}
-                    </a>
-                    {% else %}
-                    </button>
-                    {% endif %}
+                    {% set _href    =  href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
+                    {% set linkable = _href is not null and form.vars.value is not null and form.children is empty %}
+
+                    {%- if linkable -%}
+                        <a class="accordion-button collapsed" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
+                    {%- else -%}
+                        <button class="accordion-button collapsed" {{ form.children is empty ? 'style="cursor:default;"' : '' }} 
+                                type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+                    {%- endif -%}
+
+                        <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
+                        {{ form_parent(form).vars.entry_label|default(value)|stringify|raw }}
+
+                    {{ linkable ? "</a>": "</button>" }}
 
                     <div class="form-collection-buttons">
-                        {% set _href = href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
-                        {% if _href is not empty and form.vars.value is not null and form.children is empty %}
+                        {% if form.vars.value is not null %}
                         <button type="button" class="btn btn-link form-collection-link-button">
-                            <a href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
+                            <a href="{{ value.generate() }}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
                         </button>
                         {% endif %}
                         {% if allows_deleting_items %}
@@ -571,10 +571,10 @@
 {%- block array_row -%}
 
     {% if prototype is defined and not prototype.rendered %}
-        {% set prototype_row = form_row(prototype, {attr:{"class": "form-control"}}) %}
+        {% set prototype_row = form_row(prototype, {attr:{"class": "form-control form-inline"}}) %}
         {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
     {% endif %}
-
+    
     {% set attr = attr|merge({
         'data-array-field': 'true',
         'data-allow-add': allow_add ? 'true' : 'false',
@@ -592,7 +592,6 @@
         <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
         {% if form.vars.pattern is not empty %}
             <div class="input-group mb-3">
-
                 {% set pattern = pattern|preg_split("/{[0-9]*}/") %}
                 {% for key,formChild in form %}
                     {% set prevPattern = pattern[key] ?? "" %}
@@ -650,10 +649,11 @@
     {% set pattern = form_parent(form).vars.pattern|default("") %}
     {% set placeholder = form_parent(form).vars.placeholder|default([])%}
     {% set key = form.vars.name|intval %}
+
     {% if key in placeholder|keys and placeholder[key] is not empty %}
         {% set attr = attr|merge({'placeholder': placeholder[key]}) %}
-
     {% endif %}
+
     {% if pattern is not empty %}
         {{ form_widget(form, {attr:attr}) }}
     {% else %}

@@ -58,7 +58,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             "multiple"     => null,
             'allow_delete' => true,
-            'href' => null,
+            'href'         => null,
 
             'max_filesize' => null,
             'max_files'    => null,
@@ -170,7 +170,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                     $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
                     $entityData = is_callable($options["entity_data"]) ? null : $options["entity_data"];
-                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? []);
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid"] /*, ["translations"]*/);
                     $entity = $this->entityHydrator->hydrate($entity, $entityData ?? []);
 
                     $this->propertyAccessor->setValue($entity, $fieldName, $file);
@@ -179,12 +179,13 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                 } else {
 
-                    $filteredData = $viewData->filter(fn($e) => $this->propertyAccessor->setValue($e, $fieldName) == $file);
-                    $entity = $filteredData instanceof ArrayCollection ? $filteredData->first() : null;
+                    $filteredData = $viewData->filter(fn($e) => basename($this->propertyAccessor->getValue($e, $fieldName)));
+                    $entity = $filteredData instanceof ArrayCollection ? $filteredData->first() : false;
+                    $entity = $entity === false ? null : $entity;
                 }
 
-                $entity = is_callable($options["entity_data"]) ? $options["entity_data"]($entity, $parentEntity) : $entity;
-                $data[$key] = $entity;
+                $entity = $entity && is_callable($options["entity_data"]) ? $options["entity_data"]($entity, $parentEntity) : $entity;
+                if($entity !== null) $data[$key] = $entity;
             }
         }
 

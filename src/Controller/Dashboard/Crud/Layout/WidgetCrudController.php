@@ -26,6 +26,10 @@ class WidgetCrudController extends AbstractCrudController
                 "excerpt" => TextareaType::class,
                 "content" => QuillType::class,
             ]);
+
+            yield TranslationField::new("help" )->renderAsHtml()->setRequired(false)
+                    ->setFields(["help" => ["form_type" => QuillType::class]])
+                    ->setExcludedFields("value");
                     
         }, $args);
     }

@@ -11,10 +11,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\LinkRepository;
+use Base\Repository\Layout\Widget\LinksetRepository;
 
 /**
- * @ORM\Entity(repositoryClass=LinkRepository::class)
+ * @ORM\Entity(repositoryClass=LinksetRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "linkset" )
  */
 class Linkset extends Widget implements IconizeInterface
@@ -30,6 +31,7 @@ class Linkset extends Widget implements IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Hyperlink::class, orphanRemoval=true, cascade={"persist"})
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
      */
     protected $hyperlinks;
     public function getHyperlinks(): Collection { return $this->hyperlinks; }

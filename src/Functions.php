@@ -22,64 +22,68 @@ namespace {
         }, $input);
     }
 
+    function is_url(string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
     function is_uuid(string $uuid) { return is_string($uuid) && !(preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid) !== 1); }
-    function synopsis($object) { return class_synopsis($object); }
-    function class_synopsis($object)
+    function synopsis(...$args) { return class_synopsis(...$args); }
+    function class_synopsis(...$args)
     {
-        if (!$object) return dump("Object passed is null");
-        $objectID = (is_object($object)) ? "Object: 0x" . spl_object_hash($object) . "\n" : "";
+        foreach($args as $object) {
 
-        if (!is_object($object) && !is_string($object)) return dump($object);
+            if (!$object) return dump("Object passed is null");
+            $objectID = (is_object($object)) ? "Object: 0x" . spl_object_hash($object) . "\n" : "";
 
-        $className    = (is_string($object) ? $object : get_class($object));
-        if(!class_exists($className)) 
-            return dump("Class \"$className\" not found.");
-        
-        $classParent  = get_parent_class($className);
-        $classMethods = get_class_methods($className);
-        $classVars    = get_class_vars($className);
+            if (!is_object($object) && !is_string($object)) return dump($object);
 
-        $classReflection = new \ReflectionClass($object);
+            $className    = (is_string($object) ? $object : get_class($object));
+            if(!class_exists($className)) 
+                return dump("Class \"$className\" not found.");
+            
+            $classParent  = get_parent_class($className);
+            $classMethods = get_class_methods($className);
+            $classVars    = get_class_vars($className);
 
-        $methods = "";
-        foreach ($classMethods as $methodName) {
+            $classReflection = new \ReflectionClass($object);
 
-            $params = (new \ReflectionMethod($className, $methodName))->getParameters();
+            $methods = "";
+            foreach ($classMethods as $methodName) {
 
-            $args = "";
-            foreach ($params as $param) {
-                $optional = ($param->isOptional()) ? " = optional" : "";
-                $args .= (!empty($args)) ? ", " : "";
-                $args .= "$" . $param->getName() . $optional;
+                $params = (new \ReflectionMethod($className, $methodName))->getParameters();
+
+                $args = "";
+                foreach ($params as $param) {
+                    $optional = ($param->isOptional()) ? " = optional" : "";
+                    $args .= (!empty($args)) ? ", " : "";
+                    $args .= "$" . $param->getName() . $optional;
+                }
+
+                $methods .= "\n     public function " . $methodName . "(" . $args . ") { ... }";
             }
 
-            $methods .= "\n     public function " . $methodName . "(" . $args . ") { ... }";
+            $vars = "";
+            foreach ($classVars as $varName => $value) {
+
+                $value = ( is_array($value)) ? print_r($value, true) : (
+                            (is_object($value) && !method_exists($value, '__toString')) ? get_class($value)."(not is_stringeable)" : $value);
+
+                $vars .= (!empty($vars)) ? ",\n" : "";
+                $vars .= "     $" . $varName . " = \"" . $value . "\"";
+            }
+
+            if (empty($vars)) $vars = "     -- No public variable available";
+            if (empty($methods)) $methods = "     -- No public method available";
+            $parentName = (!empty($classParent)) ? "            extends " . $classParent : "";
+
+            dump(
+                $classReflection,
+                $objectID .
+                    "class " . $className . $parentName . " {\n\n" .
+                    $vars . "\n" .
+                    $methods . "\n}\n\nMore information in the ReflectionMethod below.."
+            );
         }
-
-        $vars = "";
-        foreach ($classVars as $varName => $value) {
-
-            $value = ( is_array($value)) ? print_r($value, true) : (
-                        (is_object($value) && !method_exists($value, '__toString')) ? get_class($value)."(not is_stringeable)" : $value);
-
-            $vars .= (!empty($vars)) ? ",\n" : "";
-            $vars .= "     $" . $varName . " = \"" . $value . "\"";
-        }
-
-        if (empty($vars)) $vars = "     -- No public variable available";
-        if (empty($methods)) $methods = "     -- No public method available";
-        $parentName = (!empty($classParent)) ? "            extends " . $classParent : "";
-
-        return  dump(
-                    $classReflection,
-                    $objectID .
-                        "class " . $className . $parentName . " {\n\n" .
-                        $vars . "\n" .
-                        $methods . "\n}\n\nMore information in the ReflectionMethod below.."
-                );
     }
 
     function str_shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
@@ -522,7 +526,7 @@ namespace {
         switch($format) {
 
             case FORMAT_TITLECASE:
-                return mb_ucwords(mb_strtolower($str));
+                return mb_ucwords($str);
                 break;
 
             case FORMAT_SENTENCECASE:
@@ -720,7 +724,7 @@ namespace {
         return $entry;
     }
 
-    function array_key_removes  (array $array, string ...$keys  ) 
+    function array_key_removes  (array $array, string ...$keys  ): array
     { 
         foreach($keys as $key) 
             unset($array[$key]);
@@ -728,8 +732,8 @@ namespace {
         return $array;
     }
 
-    function array_values_remove(array $array, ...$values) { return array_filter($array, fn($v) => !in_array($v, $values)); }
-    function array_values_insert(array $array, ...$values) 
+    function array_values_remove(array $array, ...$values):array { return array_filter($array, fn($v) => !in_array($v, $values)); }
+    function array_values_insert(array $array, ...$values):array 
     {
         foreach($values as $value)
             if(!in_array($value, $array)) $array[] = $value;
@@ -737,7 +741,7 @@ namespace {
         return $array;
     }
 
-    function array_values_insert_any(array $array, ...$values) 
+    function array_values_insert_any(array $array, ...$values): array
     {
         foreach($values as $value)
             $array[] = $value;
@@ -745,7 +749,7 @@ namespace {
         return $array;
     }
 
-    function array_union(...$arrays) 
+    function array_union(...$arrays): array
     {
         $union = [];
         foreach($arrays as $array)

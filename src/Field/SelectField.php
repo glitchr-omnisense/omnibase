@@ -14,6 +14,7 @@ class SelectField implements FieldInterface
     public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
     public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
 
+    public const OPTION_CRUD_LINK = "href";
     public const OPTION_AUTOCOMPLETE = 'autocomplete';
     public const OPTION_DEFAULT_CHOICE = "default_choice";
     public const OPTION_CLASS          = 'class';
@@ -60,6 +61,12 @@ class SelectField implements FieldInterface
     public function setIconAlign(string $iconAlign)
     {
         $this->setCustomOption(self::OPTION_ICON_ALIGN, $iconAlign);
+        return $this;
+    }
+
+    public function allowCrudLink(bool $allow = true)
+    {
+        $this->setCustomOption(self::OPTION_CRUD_LINK, $iconAlign);
         return $this;
     }
 

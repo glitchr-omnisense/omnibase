@@ -13,6 +13,7 @@ use Base\Repository\Layout\Widget\MenuRepository;
 
 /**
  * @ORM\Entity(repositoryClass=MenuRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "menu" )
  */
 
@@ -29,6 +30,7 @@ class Menu extends Widget implements IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class, cascade={"persist"})
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
      */
     protected $widgets;
     public function getWidgets(): Collection { return $this->widgets; }

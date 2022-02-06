@@ -57,7 +57,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected static array $crudController = [];
-    public static function getCrudControllerFqcn($entity): ?string
+    public static function getCrudControllerFqcn($entity, bool $inheritance = false): ?string
     {
         $entityFqcn = is_object($entity) ? get_class($entity) : (class_exists($entity) ? $entity : null);
         if($entityFqcn === null) return null;
@@ -79,7 +79,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         }
 
         return (class_exists($appCrudController)  ? $appCrudController :
-               (class_exists($baseCrudController) ? $baseCrudController : self::getCrudControllerFqcn(get_parent_class($entity))));
+               (class_exists($baseCrudController) ? $baseCrudController : ($inheritance ? self::getCrudControllerFqcn(get_parent_class($entity)) : null)));
     }
 
     public static function getCrudTranslationPrefix()   { return "@".AbstractDashboardController::TRANSLATION_DASHBOARD.".".self::getTranslationPrefix("Crud\\"); }
@@ -142,7 +142,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function getExtension():Extension { return $this->extension; }
 
+    protected $crud = null;
+
     public function getCrud():Crud { return $this->crud; }
+
+    protected $entityDto = null;
     public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }
     public function getEntityDto():EntityDto { return $this->entityDto; }
     public function getEntityCollection():EntityCollection { return $this->entityCollection; }
@@ -277,6 +281,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function configureResponseParameters(KeyValueStore $responseParameters): KeyValueStore
     {
         $this->entityDto        = $responseParameters->get("entity");
+
         $this->entityCollection = $responseParameters->get("entities");
         $this->entityCollection = $this->configureEntityCollectionWithResponseParameters(
             $this->entityCollection, 
@@ -303,7 +308,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         foreach ($simpleYields as $_) foreach($_ as $yield) {
 
             yield $yield;
-            
+
             $property = $yield->getAsDto()->getProperty();
             foreach($associativeYields as $path => $_) {
 

@@ -422,6 +422,7 @@ class BaseService implements RuntimeExtensionInterface
         return $this->getRoute($request->getRequestUri());
     }
 
+    public function isRoute(string $route): bool { return $this->getRouter()->getRouteCollection()->get($route) !== null; }
     public function getRoute(?string $url): ?string
     {
         if(!$url) return null;
@@ -437,7 +438,7 @@ class BaseService implements RuntimeExtensionInterface
 
     public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->getUrl($urlOrRoute, $opts), $state, $headers); }
     public function redirectToRoute(string $route, array $opts = [], int $state = 302, array $headers = []): ?RedirectResponse
-    {
+    { 
         $event = null;
         if(array_key_exists("event", $headers)) {
             $event = $headers["event"];
@@ -461,11 +462,11 @@ class BaseService implements RuntimeExtensionInterface
                 throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
             unset($headers["callback"]);
         }
-        
-        $url   = $this->getUrl($route, $opts) ?? $route;
-        $route = $this->getRoute($url); // Normalize and check if route exists
-        if (!$route) return null;
 
+        $urlOrRoute   = $this->getUrl($urlOrRoute, $opts) ?? $urlOrRoute;
+        $route = $this->getRoute($urlOrRoute);
+        if (!$route) return null;
+        
         $currentRoute = $this->getCurrentRoute();
         if ($route == $currentRoute) return null;
 
@@ -473,7 +474,7 @@ class BaseService implements RuntimeExtensionInterface
         foreach($exceptions as $pattern) 
             if (preg_match($pattern, $currentRoute)) return null;
 
-        $response = new RedirectResponse($url, $state, $headers);
+        $response = new RedirectResponse($this->getUrl($urlOrRoute, $opts), $state, $headers);
         if($event && method_exists($event, "setResponse")) $event->setResponse($response);
 
         // Callable action if redirection happens

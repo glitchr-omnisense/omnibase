@@ -63,6 +63,14 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'allow_delete' => true,
         ]);
 
+
+        $resolver->setNormalizer('class', function (Options $options, $value) {
+
+            if($value !== null && !is_a($value, Attribute::class))
+                throw new InvalidArgumentException("Option \"class\" passed \"".$value."\" doesn't inherit from \"".Attribute::class."\"");
+                return $value;
+        });
+
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
             if($options["multiple"]) return null;
             return $value ?? null;
@@ -98,7 +106,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 "autocomplete_fields" => ["code" => $options["filter_code"]], 
                 "choice_filter"       => $options["filter"],
                 "multiple"            => $options["multiple"],
-                
+                "href" => false,
                 "sortable"            => $options["sortable"],
                 "dropdownCssClass"    => "field-attribute-dropdown",
                 "containerCssClass"   => "field-attribute-selection"
@@ -181,5 +189,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 $viewData->add(new ($attributeClass)($choiceData));
         }
 
+        dump($viewData);
     }
 }

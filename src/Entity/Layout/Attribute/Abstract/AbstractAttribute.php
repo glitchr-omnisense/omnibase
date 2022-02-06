@@ -57,8 +57,6 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
 
     /**
      * @ORM\OneToMany(targetEntity=Attribute::class, mappedBy="attributePattern")
-     *
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }

@@ -3,6 +3,7 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\ArrayField;
+use Base\Traits\BaseTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -18,6 +19,8 @@ use function Symfony\Component\String\u;
 
 class ArrayConfigurator implements FieldConfiguratorInterface
 {
+    use BaseTrait;
+    
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return ArrayField::class === $field->getFieldFqcn();
@@ -65,24 +68,36 @@ class ArrayConfigurator implements FieldConfiguratorInterface
                 else throw new \Exception("Invalid property path for \"".get_class($entity)."\": ".$patternFieldName);
             }
 
-            $field->setFormattedValue($this->resolve($entity, ...PropertyAccess::createPropertyAccessor()->getValue($entityDto->getInstance(), $field->getProperty())));
+            $formattedValue = $this->resolve($entity, ...PropertyAccess::createPropertyAccessor()->getValue($entityDto->getInstance(), $field->getProperty()));
+            $field->setFormattedValue(is_url($this->sanitize($formattedValue)) ? "<a href='".$this->sanitize($formattedValue)."'>".$formattedValue."</a>" : $formattedValue);
 
         } else {
-
+            
             $field->setFormattedValue($this->formatCollection($field, $context));
         }
     }
 
-    public function resolve(string $pattern, ...$replace): ?string
+    public function resolve(string $pattern, ...$patternOpts): ?string
     {
         $search = [];
-        foreach($replace as $index => $_)
+        foreach($patternOpts as $index => $_)
             $search[] = "{".$index."}";
 
-        $url = str_replace($search, $replace, $pattern);
-        return preg_match('/\{[0-9]*\}/', $url) ? null : $url; // Return null if missing entries
+        $url = str_replace($search, $patternOpts, $pattern);
+        return rtrim(preg_match('/\{[0-9]*\}/', $url) ? null : $url, "/");
     }
 
+    public function sanitize(?string $url): ?string
+    {
+        if(!$url) return null;
+
+        $parseUrl = parse_url($url);
+        $parseUrl["scheme"] = $parseUrl["scheme"] ?? $this->getSettings()->scheme();
+        $parseUrl["domain"] = $parseUrl["domain"] ?? $this->getSettings()->domain();
+        $parseUrl["path"]   = $this->getService()->getAsset($parseUrl["path"] ?? "");
+            dump($this->getSettings()->domain());
+        return $parseUrl["scheme"] . "://" . $parseUrl["domain"] . $parseUrl["path"];
+    }
     private function formatCollection(FieldDto $field, AdminContext $context)
     {
         return $this->countNumElements($field->getValue());

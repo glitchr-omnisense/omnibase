@@ -2,10 +2,12 @@
 
 namespace Base\Database\Factory;
 
-use Doctrine\DBAL\Types\Type;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Exception;
+use ReflectionClass;
+use ReflectionObject;
 
 // Credits: https://github.com/pmill/doctrine-array-hydrator
 
@@ -27,6 +29,11 @@ class EntityHydrator
     protected $entityManager;
 
     /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
+    /**
      * If true, then associations are filled only with reference proxies. This is faster than querying them from
      * database, but if the associated entity does not really exist, it will cause:
      * * The insert/update to fail, if there is a foreign key defined in database
@@ -39,7 +46,7 @@ class EntityHydrator
     /**
      * Tells whether the input data array keys are entity field names or database column names
      *
-     * @var int one of ArrayHydrator::HIDRATE_BY_* constants
+     * @var int one of EntityHydrator::HYDRATE_BY_* constants
      */
     protected $hydrateBy = self::HYDRATE_BY_FIELD;
 
@@ -51,128 +58,153 @@ class EntityHydrator
     protected $hydrateId = false;
 
     /**
-     * @param EntityManagerInterface $entityManager
+     * @var array
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    protected $reflProperties = [];
+
+    public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->entityManager = $entityManager;
+        $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    /**
-     * @param $entity
-     * @param array $data
-     * @return mixed|object
-     * @throws Exception
-     */
-    public function hydrate($entity, $data)
+    public function hydrate(mixed $entity, $data, array $reflPropertyExceptions = []): mixed
     {
-        if (is_string($entity) && class_exists($entity)) {
-            $entity = new $entity;
-        }
-        elseif (!is_object($entity)) {
-            throw new Exception('Entity passed to ArrayHydrator::hydrate() must be a class name or entity object');
-        }
+        $reflClass = new ReflectionClass($entity);
+        if (is_string($entity) && class_exists($entity))
+            $entity = $reflClass->newInstanceWithoutConstructor();
+        if (!is_object($entity))
+            throw new Exception('Entity passed to EntityHydrator::hydrate() must be a class name or entity object');
 
-        if(is_object($data)) {
-            $data = [];
-        }
+        $data = $this->toArray($data);
+        $data = array_key_removes($data, ...$reflPropertyExceptions);
+        
+        $this->hydrateProperties($entity, $data);
+        $this->hydrateAssociations($entity, $data);
 
-        $entity = $this->hydrateProperties($entity, $data);
-        $entity = $this->hydrateAssociations($entity, $data);
         return $entity;
     }
-
     /**
-     * @param boolean $hydrateAssociationReferences
+     * This method returns the array corresponding to an object, including non public members.
+     *
+     * If the deep flag is true, is will operate recursively, otherwise (if false) just at the first level.
+     *
+     * @param object $obj
+     * @param bool $deep = true
+     * @return array
+     * @throws \Exception
      */
-    public function setHydrateAssociationReferences($hydrateAssociationReferences)
+    public function toArray($objectOrArray, bool $deepcast = false): array
     {
-        $this->hydrateAssociationReferences = $hydrateAssociationReferences;
+        if($objectOrArray instanceof Collection) $objectOrArray = $objectOrArray->toArray();
+        if(is_array($objectOrArray)) {
+
+            $array = $objectOrArray;
+            if($deepcast) {
+
+                foreach($array as $propertyName => $value)
+                    $array[$propertyName] = is_object($value) ? $this->toArray($value, $deepcast) : $value;
+            }
+
+        } else {
+
+            $reflectionClass = new \ReflectionClass(get_class($objectOrArray));
+            foreach ($reflectionClass->getProperties() as $reflProperty) {
+
+                $reflProperty->setAccessible(true);
+                
+                $value = $reflProperty->getValue($objectOrArray);
+                
+                // if($value instanceof Collection) $value = $value->toArray();
+                if (is_object($value) && $deepcast)
+                    $value = $this->toArray($value, $deepcast);
+
+                $array[$reflProperty->getName()] = $value;
+            }
+        }
+
+        return $array;
+    }
+    public function setHydrateAssociationReferences(bool $hydrateAssociationReferences) 
+    { 
+        $this->hydrateAssociationReferences = $hydrateAssociationReferences; 
+        return $this;
     }
 
-    /**
-     * @param bool $hydrateId
-     */
-    public function setHydrateId($hydrateId)
+    public function setHydrateId(bool $hydrateId)
     {
         $this->hydrateId = $hydrateId;
+        return $this;
     }
 
-    /**
-     * @param int $hydrateBy
-     */
-    public function setHydrateBy($hydrateBy)
+    public function setHydrateBy(int $hydrateBy)
     {
         $this->hydrateBy = $hydrateBy;
+        return $this;
     }
 
-    /**
-     * @param object $entity the doctrine entity
-     * @param array $data
-     * @return object
-     */
-    protected function hydrateProperties($entity, $data)
+    protected function hydrateProperties(mixed $entity, array $data): self
     {
-        $reflectionObject = new \ReflectionObject($entity);
+        $reflEntity = new ReflectionObject($entity);
 
-        $metaData = $this->entityManager->getClassMetadata(get_class($entity));
-        $skipFields = $this->hydrateId ? [] : $metaData->identifier;
+        $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
+        $skipFields = $this->hydrateId ? [] : $classMetadata->identifier;
 
-        foreach ($metaData->fieldNames as $fieldName => $_) {
+        foreach ($reflEntity->getProperties() as $reflProperty) {
 
-            $dataKey = $this->hydrateBy === self::HYDRATE_BY_FIELD ? $fieldName : $metaData->getColumnName($fieldName);
-            if (array_key_exists($dataKey, $data) && !in_array($fieldName, $skipFields, true)) {
-                $entity = $this->setProperty($entity, $fieldName, $data[$dataKey], $reflectionObject);
+            $propertyName = $reflProperty->getName();
+            if($this->classMetadataManipulator->hasAssociation($entity, $propertyName))
+                continue;
+
+            switch($reflProperty->getType()) {
+
+                case "array": $this->setPropertyValue($entity, $propertyName, []);
+                break;
             }
+
+            $dataKey = $this->hydrateBy === self::HYDRATE_BY_FIELD ? $propertyName : $classMetadata->getColumnName($propertyName);
+            if (array_key_exists($dataKey, $data) && !in_array($propertyName, $skipFields, true))
+                $this->setPropertyValue($entity, $propertyName, $data[$dataKey], $reflEntity);
         }
 
-        return $entity;
+        return $this;
     }
 
-    /**
-     * @param $entity
-     * @param $data
-     * @return mixed
-     */
-    protected function hydrateAssociations($entity, $data)
+    protected function hydrateAssociations(mixed $entity, array $data): self
     {
-        $metaData = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach ($metaData->associationMappings as $fieldName => $mapping) {
-            $associationData = $this->getAssociatedId($fieldName, $mapping, $data);
-            
+        $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
+
+        foreach ($classMetadata->associationMappings as $association => $mapping) {
+
+            $associationData = $this->getAssociatedId($association, $mapping, $data);
             if (!empty($associationData)) {
-                if (in_array($mapping['type'], [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE])) {
-                    $entity = $this->hydrateToOneAssociation($entity, $fieldName, $mapping, $associationData);
-                }
 
-                if (in_array($mapping['type'], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY])) {
-                    $entity = $this->hydrateToManyAssociation($entity, $fieldName, $mapping, $associationData);
+                if ($this->classMetadataManipulator->isToOneSide($entity, $association))
+                    $this->hydrateToOneAssociation($entity, $association, $mapping, $associationData);
+
+                if ($this->classMetadataManipulator->isToManySide($entity, $association)) {
+
+                    if($classMetadata->getFieldName($association) === $association) 
+                        $this->setPropertyValue($entity, $association, new ArrayCollection());
+
+                    $this->hydrateToManyAssociation($entity, $association, $mapping, $associationData);
                 }
             }
         }
 
-        return $entity;
+        return $this;
     }
 
-    /**
-     * Retrieves the associated entity's id from $data
-     *
-     * @param string $fieldName name of field that stores the associated entity
-     * @param array $mapping doctrine's association mapping array for the field
-     * @param array $data the hydration data
-     *
-     * @return mixed null, if the association is not found
-     */
-    protected function getAssociatedId($fieldName, $mapping, $data)
+    protected function getAssociatedId(string $column, array $mapping, array $data): mixed
     {
         if ($this->hydrateBy === self::HYDRATE_BY_FIELD)
-            return isset($data[$fieldName]) ? $data[$fieldName] : null;
+            return isset($data[$column]) ? $data[$column] : null;
 
         // from this point it is self::HYDRATE_BY_COLUMN
         // we do not support compound foreign keys (yet)
         if (isset($mapping['joinColumns']) && count($mapping['joinColumns']) === 1) {
-            $columnName = $mapping['joinColumns'][0]['name'];
 
+            $columnName = $mapping['joinColumns'][0]['name'];
             return isset($data[$columnName]) ? $data[$columnName] : null;
         }
 
@@ -181,82 +213,92 @@ class EntityHydrator
         return null;
     }
 
-    /**
-     * @param $entity
-     * @param $propertyName
-     * @param $mapping
-     * @param $value
-     * @return mixed
-     */
-    protected function hydrateToOneAssociation($entity, $propertyName, $mapping, $value)
+    protected function hydrateToOneAssociation(mixed $entity, string $propertyName, array $mapping, $value): self
     {
-        $reflectionObject = new \ReflectionObject($entity);
+        $reflEntity = new ReflectionObject($entity);
 
         $toOneAssociationObject = $this->fetchAssociationEntity($mapping['targetEntity'], $value);
-        if (!is_null($toOneAssociationObject)) {
-            $entity = $this->setProperty($entity, $propertyName, $toOneAssociationObject, $reflectionObject);
-        }
+        if ($toOneAssociationObject !== null)
+            $this->setPropertyValue($entity, $propertyName, $toOneAssociationObject, $reflEntity);
 
-        return $entity;
+        return $this;
     }
 
-    /**
-     * @param $entity
-     * @param $propertyName
-     * @param $mapping
-     * @param $value
-     * @return mixed
-     */
-    protected function hydrateToManyAssociation($entity, $propertyName, $mapping, $value)
+    protected function hydrateToManyAssociation(mixed $entity, string $propertyName, array $mapping, $value): self
     {
-        $reflectionObject = new \ReflectionObject($entity);
+        $reflEntity = new ReflectionObject($entity);
         $values = is_array($value) ? $value : [$value];
 
-        $assocationObjects = [];
+        $associationObjects = [];
         foreach ($values as $value) {
-            if (is_array($value)) {
-                $assocationObjects[] = $this->hydrate($mapping['targetEntity'], $value);
-            }
-            elseif ($associationObject = $this->fetchAssociationEntity($mapping['targetEntity'], $value)) {
-                $assocationObjects[] = $associationObject;
+
+            if($value instanceof Collection) {
+
+                $entityValue = $this->getPropertyValue($entity, $propertyName)->toArray();
+                $associationObjects = new ArrayCollection($entityValue + $value->toArray());
+
+            } else if (is_array($value)) {
+
+                $associationObjects[] = $this->hydrate($mapping['targetEntity'], $value);
+
+            } elseif ($associationObject = $this->fetchAssociationEntity($mapping['targetEntity'], $value)) {
+             
+                $associationObjects[] = $associationObject;
             }
         }
 
-        $entity = $this->setProperty($entity, $propertyName, $assocationObjects, $reflectionObject);
+        $this->setPropertyValue($entity, $propertyName, $associationObjects, $reflEntity);
 
-        return $entity;
+        return $this;
     }
 
-    /**
-     * @param $entity
-     * @param $propertyName
-     * @param $value
-     * @param null $reflectionObject
-     * @return mixed
-     */
-    protected function setProperty($entity, $propertyName, $value, $reflectionObject = null)
-    {
-        $reflectionObject = is_null($reflectionObject) ? new \ReflectionObject($entity) : $reflectionObject;
-        $property = $reflectionObject->getProperty($propertyName);
-        $property->setAccessible(true);
-        $property->setValue($entity, $value);
-        return $entity;
+    protected function getProperty(mixed $entity, string $propertyName, ?ReflectionObject $reflEntity = null): mixed { return $this->getProperties($entity, $reflEntity)[$propertyName] ?? null; }
+    protected function getProperties(mixed $entity, ?ReflectionObject $reflEntity = null): array {
+
+        $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
+        if(array_key_exists($reflEntity->getName(), $this->reflProperties))
+            return $this->reflProperties[$reflEntity->getName()];
+
+        $this->reflProperties[$reflEntity->getName()] = [];
+
+        $classFamily = [];
+        do {
+
+            $classFamily[] = $reflEntity->getName();
+
+            $this->reflProperties[$reflEntity->getName()] = [];
+            foreach ($reflEntity->getProperties() as $reflProperty) {
+                
+                $reflProperty->setAccessible(true);
+                $this->reflProperties[$reflEntity->getName()][$reflProperty->getName()] = $reflProperty;
+            }
+
+            foreach($classFamily as $className)
+                $this->reflProperties[$className] = array_merge($this->reflProperties[$reflEntity->getName()], $this->reflProperties[$className]);
+
+        } while ($reflEntity = $reflEntity->getParentClass());
+
+        return $this->reflProperties[get_class($entity)];
     }
 
-    /**
-     * @param $className
-     * @param $id
-     * @return bool|\Doctrine\Common\Proxy\Proxy|null|object
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\TransactionRequiredException
-     */
-    protected function fetchAssociationEntity($className, $id)
+    protected function getPropertyValues(mixed $entity, ?ReflectionObject $reflEntity = null): array { return array_map(fn($rp) => $rp->getValue($entity), $this->getProperties($entity, $reflEntity)); }
+    protected function getPropertyValue(mixed $entity, string $propertyName, ?ReflectionObject $reflEntity = null): mixed { return $this->getPropertyValues($entity, $reflEntity)[$propertyName] ?? null; }
+    protected function setPropertyValue(mixed $entity, string $propertyName, $value, ?ReflectionObject $reflEntity = null): mixed
     {
-        if ($this->hydrateAssociationReferences) {
-            return $this->entityManager->getReference($className, $id);
-        }
+        $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
+        
+        $reflProperty = $this->getProperty($entity, $propertyName, $reflEntity);
+        $reflProperty->setAccessible(true);
+        $reflProperty->setValue($entity, $value);
 
-        return $this->entityManager->find($className, $id);
+        return $this;
+    }
+
+    protected function fetchAssociationEntity($entityName, $id): mixed
+    {
+        if ($this->hydrateAssociationReferences)
+            return $this->entityManager->getReference($entityName, $id);
+
+        return $this->entityManager->find($entityName, $id);
     }
 }
