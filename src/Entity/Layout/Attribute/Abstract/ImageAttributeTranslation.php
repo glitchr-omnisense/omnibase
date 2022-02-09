@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Abstract;
 
+use Base\Database\Traits\TranslationTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

@@ -157,7 +157,7 @@ class TranslatableSubscriber implements EventSubscriber
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
         if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
             $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
-        
+
         if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))
             $classMetadata->mapField(['fieldName' => self::LOCALE, 'type' => 'string', 'length' => 5]);
     }

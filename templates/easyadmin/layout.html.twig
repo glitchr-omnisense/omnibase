@@ -381,12 +381,17 @@
                     padding: 0;
                 }
 
+                .actions span:not(:empty)
+                {
+                    margin-left:5px;
+                }
                 .actions .action-icon 
                 {
                     font-size:14pt !important;
-                    top:5px;
+                    top:7px;
                     position:relative;
                     padding-bottom:10px;
+
                 }
 
                 .user-menu-wrapper .user-avatar {
@@ -444,9 +449,17 @@
                 }
                 
                 .dropdown-item a { text-align:center; }
-                .dropdown i, .action-index i, .action-edit i, .action-new i 
-                {
-                    margin:0.25em 0.25em 0.25em 0;
+                .dropdown i, .action-index i, .action-edit i, .action-new i { margin-right: 0.25em; }
+                .dropdown a, .action-index a, .action-edit a, .action-new a { margin: 0.25em 0; }
+
+                .actions {
+                    display:flex;
+                    flex-direction: row;
+                    justify-content:flex-end;
+                }
+                .actions a {
+                    display: flex;
+                    align-items: center;
                 }
 
                 .responsive-menu { padding:1.25em; }

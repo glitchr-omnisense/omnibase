@@ -46,9 +46,8 @@ class Attribute implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=AbstractAttribute::class, inversedBy="attributes")
-     * @ORM\JoinColumn(nullable=false)
-     *
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+     * @ORM\JoinColumn(nullable=false)
      */
     protected $attributePattern;
     public function getAttributePattern(): AbstractAttribute { return $this->attributePattern; }

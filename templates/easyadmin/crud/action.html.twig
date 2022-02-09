@@ -1,6 +1,7 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var action \EasyCorp\Bundle\EasyAdminBundle\Dto\ActionDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
 {% if 'a' == action.htmlElement %}
 
     {% set linkUrl = action.linkUrl %}
@@ -12,7 +13,7 @@
        href="{{ linkUrl }}"
        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
         {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-        {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
+        <span>{%- if action.label is not empty -%}{{ action.label }}{%- endif -%}</span>
     </a>
 
 {% elseif 'button' == action.htmlElement %}
@@ -47,7 +48,6 @@
             {% set isRootEntityAllowed = (rootEntity in entities) %}
         {% endif %}
     {% endfor %}
-
 
     {% if isRootEntityAllowed %}
     

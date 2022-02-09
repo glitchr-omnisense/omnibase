@@ -159,6 +159,13 @@ namespace {
         return intval($val);
     }
 
+
+    function get_depth_class($object_or_class): int
+    {
+        if(!get_parent_class($object_or_class)) return 0;
+        return get_depth_class(get_parent_class($object_or_class)) + 1;
+    }
+    
     function property_declarer($object_or_class, string $property): ?string 
     {
         $class = is_object($object_or_class) ? get_class($object_or_class): $object_or_class;

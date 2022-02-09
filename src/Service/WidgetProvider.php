@@ -41,8 +41,8 @@ class WidgetProvider implements WidgetProviderInterface
     public function getWidgetSlot(string $path, bool $useCache = BaseBundle::CACHE): ?Slot
     {
         $fn = $useCache && !is_cli() ? "cacheOneByPath" : "findOneByPath";
-        return $this->widgetSlotRepository->$fn($path);
+        $ret = $this->widgetSlotRepository->$fn($path);
+
+        return $ret;
     }
-
-
 }

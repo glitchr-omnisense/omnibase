@@ -463,7 +463,7 @@ class BaseService implements RuntimeExtensionInterface
             unset($headers["callback"]);
         }
 
-        $urlOrRoute   = $this->getUrl($urlOrRoute, $opts) ?? $urlOrRoute;
+        $urlOrRoute   = $this->getUrl($route, $opts) ?? $route;
         $route = $this->getRoute($urlOrRoute);
         if (!$route) return null;
         

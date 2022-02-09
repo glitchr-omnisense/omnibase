@@ -217,7 +217,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $class->setParentClasses($nonSuperclassParents);
 
         if ($class->isRootEntity() && ! $class->isInheritanceTypeNone() && ! $class->discriminatorMap) {
-            $this->addDefaultDiscriminatorMap($class);
+            $this->addDiscriminatorMapClass($class);
         }
 
         if ($this->evm->hasListeners(Events::loadClassMetadata)) {
@@ -309,30 +309,29 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      *
      * @throws MappingException
      */
-    private function addDefaultDiscriminatorMap(ClassMetadata $class): void
+    private function addDiscriminatorMapClass(ClassMetadata $classMetadata): void
     {
         $allClasses = $this->driver->getAllClassNames();
-        $fqcn       = $class->getName();
-        $map        = [$this->getShortName($class->name) => $fqcn];
+        $fqcn       = $classMetadata->getName();
+        $map        = [$this->getShortName($classMetadata->name) => $fqcn];
 
         $duplicates = [];
-        foreach ($allClasses as $subClassCandidate) {
-            if (is_subclass_of($subClassCandidate, $fqcn)) {
-                $shortName = $this->getShortName($subClassCandidate);
+        foreach ($allClasses as $subClass) {
+            if (is_subclass_of($subClass, $fqcn)) {
 
-                if (isset($map[$shortName])) {
+                $shortName = $this->getShortName($subClass);
+                if (isset($map[$shortName]))
                     $duplicates[] = $shortName;
-                }
 
-                $map[$shortName] = $subClassCandidate;
+                $map[$shortName] = $subClass;
             }
         }
-
+        
         if ($duplicates) {
-            throw MappingException::duplicateDiscriminatorEntry($class->name, $duplicates, $map);
+            throw MappingException::duplicateDiscriminatorEntry($classMetadata->name, $duplicates, $map);
         }
-
-        $class->setDiscriminatorMap($map);
+        
+        $classMetadata->setDiscriminatorMap($map);
     }
 
     /**
@@ -545,24 +544,24 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      *
      * @throws ORMException
      */
-    private function completeIdGeneratorMapping(ClassMetadataInfo $class): void
+    private function completeIdGeneratorMapping(ClassMetadataInfo $classMetadata): void
     {
-        $idGenType = $class->generatorType;
+        $idGenType = $classMetadata->generatorType;
         if ($idGenType === ClassMetadata::GENERATOR_TYPE_AUTO) {
-            $class->setIdGeneratorType($this->determineIdGeneratorStrategy($this->getTargetPlatform()));
+            $classMetadata->setIdGeneratorType($this->determineIdGeneratorStrategy($this->getTargetPlatform()));
         }
 
         // Create & assign an appropriate ID generator instance
-        switch ($class->generatorType) {
+        switch ($classMetadata->generatorType) {
             case ClassMetadata::GENERATOR_TYPE_IDENTITY:
                 $sequenceName = null;
-                $fieldName    = $class->identifier ? $class->getSingleIdentifierFieldName() : null;
+                $fieldName    = $classMetadata->identifier ? $classMetadata->getSingleIdentifierFieldName() : null;
 
                 // Platforms that do not have native IDENTITY support need a sequence to emulate this behaviour.
                 if ($this->getTargetPlatform()->usesSequenceEmulatedIdentityColumns()) {
-                    $columnName     = $class->getSingleIdentifierColumnName();
-                    $quoted         = isset($class->fieldMappings[$fieldName]['quoted']) || isset($class->table['quoted']);
-                    $sequencePrefix = $class->getSequencePrefix($this->getTargetPlatform());
+                    $columnName     = $classMetadata->getSingleIdentifierColumnName();
+                    $quoted         = isset($classMetadata->fieldMappings[$fieldName]['quoted']) || isset($classMetadata->table['quoted']);
+                    $sequencePrefix = $classMetadata->getSequencePrefix($this->getTargetPlatform());
                     $sequenceName   = $this->getTargetPlatform()->getIdentitySequenceName($sequencePrefix, $columnName);
                     $definition     = [
                         'sequenceName' => $this->truncateSequenceName($sequenceName),
@@ -576,25 +575,25 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                         ->em
                         ->getConfiguration()
                         ->getQuoteStrategy()
-                        ->getSequenceName($definition, $class, $this->getTargetPlatform());
+                        ->getSequenceName($definition, $classMetadata, $this->getTargetPlatform());
                 }
 
-                $generator = $fieldName && $class->fieldMappings[$fieldName]['type'] === 'bigint'
+                $generator = $fieldName && $classMetadata->fieldMappings[$fieldName]['type'] === 'bigint'
                     ? new BigIntegerIdentityGenerator($sequenceName)
                     : new IdentityGenerator($sequenceName);
 
-                $class->setIdGenerator($generator);
+                $classMetadata->setIdGenerator($generator);
 
                 break;
 
             case ClassMetadata::GENERATOR_TYPE_SEQUENCE:
                 // If there is no sequence definition yet, create a default definition
-                $definition = $class->sequenceGeneratorDefinition;
+                $definition = $classMetadata->sequenceGeneratorDefinition;
 
                 if (! $definition) {
-                    $fieldName    = $class->getSingleIdentifierFieldName();
-                    $sequenceName = $class->getSequenceName($this->getTargetPlatform());
-                    $quoted       = isset($class->fieldMappings[$fieldName]['quoted']) || isset($class->table['quoted']);
+                    $fieldName    = $classMetadata->getSingleIdentifierFieldName();
+                    $sequenceName = $classMetadata->getSequenceName($this->getTargetPlatform());
+                    $quoted       = isset($classMetadata->fieldMappings[$fieldName]['quoted']) || isset($classMetadata->table['quoted']);
 
                     $definition = [
                         'sequenceName'      => $this->truncateSequenceName($sequenceName),
@@ -606,18 +605,18 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                         $definition['quoted'] = true;
                     }
 
-                    $class->setSequenceGeneratorDefinition($definition);
+                    $classMetadata->setSequenceGeneratorDefinition($definition);
                 }
 
                 $sequenceGenerator = new SequenceGenerator(
-                    $this->em->getConfiguration()->getQuoteStrategy()->getSequenceName($definition, $class, $this->getTargetPlatform()),
+                    $this->em->getConfiguration()->getQuoteStrategy()->getSequenceName($definition, $classMetadata, $this->getTargetPlatform()),
                     (int) $definition['allocationSize']
                 );
-                $class->setIdGenerator($sequenceGenerator);
+                $classMetadata->setIdGenerator($sequenceGenerator);
                 break;
 
             case ClassMetadata::GENERATOR_TYPE_NONE:
-                $class->setIdGenerator(new AssignedGenerator());
+                $classMetadata->setIdGenerator(new AssignedGenerator());
                 break;
 
             case ClassMetadata::GENERATOR_TYPE_UUID:
@@ -625,13 +624,13 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                     'doctrine/orm',
                     'https://github.com/doctrine/orm/issues/7312',
                     'Mapping for %s: the "UUID" id generator strategy is deprecated with no replacement',
-                    $class->name
+                    $classMetadata->name
                 );
-                $class->setIdGenerator(new UuidGenerator());
+                $classMetadata->setIdGenerator(new UuidGenerator());
                 break;
 
             case ClassMetadata::GENERATOR_TYPE_CUSTOM:
-                $definition = $class->customGeneratorDefinition;
+                $definition = $classMetadata->customGeneratorDefinition;
                 if ($definition === null) {
                     throw InvalidCustomGenerator::onClassNotConfigured();
                 }
@@ -640,11 +639,11 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                     throw InvalidCustomGenerator::onMissingClass($definition);
                 }
 
-                $class->setIdGenerator(new $definition['class']());
+                $classMetadata->setIdGenerator(new $definition['class']());
                 break;
 
             default:
-                throw UnknownGeneratorType::create($class->generatorType);
+                throw UnknownGeneratorType::create($classMetadata->generatorType);
         }
     }
 
@@ -688,37 +687,37 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * Inherits the ID generator mapping from a parent class.
      */
-    private function inheritIdGeneratorMapping(ClassMetadataInfo $class, ClassMetadataInfo $parent): void
+    private function inheritIdGeneratorMapping(ClassMetadataInfo $classMetadata, ClassMetadataInfo $parent): void
     {
         if ($parent->isIdGeneratorSequence()) {
-            $class->setSequenceGeneratorDefinition($parent->sequenceGeneratorDefinition);
+            $classMetadata->setSequenceGeneratorDefinition($parent->sequenceGeneratorDefinition);
         }
 
         if ($parent->generatorType) {
-            $class->setIdGeneratorType($parent->generatorType);
+            $classMetadata->setIdGeneratorType($parent->generatorType);
         }
 
         if ($parent->idGenerator) {
-            $class->setIdGenerator($parent->idGenerator);
+            $classMetadata->setIdGenerator($parent->idGenerator);
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function wakeupReflection(ClassMetadataInterface $class, ReflectionService $reflService) : void
+    protected function wakeupReflection(ClassMetadataInterface $classMetadata, ReflectionService $reflService) : void
     {
-        assert($class instanceof ClassMetadata);
-        $class->wakeupReflection($reflService);
+        assert($classMetadata instanceof ClassMetadata);
+        $classMetadata->wakeupReflection($reflService);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function initializeReflection(ClassMetadataInterface $class, ReflectionService $reflService) : void
+    protected function initializeReflection(ClassMetadataInterface $classMetadata, ReflectionService $reflService) : void
     {
-        assert($class instanceof ClassMetadata);
-        $class->initializeReflection($reflService);
+        assert($classMetadata instanceof ClassMetadata);
+        $classMetadata->initializeReflection($reflService);
     }
 
     /**
@@ -771,10 +770,10 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         $loadedMetadata = parent::loadMetadata($name);
 
-        foreach($loadedMetadata as $key => $metadata)
-            $metadataList[] = $this->getMetadataFor($metadata);
-        foreach($metadataList as $key => $metadata)
-            $metadata = $this->resolveDiscriminatorValue($metadata);
+        foreach($loadedMetadata as $key => $classMetadata)
+            $classMetadataList[] = $this->getMetadataFor($classMetadata);
+        foreach($classMetadataList as $key => $classMetadata)
+            $classMetadata = $this->resolveDiscriminatorValue($classMetadata);
 
         return $loadedMetadata;
     }
@@ -788,64 +787,64 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * @throws MappingException
      */
     
-    private function resolveDiscriminatorValue(ClassMetadata $metadata)
+    private function resolveDiscriminatorValue(ClassMetadata $classMetadata)
     {
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
-        if (is_subclass_of($metadata->getName(), TranslationInterface::class, true)) {
+        if (is_subclass_of($classMetadata->getName(), TranslationInterface::class, true)) {
 
-            if(!str_ends_with($metadata->getName(), __TRANSLATION_SUFFIX__))
-                throw new \Exception("Invalid class name for \"".$metadata->getName()."\"");
+            if(!str_ends_with($classMetadata->getName(), __TRANSLATION_SUFFIX__))
+                throw new \Exception("Invalid class name for \"".$classMetadata->getName()."\"");
 
-            $translatableClass = $metadata->getName()::getTranslatableEntityClass();
+            $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();
             $translatableMetadata = $this->getMetadataFor($translatableClass);
        
-            if(!$metadata->discriminatorMap) {
-                $metadata->discriminatorMap = array_filter(array_map(function($class) {
+            if(!$classMetadata->discriminatorMap) {
+                $classMetadata->discriminatorMap = array_filter(array_map(function($className) {
 
-                    return (is_subclass_of($class, TranslatableInterface::class, true)) 
-                        ? $class::getTranslationEntityClass(false, false) 
+                    return (is_subclass_of($className, TranslatableInterface::class, true)) 
+                        ? $className::getTranslationEntityClass(false, false) 
                         : null;
 
                 }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
             }
 
-            $metadata->inheritanceType     = $translatableMetadata->inheritanceType;
-            $metadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
-            if($metadata->discriminatorMap) {
+            $classMetadata->inheritanceType     = $translatableMetadata->inheritanceType;
+            $classMetadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
+            if($classMetadata->discriminatorMap) {
                 
-                if(!in_array($metadata->getName(), $metadata->discriminatorMap)) 
+                if(!in_array($classMetadata->getName(), $classMetadata->discriminatorMap)) 
                     throw new MissingDiscriminatorMapException(
-                        "Discriminator map missing for \"".$metadata->getName().
+                        "Discriminator map missing for \"".$classMetadata->getName().
                         "\". Did you forgot to implement \"".TranslatableInterface::class.
-                        "\" in \"".$metadata->getName()::getTranslatableEntityClass()."\".");
+                        "\" in \"".$classMetadata->getName()::getTranslatableEntityClass()."\".");
             
-                $metadata->discriminatorValue  = array_flip($translatableMetadata->discriminatorMap)[$translatableMetadata->getName()] ?? null;
-                if(!$metadata->discriminatorValue) 
-                    throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$metadata->getName()."\".");
+                $classMetadata->discriminatorValue  = array_flip($translatableMetadata->discriminatorMap)[$translatableMetadata->getName()] ?? null;
+                if(!$classMetadata->discriminatorValue) 
+                    throw new MissingDiscriminatorValueException("Discriminator value missing for \"".$classMetadata->getName()."\".");
             }
         }
 
-        if ($metadata->discriminatorValue || ! $metadata->discriminatorMap || 
-            $metadata->isMappedSuperclass || ! $metadata->reflClass || $metadata->reflClass->isAbstract()) {
+        if ($classMetadata->discriminatorValue || ! $classMetadata->discriminatorMap || 
+            $classMetadata->isMappedSuperclass || ! $classMetadata->reflClass || $classMetadata->reflClass->isAbstract()) {
             return;
         }
 
         // minor optimization: avoid loading related metadata when not needed
-        foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
-            if ($discriminatorClass === $metadata->name) {
-                $metadata->discriminatorValue = $discriminatorValue;
+        foreach ($classMetadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
+            if ($discriminatorClass === $classMetadata->name) {
+                $classMetadata->discriminatorValue = $discriminatorValue;
                 return;
             }
         }
 
         // iterate over discriminator mappings and resolve actual referenced classes according to existing metadata
-        foreach ($metadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
-            if ($metadata->name === $this->getMetadataFor($discriminatorClass)->getName()) {
-                $metadata->discriminatorValue = $discriminatorValue;
+        foreach ($classMetadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
+            if ($classMetadata->name === $this->getMetadataFor($discriminatorClass)->getName()) {
+                $classMetadata->discriminatorValue = $discriminatorValue;
                 return;
             }
         }
 
-        throw MappingException::mappedClassNotPartOfDiscriminatorMap($metadata->name, $metadata->rootEntityName);
+        throw MappingException::mappedClassNotPartOfDiscriminatorMap($classMetadata->name, $classMetadata->rootEntityName);
     }
 }

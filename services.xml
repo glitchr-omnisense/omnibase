@@ -766,6 +766,7 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="ea_extension" />
             <argument type="service" id="translator" />
+            <argument type="service" id="base.service" />
         </service>
       
 

@@ -881,15 +881,19 @@ class ServiceEntityParser
 
             $entityName     = $this->classMetadata->getName();
             $rootEntityName = $this->classMetadata->rootEntityName;
-            
-            if(class_implements_interface($entityName, TranslatableInterface::class) && $entityName == $rootEntityName) {
 
-                // dump("LEFT JOIN");
-                $qb->leftJoin(self::ALIAS_ENTITY.'.translations', self::ALIAS_TRANSLATIONS);
-                $qb->addSelect(self::ALIAS_TRANSLATIONS);
+            if(class_implements_interface($entityName, TranslatableInterface::class)) {
 
-                $query = $qb->getQuery();
-                dump($criteria, $query);
+                $rootAlias = self::ALIAS_TRANSLATIONS.get_depth_class($rootEntityName);
+                
+                if($entityName == $rootEntityName) {
+                    
+                    $qb->leftJoin(self::ALIAS_ENTITY.'.translations', $rootAlias);
+                    $qb->addSelect($rootAlias);
+                    
+                    $query = $qb->getQuery();
+                
+                }
             }
         }
 

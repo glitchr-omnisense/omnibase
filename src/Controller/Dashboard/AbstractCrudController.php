@@ -4,9 +4,10 @@ namespace Base\Controller\Dashboard;
 
 use Base\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
+
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
+use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
@@ -35,7 +36,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         EntityManagerInterface $entityManager, 
         RequestStack $requestStack,
         Extension $extension, 
-        TranslatorInterface $translator)
+        TranslatorInterface $translator, BaseService $baseService)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
@@ -44,7 +45,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->extension = $extension;
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
-
+        $this->baseService = $baseService;
+        
         $this->crud = null;
     }
 
