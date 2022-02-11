@@ -16,6 +16,12 @@ array:
   value: "Valeur"
   empty: Vide
 
+color:
+  buttons:
+    save: Sauvegarder
+    clear: Effacer
+    cancel: Annuler
+
 fileupload:
     error:
       invalid_token: Jeton expiré.

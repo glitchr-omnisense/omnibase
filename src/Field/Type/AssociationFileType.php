@@ -170,7 +170,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                     $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
                     $entityData = is_callable($options["entity_data"]) ? null : $options["entity_data"];
-                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid"] /*, ["translations"]*/);
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid"]);
                     $entity = $this->entityHydrator->hydrate($entity, $entityData ?? []);
 
                     $this->propertyAccessor->setValue($entity, $fieldName, $file);

@@ -639,6 +639,7 @@ class ServiceEntityParser
 
         $magicFn = "__".$magicFn;
         $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []);
+
         return [$magicFn, $magicArgs];
     }
 

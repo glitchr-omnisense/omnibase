@@ -230,9 +230,13 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
     protected function getFormattedItem(string $label, ?string $route = null, array $routeParameters = [])
     {
+        $url = null;
+        try { $url = $route ? $this->router->generate($route, $routeParameters) : null; }
+        catch ( \Exception $e ) {}
+
         return [
             "label" => $label,
-            "url"   => ($route ? $this->router->generate($route, $routeParameters) : null),
+            "url"   => ($route ? $url : null),
             "route" => $route
         ];
     }

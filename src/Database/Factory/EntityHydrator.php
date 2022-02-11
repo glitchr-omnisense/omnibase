@@ -5,9 +5,11 @@ namespace Base\Database\Factory;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+
 use Exception;
 use ReflectionClass;
 use ReflectionObject;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 // Credits: https://github.com/pmill/doctrine-array-hydrator
 
@@ -66,6 +68,7 @@ class EntityHydrator
     {
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
     }
 
     public function hydrate(mixed $entity, $data, array $reflPropertyExceptions = []): mixed
@@ -286,7 +289,7 @@ class EntityHydrator
     protected function setPropertyValue(mixed $entity, string $propertyName, $value, ?ReflectionObject $reflEntity = null): mixed
     {
         $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
-        
+
         $reflProperty = $this->getProperty($entity, $propertyName, $reflEntity);
         $reflProperty->setAccessible(true);
         $reflProperty->setValue($entity, $value);
@@ -294,11 +297,17 @@ class EntityHydrator
         return $this;
     }
 
-    protected function fetchAssociationEntity($entityName, $id): mixed
+    protected function fetchAssociationEntity($entityName, $identifier): mixed
     {
-        if ($this->hydrateAssociationReferences)
-            return $this->entityManager->getReference($entityName, $id);
+        if(is_object($identifier))
+            $identifier = $this->propertyAccessor->isReadable($identifier, "id") 
+                        ? $this->propertyAccessor->getValue($identifier, "id") : null;
 
-        return $this->entityManager->find($entityName, $id);
+        if(!$identifier) return null;
+
+        if ($this->hydrateAssociationReferences && $identifier !== null) 
+            return $this->entityManager->getReference($entityName, $identifier);
+
+        return $this->entityManager->find($entityName, $identifier);
     }
 }

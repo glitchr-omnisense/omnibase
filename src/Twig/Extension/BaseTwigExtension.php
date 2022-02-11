@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Component\Intl\Colors;
 use Base\Service\BaseService;
 use Base\Service\IconService;
 use Base\Service\ImageService;
@@ -19,6 +20,7 @@ use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
+use Twig\Extension\CoreExtension;
 use Twig\TwigFunction;
 
 final class BaseTwigExtension extends AbstractExtension
@@ -100,6 +102,10 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('strval',          'strval'),
             new TwigFilter('urldecode',       'urldecode'),
             new TwigFilter('synopsis',        'synopsis'),
+            new TwigFilter('closest',         'closest'),
+            new TwigFilter('distance',        'distance'),
+
+            new TwigFilter('color_name',        'color_name'),
 
             new TwigFilter('instanceof',      [$this, 'instanceof']),
             new TwigFilter('url',             [$this, 'url']),
@@ -111,8 +117,9 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('datetime',        [$this, 'datetime'],    ['needs_environment' => true]),
             new TwigFilter('less_than',       [$this, 'less_than']),
             new TwigFilter('greater_than',    [$this, 'greater_than']),
-
-            new TwigFilter('closest',         [$this, 'closest']),
+            new TwigFilter('filter',          [$this, 'filter'], ['needs_environment' => true]),
+            new TwigFilter('transforms',      [$this, 'transforms'], ['needs_environment' => true]),
+            new TwigFilter('pad',             [$this, 'pad']),
 
             new TwigFilter('is_uuid',         [Translator::class, 'is_uuid']),
             new TwigFilter('trans',           [Translator::class, 'trans']),
@@ -134,8 +141,34 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('imagine',         [ImageService::class, 'imagine']),
             new TwigFilter('webp',            [ImageService::class, 'webp']),
             new TwigFilter('image',           [ImageService::class, 'image']),
-            new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail'])
+            new TwigFilter('thumbnail',       [ImageService::class, 'thumbnail']),
         ];
+    }
+    
+    public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
+    public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
+    public function filter(Environment $env,  $array = [], $arrow = null) 
+    {
+        if($arrow === null) $arrow = function($el) {
+            return $el !== null && $el !== false && $el !== "";
+        };
+        
+        return twig_array_filter($env, $array, $arrow);
+    }
+
+
+    public function color_name(string $hex) {
+
+        $color = hex2rgb($hex);
+
+        $closestNames = array_transforms(
+            fn($hex, $name):array => [$name, distance($color, hex2rgb($hex))],
+            Colors::getNames());
+
+        asort($closestNames);
+
+        $closestNames = array_keys($closestNames);
+        return begin($closestNames);
     }
 
     public function get_class($object, $method) { return class_exists($object) ? get_class($object, $method) : null; }
@@ -149,8 +182,6 @@ final class BaseTwigExtension extends AbstractExtension
         if($array === null) return null;
         return implode($separator, array_filter($array));
     }
-
-    public function closest(array $array, int $position = -1) { return closest($array, $position); }
 
     public function image(Environment $env, array $context, $src) 
     { 

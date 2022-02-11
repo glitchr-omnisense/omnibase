@@ -57,6 +57,7 @@ class Attribute implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
+    public function getCode(): ?string { return $this->getAttributePattern()->getCode(); }
     public function getType(): ?string { return get_class($this->getAttributePattern()); }
     public function getOptions(): array { return $this->getAttributePattern()->getOptions(); }
     public function resolve(?string $locale = null): mixed 

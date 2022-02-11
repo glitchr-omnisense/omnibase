@@ -15,7 +15,13 @@ array:
   key: "Key"
   value: "Value"
   empty: Empty
-  
+
+color:
+  buttons:
+    save: Save
+    clear: Clear
+    cancel: Cancel
+
 fileupload:
   error:
     invalid_token: Token expired.

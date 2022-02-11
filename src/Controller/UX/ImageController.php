@@ -12,6 +12,7 @@ use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
 
+/** @Route("/images", name="ux_") */
 class ImageController extends AbstractController
 {
     use BaseTrait;
@@ -22,40 +23,49 @@ class ImageController extends AbstractController
     }
 
     /**
-     * @Route("/images/{hashid}.webp", name="ux_image_webp")
+     * @Route("/{hashid}", name="imagine")
      */
-    public function ImageWebp(Request $request, $hashid): Response
+    public function Imagine($hashid): Response
     {
+        $args = $this->imageService->decode($hashid);
+
+        if(!$this->imageService->isWebpEnabled())
+            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $this->imageService->getExtension($args["path"])], Response::HTTP_MOVED_PERMANENTLY);
+        
         return $this->redirectToRoute("ux_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
     }
-    
-    /**
-     * @Route("/images/{hashid}", name="ux_image")
-     */
-    public function Image(Request $request, $hashid = null): Response
-    {
-        
-        $args = $this->imageService->decode($hashid);
-        $path = stream_get_meta_data(tmpfile())['uri'];
-
-        return $this->imageService->filter($args["path"], [
-            new ImageFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
-        ]);
-    }
 
     /**
-     * @Route("/webp/{hashid}", name="ux_webp")
+     * @Route("/{hashid}/image.webp", name="webp")
      */
-    public function Webp(Request $request, $hashid = null): Response
+    public function Webp($hashid): Response
     {
         if(!$this->imageService->isWebpEnabled())
-            return $this->redirectToRoute("ux_webp", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $args = $this->imageService->decode($hashid);
         $path = stream_get_meta_data(tmpfile())['uri'];
 
         return $this->imageService->filter($args["path"], [
             new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
+        ]);
+    }
+    
+    /**
+     * @Route("/{hashid}/image", name="image")
+     * @Route("/{hashid}/image.{extension}", name="imageExtension")
+     */
+    public function Image($hashid, string $extension = null): Response
+    {
+        $args = $this->imageService->decode($hashid);
+        $path = stream_get_meta_data(tmpfile())['uri'];
+        
+        $_extension = $this->imageService->getExtension($args["path"]);
+        if($extension !== null && $_extension != $extension)
+            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
+
+        return $this->imageService->filter($args["path"], [
+            new ImageFilter($path, $args["filters"] ?? [], [])
         ]);
     }
 }

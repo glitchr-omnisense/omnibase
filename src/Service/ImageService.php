@@ -3,19 +3,20 @@
 namespace Base\Service;
 
 use Base\Filter\Advanced\ThumbnailFilter;
-use Base\Filter\ImageFilter;
 use Base\Filter\LastFilterInterface;
-use Base\Filter\WebpFilter;
+use Exception;
 use Hashids\Hashids;
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
-
+use Imagine\Image\Palette\CMYK;
+use Imagine\Image\Palette\RGB;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\Routing\RouterInterface;
 use Twig\Environment;
 
 class ImageService implements ImageServiceInterface
@@ -35,14 +36,15 @@ class ImageService implements ImageServiceInterface
      */
     protected static $mimeTypes;
 
-    public function __construct(Environment $twig, AssetExtension $assetExtension, ParameterBagInterface $parameterBag, ImagineInterface $imagine, Filesystem $filesystem)
+    public function __construct(Environment $twig, AssetExtension $assetExtension, RouterInterface $router, ParameterBagInterface $parameterBag, ImagineInterface $imagine, Filesystem $filesystem)
     {
         $this->projectDir = dirname(__FILE__, 6);
         $this->publicDir  = $this->projectDir."/public";
-        $this->twig           = $twig;
-        $this->imagine        = $imagine;
-        $this->assetExtension = $assetExtension;
-        $this->filesystem     = $filesystem->set("local.cache");
+        $this->twig       = $twig;
+        $this->assetExtension    = $assetExtension;
+        $this->imagine    = $imagine;
+        $this->router     = $router;
+        $this->filesystem = $filesystem->set("local.cache");
 
         $this->maxQuality = $parameterBag->get("base.image.max_quality") ?? 1;
         $this->enableWebp     = $parameterBag->get("base.image.enable_webp") ?? true;
@@ -58,8 +60,8 @@ class ImageService implements ImageServiceInterface
     public function encode(array $array): string { return $this->hashIds->encodeHex(bin2hex(serialize($array))); }
     public function decode(string $hash): mixed  { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
-    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("webp", $path, $filters, $config); }
-    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("images", $path, $filters, $config); }
+    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("ux_webp", $path, $filters, $config); }
+    public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("ux_image", $path, $filters, $config); }
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null { return browser_supports_webp() ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config); }
 
     public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null 
@@ -75,10 +77,10 @@ class ImageService implements ImageServiceInterface
     }
 
     public static $i = 0;
-    public function resolve(string $prefix, array|string|null $source, array $filters = [], array $config = []): array|string|null
+    public function resolve(string $route, array|string|null $source, array $filters = [], array $config = []): array|string|null
     {
         if(!$source) return $source;
-        if(is_array($source)) return array_map(fn($s) => $this->resolve($prefix, $s, $filters, $config), $source);
+        if(is_array($source)) return array_map(fn($s) => $this->resolve($route, $s, $filters, $config), $source);
 
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
 
@@ -95,9 +97,23 @@ class ImageService implements ImageServiceInterface
             $config["options"] = ($sourceConfig["options"] ?? []) + ($config["options"] ?? []);
         }
 
-        return $this->assetExtension->getAssetUrl($prefix."/").$this->encode($config);
+        return $this->router->generate($route, ["hashid" => $this->encode($config)]);
     }
 
+    /**
+     * Check if a JPEG image file uses the CMYK colour space.
+     * @param string $path The path to the file.
+     * @return bool
+     */
+    function isCMYK($path) 
+    {
+        $imagesize = getimagesize($path);
+
+        return array_key_exists('mime', $imagesize) && 'image/jpeg' == $imagesize['mime'] &&
+               array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
+    }
+
+    public function getPublic(string $path) { return $this->publicDir."/".str_strip($path, [$this->publicDir, "imagine/"]); }
     public function filter(string $path, array $filters = []): Response
     {
         if(!$path) return null;
@@ -118,7 +134,7 @@ class ImageService implements ImageServiceInterface
             }
 
             $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $filters+[$lastFilter]);
-            $pathSource = $this->publicDir."/".str_strip($path, "imagine/");
+            $pathPublic = $this->getPublic($path);
             $path = path_suffix($path, $pathSuffixes);
 
             if(!$this->filesystem->getOperator()->fileExists($path)) {
@@ -128,7 +144,9 @@ class ImageService implements ImageServiceInterface
                  */
                 try {
 
-                    $image = $this->imagine->open($pathSource);
+                    $image = $this->imagine->open($pathPublic);
+                    $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB()); 
+
                     foreach($filters+[$lastFilter] as $filter)
                         $image = $filter->apply($image);
 
@@ -139,24 +157,17 @@ class ImageService implements ImageServiceInterface
 
                 } catch (\Exception $e) { 
 
-                    $path = $pathSource;
+                    $path = $pathPublic;
                 }
             }
         }
 
-        if($path == $pathSource) {
-
-            $content = file_get_contents($pathSource); 
-            $mimetype = self::mimetype($path);
-            
-        } else {
-
-            $content = $this->filesystem->read($path);
-            $mimetype = self::mimetype($this->filesystem->getPathPrefixer()->prefixPath($path));
-        }
+        $content = $path == $pathPublic ? file_get_contents($path) : $this->filesystem->read($path);
+        $mimetype = $this->getMimetype($pathPublic);
 
         $response = new Response();
         $response->setContent($content);
+        
         $response->setMaxAge(365*24*3600);
         $response->setPublic();
         $response->setEtag(md5($response->getContent()));
@@ -167,23 +178,26 @@ class ImageService implements ImageServiceInterface
         return $response;
     }
 
+    public function getMimeType(string $path):?string { return self::mimetype($this->getPublic($path)) ?? $this->filesystem->mimetype($path); }
     public static function mimetype(null|string|array $fileOrArray):null|string|array  {
 
         if(is_array($fileOrArray)) return array_map(fn($f) => self::mimetype($f), $fileOrArray);
 
-        if(!file_exists($fileOrArray)) 
-            return self::$mimeTypes->guessMimeType($fileOrArray);
+        if(file_exists($fileOrArray))
+            return image_type_to_mime_type(exif_imagetype($fileOrArray));
 
-        $imagetype = exif_imagetype($fileOrArray);
-        return $imagetype ? image_type_to_mime_type($imagetype) : self::$mimeTypes->guessMimeType($fileOrArray);
+        try { return self::$mimeTypes->guessMimeType($fileOrArray); }
+        catch (Exception $e) { return null; }
     }
 
+    public function getExtension(string $path):null|string|array  { return self::extension($this->getMimeType($path)); }
     public static function extension(null|string|array $mimetypeOrFileOrArray):null|string|array 
     {
-        if(!$mimetypeOrFileOrArray) return [];
         if(is_array($mimetypeOrFileOrArray))
-            return array_map(function($mimetype) { return self::extension($mimetype); }, $mimetypeOrFileOrArray);
+            return array_filter(array_map(fn($mimetype) => self::extension($mimetype), $mimetypeOrFileOrArray));
 
+
+        if(!$mimetypeOrFileOrArray) return null;
         if(file_exists($mimetypeOrFileOrArray)) {
 
             $imagetype = exif_imagetype($mimetypeOrFileOrArray);
@@ -209,12 +223,11 @@ class ImageService implements ImageServiceInterface
         return self::$mimeTypes->getExtensions($mimetypeOrArray);
     }
 
-    public function imagify(null|array|string $path, array $attributes = []) 
+    public function imagify(null|array|string $path, array $attributes = []): string
     {
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($p) => $this->imagify($p), $path);
 
-        if(filter_var($path, FILTER_VALIDATE_URL) === FALSE)  return null;
         if($attributes["src"] ?? false)
             unset($attributes["src"]);
 

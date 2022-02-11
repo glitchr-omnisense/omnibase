@@ -813,3 +813,14 @@
 </div>
 
 {%- endblock -%}
+
+{% block color_pickr %}
+
+{% set attr = attr|merge({
+    'autocomplete': 'off',
+    'data-number-field': form.vars.id,
+    'data-options': pickr_options | json_encode})
+%}
+
+    {{ form_widget(form, {attr: attr}) }}
+{% endblock %}

@@ -24,9 +24,9 @@ trait ProxyTrait
             return $this->_proxy->{"get".mb_ucfirst($methodOrProperty)}(...$arguments);
 
         // Proxy variable
-        $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isReadable($this->_proxy, $methodOrProperty))
-            return $accessor->getValue($this->_proxy, $methodOrProperty);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        if ($propertyAccessor->isReadable($this->_proxy, $methodOrProperty))
+            return $propertyAccessor->getValue($this->_proxy, $methodOrProperty);
 
         // Fallback
         if(method_exists(get_class($this), "getGlobals")) {

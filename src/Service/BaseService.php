@@ -400,13 +400,13 @@ class BaseService implements RuntimeExtensionInterface
 
     public function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
 
-    public function generateUrl(string $route = "", array $opts = []): ?string { return $this->getUrl($route, $opts); }
+    public function generateUrl(string $route = "", array $routeParameters = []): ?string { return $this->getUrl($route, $routeParameters); }
     public function getCurrentUrl(): ?string { return $this->getUrl(); }
-    public function getUrl(?string $route = "", array $opts = []): ?string
+    public function getUrl(?string $route = "", array $routeParameters = []): ?string
     {
         if (!empty($route)) {
 
-            try { return self::$router->generate($route, $opts); }
+            try { return self::$router->generate($route, $routeParameters); }
             catch (RouteNotFoundException $e) { return $route; }
         }
 

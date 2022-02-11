@@ -159,7 +159,6 @@ namespace {
         return intval($val);
     }
 
-
     function get_depth_class($object_or_class): int
     {
         if(!get_parent_class($object_or_class)) return 0;
@@ -225,9 +224,22 @@ namespace {
         return $path["dirname"].$prefix.$path["filename"].$path["extension"];
     }
 
-    function str_strip(string $haystack, string $lneedle = " ", string $rneedle = " ", bool $recursive = true) { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
-    function str_rstrip(string $haystack, string $needle = " ", bool $recursive = true)
+    function str_strip(string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true) { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
+    function str_rstrip(string $haystack, array|string $needle = " ", bool $recursive = true)
     {
+        if(is_array($needle)) {
+
+            $_haystack = null;
+            while($haystack != $_haystack) {
+
+                $_haystack = $haystack;
+                foreach($needle as $n)
+                    $haystack = str_rstrip($haystack, $n);
+            }
+
+            return $haystack;
+        }
+
         while(!empty($needle) && strlen($haystack) === strrpos($haystack, $needle)+strlen($needle)) {
             $haystack = substr($haystack, 0, strlen($haystack)-strlen($needle));
             if(!$recursive) break;
@@ -236,8 +248,21 @@ namespace {
         return $haystack;
     }
 
-    function str_lstrip(string $haystack, string $needle = " ", bool $recursive = true)
+    function str_lstrip(string $haystack, array|string $needle = " ", bool $recursive = true)
     {
+        if(is_array($needle)) {
+
+            $_haystack = null;
+            while($haystack != $_haystack) {
+
+                $_haystack = $haystack;
+                foreach($needle as $n)
+                    $haystack = str_lstrip($haystack, $n);
+            }
+
+            return $haystack;
+        }
+
         while(!empty($needle) && 0 === strpos($haystack, $needle)) {
             $haystack = substr($haystack, strlen($needle));
             if(!$recursive) break;
@@ -254,6 +279,23 @@ namespace {
 
     function head(object|array &$array):mixed { return array_slice($array, 0, 1)[0] ?? null; }
     function tail(object|array &$array, int $offset = 1):array  { return array_slice($array, $offset   ); }
+
+    function distance(array $arr1, array $arr2)
+    { 
+        $min = min(count($arr1), count($arr2));
+        return sqrt(array_sum(array_map(fn($d) => $d*$d, array_diff(array_pad($arr1, $min, 0), array_pad($arr2,$min, 0)))));
+    }
+    
+    function digits(int $num, int $ndigits): string
+    {
+        $str = strval($num);
+
+        $length = strlen($str);
+        for($i = $length; $i < $ndigits; $i++)
+            $str = '0'.$str;
+
+        return $str;
+    }
 
     function closest(array $array, $position = -1) { return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array)); }
     function is_html(?string $str)  { return $str != strip_tags($str); }
@@ -820,5 +862,59 @@ namespace {
         catch (Exception $e) { return false; }
 
         return true;
+    }
+
+    function hex2rgb(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x"); }
+    function rgb2hex(array $rgb) :string { return sprintf("#%02X%02X%02X", ...array_pad($rgb,3,0)); }
+    function hex2hsl(string $hex): array { return rgb2hsl(hex2rgb($hex)); }
+    function hsl2hex(array $hsl) :string { return rgb2hex(hsl2rgb($hsl)); }
+
+    function rgb2hsl(array $rgb): array
+    {
+        list($r, $g, $b) = $rgb;
+        $r /= 255;
+        $g /= 255;
+        $b /= 255;
+
+        $min = min($r, min($g, $b));
+        $max = max($r, max($g, $b));
+        $delta = $max - $min;
+
+        $s = 0;
+        $l = ($min + $max) / 2;
+        if ($l > 0 && $l < 1)
+            $s = $delta / ($l < 0.5 ? (2 * $l) : (2 - 2 * $l));
+
+        $h = 0;
+        if ($delta > 0) {
+            if ($max == $r && $max != $g) $h += ($g - $b) / $delta;
+            if ($max == $g && $max != $b) $h += (2 + ($b - $r) / $delta);
+            if ($max == $b && $max != $r) $h += (4 + ($r - $g) / $delta);
+            $h /= 6;
+        }
+
+        return [round($h,5), round($s,5), round($l,5)];
+    }
+
+    function hsl2rgb(array $hsl): array
+    {
+        list($h, $s, $l) = $hsl;
+        $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l*$s;
+        $m1 = $l * 2 - $m2;
+        return [
+            0 => intval(round(hue2rgb($m1, $m2, $h + 0.33333) * 255)),
+            1 => intval(round(hue2rgb($m1, $m2, $h) * 255)),
+            2 => intval(round(hue2rgb($m1, $m2, $h - 0.33333) * 255)),
+        ];
+    }
+
+    function hue2rgb($m1, $m2, $h)
+    {
+        $h = ($h < 0) ? $h + 1 : (($h > 1) ? $h - 1 : $h);
+        if ($h * 6 < 1) return $m1 + ($m2 - $m1) * $h * 6;
+        if ($h * 2 < 1) return $m2;
+        if ($h * 3 < 2) return $m1 + ($m2 - $m1) * (0.66666 - $h) * 6;
+
+        return $m1;
     }
 }

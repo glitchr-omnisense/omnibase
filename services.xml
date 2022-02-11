@@ -294,6 +294,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="twig" />
             <argument type="service" id="twig.extension.assets" />
+            <argument type="service" id="router.default" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="imagine" />
             <argument type="service" id="base.filesystem" />
