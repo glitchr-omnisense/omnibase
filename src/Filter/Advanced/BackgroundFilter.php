@@ -24,7 +24,7 @@ class BackgroundFilter implements FilterInterface
     /**
      * {@inheritdoc}
      */
-    public function apply(ImageInterface $image)
+    public function apply(ImageInterface $image): ImageInterface
     {
         $background = $image->palette()->color(
             isset($this->options['color']) ? $this->options['color'] : '#fff',

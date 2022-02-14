@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository\Layout;
+namespace Base\Repository\Layout;
 
-use App\Entity\Layout\Image;
+use Base\Entity\Layout\Image;
 use Base\Database\Repository\ServiceEntityRepository;
 
 use Doctrine\Persistence\ManagerRegistry;

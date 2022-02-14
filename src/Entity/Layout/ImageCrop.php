@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Entity\Layout;
+namespace Base\Entity\Layout;
 
-use App\Entity\Layout\Image;
-use App\Repository\Layout\ImageCropRepository;
+use Base\Entity\Layout\Image;
+use Base\Repository\Layout\ImageCropRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**

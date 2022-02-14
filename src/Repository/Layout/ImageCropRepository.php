@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository\Layout;
+namespace Base\Repository\Layout;
 
-use App\Entity\Layout\ImageCrop;
+use Base\Entity\Layout\ImageCrop;
 use Base\Database\Repository\ServiceEntityRepository;
 
 use Doctrine\Persistence\ManagerRegistry;

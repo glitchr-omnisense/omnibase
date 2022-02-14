@@ -20,7 +20,7 @@ class CropFilter implements FilterInterface
 
     }
 
-    public function apply(ImageInterface $image)
+    public function apply(ImageInterface $image): ImageInterface
     {
         $filter = new Crop(
             new Point($this->x,     $this->y),

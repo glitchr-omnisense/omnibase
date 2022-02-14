@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Entity\Layout;
+namespace Base\Entity\Layout;
 
-use App\Entity\Layout\ImageCrop;
+use Base\Entity\Layout\ImageCrop;
 use Base\Validator\Constraints as AssertBase;
 
 use Base\Annotations\Annotation\Uploader;
@@ -11,14 +11,28 @@ use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Traits\BaseTrait;
+use Doctrine\ORM\Mapping\DiscriminatorColumn;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @ORM\InheritanceType( "JOINED" )
+ * 
+ * @ORM\DiscriminatorColumn( name = "context", type = "string" )
+ *     @DiscriminatorEntry( value = "generic" )
  */
 class Image
 {
-    public function __construct() { $this->crops = new ArrayCollection(); }
+    use BaseTrait;
+
+    public function __toString() { return Uploader::getPublic($this, "file") ?? $this->getService()->getParameterBag("base.image.no_image") ?? ""; }
+    public function __construct($file) 
+    {
+        $this->crops = new ArrayCollection(); 
+        $this->setFile($file);
+    }
 
     /**
      * @ORM\Id
@@ -32,7 +46,7 @@ class Image
      * @ORM\Column(type="text")
      */
     protected $name;
-    public function getIdentifier(): ?string { return $this->name; }
+    public function getName(): ?string { return $this->name; }
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -43,11 +57,11 @@ class Image
     /**
      * @ORM\Column(type="text")
      * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", size="2MB", keepNotFound=true)
+     * @Uploader(storage="local.storage", public="/storage", size="2MB")
      */
     protected $file;
-    public function getFile(): ?string { return $this->file; }
-    public function setFile(string $file): self
+    public function getFile(): string { return $this->file; }
+    public function setFile($file): self
     {
         $this->file = $file;
 
@@ -58,8 +72,8 @@ class Image
      * @ORM\Column(type="integer")
      */
     protected $fileSize;
-    public function getFileSize(): ?string { return $this->fileSize; }
-    public function setFileSize(string $fileSize): self
+    public function getFileSize(): ?int { return $this->fileSize; }
+    public function setFileSize(int $fileSize): self
     {
         $this->fileSize = $fileSize;
 
@@ -70,7 +84,7 @@ class Image
      * @ORM\Column(type="text")
      */
     protected $mimeType;
-    public function getMimeType(): ?string { return $this->mimeType; }
+    public function getMimeType(): string { return $this->mimeType; }
     public function setMimeType(string $mimeType): self
     {
         $this->mimeType = $mimeType;
@@ -82,8 +96,8 @@ class Image
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image")
      */
     protected $crops;
-    public function getImageCrops(): Collection { return $this->crops; }
-    public function addImageCrop(ImageCrop $crop): self
+    public function getCrops(): Collection { return $this->crops; }
+    public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {
             $this->crops[] = $crop;
@@ -93,7 +107,7 @@ class Image
         return $this;
     }
 
-    public function removeImageCrop(ImageCrop $crop): self
+    public function removeCrop(ImageCrop $crop): self
     {
         if ($this->crops->removeElement($crop)) {
             // set the owning side to null (unless already changed)
@@ -104,5 +118,4 @@ class Image
 
         return $this;
     }
-    
 }

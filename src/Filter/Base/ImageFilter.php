@@ -25,7 +25,7 @@ class ImageFilter implements LastFilterInterface
     }
 
     protected ?string $path;
-    public function getExtension() { return ImageService::extension($this->path); }
+    public function getExtension() { return $this->options["extension"] ?? ImageService::extension($this->path); }
     public function getPath():?string { return $this->path; }
     public function setPath(?string $path)
     {

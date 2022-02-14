@@ -23,7 +23,6 @@ class PasteFilter implements FilterInterface
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        return $image->paste($this->destination, new Point($this->x, $this->y)
-        );
+        return $image->paste($this->destination, new Point($this->x, $this->y));
     }
 }

@@ -28,6 +28,7 @@ class ImageController extends AbstractController
     public function Imagine($hashid): Response
     {
         $args = $this->imageService->decode($hashid);
+        if(!$args) $args = [];
 
         if(!$this->imageService->isWebpEnabled())
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $this->imageService->getExtension($args["path"])], Response::HTTP_MOVED_PERMANENTLY);
@@ -43,10 +44,12 @@ class ImageController extends AbstractController
         if(!$this->imageService->isWebpEnabled())
             return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
-        $args = $this->imageService->decode($hashid);
         $path = stream_get_meta_data(tmpfile())['uri'];
+        $args = $this->imageService->decode($hashid);
+        if(!$args) $args = [];
 
-        return $this->imageService->filter($args["path"], [
+
+        return $this->imageService->filter($args["path"] ?? null, [
             new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
         ]);
     }
@@ -57,9 +60,10 @@ class ImageController extends AbstractController
      */
     public function Image($hashid, string $extension = null): Response
     {
-        $args = $this->imageService->decode($hashid);
         $path = stream_get_meta_data(tmpfile())['uri'];
-        
+        $args = $this->imageService->decode($hashid);
+        if(!$args) $args = [];
+
         $_extension = $this->imageService->getExtension($args["path"]);
         if($extension !== null && $_extension != $extension)
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);

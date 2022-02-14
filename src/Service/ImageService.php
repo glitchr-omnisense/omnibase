@@ -47,7 +47,8 @@ class ImageService implements ImageServiceInterface
         $this->filesystem = $filesystem->set("local.cache");
 
         $this->maxQuality = $parameterBag->get("base.image.max_quality") ?? 1;
-        $this->enableWebp     = $parameterBag->get("base.image.enable_webp") ?? true;
+        $this->enableWebp = $parameterBag->get("base.image.enable_webp") ?? true;
+        $this->noImage    = $parameterBag->get("base.image.no_image") ?? null;
 
         $this->hashIds = new Hashids($parameterBag->get("kernel.secret"));
         self::$mimeTypes = new MimeTypes();
@@ -64,6 +65,10 @@ class ImageService implements ImageServiceInterface
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("ux_image", $path, $filters, $config); }
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null { return browser_supports_webp() ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config); }
 
+    public function thumbnail_inset   (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET])); }
+    public function thumbnail_outbound(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND])); }
+    public function thumbnail_noclone (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
+    public function thumbnail_upscale (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
     public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null 
     { 
         $filters[] = new ThumbnailFilter(
@@ -107,63 +112,73 @@ class ImageService implements ImageServiceInterface
      */
     function isCMYK($path) 
     {
-        $imagesize = getimagesize($path);
+        if(!$path || !file_exists($path)) 
+            return false;
 
+        $imagesize = @getimagesize($path);
         return array_key_exists('mime', $imagesize) && 'image/jpeg' == $imagesize['mime'] &&
                array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
 
-    public function getPublic(string $path) { return $this->publicDir."/".str_strip($path, [$this->publicDir, "imagine/"]); }
-    public function filter(string $path, array $filters = []): Response
+    public function getPublic(?string $path) { return $path !== null ? $this->publicDir."/".str_strip($path, [$this->publicDir, "imagine/"]) : null; }
+    public function filter(?string $path, array $filters = []): Response
     {
-        if(!$path) return null;
+        $content = null;
+        $publicPath = null;
 
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
-
+        
         $lastFilter = array_slice($filters, -1, 1)[0] ?? null;
         if($lastFilter !== null) {
-
+            
             if(!class_implements_interface($lastFilter, LastFilterInterface::class))
-                throw new \Exception("Last filter \"".($lastFilter ? get_class($lastFilter) : null)."\" must implement \"".LastFilterInterface::class."\"");
-
+            throw new \Exception("Last filter \"".($lastFilter ? get_class($lastFilter) : null)."\" must implement \"".LastFilterInterface::class."\"");
+            
             $filters = array_slice($filters, 0, count($filters)-1);
             foreach($filters as $filter) {
-
+                
                 if(!class_implements_interface($filters, LastFilterInterface::class))
-                    throw new \Exception("Only last filter must implement \"".LastFilterInterface::class."\"");
+                throw new \Exception("Only last filter must implement \"".LastFilterInterface::class."\"");
             }
 
-            $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $filters+[$lastFilter]);
-            $pathPublic = $this->getPublic($path);
+            $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters+[$lastFilter]);
+            $publicPath = $this->getPublic($path);
             $path = path_suffix($path, $pathSuffixes);
 
-            if(!$this->filesystem->getOperator()->fileExists($path)) {
-
+            // Handle null path case
+            if ($path === null) {
+                $path = $this->noImage;
+                $publicPath = $this->getPublic($this->noImage);
+            }
+            
+            // Cache not found
+            if (!$this->filesystem->getOperator()->fileExists($path)) {
+                
                 /**
                  * @var ImageInterface
                  */
                 try {
-
-                    $image = $this->imagine->open($pathPublic);
-                    $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB()); 
-
-                    foreach($filters+[$lastFilter] as $filter)
-                        $image = $filter->apply($image);
-
-                    $this->filesystem->mkdir(dirname($path));
-
-                    $content = $image->get(self::extension($lastFilter->getPath()));
-                    $content = $this->filesystem->write($path, $content);
-
-                } catch (\Exception $e) { 
-
-                    $path = $pathPublic;
+                    $image = $this->imagine->open($publicPath);
+                } catch (Exception $e) {
+                    $publicPath = $this->getPublic($this->noImage);
+                    $image = $this->imagine->open($publicPath);
                 }
+
+                $image->usePalette($this->isCMYK($publicPath) ? new CMYK() : new RGB());
+
+                foreach ($filters+[$lastFilter] as $filter) {
+                    $image = $filter->apply($image);
+                }
+
+                $this->filesystem->mkdir(dirname($path));
+
+                $content = $image->get(self::extension($lastFilter->getPath()));
+                $content = $this->filesystem->write($path, $content);
             }
         }
 
-        $content = $path == $pathPublic ? file_get_contents($path) : $this->filesystem->read($path);
-        $mimetype = $this->getMimetype($pathPublic);
+        $content = $path == $publicPath ? @file_get_contents($path) : $this->filesystem->read($path);
+        $mimetype = $this->getMimetype($publicPath);
 
         $response = new Response();
         $response->setContent($content);

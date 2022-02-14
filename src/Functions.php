@@ -86,12 +86,27 @@ namespace {
         }
     }
 
-    function str_shorten(?string $str, int $length = 100, string $separator = " [..] "): ?string
+    define("SHORTEN_FRONT", -1); // [..] dolor sit amet
+    define("SHORTEN_MIDDLE", 0); // Lorem ipsum [..] amet
+    define("SHORTEN_BACK",   1); // Lorem ipsum dolor [..]
+    function str_shorten(?string $str, int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): ?string
     {
         $nChr = strlen($str);
 
-        if($nChr > $length + strlen($separator))
-            return substr($str, 0, $length/2) . $separator . substr($str, $nChr-$length/2, $length/2+1);
+        if($nChr > $length + strlen($separator)) {
+
+            switch($position) {
+                
+                case SHORTEN_FRONT:
+                    return ltrim($separator) . substr($str, $nChr, $length+1);
+
+                case SHORTEN_MIDDLE:
+                    return substr($str, 0, $length/2). $separator . substr($str, $nChr-$length/2, $length/2+1);
+
+                case SHORTEN_BACK:
+                    return substr($str, 0, $length) . rtrim($separator);
+            }
+        }
 
         return $str;
     }
@@ -181,7 +196,7 @@ namespace {
         return $reflMethod->getDeclaringClass()->getName();
     }
 
-    function path_suffix(string|array|null $path, $suffix, $separator = "_"): string
+    function path_suffix(string|array|null $path, $suffix, $separator = "_"): string|array|null
     {
         if($path === null) return $path;
      
@@ -202,7 +217,7 @@ namespace {
         return $path["dirname"].$path["filename"].$suffix.$path["extension"];
     }
     
-    function path_prefix(string|array|null $path, $prefix, $separator = "_")
+    function path_prefix(string|array|null $path, $prefix, $separator = "_"): string|array|null
     {
         if($path === null) return $path;
      
@@ -864,11 +879,21 @@ namespace {
         return true;
     }
 
+    function hex2rgba(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x%02x"); }
     function hex2rgb(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x"); }
-    function rgb2hex(array $rgb) :string { return sprintf("#%02X%02X%02X", ...array_pad($rgb,3,0)); }
     function hex2hsl(string $hex): array { return rgb2hsl(hex2rgb($hex)); }
+    function hex2int(string $hex):int { return hexdec(ltrim($hex, '#')); }
+    
+    function int2hex(int $int, bool $hash = true):string { return ($hash ? '#' : '').sprintf('%06X', $int); }
+    function int2rgb(int $int):array { return [$int >> 16 & 0xFF, $int >> 8 & 0xFF, $int & 0xFF]; }
+    function float2rgba(float $float):array { return [$float >> 24 & 0xFF, $float >> 16 & 0xFF, $float >> 8 & 0xFF, $float & 0xFF]; }
+    
+    function rgb2int(array $rgb) { return ($rgb[0] * 65536) + ($rgb[1] * 256) + ($rgb[2]); }
+    function rgb2hex(array $rgb) :string { return sprintf("#%02X%02X%02X", ...array_pad($rgb,3,0)); }
+    function rgba2float(array $rgba):float { return ($rgba[0] * 4294967296) + ($rgba[1] * 65536) + ($rgba[2] * 256) + ($rgba[3]); }
+    function rgba2hex(array $rgba) :string { return sprintf("#%02X%02X%02X%02X", ...array_pad($rgba,4,0)); }
+    
     function hsl2hex(array $hsl) :string { return rgb2hex(hsl2rgb($hsl)); }
-
     function rgb2hsl(array $rgb): array
     {
         list($r, $g, $b) = $rgb;
