@@ -75,7 +75,7 @@ class Translator implements TranslatorInterface
                 if($pos !== false) $brackets = $bracketList[$pos];
             }
 
-            if (preg_match("/[a-zA-Z0-9_.]+/", $key) && $brackets < 0)
+            if ( preg_match("/^[a-zA-Z0-9_.]+$/", $key) && $brackets < 0 )
                 $brackets = begin($bracketList);
 
             if($brackets < 0) continue;

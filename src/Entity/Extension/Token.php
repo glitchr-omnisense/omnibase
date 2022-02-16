@@ -1,16 +1,15 @@
 <?php
 
-namespace Base\Entity\User;
+namespace Base\Entity\Extension;
 
 use App\Entity\User;
 use Base\Annotations\Annotation\Slugify;
 use Base\Model\IconizeInterface;
-use Base\Service\BaseService;
 
 use Hashids\Hashids;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\TokenRepository;
+use Base\Repository\Extension\TokenRepository;
 use Base\Traits\BaseTrait;
 
 /**
@@ -20,12 +19,15 @@ class Token implements IconizeInterface
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-drumstick-bite"]; } 
+    public        function __iconize()       : ?array { return self::__iconizeStatic()[$this->isValid() ? 1 : 0]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-drumstick-bite", "fas fa-drumstick"]; } 
 
-    public const SEPARATOR = ";";
-    public const DEADTIME = 3*60; /* time before next request */
-    public function __construct(string $name, ?int $expiry = null, ?int $deadtime = self::DEADTIME)
+    public const ALL     = "ALL_TOKENS";
+    public const VALID   = "VALID_TOKENS";
+    public const EXPIRED = "EXPIRED_TOKENS";
+
+    public const THROTTLE = 3*60; /* time before next request */
+    public function __construct(string $name, ?int $expiry = null, ?int $throttle = self::THROTTLE)
     {
         $this->name = $name;
         $this->isRevoked = false;
@@ -33,24 +35,22 @@ class Token implements IconizeInterface
         $this->allowAt = null;
 
         $this->hashIds = new Hashids($this->getService()->getSalt());
-        $this->generate($expiry, $deadtime);
+        $this->generate($expiry, $throttle);
     }
 
     public function __sleep() { return array_keys(get_object_vars($this)); }
-    public function __toString()
-    {
-        return $this->getName() .
-                self::SEPARATOR . $this->get() .
-                self::SEPARATOR . $this->getCreatedAt()->getTimestamp() .
-                self::SEPARATOR . $this->getLifetime() .
-                self::SEPARATOR . $this->getDeadtime() .
-                self::SEPARATOR . $this->isRevoked();
-    }
-
 
     public function encode()
     {
-        $hex = bin2hex($this->__toString());
+        $hex = bin2hex(serialize([
+            $this->getName(),
+            $this->get(),
+            $this->getCreatedAt()->getTimestamp(),
+            $this->getLifetime(),
+            $this->getThrottle(),
+            $this->isRevoked()
+        ]));
+
         return $this->hashIds->encodeHex($hex);
     }
 
@@ -59,7 +59,7 @@ class Token implements IconizeInterface
         $hex = $this->hashIds->decodeHex($hash);
         $str = hex2bin($hex);
 
-        list($name, $value, $timestamp, $expiry, $deadtime, $isRevoked) = explode(self::SEPARATOR, $str);
+        list($name, $value, $timestamp, $expiry, $throttle, $isRevoked) = unserialize($str);
         $this->name = $name;
         $this->value = $value;
 
@@ -76,11 +76,11 @@ class Token implements IconizeInterface
             $this->setExpiry($expireAt);
         }
 
-        // Deadtime date calculation (before next request)
-        if($deadtime < 0) $deadtime = null;
-        if($deadtime) {
+        // Throttle date calculation (before next request)
+        if($throttle < 0) $throttle = null;
+        if($throttle) {
             $allowAt = clone $createdAt;
-            $allowAt->modify(is_numeric($deadtime) ? "+ ".floor($deadtime)." seconds" : $deadtime);
+            $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
             $this->setExpiry($allowAt);
         }
 
@@ -118,7 +118,7 @@ class Token implements IconizeInterface
 
     public function get(): ?string { return $this->getValue(); }
     public function getValue(): ?string { return $this->value; }
-    public function generate(?int $expiry = null, ?int $deadtime = null): self
+    public function generate(?int $expiry = null, ?int $throttle = null): self
     {
         // Creation date
         $now = new \DateTime("now");
@@ -133,11 +133,11 @@ class Token implements IconizeInterface
         }
 
         // Rate date calculation
-        if($deadtime) {
+        if($throttle) {
 
             $allowAt = clone $now;
-            $allowAt->modify(is_numeric($deadtime) ? "+ ".floor($deadtime)." seconds" : $deadtime);
-            $this->setDeadtime($allowAt);
+            $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
+            $this->setThrottle($allowAt);
         }
 
         // Generate token value
@@ -198,9 +198,11 @@ class Token implements IconizeInterface
 
     public function getExpiry(): ?\DateTimeInterface { return $this->getExpireAt(); }
     public function setExpiry(\DateTimeInterface $expireAt): self { return $this->setExpireAt($expireAt); }
-    public function hasExpiry():bool { return $this->getExpireAt() == $this->getCreatedAt(); }
+    protected function isExpired():bool { return $this->getExpiry() == null ? false : new \DateTime("now") >= $this->getExpiry(); }
+    protected function isHit():bool { return $this->isExpired(); }
+
     public function isValid():bool { return !$this->isHit() && !$this->isRevoked(); }
-    public function isHit():bool { return ($this->getExpiry() == null ? false : new \DateTime("now") >= $this->getExpiry()); }
+
     public function getElapsedTime():int { return time() - $this->createdAt->getTimestamp(); }
     public function getLifetime():int { return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp()); }
     public function getRemainingTime():int { return $this->expireAt->getTimestamp() - time(); }
@@ -226,10 +228,10 @@ class Token implements IconizeInterface
     }
 
     public function hasVeto():bool { return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt()); }
-    public function getDeadtime():int { return $this->allowAt->getTimestamp() - time(); }
-    public function getDeadtimeStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
-    public function setDeadtime(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
-    public function hasDeadtime():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
+    public function getThrottle():int { return $this->allowAt->getTimestamp() - time(); }
+    public function getThrottleStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
+    public function setThrottle(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
+    public function hasThrottle():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
     
     /**
      * @ORM\Column(type="boolean")

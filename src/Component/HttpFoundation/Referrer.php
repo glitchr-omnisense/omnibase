@@ -39,12 +39,14 @@ class Referrer
         return $path;
     }
 
-    public function getRoute(?string $path = null): string
+    public function getRoute(?string $path = null, ?string $requestUri = null): string
     {
         if($path === null) return "";
-        
+
         $baseDir = $this->getAsset("/");
         $path = parse_url($path, PHP_URL_PATH);
+        if($path === $requestUri) return "";
+
         if ($baseDir && strpos($path, $baseDir) === 0)
             $path = substr($path, strlen($baseDir));
 
@@ -52,12 +54,13 @@ class Referrer
         catch (ResourceNotFoundException $e) { return ''; }
 
         $route = $routeMatch['_route'] ?? "";
+
         return $route;
     }
 
     public function setUrl(string $url)
     {
-        
+        $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
         return $this;
     }
 
@@ -68,37 +71,37 @@ class Referrer
 
         // Target path fallbacks
         $targetPath = $request->request->get('_target_path');
-        $targetRoute = $this->getRoute($targetPath);
+        $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
 
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_target_path');
-            $targetRoute = $this->getRoute($targetPath);
+            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
         }
 
         // Security fallbacks
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.main.target_path');
-            $targetRoute = $this->getRoute($targetPath);
+            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
         }
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.account.target_path');
-            $targetRoute = $this->getRoute($targetPath);
+            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
         }
 
         // Default referrer
         if(!$targetRoute) {
             $targetPath = $request->headers->get("referer"); // Yes, with the legendary misspelling.
-            $targetRoute = $this->getRoute($targetPath);
+            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
         }
         if(!$targetRoute) {
             $targetPath = $request->request->get('referer');
-            $targetRoute = $this->getRoute($targetPath);
+            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
         }
         if(!$targetRoute) {
             $targetPath = $request->request->get('referrer');
-            $targetRoute = $this->getRoute($targetPath);
+            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
         }
 
-        return $targetPath;
+        return $targetPath ?? $this->getAsset("/");
     }
 }

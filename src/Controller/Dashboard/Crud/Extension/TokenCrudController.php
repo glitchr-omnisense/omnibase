@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Controller\Dashboard\Crud\User;
+namespace Base\Controller\Dashboard\Crud\Extension;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 
-class LogCrudController extends AbstractCrudController
+class TokenCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 }

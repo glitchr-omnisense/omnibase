@@ -241,7 +241,7 @@
             
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="App\Repository\User\TokenRepository" />
+            <argument type="service" id="Base\Repository\Extension\TokenRepository" />
             <argument type="service" id="referrer" />
             <argument type="service" id="base.service" />
         </service>
@@ -687,6 +687,8 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
+        <service id="Base\Field\Configurator\CropperConfigurator"><tag name="ea.field_configurator" /></service>
+
         <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FileConfigurator">
@@ -761,6 +763,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -778,8 +781,8 @@
         
         <service id="Base\Controller\Dashboard\Crud\UserCrudController"              parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\GroupCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\LogCrudController"          parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Extension\LogCrudController"          parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Extension\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\NotificationCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\PermissionCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController"      parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /> </service>

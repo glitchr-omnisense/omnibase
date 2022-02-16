@@ -7,8 +7,9 @@ use Base\Exception\MissingLocaleException;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
-use App\Entity\User\Log;
-use App\Entity\User\Token;
+use Base\Entity\Extension\Log;
+use Base\Entity\Extension\Token;
+
 use App\Entity\User\Group;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
@@ -45,10 +46,13 @@ use Exception;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Base\Database\Annotation\EntityExtension;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @EntityExtension
+ * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  *
@@ -461,26 +465,22 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $tokens;
 
-    public const ALL_TOKENS     = "ALL_TOKENS";
-    public const VALID_TOKENS   = "VALID_TOKENS";
-    public const EXPIRED_TOKENS = "EXPIRED_TOKENS";
-
-    public function getExpiredTokens(): ?array { return $this->getTokens(self::EXPIRED_TOKENS); }
-    public function getValidTokens(): ?array { return $this->getTokens(self::VALID_TOKENS); }
-    public function getTokens($type = self::ALL_TOKENS): ?array
+    public function getExpiredTokens(): ?array { return $this->getTokens(Token::EXPIRED); }
+    public function getValidTokens(): ?array { return $this->getTokens(Token::VALID); }
+    public function getTokens($type = Token::ALL): ?array
     {
         $tokens = [];
         foreach($this->tokens as $token)
         {
             switch($type)
             {
-                case self::ALL_TOKENS:
+                case Token::ALL:
                     $tokens[] = $token;
                     break;
-                case self::VALID_TOKENS:
+                case Token::VALID:
                     if($token->isValid()) $tokens[] = $token;
                     break;
-                case self::EXPIRED_TOKENS:
+                case Token::EXPIRED:
                     if (!$token->isValid()) $tokens[] = $token;
                     break;
                 }
@@ -499,9 +499,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
     
-    public function getExpiredToken(string $name): ?Token { return $this->getToken($name, self::EXPIRED_TOKENS); }
-    public function getValidToken(string $name): ?Token { return $this->getToken($name, self::VALID_TOKENS); }
-    public function getToken(string $name, $type = self::ALL_TOKENS): ?Token
+    public function getExpiredToken(string $name): ?Token { return $this->getToken($name, Token::EXPIRED); }
+    public function getValidToken(string $name): ?Token { return $this->getToken($name, Token::VALID); }
+    public function getToken(string $name, $type = Token::ALL): ?Token
     {
         $tokens = $this->getTokens($type);
         foreach ($tokens as $token)

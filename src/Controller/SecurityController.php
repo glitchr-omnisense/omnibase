@@ -23,13 +23,13 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 use Symfony\Component\Notifier\NotifierInterface;
 
-use Base\Entity\User\Token;
+use Base\Entity\Extension\Token;
 use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
 use Base\Annotations\Annotation\Iconize;
 use Base\Component\HttpFoundation\Referrer;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
-use Base\Repository\User\TokenRepository;
+use Base\Repository\Extension\TokenRepository;
 use Doctrine\ORM\EntityManager;
 
 class SecurityController extends AbstractController

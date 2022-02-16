@@ -6,7 +6,7 @@ use App\Enum\UserRole;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-
+use Base\Model\UrlInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\RouteRepository;
 
@@ -16,12 +16,13 @@ use Base\Repository\Layout\Widget\RouteRepository;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  */
 
-class Route extends Widget implements IconizeInterface
+class Route extends Widget implements IconizeInterface, UrlInterface
 {
     public        function __iconize()       : ?array { return $this->getRouteIcons(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-road"]; } 
 
-    public function __toString() { return "<a href='".$this->generate()."'>".$this->getTitle()."</a>"; }
+    public function __toUrl(): string { return $this->generate(); }
+    public function __toString() { return $this->getTitle(); }
     
     public function __construct(string $title, string $route, array $routeParameters = []) 
     {

@@ -27,11 +27,11 @@ class Image
 {
     use BaseTrait;
 
-    public function __toString() { return Uploader::getPublic($this, "file") ?? $this->getService()->getParameterBag("base.image.no_image") ?? ""; }
-    public function __construct($file) 
+    public function __toString() { return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.image.no_image") ?? ""; }
+    public function __construct($src) 
     {
         $this->crops = new ArrayCollection(); 
-        $this->setFile($file);
+        $this->setSource($src);
     }
 
     /**
@@ -44,53 +44,21 @@ class Image
 
     /**
      * @ORM\Column(type="text")
-     */
-    protected $name;
-    public function getName(): ?string { return $this->name; }
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="text")
      * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
      * @Uploader(storage="local.storage", public="/storage", size="2MB")
      */
-    protected $file;
-    public function getFile(): string { return $this->file; }
-    public function setFile($file): self
+    protected $source;
+    public function getSource()     { return Uploader::getPublic($this, "source"); }
+    public function getSourceFile() { return Uploader::get($this, "source"); }
+    public function setSource($source): self
     {
-        $this->file = $file;
-
+        $this->source = $source;
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    protected $fileSize;
-    public function getFileSize(): ?int { return $this->fileSize; }
-    public function setFileSize(int $fileSize): self
-    {
-        $this->fileSize = $fileSize;
-
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="text")
-     */
-    protected $mimeType;
-    public function getMimeType(): string { return $this->mimeType; }
-    public function setMimeType(string $mimeType): self
-    {
-        $this->mimeType = $mimeType;
-
-        return $this;
-    }
+    public function get()     { return $this->getSource(); }
+    public function getFile() { return $this->getSourceFile(); }
+    public function set($source): self { return $this->setSource($source); }
 
     /**
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image")

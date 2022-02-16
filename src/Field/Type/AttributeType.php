@@ -3,7 +3,6 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
 use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\AttributeTranslation;
@@ -188,7 +187,5 @@ class AttributeType extends AbstractType implements DataMapperInterface
             if ($viewData->getAttributePattern() === $choiceData)
                 $viewData->add(new ($attributeClass)($choiceData));
         }
-
-        dump($viewData);
     }
 }

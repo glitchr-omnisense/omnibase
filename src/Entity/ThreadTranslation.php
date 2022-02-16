@@ -2,13 +2,15 @@
 
 namespace Base\Entity;
 
+use Base\Database\Annotation\EntityExtension;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity
+ * @EntityExtension
  */
 
 class ThreadTranslation implements TranslationInterface
@@ -17,7 +19,7 @@ class ThreadTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $title;
 

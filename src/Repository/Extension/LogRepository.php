@@ -1,10 +1,9 @@
 <?php
 
-namespace Base\Repository\User;
+namespace Base\Repository\Extension;
 
-use App\Entity\User\Log;
+use App\Entity\Extension\Log;
 use Base\Database\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Log|null find($id, $lockMode = null, $lockVersion = null)

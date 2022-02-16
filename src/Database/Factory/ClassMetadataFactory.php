@@ -436,7 +436,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
             }
 
             $embeddableMetadata = $this->getMetadataFor($embeddableClass['class']);
-
+            
             $parentClass->mapEmbedded(
                 [
                     'fieldName' => $prefix . '.' . $property,

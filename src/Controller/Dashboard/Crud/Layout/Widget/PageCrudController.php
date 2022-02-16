@@ -6,6 +6,8 @@ use Base\Field\ImageField;
 use Base\Field\SlugField;
 
 use Base\Controller\Dashboard\Crud\Layout\WidgetCrudController;
+use Base\Entity\Layout\Widget\Page;
+use Base\Field\SelectField;
 
 class PageCrudController extends WidgetCrudController
 {
@@ -13,11 +15,13 @@ class PageCrudController extends WidgetCrudController
 
     public function configureFields(string $pageName, ...$args): iterable
     {
-        return parent::configureFields($pageName, function () {
+        return parent::configureFields($pageName, ["id" => function () {
 
-            yield ImageField::new('thumbnail');
-            yield SlugField::new('slug')->setTargetFieldName("translations.title");
+            yield ImageField::new('thumbnail')->setColumns(6);
+            yield SlugField::new('slug')->setColumns(6)->setTargetFieldName("translations.title");
 
-        }, $args);
+            yield SelectField::new('similars')->showFirst()->setColumns(6)->setFilter(Page::class);
+
+        }], $args);
     }
 }

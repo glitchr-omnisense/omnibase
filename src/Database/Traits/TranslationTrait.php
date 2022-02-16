@@ -60,10 +60,10 @@ trait TranslationTrait
     public function isEmpty(): bool
     {
         foreach (get_object_vars($this) as $var => $value) {
-
+            
             if (in_array($var, ['id', 'translatable', 'locale'], true))
                 continue;
-
+            
             if (!empty($value)) return false;
         }
 

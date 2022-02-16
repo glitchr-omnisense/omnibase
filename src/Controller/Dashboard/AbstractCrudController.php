@@ -4,19 +4,25 @@ namespace Base\Controller\Dashboard;
 
 use Base\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
-
+use Base\Field\Filter\AssociationFilter;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\EntityCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FieldCollection;
+use EasyCorp\Bundle\EasyAdminBundle\Collection\FilterCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
-
+use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
+use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -31,6 +37,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     protected $classMetadataManipulator;
 
     public function __construct(
+        AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
         ClassMetadataManipulator $classMetadataManipulator, 
         EntityManagerInterface $entityManager, 
@@ -41,6 +48,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->entityManager = $entityManager;
+        $this->adminContextProvider  = $adminContextProvider;
         $this->requestStack = $requestStack;
         $this->extension = $extension;
         $this->translator = $translator;
@@ -201,7 +209,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                     ->configureCrud($crud)
                     ->showEntityActionsInlined(true)
                     ->setDefaultSort(['id' => 'DESC'])
-                    ->setPaginatorPageSize(30)
+                    ->setPaginatorPageSize(20)
                     ->setFormOptions(
                         ['validation_groups' => ['new' ]],
                         ['validation_groups' => ['edit']]
@@ -213,6 +221,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         foreach($entityCollection ?? [] as $entityDto) {
 
             $entityDto = $this->configureEntityDto($entityDto);
+
             $actions = $entityDto->getActions();
             foreach($actions ?? [] as $action) {
 
@@ -305,24 +314,26 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $yields = $this->yield($args);
         $simpleYields      = array_filter_recursive(array_filter($yields, fn($k) => preg_match("/^[0-9.]+$/", $k), ARRAY_FILTER_USE_KEY));
         $associativeYields = array_diff_key($yields, $simpleYields);
-
         $simpleYields      = array_values($simpleYields);
-        foreach ($simpleYields as $_) foreach($_ as $yield) {
 
-            yield $yield;
+        $yields = [];
+        foreach($simpleYields as $_) foreach($_ as $yield)
+            $yields[] = $yield;
 
-            $property = $yield->getAsDto()->getProperty();
-            foreach($associativeYields as $path => $_) {
+        $restYields = [];
+        foreach($associativeYields as $path => $_) foreach($_ as $i => $yield) {
 
-                if($property != preg_replace("/^[0-9.]+/", "",$path))
-                    continue;
+            $property = preg_replace("/^[0-9.]+/", "", $path);
+            
+            $yieldList = array_map(fn($y) => $y->getAsDto()->getProperty(), $yields);
+            $yieldPos  = array_search($property, $yieldList);
 
-                foreach($_ ?? [] as $yield) yield $yield;
-                unset($associativeYields[$path]);
-            }
+            $yieldPosNext = next_key($yieldList, $yieldPos);
+            $yieldPosNext = $yieldPosNext === false ? false : $yieldPosNext+$i;
+            $yields = array_insert($yields, $yieldPosNext, $yield);
         }
-        
-        foreach($associativeYields as $_) foreach($_ ?? [] as $yield) 
+
+        foreach(array_flatten(array_concat($yields, $restYields), ARRAY_FLATTEN_PRESERVE_KEYS) ?? [] as $yield)
             yield $yield;
     }
 
@@ -341,5 +352,15 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             if($field === null || $field == $field2) $yields[$field2] = $yield;
 
         return $yields;
+    }
+
+    public function configureFilters(Filters $filters): Filters
+    {
+        return $filters;
+    }
+
+    public function createIndexQueryBuilder(SearchDto $searchDto, EntityDto $entityDto, FieldCollection $fields, FilterCollection $filters): QueryBuilder
+    {
+        return parent::createIndexQueryBuilder($searchDto, $entityDto, $fields, $filters);
     }
 }

@@ -133,9 +133,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 $fields = $this->classMetadataManipulator->getFields($dataClass, $options["fields"], $options["excluded_fields"]);
                 if(!$options["autoload"])
                     $fields = array_filter($fields, fn($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
-        
-                foreach ($fields as $fieldName => $field) {
 
+                foreach ($fields as $fieldName => $field) {
 
                     if($options["recursive"] && array_key_exists($form->getName(), $field))
                     $field = $field[$form->getName()];
@@ -144,7 +143,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     unset($field['form_type']);
 
                     $isNullable = $this->classMetadataManipulator->getMapping($dataClass, $fieldName)["nullable"] ?? false;
-                    $field['required'] = !$isNullable && ($field['required'] ?? true);
+                    $field['required'] = !$isNullable || ($field['required'] ?? false);
 
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"] ?? false;
                     unset($field['allow_entity']);

@@ -3,11 +3,10 @@
 namespace Base\Entity\Layout\Widget;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-
+use Base\Model\UrlInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\LinkRepository;
 
@@ -17,7 +16,7 @@ use Base\Repository\Layout\Widget\LinkRepository;
  * @DiscriminatorEntry( value = "hyperlink" )
  */
 
-class Link extends Widget implements IconizeInterface
+class Link extends Widget implements IconizeInterface, UrlInterface
 {
     public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; } 
@@ -37,9 +36,9 @@ class Link extends Widget implements IconizeInterface
         return $this;
     }
 
+    public function __toUrl(): string { return $this->getHyperlink()->generateUrl(); }
     public function __toString() 
     {
-        $title = $this->getTitle() ?? $this->getHyperlink()->getTitle() ?? $this->__iconize();
-        return "<a href='".$this->getHyperlink()->generateUrl()."'>".$title."</a>";
+        return $this->getTitle() ?? $this->getHyperlink()->getTitle() ?? $this->__iconize();
     }
 }

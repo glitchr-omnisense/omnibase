@@ -79,10 +79,10 @@ class ClassMetadataManipulator
         return \Doctrine\DBAL\Types\Type::getType($type);
     }
 
-    public function getDiscriminatorColumn($entity): ?string { return $this->getClassMetadata($entity)->discriminatorColumn["fieldName"]; }
-    public function getDiscriminatorValue($entity): ?string { return $this->getClassMetadata($entity)->discriminatorValue; }
-    public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity)->discriminatorMap; }
-    public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity)->rootEntityName; }
+    public function getDiscriminatorColumn($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorColumn["fieldName"] : null; }
+    public function getDiscriminatorValue($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorValue : null; }
+    public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : []; }
+    public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null; }
 
     public function getTargetClass($entity, $fieldName)
     {
@@ -157,7 +157,7 @@ class ClassMetadataManipulator
         foreach($fields as $fieldName => $field) {
 
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName]))
-                $validFields[$fieldName] = $fields[$fieldName];
+                $validFields[$fieldName] = array_merge($validFields[$fieldName] ?? [], $fields[$fieldName] ?? []);
         }
 
         $validFields = $this->filteringFields($validFields, $excludedFields);

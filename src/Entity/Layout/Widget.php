@@ -14,6 +14,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Base\Repository\Layout\WidgetRepository;
 use Base\Traits\BaseTrait;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -36,6 +38,8 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     public function __construct(string $title, ?string $excerpt = null, ?string $content = null)
     {
+        $this->similars = new ArrayCollection();
+
         $this->setTitle($title);
         $this->setExcerpt($excerpt);
         $this->setContent($content);
@@ -85,6 +89,25 @@ class Widget implements TranslatableInterface, IconizeInterface
     public function setThumbnail($thumbnail)
     {
         $this->thumbnail = $thumbnail;
+        return $this;
+    }
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Widget::class)
+     */
+    protected $similars;
+    public function getSimilars(): Collection { return $this->similars; }
+    public function addSimilar(self $similar): self
+    {
+        if(!$this->similars->contains($similar))
+            $this->similars[] = $similar;
+
+        return $this;
+    }
+
+    public function removeSimilar(self $similar): self
+    {
+        $this->similars->removeElement($similar);
         return $this;
     }
 }

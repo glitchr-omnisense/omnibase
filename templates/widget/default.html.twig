@@ -6,6 +6,6 @@
     <h3>{{widget.excerpt}}</h3>
 
     {% set referer = app.request.server.get('http-referer')|default(asset('')) %}
-    <div class="page-referer">{{ '@messages.base.return'|trans([referer])|raw }}<p>
+    <div class="page-referer">{{ '@messages.base.returnUrl'|trans([referer])|raw }}<p>
 </div>
 {% endblock %}

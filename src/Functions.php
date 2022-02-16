@@ -239,9 +239,10 @@ namespace {
         return $path["dirname"].$prefix.$path["filename"].$path["extension"];
     }
 
-    function str_strip(string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true) { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
-    function str_rstrip(string $haystack, array|string $needle = " ", bool $recursive = true)
+    function str_strip(?string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true): ?string { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
+    function str_rstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
+        if($haystack === null) return null; 
         if(is_array($needle)) {
 
             $_haystack = null;
@@ -263,8 +264,9 @@ namespace {
         return $haystack;
     }
 
-    function str_lstrip(string $haystack, array|string $needle = " ", bool $recursive = true)
+    function str_lstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
+        if($haystack === null) return null; 
         if(is_array($needle)) {
 
             $_haystack = null;
@@ -286,6 +288,9 @@ namespace {
         return $haystack;
     }
 
+    function first(object|array &$array) { return begin($array) ?? false; }
+    function last(object|array &$array)  { return end($array)   ?? false; }
+
     function begin(object|array &$array) 
     {
         $first = array_key_first($array);
@@ -293,7 +298,7 @@ namespace {
     }
 
     function head(object|array &$array):mixed { return array_slice($array, 0, 1)[0] ?? null; }
-    function tail(object|array &$array, int $offset = 1):array  { return array_slice($array, $offset   ); }
+    function tail(object|array &$array, int $offset = 1):array  { return array_slice($array, $offset); }
 
     function distance(array $arr1, array $arr2)
     { 
@@ -315,6 +320,14 @@ namespace {
     function closest(array $array, $position = -1) { return $array[$position] ?? ($position < 0 ? ($array[0] ?? false) : end($array)); }
     function is_html(?string $str)  { return $str != strip_tags($str); }
     function is_stringeable($value) { return (!is_object($value) && !is_array($value)) || ((is_string($value) || is_object($value)) && method_exists($value, '__toString')); }
+    function tmpfile2(string $extension = "", string $suffix = "", string $prefix = "")
+    {
+        $extension = $extension ? '.'.$extension : "";
+        $fname = tempnam(sys_get_temp_dir(), $prefix);
+        rename($fname, $fname .= $suffix . $extension);
+
+        return fopen($fname, "w");
+    }
 
     function get_alias(array|object|string|null $arrayOrObjectOrClass): string
     {
@@ -387,7 +400,11 @@ namespace {
         return $string;
     }
 
-    function html_attributes(array $attributes =[]) { return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k])."\"", array_keys(array_filter($attributes))))); }
+    function html_attributes(array ...$attributes) 
+    { 
+        $attributes = array_merge(...$attributes); 
+        return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k])."\"", array_keys(array_filter($attributes)))));
+    }
 
     function browser_name()    : string { return get_browser2()["name"]; }
     function browser_platform(): string { return get_browser2()["platform"]; }
@@ -456,6 +473,15 @@ namespace {
         ];
     }
 
+    function array_concat(array ...$arrays): array {
+
+        $array = [];
+        foreach($arrays as $arr)
+            foreach($arr as $key => $element) $array[] = $element;
+
+        return $array;
+    }
+
     function array_clear(array &$array) { while(array_pop($array)) {} }
 
     function array_prepend(array &$array, ...$value):int { return array_unshift($array, ...array_map(fn($v) => $v !== null && !is_array($v) ? [$v] : $v, $value)); }
@@ -508,6 +534,27 @@ namespace {
         return false;
     }
 
+    function array_insert(array $array, bool|int|string $index = false, ...$val): array
+    {
+        $keys = array_keys($array);
+
+        $pos  = $index === false ? false : array_search($index, $keys, true);
+        if($pos === false) $pos = count($array);
+
+        return array_merge(array_slice($array, 0, $pos), $val, array_slice($array, $pos));
+    }
+
+    function next_key(array $array, $key): mixed
+    {
+        $keys = array_keys($array);
+
+        $position = array_search($key, $keys);
+        if (isset($keys[$position + 1]))
+            return $keys[$position + 1];
+
+        return false;
+    }
+    
     function pathinfo_relationship(string $path)
     {
         $extension = pathinfo(parse_url($path, PHP_URL_PATH), PATHINFO_EXTENSION);

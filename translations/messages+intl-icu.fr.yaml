@@ -29,9 +29,12 @@ logout:
 login:
     title: "Se connecter"
 
+
 base:
+    return: "Page précédente"
+    returnUrl: "<a href=\"{0}\">Page précédente</a>"
+
     csrfToken: "Jeton CSRF invalide. Merci de recommencer."
-    return: "<a href=\"{0}\">Go back to previous page</a>"
     years: "{0, plural,
                 =0 { }
                 =1 {# an }

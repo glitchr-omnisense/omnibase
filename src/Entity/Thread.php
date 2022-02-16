@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
+use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -16,12 +17,12 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Hierarchify;
+use Base\Database\Annotation\EntityExtension;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Enum\ThreadWorkflow;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
@@ -29,13 +30,13 @@ use Base\Repository\ThreadRepository;
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @EntityExtension
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
- * 
- * @Hierarchify(null, separator = "/" );
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
+ * @Hierarchify(null, separator = "/" );
  */
 
 class Thread implements TranslatableInterface, IconizeInterface
@@ -61,7 +62,7 @@ class Thread implements TranslatableInterface, IconizeInterface
         $this->setTitle($title);
 
         $this->slug = $slug;
-        
+
         $this->setState(ThreadState::DRAFT);
     }
 
@@ -124,7 +125,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
      * @Slugify(reference="translations.title")
      */
     protected $slug;
@@ -162,6 +163,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
      * @AssertBase\NotBlank(groups={"new", "edit"})
+     * @OrderColumn()
      */
     protected $owners;
     public function getOwner(): ?User { return $this->owners[0] ?? null; }

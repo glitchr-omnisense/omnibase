@@ -138,6 +138,18 @@ class SelectField implements FieldInterface
         $this->setCustomOption(self::OPTION_SHOW, $show);
         return $this;
     }
+    public function showIconOnly()
+    {
+        $this->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ICON_ONLY);
+        $this->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY);
+        return $this;
+    }
+    public function showNameOnly()
+    {
+        $this->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_NAME_ONLY);
+        $this->setCustomOption(self::OPTION_SHOW, self::SHOW_NAME_ONLY);
+        return $this;
+    }
 
     public function renderAsCount()
     {

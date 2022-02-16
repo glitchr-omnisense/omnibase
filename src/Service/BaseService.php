@@ -25,6 +25,7 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
 use Base\Twig\Extension\BaseTwigExtension;
+use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
@@ -44,6 +45,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
@@ -534,8 +536,15 @@ class BaseService implements RuntimeExtensionInterface
         return !empty($eaParents);
     }
 
+    public function isEntity($entityOrClass) : bool
+    {
+        if ($entityOrClass instanceof ClassMetadataInterface)
+            return isset($entityOrClass->isMappedSuperclass) && $entityOrClass->isMappedSuperclass === false;
+        else if (is_object($entityOrClass))
+            $entityOrClass = ($entityOrClass instanceof Proxy) ? get_parent_class($entityOrClass) : get_class($entityOrClass);
 
-
+        return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClass);
+    }
 
 
     /**

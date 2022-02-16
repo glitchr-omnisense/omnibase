@@ -7,15 +7,16 @@
 
 {% if renderFormat == "image" or renderFormat == "avatar" %}
 
-    {% set counter = field.formattedValue.count %}
-    
     {% if renderFormat == 'avatar' %}
         {% set icon = '<i class="fas fa-fw fa-user-circle fa-3x"></i>' %}
     {% else %}
-        {% set icon = '<i class="fas fa-fw fa-image fa-3x"></i>' %}
+        {% set icon = '<i class="fas fa-fw fa-image fa-2x"></i>' %}
     {% endif %}
     
     {% if field.value is iterable %}
+
+        {% set counter = field.formattedValue.count %}
+
         {% if ea.crud.currentAction == 'detail' %}
             {% set images = field.value %}
         {% else %}
@@ -26,12 +27,16 @@
         {% set images = field.value is empty or null ? [] : [field.value] %}
     {% endif %}
     
+    {% if showFirst %}
+        {% set images = [images|first] %}
+    {% endif %}
+
     {% set entityFile    = field.formTypeOptions['entity_file'] ?? null %}
     {% for key, entity in images %}
 
-        {% set image = attribute(entity, entityFile) %}
+        {% set image = entity ? attribute(entity, entityFile) : null %}
         {% set image = image is iterable ? image|first : image %}
-        {% set image = image is not null ? image : "bundles/base/images.svg" %}
+        {% set image = image is not null ? image : null %}
 
         {% if image is not null %}
 
@@ -41,7 +46,9 @@
             <a href="#" class="{{ class_index }} ea-lightbox-thumbnail" data-featherlight="#{{ html_id }}" data-ea-lightbox-content-selector="#{{ html_id }}" data-featherlight-close-on-click="anywhere">
                 <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">
                     <img src="{{ image }}">
-                    {% if ea.crud.currentAction != 'detail' and counter > 1 %}<span>+{{counter-1}}</span>{% endif %}
+                    {% if not showFirst and ea.crud.currentAction != 'detail' and counter > 1 %}
+                        <span>+{{counter-1}}</span>
+                    {% endif %}
                 </div>
             </a>
             

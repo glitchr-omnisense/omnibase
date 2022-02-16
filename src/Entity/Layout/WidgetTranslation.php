@@ -16,7 +16,7 @@ class WidgetTranslation implements TranslationInterface
     use TranslationTrait;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $title;
     public function getTitle(): string { return $this->title; }

@@ -79,7 +79,7 @@ class EntityHydrator
         if (!is_object($entity))
             throw new Exception('Entity passed to EntityHydrator::hydrate() must be a class name or entity object');
 
-        $data = $this->toArray($data);
+        $data = array_filter($this->toArray($data), fn($e) => $e !== null);
         $data = array_key_removes($data, ...$reflPropertyExceptions);
         
         $this->hydrateProperties($entity, $data);
@@ -128,6 +128,7 @@ class EntityHydrator
 
         return $array;
     }
+
     public function setHydrateAssociationReferences(bool $hydrateAssociationReferences) 
     { 
         $this->hydrateAssociationReferences = $hydrateAssociationReferences; 

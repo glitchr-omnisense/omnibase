@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity\User;
+namespace Base\Entity\Extension;
 
 use App\Entity\User;
 use Base\Enum\LogLevel;
@@ -10,7 +10,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\User\LogRepository;
+use Base\Repository\Extension\LogRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)

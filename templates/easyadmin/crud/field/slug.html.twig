@@ -1,8 +1,8 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
-{% if ea.crud.currentAction == 'detail' %}
-    <span class="badge badge-secondary" title="{{ field.value }}">{{ field.formattedValue|raw|nl2br }}</span>
+{% if field.formattedValue is iterable %}
+    <span class="badge badge-secondary" title="{{ field.value }}"><a href="{{ field.formattedValue['url'] }}">#{{ field.formattedValue['slug']|raw|nl2br }}</a></span>
 {% else %}
-    <span class="badge badge-secondary" title="{{ field.value }}">{{ field.formattedValue|raw }}</span>
+    <span class="badge badge-secondary" title="{{ field.value }}">{{ field.formattedValue|raw|nl2br }}</span>
 {% endif %}

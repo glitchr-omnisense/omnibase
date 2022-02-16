@@ -8,6 +8,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Base\Field\SlugField;
+use Base\Model\UrlInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -32,9 +34,14 @@ class SlugConfigurator implements FieldConfiguratorInterface
     {
         $targetFieldName = $field->getCustomOption(SlugField::OPTION_TARGET_FIELD_NAME);
         $field->setFormTypeOption('target', $targetFieldName);
-
+        
         if (null !== $unlockConfirmationMessage = $field->getCustomOption(SlugField::OPTION_UNLOCK_CONFIRMATION_MESSAGE)) {
             $field->setFormTypeOption('attr.data-confirm-text', $this->translator->trans($unlockConfirmationMessage, [], $context->getI18n()->getTranslationDomain()));
         }
+        
+        $entity = $entityDto->getInstance();
+        $slug = PropertyAccess::createPropertyAccessor()->getValue($entity, $field->getProperty());
+        if(class_implements_interface($entityDto->getInstance(), UrlInterface::class))
+            $field->setFormattedValue(["url" => $entity->__toUrl(), "slug" => $slug]);
     }
 }

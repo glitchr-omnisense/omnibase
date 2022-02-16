@@ -54,7 +54,7 @@
         "scheb/2fa": "^6.0",
         "endroid/qr-code": "^4.0",
         "picqer/php-barcode-generator": "^2.0",
-
+        "florianv/swap-bundle": "^5.3",
         "easycorp/easyadmin-bundle": "^4.0",
         "league/flysystem-bundle": "^2.0",
 

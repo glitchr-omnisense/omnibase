@@ -4,8 +4,6 @@ namespace Base\Controller\Dashboard;
 
 use App\Entity\User              as User;
 use App\Entity\User\Group        as UserGroup;
-use App\Entity\User\Log          as UserLog;
-use App\Entity\User\Token        as UserToken;
 use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
@@ -55,6 +53,10 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 
 use Base\Config\Traits\WidgetTrait;
+use Base\Entity\Extension\Log;
+use Base\Entity\Extension\Revision;
+use Base\Entity\Extension\Sort;
+use Base\Entity\Extension\Token;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
@@ -480,10 +482,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(User::class),
                 WidgetItem::linkToCrud(UserGroup::class),
                 WidgetItem::linkToCrud(UserNotification::class),
-                WidgetItem::linkToCrud(UserToken::class),
                 WidgetItem::linkToCrud(UserPermission::class),
-                WidgetItem::linkToCrud(UserPenalty::class),
-                WidgetItem::linkToCrud(UserLog::class)
+                WidgetItem::linkToCrud(UserPenalty::class)
+            ]);
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', null, 1));
+            $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
+                WidgetItem::linkToCrud(Log::class),
+                WidgetItem::linkToCrud(Sort::class),
+                WidgetItem::linkToCrud(Revision::class),
+                WidgetItem::linkToCrud(Token::class)
             ]);
 
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));

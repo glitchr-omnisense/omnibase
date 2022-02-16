@@ -3,7 +3,7 @@
 namespace Base\Command;
 
 use App\Entity\User;
-use Base\Entity\User\Log;
+use Base\Entity\Extension\Log;
 
 use Base\Service\BaseService;
 use Doctrine\ORM\EntityManager;
@@ -57,7 +57,7 @@ class UserLogCommand extends Command
         else {
 
             $expiry = $input->getOption('expiry');
-            $defaultExpiry = $this->baseService->getParameterBag("base.logging_default_expiry");
+            $defaultExpiry = $this->baseService->getParameterBag("base.extension.logging_default_expiry");
 
             // Format monitored entries
             $user = $userRepository->loadUserByIdentifier($userIdentifier);

@@ -6,7 +6,7 @@ use Base\Service\BaseService;
 use App\Entity\User;
 use App\Repository\UserRepository;
 
-use App\Form\User\Login2FAType;
+use App\Form\Extension\Login2FAType;
 use Base\Annotations\Annotation\Iconize;
 use Base\Entity\User\Notification;
 use Symfony\Component\HttpFoundation\Request;

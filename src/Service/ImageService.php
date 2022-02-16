@@ -120,55 +120,88 @@ class ImageService implements ImageServiceInterface
                array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
 
-    public function getPublic(?string $path) { return $path !== null ? $this->publicDir."/".str_strip($path, [$this->publicDir, "imagine/"]) : null; }
-    public function filter(?string $path, array $filters = []): Response
+    public function getPublic(?string $path) 
+    { 
+        $stripPath = str_strip($path, [$this->publicDir, "imagine/"]);
+        if($path == $stripPath && str_starts_with($stripPath, "/")) return null;
+
+        return $path !== null ? $this->publicDir."/".$stripPath : null; 
+    }
+
+    public function filter(?string $path, array $filters = []): null|bool|Response
     {
+        do {
+
+            $nestedPath = $this->decode(basename($path));
+            $nestedPath = $nestedPath ? $nestedPath : $this->decode(basename(dirname($path)));
+            
+            if(is_array($nestedPath)) {
+            
+                $path = $nestedPath["path"] ?? $path;
+                $filters = array_key_exists("filters", $nestedPath) ? array_merge($nestedPath["filters"], $filters) : $filters;
+            }
+
+        } while(is_array($nestedPath));
+
         $content = null;
-        $publicPath = null;
+        $pathPublic = null;
 
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
-        
-        $lastFilter = array_slice($filters, -1, 1)[0] ?? null;
+        $lastFilter = end($filters);
         if($lastFilter !== null) {
             
             if(!class_implements_interface($lastFilter, LastFilterInterface::class))
-            throw new \Exception("Last filter \"".($lastFilter ? get_class($lastFilter) : null)."\" must implement \"".LastFilterInterface::class."\"");
+                throw new \Exception("Last filter \"".($lastFilter ? get_class($lastFilter) : null)."\" must implement \"".LastFilterInterface::class."\"");
             
-            $filters = array_slice($filters, 0, count($filters)-1);
-            foreach($filters as $filter) {
+            $filtersButLast = array_slice($filters, 0, count($filters)-1);
+            foreach($filtersButLast as $filter) {
                 
-                if(!class_implements_interface($filters, LastFilterInterface::class))
-                throw new \Exception("Only last filter must implement \"".LastFilterInterface::class."\"");
+                if(class_implements_interface($filter, LastFilterInterface::class))
+                    throw new \Exception("Only last filter must implement \"".LastFilterInterface::class."\"");
             }
 
-            $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters+[$lastFilter]);
-            $publicPath = $this->getPublic($path);
+            $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+            $pathPublic = $this->getPublic($path);
             $path = path_suffix($path, $pathSuffixes);
 
             // Handle null path case
             if ($path === null) {
+
                 $path = $this->noImage;
-                $publicPath = $this->getPublic($this->noImage);
+                $pathPublic = $this->getPublic($this->noImage);
             }
-            
+
+            // No public path can be created.. so just apply filter to the image
+            if($pathPublic === null) {
+
+                try { $image = $this->imagine->open($path); }
+                catch (Exception $e ) { return false; }
+
+                $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB());
+                foreach ($filters as $filter)
+                    $image = $filter->apply($image);
+
+                return true;
+            }
+
+            //
+            // Compute a response..
             // Cache not found
             if (!$this->filesystem->getOperator()->fileExists($path)) {
-                
+
                 /**
                  * @var ImageInterface
                  */
-                try {
-                    $image = $this->imagine->open($publicPath);
-                } catch (Exception $e) {
-                    $publicPath = $this->getPublic($this->noImage);
-                    $image = $this->imagine->open($publicPath);
+                try { $image = $this->imagine->open($pathPublic); } 
+                catch (Exception $e) {
+
+                    $pathPublic = $this->getPublic($this->noImage);
+                    $image = $this->imagine->open($pathPublic);
                 }
 
-                $image->usePalette($this->isCMYK($publicPath) ? new CMYK() : new RGB());
-
-                foreach ($filters+[$lastFilter] as $filter) {
+                $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB());
+                foreach ($filters as $filter)
                     $image = $filter->apply($image);
-                }
 
                 $this->filesystem->mkdir(dirname($path));
 
@@ -177,8 +210,8 @@ class ImageService implements ImageServiceInterface
             }
         }
 
-        $content = $path == $publicPath ? @file_get_contents($path) : $this->filesystem->read($path);
-        $mimetype = $this->getMimetype($publicPath);
+        $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);
+        $mimetype = $this->getMimeType($pathPublic);
 
         $response = new Response();
         $response->setContent($content);
@@ -193,9 +226,10 @@ class ImageService implements ImageServiceInterface
         return $response;
     }
 
-    public function getMimeType(string $path):?string { return self::mimetype($this->getPublic($path)) ?? $this->filesystem->mimetype($path); }
+    public function getMimeType(?string $path):?string { return $path !== null ? (self::mimetype($path) ?? $this->filesystem->mimetype($path)) : null; }
     public static function mimetype(null|string|array $fileOrArray):null|string|array  {
 
+        if($fileOrArray === null) return null;
         if(is_array($fileOrArray)) return array_map(fn($f) => self::mimetype($f), $fileOrArray);
 
         if(file_exists($fileOrArray))
@@ -205,21 +239,21 @@ class ImageService implements ImageServiceInterface
         catch (Exception $e) { return null; }
     }
 
-    public function getExtension(string $path):null|string|array  { return self::extension($this->getMimeType($path)); }
+    public function getExtension(string $path):null|string|array { return self::extension($this->getMimeType($path)); }
     public static function extension(null|string|array $mimetypeOrFileOrArray):null|string|array 
     {
         if(is_array($mimetypeOrFileOrArray))
             return array_filter(array_map(fn($mimetype) => self::extension($mimetype), $mimetypeOrFileOrArray));
 
-
         if(!$mimetypeOrFileOrArray) return null;
         if(file_exists($mimetypeOrFileOrArray)) {
 
-            $imagetype = exif_imagetype($mimetypeOrFileOrArray);
-            return $imagetype ? substr(image_type_to_extension($imagetype), 1) : null;
+            try { $imagetype = exif_imagetype($mimetypeOrFileOrArray); }
+            catch (Exception $e) { $imagetype = false; }
+            return $imagetype !== false ? substr(image_type_to_extension($imagetype), 1) : pathinfo($mimetypeOrFileOrArray, PATHINFO_EXTENSION) ?? null;
         }
-
-        return self::$mimeTypes->getExtensions($mimetypeOrFileOrArray)[0] ?? null;
+        
+        return self::$mimeTypes->getExtensions($mimetypeOrFileOrArray)[0] ?? pathinfo($mimetypeOrFileOrArray, PATHINFO_EXTENSION) ?? null;
     }
 
     public static function extensions(null|string|array $mimetypeOrArray):null|string|array 
@@ -238,7 +272,7 @@ class ImageService implements ImageServiceInterface
         return self::$mimeTypes->getExtensions($mimetypeOrArray);
     }
 
-    public function imagify(null|array|string $path, array $attributes = []): string
+    public function imagify(null|array|string $path, array $attributes = []): ?string
     {
         if(!$path) return $path;
         if(is_array($path)) return array_map(fn($p) => $this->imagify($p), $path);
@@ -246,6 +280,6 @@ class ImageService implements ImageServiceInterface
         if($attributes["src"] ?? false)
             unset($attributes["src"]);
 
-        return "<img ".html_attributes($attributes)." src='".$path."' />";
+        return "<img ".html_attributes($attributes)." src='".$this->imagine($path)."' />";
     }
 }

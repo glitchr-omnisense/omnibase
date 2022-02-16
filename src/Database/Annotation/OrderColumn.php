@@ -36,18 +36,6 @@ class OrderColumn extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        // dump("PRE PERSIST !");
-        // exit(1);
-    }
-
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        // dump("PRE UPDATE !");
-        // exit(1);
-    }
-
     /**
      * Adds mapping to the translatable and translations.
      */
@@ -64,6 +52,18 @@ class OrderColumn extends AbstractAnnotation
             self::$orderedColumns[$classMetadata->getName()]   = self::$orderedColumns[$classMetadata->getName()] ?? [];
             self::$orderedColumns[$classMetadata->getName()][] = $targetValue;
         }
+    }
+
+    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    {
+        // dump("PRE PERSIST !");
+        // exit(1);
+    }
+
+    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    {
+        // dump("PRE UPDATE !");
+        // exit(1);
     }
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

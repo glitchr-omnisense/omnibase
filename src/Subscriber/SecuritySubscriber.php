@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Base\Entity\User;
 
 use Base\Service\BaseService;
-use Base\Entity\User\Log;
+use Base\Entity\Extension\Log;
 use Base\Security\LoginFormAuthenticator;
 
 use Symfony\Component\HttpKernel\Event\KernelEvent;
@@ -16,7 +16,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
-use Base\Entity\User\Token;
+use Base\Entity\Extension\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
@@ -290,7 +290,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             }
         }
 
-        $this->baseService->getEntityManager()->flush();
+        $this->entityManager->flush();
     }
 
     public function onKernelResponse(ResponseEvent $event)

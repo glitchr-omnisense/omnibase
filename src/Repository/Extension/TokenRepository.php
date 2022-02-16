@@ -1,10 +1,9 @@
 <?php
 
-namespace Base\Repository\User;
+namespace Base\Repository\Extension;
 
-use App\Entity\User\Token;
+use Base\Entity\Extension\Token;
 use Base\Database\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @method Token|null find($id, $lockMode = null, $lockVersion = null)

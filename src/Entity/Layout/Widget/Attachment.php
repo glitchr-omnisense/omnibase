@@ -26,11 +26,15 @@ class Attachment extends Widget implements IconizeInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; } 
 
-    public function __toString() 
+    public function __toUrl(): string
     {
-        $path = $this->getTwigExtension()->getRoutingExtension()->getPath("widget_attachment", ["slug" => $this->getSlug()]);
-        return "<a href='".$path."'>".$this->getTitle()."</a>";
+        return $this->getTwigExtension()->getRoutingExtension()->getPath(
+            "widget_attachment", 
+            ["slug" => $this->getSlug()]
+        );
     }
+
+    public function __toString() { return $this->getTitle(); }
     
     /**
      * @ORM\Column(type="string", length=255, unique=true)

@@ -176,14 +176,11 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
             $count = $this->countNumElements($others);
             if($first && $showFirst) $count++;
 
-            if($first != null || !empty($others))  {
-         
-                $field->setFormattedValue([
-                    "count" => $count,
-                    "first" => $first,
-                    "others" => $others
-                ]);
-            }
+            $field->setFormattedValue([
+                "count" => $count,
+                "first" => $first,
+                "others" => $others
+            ]);
         }
     }
 }

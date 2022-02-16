@@ -2,7 +2,7 @@
     {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
     <ul class="items">
         {% for item in widget.widgets %}
-        <li>{{item|raw}}</li>
+        <li><a href="{{ item.__toUrl() }}" class="{{ class|default(null) }}">{{item|raw}}</a></li>
         {% endfor %}
     </ul>
 </div>

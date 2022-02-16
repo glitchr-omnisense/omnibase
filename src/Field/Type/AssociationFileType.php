@@ -2,14 +2,17 @@
 
 namespace Base\Field\Type;
 
+use App\Enum\UserRole;
 use Base\Annotations\Annotation\Uploader;
+use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;
+use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -25,6 +28,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class AssociationFileType extends AbstractType implements DataMapperInterface
 {
+    use BaseTrait;
+
     /**
      * @var ClassMetadataManipulator
      */
@@ -92,15 +97,38 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+        // 
+        // Set controller url
+        $options["class"]    = $this->formFactory->guessType($form, $options);
+        $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
+        $options["sortable"] = $this->formFactory->guessSortable($form, $options);
+        $isNullable = $this->classMetadataManipulator->getMapping($options["class"], $form->getName())["nullable"] ?? false;
+        
+        $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
+
+        $href = null;
+        if($options["href"] === null && $crudController && $this->getService()->isGranted(UserRole::ADMIN)) {
+
+            $href = $this->adminUrlGenerator
+                    ->unsetAll()
+                    ->setController($crudController)
+                    ->setAction(Action::EDIT)
+                    ->setEntityId("{0}")
+                    ->generateUrl();
+        }
+        $view->vars["href"]     = $options["href"] ?? $href;
+
         $view->vars["multiple"]     = $options["multiple"];
-        $view->vars["allow_delete"] = $options["allow_delete"];
+        $view->vars["allow_delete"] = $isNullable;
+        $view->vars["required"]     = !$isNullable;
 
         $data = $form->getData();
-        $view->vars["entityId"] = json_encode(array_transforms(function($k,$e) use ($options):array {
+        $view->vars["entityId"] = json_encode(array_transforms(function($k, $e) use ($options):array {
 
             $path = PropertyAccess::createPropertyAccessor()->getValue($e, $options["entity_file"]);
-            $path = is_array($path) ? begin($path) ?? null : $path;
+            if($path instanceof Collection) $path = $path->toArray();
 
+            $path = is_array($path) ? begin($path) ?? null : $path;
             return [basename($path), $e->getId()];
 
         }, ($data instanceof Collection) ? $data->toArray() : []));
@@ -117,14 +145,16 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $options["class"]    = $this->formFactory->guessType($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-
+            
             $fieldName = $options["entity_file"];
+            $isNullable = $this->classMetadataManipulator->getMapping($options["class"], $fieldName)["nullable"] ?? false;
+
             $form->add($fieldName, $options["form_type"], [
                 'class'         => $options["class"],
-                'allow_delete'  => $options["allow_delete"] ?? true,
+                'allow_delete'  => $isNullable,
+                'required'      => !$isNullable,
                 'multiple'      => $options["multiple"] ?? false,
                 'href'          => $options["href"] ?? null,
-
                 'max_filesize'  => $options["max_filesize"],
                 'max_files'     => $options["max_files"],
                 'mime_types'    => $options["mime_types"],
@@ -136,7 +166,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 $public = Uploader::getPublic($e, $fieldName);
                 return is_array($public) ? begin($public) ?? null : $public;
 
-            }, $data->toArray()));
+            }, $options["multiple"] ? $data->toArray() : [$data]));
 
             $form->get($fieldName)->setData($files);
         });
@@ -158,13 +188,13 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
         $newData = [];
         $data = new ArrayCollection();
-
+        
         $fieldName = $options["entity_file"];
         $form = iterator_to_array($forms)[$fieldName] ?? null;
         if($form) {
 
-            $files = $form->getData() ?? [];
-            foreach($files as $key => $file) {
+            $files = $options["multiple"] ? $form->getData() : array_filter([$form->getData()]);
+            foreach($files ?? [] as $key => $file) {
 
                 if($file instanceof File) {
 
@@ -176,11 +206,14 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     $this->propertyAccessor->setValue($entity, $fieldName, $file);
 
                     $newData[] = $entity;
-
+                    
                 } else {
 
-                    $filteredData = $viewData->filter(fn($e) => basename($this->propertyAccessor->getValue($e, $fieldName)));
-                    $entity = $filteredData instanceof ArrayCollection ? $filteredData->first() : false;
+                    $filteredData = $options["multiple"] 
+                        ? $viewData->filter(fn($e) => basename($this->propertyAccessor->getValue($e, $fieldName)))
+                        : [basename($this->propertyAccessor->getValue($viewData, $fieldName))];
+
+                    $entity = $filteredData instanceof ArrayCollection ? $filteredData->first() : first($filteredData);
                     $entity = $entity === false ? null : $entity;
                 }
 
@@ -188,7 +221,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 if($entity !== null) $data[$key] = $entity;
             }
         }
-
+        
         if($options["multiple"]) {
 
             if($viewData instanceof PersistentCollection) {
@@ -212,6 +245,9 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             } else $viewData = $data;
 
-        } else $viewData = $data->first();
+        } else if($data->first()) {
+
+            $this->entityHydrator->hydrate($viewData, $data->first());
+        }
     }
 }
