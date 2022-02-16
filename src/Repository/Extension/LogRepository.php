@@ -2,7 +2,7 @@
 
 namespace Base\Repository\Extension;
 
-use App\Entity\Extension\Log;
+use Base\Entity\Extension\Log;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**

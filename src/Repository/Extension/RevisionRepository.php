@@ -2,7 +2,7 @@
 
 namespace Base\Repository\Extension;
 
-use App\Entity\Extension\Revision;
+use Base\Entity\Extension\Revision;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**

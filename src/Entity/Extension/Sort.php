@@ -8,11 +8,11 @@ use Base\Annotations\Annotation\Hashify;
 use Base\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Extension\RevisionRepository;
+use Base\Repository\Extension\SortRepository;
 use Base\Traits\BaseTrait;
 
 /**
- * @ORM\Entity(repositoryClass=RevisionRepository::class)
+ * @ORM\Entity(repositoryClass=SortRepository::class)
  */
 class Sort implements IconizeInterface
 {

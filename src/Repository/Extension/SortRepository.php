@@ -2,7 +2,7 @@
 
 namespace Base\Repository\Extension;
 
-use App\Entity\Extension\Sort;
+use Base\Entity\Extension\Sort;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**
