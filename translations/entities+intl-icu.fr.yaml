@@ -6,24 +6,26 @@ user:
   group:
     singular: "groupe"
     plural: "groupes"
-
-  thread:
-    singular: "fil"
-    plural: "fils"
-
   permission:
     singular: "permission"
     plural: "permissions"
-  token:
-    singular: "jeton"
-    plural: "jetons"
   notification:
     singular: "notification"
     plural: "notifications"
-
   penalty:
     singular: "pénalité"
     plural: "pénalités"
+
+extension:
+  revision:
+    singular: "revision"
+    plural: "revisions"
+  sort:
+    singular: "triage"
+    plural: "triages"
+  token:
+    singular: "jeton"
+    plural: "jetons"
   log:
     singular: "historique"
     plural: "historiques"

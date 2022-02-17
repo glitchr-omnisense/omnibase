@@ -357,6 +357,11 @@
             <argument type="service" id="base.database.entity_hydrator" />
         </service>
 
+        <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
+        <service id="Base\Database\Annotation\Versioning" ><tag name="base.entity_extension" /></service>
+        <service id="Base\Database\Annotation\Tokenize"   ><tag name="base.entity_extension" /></service>
+        <service id="Base\Database\Annotation\Logging"    ><tag name="base.entity_extension" /></service>
+
         <!-- Twig declarations -->
         <service id="Base\Twig\Loader\FilesystemLoader">
             <tag name="twig.loader" />
@@ -773,16 +778,18 @@
             <argument type="service" id="base.service" />
         </service>
       
-
         <service id="Base\Controller\Dashboard\Crud\ThreadCrudController"         parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Thread\LikeCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Thread\MentionCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Thread\TagCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         
-        <service id="Base\Controller\Dashboard\Crud\UserCrudController"              parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\GroupCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Extension\LogCrudController"          parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Extension\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Extension\SortCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Extension\RevisionCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        
+        <service id="Base\Controller\Dashboard\Crud\UserCrudController"              parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\GroupCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\NotificationCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\PermissionCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController"      parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /> </service>

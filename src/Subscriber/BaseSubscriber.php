@@ -60,6 +60,9 @@ class BaseSubscriber implements EventSubscriberInterface
         if ($contentType && !str_contains($contentType, "text/html"))
             return false;
     
+        if ($this->baseService->isProfiler())
+            return false;
+
         if (!$event->isMainRequest())
             return false;
         

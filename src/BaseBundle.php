@@ -3,6 +3,7 @@
 namespace Base;
 
 use Base\DependencyInjection\Compiler\AnnotationPass;
+use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -24,6 +25,7 @@ class BaseBundle extends Bundle
 
         $container->addCompilerPass(new AnnotationPass());
         $container->addCompilerPass(new IconProviderPass());
+        $container->addCompilerPass(new EntityExtensionPass());
 
         /* Register aliased repositories */
         foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {

@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\EntityExtensionInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -16,7 +17,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  *   @Attribute("disable",   type = "boolean"),
  * })
  */
-class Versioning extends AbstractAnnotation
+class Versioning extends AbstractAnnotation implements EntityExtensionInterface
 {
     protected ?string $referenceColumn;
 

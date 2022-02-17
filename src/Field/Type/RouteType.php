@@ -12,7 +12,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class RouteType extends AbstractType
 {
-    public function getParent() { return SelectType::class; }
+    public function getParent(): ?string { return SelectType::class; }
     public function getBlockPrefix(): string { return 'route'; }
 
     public function __construct(RouterInterface $router) { $this->router = $router; }

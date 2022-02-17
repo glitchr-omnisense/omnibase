@@ -12,9 +12,8 @@ class IconProviderPass implements CompilerPassInterface
     public function process(ContainerBuilder $container): void
     {
         // always first check if the primary service is defined
-        if (!$container->has(IconService::class)) {
+        if (!$container->has(IconService::class))
             return;
-        }
 
         $definition = $container->findDefinition(IconService::class);
 

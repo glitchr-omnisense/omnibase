@@ -4,8 +4,8 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\EntityExtensionInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
@@ -36,6 +36,16 @@ class EntityExtension extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_CLASS);
     }
 
+    protected $extensions = [];
+    public function addExtension(EntityExtensionInterface $extension): self
+    {
+        dump($extension);
+        dump(self::$extendedEntities);
+
+        $this->extensions[get_class($extension)] = $extension;
+        return $this;
+    }
+
     /**
      * Adds mapping to the translatable and translations.
      */
@@ -49,22 +59,15 @@ class EntityExtension extends AbstractAnnotation
     
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
     {
-        self::$extendedEntities[] = $classMetadata->getName();
+        if(!in_array($classMetadata->getName(), self::$extendedEntities))
+            self::$extendedEntities[] = $classMetadata->getName();
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-    }
-
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-    }
-
-    public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
+    public function postUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
     }
 }

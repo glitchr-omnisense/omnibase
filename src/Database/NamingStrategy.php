@@ -45,7 +45,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
         // Determination of table name based on class information
         if(!$tableName) {
 
-            $tableName = ltrim(strstr($classNameWithNamespace, "\\Entity\\"), "\\Entity\\");
+            $tableName = str_strip(strstr($classNameWithNamespace, "\\Entity\\"), "\\Entity\\");
             if(empty($tableName)) {
 
                 $tableName = $classNameWithNamespace;

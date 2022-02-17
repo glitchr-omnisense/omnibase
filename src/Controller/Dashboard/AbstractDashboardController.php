@@ -278,6 +278,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureDashboard(): Dashboard
     {
+
         $logo  = $this->baseService->getSettings()->getScalar("base.settings.logo.backoffice");
         if(!$logo) $logo = $this->baseService->getSettings()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
@@ -298,6 +299,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
             ->setTitle('<img src="'.$logo.'" alt="'.$title.'">')
             ->disableUrlSignatures();
+
     }
 
     public function addRoles(array &$menu, string $class)
@@ -475,34 +477,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);
 
-        if ($this->isGranted('ROLE_EDITOR')) {
-
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
-            $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
-                WidgetItem::linkToCrud(User::class),
-                WidgetItem::linkToCrud(UserGroup::class),
-                WidgetItem::linkToCrud(UserNotification::class),
-                WidgetItem::linkToCrud(UserPermission::class),
-                WidgetItem::linkToCrud(UserPenalty::class)
-            ]);
-
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', null, 1));
-            $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
-                WidgetItem::linkToCrud(Log::class),
-                WidgetItem::linkToCrud(Sort::class),
-                WidgetItem::linkToCrud(Revision::class),
-                WidgetItem::linkToCrud(Token::class)
-            ]);
-
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));
-            $widgets = $this->addWidgetItem($widgets, "THREADS", [
-                WidgetItem::linkToCrud(Thread::class),
-                WidgetItem::linkToCrud(Mention::class),
-                WidgetItem::linkToCrud(Tag::class),
-                WidgetItem::linkToCrud(Like::class),
-            ]);
-        }
-
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
         if ($this->isGranted('ROLE_EDITOR')) {
 
@@ -524,6 +498,35 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             WidgetItem::linkToCrud(Link::class ),
         ]);
 
+        if ($this->isGranted('ROLE_ADMIN')) {
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));
+            $widgets = $this->addWidgetItem($widgets, "THREADS", [
+                WidgetItem::linkToCrud(Thread::class),
+                WidgetItem::linkToCrud(Mention::class),
+                WidgetItem::linkToCrud(Tag::class),
+                WidgetItem::linkToCrud(Like::class),
+            ]);
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', null, 1));
+            $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
+                WidgetItem::linkToCrud(Log::class),
+                WidgetItem::linkToCrud(Sort::class),
+                WidgetItem::linkToCrud(Token::class),
+                WidgetItem::linkToCrud(Revision::class),
+            ]);
+
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 1));
+            $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
+                WidgetItem::linkToCrud(User::class),
+                WidgetItem::linkToCrud(UserGroup::class),
+                WidgetItem::linkToCrud(UserNotification::class),
+                WidgetItem::linkToCrud(UserPermission::class),
+                WidgetItem::linkToCrud(UserPenalty::class)
+            ]);
+
+        }
+        
         return $widgets;
     }
 }

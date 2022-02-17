@@ -1,31 +1,32 @@
 user:
   singular: "user"
   plural: "users"
-
   group:
     singular: "group"
     plural: "groups"
-
-  thread:
-    singular: "thread"
-    plural: "threads"
-
   permission:
     singular: "permission"
     plural: "permissions"
-  token:
-    singular: "token"
-    plural: "tokens"
   notification:
     singular: "notification"
     plural: "notifications"
-
   penalty:
     singular: "penalty"
     plural: "penalties"
+
+extension:
   log:
     singular: "log"
     plural: "logs"
+  token:
+    singular: "token"
+    plural: "tokens"
+  revision:
+    singular: "revision"
+    plural: "revisions"
+  sort:
+    singular: "ordering"
+    plural: "ordering"
 
 thread:
   singular: "thread"
