@@ -7,6 +7,7 @@ use App\Entity\User\Group        as UserGroup;
 use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
+use App\Entity\User\Token      as UserToken;
 
 use App\Entity\Thread;
 use App\Entity\Thread\Like;
@@ -55,8 +56,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Base\Config\Traits\WidgetTrait;
 use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
-use Base\Entity\Extension\Sort;
-use Base\Entity\Extension\Token;
+use Base\Entity\Extension\Ordering;
+
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
@@ -206,15 +207,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         if($form->isSubmitted() && $form->isValid()){
 
-            $data     = array_filter($form->getData(), fn($value) => !is_null($value));
-            $fields   = array_keys($form->getConfig()->getOption("fields"));
-            $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
-                $this->baseService->getSettings()->getRawScalar($fields)
-            );
-
-            foreach(array_diff_key($data, $settings) as $name => $setting)
-                $this->settingRepository->persist($setting);
+            $settings     = array_filter($form->getData(), fn($value) => !is_null($value));
+            foreach($settings as $setting) {
+            
+                if(!$this->settingRepository->contains($setting))
+                    $this->settingRepository->persist($setting);
+            }
 
             $this->settingRepository->flush();
 
@@ -249,7 +247,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach(array_keys($widgetSlots) as $path) {
 
                 $widgetSlot = $this->slotRepository->findOneByPath($path);
-                
+
                 if(!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
@@ -511,18 +509,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('EXTENSIONS', null, 1));
             $widgets = $this->addWidgetItem($widgets, "EXTENSIONS", [
                 WidgetItem::linkToCrud(Log::class),
-                WidgetItem::linkToCrud(Sort::class),
-                WidgetItem::linkToCrud(Token::class),
+                WidgetItem::linkToCrud(Ordering::class),
                 WidgetItem::linkToCrud(Revision::class),
             ]);
 
-            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 1));
+            $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));
             $widgets = $this->addWidgetItem($widgets, "MEMBERSHIP", [
                 WidgetItem::linkToCrud(User::class),
                 WidgetItem::linkToCrud(UserGroup::class),
                 WidgetItem::linkToCrud(UserNotification::class),
                 WidgetItem::linkToCrud(UserPermission::class),
-                WidgetItem::linkToCrud(UserPenalty::class)
+                WidgetItem::linkToCrud(UserPenalty::class),
+                WidgetItem::linkToCrud(UserToken::class),
             ]);
 
         }

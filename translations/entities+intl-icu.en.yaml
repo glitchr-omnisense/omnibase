@@ -13,18 +13,18 @@ user:
   penalty:
     singular: "penalty"
     plural: "penalties"
+  token:
+    singular: "token"
+    plural: "tokens"
 
 extension:
   log:
     singular: "log"
     plural: "logs"
-  token:
-    singular: "token"
-    plural: "tokens"
   revision:
     singular: "revision"
     plural: "revisions"
-  sort:
+  ordering:
     singular: "ordering"
     plural: "ordering"
 

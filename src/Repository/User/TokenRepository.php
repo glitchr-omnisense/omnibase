@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Repository\Extension;
+namespace Base\Repository\User;
 
-use Base\Entity\Extension\Token;
+use Base\Entity\User\Token;
 use Base\Database\Repository\ServiceEntityRepository;
 
 /**

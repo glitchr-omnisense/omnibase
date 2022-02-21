@@ -3,6 +3,7 @@
 namespace Base\Entity\Extension;
 
 use App\Entity\User;
+use Base\Database\Traits\EntityExtensionTrait;
 use Base\Enum\LogLevel;
 use Base\Model\IconizeInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,51 +15,36 @@ use Base\Repository\Extension\LogRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Log implements IconizeInterface
 {
+    use EntityExtensionTrait;
+
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-info-circle"]; } 
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-    public function getId() { return $this->id; }
-
-    /**
-     * Type Of Event
-     *
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $event;
-    public function getEvent() { return $this->event; }
-
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    protected $priority;
-    public function getPriority() { return $this->priority; }
-
-    /**
-     * @ORM\Column(type="text")
-     */
-    protected $pretty;
-    public function getPretty() { return $this->pretty; }
-
-    /**
-     * @ORM\OneToOne(targetEntity=User::class)
-     */
-    protected $impersonator;
-    public function getImpersonator(): ?User { return $this->impersonator; }
-    public function setImpersonator(?User $impersonator): self
+    public function __construct(array $listener, Request $request = null)
     {
-        $this->impersonator = $impersonator;
+        if (!array_key_exists("event", $listener))
+            throw new Exception("Array key \"event\" missing in dispatcher entry");
+        if (!array_key_exists("priority", $listener))
+            throw new Exception("Array key \"priority\" missing in dispatcher entry");
+        if (!array_key_exists("pretty", $listener))
+            throw new Exception("Array key \"pretty\" missing in dispatcher entry");
 
-        return $this;
+        $this->event    = $listener["event"];
+        $this->priority = $listener["priority"];
+        $this->pretty   = $listener["pretty"];
+        $this->level    = LogLevel::INFO;
+        $this->browser  = User::getBrowser();
+        $this->ip       = User::getIp();
+
+        if ($request)
+            $this->setRequest($request);
     }
+
+    public function __toString() { return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt; }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="logs")
@@ -75,6 +61,24 @@ class Log implements IconizeInterface
 
         return $this;
     }
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $event;
+    public function getEvent() { return $this->event; }
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $priority;
+    public function getPriority() { return $this->priority; }
+
+    /**
+     * @ORM\Column(type="text")
+     */
+    protected $pretty;
+    public function getPretty() { return $this->pretty; }
 
     /**
      * @ORM\Column(type="string", length=20)
@@ -119,44 +123,12 @@ class Log implements IconizeInterface
     public function getExtra() { return $this->extra; }
 
     /**
-     * Level
-     *
      * @ORM\Column(type="log_level")
      */
     protected $level;
     public function getLevel() { return $this->level; }
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    protected $createdAt;
-    public function getCreatedAt() { return $this->createdAt; }
-
-    public function __construct(array $listener, Request $request = null)
-    {
-        if (!array_key_exists("event", $listener))
-            throw new Exception("Array key \"event\" missing in dispatcher entry");
-        if (!array_key_exists("priority", $listener))
-            throw new Exception("Array key \"priority\" missing in dispatcher entry");
-        if (!array_key_exists("pretty", $listener))
-            throw new Exception("Array key \"pretty\" missing in dispatcher entry");
-
-        $this->createdAt   = new \DateTime("now");
-        $this->level      = LogLevel::INFO;
-        $this->event      = $listener["event"];
-        $this->priority   = $listener["priority"];
-        $this->pretty   = $listener["pretty"];
-
-        if ($request)
-            $this->setRequest($request);
-    }
-
-    public function __toString()
-    {
-        return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt;
-    }
-
-    function setRequest(Request $request) {
+    public function setRequest(Request $request) {
 
         $this->statusCode = "302";
         $this->requestUri = $request->getRequestUri() ?? null;
@@ -164,7 +136,7 @@ class Log implements IconizeInterface
         $this->method     = $request->getMethod()     ?? null;
     }
 
-    function setException(?\Throwable $exception)
+    public function setException(?\Throwable $exception)
     {
         if(!$exception) return;
         $this->level      = LogLevel::CRITICAL;

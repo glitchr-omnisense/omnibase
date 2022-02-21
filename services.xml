@@ -241,7 +241,7 @@
             
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="Base\Repository\Extension\TokenRepository" />
+            <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="referrer" />
             <argument type="service" id="base.service" />
         </service>
@@ -273,10 +273,15 @@
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
-        <service id="Base\DatabaseSubscriber\TranslatableSubscriber">
+        <service id="Base\DatabaseSubscriber\IntlSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
+        </service>
+        <service id="Base\DatabaseSubscriber\ExtensionSubscriber">
+            <tag name="doctrine.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.entity_extension" />
         </service>
 
         <service id="Base\EntitySubscriber\ThreadSubscriber">
@@ -355,12 +360,15 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="base.database.entity_hydrator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
+
+        <service id="Base\Database\Factory\EntityExtension" public="true" />
         <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
-        <service id="Base\Database\Annotation\Versioning" ><tag name="base.entity_extension" /></service>
-        <service id="Base\Database\Annotation\Tokenize"   ><tag name="base.entity_extension" /></service>
+        <service id="Base\Database\Annotation\Versionable"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Logging"    ><tag name="base.entity_extension" /></service>
+        <service id="Base\Database\Annotation\Trasheable" ><tag name="base.entity_extension" /></service>
 
         <!-- Twig declarations -->
         <service id="Base\Twig\Loader\FilesystemLoader">
@@ -784,8 +792,8 @@
         <service id="Base\Controller\Dashboard\Crud\Thread\TagCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         
         <service id="Base\Controller\Dashboard\Crud\Extension\LogCrudController"          parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Extension\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Extension\SortCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\User\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Dashboard\Crud\Extension\OrderingCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Dashboard\Crud\Extension\RevisionCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         
         <service id="Base\Controller\Dashboard\Crud\UserCrudController"              parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

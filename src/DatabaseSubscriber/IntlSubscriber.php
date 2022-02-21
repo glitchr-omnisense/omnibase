@@ -12,7 +12,7 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
-class TranslatableSubscriber implements EventSubscriber
+class IntlSubscriber implements EventSubscriber
 {
     /**
      * @var string

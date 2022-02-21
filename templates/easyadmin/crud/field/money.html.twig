@@ -1,0 +1,26 @@
+{# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
+{# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
+{# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+{% if field.formattedValue is iterable %}
+
+    {% set index_min = 0 %}
+    {% set index_max = 0 %}
+
+    {% for price in field.formattedValue %}
+
+        {% set price_int = price|intval %}
+        {% set index_min = field.formattedValue[index_min]|intval > price_int ? loop.index0 : index_min %}
+        {% set index_max = field.formattedValue[index_max]|intval < price_int ? loop.index0 : index_max %}
+
+    {% endfor %}
+
+    {% set price_min = field.formattedValue[index_min] %}
+    {% set price_max = field.formattedValue[index_max] %}
+
+    {{ price_min != price_max ? price_min ~ ' - ' ~ price_max : price_min }}
+
+{% else %}
+
+    {{ field.formattedValue }}
+
+{% endif %}

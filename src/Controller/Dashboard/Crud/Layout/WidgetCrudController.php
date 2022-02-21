@@ -5,9 +5,7 @@ namespace Base\Controller\Dashboard\Crud\Layout;
 use Base\Field\TranslationField;
 
 use Base\Controller\Dashboard\AbstractCrudController;
-use Base\Entity\Layout\Widget\Page;
 use Base\Field\DiscriminatorField;
-use Base\Field\SelectField;
 use Base\Field\Type\QuillType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;

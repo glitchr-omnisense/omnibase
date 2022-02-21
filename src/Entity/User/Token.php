@@ -1,16 +1,17 @@
 <?php
 
-namespace Base\Entity\Extension;
+namespace Base\Entity\User;
 
 use App\Entity\User;
 use Base\Annotations\Annotation\Slugify;
+use Base\Annotations\Annotation\Timestamp;
 use Base\Model\IconizeInterface;
 
 use Hashids\Hashids;
 
-use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Extension\TokenRepository;
 use Base\Traits\BaseTrait;
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\User\TokenRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TokenRepository::class)
@@ -26,13 +27,14 @@ class Token implements IconizeInterface
     public const VALID   = "VALID_TOKENS";
     public const EXPIRED = "EXPIRED_TOKENS";
 
-    public const THROTTLE = 3*60; /* time before next request */
-    public function __construct(string $name, ?int $expiry = null, ?int $throttle = self::THROTTLE)
+    public function __construct(string $name, ?int $expiry = null, ?int $throttle = null)
     {
         $this->name = $name;
         $this->isRevoked = false;
         $this->expireAt = null;
         $this->allowAt = null;
+
+        $this->throttle = $this->getService()->getParameterBag("base.user.token_default_throttling");
 
         $this->hashIds = new Hashids($this->getService()->getSalt());
         $this->generate($expiry, $throttle);
@@ -95,8 +97,26 @@ class Token implements IconizeInterface
      * @ORM\Column(type="integer")
      */
     protected $id;
-
     public function getId(): ?int { return $this->id; }
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tokens")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    protected $user;
+
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): self
+    {
+        if ($this->user && $this->user != $user)
+            $this->user->removeToken($this);
+
+        if ($user)
+            $user->addToken($this);
+
+        $this->user = $user;
+        return $this;
+    }
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -110,7 +130,7 @@ class Token implements IconizeInterface
         $this->name = $name;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="string", length=255)
      */
@@ -147,34 +167,14 @@ class Token implements IconizeInterface
     }
 
     /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="tokens")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    protected $user;
-
-    public function getUser(): ?User { return $this->user; }
-    public function setUser(?User $user): self
-    {
-        if ($this->user && $this->user != $user)
-            $this->user->removeToken($this);
-
-        if ($user)
-            $user->addToken($this);
-
-        $this->user = $user;
-        return $this;
-    }
-
-    /**
      * @ORM\Column(type="datetime")
+     * @Timestamp(on="create")
      */
     protected $createdAt;
-
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
     public function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -243,11 +243,9 @@ class Token implements IconizeInterface
     public function markAsRevoked(): self
     {
         $this->isRevoked = true;
-        
         if(($user = $this->getUser())) 
             $user->removeToken($this);
 
         return $this;
     }
-
 }

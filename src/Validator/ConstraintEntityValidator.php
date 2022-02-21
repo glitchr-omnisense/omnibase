@@ -72,10 +72,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
 
     public function getEntityChangeSet($entity): ?array
     {
-        $class = get_class($entity);
+        $classMetadata = $this->getClassMetadata($entity);
 
-        $uow = $this->getEntityManager($class)->getUnitOfWork();
-        $uow->computeChangeSets();
+        $uow = $this->getEntityManager($classMetadata->getName())->getUnitOfWork();
+        $uow->recomputeSingleChangeSet($classMetadata->getName(), $entity);
 
         return $uow->getEntityChangeSet($entity);
     }

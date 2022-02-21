@@ -42,6 +42,8 @@
 
         <service id="base.annotation_reader" alias="Base\Annotations\AnnotationReader" />
 
+        <service id="base.entity_extension" alias="Base\Database\Factory\EntityExtension" />
+
         <service id="twig.extension.base" alias="Base\Twig\Extension\BaseTwigExtension" />
         <service id="base.twig_loader"  alias="Base\Twig\Loader\FilesystemLoader" />
         <service id="base.twig_loader"  alias="Base\Twig\Loader\FilesystemLoader" />

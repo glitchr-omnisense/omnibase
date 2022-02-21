@@ -6,10 +6,13 @@ use Doctrine\Common\Annotations\AnnotationReader as DoctrineAnnotationReader;
 use Doctrine\ORM\EntityManager;
 
 use Base\Annotations\AbstractAnnotation;
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Service\Filesystem;
 use Base\Traits\BaseTrait;
 use Exception;
+
+use App\Entity\User;
 
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -40,7 +43,16 @@ class AnnotationReader
 
     protected $parameterBag;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher, EntityManager $entityManager, ParameterBagInterface $parameterBag, CacheInterface $cache, Filesystem $filesystem, RequestStack $requestStack, TokenStorageInterface $tokenStorage, EntityHydrator $entityHydrator)
+    public function __construct(
+        EventDispatcherInterface $eventDispatcher, 
+        EntityManager $entityManager, 
+        ParameterBagInterface $parameterBag, 
+        CacheInterface $cache, 
+        Filesystem $filesystem, 
+        RequestStack $requestStack, 
+        TokenStorageInterface $tokenStorage, 
+        EntityHydrator $entityHydrator,
+        ClassMetadataManipulator $classMetadataManipulator)
     {
         if(!self::getInstance(false))
             self::setInstance($this);
@@ -71,11 +83,13 @@ class AnnotationReader
         $this->cachePool['propertyAnnotations'] = $this->cache->getItem($cacheName . ".propertyAnnotations");
 
         $this->entityManager   = $entityManager;
-        $this->entityHydrator   = $entityHydrator;
+        $this->entityHydrator  = $entityHydrator;
         $this->requestStack    = $requestStack;
         $this->tokenStorage    = $tokenStorage;
         $this->filesystem      = $filesystem;
         $this->eventDispatcher = $eventDispatcher;
+
+        $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
     /**
@@ -115,8 +129,8 @@ class AnnotationReader
     }
     
     public function getProjectDir() { return dirname(__DIR__, 5); }
-    public function getUser() { return $this->tokenStorage->getUser(); }
-    public function getImpersonator() 
+    public function getUser(): ?User { return $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null; }
+    public function getImpersonator(): ?User 
     {
         $token = $this->tokenStorage->getToken();
         return ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
@@ -134,6 +148,12 @@ class AnnotationReader
      */
     protected $entityHydrator = null;
     public function getEntityHydrator() { return $this->entityHydrator; }
+    
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator = null;
+    public function getClassMetadataManipulator() { return $this->classMetadataManipulator; }
     
     /**
      * @var Filesystem
@@ -355,10 +375,18 @@ class AnnotationReader
     }
 
 
-    public function getDefaultClassAnnotations($classNameOrMetadataOrRefl)
+    public function getDefaultClassAnnotations($classNameOrMetadataOrRefl, $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        return $this->getDefaultReader()->getClassAnnotations($reflClass);
+
+        $annotations = $this->getDefaultReader()->getClassAnnotations($reflClass);
+        $annotationNames = array_unique(
+            (is_array($annotationNames) ? $annotationNames :
+            (is_object($annotationNames) ? [get_class($annotationNames)] :
+            (is_string($annotationNames) ? [$annotationNames] : [])))
+        );
+
+        return array_filter($annotations, fn($a) => in_array(get_class($a), $annotationNames));
     }
 
     public function getClassAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $targets = []): array
@@ -390,7 +418,7 @@ class AnnotationReader
 
         if (empty($annotationNames))
             $annotationNames = $this->getAnnotationNames();
-        
+
         // If annotation already computed
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         $annotations = $this->cachePool['classAnnotations']->get() ?? [];
@@ -398,8 +426,10 @@ class AnnotationReader
 
             // Compute the class annotations
             $annotations[$reflClass->name] = [];
-
             foreach ($this->getDefaultReader()->getClassAnnotations($reflClass) as $annotation) {
+
+                if (!is_serializable($annotation))
+                    throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
 
                 // Only look for AbstractAnnotation classes
                 if (!is_subclass_of($annotation, AbstractAnnotation::class))
@@ -428,18 +458,29 @@ class AnnotationReader
         return $filteredAnnotations;
     }
 
-    public function getDefaultMethodAnnotations($classNameOrMetadataOrRefl)
+    public function getDefaultMethodAnnotations($classNameOrMetadataOrRefl, $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
         $annotations = [];
-        foreach ($reflClass->getMethods() as $reflMethod)
-            $annotations[$reflMethod->getName()] = $this->getDefaultReader()->getMethodAnnotations($reflMethod);
+        $annotationNames = array_unique(
+            (is_array($annotationNames) ? $annotationNames :
+            (is_object($annotationNames) ? [get_class($annotationNames)] :
+            (is_string($annotationNames) ? [$annotationNames] : [])))
+        );
         
+        foreach ($reflClass->getMethods() as $reflMethod) {
+    
+            $annotations[$reflMethod->getName()] = array_filter(
+                $this->getDefaultReader()->getMethodAnnotations($reflMethod), 
+                fn($a) => in_array(get_class($a), $annotationNames)
+            );
+        }
+
         return array_filter($annotations);
     }
 
-    public function getMethodAnnotations($classNameOrMetadataOrRefl, array $annotationNames = [], array $targets = []): array
+    public function getMethodAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $targets = []): array
     {
         // Browsed classTypes (annotationNames)
          $annotationNames = array_unique(
@@ -477,8 +518,16 @@ class AnnotationReader
 
                 foreach ($reflClass->getMethods() as $reflMethod) {
 
-                    if ( ($annotation = $this->getDefaultReader()->getMethodAnnotation($reflMethod, $annotationName)) )
+                    if ( ($annotation = $this->getDefaultReader()->getMethodAnnotation($reflMethod, $annotationName)) ) {
+
+                        if (!is_serializable($annotation))
+                            throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+
+                        if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                            continue;
+
                         $annotations[$reflClass->name][$reflMethod->name][] = $annotation;
+                    }
                 }
             }
 
@@ -502,14 +551,25 @@ class AnnotationReader
         return $filteredAnnotations;
     }
 
-    public function getDefaultPropertyAnnotations($classNameOrMetadataOrRefl)
+    public function getDefaultPropertyAnnotations($classNameOrMetadataOrRefl, $annotationNames = null)
     {
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
         $annotations = [];
-        foreach ($reflClass->getProperties() as $reflProperty)
-            $annotations[$reflProperty->getName()] = $this->getDefaultReader()->getPropertyAnnotations($reflProperty);
-        
+        $annotationNames = array_unique(
+            (is_array($annotationNames) ? $annotationNames :
+            (is_object($annotationNames) ? [get_class($annotationNames)] :
+            (is_string($annotationNames) ? [$annotationNames] : [])))
+        );
+
+        foreach ($reflClass->getProperties() as $reflProperty) {
+
+            $annotations[$reflProperty->getName()] = array_filter(
+                $this->getDefaultReader()->getPropertyAnnotations($reflProperty), 
+                fn($a) => in_array(get_class($a), $annotationNames)
+            );
+        }
+
         return array_filter($annotations);
     }
 
@@ -551,8 +611,16 @@ class AnnotationReader
 
                 foreach ($reflClass->getProperties() as $reflProperty) {
 
-                    if( ($annotation = $this->getDefaultReader()->getPropertyAnnotation($reflProperty, $annotationName)) )
+                    if( ($annotation = $this->getDefaultReader()->getPropertyAnnotation($reflProperty, $annotationName)) ) {
+
+                        if (!is_serializable($annotation))
+                            throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
+        
+                        if (!is_subclass_of($annotation, AbstractAnnotation::class))
+                            continue;
+
                         $annotations[$reflClass->name][$reflProperty->name][] = $annotation;
+                    }
                 }
             }
 
@@ -661,7 +729,7 @@ class AnnotationReader
         // Find targets corresponding to the annotationNames specified
         if (empty($annotationNames))
             $annotationNames = $this->getAnnotationNames();
-
+        
         // Compute target list
         if (empty($targets)) {
 

@@ -62,7 +62,7 @@
 
     {% set attr = attr|merge({
         'data-quill-field': form.vars.id,
-       'data-quill-options': quill
+        'data-quill-options': quill
     }) %}
 
     {{ form_widget(form) }}
@@ -368,17 +368,16 @@
     {% for childForm in form.children %}
         {% set attr = childForm.vars.attr|merge({'data-entity-id': form.vars.entityId }) %}
         {{ form_widget(childForm, {attr:attr}) }}
-
     {% endfor %}
 {% endblock associationfile_widget %}
-{%- block associationfile_label -%}
-    {{ form_label(form, null, {'required': form.vars.required})}}
 
-    {% if form.vars.href is not null and not form.vars.multiple %}
-        <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}">
-    {% endif %}
-    <i class="fas fa-external-link-square-alt"></i>
-    {% if form.vars.href is not null and not form.vars.multiple %}</a>{% endif %}
+{%- block associationfile_label -%}
+    {{ form_label(form, null, {'required': required})}}
+
+    {% if form.vars.href is not null and not form.vars.multiple and form.vars.value %}
+    <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}">
+        <i class="fas fa-external-link-square-alt"></i>
+    </a>{% endif %}
     
 {% endblock associationfile_label %}
 
@@ -386,7 +385,7 @@
     {% if form.vars.multiple %}
         {{ form_label(form, null, {'required': false}) }}
     {% else %}
-        {{ form_label(form, null, {'required': form.vars.required}) }}
+        {{ form_label(form, null, {'required': required}) }}
     {% endif %}
 {%- endblock -%}
 

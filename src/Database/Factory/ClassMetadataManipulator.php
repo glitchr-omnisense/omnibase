@@ -9,6 +9,7 @@ use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\AssociationType;
 use Base\Field\Type\SelectType;
 use Base\Field\Type\TranslationType;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -43,34 +44,34 @@ class ClassMetadataManipulator
             foreach ($matches as $match) $this->globalExcludedFields[] = $parameterBag->get($match);
     }
 
-    public function isEntity($entityOrClass) : bool
+    public function isEntity($entityOrClassOrMetadata) : bool
     {
-        if ($entityOrClass instanceof ClassMetadataInterface)
-            return isset($entityOrClass->isMappedSuperclass) && $entityOrClass->isMappedSuperclass === false;
-        else if (is_object($entityOrClass))
-            $entityOrClass = ($entityOrClass instanceof Proxy) ? get_parent_class($entityOrClass) : get_class($entityOrClass);
+        if ($entityOrClassOrMetadata instanceof ClassMetadata)
+            return isset($entityOrClassOrMetadata->isMappedSuperclass) && $entityOrClassOrMetadata->isMappedSuperclass === false;
+        else if (is_object($entityOrClassOrMetadata))
+            $entityOrClassOrMetadata = ($entityOrClassOrMetadata instanceof Proxy) ? get_parent_class($entityOrClassOrMetadata) : get_class($entityOrClassOrMetadata);
 
-        return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClass);
+        return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
     }
 
-    public function isEnumType($entityOrClass) : bool
+    public function isEnumType($entityOrClassOrMetadata) : bool
     {
-        if ($entityOrClass instanceof ClassMetadataInterface)
-            return isset($entityOrClass->name);
-        else if (is_object($entityOrClass))
-            $entityOrClass = get_class($entityOrClass);
+        if ($entityOrClassOrMetadata instanceof ClassMetadata)
+            $entityOrClassOrMetadata = $entityOrClassOrMetadata->name;
+        else if (is_object($entityOrClassOrMetadata))
+            $entityOrClassOrMetadata = get_class($entityOrClassOrMetadata);
 
-        return is_subclass_of($entityOrClass, EnumType::class);
+        return is_subclass_of($entityOrClassOrMetadata, EnumType::class);
     }
 
-    public function isSetType($entityOrClass) : bool
+    public function isSetType($entityOrClassOrMetadata) : bool
     {
-        if ($entityOrClass instanceof ClassMetadataInterface)
-            return isset($entityOrClass->name);
-        else if (is_object($entityOrClass))
-            $entityOrClass = get_class($entityOrClass);
+        if ($entityOrClassOrMetadata instanceof ClassMetadata)
+            $entityOrClassOrMetadata = $entityOrClassOrMetadata->name;
+        else if (is_object($entityOrClassOrMetadata))
+            $entityOrClassOrMetadata = get_class($entityOrClassOrMetadata);
 
-        return is_subclass_of($entityOrClass, SetType::class);
+        return is_subclass_of($entityOrClassOrMetadata, SetType::class);
     }
 
     public function getDoctrineType(?string $type)
@@ -78,6 +79,8 @@ class ClassMetadataManipulator
         if(!$type) return $type;
         return \Doctrine\DBAL\Types\Type::getType($type);
     }
+
+    public function getPrimaryKey($entity) { return $this->getClassMetadata($entity)->getSingleIdentifierFieldName(); }
 
     public function getDiscriminatorColumn($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorColumn["fieldName"] : null; }
     public function getDiscriminatorValue($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorValue : null; }
@@ -104,25 +107,27 @@ class ClassMetadataManipulator
         return null;
     }
 
-    public function getClassMetadata($entity)
+    public function getClassMetadata($entityOrClassOrMetadataMetadata)
     {
-        if($entity === null) return null;
+        if($entityOrClassOrMetadataMetadata === null) return null;
+        if($entityOrClassOrMetadataMetadata instanceof ClassMetadataInfo) 
+            return $entityOrClassOrMetadataMetadata;
 
-        $entityOrClassName = is_object($entity) ? get_class($entity) : $entity;
-        $metadata  = $this->entityManager->getClassMetadata($entityOrClassName);
+        $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadataMetadata) ? get_class($entityOrClassOrMetadataMetadata) : $entityOrClassOrMetadataMetadata;
+        $metadata  = $this->entityManager->getClassMetadata($entityOrClassOrMetadataName);
         
         if (!$metadata)
-            throw new InvalidArgumentException("Entity expected, '" . $entityOrClassName . "' is not an entity.");
+            throw new InvalidArgumentException("Entity expected, '" . $entityOrClassOrMetadataName . "' is not an entity.");
         
         return $metadata;
     }
 
-    public function getFields(string $entityOrClass, array $fields = [], array $excludedFields = []): array
+    public function getFields(string $entityOrClassOrMetadata, array $fields = [], array $excludedFields = []): array
     {
         if(!empty($fields) && !is_associative($fields))
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
 
-        $metadata = $this->getClassMetadata($entityOrClass);
+        $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         $validFields  = array_fill_keys(array_merge($metadata->getFieldNames()), []);
         $validFields += $this->getAssociationFormType($metadata, $metadata->getAssociationNames());
 
@@ -136,20 +141,20 @@ class ClassMetadataManipulator
             else if($fieldName == "translations")
                 $validFields[$fieldName] = ["form_type" => TranslationType::class];
             
-            else if($this->getTypeOfField($entityOrClass, $fieldName) == "datetime")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
-            else if($this->getTypeOfField($entityOrClass, $fieldName) == "array")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array")
                 $validFields[$fieldName] = ["form_type" => ArrayType::class];
-            else if($this->getTypeOfField($entityOrClass, $fieldName) == "integer")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
-            else if($this->getTypeOfField($entityOrClass, $fieldName) == "string")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "string")
                 $validFields[$fieldName] = ["form_type" => TextType::class];
-            else if($this->getTypeOfField($entityOrClass, $fieldName) == "text")
+            else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "text")
                 $validFields[$fieldName] = ["form_type" => TextareaType::class];
 
-            else if( ($enumType = $this->getDoctrineType($this->getTypeOfField($entityOrClass, $fieldName))) instanceof EnumType)
+            else if( ($enumType = $this->getDoctrineType($this->getTypeOfField($entityOrClassOrMetadata, $fieldName))) instanceof EnumType)
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "class" => get_class($enumType)];
-            else if( ($setType = $this->getDoctrineType($this->getTypeOfField($entityOrClass, $fieldName))) instanceof SetType)
+            else if( ($setType = $this->getDoctrineType($this->getTypeOfField($entityOrClassOrMetadata, $fieldName))) instanceof SetType)
                 $validFields[$fieldName] = ["form_type" => SelectType::class, "class" => get_class($setType)];
         }
 
@@ -163,7 +168,7 @@ class ClassMetadataManipulator
         $validFields = $this->filteringFields($validFields, $excludedFields);
         if (empty($fields)) return $validFields;
 
-        $unmappedFields = $this->filteringRemainingFields($validFields, $fields, $excludedFields, $entityOrClass);
+        $unmappedFields = $this->filteringRemainingFields($validFields, $fields, $excludedFields, $entityOrClassOrMetadata);
         foreach ($fields as $fieldName => $field) {
 
             if (\in_array($fieldName, $excludedFields, true))
@@ -212,7 +217,7 @@ class ClassMetadataManipulator
         return $validFields;
     }
 
-    private function filteringRemainingFields(array $validFields, array $fields, array $excludedFields, string $entityOrClass): array
+    private function filteringRemainingFields(array $validFields, array $fields, array $excludedFields, string $entityOrClassOrMetadata): array
     {
         $unmappedFields = [];
 
@@ -232,7 +237,7 @@ class ClassMetadataManipulator
         }
 
         if (\count($unknowsFields) > 0) {
-            throw new \RuntimeException(sprintf("Field(s) '%s' doesn't exist in %s", implode(', ', $unknowsFields), $entityOrClass));
+            throw new \RuntimeException(sprintf("Field(s) '%s' doesn't exist in %s", implode(', ', $unknowsFields), $entityOrClassOrMetadata));
         }
 
         return $unmappedFields;
@@ -247,14 +252,14 @@ class ClassMetadataManipulator
             if (!$metadata->isAssociationInverseSide($assocName)) 
                 continue;
 
-            $entityOrClass = $metadata->getAssociationTargetClass($assocName);
+            $entityOrClassOrMetadata = $metadata->getAssociationTargetClass($assocName);
 
             if ($metadata->isSingleValuedAssociation($assocName)) {
 
                 $nullable = ($metadata instanceof ClassMetadataInfo) && isset($metadata->discriminatorColumn['nullable']) && $metadata->discriminatorColumn['nullable'];
                 $fields[$assocName] = [
                     'type' => AssociationType::class,
-                    'data_class' => $entityOrClass,
+                    'data_class' => $entityOrClassOrMetadata,
                     'required' => !$nullable,
                     'allow_recursive' => false
                 ];
@@ -267,7 +272,7 @@ class ClassMetadataManipulator
                 'type' => CollectionType::class,
                 'entry_type' => AssociationType::class,
                 'entry_options' => [
-                    'data_class' => $entityOrClass
+                    'data_class' => $entityOrClassOrMetadata
                 ],
                 'allow_add' => true,
                 'by_reference' => false,
@@ -278,14 +283,14 @@ class ClassMetadataManipulator
         return $fields;
     }
 
-    public function hasProperty($entityOrClass, string $fieldName): ?string
+    public function hasProperty($entityOrClassOrMetadata, string $fieldName): ?string
     {
-        return property_exists($entityOrClass, $fieldName);
+        return property_exists($entityOrClassOrMetadata, $fieldName);
     }
 
-    public function hasField($entityOrClass, string $fieldName): ?string
+    public function hasField($entityOrClassOrMetadata, string $fieldName): ?string
     {
-        $metadata = $this->getClassMetadata($entityOrClass);
+        $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
@@ -310,105 +315,157 @@ class ClassMetadataManipulator
         return $metadata->setFieldValue($entity, $fieldName, $value);
     }
 
-    public function getTypeOfField($entityOrClass, string $fieldName): ?string 
+    public function getType($entityOrClassOrMetadata, string $property) 
     {
-        $metadata = $this->getClassMetadata($entityOrClass);
-        if(!$metadata) return false;
-
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
-        return $metadata->getTypeOfField($fieldName);
+        return $this->hasAssociation($entityOrClassOrMetadata, $property) 
+            ? $this->getTypeOfAssociation($entityOrClassOrMetadata, $property) 
+            : $this->getTypeOfField($entityOrClassOrMetadata, $property);
     }
 
-    public function getAssociationTargetClass($entityOrClass, string $fieldName): string 
+    public function getTypeOfField($entityOrClassOrMetadata, string $property)
+    {
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$metadata) return false;
+
+        if( ($dot = strpos($property, ".")) > 0 ) {
+            
+            $field    = trim(substr($property, 0, $dot));
+            $field = $metadata->getFieldName($field) ?? $field;
+       
+            $property = trim(substr($property,    $dot+1));
+            
+            if(!$metadata->hasAssociation($field))
+                throw new \Exception("No association found for field \"$field\" in \"".get_class($entityOrClassOrMetadata)."\"");
+            
+            $entityOrClassOrMetadata = $this->getTypeOfField($entityOrClassOrMetadata, $field);
+            if ($entityOrClassOrMetadata instanceof ArrayCollection)
+                $entityOrClassOrMetadata = $entityOrClassOrMetadata->first();
+            else if(is_array($entityOrClassOrMetadata))
+                $entityOrClassOrMetadata = current($entityOrClassOrMetadata) ?? null;
+            
+            return $this->getTypeOfField($entityOrClassOrMetadata, $property);
+        }
+        
+        return ($metadata->hasField($property) ? $metadata->getTypeOfField($property) : null);
+    }
+
+    public function getTypeOfAssociation($entityOrClassOrMetadata, string $property)
+    {
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$metadata) return false;
+
+        if( ($dot = strpos($property, ".")) > 0 ) {
+            
+            $field    = trim(substr($property, 0, $dot));
+            $field = $metadata->getFieldName($field) ?? $field;
+       
+            $property = trim(substr($property,    $dot+1));
+            
+            if(!$metadata->hasAssociation($field))
+                throw new \Exception("No association found for field \"$field\" in \"".get_class($entityOrClassOrMetadata)."\"");
+            
+            $entityOrClassOrMetadata = $this->getTypeOfAssociation($entityOrClassOrMetadata, $field);
+            if ($entityOrClassOrMetadata instanceof ArrayCollection)
+                $entityOrClassOrMetadata = $entityOrClassOrMetadata->first();
+            else if(is_array($entityOrClassOrMetadata))
+                $entityOrClassOrMetadata = current($entityOrClassOrMetadata) ?? null;
+            
+            return $this->getTypeOfAssociation($entityOrClassOrMetadata, $property);
+        }
+
+        return ($metadata->hasAssociation($property) ? $metadata->getAssociationMapping($property)["type"] ?? null : null);
+    }
+
+    public function getAssociationTargetClass($entityOrClassOrMetadata, string $fieldName): string 
     { 
-        $metadata = $this->getClassMetadata($entityOrClass);
+        $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationTargetClass($fieldName);
     }
 
-    public function hasAssociation($entityOrClass, string $fieldName)
+    public function hasAssociation($entityOrClassOrMetadata, string $fieldName)
     {
-        $metadata = $this->getClassMetadata($entityOrClass);
+        $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->hasAssociation($fieldName);
     }
 
-    public function getFieldMapping($entityOrClass, string $fieldName): ?array
+    public function getFieldMapping($entityOrClassOrMetadata, string $fieldName): ?array
     {
-        $metadata  = $this->getClassMetadata($entityOrClass);
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getFieldMapping($fieldName) ?? null;
     }
     
-    public function getAssociationMapping($entityOrClass, string $fieldName): ?array
+    public function getAssociationMapping($entityOrClassOrMetadata, string $fieldName): ?array
     {
-        $metadata  = $this->getClassMetadata($entityOrClass);
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName) ?? null;
     }
 
-    public function getMapping($entityOrClass, string $fieldName): ?array
+    public function getMapping($entityOrClassOrMetadata, string $fieldName): ?array
     {
-        if($this->hasAssociation($entityOrClass, $fieldName))
-            return $this->getAssociationMapping($entityOrClass, $fieldName);
-        else if($this->hasField($entityOrClass, $fieldName))
-            return $this->getFieldMapping($entityOrClass, $fieldName);
+        if($this->hasAssociation($entityOrClassOrMetadata, $fieldName))
+            return $this->getAssociationMapping($entityOrClassOrMetadata, $fieldName);
+        else if($this->hasField($entityOrClassOrMetadata, $fieldName))
+            return $this->getFieldMapping($entityOrClassOrMetadata, $fieldName);
     
         return null;
     }
     
-    public function getAssociationMappings($entityOrClass): array
+    public function getAssociationMappings($entityOrClassOrMetadata): array
     {
-        $metadata = $this->getClassMetadata($entityOrClass);
+        $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         return $metadata->getAssociationMappings();
     }
     
-    public function isOwningSide($entityOrClass, string $fieldName):bool
+    public function isOwningSide($entityOrClassOrMetadata, string $fieldName):bool
     {
-        if(!$this->hasAssociation($entityOrClass, $fieldName)) return false;
-        $metadata  = $this->getClassMetadata($entityOrClass);
+        if(!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) return false;
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return !$metadata->isAssociationInverseSide($fieldName);
     }
 
-    public function isInverseSide($entityOrClass, string $fieldName):bool
+    public function isInverseSide($entityOrClassOrMetadata, string $fieldName):bool
     {
-        if(!$this->hasAssociation($entityOrClass, $fieldName)) return false;
-        $metadata  = $this->getClassMetadata($entityOrClass);
+        if(!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) return false;
+
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->isAssociationInverseSide($fieldName);
     }
 
-    public function isToOneSide ($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true); }
-    public function isToManySide($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isManyToSide($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isOneToSide ($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true); }
-    public function isManyToMany($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::MANY_TO_MANY], true); }
-    public function isOneToMany ($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::ONE_TO_MANY], true); }
-    public function isManyToOne ($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::MANY_TO_ONE], true); }
-    public function isOneToOne  ($entityOrClass, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClass, $fieldName), [ClassMetadataInfo::ONE_TO_ONE], true); }
-    public function getAssociationType($entityOrClass, string $fieldName)
+    public function isToOneSide ($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true); }
+    public function isToManySide($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isManyToSide($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE, ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isOneToSide ($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::ONE_TO_ONE], true); }
+    public function isManyToMany($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_MANY], true); }
+    public function isOneToMany ($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_MANY], true); }
+    public function isManyToOne ($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::MANY_TO_ONE], true); }
+    public function isOneToOne  ($entityOrClassOrMetadata, string $fieldName):bool { return \in_array($this->getAssociationType($entityOrClassOrMetadata, $fieldName), [ClassMetadataInfo::ONE_TO_ONE], true); }
+    public function getAssociationType($entityOrClassOrMetadata, string $fieldName)
     {
-        $entityOrClass = is_object($entityOrClass) ? get_class($entityOrClass) : $entityOrClass;
-        if(!$this->hasAssociation($entityOrClass, $fieldName)) return false;
-
-        $metadata  = $this->getClassMetadata($entityOrClass);
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
-
+     
+        if(!$this->hasAssociation($metadata, $fieldName)) return false;
+        
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }

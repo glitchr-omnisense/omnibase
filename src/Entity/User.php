@@ -8,8 +8,8 @@ use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 
 use Base\Entity\Extension\Log;
-use Base\Entity\Extension\Token;
 
+use App\Entity\User\Token;
 use App\Entity\User\Group;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
@@ -46,12 +46,11 @@ use Exception;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Base\Database\Annotation\EntityExtension;
+use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * @EntityExtension
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
@@ -271,7 +270,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      */
     protected $plainPassword;
     public function getPlainPassword(): ?string { return $this->plainPassword; }
-    public function setPlainPassword(string $password): void
+    public function setPlainPassword(?string $password): void
     {
         $this->plainPassword = $password;
         $this->updatedAt = new \DateTime("now"); // Plain password is not an ORM variable..
@@ -325,27 +324,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    // ISSUE WHEN ADDING ROLE.....
-    // public function addRole(string $role): self
-    // {
-    //     if (!in_array($role, $this->roles))
-    //         $this->roles[] = $role;
-    //     return $this;
-    // }
-
-    // public function removeRole(string $role): self
-    // {
-    //     if ( ($pos = array_search($role, $this->roles)) )
-    //         unset($this->roles[$pos]);
-
-    //     if(empty($this->roles))
-    //         $this->roles[] = UserRole::USER;
-
-    //     return $this;
-    // }
-
     /**
-     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Log::class, mappedBy="user")
+     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $logs;
     public function getLogs(): Collection { return $this->logs; }
@@ -464,7 +445,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $tokens;
-
     public function getExpiredTokens(): ?array { return $this->getTokens(Token::EXPIRED); }
     public function getValidTokens(): ?array { return $this->getTokens(Token::VALID); }
     public function getTokens($type = Token::ALL): ?array

@@ -16,7 +16,7 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
-use Base\Entity\Extension\Token;
+use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
 use Doctrine\ORM\EntityManagerInterface;
@@ -233,9 +233,6 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!($token = $this->tokenStorage->getToken()) ) return;
         if(!($user = $token->getUser())) return;
 
-        if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) $user->approve();
-        else if($this->baseService->getParameterBag("base.user.autoapprove")) $user->approve();
-        
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 
@@ -250,11 +247,21 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
 
             $this->referrer->setUrl($event->getRequest()->getUri());
-
             $event->setResponse($this->baseService->redirectToRoute("security_logoutRequest"));
+
+            if(!$user->isDirty()) $this->entityManager->flush($user);
             return $event->stopPropagation();
         }
 
+        if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
+            $user->approve();
+            $this->entityManager->flush($user);
+
+        } else if($this->baseService->getParameterBag("base.user.autoapprove")) {
+            $user->approve();
+            $this->entityManager->flush($user);
+        }
+        
         if (! $user->isVerified()) {
 
             $callbackFn = function () use ($user) {
@@ -289,8 +296,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             }
         }
-
-        $this->entityManager->flush();
     }
 
     public function onKernelResponse(ResponseEvent $event)

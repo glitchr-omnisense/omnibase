@@ -25,7 +25,7 @@ class Hyperlink extends Attribute implements IconizeInterface
 
     public function __toString() 
     {
-      return "<b>".$this->getHyperpattern()."</b>: ".implode(", ", $this->getValue()); 
+      return "<b>".$this->getHyperpattern()." #".$this->getId()."</b> : ".implode(", ", $this->getValue()); 
     }
 
     /**

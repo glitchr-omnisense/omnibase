@@ -15,17 +15,17 @@ user:
   penalty:
     singular: "pénalité"
     plural: "pénalités"
-
-extension:
-  revision:
-    singular: "revision"
-    plural: "revisions"
-  sort:
-    singular: "triage"
-    plural: "triages"
   token:
     singular: "jeton"
     plural: "jetons"
+
+extension:
+  revision:
+    singular: "révision"
+    plural: "révisions"
+  ordering:
+    singular: "tri"
+    plural: "tris"
   log:
     singular: "historique"
     plural: "historiques"

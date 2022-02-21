@@ -17,7 +17,6 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Hierarchify;
-use Base\Database\Annotation\EntityExtension;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
@@ -30,13 +29,12 @@ use Base\Repository\ThreadRepository;
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * @EntityExtension
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
- * @Hierarchify(null, separator = "/" );
+ * @Hierarchify(null, separator = "/" )
  */
 
 class Thread implements TranslatableInterface, IconizeInterface

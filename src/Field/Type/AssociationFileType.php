@@ -13,6 +13,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use Error;
+use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -186,68 +188,91 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         if(!$classMetadata)
             throw new \Exception("Entity \"".$options['data_class']."\" not found.");
 
-        $newData = [];
-        $data = new ArrayCollection();
+        $newData = new ArrayCollection();
         
         $fieldName = $options["entity_file"];
         $form = iterator_to_array($forms)[$fieldName] ?? null;
         if($form) {
 
-            $files = $options["multiple"] ? $form->getData() : array_filter([$form->getData()]);
-            foreach($files ?? [] as $key => $file) {
+            $viewDataFileIndexes = [];
+            if($viewData instanceof PersistentCollection)
+                $viewDataFileIndexes = $viewData->map(fn($e) => $this->propertyAccessor->getValue($e, $fieldName))->toArray();
 
-                if($file instanceof File) {
+            if($options["multiple"]) {
+
+                foreach($form->getData() ?? [] as $key => $file) {
+
+                    $entity = null;
+                    if($file instanceof File) {
+
+                        $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
+                        $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"]);
+
+                    } else if( ($pos = array_search($file, $viewDataFileIndexes)) ){
+
+                        $entity = $viewData[$pos];
+                    }
+
+                    if($entity) {
+
+                        $entity = $this->entityHydrator->hydrate($entity, $options["entity_data"] ?? []);
+                        if($options["entity_data"] ?? false) {
+
+                            if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);
+                            else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]));
+
+                        } else {
+
+                            try { $this->propertyAccessor->setValue($entity, $fieldName, $file); }
+                            catch (Error $e) { throw new Exception("Failed to modify field \"$fieldName\" (is it an association ?), consider using \"entity_data\" option"); } 
+                        }
+
+                        $newData[] = $entity;
+                    }
+                }
+
+            } else if(($file = $form->getData())) {
+
+                $entity = $viewData;
+                if(!$entity) {
 
                     $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
-                    $entityData = is_callable($options["entity_data"]) ? null : $options["entity_data"];
-                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid"]);
-                    $entity = $this->entityHydrator->hydrate($entity, $entityData ?? []);
-
-                    $this->propertyAccessor->setValue($entity, $fieldName, $file);
-
-                    $newData[] = $entity;
-                    
-                } else {
-
-                    $filteredData = $options["multiple"] 
-                        ? $viewData->filter(fn($e) => basename($this->propertyAccessor->getValue($e, $fieldName)))
-                        : [basename($this->propertyAccessor->getValue($viewData, $fieldName))];
-
-                    $entity = $filteredData instanceof ArrayCollection ? $filteredData->first() : first($filteredData);
-                    $entity = $entity === false ? null : $entity;
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"]);
                 }
 
-                $entity = $entity && is_callable($options["entity_data"]) ? $options["entity_data"]($entity, $parentEntity) : $entity;
-                if($entity !== null) $data[$key] = $entity;
+                if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);
+                else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]));
+
+                $newData[] = $entity;
             }
-        }
-        
-        if($options["multiple"]) {
 
-            if($viewData instanceof PersistentCollection) {
+            if($options["multiple"]) {
 
-                $mappedBy =  $viewData->getMapping()["mappedBy"];
-                $fieldName = $viewData->getMapping()["fieldName"];
-                $isOwningSide = $viewData->getMapping()["isOwningSide"];
-                
-                if(!$isOwningSide) {
+                if($viewData instanceof PersistentCollection) {
 
-                    foreach($viewData as $entry)
-                        $this->propertyAccessor->setValue($entry, $mappedBy, null);
-                }
+                    $mappedBy =  $viewData->getMapping()["mappedBy"];
+                    $fieldName = $viewData->getMapping()["fieldName"];
+                    $isOwningSide = $viewData->getMapping()["isOwningSide"];
+                    
+                    if(!$isOwningSide) {
 
-                $viewData->clear();
-                foreach($data as $entry) {
+                        foreach($viewData as $entry)
+                            $this->propertyAccessor->setValue($entry, $mappedBy, null);
+                    }
 
-                    if(!$isOwningSide) 
-                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
-                }
+                    $viewData->clear();
+                    foreach($newData as $entry) {
 
-            } else $viewData = $data;
+                        if(!$isOwningSide) 
+                            $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                    }
 
-        } else if($data->first()) {
+                } else $viewData = $newData;
 
-            $this->entityHydrator->hydrate($viewData, $data->first());
+            } else if($newData->first()) {
+
+                $viewData = $newData->first();
+            }
         }
     }
 }

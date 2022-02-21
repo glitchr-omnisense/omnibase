@@ -3,9 +3,6 @@
 namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\AnnotationReader;
-use DateTime;
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -18,7 +15,6 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  * @Attributes({
  *   @Attribute("on", type = "array"),
  *   @Attribute("fields", type = "array"),
- *   @Attribute("value", type = "datetime"),
  *   @Attribute("impersonator", type = "bool")
  * })
  */
@@ -48,7 +44,7 @@ class Blameable extends AbstractAnnotation
     {
         if(!in_array("create", $this->getContext())) return;
 
-        $user = ($this->impersonator ? $this->getImpersonator() : null) ?? $this->getUser();
+        $user = ($this->impersonator ? $this->getImpersonator() : $this->getUser());
         $this->setPropertyValue($entity, $property, $user);
     }
 
@@ -56,7 +52,7 @@ class Blameable extends AbstractAnnotation
     {
         if (!in_array("update", $this->getContext())) return;
 
-        $user = ($this->impersonator ? $this->getImpersonator() : null) ?? $this->getUser();
+        $user = ($this->impersonator ? $this->getImpersonator() : $this->getUser());
         $this->setPropertyValue($entity, $property, $user);
     }
 }

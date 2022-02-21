@@ -89,7 +89,6 @@ class AnnotationSubscriber implements EventSubscriber {
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
-        $uow->computeChangeSets();
 
         $entities = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
@@ -150,9 +149,9 @@ class AnnotationSubscriber implements EventSubscriber {
 
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
-
-        $annotations    = $this->annotationReader->getAnnotations($className);
         
+        $annotations    = $this->annotationReader->getAnnotations($className);
+
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {
 
@@ -172,10 +171,10 @@ class AnnotationSubscriber implements EventSubscriber {
 
                 if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
                     continue;
-
+                
                 if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
                     continue;
-
+                
                 $entry->{$eventName}($event, $classMetadata, $entity, $property);
             }
         }

@@ -863,7 +863,7 @@ class ServiceEntityParser
             }
         }
 
-        // Sort result by group
+        // Ordering result by group
         if($groupBy) $qb->select(self::ALIAS_ENTITY . " as entity");
         else $qb->select(self::ALIAS_ENTITY);
 

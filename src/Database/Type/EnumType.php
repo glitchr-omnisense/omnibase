@@ -56,6 +56,19 @@ abstract class EnumType extends Type implements SelectInterface
     public static function getValue(string $key,   bool $inheritance = true) { return self::getPermittedValues($inheritance, true)[$key] ?? null; }
     public static function hasValue(string $value, bool $inheritance = true) { return array_search($value, self::getPermittedValues($inheritance, true)) !== false; }
 
+    public static function getOrderingKeys(array $array): array
+    {
+        $permittedValues = self::getPermittedValues();
+
+        $ordering = array_filter(
+                array_map(fn($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array), 
+                fn($c) => $c !== null
+            ); 
+
+        asort($ordering);
+        return $ordering;
+    }
+
     public static function getPermittedValues(bool $inheritance = true, bool $preserve_keys = false): array
     { 
         $refl = new \ReflectionClass(get_called_class());
@@ -67,7 +80,7 @@ abstract class EnumType extends Type implements SelectInterface
         if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values)
             throw new \Exception("\"".get_called_class()."\" is empty");
 
-        asort($values);
+        //asort($values);
 
         return $values;
     }

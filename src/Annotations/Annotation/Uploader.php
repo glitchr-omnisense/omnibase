@@ -88,7 +88,8 @@ class Uploader extends AbstractAnnotation
         if(!self::hasAnnotations($entity, $mapping)) 
             return null;
         
-        $that = self::getAnnotations($entity, $mapping);
+        $that = self::getAnnotation($entity, $mapping, self::class);
+
         if(!$that) return null;
         
         if($that->public === null)
@@ -141,7 +142,7 @@ class Uploader extends AbstractAnnotation
         if(!self::hasAnnotations($entity, $mapping)) 
             return [];
         
-        $that = self::getAnnotations($entity, $mapping);
+        $that = self::getAnnotation($entity, $mapping, self::class);
         if(!$that) return [];
 
         return $that->mimeTypes;
@@ -152,7 +153,7 @@ class Uploader extends AbstractAnnotation
         if(!self::hasAnnotations($entity, $mapping)) 
             return UploadedFile::getMaxFilesize();
         
-        $that = self::getAnnotations($entity, $mapping);
+        $that = self::getAnnotation($entity, $mapping, self::class);
         if(!$that) return UploadedFile::getMaxFilesize();
 
         return min($that->maxSize ?: \PHP_INT_MAX, UploadedFile::getMaxFilesize());
@@ -165,7 +166,7 @@ class Uploader extends AbstractAnnotation
 
         if(!self::hasAnnotations($entity, $mapping)) return null;
         
-        $that       = self::getAnnotations($entity, $mapping);
+        $that       = self::getAnnotation($entity, $mapping, self::class);
         if(!$that) return null;
 
         $config       = $that->config;

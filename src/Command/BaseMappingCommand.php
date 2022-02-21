@@ -4,6 +4,7 @@ namespace Base\Command;
 
 use Base\BaseBundle;
 use Base\Component\Console\Command\Command;
+use Base\Service\BaseService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

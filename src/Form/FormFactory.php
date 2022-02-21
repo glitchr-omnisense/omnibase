@@ -178,13 +178,14 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                 else if($this->classMetadataManipulator->hasField($entity, $entityField))
                     return $this->classMetadataManipulator->getTypeOfField($entity, $entityField) == "array";
 
+            } else if($this->classMetadataManipulator->isSetType($target)) {
+
+                return true;
+            
             } else if($this->classMetadataManipulator->isEnumType($target)) {
 
                 return false;
 
-            } else if($this->classMetadataManipulator->isSetType($target)) {
-
-                return true;
             }
         }
 

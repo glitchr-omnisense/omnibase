@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Dashboard\Crud\Extension;
+namespace Base\Controller\Dashboard\Crud\User;
 
 use Base\Controller\Dashboard\AbstractCrudController;
 

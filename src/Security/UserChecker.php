@@ -4,7 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
-use Base\Entity\Extension\Token;
+use Base\Entity\User\Token;
 use Base\Service\BaseService;
 use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;

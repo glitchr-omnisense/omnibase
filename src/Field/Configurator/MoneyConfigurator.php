@@ -48,9 +48,12 @@ final class MoneyConfigurator implements FieldConfiguratorInterface
             return;
         }
 
-        $amount = $storedAsCents ? $field->getValue() / 100 : $field->getValue();
-        $formattedValue = $this->intlFormatter->formatCurrency($amount, $currencyCode, ['fraction_digit' => $numDecimals]);
-        $field->setFormattedValue($formattedValue);
+        $formattedValue = apply_callback(fn($v) =>
+            $this->intlFormatter->formatCurrency($storedAsCents ? $v / 100 : $v, $currencyCode, ['fraction_digit' => $numDecimals]),
+            $field->getValue()
+        );
+
+        $field->setFormattedValue(empty($formattedValue) ? null : $formattedValue);
     }
 
     private function getCurrency(FieldDto $field, EntityDto $entityDto): ?string

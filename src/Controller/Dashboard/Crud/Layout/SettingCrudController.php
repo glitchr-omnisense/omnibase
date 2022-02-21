@@ -4,11 +4,9 @@ namespace Base\Controller\Dashboard\Crud\Layout;
 
 use Base\Field\TranslationField;
 
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\SlugField;
 use Base\Field\Type\QuillType;
-use EasyCorp\Bundle\EasyAdminBundle\Form\Type\TextEditorType;
 
 class SettingCrudController extends AbstractCrudController
 {

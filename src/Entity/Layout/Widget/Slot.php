@@ -26,7 +26,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
-    public function __construct(string $path, string $label, ?string $help = null)
+    public function __construct(string $path, ?string $label = null, ?string $help = null)
     {
         $this->path    = $path;
         $this->setLabel($label);

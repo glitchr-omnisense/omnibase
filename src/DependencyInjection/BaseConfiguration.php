@@ -46,11 +46,19 @@ class BaseConfiguration implements ConfigurationInterface
 
                 ->arrayNode('user')->addDefaultsIfNotSet()
                     ->children()
+                    ->scalarNode('token_default_throttling')
+                        ->info('Default throttling time between two tokens received')
+                        ->defaultValue(3*60)
+                        ->end()
+                    ->end()
+
+                    ->children()
                         ->booleanNode('autoapprove')
                             ->info('Administrator check required')
                             ->defaultValue(False)
                             ->end()
                     ->end()
+                    
                     ->children()
                         ->scalarNode('identifier')
                             ->info('Property used to identity user')
@@ -289,13 +297,6 @@ class BaseConfiguration implements ConfigurationInterface
                         ->end()
                     ->end()
                     
-                    ->children()
-                    ->scalarNode('token_default_throttling')
-                        ->info('Default throttling time between two tokens received')
-                        ->defaultValue(3*60)
-                        ->end()
-                    ->end()
-
                     ->children()
                     ->scalarNode('logging_default_expiry')
                         ->info('Default logging expirty')

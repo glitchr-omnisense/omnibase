@@ -131,7 +131,6 @@ class BaseService implements RuntimeExtensionInterface
         ImageService $imageService,
         IconService $iconService)
     {
-
         $this->setInstance($this);
 
         // Kernel and additional stopwatch
@@ -662,7 +661,13 @@ class BaseService implements RuntimeExtensionInterface
         return $this->entityManager;
     }
 
-    public function isWithinDoctrine()
+    public function inDoctrine($entity): bool
+    {
+        if(!is_object($entity)) return false;
+        return $this->entityManager->contains($entity);
+    }
+
+    public function inDoctrineStack()
     {
         $debug_backtrace = debug_backtrace();
         foreach($debug_backtrace as $trace)
@@ -671,7 +676,7 @@ class BaseService implements RuntimeExtensionInterface
         return false;
     }
 
-    public function getOriginalEntityData($eventOrEntity, bool $isWithinDoctrine = false, bool $reopen = false)
+    public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     { 
         $entity = $eventOrEntity->getObject();
         $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
@@ -682,7 +687,7 @@ class BaseService implements RuntimeExtensionInterface
             foreach($event->getEntityChangeSet() as $field => $data)
                 $originalEntityData[$field] = $data[0];
 
-        } else if($isWithinDoctrine && $this->isWithinDoctrine()) {
+        } else if($inDoctrineStack && $this->inDoctrineStack()) {
 
             throw new \Exception("Achtung ! You are trying to access data object within a Doctrine method..".
                                 "Original entity might have already been updated.");
@@ -692,12 +697,12 @@ class BaseService implements RuntimeExtensionInterface
     }
 
     protected static $entitySerializer = null;
-    public function getOriginalEntity($eventOrEntity, bool $isWithinDoctrine = false, bool $reopen = false)
+    public function getOriginalEntity($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     { 
         if(!self::$entitySerializer)
             self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
-        $data = $this->getOriginalEntityData($eventOrEntity, $isWithinDoctrine, $reopen);
+        $data = $this->getOriginalEntityData($eventOrEntity, $inDoctrineStack, $reopen);
 
         if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
         else $entity = $eventOrEntity->getObject();

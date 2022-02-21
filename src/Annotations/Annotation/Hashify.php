@@ -20,6 +20,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  * @Annotation
  * @Target({"PROPERTY"})
  * @Attributes({
+ *   @Attribute("reference",        type = "string"),
+ *   @Attribute("random",           type = "bool"),
  *   @Attribute("algorithm",        type = "string"),
  *   @Attribute("hash_algorithm",   type = "string"),
  *   @Attribute("migrate_from",     type = "array"),
@@ -43,9 +45,10 @@ class Hashify extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $this->data = $data;
-        $this->nullable      = $data["nullable"] ?? false;
-        $this->referenceColumn     = $data["reference"] ?? null;
+        $this->data            = $data;
+        $this->nullable        = $data["nullable"] ?? false;
+        $this->random          = $data["random"] ?? false;
+        $this->referenceColumn = $data["reference"] ?? null;
     }
 
     public static function getHashify($className, $property)
@@ -109,6 +112,9 @@ class Hashify extends AbstractAnnotation
 
     private function getPlainMessage($entity): ?string
     {
+        if ($this->random) 
+            return random_bytes(10);
+
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
 

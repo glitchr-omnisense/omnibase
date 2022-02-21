@@ -22,7 +22,7 @@ namespace {
         }, $input);
     }
 
-    function is_url(string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
+    function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
@@ -374,6 +374,8 @@ namespace {
             return array_map(fn($a) => class_basename($a), $arrayOrObjectOrClass);
 
         $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
+        $class = explode("::", $class)[0];
+
         return str_replace("/", "\\", basename(str_replace('\\', '/', $class)));
     }
 
@@ -988,5 +990,36 @@ namespace {
         if ($h * 3 < 2) return $m1 + ($m2 - $m1) * (0.66666 - $h) * 6;
 
         return $m1;
+    }
+
+    function apply_callback(callable $callback, $value)
+    {
+        if(is_array($value)) {
+
+            $array = [];
+            foreach($value as $v)
+                $array[] = $callback($v);
+
+            return $array;
+        }
+
+        return $callback($value);
+    }
+
+    function is_identity(array $array) 
+    {
+        foreach($array as $key => $value)
+        {
+            if(is_array($value)) {
+                
+                if($value[$key] ?? $key !== $key) return false;
+
+            } else {
+                
+                if($key !== $value) return false;
+            }
+        }
+
+        return true;
     }
 }
