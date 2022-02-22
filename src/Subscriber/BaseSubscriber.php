@@ -20,7 +20,6 @@ class BaseSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
-
         $this->autoAppend  = $this->baseService->getParameterBag("base.twig.autoappend");
     }
 

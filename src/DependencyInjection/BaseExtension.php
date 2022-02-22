@@ -43,6 +43,7 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconProviderInterface::class)->addTag('base.icon_provider');
+        $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('base.currency_api');
     }
 
     public function setConfiguration(ContainerBuilder $container, array $config, $globalKey = "")

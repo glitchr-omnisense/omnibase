@@ -19,7 +19,7 @@ use Exception;
  */
 class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
 {
-    protected $deletedAt;
+    public $deletedAt;
     public function __construct( array $data = [])
     {
         $this->deletedAt = $data["field"] ?? "deletedAt";
@@ -51,6 +51,14 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
                 break;
 
             case EntityAction::DELETE:
+
+                if (!$entity->getDeletedAt() instanceof \Datetime) {
+
+                    $entity->setDeletedAt(new \DateTime());
+                    $this->getEntityManager()->merge($entity);
+                    $this->getEntityManager()->persist($entity);
+                }
+
                 break;
 
             default:

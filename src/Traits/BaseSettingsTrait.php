@@ -11,6 +11,16 @@ trait BaseSettingsTrait
 {
     protected $settingRepository = null;
 
+    public function getPaths(null|string|array $path = null) 
+    { 
+        return array_flatten(
+                    array_map_recursive(
+                        fn($s) => $s instanceof Setting ? $s->getPath() : null, 
+                        array_filter($this->getRaw($path)) ?? []
+                    ), ARRAY_FLATTEN_PRESERVE_KEYS
+        );
+    }
+
     protected function read(?string $path, array $normSettings)
     {
         if($path === null) return $normSettings;
@@ -119,7 +129,7 @@ trait BaseSettingsTrait
         
         return $values;
     }
-    
+
     public function getRawScalar(null|string|array $path = null, ?string $locale = null)
     {
         if(is_array($paths = $path)) {
@@ -231,4 +241,23 @@ trait BaseSettingsTrait
 
         return $this;
     }
+
+    public function secure(string $path  ) { return $this->setSecure($path, true); }
+    public function unsecure(string $path) { return $this->setSecure($path, false); }
+    public function setSecure(string $path, bool $flag = true)
+    {
+        // Compute new label or create setting if missing
+        $setting = $this->getRaw($path)["_self"];
+        if(!$setting instanceof Setting) {
+        
+            $setting = new Setting($path);
+            $this->entityManager->persist($setting);
+        }
+
+        $setting->setSecure($flag);
+        $this->entityManager->flush();
+
+        return $this;
+    }
+
 }

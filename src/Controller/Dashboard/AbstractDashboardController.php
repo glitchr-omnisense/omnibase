@@ -58,10 +58,10 @@ use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
+use Base\Field\Type\PasswordType;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
@@ -199,8 +199,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      */
     public function ApiKey(Request $request, array $fields = []): Response
     {
-        foreach($fields as $key => $field)
+        if(empty($fields))
+            $fields = array_fill_keys($this->baseService->getSettings()->getPaths("api"), []);
+
+        foreach($fields as $key => $field) {
+
             if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
+            if ($fields[$key]["form_type"] == PasswordType::class)
+                $fields[$key]["revealer"] = true;
+        }
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);

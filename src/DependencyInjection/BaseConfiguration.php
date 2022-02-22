@@ -296,6 +296,13 @@ class BaseConfiguration implements ConfigurationInterface
                         ->defaultValue(5)
                         ->end()
                     ->end()
+
+                    ->children()
+                    ->scalarNode('empty_trash')
+                        ->info('Time before hard deletion')
+                        ->defaultValue(5)
+                        ->end()
+                    ->end()
                     
                     ->children()
                     ->scalarNode('logging_default_expiry')

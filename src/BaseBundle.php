@@ -18,7 +18,12 @@ class BaseBundle extends Bundle
     public const CACHE   = true;
     public const VERSION = '1.0.0';
 
-    public function boot() { $this->defineDoctrineType(); }
+    public function boot() 
+    { 
+        $this->defineDoctrineTypes();
+        $this->defineDoctrineFilters();
+    }
+
     public function build(ContainerBuilder $container)
     {
         parent::build($container);
@@ -42,12 +47,18 @@ class BaseBundle extends Bundle
         }
     }
 
-    public function defineDoctrineType()
+    public function defineDoctrineFilters()
     {
-        $em = $this->container->get('doctrine.orm.entity_manager');
+        $entityManager = $this->container->get('doctrine.orm.entity_manager');
+        $entityManager->getFilters()->enable("trash_filter");
+    }
+
+    public function defineDoctrineTypes()
+    {
+        $entityManager = $this->container->get('doctrine.orm.entity_manager');
         try {
-            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-            $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
+            $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+            $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
         } catch(\Exception $e) {}
 
         $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
@@ -61,7 +72,7 @@ class BaseBundle extends Bundle
             else Type::addType($className::getStaticName(), $className);
 
             try {
-                $em->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
+                $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
             } catch(\Exception $e) { dump($e); }
         }
     }

@@ -59,6 +59,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
 
         if($entityCrudController != $crud->getControllerFqcn()) {
 
+dump($crud, $crud->getCurrentPage());
             $instance = $entity->getInstance();
             $url = $this->adminUrlGenerator->unsetAll()
                 ->setController($entityCrudController)

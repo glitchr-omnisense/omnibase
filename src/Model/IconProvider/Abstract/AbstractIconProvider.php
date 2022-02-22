@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Model\IconProvider;
+namespace Base\Model\IconProvider\Abstract;
 
 use Base\Model\IconProviderInterface;
 use Symfony\Component\Yaml\Yaml;

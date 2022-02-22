@@ -2,6 +2,8 @@
 
 namespace Base\Model\IconProvider;
 
+use Base\Model\IconProvider\Abstract\AbstractIconProvider;
+
 class FontAwesome extends AbstractIconProvider
 {
     public const STYLE_SOLID   = "solid";

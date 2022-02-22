@@ -5,8 +5,10 @@ namespace Base\Field\Type;
 
 use Base\Model\AutovalidateInterface;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class PasswordType extends AbstractType implements AutovalidateInterface
@@ -30,9 +32,13 @@ class PasswordType extends AbstractType implements AutovalidateInterface
             'invalid_message' => 'The password is invalid.',
             'always_empty' => true,
             'trim' => false,
-            'repeater' => false,
+            'repeater' => null,
             'revealer' => false
         ]);
+
+        $resolver->setNormalizer('repeater', function (Options $options, $value) {
+            return $value === null ? !$options["revealer"] : $value;
+        });
     }
 
     /**

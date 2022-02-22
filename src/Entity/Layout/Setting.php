@@ -32,6 +32,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     public function __construct(string $path, $value = null, $locale = null)
     {
         $this->setPath($path);
+        $this->setSecure(false);
 
         if($value !== null)
             $this->translate($locale)->setValue($value);
@@ -59,4 +60,15 @@ class Setting implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $secure;
+
+    public function isSecure(): bool { return $this->secure; }
+    public function setSecure(bool $secure)
+    {
+        $this->secure = $secure;
+        return $this;
+    }
 }

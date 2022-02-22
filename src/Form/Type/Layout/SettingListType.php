@@ -3,7 +3,6 @@
 namespace Base\Form\Type\Layout;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Database\TranslationInterface;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingTranslation;
 use Base\Field\Type\AvatarType;
@@ -109,6 +108,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 if(!array_key_exists("help", $fieldOptions))
                     $fieldOptions["help"] = $setting->getHelp() ?? "";
+                if(!array_key_exists("disabled", $fieldOptions))
+                    $fieldOptions["disabled"] = $setting->isSecure() ?? false;
 
                 //
                 // Check if expected to be translatable

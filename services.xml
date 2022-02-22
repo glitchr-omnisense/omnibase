@@ -143,7 +143,9 @@
         </service>
 
         <!-- Commands -->
-        <service id="Base\Component\Console\Command\Command" public="true" />
+        <service id="Base\Component\Console\Command\Command" public="true">
+            <argument type="service" id="base.service" />
+        </service>
 
         <service id="Base\Command\BaseMappingCommand"><tag name="console.command" /></service>
         <service id="Base\Command\ThreadPublishableCommand">
@@ -328,8 +330,15 @@
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
         </service>
 
+        <service id="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="base.settings" /></service>
+        <service id="Base\Model\CurrencyApi\Fixer"            parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
+        <service id="Base\Model\CurrencyApi\AbstractApi"      parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
+        <service id="Base\Model\CurrencyApi\ExchangeRatesApi" parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
+        <service id="Base\Model\CurrencyApi\CurrencyLayer"    parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi">
+            <tag name="base.currency_api" />
+            <!-- <bind key="$metadata">%base.currency_api.currency_layer%</bind> -->
+        </service>
 
-        <!-- DOCTRINE -->
         <service id="Base\Database\NamingStrategy"  public="true" />
         <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
         <service id="Base\Database\Factory\EntityHydrator"  public="true">

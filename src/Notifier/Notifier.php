@@ -7,6 +7,7 @@ use Base\Entity\User\Notification;
 use Base\Notifier\NotifierInterface;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
+use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -72,6 +73,7 @@ class Notifier implements NotifierInterface
     protected function getAdminUsers()
     {
         if(!$this->adminRole) return [];
+        if (BaseService::getService() === null) return [];
 
         $item = $this->cache->getItem("base.notifier.admin_users[".$this->adminRole."]");
         if($item->get() !== null) return $item->get();

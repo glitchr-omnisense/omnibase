@@ -21,14 +21,13 @@ class TrashBall implements IconizeInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-trash-alt"]; } 
 
     /**
-     * @ORM\Column(type="datetime")
-     * @Timestamp(on="create")
+     * @ORM\Column(type="datetime", nullable=true)
      */
-    protected $deletedAt;
-    public function getDeletedAt(): ?\DateTimeInterface { return $this->deletedAt; }
-    public function setDeletedAt(\DateTimeInterface $deletedAt): self
+    protected $permanentAfter;
+    public function getPermanentAfter(): ?\DateTimeInterface { return $this->permanentAfter; }
+    public function setPermanentAfter(\DateTimeInterface $permanentAfter): self
     {
-        $this->deletedAt = $deletedAt;
+        $this->permanentAfter = $permanentAfter;
         return $this;
     }
 }
