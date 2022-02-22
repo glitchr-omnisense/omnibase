@@ -128,7 +128,7 @@ class Thread implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="string", length=255, unique=true, nullable=true)
-     * @Slugify(reference="translations.title")
+     * @Slugify(reference="title")
      */
     protected $slug;
     public function getSlug(): ?string { return $this->slug; }
@@ -324,4 +324,95 @@ class Thread implements TranslatableInterface, IconizeInterface
         $this->publishedAt = $publishedAt;
         return $this;
     }
+
+    public function getTitle(?string $locale = null, int $depth = 0): ?string
+    {
+        $title = $this->translate($locale)->getTitle();
+        if($depth > 0)
+            $title = $title ?? ($this->getParent() ? $this->getParent()->getTitle($locale, --$depth) : null);
+
+        return $title;
+    }
+
+    public function setTitle(?string $title, ?string $locale = null, int $depth = 0)
+    {
+        if($depth > 0)
+            return $this->translate($locale)->setTitle(empty($title) || $title === $this->getParent()->getTitle($locale, --$depth) ? null : $title);
+        
+        return $this->translate($locale)->setTitle($title);
+    }
+
+    public function getExcerpt(?string $locale = null, int $depth = 0): ?string
+    {
+        $excerpt = $this->translate($locale)->getExcerpt();
+        if($depth > 0) 
+            $excerpt = $excerpt ?? ($this->getParent() ? $this->getParent()->getExcerpt($locale, --$depth) : null);
+
+        return $excerpt;
+    }
+
+    public function setExcerpt(?string $excerpt, ?string $locale = null, int $depth = 0)
+    {
+        if($depth > 0) 
+            return $this->translate($locale)->setExcerpt(empty($excerpt) || $excerpt === $this->getParent()->getExcerpt($locale, --$depth) ? null : $excerpt);
+
+        return $this->translate($locale)->setExcerpt($excerpt);
+    }
+
+    public function getContent(?string $locale = null, int $depth = 0): ?string
+    {
+        $content = $this->translate($locale)->getContent();
+        if($depth > 0) 
+            $content = $content ?? ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
+
+        return $content;
+    }
+
+    public function setContent(?string $content, ?string $locale = null, int $depth = 0)
+    {
+        if($depth > 0) 
+            return $this->translate($locale)->setContent(empty($content) || $content === $this->getParent()->getContent($locale, --$depth) ? null : $content);
+
+        return $this->translate($locale)->setContent($content);
+    }
+    
+    /**
+     * Add article content with reshaped titles
+     */
+    public const MAX_ANCHOR = 6;
+    public function getContentWithAnchor($suffix = "", $max = self::MAX_ANCHOR): ?string
+    {
+        $max = min($max, self::MAX_ANCHOR);
+        return preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use ($suffix) {
+
+            $tag = $match[1];
+            $content = $match[2];
+            $slug = $this->getSlugger()->slug($content);
+
+            return "<".$tag." id='".$slug. "'><a class='anchor' href='#" . $slug . "'>&nbsp".$content."&nbsp</a>$suffix</".$tag.">";
+
+        }, $this->getContent());
+    }
+
+    /**
+     * Compute table of content
+     */
+    public function getTableOfContent($max = 6): array
+    {
+        $headlines = [];
+        $max = min($max, 6);
+
+        preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use (&$headlines) {
+
+            $headlines[] = [
+                "tag" => $match[1],
+                "slug"  => $this->getSlugger()->slug($match[2]),
+                "title" => $match[2]
+            ];
+
+        }, $this->getContent());
+
+        return $headlines;
+    }
+    
 }

@@ -90,12 +90,12 @@ class Slugify extends AbstractAnnotation
             $propertyDeclarer2 = property_declarer($entity2, $property);
             if($propertyDeclarer != $propertyDeclarer2 && !is_a($propertyDeclarer, $propertyDeclarer2)) continue;
 
-            $invalidSlugs[] = $this->getPropertyValue($entity2, $property);
+            $invalidSlugs[] = $this->getFieldValue($entity2, $property);
         }
 
         $firstEntity = begin($candidateEntities);
         if($firstEntity === $entity) {
-            $firstSlug = $this->getPropertyValue($entity, $property);
+            $firstSlug = $this->getFieldValue($entity, $property);
             $invalidSlugs = array_filter($invalidSlugs, fn($s) => $s !== $firstSlug);
         }
 
@@ -114,10 +114,10 @@ class Slugify extends AbstractAnnotation
             ? implode($this->exception, array_map(fn($i) => $this->slugger->slug($i, $this->separator), explode($this->exception, $input)))
             : $this->slugger->slug($input, $this->separator);
 
-        return ($this->lowercase ? strtolower($slug) : $slug);
+            return ($this->lowercase ? strtolower($slug) : $slug);
     }
     
-    public function getSlug($entity, string $property, ?string $defaultInput = null, array $invalidSlugs = []): string
+    public function getSlug($entity, string $property, ?string $defaultInput = null, array &$invalidSlugs = []): string
     {
         $repository  = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
@@ -128,6 +128,7 @@ class Slugify extends AbstractAnnotation
         for($i = 1; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
 
+        
         return $slug;
     }
 
@@ -138,21 +139,23 @@ class Slugify extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $currentSlug = $this->getPropertyValue($entity, $property);
+        $currentSlug = $this->getFieldValue($entity, $property);
         $slug = $this->getSlug($entity, $property, $currentSlug);
-        $this->setPropertyValue($entity, $property, $slug);
+        $this->setFieldValue($entity, $property, $slug);
     }
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
 
-        $classMetadata = $this->getClassMetadata(get_class($entity));
+        $propertyDeclarer  = property_declarer($entity , $property);
+        $classMetadata = $this->getClassMetadata($propertyDeclarer);
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
 
-        $currentSlug = $this->getPropertyValue($entity, $property);
+        $currentSlug = $this->getFieldValue($entity, $property);
         $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
-        $this->setPropertyValue($entity, $property, $slug);
+
+        $this->setFieldValue($entity, $property, $slug);
 
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }

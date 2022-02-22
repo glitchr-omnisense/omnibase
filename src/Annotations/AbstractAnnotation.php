@@ -6,6 +6,7 @@ use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\Filesystem;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
@@ -143,7 +144,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $primaryKey = self::getClassMetadataManipulator()->getPrimaryKey($entity); // primaryKey information missing
 
         $entityData = self::getUnitOfWork()->getOriginalEntityData($entity);
-        $entityData[$primaryKey] = self::getPropertyValue($entity, $primaryKey);
+        $entityData[$primaryKey] = self::getFieldValue($entity, $primaryKey);
 
         return $entityData;
     }
@@ -164,9 +165,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     }
 
     public static function hasField($entity, string $property) { return self::getClassMetadata($entity)->hasField($property); }
-
-    public static function hasProperty($entity, string $property) { return property_exists($entity, $property); }
-    public static function getPropertyValue($entity, string $property)
+    public static function getFieldValue($entity, string $property)
     {
         if(!$entity) return null;
 
@@ -179,13 +178,13 @@ abstract class AbstractAnnotation implements AnnotationInterface
             if(!$classMetadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
 
-            $entity = self::getPropertyValue($entity, $field);
-            if ($entity instanceof ArrayCollection)
+            $entity = self::getFieldValue($entity, $field);
+            if ($entity instanceof Collection)
                 $entity = $entity->first();
             else if(is_array($entity))
                 $entity = current($entity) ?? null;
 
-            return self::getPropertyValue($entity, $property);
+            return self::getFieldValue($entity, $property);
         }
 
         $fieldName = $classMetadata->getFieldName($property);
@@ -196,7 +195,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $propertyAccessor->getValue($entity, $fieldName);
     }
 
-    public static function setPropertyValue($entity, string $property, $value)
+    public static function setFieldValue($entity, string $property, $value)
     {
         $classMetadata = self::getClassMetadata($entity);
         
@@ -204,6 +203,42 @@ abstract class AbstractAnnotation implements AnnotationInterface
         if ($classMetadata->hasField($fieldName) || $classMetadata->hasAssociation($fieldName))
             return $classMetadata->setFieldValue($entity, $fieldName, $value);
 
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        return $propertyAccessor->setValue($entity, $fieldName, $value);
+    }
+
+    public static function hasProperty($entity, string $property) { return property_exists($entity, $property); }
+    public static function getPropertyValue($entity, string $property)
+    {
+        if(!$entity) return null;
+        
+        $classMetadata = self::getClassMetadata($entity);
+        if( ($dot = strpos($property, ".")) > 0 ) {
+
+            $field    = trim(substr($property, 0, $dot));
+            $property = trim(substr($property,    $dot+1));
+
+            if(!$classMetadata->hasAssociation($field))
+                throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
+
+            $entity = self::getPropertyValue($entity, $field);
+            if ($entity instanceof Collection) $entity = $entity->first();
+            else if(is_array($entity)) $entity = current($entity) ?? null;
+
+            return self::getPropertyValue($entity, $property);
+        }
+
+        $fieldName = $classMetadata->getFieldName($property);
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        
+        return $propertyAccessor->getValue($entity, $fieldName);
+    }
+
+    public static function setPropertyValue($entity, string $property, $value)
+    {
+        $classMetadata = self::getClassMetadata($entity);
+        $fieldName = $classMetadata->getFieldName($property);
+       
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         return $propertyAccessor->setValue($entity, $fieldName, $value);
     }

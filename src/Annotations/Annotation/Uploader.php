@@ -95,7 +95,7 @@ class Uploader extends AbstractAnnotation
         if($that->public === null)
             throw new MissingPublicPathException("No public path provided for \"$mapping\" property annotation for \"".get_class($entity)."\".");
 
-        $field = self::getPropertyValue($entity, $mapping);
+        $field = self::getFieldValue($entity, $mapping);
         if(!$field) return null;
         
         if(is_array($field)) {
@@ -174,7 +174,7 @@ class Uploader extends AbstractAnnotation
         $adapter      = $that->getStorageFilesystem()->getAdapter();
         $pathPrefixer = $that->getStorageFilesystem()->getPathPrefixer();
 
-        $propertyValue = self::getPropertyValue($entity, $mapping);
+        $propertyValue = self::getFieldValue($entity, $mapping);
         if (!$propertyValue) return null;
         if (!is_array($propertyValue)) $propertyValue = [$propertyValue];
 
@@ -218,7 +218,7 @@ class Uploader extends AbstractAnnotation
 
     protected function uploadFiles($entity, $oldEntity, ?string $property = null)
     {
-        $new = self::getPropertyValue($entity, $property);
+        $new = self::getFieldValue($entity, $property);
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
@@ -227,7 +227,7 @@ class Uploader extends AbstractAnnotation
         if(count($newList) != count($newListStringable))
             return false; 
 
-        $old = self::getPropertyValue($oldEntity, $property);
+        $old = self::getFieldValue($oldEntity, $property);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 
@@ -242,7 +242,7 @@ class Uploader extends AbstractAnnotation
         // Nothing to upload, empty field..
         if ($newList == null) {
 
-            $this->setPropertyValue($entity, $property, null);
+            $this->setFieldValue($entity, $property, null);
             return true;
         }
 
@@ -285,13 +285,13 @@ class Uploader extends AbstractAnnotation
                 $fileList[] = basename($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
         }
 
-        $this->setPropertyValue($entity, $property, !is_array($new) ? $fileList[0] ?? null : $fileList);
+        $this->setFieldValue($entity, $property, !is_array($new) ? $fileList[0] ?? null : $fileList);
         return true;
     }
 
     protected function deleteFiles($entity, $oldEntity, string $property)
     {
-        $new = self::getPropertyValue($entity, $property);
+        $new = self::getFieldValue($entity, $property);
         $newList = is_array($new) ? $new : [$new];
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
@@ -300,7 +300,7 @@ class Uploader extends AbstractAnnotation
         if(count($newList) != count($newListStringable))
             return false; 
 
-        $old = self::getPropertyValue($oldEntity, $property);
+        $old = self::getFieldValue($oldEntity, $property);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 
@@ -333,7 +333,7 @@ class Uploader extends AbstractAnnotation
         catch(Exception $e) {
 
             $this->deleteFiles([], $entity, $property);
-            self::setPropertyValue($entity, $property, null);
+            self::setFieldValue($entity, $property, null);
         }
     }
 
@@ -349,8 +349,8 @@ class Uploader extends AbstractAnnotation
         } catch(Exception $e) {
 
             $this->deleteFiles($oldEntity, $entity, $property);
-            $old = self::getPropertyValue($oldEntity, $property);
-            self::setPropertyValue($entity, $property, $old);
+            $old = self::getFieldValue($oldEntity, $property);
+            self::setFieldValue($entity, $property, $old);
         }
     }
 

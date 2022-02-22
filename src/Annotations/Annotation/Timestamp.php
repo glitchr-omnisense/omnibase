@@ -65,13 +65,13 @@ class Timestamp extends AbstractAnnotation
     {
         if(!in_array("create", $this->context)) return;
 
-        $this->setPropertyValue($entity, $property, $this->getValue());
+        $this->setFieldValue($entity, $property, $this->getValue());
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         if (!in_array("update", $this->context)) return;
 
-        $this->setPropertyValue($entity, $property, $this->getValue());
+        $this->setFieldValue($entity, $property, $this->getValue());
     }
 }

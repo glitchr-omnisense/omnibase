@@ -21,8 +21,8 @@ class OrderingCrudController extends AbstractCrudController
             yield SelectField::new('action');
             yield NumberField::new('entityId')->hideOnForm();
             yield DiscriminatorField::new('entityClass');
+
             yield CollectionField::new('entityData', [
-                "entry_type" => ArrayType::class
             ]);
         });
     }

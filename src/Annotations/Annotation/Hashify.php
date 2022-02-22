@@ -84,7 +84,7 @@ class Hashify extends AbstractAnnotation
         if($plainMessage)
             return $this->getMessageHasher($entity)->hash($plainMessage);
 
-        return ($property ? $this->getPropertyValue($entity, $property) : null);
+        return ($property ? $this->getFieldValue($entity, $property) : null);
     }
 
     public function needsRehash($entity, string $hashedMessage): bool
@@ -106,7 +106,7 @@ class Hashify extends AbstractAnnotation
         
         return $that->getMessageHasher($entity)->verify(
                     $that->getHashedMessage($entity, $property), 
-                    $that->getPropertyValue($entity, $property)
+                    $that->getFieldValue($entity, $property)
                 );
     }
 
@@ -119,7 +119,7 @@ class Hashify extends AbstractAnnotation
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
 
         if (property_exists($entity, $this->referenceColumn))
-            return $this->getPropertyValue($entity, $this->referenceColumn);
+            return $this->getFieldValue($entity, $this->referenceColumn);
     }
 
     private function erasePlainMessage($entity)
@@ -127,7 +127,7 @@ class Hashify extends AbstractAnnotation
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"plain\" missing for @Hashify in " . ClassUtils::getClass($entity));
 
-        return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
+        return $this->setFieldValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
@@ -138,13 +138,13 @@ class Hashify extends AbstractAnnotation
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
-        if($value) $this->setPropertyValue($entity, $property, $value);
+        if($value) $this->setFieldValue($entity, $property, $value);
     }
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $value = $this->getHashedMessage($entity);
-        if($value) $this->setPropertyValue($entity, $property, $value);
+        if($value) $this->setFieldValue($entity, $property, $value);
     }
 
     public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

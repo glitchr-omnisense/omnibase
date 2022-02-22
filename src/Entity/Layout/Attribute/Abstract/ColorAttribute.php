@@ -2,6 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Abstract;
 
+use Base\Component\Intl\Colors;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Field\Type\ColorType;
 use Base\Model\IconizeInterface;
@@ -22,4 +23,8 @@ class ColorAttribute extends AbstractAttribute implements IconizeInterface
     public function getOptions(): array { return []; }
     public function resolve(mixed $value): mixed { return $value; }
 
+    public function getName(string $locale = null): string
+    {
+        return Colors::getName($this->color, $locale);
+    }
 }
