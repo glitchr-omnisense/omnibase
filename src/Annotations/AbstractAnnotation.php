@@ -83,7 +83,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         // (NB: /!\ computeChangeSets != recomputeSingleChangeSets)
         self::getUnitOfWork()->recomputeSingleEntityChangeSet(
-            self::getClassMetadata(get_class($entity)), $entity
+            self::getClassMetadata($entity), $entity
         );
 
         return self::getUnitOfWork()->getEntityChangeSet($entity);
@@ -163,14 +163,14 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $entityData;
     }
 
-    public static function hasField($entity, string $property) { return self::getClassMetadata(get_class($entity))->hasField($property); }
+    public static function hasField($entity, string $property) { return self::getClassMetadata($entity)->hasField($property); }
 
     public static function hasProperty($entity, string $property) { return property_exists($entity, $property); }
     public static function getPropertyValue($entity, string $property)
     {
         if(!$entity) return null;
 
-        $classMetadata = self::getClassMetadata(get_class($entity));
+        $classMetadata = self::getClassMetadata($entity);
         if( ($dot = strpos($property, ".")) > 0 ) {
 
             $field    = trim(substr($property, 0, $dot));
@@ -198,7 +198,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function setPropertyValue($entity, string $property, $value)
     {
-        $classMetadata = self::getClassMetadata(get_class($entity));
+        $classMetadata = self::getClassMetadata($entity);
         
         $fieldName = $classMetadata->getFieldName($property);
         if ($classMetadata->hasField($fieldName) || $classMetadata->hasAssociation($fieldName))

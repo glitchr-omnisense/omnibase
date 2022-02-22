@@ -45,13 +45,14 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
         if($discriminatorAutoload)
             $field->setFormType(DiscriminatorType::class);
 
-        $defaultClass = $entityDto->getInstance() ? get_class($entityDto->getInstance()) : null;
+        $defaultClass = class_exists($field->getValue()) ? $field->getValue() : null;
+        $defaultClass = $defaultClass ?? ($entityDto->getInstance() ? get_class($entityDto->getInstance()) : null);
         if($showColumn)
             $field->setLabel(ucfirst($this->classMetadataManipulator->getDiscriminatorColumn($defaultClass)));
 
-        $discriminatorMap    = $this->classMetadataManipulator->getDiscriminatorMap($defaultClass);
-        $discriminatorValue  = $this->classMetadataManipulator->getDiscriminatorValue($defaultClass);
-        $classCrudController = AbstractCrudController::getCrudControllerFqcn($defaultClass);
+        $discriminatorMap    = $this->classMetadataManipulator->getDiscriminatorMap($entityDto->getInstance());
+        $discriminatorValue  = $this->classMetadataManipulator->getDiscriminatorValue($entityDto->getInstance());
+        $classCrudController = AbstractCrudController::getCrudControllerFqcn($entityDto->getInstance());
 
         $field->setValue($discriminatorValue);
 

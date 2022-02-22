@@ -19,9 +19,12 @@ abstract class EnumType extends Type implements SelectInterface
     {
         $class = static::class;
         if(array_key_exists($class, self::$icons))
-            return self::$icons[$class];
+            return self::$icons[$class] ?? [];
 
-        $icons = static::class::__iconizeStatic();
+        $icons = [];
+        if(class_implements_interface(static::class, IconizeInterface::class))
+            $icons = static::class::__iconizeStatic();
+
         while($class) {
 
             if(class_implements_interface($class, IconizeInterface::class)) {
@@ -37,7 +40,7 @@ abstract class EnumType extends Type implements SelectInterface
         }
         
         self::$icons[static::class] = $icons;
-        return $icons;
+        return $icons ?? [];
     }
 
     public static function getIcon(string $id, int $index = -1): ?string { return array_map( fn($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons() )[$id] ?? null; }
@@ -80,8 +83,7 @@ abstract class EnumType extends Type implements SelectInterface
         if(!in_array($refl->getName(), [EnumType::class, SetType::class]) && $refl->getName() != Type::class && !$values)
             throw new \Exception("\"".get_called_class()."\" is empty");
 
-        //asort($values);
-
+        asort($values);
         return $values;
     }
 

@@ -16,8 +16,7 @@ class TagCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function() {
             
-            yield IdField::new('id')->hideOnForm();
-            yield DiscriminatorField::new('id')->hideOnForm()->showColumnLabel();
+            yield DiscriminatorField::new('class')->hideOnForm()->showColumnLabel();
             yield TranslationField::new()->setTextAlign(TextAlign::RIGHT)->hideOnDetail();
         });
     }

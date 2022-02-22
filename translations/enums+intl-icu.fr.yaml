@@ -1,10 +1,21 @@
+entity_action:
+  action_insert:
+    singular: "insertion"
+    plural: "insertions"
+  action_update:
+    singular: "mise à jour"
+    plural: "mises à jour"
+  action_delete:
+    singular: "suppression"
+    plural: "suppressions"
+
 user_role: 
   singular: "générique"
   plural: "génériques"
 
-  role_editor: 
-    singular: "éditeur"
-    plural: "éditeurs"
+  role_superadmin: 
+    singular: "super administrateur"
+    plural: "super administrateurs"
 
   role_admin: 
     singular: "administrateur"

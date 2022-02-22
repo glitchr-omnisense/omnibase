@@ -5,7 +5,10 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Factory\EntityExtensionInterface;
+use Base\Entity\Extension\TrashBall;
 use Base\Enum\EntityAction;
+use Doctrine\ORM\Mapping\ClassMetadata;
+use Exception;
 
 /**
  * @Annotation
@@ -16,22 +19,27 @@ use Base\Enum\EntityAction;
  */
 class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
 {
+    protected $deletedAt;
     public function __construct( array $data = [])
     {
+        $this->deletedAt = $data["field"] ?? "deletedAt";
     }
 
-    public function supports(string $target, ?string $targetValue = null, $entity = null): bool
+    public function supports(string $target, ?string $targetValue = null, $classMetadata = null): bool
     {
+        if($classMetadata instanceof ClassMetadata) {
+
+            if(!$this->deletedAt) throw new Exception("Timing field for deletion missing, please provide a valid field \"".$this->deletedAt."\"");
+            if(!$classMetadata->getFieldName($this->deletedAt)) throw new Exception("Field \"".$this->deletedAt."\" is missing, did you forget to import \"".TrasheableTrait::class."\" ?");
+        }
+
         return ($target == AnnotationReader::TARGET_CLASS);
     }
 
-    /**
-     * Adds mapping to the translatable and translations.
-     */
-    public static $trackedColumns   = [];
-    public static function get():array { return self::$trackedColumns; }
-    public static function has($entity, $property):bool { return isset(self::$trackedColumns[$entity]) && in_array($property, self::$trackedColumns[$entity]); } 
-    
+    public static $trackedEntities   = [];
+    public static function get():array { return self::$trackedEntities; }
+    public static function has(string $className, ?string $property = null): bool { return array_key_exists($className, self::$trackedEntities); } 
+
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
         switch($action) {
@@ -39,7 +47,7 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
             case EntityAction::INSERT:
             case EntityAction::UPDATE:
 
-                // $trashBall = $trashBall ?? new TrashBall();
+                $trashBall = $trashBall ?? new TrashBall();
                 break;
 
             case EntityAction::DELETE:
@@ -51,20 +59,4 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
 
         return [];
     }
-
-    // public function preFlush(PreFlushEventArgs $event) {
-
-    //     $em = $event->getEntityManager();
-    //     foreach ($em->getUnitOfWork()->getScheduledEntityDeletions() as $object) {
-    //         if (method_exists($object, "getDeletedAt")) {
-    //             if ($object->getDeletedAt() instanceof \Datetime) {
-    //                 continue;
-    //             } else {
-    //                 $object->setDeletedAt(new \DateTime());
-    //                 $em->merge($object);
-    //                 $em->persist($object);
-    //             }
-    //         }
-    //     }
-    // }
 }

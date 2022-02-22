@@ -489,6 +489,7 @@
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
         </button>
     {% endif %}
+
 {%- endblock collection2_widget -%}
 
 {%- block collection2_entry_row -%}
@@ -514,6 +515,7 @@
         
     {% else %}
 
+        {% set href = form_parent(form).vars.href %}
         {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
@@ -542,9 +544,9 @@
                     {{ linkable ? "</a>": "</button>" }}
 
                     <div class="form-collection-buttons">
-                        {% if form.vars.value is not null %}
+                        {% if form.vars.value is not null and _href is not null %}
                         <button type="button" class="btn btn-link form-collection-link-button">
-                            <a href="{{ value.generate() }}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
+                            <a href="{{ _href }}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
                         </button>
                         {% endif %}
                         {% if allows_deleting_items %}

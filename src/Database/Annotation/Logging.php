@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 
 /**
  * @Annotation
- * @Target({"PROPERTY"})
+ * @Target({"CLASS"})
  * @Attributes({
  *   @Attribute("verbosity", type = "string"),
  * })
@@ -23,16 +23,16 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
 
     public function supports(string $target, ?string $targetValue = null, $entity = null): bool
     {
-        return ($target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AnnotationReader::TARGET_CLASS);
     }
 
     /**
      * Adds mapping to the translatable and translations.
      */
-    public static $trackedColumns   = [];
-    public static function get():array { return self::$trackedColumns; }
-    public static function has($entity, $property):bool { return isset(self::$trackedColumns[$entity]) && in_array($property, self::$trackedColumns[$entity]); } 
-    
+    public static $trackedEntities   = [];
+    public static function get():array { return self::$trackedEntities; }
+    public static function has(string $className, ?string $property = null): bool { return array_key_exists($className, self::$trackedEntities); } 
+
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
         $log = null; //new Log([], null);
@@ -46,8 +46,8 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
         if($reflProperty->getDeclaringClass()->getName() == $classMetadata->getName()) {
 
             // $classMetadata->setField
-            self::$trackedColumns[$classMetadata->getName()]   = self::$trackedColumns[$classMetadata->getName()] ?? [];
-            self::$trackedColumns[$classMetadata->getName()][] = $targetValue;
+            self::$trackedEntities[$classMetadata->getName()]   = self::$trackedEntities[$classMetadata->getName()] ?? [];
+            self::$trackedEntities[$classMetadata->getName()][] = $targetValue;
         }
     }
 }

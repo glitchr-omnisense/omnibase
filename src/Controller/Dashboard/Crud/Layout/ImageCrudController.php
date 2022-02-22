@@ -8,7 +8,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\CropperField;
 use Base\Field\ImageField;
 
-class SettingCrudController extends AbstractCrudController
+class ImageCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 

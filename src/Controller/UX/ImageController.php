@@ -3,6 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\Filter\Base\ImageFilter;
+use Base\Filter\Base\SvgFilter;
 use Base\Filter\Base\WebpFilter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -48,9 +49,28 @@ class ImageController extends AbstractController
         $args = $this->imageService->decode($hashid);
         if(!$args) $args = [];
 
+        if(str_ends_with($args["path"], "svg"))
+            return $this->redirectToRoute("ux_svg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         return $this->imageService->filter($args["path"] ?? null, [
             new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
+        ]);
+    }
+    
+    /**
+     * @Route("/{hashid}/image.svg", name="svg")
+     */
+    public function Svg($hashid): Response
+    {
+        $args = $this->imageService->decode($hashid);
+        if(!$args) $args = [];
+
+        $path = stream_get_meta_data(tmpfile())['uri'];
+        $args = $this->imageService->decode($hashid);
+        if(!$args) $args = [];
+
+        return $this->imageService->filter($args["path"] ?? null, [
+            new SvgFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
         ]);
     }
     

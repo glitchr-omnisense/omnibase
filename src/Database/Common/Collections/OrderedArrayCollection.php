@@ -24,7 +24,12 @@ class OrderedArrayCollection extends ArrayCollection
             $elements = parent::toArray();
             if(empty($elements)) return $this;
 
-            $elements = array_map(fn($i) => $elements[$i] ?? $elements, array_slice($this->ordering, 0, count($elements)));
+            if(count($elements) < count($this->ordering))
+                $elements = array_pad($elements, count($this->ordering), null);
+
+            $elements = array_map(fn($i) => $elements[$i] ?? null, $this->ordering);
+            $elements = array_filter($elements, fn($e) => $e !== null);
+
             parent::clear();
 
             foreach($elements as $element)
@@ -48,7 +53,7 @@ class OrderedArrayCollection extends ArrayCollection
     public function offsetExists($offset):bool               { $this->applyOrdering(); return parent::offsetExists($offset); }
     public function offsetGet($offset):mixed                 { $this->applyOrdering(); return parent::offsetGet($offset); }
     public function offsetSet($offset, $value):void          { $this->applyOrdering(); parent::offsetSet($offset, $value); }
-    public function offsetUnset($offset)                     { $this->applyOrdering(); return parent::offsetUnset($offset); }
+    public function offsetUnset($offset):void                { $this->applyOrdering(); parent::offsetUnset($offset); }
     public function containsKey($key):bool                   { $this->applyOrdering(); return parent::containsKey($key); }
     public function contains($element):bool                  { $this->applyOrdering(); return parent::contains($element); }
     public function exists(Closure $p):bool                  { $this->applyOrdering(); return parent::exists($p); }

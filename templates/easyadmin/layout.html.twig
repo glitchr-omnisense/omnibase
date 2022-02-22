@@ -19,8 +19,9 @@
 
     <title>{{ [base.settings.get("base.settings.title.backoffice")["_self"] ?? null, block('page_title') ?? _content_title|striptags|raw]|join_if_exists(" - ") }}</title>
 
-    {% block head_stylesheets %}
-        <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
+        {% block head_stylesheets %}
+            <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
+        {% endblock %}
         
         {% block configured_stylesheets %}
             {{ include('@EasyAdmin/includes/_css_assets.html.twig', { assets: ea.assets.cssAssets ?? [] }, with_context = false) }}
@@ -165,6 +166,8 @@
                     background-color: white;
                     border-bottom: 1px solid white;
                 }
+
+                .select2-container .select2-selection--single { height: 35px !important; }
 
                 .content-top { height:90px; }
                 
@@ -633,7 +636,6 @@
                     }
                 }
         </style>
-    {% endblock %}
     
 </head>
 

@@ -101,7 +101,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
-            'capitalize'         => true,
+            'capitalize'         => false,
             'language'           => null,
             'required'           => true,
             'multiple'           => null,

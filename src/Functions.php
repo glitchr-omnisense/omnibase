@@ -1008,8 +1008,8 @@ namespace {
 
     function is_identity(array $array) 
     {
-        foreach($array as $key => $value)
-        {
+        foreach($array as $key => $value) {
+
             if(is_array($value)) {
                 
                 if($value[$key] ?? $key !== $key) return false;

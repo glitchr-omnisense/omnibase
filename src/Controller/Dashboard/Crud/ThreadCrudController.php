@@ -39,10 +39,8 @@ class ThreadCrudController extends AbstractCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function() {
-            
-            yield IdField::new('id')->hideOnForm();
 
-            yield DiscriminatorField::new('id')->hideOnForm()->showColumnLabel();
+            yield DiscriminatorField::new('class')->hideOnForm()->showColumnLabel();
             yield TextField::new('title')->setTextAlign(TextAlign::RIGHT)->hideOnDetail()->hideOnForm();
             yield SelectField::new('owners')->showFirst()->setTextAlign(TextAlign::LEFT);
             yield StateField::new('state')->setColumns(6);

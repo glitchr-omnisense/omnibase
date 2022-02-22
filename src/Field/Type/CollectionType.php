@@ -26,6 +26,7 @@ class CollectionType extends AbstractType
             'length' => 0,
             'allow_add' => true,
             'allow_delete' => true,
+            'href' => null,
             'collection_required' => true,
             'prototype' => true,
             'prototype_data' => null,
@@ -105,6 +106,7 @@ class CollectionType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        $view->vars['href']         = $options["href"];
         $view->vars['entry_label'] = $options['entry_label'] ?? null;
         $view->vars['entry_inline'] = $options['entry_inline'] ?? false;
         $view->vars['entry_row_inline'] = $options['entry_row_inline'] ?? false;

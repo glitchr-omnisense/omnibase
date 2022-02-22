@@ -26,7 +26,6 @@ class FontAwesome extends AbstractIconProvider
     public function getAssets(): array
     {
         return [
-            
             "<script type='text/javascript'>window.FontAwesomeConfig = { autoReplaceSvg: false }</script>", 
             $this->javascript, 
             $this->stylesheet

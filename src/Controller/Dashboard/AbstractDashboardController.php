@@ -57,7 +57,7 @@ use Base\Config\Traits\WidgetTrait;
 use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
-
+use Base\Entity\Extension\TrashBall;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
@@ -511,6 +511,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(Log::class),
                 WidgetItem::linkToCrud(Ordering::class),
                 WidgetItem::linkToCrud(Revision::class),
+                WidgetItem::linkToCrud(TrashBall::class),
             ]);
 
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('MEMBERSHIP', null, 2));

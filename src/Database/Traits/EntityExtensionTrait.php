@@ -36,7 +36,7 @@ trait EntityExtensionTrait
     public function getUser(): ?User { return $this->user; }
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     protected $entityId;
     public function getEntityId() { return $this->entityId; }
@@ -52,7 +52,7 @@ trait EntityExtensionTrait
      * @ORM\Column(type="string", length=255)
      */
     protected $entityClass;
-    public function getEntityClass() { return $this->createdAt; }
+    public function getEntityClass() { return $this->entityClass; }
     public function setEntityClass(object|string $entity) 
     {
         $this->entityClass = is_object($entity) ? get_class($entity) : $entity;
@@ -74,6 +74,7 @@ trait EntityExtensionTrait
      * @ORM\Column(type="array", nullable=true)
      */
     protected $entityData = [];
+    public function isEmpty() { return empty($this->getEntityData()); }
     public function getEntityData(): array { return $this->entityData; }
     public function setEntityData(array $entityData)
     {

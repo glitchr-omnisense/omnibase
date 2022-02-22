@@ -2,16 +2,12 @@
 
 namespace Base\Annotations\Annotation;
 
-use App\Entity\Blog\Comment;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 
-use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
-use Symfony\Component\String\Slugger\AsciiSlugger;
 
 /**
  * @Annotation

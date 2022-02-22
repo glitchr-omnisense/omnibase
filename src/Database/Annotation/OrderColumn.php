@@ -63,13 +63,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    /**
-     * Adds mapping to the translatable and translations.
-     */
     public static $orderedColumns   = [];
     public static function get():array { return self::$orderedColumns; }
-    public static function has($entity, $property):bool { return isset(self::$orderedColumns[$entity]) && in_array($property, self::$orderedColumns[$entity]); } 
+    public static function has(string $className, ?string $property = null): bool { return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]); } 
     
+    protected $ordering = [];
     public function getOrderedColumns($entity)
     {
         $orderedColumns = [];
@@ -105,7 +103,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             foreach($orderingRules as $ordering) {
                 
                 $data = $ordering->getEntityData();
-
                 foreach($data as $column => $orderedIndexes) {
                     
                     try { $entityValue = $propertyAccessor->getValue($entity, $column); }
@@ -114,13 +111,15 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     if(is_array($entityValue)) {
 
                         $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
+                        if($this->order == "DESC") $entityValue = array_reverse($entityValue);
+
                         $propertyAccessor->setValue($entity, $column, $entityValue);
 
                     } else if($entityValue instanceof PersistentCollection) {
 
                         $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
                         $reflProp->setAccessible(true);
-                        $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $orderedIndexes));
+                        $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
                     }
                 }
             }
@@ -130,8 +129,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
         $orderingRepository = $this->getEntityManager()->getRepository(Ordering::class);
-        $ordering = $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
-        
+
+        $id = spl_object_id($entity);
         switch($action) {
 
             case EntityAction::INSERT:
@@ -140,7 +139,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $propertyAccessor = PropertyAccess::createPropertyAccessor();
 
                 $data = [];
-                $oldData = [];
                 foreach($properties as $property) {
                     
                     $type = $this->getClassMetadataManipulator()->getTypeOfField($entity, $property);
@@ -148,8 +146,10 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     $value = $propertyAccessor->getValue($entity, $property);
                     if($doctrineType instanceof EnumType) {
-                    
+
                         $data[$property] = array_keys($doctrineType::getOrderingKeys($value));
+                        if(!is_identity($data[$property]))
+                            unset($data[$property]);
 
                     } else {
 
@@ -161,11 +161,15 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         );
 
                         $data[$property] = array_keys($dataIdentifier);
+                        if(is_identity($data[$property]))
+                            unset($data[$property]);
                     }
                 }
 
-                $ordering = $ordering ?? new Ordering();
-                $ordering->setEntityData($data);
+                if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
+                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
+                $this->ordering[$className][$id]->setEntityData($data);
 
                 break;
 
@@ -176,6 +180,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 throw new Exception("Unknown action \"$action\" passed to ".__CLASS__);
         }
 
-        return $ordering ? [$ordering] : [];
+        return isset($this->ordering[$className][$id]) ? [$this->ordering[$className][$id]] : [];
     }
 }

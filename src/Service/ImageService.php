@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use Base\Filter\Advanced\ThumbnailFilter;
+use Base\Filter\Base\SvgFilter;
 use Base\Filter\LastFilterInterface;
 use Exception;
 use Hashids\Hashids;
@@ -189,30 +190,37 @@ class ImageService implements ImageServiceInterface
             // Cache not found
             if (!$this->filesystem->getOperator()->fileExists($path)) {
 
-                /**
-                 * @var ImageInterface
-                 */
-                try { $image = $this->imagine->open($pathPublic); } 
-                catch (Exception $e) {
+                if($lastFilter instanceof SvgFilter) {
 
-                    $pathPublic = $this->getPublic($this->noImage);
-                    $image = $this->imagine->open($pathPublic);
+                    $content = file_get_contents($pathPublic);
+
+                } else {
+
+                    /**
+                     * @var ImageInterface
+                     */
+                    try { $image = $this->imagine->open($pathPublic); } 
+                    catch (Exception $e) {
+
+                        $pathPublic = $this->getPublic($this->noImage);
+                        $image = $this->imagine->open($pathPublic);
+                    }
+
+                    $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB());
+                    foreach ($filters as $filter)
+                        $image = $filter->apply($image);
+
+                    $content = $image->get(self::extension($lastFilter->getPath()));
                 }
 
-                $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB());
-                foreach ($filters as $filter)
-                    $image = $filter->apply($image);
-
                 $this->filesystem->mkdir(dirname($path));
-
-                $content = $image->get(self::extension($lastFilter->getPath()));
                 $content = $this->filesystem->write($path, $content);
             }
         }
 
         $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);
         $mimetype = $this->getMimeType($pathPublic);
-
+    
         $response = new Response();
         $response->setContent($content);
         
@@ -232,8 +240,11 @@ class ImageService implements ImageServiceInterface
         if($fileOrArray === null) return null;
         if(is_array($fileOrArray)) return array_map(fn($f) => self::mimetype($f), $fileOrArray);
 
-        if(file_exists($fileOrArray))
+        if(file_exists($fileOrArray)) {
+
+            if(str_ends_with($fileOrArray, "svg")) return "image/svg+xml";
             return image_type_to_mime_type(exif_imagetype($fileOrArray));
+        }
 
         try { return self::$mimeTypes->guessMimeType($fileOrArray); }
         catch (Exception $e) { return null; }

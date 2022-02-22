@@ -27,6 +27,9 @@ extension:
   ordering:
     singular: "ordering"
     plural: "ordering"
+  trash_ball:
+    singular: "trash"
+    plural: "trash"
 
 thread:
   singular: "thread"

@@ -3,12 +3,12 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\Database\Factory\EntityExtension;
-use Base\Database\Factory\EntityHydrator;
+
 use Base\Enum\EntityAction;
 use Doctrine\Common\EventArgs;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\PreFlushEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -20,7 +20,7 @@ class ExtensionSubscriber implements EventSubscriber
     public function getSubscribedEvents(): array
     {
         return [
-            Events::preFlush, Events::postPersist
+            Events::onFlush, Events::postPersist
         ];
     }
 
@@ -36,17 +36,19 @@ class ExtensionSubscriber implements EventSubscriber
     protected $scheduledEntityUpdates    = [];
     protected $scheduledEntityDeletions  = [];
 
-    public function preFlush(PreFlushEventArgs $event)
+    public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
-        $uow->computeChangeSets();
 
+        $this->scheduledEntityInsertions = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
             $this->scheduledEntityInsertions[] = $entity;
 
+        $this->scheduledEntityUpdates = [];
         foreach ($uow->getScheduledEntityUpdates() as $entity)
             $this->scheduledEntityUpdates[] = $entity;
 
+        $this->scheduledEntityDeletions = [];
         foreach ($uow->getScheduledEntityDeletions() as $entity)
             $this->scheduledEntityDeletions[] = $entity;
 
@@ -67,11 +69,13 @@ class ExtensionSubscriber implements EventSubscriber
     }
 
     public function payload(string $action, array $entities)
-    {
+    {  
+        $uow = $this->entityManager->getUnitOfWork();
+
         $entries = [];
         foreach($entities as $entity) {
 
-                $id = spl_object_id($entity);
+            $id = spl_object_id($entity);
             foreach($this->entityExtension->getExtensions() as $extension) {
 
                 $matches = [];
@@ -90,24 +94,37 @@ class ExtensionSubscriber implements EventSubscriber
                     $properties = [];
                     foreach($match as $columns)
                         $properties[] = explode("::", $columns)[1];
-
+                    
                     $array = $extension->payload($action, $className, $properties, $entity);
-
                     foreach($array as $entry) {
 
-                        if($entry === null) continue;
-
-                        $entry->setAction($action);
+                        if($entry === null || $entry->isEmpty()) {
+                        
+                            $this->entityManager->remove($entry);
+                            continue;
+                        }
+                        
                         $entry->setEntityClass($className);
                         $entry->setEntityId($entity->getId());
-
+                        $entry->setAction($action);
+                        
                         switch($action) {
 
                             case EntityAction::INSERT:
-                            case EntityAction::UPDATE:
-                                if(!$this->entityManager->contains($entry))
-                                    $this->entityManager->persist($entry);
+                                $this->entityManager->persist($entry);
+                                $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
+                                break;
 
+                            case EntityAction::UPDATE:
+                                if($this->entityManager->contains($entry)) {
+
+                                    $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
+
+                                } else {
+
+                                    $this->entityManager->persist($entry);
+                                    $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);    
+                                }  
                                 break;
 
                             case EntityAction::DELETE:
@@ -115,7 +132,11 @@ class ExtensionSubscriber implements EventSubscriber
                                 break;
                         }
 
-                        $entries[$id] = $entry;
+                        if($entry) {
+                            
+                            if(!array_key_exists($id, $entries)) $entries[$id] = [];
+                            $entries[$id][] = $entry;
+                        }
                     }
                 }
             }

@@ -24,7 +24,7 @@ class Versionable extends AbstractAnnotation implements EntityExtensionInterface
      */
     public static $trackedColumns   = [];
     public static function get():array { return self::$trackedColumns; }
-    public static function has($entity, $property):bool { return isset(self::$trackedColumns[$entity]) && in_array($property, self::$trackedColumns[$entity]); } 
+    public static function has(string $className, ?string $property = null):bool { return isset(self::$trackedColumns[$className]) && in_array($property, self::$trackedColumns[$className]); } 
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
     {

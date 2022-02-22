@@ -17,11 +17,13 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Hierarchify;
+use Base\Database\Annotation\Trasheable;
 use Base\Enum\ThreadState;
 
 use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
+use Base\Database\Traits\TrasheableTrait;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
@@ -35,11 +37,13 @@ use Base\Repository\ThreadRepository;
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  * @Hierarchify(null, separator = "/" )
+ * @Trasheable
  */
 
 class Thread implements TranslatableInterface, IconizeInterface
 {
     use BaseTrait;
+    use TrasheableTrait;
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }

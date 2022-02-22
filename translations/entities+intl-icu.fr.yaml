@@ -29,6 +29,9 @@ extension:
   log:
     singular: "historique"
     plural: "historiques"
+  trash_ball:
+    singular: "poubelle"
+    plural: "poubelle"
 
 thread:
   singular: "fil"
