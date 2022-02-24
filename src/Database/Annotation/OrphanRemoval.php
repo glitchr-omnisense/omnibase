@@ -35,12 +35,19 @@ class OrphanRemoval extends AbstractAnnotation
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
-        if(!property_exists($classMetadata->getName(), $this->column)) throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
-        
-        $associationMapping = $classMetadata->getAssociationMapping($this->column);
-        $associationMapping["orphanRemoval"] = $this->value;
+        if($target == "property") $column = $targetValue;
+        else $column = $this->column;
 
-        if(array_key_exists($this->column,  $classMetadata->associationMappings))
-            $classMetadata->associationMappings[$this->column] = $associationMapping;
+        $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
+        if($columnAlias) $column = $columnAlias->column;
+
+        if(!property_exists($classMetadata->getName(), $column)) 
+            throw new Exception("Invalid column property \"$column\" provided in annotation of class ".$classMetadata->getName());
+
+        $associationMapping = $classMetadata->getAssociationMapping($classMetadata->getFieldName($column));
+        $associationMapping["orphanRemoval"]    = $this->value;
+
+        if(array_key_exists($column,  $classMetadata->associationMappings))
+            $classMetadata->associationMappings[$column] = $associationMapping;
     }
 }

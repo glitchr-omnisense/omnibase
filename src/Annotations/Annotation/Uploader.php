@@ -85,7 +85,7 @@ class Uploader extends AbstractAnnotation
     
     public static function getPublic($entity, $mapping)
     {
-        if(!self::hasAnnotations($entity, $mapping)) 
+        if(!self::hasAnnotation($entity, $mapping, self::class)) 
             return null;
         
         $that = self::getAnnotation($entity, $mapping, self::class);
@@ -139,7 +139,7 @@ class Uploader extends AbstractAnnotation
 
     public static function getMimeTypes($entity, $mapping): array
     {
-        if(!self::hasAnnotations($entity, $mapping)) 
+        if(!self::hasAnnotation($entity, $mapping, self::class)) 
             return [];
         
         $that = self::getAnnotation($entity, $mapping, self::class);
@@ -150,7 +150,7 @@ class Uploader extends AbstractAnnotation
 
     public static function getMaxFilesize($entity, $mapping): int
     {
-        if(!self::hasAnnotations($entity, $mapping)) 
+        if(!self::hasAnnotation($entity, $mapping, self::class)) 
             return UploadedFile::getMaxFilesize();
         
         $that = self::getAnnotation($entity, $mapping, self::class);
@@ -164,7 +164,7 @@ class Uploader extends AbstractAnnotation
     {
         if($entity === null) return null;
 
-        if(!self::hasAnnotations($entity, $mapping)) return null;
+        if(!self::hasAnnotation($entity, $mapping, self::class)) return null;
         
         $that       = self::getAnnotation($entity, $mapping, self::class);
         if(!$that) return null;

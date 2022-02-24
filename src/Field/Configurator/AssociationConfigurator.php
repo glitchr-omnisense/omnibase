@@ -42,7 +42,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         if (!$this->classMetadataManipulator->hasAssociation($entityDto->getFqcn(), $propertyName)) {
             throw new \RuntimeException(sprintf('The "%s" field is not a Doctrine association, so it cannot be used as an association field.', $propertyName));
         }
-        
+
         $targetEntity = $this->classMetadataManipulator->getAssociationMapping($entityDto->getFqcn(), $propertyName)["targetEntity"] ?? null;
         if ($field->getFormTypeOption("class") == null)
             $field->setFormTypeOption("class", $targetEntity);
@@ -54,7 +54,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         $href = [$field->getFormTypeOption("class") => AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"))];
         
         $fieldValue = $field->getValue();
-        $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn($e) => get_class($e))->toArray()) : [get_class($fieldValue)];
+        $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn($e) => get_class($e))->toArray()) : array_filter([is_object($fieldValue) ? get_class($fieldValue) : null]);
         foreach($classList as $classname) {
         
             $crudController = AbstractCrudController::getCrudControllerFqcn($classname);

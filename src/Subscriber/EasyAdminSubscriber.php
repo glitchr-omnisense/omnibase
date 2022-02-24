@@ -2,9 +2,9 @@
 
 namespace Base\Subscriber;
 
+use Base\Component\HttpFoundation\Referrer;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Service\BaseService;
-use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\ForbiddenActionException;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
@@ -21,6 +21,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->baseService = $baseService;
+
         $this->adminContextProvider = $adminContextProvider;
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
@@ -57,14 +58,15 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         // Redirect to proper CRUD controller
         if($entityCrudController == null) return;
 
-        if($entityCrudController != $crud->getControllerFqcn()) {
+        // Calling child CRUD controller
+        if($entityCrudController != $crud->getControllerFqcn() && !empty($crud->getCurrentPage())) {
 
-dump($crud, $crud->getCurrentPage());
+            
             $instance = $entity->getInstance();
             $url = $this->adminUrlGenerator->unsetAll()
                 ->setController($entityCrudController)
                 ->setEntityId($instance ? $instance->getId() : null)
-                ->setAction($crud->getCurrentPage())
+                ->setAction($crud->getCurrentAction())
                 ->generateUrl();
 
             $e->setResponse($this->baseService->redirect($url));
@@ -97,5 +99,7 @@ dump($crud, $crud->getCurrentPage());
 
             $e->stopPropagation();
         }
+        dump($e);
+        $e->stopPropagation();
     }
 }

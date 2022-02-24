@@ -45,9 +45,7 @@ class ClassMetadataManipulator
 
     public function isEntity($entityOrClassOrMetadata) : bool
     {
-        if ($entityOrClassOrMetadata instanceof ClassMetadata)
-            return isset($entityOrClassOrMetadata->isMappedSuperclass) && $entityOrClassOrMetadata->isMappedSuperclass === false;
-        else if (is_object($entityOrClassOrMetadata))
+        if (is_object($entityOrClassOrMetadata))
             $entityOrClassOrMetadata = ($entityOrClassOrMetadata instanceof Proxy) ? get_parent_class($entityOrClassOrMetadata) : get_class($entityOrClassOrMetadata);
 
         return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClassOrMetadata);

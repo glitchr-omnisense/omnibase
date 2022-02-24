@@ -426,7 +426,16 @@
     {% else %}
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
         {%- set attr = attr|merge({'class': 'form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-        {{ form_widget(form, {attr: attr}) }}
+
+        {% if inline %}
+            {{ form_widget(form, {attr: attr}) }}
+        {% else %}
+
+        <fieldset>
+            <legend>{{ form_label(form) }}</legend>
+            {{ form_widget(form, {attr: attr}) }}
+        </fieldset>
+        {% endif %}
     {% endif %}
     
 {%- endblock -%}

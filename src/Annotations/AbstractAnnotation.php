@@ -41,40 +41,34 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getRepository($className)                    { return AnnotationReader::getInstance()->getRepository($className); }
     public static function getAsset($url)                               { return AnnotationReader::getInstance()->getAsset($url);            }
 
-    public static function getAnnotations($entity, string $mapping): array
+    public static function getAnnotations($entityOrClassNameOrMetadataOrRefl, string $mapping, ?string $annotationClass = null): array
     {
-        $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
-        if(!$classname) return null;
-        
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($classname, static::class);
-        if(!array_key_exists($mapping, $annotations))
-            throw new Exception("Annotation \"".static::class."\" not found in the mapped property \"$mapping\". Did you forget to clear cache ?");
+        if(!$entityOrClassNameOrMetadataOrRefl) return [];
+        if (AnnotationReader::getInstance()->getClassMetadataManipulator()->isEntity($entityOrClassNameOrMetadataOrRefl))
+            $entityOrClassNameOrMetadataOrRefl = is_object($entityOrClassNameOrMetadataOrRefl) ? get_class($entityOrClassNameOrMetadataOrRefl) : $entityOrClassNameOrMetadataOrRefl;
+
+        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($entityOrClassNameOrMetadataOrRefl);
+        foreach($annotations as $column => $annotation) {
+            
+            if ($annotationClass !== null)
+                $annotations[$column] = array_filter($annotation, fn($a) => is_a($a, $annotationClass));
+        }
 
         return $annotations[$mapping] ?? [];
     }
 
-    public static function getAnnotation($entity, string $mapping, string $annotationClass): ?AbstractAnnotation
+    public static function getAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass): ?AbstractAnnotation
     {
-        $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
-        if(!$classname) return null;
-        
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($classname, static::class);
-        if(!array_key_exists($mapping, $annotations))
-            throw new Exception("Annotation \"".static::class."\" not found in the mapped property \"$mapping\". Did you forget to clear cache ?");
-
-        $annotations = array_filter($annotations[$mapping], fn($a) => is_a($a, $annotationClass));
-        return end($annotations);
+        $annotations = self::getAnnotations($entityOrClassNameOrMetadataOrRefl, $mapping, $annotationClass);
+        return !empty($annotations) ? end($annotations) : null;
     }
 
-    public static function hasAnnotations($entity, string $mapping)
-    {
-        $classname = (is_object($entity) ? get_class($entity) : (is_string($entity) ? $entity : null));
-        if(!$classname) return null;
-        
-        $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($classname, static::class);
-        return array_key_exists($mapping, $annotations);
+    public static function hasAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass) 
+    { 
+        $annotations = self::getAnnotations($entityOrClassNameOrMetadataOrRefl, $mapping, $annotationClass);
+        return !empty($annotations); 
     }
-    
+
     /**
      * Minimize the use unit of work to very specific context.. (doctrine internal use only)
      * Please use getNativeEntity() to get back the

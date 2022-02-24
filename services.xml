@@ -20,7 +20,6 @@
         <service id="Base\Component\HttpFoundation\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router.default" />
-            <argument type="service" id="twig.extension.assets" />
         </service>
 
         <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
