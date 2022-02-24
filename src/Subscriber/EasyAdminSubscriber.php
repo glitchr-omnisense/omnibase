@@ -99,7 +99,5 @@ class EasyAdminSubscriber implements EventSubscriberInterface
 
             $e->stopPropagation();
         }
-        dump($e);
-        $e->stopPropagation();
     }
 }
