@@ -51,7 +51,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         foreach($annotations as $column => $annotation) {
             
             if ($annotationClass !== null)
-                $annotations[$column] = array_filter($annotation, fn($a) => is_a($a, $annotationClass));
+                $annotations[$column] = array_filter($annotation, fn($a) => is_instanceof($a, $annotationClass));
         }
 
         return $annotations[$mapping] ?? [];

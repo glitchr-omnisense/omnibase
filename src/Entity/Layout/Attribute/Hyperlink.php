@@ -5,6 +5,7 @@ namespace Base\Entity\Layout\Attribute;
 use Base\Database\Annotation\ColumnAlias;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute;
+use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;
 use Base\Model\IconizeInterface;
 

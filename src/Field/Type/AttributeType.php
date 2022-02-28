@@ -51,7 +51,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
         parent::configureOptions($resolver);
         
         $resolver->setDefaults([
-            'class'        => null,
+            'abstract_class' => null,
+            'class'          => null,
+
             'recursive'    => false,
             "multiple"     => null,
             'filter'       => null, 
@@ -65,9 +67,10 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
 
-            if($value !== null && !is_a($value, Attribute::class))
-                throw new InvalidArgumentException("Option \"class\" passed \"".$value."\" doesn't inherit from \"".Attribute::class."\"");
-                return $value;
+            if($value !== null && !is_instanceof($value, Attribute::class))
+                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but doesn't inherit from \"".Attribute::class."\"");
+            
+            return $value;
         });
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
@@ -96,12 +99,12 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
-            $options["class"]    = $options["class"] ?? AbstractAttribute::class;
+            $options["abstract_class"]    = $options["abstract_class"] ?? AbstractAttribute::class;
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
             $form->add("choice", SelectType::class, [
-                "class"               => $options["class"],
+                "class"               => $options["abstract_class"],
                 "autocomplete_fields" => ["code" => $options["filter_code"]], 
                 "choice_filter"       => $options["filter"],
                 "multiple"            => $options["multiple"],
@@ -134,9 +137,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, \Traversable $forms): void
     {
         // there is no data yet, so nothing to prepopulate
-        if (null === $viewData) {
+        if (null === $viewData)
             return;
-        }
 
         $choiceForm = iterator_to_array($forms)["choice"];
         if ($viewData instanceof PersistentCollection)
@@ -159,14 +161,19 @@ class AttributeType extends AbstractType implements DataMapperInterface
         if($choiceMultiple !=  $options["multiple"])
             throw new \Exception("Unexpected mismatching between choices and attributes");
 
-        $bakData = clone $viewData;
-        if($choiceMultiple) {
+        if(!$choiceMultiple) {
+        
+            $viewData = new ($attributeClass)($choiceData);
+
+        } else {
+
+            $bakData = is_object($viewData) ? clone $viewData : null;
 
             $viewData->clear();
             foreach($choiceData as $data) {
 
                 $existingData = $bakData->filter(fn(Attribute $e) => $e->getAttributePattern() === $data)->first() ?? null;
-                if($existingData) $viewData->add($existingData); // I use "clone" here, to make sure collection gets refreshed
+                if($existingData) $viewData->add($existingData);
                 else if ($data instanceof AbstractAttribute) $viewData->add(new ($attributeClass)($data));
                 else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);
             }
@@ -181,11 +188,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
                     $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
-
-        } else {
-
-            if ($viewData->getAttributePattern() === $choiceData)
-                $viewData->add(new ($attributeClass)($choiceData));
         }
     }
 }

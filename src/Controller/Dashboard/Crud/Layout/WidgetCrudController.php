@@ -15,7 +15,6 @@ class WidgetCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
-    public function createEntity(string $entityFqcn) { return new $entityFqcn(""); }
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {

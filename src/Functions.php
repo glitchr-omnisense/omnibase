@@ -22,6 +22,14 @@ namespace {
         }, $input);
     }
 
+    function is_instanceof(mixed $object_or_class, string $class): bool
+    {
+        if(!class_exists($class))
+            throw new Exception("Class \"$class\" doesn't exists.");
+
+        return is_a($object_or_class, $class, !is_object($object_or_class));
+    }
+
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
@@ -303,9 +311,24 @@ namespace {
     function distance(array $arr1, array $arr2)
     { 
         $min = min(count($arr1), count($arr2));
-        return sqrt(array_sum(array_map(fn($d) => $d*$d, array_diff(array_pad($arr1, $min, 0), array_pad($arr2,$min, 0)))));
+        if($min == count($arr1))
+            $arr2 = array_pad($arr2, $min, 0);
+        if($min == count($arr2))
+            $arr1 = array_pad($arr1, $min, 0);
+
+        return sqrt(array_sum(array_map(fn($d1, $d2) => (intval($d1) - intval($d2)) * (intval($d1) - intval($d2)), $arr1, $arr2)));
     }
     
+    function fread2($handle, int $bytes = 1, int $rollback = 0): ?string
+    {
+        if(!$handle) return null;
+        $ftell = ftell($handle);
+        if($rollback)
+            fseek($handle, $ftell-$rollback);
+
+        return fread($handle, $bytes);
+    }
+
     function digits(int $num, int $ndigits): string
     {
         $str = strval($num);
@@ -941,7 +964,12 @@ namespace {
     function rgb2hex(array $rgb) :string { return sprintf("#%02X%02X%02X", ...array_pad($rgb,3,0)); }
     function rgba2float(array $rgba):float { return ($rgba[0] * 4294967296) + ($rgba[1] * 65536) + ($rgba[2] * 256) + ($rgba[3]); }
     function rgba2hex(array $rgba) :string { return sprintf("#%02X%02X%02X%02X", ...array_pad($rgba,4,0)); }
-    
+
+    function usort_column(array &$array, string $column, callable $fn):bool
+    {
+        return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); 
+    }
+
     function hsl2hex(array $hsl) :string { return rgb2hex(hsl2rgb($hsl)); }
     function rgb2hsl(array $rgb): array
     {

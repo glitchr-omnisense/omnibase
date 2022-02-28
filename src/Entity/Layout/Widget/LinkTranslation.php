@@ -12,12 +12,12 @@ use Base\Entity\Layout\WidgetTranslation;
 
 class LinkTranslation extends WidgetTranslation
 {
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         /**
          * @var Link
          */
         $translatable = $this->getTranslatable();
-        return $translatable->getTitle() ?? $translatable->getHyperlink()->getTitle() ?? $translatable->__iconize();
+        return parent::getTitle() ?? $translatable->getHyperlink()->getLabel() ?? $translatable->__iconize();
     }
 }

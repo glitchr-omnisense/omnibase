@@ -83,7 +83,7 @@ class ExtensionSubscriber implements EventSubscriber
                 foreach($extension::get() as $column) {
                 
                     list($className, $_) = explode("::", $column);
-                    if(!is_a($entity, $className)) continue;
+                    if(!is_instanceof($entity, $className)) continue;
 
                     $matches[$className] = $matches[$className] ?? [];
                     $matches[$className][] = $column;

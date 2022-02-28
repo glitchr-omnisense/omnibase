@@ -3,7 +3,7 @@
 namespace Base\Form;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-
+use Base\Field\Type\TranslationType;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
 
@@ -144,7 +144,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
                 case self::GUESS_FROM_PHPDOC:
                     // To be implemented..
-            
+
                     break;
             }
 
@@ -152,6 +152,29 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         }
 
         return $class ?? $options["class"] ?? null;
+    }
+
+    public function followPropertyPath(FormInterface $form, array &$propertyPath): ?FormInterface
+    {
+        $originalFormName = 
+        $originalPropertyPathSt = implode(".", $propertyPath);
+        foreach($propertyPath as $path) {
+
+            if(!$form->has($path)) break;
+            $form = $form->get($path);
+
+            $formType = $form->getConfig()->getType()->getInnerType();
+            if($formType instanceof TranslationType) {
+
+                $availableLocales = array_keys($form->all());
+                $locale = count($availableLocales) > 1 ? $formType->getDefaultLocale() : $availableLocales[0];
+                $form = $form->get($locale);
+            }
+
+            array_shift($propertyPath);
+        }
+
+        return $form;
     }
 
     public function guessMultiple(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)

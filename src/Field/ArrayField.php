@@ -59,7 +59,7 @@ class ArrayField extends CollectionField implements FieldInterface
 
     public function setPatternFieldName(string $fieldName): self
     {
-        $this->setCustomOption(self::OPTION_PATTERN_FIELD_NAME, $fieldName);
+        $this->setFormTypeOption(self::OPTION_PATTERN_FIELD_NAME, $fieldName);
         return $this;
     }
 

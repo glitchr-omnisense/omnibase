@@ -10,7 +10,7 @@ final class Colors extends ResourceBundle
 {
     public const COLOR_DIR = "colors";
 
-    protected static function getPath(): string { return Intl::getDataDirectory().'/'.self::COLOR_DIR; }
+    protected static function getPath(): string { dump(Intl::getDataDirectory()); return Intl::getDataDirectory().'/'.self::COLOR_DIR; }
     public static function getLanguageCodes(): array
     {
         return self::readEntry(['Colors'], 'meta');

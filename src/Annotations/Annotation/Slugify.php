@@ -88,7 +88,7 @@ class Slugify extends AbstractAnnotation
 
             $propertyDeclarer  = property_declarer($entity , $property);
             $propertyDeclarer2 = property_declarer($entity2, $property);
-            if($propertyDeclarer != $propertyDeclarer2 && !is_a($propertyDeclarer, $propertyDeclarer2)) continue;
+            if($propertyDeclarer != $propertyDeclarer2 && !is_instanceof($propertyDeclarer, $propertyDeclarer2)) continue;
 
             $invalidSlugs[] = $this->getFieldValue($entity2, $property);
         }

@@ -139,7 +139,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
             return false;
         }
 
-        if (!is_a($constraint, $this->constraintClass))
+        if (!is_instanceof($constraint, $this->constraintClass))
             throw new UnexpectedTypeException($constraint, $this->constraintClass);
 
         if (!\is_array($constraint->fields) && !\is_string($constraint->fields))

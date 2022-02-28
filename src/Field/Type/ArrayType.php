@@ -2,6 +2,8 @@
 
 namespace Base\Field\Type;
 
+use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Service\BaseService;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -13,6 +15,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ArrayType extends CollectionType
 {
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator)
+    {
+        parent::__construct($baseService);
+        $this->classMetadataManipulator = $classMetadataManipulator;
+    }
     public function getBlockPrefix(): string { return 'array'; }
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -72,26 +79,38 @@ class ArrayType extends CollectionType
         parent::finishView($view, $form, $options);
 
         $target = $form->getParent();
-        $targetPath = $options["target"] ? explode(".", $options["target"]) : [];
-        $view->vars['target'] = $targetPath;
-        
-        // Check if child exists.. this just trigger an exception..
+        $targetPath = $options["pattern"] ? explode(".", $options["pattern"]) : [] ;
+
+        dump(    $targetData = $this->classMetadataManipulator->getFieldValue($target->getData(), $options["pattern"]));
         foreach($targetPath as $path) {
-            
-            if(!$target->has($path))
-            throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
-            
+
+            if(!$target->has($path)) break;
+
             $target = $target->get($path);
             $targetType = $target->getConfig()->getType()->getInnerType();
-            
+
             if($targetType instanceof TranslationType) {
+
                 $availableLocales = array_keys($target->all());
                 $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
                 $target = $target->get($locale);
             }
+
+            array_shift($targetPath);
         }
-        
-        $view->vars["pattern"] = $options["pattern"];
+
+        $targetData = $target->getData();
+        $targetPath = implode(".", $targetPath);
+
+        if(!empty($targetPath)) {
+
+            if($targetData === null || !is_object($target))
+                throw new \Exception("Failed to find a property path \"$targetPath\" to pattern with data \"".get_class($targetData)."\"");
+
+            $targetData = $this->classMetadataManipulator->getFieldValue($targetData, $targetPath);
+        }
+
+        $view->vars["pattern"] = $targetData;
         $view->vars["placeholder"] = $options["placeholder"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");

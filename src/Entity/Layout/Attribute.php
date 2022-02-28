@@ -50,8 +50,8 @@ class Attribute implements TranslatableInterface, IconizeInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $attributePattern;
-    public function getAttributePattern(): AbstractAttribute { return $this->attributePattern; }
-    public function setAttributePattern(AbstractAttribute $attributePattern): self
+    public function getAttributePattern(): ?AbstractAttribute { return $this->attributePattern; }
+    public function setAttributePattern(?AbstractAttribute $attributePattern): self
     {
         $this->attributePattern = $attributePattern;
         return $this;

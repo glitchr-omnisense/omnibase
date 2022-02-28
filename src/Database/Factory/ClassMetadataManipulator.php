@@ -84,26 +84,6 @@ class ClassMetadataManipulator
     public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : []; }
     public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null; }
 
-    public function getTargetClass($entity, $fieldName)
-    {
-        // Associations can help to guess the expected returned values
-        if($this->hasAssociation($entity, $fieldName)) {
-
-            return $this->getAssociationTargetClass($entity, $fieldName);
-
-        } else if($this->hasField($entity, $fieldName)) {
-
-            // Doctrine types as well.. (e.g. EnumType or SetType)
-            $fieldType = $this->getTypeOfField($entity, $fieldName);
-
-            $doctrineType = $this->getDoctrineType($fieldType);
-            if($this->isEnumType($doctrineType) || $this->isSetType($doctrineType))
-                return get_class($doctrineType);
-        }
-
-        return null;
-    }
-
     public function getClassMetadata($entityOrClassOrMetadataMetadata)
     {
         if($entityOrClassOrMetadataMetadata === null) return null;
@@ -280,9 +260,33 @@ class ClassMetadataManipulator
         return $fields;
     }
 
-    public function hasProperty($entityOrClassOrMetadata, string $fieldName): ?string
+    public function getFieldValue($entity, string|array $fieldPath): mixed 
     {
-        return property_exists($entityOrClassOrMetadata, $fieldName);
+        $metadata = $this->getClassMetadata($entity);
+        if(!$metadata) return false;
+
+        if(is_string($fieldPath)) 
+            $fieldPath = explode(".", $fieldPath);
+
+        if(!empty($targetPath)) {
+
+            if($entity === null || !is_object($entity))
+                throw new \Exception("Failed to find a property path \"$targetPath\" using \"".get_class($targetData)."\" data");
+
+            $targetData = $this->classMetadataManipulator->getFieldValue($entity, $targetPath);
+        }
+
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        return $metadata->getFieldValue($entity, $fieldName);
+    }
+
+    public function setFieldValue($entity, string|array $fieldPath, $value) 
+    {
+        $metadata = $this->getClassMetadata($entity);
+        if(!$metadata) return false;
+
+        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        return $metadata->setFieldValue($entity, $fieldName, $value);
     }
 
     public function hasField($entityOrClassOrMetadata, string $fieldName): ?string
@@ -294,29 +298,33 @@ class ClassMetadataManipulator
         return $metadata->hasField($fieldName);
     } 
 
-    public function getFieldValue($entity, string $fieldName): mixed 
-    {
-        $metadata = $this->getClassMetadata($entity);
-        if(!$metadata) return false;
-
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
-        return $metadata->getFieldValue($entity, $fieldName);
-    }
-
-    public function setFieldValue($entity, string $fieldName, $value) 
-    {
-        $metadata = $this->getClassMetadata($entity);
-        if(!$metadata) return false;
-
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
-        return $metadata->setFieldValue($entity, $fieldName, $value);
-    }
+    public function hasProperty($entityOrClassOrMetadata, string $fieldName): ?string { return property_exists($entityOrClassOrMetadata, $fieldName); }
 
     public function getType($entityOrClassOrMetadata, string $property) 
     {
         return $this->hasAssociation($entityOrClassOrMetadata, $property) 
             ? $this->getTypeOfAssociation($entityOrClassOrMetadata, $property) 
             : $this->getTypeOfField($entityOrClassOrMetadata, $property);
+    }
+
+    public function getTargetClass($entityOrClassOrMetadata, $fieldName)
+    {
+        // Associations can help to guess the expected returned values
+        if($this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
+
+            return $this->getAssociationTargetClass($entityOrClassOrMetadata, $fieldName);
+
+        } else if($this->hasField($entityOrClassOrMetadata, $fieldName)) {
+
+            // Doctrine types as well.. (e.g. EnumType or SetType)
+            $fieldType = $this->getTypeOfField($entityOrClassOrMetadata, $fieldName);
+
+            $doctrineType = $this->getDoctrineType($fieldType);
+            if($this->isEnumType($doctrineType) || $this->isSetType($doctrineType))
+                return get_class($doctrineType);
+        }
+
+        return null;
     }
 
     public function getTypeOfField($entityOrClassOrMetadata, string $property)

@@ -21,7 +21,11 @@ class Link extends Widget implements IconizeInterface, UrlInterface
     public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; } 
 
-    public function __construct(Hyperlink $hyperlink) { $this->setHyperlink($hyperlink); }
+    public function __construct(?Hyperlink $hyperlink = null) 
+    { 
+        if($hyperlink)
+            $this->setHyperlink($hyperlink);
+    }
 
     /**
      * @ORM\ManyToOne(targetEntity=Hyperlink::class, cascade={"persist"})
@@ -29,7 +33,7 @@ class Link extends Widget implements IconizeInterface, UrlInterface
      * @ORM\JoinColumn(nullable=false)
      */
     protected $hyperlink;
-    public function getHyperlink(): Hyperlink { return $this->hyperlink; }
+    public function getHyperlink(): ?Hyperlink { return $this->hyperlink; }
     public function setHyperlink(Hyperlink $hyperlink)
     {
         $this->hyperlink = $hyperlink;
@@ -39,6 +43,6 @@ class Link extends Widget implements IconizeInterface, UrlInterface
     public function __toUrl(): string { return $this->getHyperlink()->generateUrl(); }
     public function __toString() 
     {
-        return $this->getTitle() ?? $this->getHyperlink()->getTitle() ?? $this->__iconize();
+        return $this->getTitle() ?? $this->getHyperlink()->getLabel() ?? $this->__iconize();
     }
 }

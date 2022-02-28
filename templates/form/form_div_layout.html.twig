@@ -611,6 +611,7 @@
     {% if form.children is not empty or allow_add != false or form.vars.pattern is not empty %}
     <div class="form-group">
         <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
+
         {% if form.vars.pattern is not empty %}
             <div class="input-group mb-3">
                 {% set pattern = pattern|preg_split("/{[0-9]*}/") %}

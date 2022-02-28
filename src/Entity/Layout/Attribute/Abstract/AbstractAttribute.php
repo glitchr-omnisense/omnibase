@@ -60,9 +60,25 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }
-    public function setAttributes(Collection $attributes): self
+    public function addAttribute(Attribute $attribute): self
     {
-        $this->attributes = $attributes;
+        if (!$this->attributes->contains($attribute)) {
+            $this->attributes[] = $attribute;
+            $attribute->setAttributePattern($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAttribute(Attribute $attribute): self
+    {
+        if ($this->attributes->removeElement($attribute)) {
+            // set the owning side to null (unless already changed)
+            if ($attribute->getAttributePattern() === $this) {
+                $attribute->setAttributePattern(null);
+            }
+        }
+
         return $this;
     }
 

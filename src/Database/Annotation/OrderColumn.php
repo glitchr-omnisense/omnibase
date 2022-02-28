@@ -45,7 +45,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
             
-            $isEnum = is_a($doctrineType, EnumType::class);
+            $isEnum = is_instanceof($doctrineType, EnumType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
 
             if(!$isEnum && !$isToMany)
@@ -70,7 +70,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         foreach(self::$orderedColumns as $column) {
 
             list($className, $_) = explode("::", $column);
-            if(is_a($entity, $className)) 
+            if(is_instanceof($entity, $className)) 
                 $orderedColumns[] = $column;
         }
 

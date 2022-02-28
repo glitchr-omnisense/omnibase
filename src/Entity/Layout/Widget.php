@@ -36,7 +36,7 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     public function __toString() { return $this->getTitle(); }
 
-    public function __construct(string $title, ?string $excerpt = null, ?string $content = null)
+    public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)
     {
         $this->similars = new ArrayCollection();
 

@@ -659,14 +659,8 @@
             <argument type="service" id="validator" />
         </service>
 
-        <service id="Base\Field\Type\CollectionType">
-            <tag name="form.type" />
-            <argument type="service" id="base.service" />
-        </service>
-        <service id="Base\Field\Type\ArrayType" parent="Base\Field\Type\CollectionType">
-            <tag name="form.type" />
-            <argument type="service" id="base.service" />
-        </service>
+        <service id="Base\Field\Type\CollectionType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\ArrayType" parent="Base\Field\Type\CollectionType"><tag name="form.type" /><argument type="service" id="base.database.metadata_manipulator" /></service>
 
         <service id="Base\Field\Configurator\IdConfigurator">
             <tag name="ea.field_configurator" />
@@ -702,14 +696,9 @@
             <argument type="service" id="translator" />
         </service>
 
-
-        <service id="Base\Normalizer\EntityNormalizer">
-            <tag name="serializer.normalizer" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
+        <service id="Base\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>
 
         <service id="Base\Field\Configurator\CropperConfigurator"><tag name="ea.field_configurator" /></service>
-
         <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\FileConfigurator">

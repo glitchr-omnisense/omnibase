@@ -170,7 +170,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
 
             $classFilter = $field->getFormTypeOption('class');
             $others = $field->getValue()->filter(function($value) use ($classFilter) {
-                return is_a($value, $classFilter) || is_subclass_of($value, $classFilter);
+                return is_instanceof($value, $classFilter) || is_subclass_of($value, $classFilter);
             })->toArray();
 
             $first  = ($showFirst) ? array_shift($others) : $others[0] ?? null;

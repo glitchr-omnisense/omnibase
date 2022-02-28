@@ -77,8 +77,10 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         }
     }
 
-    public function resolve(string $pattern, ...$patternOpts): ?string
+    public function resolve(?string $pattern, ...$patternOpts): ?string
     {
+        if(!$pattern) return null;
+        
         $search = [];
         foreach($patternOpts as $index => $_)
             $search[] = "{".$index."}";
@@ -95,7 +97,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         $parseUrl["scheme"] = $parseUrl["scheme"] ?? $this->getSettings()->scheme();
         $parseUrl["domain"] = $parseUrl["domain"] ?? $this->getSettings()->domain();
         $parseUrl["path"]   = $this->getService()->getAsset($parseUrl["path"] ?? "");
-            dump($this->getSettings()->domain());
+
         return $parseUrl["scheme"] . "://" . $parseUrl["domain"] . $parseUrl["path"];
     }
     private function formatCollection(FieldDto $field, AdminContext $context)

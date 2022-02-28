@@ -180,7 +180,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
     public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) { return preg_split($pattern, $subject, $limit, $flags); }
 
-    public function instanceof(mixed $object, string $class): bool { return is_a($object, $class, true); }
+    public function instanceof(mixed $object, string $class): bool { return is_instanceof($object, $class, true); }
 
     public function joinIfExists(?array $array, string $separator) 
     {
