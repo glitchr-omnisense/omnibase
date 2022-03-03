@@ -6,7 +6,7 @@ trait SingletonTrait
 {
     private static $_instance = null;
 
-    protected function __construct() { }
+    // protected function __construct() { }
 
     public static function hasInstance()
     {
