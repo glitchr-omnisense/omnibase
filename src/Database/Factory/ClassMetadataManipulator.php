@@ -2,6 +2,7 @@
 
 namespace Base\Database\Factory;
 
+use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Field\Type\ArrayType;
@@ -10,10 +11,13 @@ use Base\Field\Type\AssociationType;
 use Base\Field\Type\SelectType;
 use Base\Field\Type\TranslationType;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Google\Service\Translate\Translation;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -262,22 +266,50 @@ class ClassMetadataManipulator
 
     public function getFieldValue($entity, string|array $fieldPath): mixed 
     {
+        // Prepare field path information
+        if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
+        if(empty($fieldPath)) throw new \Exception("No field path provided for \"".get_class($entity)."\" ");
+
+        // Extract leading field && get metadata
+        $fieldName = array_shift($fieldPath);
+
+        // Extract key information
+        $fieldRegex = ["/(\w*)\[(\w*)\]/", "/(\w*)%(\w*)%/", "/(\w*){(\w*)}/", "/(\w*)\((\w*)\)/"];
+        $fieldKey   = preg_replace($fieldRegex, "$2", $fieldName, 1);
+        if($fieldKey) $fieldName = preg_replace($fieldRegex, "$1", $fieldName, 1);
+        else $fieldKey = null;
+
+        // Check entity validity
+        if($entity === null || !is_object($entity)) {
+            if(!empty($fieldName)) throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
+            else return null;
+        }
+
+        // Go get class metadata
         $metadata = $this->getClassMetadata($entity);
         if(!$metadata) return false;
 
-        if(is_string($fieldPath)) 
-            $fieldPath = explode(".", $fieldPath);
+        $entity = $metadata->getFieldValue($entity, $fieldName);
+        if(class_implements_interface($entity, TranslatableInterface::class)) 
+            $entity = $entity->getTranslations();
 
-        if(!empty($targetPath)) {
-
-            if($entity === null || !is_object($entity))
-                throw new \Exception("Failed to find a property path \"$targetPath\" using \"".get_class($targetData)."\" data");
-
-            $targetData = $this->classMetadataManipulator->getFieldValue($entity, $targetPath);
+        if(is_array($entity)) {
+            $entity = $fieldKey ? $entity[$fieldKey] ?? null : null;
+            $entity = $entity ?? begin($entity);
+        } else if(class_implements_interface($entity, Collection::class)) {
+            $entity = $entity->has($fieldKey ?? 0) ? $entity->get($fieldKey ?? 0) : null;
         }
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
-        return $metadata->getFieldValue($entity, $fieldName);
+        if($entity === null || !is_object($entity)) {
+            if(empty($fieldPath)) return $entity;
+            throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
+        }
+
+        // If field path is empty
+        if(empty($fieldPath))
+            return $metadata->getFieldValue($entity, $fieldName);
+
+        return $this->getFieldValue($entity, implode(".", $fieldPath));
     }
 
     public function setFieldValue($entity, string|array $fieldPath, $value) 
@@ -285,7 +317,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entity);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->getFieldName($fieldPath) ?? $fieldPath;
         return $metadata->setFieldValue($entity, $fieldName, $value);
     }
 

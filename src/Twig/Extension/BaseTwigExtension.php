@@ -20,7 +20,6 @@ use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
-use Twig\Extension\CoreExtension;
 use Twig\TwigFunction;
 
 final class BaseTwigExtension extends AbstractExtension
@@ -83,7 +82,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('title',           [$this, 'title'  ], ['is_safe' => ['all']]),
             new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFunction('get_class',   [$this, 'get_class']),
+            new TwigFunction('get_class',       [$this, 'get_class']),
             new TwigFunction('method_exists',   [$this, 'method_exists']),
             new TwigFunction('static_call',     [$this, 'static_call'  ]),
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),

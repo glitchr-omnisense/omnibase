@@ -85,7 +85,7 @@ class ImageController extends AbstractController
         if(!$args) $args = [];
 
         $_extension = $this->imageService->getExtension($args["path"]);
-        if($extension !== null && $_extension != $extension)
+        if($extension === null && $_extension != $extension)
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
 
         return $this->imageService->filter($args["path"], [

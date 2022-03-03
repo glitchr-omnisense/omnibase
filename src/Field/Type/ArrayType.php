@@ -78,39 +78,7 @@ class ArrayType extends CollectionType
     {
         parent::finishView($view, $form, $options);
 
-        $target = $form->getParent();
-        $targetPath = $options["pattern"] ? explode(".", $options["pattern"]) : [] ;
-
-        dump(    $targetData = $this->classMetadataManipulator->getFieldValue($target->getData(), $options["pattern"]));
-        foreach($targetPath as $path) {
-
-            if(!$target->has($path)) break;
-
-            $target = $target->get($path);
-            $targetType = $target->getConfig()->getType()->getInnerType();
-
-            if($targetType instanceof TranslationType) {
-
-                $availableLocales = array_keys($target->all());
-                $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
-                $target = $target->get($locale);
-            }
-
-            array_shift($targetPath);
-        }
-
-        $targetData = $target->getData();
-        $targetPath = implode(".", $targetPath);
-
-        if(!empty($targetPath)) {
-
-            if($targetData === null || !is_object($target))
-                throw new \Exception("Failed to find a property path \"$targetPath\" to pattern with data \"".get_class($targetData)."\"");
-
-            $targetData = $this->classMetadataManipulator->getFieldValue($targetData, $targetPath);
-        }
-
-        $view->vars["pattern"] = $targetData;
+        $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");

@@ -2,6 +2,8 @@
 
 namespace Base\Form;
 
+use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\OrderColumn;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\Type\TranslationType;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -202,13 +204,9 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                     return $this->classMetadataManipulator->getTypeOfField($entity, $entityField) == "array";
 
             } else if($this->classMetadataManipulator->isSetType($target)) {
-
                 return true;
-            
             } else if($this->classMetadataManipulator->isEnumType($target)) {
-
                 return false;
-
             }
         }
 
@@ -221,9 +219,10 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             $form = $form->getForm();
 
         $options = $options ?? $form->getConfig()->getOptions();
-        if ($options["sortable"] === null) {
+        if ($options["sortable"] === null && $options["class"] !== null) {
 
-            $options["sortable"] = true;
+            $annotations = AnnotationReader::getAnnotationReader()->getAnnotations($options["class"], OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
+            $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$options["class"]] ?? []));
         }
 
         return $options["sortable"] ?? false;

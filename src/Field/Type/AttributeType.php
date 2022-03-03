@@ -8,6 +8,7 @@ use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\AttributeTranslation;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\PersistentCollection;
 use InvalidArgumentException;
 use Symfony\Component\Form\AbstractType;
@@ -115,9 +116,14 @@ class AttributeType extends AbstractType implements DataMapperInterface
             ]);
 
             if($data !== null) {
-                
-                $fields   = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "help" => $v->getAttributePattern()->getHelp(), "form_type" => $v->getAttributePattern()::getType()])], $data->toArray());
-                $intlData = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data->toArray());
+
+                if($data instanceof ArrayCollection)
+                    $data = $data->toArray();
+                else if(!is_array($data))
+                    $data = [$data];
+
+                $fields   = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "help" => $v->getAttributePattern()->getHelp(), "form_type" => $v->getAttributePattern()::getType()])], $data);
+                $intlData = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data);
 
                 if(!empty($fields)) {
 

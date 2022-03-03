@@ -19,7 +19,7 @@ class LinkCrudController extends WidgetCrudController
     {
         return parent::configureFields($pageName, ["id" => function () {
 
-            yield AttributeField::new('hyperlink')->setClass(Hyperlink::class)->setFilterCode(".*")->setFilter(HyperpatternAttribute::class);
+            yield AttributeField::new('hyperlink')->setClass(Hyperlink::class)->setFilter(HyperpatternAttribute::class);
             yield TranslationField::new('title')->setFields([
                 "title" => [],
                 "excerpt" => ["form_type" => TextareaType::class],

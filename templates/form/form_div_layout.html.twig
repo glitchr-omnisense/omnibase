@@ -660,6 +660,7 @@
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
         </button>
     {% endif %}
+
 {%- endblock array_widget -%}
 
 {%- block array_entry_row -%}
@@ -677,8 +678,11 @@
     {% endif %}
 
     {% if pattern is not empty %}
+
         {{ form_widget(form, {attr:attr}) }}
+
     {% else %}
+
         {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"

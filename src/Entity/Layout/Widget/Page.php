@@ -67,7 +67,7 @@ class Page extends Widget implements IconizeInterface, UrlInterface
 
             $tag = $match[1];
             $content = $match[2];
-            $slug = $this->getSlugger()->slug($content);
+            $slug = strtolower($this->getSlugger()->slug($content));
 
             $options["attr"]["class"] = $options["attr"]["class"] ?? "";
             $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
@@ -95,7 +95,6 @@ class Page extends Widget implements IconizeInterface, UrlInterface
             ];
 
         }, $this->content);
-
 
         return $headlines;
     }

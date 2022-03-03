@@ -37,10 +37,14 @@ class ImageService implements ImageServiceInterface
      */
     protected static $mimeTypes;
 
+    protected static $projectDir;
+    protected static $publicDir;
+    
     public function __construct(Environment $twig, AssetExtension $assetExtension, RouterInterface $router, ParameterBagInterface $parameterBag, ImagineInterface $imagine, Filesystem $filesystem)
     {
-        $this->projectDir = dirname(__FILE__, 6);
-        $this->publicDir  = $this->projectDir."/public";
+        self::$projectDir = dirname(__FILE__, 6);
+        self::$publicDir  = self::$projectDir."/public";
+
         $this->twig       = $twig;
         $this->assetExtension    = $assetExtension;
         $this->imagine    = $imagine;
@@ -121,12 +125,17 @@ class ImageService implements ImageServiceInterface
                array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
 
-    public function getPublic(?string $path) 
+    public static function getPublic(?string $path) 
     { 
-        $stripPath = str_strip($path, [$this->publicDir, "imagine/"]);
+        if(!self::$projectDir)
+            self::$projectDir = dirname(__FILE__, 6);
+        if(!self::$publicDir)
+            self::$publicDir  = self::$projectDir."/public";
+
+        $stripPath = str_strip($path, [self::$publicDir, "imagine/"]);
         if($path == $stripPath && str_starts_with($stripPath, "/")) return null;
 
-        return $path !== null ? $this->publicDir."/".$stripPath : null; 
+        return $path !== null ? self::$publicDir."/".$stripPath : null; 
     }
 
     public function filter(?string $path, array $filters = []): null|bool|Response
@@ -162,14 +171,14 @@ class ImageService implements ImageServiceInterface
             }
 
             $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-            $pathPublic = $this->getPublic($path);
+            $pathPublic = self::getPublic($path);
             $path = path_suffix($path, $pathSuffixes);
 
             // Handle null path case
             if ($path === null) {
 
                 $path = $this->noImage;
-                $pathPublic = $this->getPublic($this->noImage);
+                $pathPublic = self::getPublic($this->noImage);
             }
 
             // No public path can be created.. so just apply filter to the image
@@ -202,7 +211,7 @@ class ImageService implements ImageServiceInterface
                     try { $image = $this->imagine->open($pathPublic); } 
                     catch (Exception $e) {
 
-                        $pathPublic = $this->getPublic($this->noImage);
+                        $pathPublic = self::getPublic($this->noImage);
                         $image = $this->imagine->open($pathPublic);
                     }
 
@@ -240,28 +249,31 @@ class ImageService implements ImageServiceInterface
         if($fileOrArray === null) return null;
         if(is_array($fileOrArray)) return array_map(fn($f) => self::mimetype($f), $fileOrArray);
 
-        if(file_exists($fileOrArray)) {
+        $file = self::getPublic($fileOrArray);
+        if(file_exists($file)) {
 
-            if(str_ends_with($fileOrArray, "svg")) return "image/svg+xml";
-            return image_type_to_mime_type(exif_imagetype($fileOrArray));
+            if(str_ends_with($file, "svg")) return "image/svg+xml";
+            return image_type_to_mime_type(exif_imagetype($file));
         }
 
         try { return self::$mimeTypes->guessMimeType($fileOrArray); }
         catch (Exception $e) { return null; }
     }
 
-    public function getExtension(string $path):null|string|array { return self::extension($this->getMimeType($path)); }
+    public function getExtension(string $path):null|string|array { return self::extension($this->getMimeType($path) ?? $path); }
     public static function extension(null|string|array $mimetypeOrFileOrArray):null|string|array 
     {
         if(is_array($mimetypeOrFileOrArray))
             return array_filter(array_map(fn($mimetype) => self::extension($mimetype), $mimetypeOrFileOrArray));
 
         if(!$mimetypeOrFileOrArray) return null;
-        if(file_exists($mimetypeOrFileOrArray)) {
 
-            try { $imagetype = exif_imagetype($mimetypeOrFileOrArray); }
+        $file = self::getPublic($mimetypeOrFileOrArray);
+        if(file_exists($file)) {
+
+            try { $imagetype = exif_imagetype($file); }
             catch (Exception $e) { $imagetype = false; }
-            return $imagetype !== false ? substr(image_type_to_extension($imagetype), 1) : pathinfo($mimetypeOrFileOrArray, PATHINFO_EXTENSION) ?? null;
+            return $imagetype !== false ? substr(image_type_to_extension($imagetype), 1) : pathinfo($file, PATHINFO_EXTENSION) ?? null;
         }
         
         return self::$mimeTypes->getExtensions($mimetypeOrFileOrArray)[0] ?? pathinfo($mimetypeOrFileOrArray, PATHINFO_EXTENSION) ?? null;

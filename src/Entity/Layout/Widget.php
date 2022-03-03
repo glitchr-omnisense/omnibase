@@ -7,6 +7,7 @@ use Base\Validator\Constraints as AssertBase;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Uploader;
+use Base\Database\Annotation\OrderColumn;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
@@ -94,6 +95,7 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class)
+     * @OrderColumn
      */
     protected $similars;
     public function getSimilars(): Collection { return $this->similars; }

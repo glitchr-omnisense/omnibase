@@ -44,6 +44,15 @@ class BaseConfiguration implements ConfigurationInterface
                 ->end()
                 ->end()
 
+                ->arrayNode('share')
+                ->arrayPrototype()
+                    ->children()
+                        ->scalarNode("id")->end()
+                        ->scalarNode("url")->end()
+                        ->end()
+                    ->end()
+                ->end()
+
                 ->arrayNode('user')->addDefaultsIfNotSet()
                     ->children()
                     ->scalarNode('token_default_throttling')

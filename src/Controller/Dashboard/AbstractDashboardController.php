@@ -150,6 +150,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
             "base.settings.title"                => ["translatable" => true],
             "base.settings.title.backoffice"     => ["translatable" => true],
+            "base.settings.author"               => ["translatable" => true],
             "base.settings.description"          => ["form_type" => TextareaType::class, "translatable" => true],
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true],

@@ -5,13 +5,8 @@
 <article>
     <h1>{{ page.title }}</h1>
     <h3>{{ page.excerpt }}</h3>
-
     <div>{{page.content|raw}}</div>
 
     <div class="page-referer">{{ '@messages.base.return'|trans([app.referrer.getUrl()])|raw }}<p>
 </article>
-{% endblock %}
-
-{% block aside %}
-XXX
 {% endblock %}

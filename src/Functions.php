@@ -99,8 +99,11 @@ namespace {
     define("SHORTEN_BACK",   1); // Lorem ipsum dolor [..]
     function str_shorten(?string $str, int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): ?string
     {
+        if($length == 0) return "";
+
         $nChr = strlen($str);
 
+        if($nChr == 0) return "";
         if($nChr > $length + strlen($separator)) {
 
             switch($position) {
