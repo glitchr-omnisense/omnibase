@@ -333,6 +333,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options = $choicesType->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessType($choicesType->getParent());
 
+        $bakMultiple = $options["multiple"];
+
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choicesType->getParent(), $options);
@@ -351,7 +353,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             }
         }
 
-        $options["multiple"] = null;
+        $options["multiple"] = $bakMultiple !== null ? $bakMultiple : null;
         $options["multiple"] = $this->formFactory->guessMultiple($choicesType->getParent(), $options);
 
         if($viewData instanceof Collection) {

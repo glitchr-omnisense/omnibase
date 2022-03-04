@@ -552,6 +552,7 @@
         <service id="Base\Form\Type\Layout\SettingListType">
             <tag name="form.type" />
             <argument type="service" id="base.settings" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         <service id="Base\Form\Type\Layout\WidgetListType">
             <tag name="form.type" />
@@ -684,6 +685,7 @@
             <argument type="service" id="property_accessor" />
         </service>
 
+        <service id="Base\Field\Configurator\CurrencyConfigurator"      ><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\EmailConfigurator"         ><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\DateTimePickerConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\CollectionConfigurator"    ><tag name="ea.field_configurator" /></service>

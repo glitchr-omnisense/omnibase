@@ -172,14 +172,12 @@ class ClassMetadataManipulator
 
         $aliasNames = [];
         foreach($metadata->fieldNames as $aliasName => $fieldName)
-            if($aliasName != $fieldName) $aliasNames[$fieldName] = $aliasName;
+            if($aliasName != $fieldName) $aliasNames[$aliasName] = $fieldName;
 
         $fields = $validFields + $unmappedFields;
         $aliasFields = array_filter($fields, fn($k) => in_array($k, $aliasNames), ARRAY_FILTER_USE_KEY);
 
-        $fields = array_key_removes($fields, ...array_values($aliasNames));
         $fields = array_transforms(fn($k,$v): ?array => array_key_exists($k, $aliasNames) ? [$aliasNames[$k], $aliasFields[$aliasNames[$k]]] : [$k,$v], $fields);
-
         return $fields;
     }
 

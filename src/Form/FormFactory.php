@@ -189,7 +189,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         if($options["multiple"] === null && ($options["class"] !== null || $options["data_class"] !== null)) {
 
             $target = $options["class"] ?? $options["data_class"] ?? null;
-
             if($this->classMetadataManipulator->isEntity($target)) {
 
                 $parentForm = $form->getParent();

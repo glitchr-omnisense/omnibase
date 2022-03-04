@@ -59,7 +59,7 @@ class Setting implements TranslatableInterface, IconizeInterface
         $this->path = $path;
         return $this;
     }
-
+    
     /**
      * @ORM\Column(type="boolean")
      */

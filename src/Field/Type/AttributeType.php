@@ -9,6 +9,7 @@ use Base\Entity\Layout\AttributeTranslation;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use InvalidArgumentException;
 use Symfony\Component\Form\AbstractType;
@@ -83,9 +84,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
-        $view->vars["multiple"] = $options["multiple"];
+        $view->vars["multiple"]     = $options["multiple"];
         $view->vars["allow_delete"] = $options["allow_delete"];
-        $view->vars["allow_add"] = $options["allow_add"];
+        $view->vars["allow_add"]    = $options["allow_add"];
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -117,7 +118,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             if($data !== null) {
 
-                if($data instanceof ArrayCollection)
+                if($data instanceof Collection)
                     $data = $data->toArray();
                 else if(!is_array($data))
                     $data = [$data];
@@ -128,7 +129,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(!empty($fields)) {
 
                     $form->add("intl", TranslationType::class, [
-                        "multiple" => true,
+                        "multiple" => $options["multiple"],
                         "autoload" => false,
                         "fields"   => ["value" => $fields],
                         "translation_class" => AttributeTranslation::class,
@@ -157,6 +158,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
     {
         $form = current(iterator_to_array($forms))->getParent();
         $options = $form->getConfig()->getOptions();
+
         $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessType($form, $options) ?? Attribute::class;
         $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($form, $options);
 

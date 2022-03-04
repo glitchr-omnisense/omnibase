@@ -53,4 +53,16 @@ class SettingTranslation implements TranslationInterface
         $this->value = $value;
         return $this;
     }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): string { return $this->class; }
+    public function setClass(string $class)
+    {
+        $this->class = $class;
+        return $this;
+    }
 }

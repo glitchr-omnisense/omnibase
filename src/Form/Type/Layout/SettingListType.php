@@ -3,6 +3,7 @@
 namespace Base\Form\Type\Layout;
 
 use Base\Annotations\Annotation\Uploader;
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingTranslation;
 use Base\Field\Type\AvatarType;
@@ -25,7 +26,11 @@ use Symfony\Component\Form\FormEvents;
 
 class SettingListType extends AbstractType implements DataMapperInterface
 {
-    public function __construct(BaseSettings $baseSettings) { $this->baseSettings = $baseSettings; }
+    public function __construct(BaseSettings $baseSettings, ClassMetadataManipulator $classMetadataManipulator) 
+    { 
+        $this->baseSettings = $baseSettings;
+        $this->classMetadataManipulator = $classMetadataManipulator;
+    }
 
     public function configureOptions(OptionsResolver $resolver)
     {
@@ -82,6 +87,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
             $unvData = [];
             $intlData = [];
+
             foreach($settings as $formattedField => $setting) {
 
                 // Exclude requested fields
@@ -134,6 +140,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                             $bool = !empty($settingValue) && $settingValue != "0";
                             $settingTranslation->setValue($bool ? true : false);
                             break;
+
                     }
                 }
 
@@ -188,7 +195,20 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     foreach($translations as $locale => $translation) {
 
                         $viewData[$field] = $viewData[$field] ?? $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field);
-                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
+                        
+                        $value = $translation->getValue();
+                        if(is_object($value) && $this->classMetadataManipulator->isEntity($value)) {
+
+                            $viewData[$field]->translate($locale)
+                                ->setClass(get_class($value))
+                                ->setValue($translation->getValue()->getId());
+                            dump($viewData);
+                            exit(1);
+
+                        } else {
+
+                            $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
+                        }
                     }
                  }
 
@@ -203,7 +223,18 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $locale      = $translation->getLocale();
 
                 $field = str_replace("-", ".", $formName);
-                $viewData[$formName] = $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
+
+                $value = $translation->getValue();
+                if(is_object($value) && $this->classMetadataManipulator->isEntity($value)) {
+
+                    $viewData[$formName]->translate($locale)
+                        ->setClass(get_class($value))
+                        ->setValue($translation->getValue()->getId());
+                      
+                } else {
+
+                    $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
+                }               
             }
         }
     }
