@@ -23,6 +23,8 @@ class Link extends Widget implements IconizeInterface, UrlInterface
 
     public function __construct(?Hyperlink $hyperlink = null) 
     { 
+        parent::__construct();
+
         if($hyperlink)
             $this->setHyperlink($hyperlink);
     }

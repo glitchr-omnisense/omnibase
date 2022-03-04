@@ -24,8 +24,8 @@ class Menu extends Widget implements IconizeInterface
 
     public function __construct(string $title)
     {
-        $this->widgets = new ArrayCollection();
         parent::__construct($title);
+        $this->widgets = new ArrayCollection();
     }
 
     /**

@@ -99,7 +99,7 @@ class Widget implements TranslatableInterface, IconizeInterface
      */
     protected $similars;
     public function getSimilars(): Collection { return $this->similars; }
-    public function addSimilar(self $similar): self
+    public function addSimilar(Widget $similar): self
     {
         if(!$this->similars->contains($similar))
             $this->similars[] = $similar;
@@ -107,7 +107,7 @@ class Widget implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    public function removeSimilar(self $similar): self
+    public function removeSimilar(Widget $similar): self
     {
         $this->similars->removeElement($similar);
         return $this;

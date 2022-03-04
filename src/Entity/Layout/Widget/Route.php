@@ -27,6 +27,7 @@ class Route extends Widget implements IconizeInterface, UrlInterface
     public function __construct(string $title, string $route, array $routeParameters = []) 
     {
         parent::__construct($title);
+        
         $this->route = $route;
         $this->routeParameters = $routeParameters;
     }

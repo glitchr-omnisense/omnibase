@@ -28,6 +28,8 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public function __toString() { return $this->getPath(); }
     public function __construct(string $path, ?string $label = null, ?string $help = null)
     {
+        parent::__construct();
+
         $this->path    = $path;
         $this->setLabel($label);
         $this->setHelp($help);
