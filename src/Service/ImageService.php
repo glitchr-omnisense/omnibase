@@ -49,7 +49,10 @@ class ImageService implements ImageServiceInterface
         $this->assetExtension    = $assetExtension;
         $this->imagine    = $imagine;
         $this->router     = $router;
+        
         $this->filesystem = $filesystem->set("local.cache");
+        try { $this->filesystem->mkdir("imagine"); } 
+        catch(\Exception $e) {}
 
         $this->maxQuality = $parameterBag->get("base.image.max_quality") ?? 1;
         $this->enableWebp = $parameterBag->get("base.image.enable_webp") ?? true;
