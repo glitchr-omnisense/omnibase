@@ -13,7 +13,7 @@ class Autocomplete
         $this->translator = $translator;
     }
 
-    public function resolve($entry, $class = null, $format = FORMAT_SENTENCECASE) 
+    public function resolve($entry, $class = null, $format = FORMAT_TITLECASE) 
     {
         if($entry == null) return null;
         if(is_object($entry) && $class !== null) {

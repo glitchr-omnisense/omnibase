@@ -153,6 +153,7 @@ class SelectField implements FieldInterface
 
     public function renderAsCount()
     {
+        $this->setCustomOption(self::OPTION_SHOW_FIRST, self::NO_SHOW);
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
         return $this;
     }

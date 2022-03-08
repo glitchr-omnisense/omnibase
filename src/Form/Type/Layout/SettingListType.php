@@ -202,8 +202,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
                             $viewData[$field]->translate($locale)
                                 ->setClass(get_class($value))
                                 ->setValue($translation->getValue()->getId());
-                            dump($viewData);
-                            exit(1);
 
                         } else {
 

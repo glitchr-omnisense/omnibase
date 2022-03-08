@@ -184,24 +184,41 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         if ($form instanceof FormEvent)
             $form = $form->getForm();
 
-        $options = $options ?? $form->getConfig()->getOptions();
+        if($options["multiple"] === null) {
 
-        if($options["multiple"] === null && ($options["class"] !== null || $options["data_class"] !== null)) {
+            $parentForm = $form->getParent();
+            if($parentForm) {
 
-            $target = $options["class"] ?? $options["data_class"] ?? null;
+                $options = $parentForm->getConfig()->getOptions();
+                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+            }
+
+            if($target == null) {
+
+                $options = $options ?? $form->getConfig()->getOptions();
+                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+            }
+
             if($this->classMetadataManipulator->isEntity($target)) {
 
-                $parentForm = $form->getParent();
-                if(!$parentForm) return false;
+                $targetField = $form->getName();
+                
+                if($this->classMetadataManipulator->hasAssociation($target, $targetField) )
+                    return $this->classMetadataManipulator->isToManySide($target, $targetField);
+                else if($this->classMetadataManipulator->hasField($target, $targetField)) {
 
-                $entityField = $form->getName();
-                $entity = $parentForm->getConfig()->getOption("data_class");
+                    $typeOfField  = $this->classMetadataManipulator->getTypeOfField($target, $targetField);
+                    $doctrineType = $this->classMetadataManipulator->getDoctrineType($typeOfField);
 
-                if($this->classMetadataManipulator->hasAssociation($entity, $entityField) )
-                    return $this->classMetadataManipulator->isToManySide($entity, $entityField);
-                else if($this->classMetadataManipulator->hasField($entity, $entityField))
-                    return $this->classMetadataManipulator->getTypeOfField($entity, $entityField) == "array";
-
+                    if($this->classMetadataManipulator->isSetType($doctrineType)) {
+                        return true;
+                    } else if($this->classMetadataManipulator->isEnumType($doctrineType)) {
+                        return false;
+                    } else {
+                        return $typeOfField == "array";
+                    }
+                }
+                
             } else if($this->classMetadataManipulator->isSetType($target)) {
                 return true;
             } else if($this->classMetadataManipulator->isEnumType($target)) {
@@ -218,10 +235,23 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             $form = $form->getForm();
 
         $options = $options ?? $form->getConfig()->getOptions();
-        if ($options["sortable"] === null && $options["class"] !== null) {
+        if($options["sortable"] === null) {
 
-            $annotations = AnnotationReader::getAnnotationReader()->getAnnotations($options["class"], OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
-            $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$options["class"]] ?? []));
+            $parentForm = $form->getParent();
+            if($parentForm) {
+
+                $options = $parentForm->getConfig()->getOptions();
+                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+            }
+
+            if($target == null) {
+
+                $options = $options ?? $form->getConfig()->getOptions();
+                $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
+            }
+
+            $annotations = AnnotationReader::getAnnotationReader()->getAnnotations($target, OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
+            $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$target] ?? []));
         }
 
         return $options["sortable"] ?? false;

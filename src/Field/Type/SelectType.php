@@ -101,7 +101,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
-            'capitalize'         => false,
+            'capitalize'         => true,
             'language'           => null,
             'required'           => true,
             'multiple'           => null,
@@ -153,14 +153,13 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $options["class_priority"]
             );
 
-            // Guess class option
+            // Guess some options
             $options["class"]    = $this->formFactory->guessType($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-
-            // Guess multiple option
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
-            $multipleExpected = $data === null || $data instanceof Collection || is_array($data);
-            if($options["multiple"] && !$multipleExpected)
+
+            $multipleExpected = $data instanceof Collection || is_array($data);
+            if($options["multiple"] == true && !$multipleExpected && $data !== null)
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
@@ -240,7 +239,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         if(!$options["class"]) $entry["text"] = $key;
                         yield $entry["id"] => $entry["text"];
                     }
-                    
+
                 }, $dataset ?? []);
 
                 // Search missing information
@@ -289,6 +288,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                         // Format values
                         $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
                         $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
+                        if($entry === null) return null;
 
                         if(!$options["class"]) $entry["text"] = $key;
                         yield $entry["id"] => $entry["text"];
@@ -387,8 +387,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         
         if($options["select2"] !== null) {
 
-            $multipleExpected = $form->getData() === null || $form->getData() instanceof Collection || is_array($form->getData());
-            if($options["multiple"] && !$multipleExpected)
+            $multipleExpected = $form->getData() instanceof Collection || is_array($form->getData());
+            if($options["multiple"] == true && !$multipleExpected && $form->getData() !== null)
                 throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
 
             //

@@ -84,7 +84,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
-        $view->vars["multiple"]     = $options["multiple"];
+        $view->vars["multiple"]     = $this->formFactory->guessMultiple($form, $options);
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"]    = $options["allow_add"];
     }

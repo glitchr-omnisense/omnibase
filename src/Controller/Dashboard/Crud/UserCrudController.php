@@ -61,7 +61,7 @@ class UserCrudController extends AbstractCrudController
 
             yield AvatarField::new('avatar')->hideOnDetail();
 
-            yield RoleField::new('roles')->setColumns(5)->allowMultipleChoices(true);
+            yield RoleField::new('roles')->setColumns(5);
             yield EmailField::new('email')->setColumns(5);
             yield BooleanField::new("isApproved")->withConfirmation();
 
