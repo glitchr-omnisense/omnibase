@@ -105,6 +105,30 @@ trait BaseSettingsTrait
         return array_filter($settings);
     }
     
+    public function loadAssociations($settings): array
+    {
+        foreach($settings as $setting) {
+
+            if($setting instanceof Setting) {
+
+                $class = $setting->getClass();
+                if($class === null) continue;
+                if(!$this->classMetadataManipulator->isEntity($class)) continue;
+
+                $repository = $this->entityManager->getRepository($class);
+                foreach($this->getTranslations() as $locale => $translation) {
+
+                    $value = $translation->getValue($locale);
+
+                    $value = $repository->findOneById($value instanceof $class ? $value->getId() : $value);
+                    $translation->setValue($value, $locale);
+                }
+            }
+        }
+
+        return $settings;
+    }
+
     public function getRaw(null|string|array $path = null, ?string $locale = null)
     {
         if(is_array($paths = $path)) {
@@ -133,28 +157,17 @@ trait BaseSettingsTrait
         return $values;
     }
 
-    public function loadAssociations($settings): array
+    public function generateRaw(string $path, ?string $locale = null): Setting
     {
-        foreach($settings as $setting) {
+        $locale = $this->localeProvider->getLocale($locale);
+        $setting = $this->getRaw($path, $locale)["_self"];
+        if(!$setting instanceof Setting) {
 
-            if($setting instanceof Setting) {
-
-                $class = $setting->getClass();
-                if($class === null) continue;
-                if(!$this->classMetadataManipulator->isEntity($class)) continue;
-
-                $repository = $this->entityManager->getRepository($class);
-                foreach($this->getTranslations() as $locale => $translation) {
-
-                    $value = $translation->getValue($locale);
-
-                    $value = $repository->findOneById($value instanceof $class ? $value->getId() : $value);
-                    $translation->setValue($value, $locale);
-                }
-            }
+            $setting = new Setting($path);
+            $this->entityManager->persist($setting);
         }
 
-        return $settings;
+        return $setting;
     }
 
     public function getRawScalar(null|string|array $path = null, ?string $locale = null)
@@ -203,52 +216,37 @@ trait BaseSettingsTrait
 
     public function set(string $path, $value, ?string $locale = null)
     {
-        // Compute new value or create setting if missing
-        $locale = $this->localeProvider->getLocale($locale);
-        $setting = $this->getRaw($path, $locale)["_self"];
-        if(!$setting instanceof Setting) {
-
-            $setting = new Setting($path);
-            $this->entityManager->persist($setting);
-        }
-
+        $setting = $this->generateRaw($path);
         $setting->translate($locale)->setValue($value);
-        $this->entityManager->flush();
 
+        $this->entityManager->flush();
         return $this;
     }
 
     public function setLabel(string $path, ?string $label = null, ?string $locale = null)
     {
-        // Compute new label or create setting if missing
-        $locale = $this->localeProvider->getLocale($locale);
-        $setting = $this->getRaw($path, $locale)["_self"];
-        if(!$setting instanceof Setting) {
-        
-            $setting = new Setting($path);
-            $this->entityManager->persist($setting);
-        }
-
+        $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
+        
         $this->entityManager->flush();
-
         return $this;
     }
 
     public function setHelp(string $path, ?string $help = null, ?string $locale = null)
     {
-        // Compute new help or create setting if missing
-        $locale = $this->localeProvider->getLocale($locale);
-        $setting = $this->getRaw($path, $locale)["_self"];
-        if(!$setting instanceof Setting) {
-
-            $setting = new Setting($path);
-            $this->entityManager->persist($setting);
-        }
-
+        $setting = $this->generateRaw($path);
         $setting->translate($locale)->setHelp($help);
-        $this->entityManager->flush();
 
+        $this->entityManager->flush();
+        return $this;
+    }
+
+    public function setBag(string $path, ?string $parameterName = null)
+    {
+        $setting = $this->generateRaw($path);
+        $setting->setBag($parameterName);
+        
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -273,17 +271,10 @@ trait BaseSettingsTrait
     public function unlock(string $path) { return $this->setLock($path, false); }
     public function setLock(string $path, bool $flag = true)
     {
-        // Compute new label or create setting if missing
-        $setting = $this->getRaw($path)["_self"];
-        if(!$setting instanceof Setting) {
-        
-            $setting = new Setting($path);
-            $this->entityManager->persist($setting);
-        }
-
+        $setting = $this->generateRaw($path);
         $setting->setLock($flag);
-        $this->entityManager->flush();
 
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -291,17 +282,10 @@ trait BaseSettingsTrait
     public function unsecure(string $path) { return $this->setSecure($path, false); }
     public function setSecure(string $path, bool $flag = true)
     {
-        // Compute new label or create setting if missing
-        $setting = $this->getRaw($path)["_self"];
-        if(!$setting instanceof Setting) {
-        
-            $setting = new Setting($path);
-            $this->entityManager->persist($setting);
-        }
-
+        $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
-        $this->entityManager->flush();
 
+        $this->entityManager->flush();
         return $this;
     }
 }

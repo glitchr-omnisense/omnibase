@@ -292,7 +292,8 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entity);
         if(!$metadata) return false;
 
-        $entity = $metadata->getFieldValue($entity, $fieldName);
+        $entity = $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
+
         if(class_implements_interface($entity, TranslatableInterface::class)) 
             $entity = $entity->getTranslations();
 
@@ -310,7 +311,7 @@ class ClassMetadataManipulator
 
         // If field path is empty
         if(empty($fieldPath))
-            return $metadata->getFieldValue($entity, $fieldName);
+            return $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
 
         return $this->getFieldValue($entity, implode(".", $fieldPath));
     }
