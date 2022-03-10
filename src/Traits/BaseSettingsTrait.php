@@ -6,6 +6,7 @@ use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\ORM\Query;
 
 trait BaseSettingsTrait
 {
@@ -145,7 +146,9 @@ trait BaseSettingsTrait
             $fn = $path ? (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
                           (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheAll" : "findAll");
 
-            $settings = $this->settingRepository->$fn($path)->getResult();
+            $settings = $this->settingRepository->$fn($path);
+            if ($settings instanceof Query) 
+                $settings = $settings->getResult();
 
         } catch(TableNotFoundException  $e) { return []; }
 

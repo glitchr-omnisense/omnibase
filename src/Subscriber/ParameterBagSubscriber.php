@@ -11,7 +11,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ParameterBagSubscriber implements EventSubscriberInterface
 {
-    public function __construct(ParameterBagInterface $parameterBag, BaseSettings $baseSettings)
+    public function __construct($parameterBag, BaseSettings $baseSettings)
     {
         $this->parameterBag = $parameterBag;
         $this->baseSettings = $baseSettings;
@@ -19,9 +19,7 @@ class ParameterBagSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        return [
-            KernelEvents::REQUEST  => ['onKernelRequest', 256],
-        ];
+        return [KernelEvents::REQUEST  => ['onKernelRequest', 256]];
     }
 
     public function onKernelRequest(RequestEvent $event)
