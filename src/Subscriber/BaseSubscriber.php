@@ -3,16 +3,12 @@
 namespace Base\Subscriber;
 
 use Base\Service\BaseService;
-use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
-use EasyCorp\Bundle\EasyAdminBundle\Exception\ForbiddenActionException;
 use InvalidArgumentException;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BaseSubscriber implements EventSubscriberInterface
@@ -37,6 +33,8 @@ class BaseSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        $this->baseService->settings(); // NB: Make sure Settings are loaded before twig is called /!\
+
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.stylesheet")));
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.stylesheet")));
         $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));

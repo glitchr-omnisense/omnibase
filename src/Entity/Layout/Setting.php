@@ -7,6 +7,7 @@ use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Base\Annotations\Annotation\Slugify;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\SettingRepository;
 

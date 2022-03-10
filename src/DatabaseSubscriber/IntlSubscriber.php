@@ -41,7 +41,6 @@ class IntlSubscriber implements EventSubscriber
 
     public function preUpdate(LifecycleEventArgs $event)
     {
-
         if (is_subclass_of($event->getEntity(), TranslationInterface::class, true)) 
             $this->removeIfEmpty($event->getEntity());
     }
@@ -156,7 +155,7 @@ class IntlSubscriber implements EventSubscriber
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
-        if (!$this->hasUniqueTranslationConstraint($classMetadata, $name))
+        if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
             $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
 
         if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))

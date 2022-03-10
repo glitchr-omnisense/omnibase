@@ -311,7 +311,7 @@ class ClassMetadataManipulator
 
         // If field path is empty
         if(empty($fieldPath))
-            return $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
+            return $metadata->getFieldValue($entity, $fieldName);
 
         return $this->getFieldValue($entity, implode(".", $fieldPath));
     }
@@ -330,9 +330,62 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
-        return $metadata->hasField($fieldName);
+        $fieldName = $metadata->getFieldName($entityOrClassOrMetadata, $fieldName) ?? null;
+        return ($fieldName != null);
     } 
+
+//     public function getFieldName($entityOrClassOrMetadata, string $fieldPath): ?string
+//     {
+//         $entityName = $entityOrClassOrMetadata instanceof ClassMetadataInfo ? $entityOrClassOrMetadata->getName() : null;
+//         if($entityName === null) $entityName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
+
+//         // Prepare field path information
+//         if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
+//         if(empty($fieldPath)) throw new \Exception("No field path provided for \"".$entityName."\" ");
+
+//         // Extract leading field && get metadata
+//         $fieldName = array_shift($fieldPath);
+//         dump($fieldName, $fieldPath);
+// exit(1);
+//         // Extract key information
+//         $fieldRegex = ["/(\w*)\[(\w*)\]/", "/(\w*)%(\w*)%/", "/(\w*){(\w*)}/", "/(\w*)\((\w*)\)/"];
+//         $fieldKey   = preg_replace($fieldRegex, "$2", $fieldName, 1);
+//         if($fieldKey) $fieldName = preg_replace($fieldRegex, "$1", $fieldName, 1);
+//         else $fieldKey = null;
+
+//         // Check entity validity
+//         if($entity === null || !is_object($entity)) {
+//             if(!empty($fieldName)) throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
+//             else return null;
+//         }
+
+//         // Go get class metadata
+//         $metadata = $this->getClassMetadata($entity);
+//         if(!$metadata) return false;
+
+//         $entity = $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
+
+//         if(class_implements_interface($entity, TranslatableInterface::class)) 
+//             $entity = $entity->getTranslations();
+
+//         if(is_array($entity)) {
+//             $entity = $fieldKey ? $entity[$fieldKey] ?? null : null;
+//             $entity = $entity ?? begin($entity);
+//         } else if(class_implements_interface($entity, Collection::class)) {
+//             $entity = $entity->has($fieldKey ?? 0) ? $entity->get($fieldKey ?? 0) : null;
+//         }
+
+//         if($entity === null || !is_object($entity)) {
+//             if(empty($fieldPath)) return $entity;
+//             throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
+//         }
+
+//         // If field path is empty
+//         if(empty($fieldPath))
+//             return $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
+
+//         return $this->getFieldValue($entity, implode(".", $fieldPath));
+//     }
 
     public function hasProperty($entityOrClassOrMetadata, string $fieldName): ?string { return property_exists($entityOrClassOrMetadata, $fieldName); }
 

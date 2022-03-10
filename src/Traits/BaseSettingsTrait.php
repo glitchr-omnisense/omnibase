@@ -6,6 +6,7 @@ use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\ORM\EntityNotFoundException;
 
 trait BaseSettingsTrait
 {
@@ -147,7 +148,7 @@ trait BaseSettingsTrait
 
             $settings = $this->settingRepository->$fn($path)->getResult();
 
-        } catch(TableNotFoundException $e) { return []; }
+        } catch(TableNotFoundException  $e) { return []; }
 
         $settings = $this->loadAssociations($settings);
 
@@ -217,6 +218,10 @@ trait BaseSettingsTrait
     public function set(string $path, $value, ?string $locale = null)
     {
         $setting = $this->generateRaw($path);
+
+        if($setting->isLocked()) 
+            throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
+
         $setting->translate($locale)->setValue($value);
 
         $this->entityManager->flush();
@@ -272,7 +277,7 @@ trait BaseSettingsTrait
     public function setLock(string $path, bool $flag = true)
     {
         $setting = $this->generateRaw($path);
-        $setting->setLock($flag);
+        $setting->setLocked($flag);
 
         $this->entityManager->flush();
         return $this;

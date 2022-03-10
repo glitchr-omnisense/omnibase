@@ -2,16 +2,20 @@
 
 namespace Base\Service;
 
-use Base\Model\CurrencyApi\CurrencyApiInterface;
+use Base\Model\CurrencyApiInterface;
 use Swap\Builder;
 
 class CurrencyApi
 {
+    public function __construct(array $options)
+    {
+    }
+
     protected $swap = null;
     
     protected $providers = [];
     public function getProviders() { return $this->providers; }
-    public function getProvider(string $idOrClass): ?CurrencyApiInterface 
+    public function getProvider(string $idOrClass): ?CurrencyApiInterface
     {
         if(class_exists($idOrClass))
             return $this->providers[$idOrClass] ?? null;
@@ -35,10 +39,6 @@ class CurrencyApi
     {
         array_values_remove($this->providers, $provider);
         return $this;
-    }
-
-    public function __construct(array $options)
-    {
     }
 
     protected function build()

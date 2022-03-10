@@ -35,6 +35,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         return $this->serviceParser->parse($method, $arguments);
     }
 
+
+    public function findAll() { return $this->serviceParser->parse("findBy", []); }
+    public function findOneBy(array $criteria, ?array $orderBy = null) { return $this->serviceParser->parse("findOneBy", [$criteria, $orderBy]); }
+
     public function flush() { return $this->getEntityManager()->flush(); }
     public function persist($entity) {
 

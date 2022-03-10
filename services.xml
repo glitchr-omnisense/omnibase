@@ -96,7 +96,6 @@
         </service>
 
         <service id="Base\Service\BaseService" public="true">
-            <tag name="twig.runtime" />
             <argument type="service" id="kernel" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="twig" />
