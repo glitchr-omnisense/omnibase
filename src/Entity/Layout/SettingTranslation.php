@@ -14,6 +14,7 @@ use Base\Database\Traits\VaultTrait;
 
 /**
  * @ORM\Entity()
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @Vault(fields={"value"})
  */
 class SettingTranslation implements TranslationInterface

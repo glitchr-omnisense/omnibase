@@ -3,6 +3,7 @@
 namespace Base\Subscriber;
 
 use Base\Service\BaseSettings;
+use Base\Service\HotParameterBag;
 use Base\Service\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -25,6 +26,8 @@ class ParameterBagSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        if(!$this->parameterBag instanceof HotParameterBag) return;
+
         $settings = array_flatten($this->baseSettings->getRaw(), ARRAY_FLATTEN_PRESERVE_KEYS);
         foreach($settings as $setting) {
 

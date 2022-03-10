@@ -6,7 +6,6 @@ use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
-use Doctrine\ORM\EntityNotFoundException;
 
 trait BaseSettingsTrait
 {
@@ -130,7 +129,7 @@ trait BaseSettingsTrait
         return $settings;
     }
 
-    public function getRaw(null|string|array $path = null, ?string $locale = null)
+    public function getRaw(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true)
     {
         if(is_array($paths = $path)) {
             
@@ -143,8 +142,8 @@ trait BaseSettingsTrait
 
         try {
 
-            $fn = $path ? (BaseBundle::CACHE && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
-                          (BaseBundle::CACHE && !is_cli() ? "cacheAll" : "findAll");
+            $fn = $path ? (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
+                          (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheAll" : "findAll");
 
             $settings = $this->settingRepository->$fn($path)->getResult();
 
@@ -158,10 +157,10 @@ trait BaseSettingsTrait
         return $values;
     }
 
-    public function generateRaw(string $path, ?string $locale = null): Setting
+    public function generateRaw(string $path, ?string $locale = null, ?bool $useCache = false): Setting
     {
         $locale = $this->localeProvider->getLocale($locale);
-        $setting = $this->getRaw($path, $locale)["_self"];
+        $setting = $this->getRaw($path, $locale, $useCache)["_self"];
         if(!$setting instanceof Setting) {
 
             $setting = new Setting($path);
@@ -171,7 +170,7 @@ trait BaseSettingsTrait
         return $setting;
     }
 
-    public function getRawScalar(null|string|array $path = null, ?string $locale = null)
+    public function getRawScalar(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true)
     {
         if(is_array($paths = $path)) {
             
@@ -182,7 +181,7 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        return $this->getRaw($path, $locale)["_self"] ?? null;
+        return $this->getRaw($path, $locale, $useCache)["_self"] ?? null;
     }
 
     public function getScalar(null|string|array $path, ?string $locale = null): string|array|object|null
