@@ -178,7 +178,7 @@ class BaseService implements RuntimeExtensionInterface
     /*
      * Stylesheet and javascripts blocks
      */
-    public function settings() { return self::$settings->get("base.settings") ?? []; }
+    public function settings() { return $this->getSettings(); }
 
     public function getParameterTwig(string $name = "")
     {
