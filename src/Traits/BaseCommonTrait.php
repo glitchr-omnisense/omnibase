@@ -30,13 +30,13 @@ trait BaseCommonTrait {
      * @var string
      */
     protected static $projectDir = null;
-    public static function setProjectDir($projectDir) { return self::$projectDir = $projectDir; }
+    public static function setProjectDir($projectDir) { self::$projectDir = $projectDir; }
     
     /**
      * @var string
      */
     protected static $environment = null;
-    public static function setEnvironment($environment) { return self::$environment = $environment; }
+    public static function setEnvironment(?string $environment) { self::$environment = $environment; }
 
     /**
      * @var TranslatorInterface

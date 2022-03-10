@@ -23,7 +23,8 @@
         </service>
 
         <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
-        <service id="Base\Service\ParameterBag" parent="parameter_bag" public="true" />
+        <service id="Base\Service\ParameterBag"    parent="parameter_bag"      decorates="parameter_bag" public="true" />
+        <service id="Base\Service\HotParameterBag" parent="base.parameter_bag" decorates="parameter_bag" public="true" />
 
         <service id="Base\Controller\MainController">
             <tag name="controller.service_arguments" />
@@ -60,6 +61,13 @@
             <argument type="service" id="base.service" />
         </service>
 
+
+        <service id="Base\Subscriber\ParameterBagSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.settings" />
+        </service>
+
         <service id="Base\Subscriber\EasyAdminSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.service" />
@@ -69,9 +77,10 @@
 
         <service id="Base\Service\BaseSettings" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="assets.packages" />
+            <bind key="$environment">%kernel.environment%</bind>
         </service>
 
         <service id="Base\Notifier\NotifierInterface" alias="Base\Notifier\Notifier"/>
@@ -104,6 +113,7 @@
             <argument type="service" id="base.settings" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
+            <argument type="service" id="base.database.entity_hydrator" />
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">
@@ -566,6 +576,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Field\Type\BooleanType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+        </service>
+
         <service id="Base\Field\Type\RouteType">
             <tag name="form.type" />
             <argument type="service" id="router.default" />
@@ -717,6 +732,8 @@
         <service id="Base\Field\Configurator\BooleanConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Field\Configurator\AssociationConfigurator">

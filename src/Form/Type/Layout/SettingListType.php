@@ -115,7 +115,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 if(!array_key_exists("help", $fieldOptions))
                     $fieldOptions["help"] = $setting->getHelp() ?? "";
                 if(!array_key_exists("disabled", $fieldOptions))
-                    $fieldOptions["disabled"] = $setting->isSecure() ?? false;
+                    $fieldOptions["disabled"] = $setting->isLocked() ?? false;
 
                 //
                 // Check if expected to be translatable
@@ -181,7 +181,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void { }
-
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         foreach(iterator_to_array($forms) as $formName => $form)
@@ -195,12 +194,15 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     foreach($translations as $locale => $translation) {
 
                         $viewData[$field] = $viewData[$field] ?? $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field);
-                        
+
+                        if($viewData[$field]->isLocked()) 
+                            throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
+
                         $value = $translation->getValue();
                         if(is_object($value) && $this->classMetadataManipulator->isEntity($value)) {
 
-                            $viewData[$field]->translate($locale)
-                                ->setClass(get_class($value))
+                            $viewData[$field]->setClass(get_class($value))
+                                ->translate($locale)
                                 ->setValue($translation->getValue()->getId());
 
                         } else {
@@ -217,6 +219,9 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 if(!$viewData[$formName] instanceof Setting)
                     $viewData[$formName] = $viewData[$formName] ?? $this->baseSettings->getRawScalar($formName) ?? new Setting($formName);
 
+                if($viewData[$formName]->isLocked()) 
+                    throw new \Exception("Setting \"".$viewData[$formName]->getPath()."\" is currently locked.");
+
                 $translation = $form->getViewData();
                 $locale      = $translation->getLocale();
 
@@ -225,14 +230,14 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $value = $translation->getValue();
                 if(is_object($value) && $this->classMetadataManipulator->isEntity($value)) {
 
-                    $viewData[$formName]->translate($locale)
-                        ->setClass(get_class($value))
+                    $viewData[$formName]->setClass(get_class($value))
+                        ->translate($locale)
                         ->setValue($translation->getValue()->getId());
                       
                 } else {
 
                     $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
-                }               
+                }
             }
         }
     }

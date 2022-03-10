@@ -2,6 +2,7 @@
 
 namespace Base\Field;
 
+use Base\Field\Type\BooleanType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -11,11 +12,12 @@ final class BooleanField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_RENDER_AS_SWITCH = 'renderAsSwitch';
-    public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
-    public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
-
+    public const OPTION_RENDER_AS_SWITCH = 'switch';
+    public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmation[onCheck]';
+    public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmation[onUncheck]';
+    
     /** @internal */
+    public const CSRF_TOKEN_NAME = 'ea-toggle';
     public const OPTION_TOGGLE_URL = 'toggleUrl';
 
     /**
@@ -28,7 +30,7 @@ final class BooleanField implements FieldInterface
             ->setLabel($label)
             ->setTemplateName('crud/field/boolean')
             ->setTemplatePath('@EasyAdmin/crud/field/boolean.html.twig')
-            ->setFormType(CheckboxType::class)
+            ->setFormType(BooleanType::class)
             ->addCssClass('field-boolean')
             ->setTextAlign(TextAlign::CENTER)
             ->setCustomOption(self::OPTION_RENDER_AS_SWITCH, true)

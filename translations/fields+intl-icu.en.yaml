@@ -1,3 +1,10 @@
+boolean:
+  title: "Toggle switch on \"{0}\""
+  text:  Are you sure you want to confirm this action ?
+  button:
+    confirm: Confirm
+    cancel: Cancel
+
 stock:
   unlimited: Unlimited
 
@@ -17,7 +24,7 @@ array:
   empty: Empty
 
 color:
-  buttons:
+  button:
     save: Save
     clear: Clear
     cancel: Cancel

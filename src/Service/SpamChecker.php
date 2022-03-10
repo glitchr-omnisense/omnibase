@@ -47,7 +47,7 @@ class SpamChecker
         switch($api) {
 
             case SpamApi::AKISMET:
-                return $this->baseSettings->getScalar("api.key.akismet") ?? $this->baseService->getParameterBag("base.spam.akismet");
+                return $this->baseSettings->getScalar("api.spam.akismet");
 
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");

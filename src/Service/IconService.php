@@ -80,10 +80,10 @@ class IconService
         if(is_array($icon))
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 
-        foreach($this->providers as $provider) {
-
-            if ($provider->supports($icon))
-                return $provider->iconify($icon, $attributes);
+            foreach($this->providers as $provider) {
+            
+                if ($provider->supports($icon))
+                    return $provider->iconify($icon, $attributes);
         }
 
         return $this->imageService->imagify($icon, $attributes);

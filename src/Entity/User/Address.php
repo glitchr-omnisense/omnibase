@@ -42,7 +42,7 @@ class Address implements IconizeInterface
     /**
      * @ORM\Column(type="string", length=255)
      */
-    protected $streetAdress;
+    protected $streetAddress;
 
     public function getStreetAddress(): ?string { return $this->streetAddress; }
     public function setStreetAddress(?string $streetAddress): self

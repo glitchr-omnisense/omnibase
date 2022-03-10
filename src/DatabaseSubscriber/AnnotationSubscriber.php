@@ -144,9 +144,9 @@ class AnnotationSubscriber implements EventSubscriber {
     protected function onLifecycle(LifecycleEventArgs $event, $eventName)
     {
         $entity         = $event->getObject();
+
         $className      = get_class($entity);
         $classMetadata  = $this->entityManager->getClassMetadata($className);
-
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
         

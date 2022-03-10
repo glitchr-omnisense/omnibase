@@ -51,6 +51,7 @@ class BaseBundle extends Bundle
     {
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
         $entityManager->getFilters()->enable("trash_filter");
+        $entityManager->getFilters()->enable("vault_filter");
     }
 
     public function defineDoctrineTypes()

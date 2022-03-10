@@ -4,8 +4,6 @@ namespace Base\Field\Type;
 
 use Base\Controller\Dashboard\AbstractDashboardController;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Entity\Layout\AttributeInterface;
-use Base\Enum\UserRole;
 use Base\Form\FormFactory;
 use Base\Model\Autocomplete;
 use Base\Model\IconizeInterface;
@@ -111,7 +109,7 @@ class DiscriminatorType extends AbstractType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        //Optional: Implement SelectType + AssociationType with autoload if option enabled
+        //Optional: Implement SelectType + AssociationType with autoload option if option enabled
     }
 
     public function getBlockPrefix(): string { return 'discriminator'; }

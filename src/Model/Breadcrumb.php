@@ -107,7 +107,6 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
                     
                     $this->appendItem($pageTitle);
                     $icons[] = null;
-
                 }
 
                 $first = false;

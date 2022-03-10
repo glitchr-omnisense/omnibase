@@ -135,17 +135,16 @@
     {% endif %}
 
 {% else %}
+
      <span class="badge badge-secondary">
      {% if field.customOptions.get('renderFormat') == "count" %} 
-        {{ field.formattedValue|length }}
+        {{ is_countable(field.value) ? field.value|length : "-" }}
      {% elseif field.customOptions.get('renderFormat') == "text" %} 
         {% if field.customOptions.get('relatedUrl') is not null %}
             <a href="{{ field.customOptions.get('relatedUrl') }}">{{ field.formattedValue|default("-") }}</a>
         {% else %}
             {{ field.formattedValue|default("-") }}
         {% endif %}
-    {% else %}
-    ?
     {% endif %}
     </span>
 {% endif %}

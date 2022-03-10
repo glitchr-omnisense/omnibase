@@ -174,6 +174,14 @@ trait TranslatableTrait
                     }
                 }
             }
+
+        } else if($translationClassName && method_exists($translationClassName, $method)) {
+
+            try { return $this->translate()->$method(...$arguments); }
+            catch (\BadMethodCallException $e) 
+            {
+                throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+            }
         }
 
         //
@@ -187,34 +195,42 @@ trait TranslatableTrait
         return null;
     }
 
-    public function __set($property, $argument)
+    public function __set($property, $value)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
+        $translationClassName = $this->getTranslationEntityClass();
+        $property = snake_to_camel($property);
+        $entity = $this;
         
         //
         // Setter method in called class
-        if(property_exists($this, $property)) {
+        if (method_exists($entity, "set".mb_ucfirst($property))) {
+            return $entity->{"set".mb_ucfirst($property)}($value);
+        } else if(property_exists($this, $property)) {
 
             if (!$accessor->isWritable($this, $property))
                 throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($this));
 
-            $accessor->setValue($this, $property, $argument);
+            $accessor->setValue($this, $property, $value);
             return $this;
         }
 
         //
         // Proxy setter method for current locale
         $entityTranslation = $this->translate();
-        if(property_exists($entityTranslation, $property)) {
+        if (method_exists($entityTranslation, "set".mb_ucfirst($property))) {
+            return $entityTranslation->{"set".mb_ucfirst($property)}($value);
+        } else if(property_exists($entityTranslation, $property)) {
 
             if (!$accessor->isWritable($entityTranslation, $property))
                 throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityTranslation));
 
-            $accessor->setValue($entityTranslation, $property, $argument);
+            $accessor->setValue($entityTranslation, $property, $value);
             return $this;
+
         }
 
-        if(!str_starts_with($property, "ea_"))
+        if(!str_starts_with($property, "ea_"))// Prevent "ea_" property exception conflict.. Damn'it.. ! >()
             throw new \BadMethodCallException("Can't get a way to write property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
 
         return $this;
@@ -223,6 +239,7 @@ trait TranslatableTrait
     public function __get($property)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
+        $property = snake_to_camel($property);
 
         //
         // Getter method in called class

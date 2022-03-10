@@ -8,6 +8,7 @@ use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Field\BooleanField;
 use Base\Field\SlugField;
 use Base\Field\Type\QuillType;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class SettingCrudController extends AbstractCrudController
 {
@@ -17,8 +18,12 @@ class SettingCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function () {
 
-            yield SlugField::new('path');
-            yield BooleanField::new('secure');
+            yield SlugField::new('path')->setColumns(6)->setTargetFieldName("translations.label");
+            yield TextField::new('bag')->setColumns(6);
+            yield BooleanField::new('locked')->setColumns(6)->withConfirmation();
+
+            yield BooleanField::new('secure')->setColumns(6)->renderAsSwitch(false)->onlyOnIndex();
+            yield BooleanField::new('secure')->setColumns(6)->hideOnIndex()->withConfirmation();
 
             yield TranslationField::new("label")->renderAsHtml();
             yield TranslationField::new("help" )->renderAsHtml()->setRequired(false)

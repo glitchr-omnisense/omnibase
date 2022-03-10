@@ -21,7 +21,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
-use EasyCorp\Bundle\EasyAdminBundle\Orm\EntityRepository;
+
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -264,10 +264,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         if ($entity) {
 
-            $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], get_class($entity));
+            $class = str_replace(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], ["", "", "",], get_class($entity));
             $class = implode(".", array_map("camel_to_snake", explode("\\", $class)));
-            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
 
+            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".singular", [], AbstractDashboardController::TRANSLATION_ENTITY));
             $extension->setTitle(mb_ucfirst($this->translator->trans(mb_strtolower(camel_to_snake($class)).".plural", [], AbstractDashboardController::TRANSLATION_ENTITY)));
         }
 

@@ -83,6 +83,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('get_class',       [$this, 'get_class']),
+            new TwigFunction('is_countable',       [$this, 'is_countable']),
             new TwigFunction('method_exists',   [$this, 'method_exists']),
             new TwigFunction('static_call',     [$this, 'static_call'  ]),
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
@@ -175,6 +176,7 @@ final class BaseTwigExtension extends AbstractExtension
         return begin($closestNames);
     }
 
+    public function is_countable($object) { return is_countable($object); }
     public function get_class($object, $method) { return class_exists($object) ? get_class($object, $method) : null; }
     public function method_exists($object, $method) { return $object ? method_exists($object, $method) : false; }
     public function preg_split(string $subject, string $pattern, int $limit = -1, int $flags = 0) { return preg_split($pattern, $subject, $limit, $flags); }
@@ -224,7 +226,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
-    public function url(string $url): string
+    public function url(?string $url): ?string
     {
         $url = trim($url);
         $parseUrl = parse_url($url);

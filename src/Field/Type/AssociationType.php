@@ -263,5 +263,4 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $viewData = current(iterator_to_array($forms))->getViewData();
         }
     }
-
 }

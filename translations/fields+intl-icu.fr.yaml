@@ -1,3 +1,10 @@
+boolean:
+  title: "Action démandée sur \"{0}\""
+  text: Es-tu certain de vouloir confirmer cette action ?
+  button:
+    confirm: Confirmer
+    cancel: Annuler
+
 stock:
   unlimited: Illimité
 
@@ -17,7 +24,7 @@ array:
   empty: Vide
 
 color:
-  buttons:
+  button:
     save: Sauvegarder
     clear: Effacer
     cancel: Annuler

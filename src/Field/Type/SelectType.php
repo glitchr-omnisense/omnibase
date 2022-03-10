@@ -159,8 +159,10 @@ class SelectType extends AbstractType implements DataMapperInterface
             $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
 
             $multipleExpected = $data instanceof Collection || is_array($data);
-            if($options["multiple"] == true && !$multipleExpected && $data !== null)
-                throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
+            if($options["multiple"] == false &&  $multipleExpected && $data !== null)
+                $data = null;
+            else if($options["multiple"] == true  && !$multipleExpected && $data !== null)
+                $data = null;
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
             if(!$options["choices"] && $options["choice_loader"] === null) {
@@ -385,11 +387,14 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
         $options["choices"]       = $this->formFactory->guessChoices($form, $options);
         
+        $data = $form->getData();
         if($options["select2"] !== null) {
 
-            $multipleExpected = $form->getData() instanceof Collection || is_array($form->getData());
-            if($options["multiple"] == true && !$multipleExpected && $form->getData() !== null)
-                throw new \Exception("Data is not a collection in \"".$form->getName()."\" field and you required the option \"multiple\".. Please set multiple to \"false\"");
+            $multipleExpected = $data instanceof Collection || is_array($data);
+            if($options["multiple"] == false &&  $multipleExpected && $data !== null)
+                $data = null;
+            else if($options["multiple"] == true  && !$multipleExpected && $data !== null)
+                $data = null;
 
             //
             // Prepare variables
@@ -463,7 +468,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             //
             // Format preselected values
             $selectedData  = [];
-            $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
+            $dataset = $data instanceof Collection ? $data->toArray() : ( !is_array($data) ? [$data] : $data );
 
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
             $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, $dataset, &$options, &$selectedData) : Generator { 

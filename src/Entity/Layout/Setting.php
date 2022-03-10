@@ -7,7 +7,6 @@ use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Base\Annotations\Annotation\Slugify;
-
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\SettingRepository;
 
@@ -18,12 +17,6 @@ use Base\Repository\Layout\SettingRepository;
 class Setting implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
-    public function getOneOrNullValue()
-    {
-        $value = $this->getValue();
-        if(is_array($value)) return $value[0] ?? null;
-        return $value;
-    }
 
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-tools"]; }
@@ -32,7 +25,10 @@ class Setting implements TranslatableInterface, IconizeInterface
     public function __construct(string $path, $value = null, $locale = null)
     {
         $this->setPath($path);
-        $this->setSecure(false);
+        $this->setClass(null);
+
+        $this->setLocked(false);
+        $this->setBag(null);
 
         if($value !== null)
             $this->translate($locale)->setValue($value);
@@ -47,9 +43,9 @@ class Setting implements TranslatableInterface, IconizeInterface
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255)
      * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(reference="translations.title", separator=".", exception="_")
+     * @Slugify(reference="translations.label", separator=".", exception="_")
      */
     protected $path;
 
@@ -59,16 +55,43 @@ class Setting implements TranslatableInterface, IconizeInterface
         $this->path = $path;
         return $this;
     }
-    
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): ?string { return $this->class; }
+    public function setClass(?string $class)
+    {
+        $this->class = $class;
+        return $this;
+    }
+
     /**
      * @ORM\Column(type="boolean")
      */
-    protected $secure;
+    protected $locked;
+    public function isLocked() : bool { return $this->locked; }
+    public function getLocked(): bool { return $this->isLocked(); }
 
-    public function isSecure(): bool { return $this->secure; }
-    public function setSecure(bool $secure)
+    public function lock(): self { return $this->setLocked(true); }
+    public function unlock(): self { return $this->setLocked(false); }
+    public function setLocked(bool $locked)
     {
-        $this->secure = $secure;
+        $this->locked = $locked;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
+     */
+    protected $bag;
+
+    public function getBag(): ?string { return $this->bag; }
+    public function setBag(?string $bag)
+    {
+        $this->bag = $bag;
         return $this;
     }
 }

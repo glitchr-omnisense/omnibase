@@ -38,11 +38,11 @@ final class SlugType extends AbstractType implements AutovalidateInterface
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $target = $form->getParent();
-        $targetPath = $options["target"] ? explode(".", $options["target"]) : [];
+        $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
         $view->vars['target'] = $targetPath;
         
         // Check if child exists.. this just trigger an exception..
-        foreach($targetPath as $path) {
+        foreach($targetPath ?? [] as $path) {
             
             if(!$target->has($path))
                 throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");

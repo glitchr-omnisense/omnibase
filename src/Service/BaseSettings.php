@@ -2,11 +2,10 @@
 
 namespace Base\Service;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Traits\BaseSettingsTrait;
 use Symfony\Component\Asset\Packages;
-
-use Doctrine\ORM\EntityManager;
 
 use DateTime;
 
@@ -14,13 +13,15 @@ class BaseSettings
 {
     use BaseSettingsTrait;
 
-    public function __construct(EntityManager $entityManager, LocaleProviderInterface $localeProvider, Packages $packages)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Packages $packages, string $environment)
     {
-        $this->entityManager     = $entityManager;
-        $this->settingRepository = $entityManager->getRepository(Setting::class);
+        $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->entityManager            = $classMetadataManipulator->getEntityManager();
+        $this->settingRepository        = $classMetadataManipulator->getRepository(Setting::class);
 
-        $this->packages          = $packages;
-        $this->localeProvider    = $localeProvider;
+        $this->packages       = $packages;
+        $this->localeProvider = $localeProvider;
+        $this->environment    = $environment;
     }
 
     public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
@@ -38,7 +39,8 @@ class BaseSettings
         return $domain;
     }
 
-    public function logo       (?string $locale = null) : ?string { return $this->getScalar("base.settings.logo",        $locale); }
+    public function logo          (?string $locale = null) : ?string { return $this->getScalar("base.settings.logo",        $locale); }
+
     public function title      (?string $locale = null) : ?string { return $this->getScalar("base.settings.title",       $locale); }
     public function slogan     (?string $locale = null) : ?string { return $this->getScalar("base.settings.slogan",      $locale); }
     public function keywords   (?string $locale = null) : ?array  { return $this->getScalar("base.settings.keywords",    $locale); }

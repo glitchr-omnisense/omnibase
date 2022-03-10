@@ -5,7 +5,6 @@
 {% if _content_title is empty %}
     {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? null)|default("Dashboard") %}
 {% endif %}
-
 <!DOCTYPE html>
 <html lang="{{ ea.i18n.htmlLocale }}" dir="{{ ea.i18n.textDirection }}">
 <head>

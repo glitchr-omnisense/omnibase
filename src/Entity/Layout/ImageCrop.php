@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=CropRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class ImageCrop
 {

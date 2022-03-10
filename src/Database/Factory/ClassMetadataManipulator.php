@@ -17,6 +17,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectRepository;
+use EasyCorp\Bundle\EasyAdminBundle\Contracts\Orm\EntityRepositoryInterface;
 use Google\Service\Translate\Translation;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -46,6 +48,9 @@ class ClassMetadataManipulator
         if ( ($matches = preg_grep('/^base.database.excluded_fields\.[0-9]*$/', array_keys($parameterBag->all()))) )
             foreach ($matches as $match) $this->globalExcludedFields[] = $parameterBag->get($match);
     }
+
+    public function getEntityManager()        : EntityManagerInterface { return $this->entityManager; }
+    public function getRepository($className) : ObjectRepository       { return $this->entityManager->getRepository($className); }
 
     public function isEntity($entityOrClassOrMetadata) : bool
     {

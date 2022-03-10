@@ -3,20 +3,24 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% trans_default_domain 'EasyAdminBundle' %}
 
-{% if ea.crud.currentAction == 'detail' or not field.customOptions.get('renderAsSwitch') %}
+{% if ea.crud.currentAction == 'detail' or not field.customOptions.get('switch') %}
 
     <span class="badge {{ field.value == true ? 'badge-boolean-true' : 'badge-boolean-false' }}">
         {{ (field.value == true ? 'label.true' : 'label.false')|trans }}
     </span>
 
-{% elseif field.customOptions.get('confirmationModalOnCheck') or field.customOptions.get('confirmationModalOnUncheck') %}
+{% else %}
 
     <div class="form-check form-switch">
-        <input type="checkbox" class="form-check-input" id="{{ field.uniqueId }}" {{ field.value == true ? 'checked' }}
+        <input type="checkbox" class="form-check-input" data-boolean-field="{{field.uniqueId}}" data-boolean-confirmation-check="{{ field.customOptions.get('confirmation[onCheck]') }}" data-boolean-confirmation-uncheck="{{ field.customOptions.get('confirmation[onUncheck]') }}" id="{{ field.uniqueId }}" {{ field.value == true ? 'checked' }}
             data-toggle-url="{{ field.customOptions.get('toggleUrl') }}"
             {{ field.formTypeOption('disabled') == true ? 'disabled' }} autocomplete="off">
         <label class="form-check-label" for="{{ field.uniqueId }}"></label>
     </div>
+
+{% endif %}
+
+{% if field.customOptions.get('confirmation[onCheck]') or field.customOptions.get('confirmation[onUncheck]') %}
 
     <!-- Modal -->
     <div class="modal fade" id="{{ field.uniqueId }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ field.uniqueId }}-modal">
@@ -24,59 +28,17 @@
         <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ field.uniqueId }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Toggle switch "{{ field.label }}"</h4>
+            <h4 class="modal-title" id="myModalLabel">{{ "@fields.boolean.title" | trans([field.label]) }}</h4>
         </div>
         <div class="modal-body">
-            Are you sure you want to confirm this action ?
+            {{ "@fields.boolean.text"|trans }}
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="$('#{{ field.uniqueId }}-modal').modal('hide');">Close</button>
-            <button type="button" class="btn btn-primary" id="{{ field.uniqueId }}-confirm">Confirm changes</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="$('#{{ field.uniqueId }}-modal').modal('hide');">{{ "@fields.boolean.button.cancel"|trans }}</button>
+            <button type="button" class="btn btn-primary" id="{{ field.uniqueId }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
         </div>
         </div>
     </div>
-    </div>
-
-    <script>
-
-        var onCheck_{{ field.uniqueId }}        = {% if field.customOptions.get('confirmationModalOnCheck') %}true{% else %}false{% endif %};
-        var onUncheck_{{ field.uniqueId }}      = {% if field.customOptions.get('confirmationModalOnUncheck') %}true{% else %}false{% endif %};
-        var onConfirmation_{{ field.uniqueId }} = false;
-        
-        $("#{{ field.uniqueId }}").on("click", function (e) {
-
-            var checkbox = $(this);
-            if (onConfirmation_{{ field.uniqueId }}) {
-                onConfirmation_{{ field.uniqueId }} = false;
-                return true;
-            }
-
-            if ((checkbox.checked && onCheck_{{ field.uniqueId }}) ||
-                (!checkbox.checked && onUncheck_{{ field.uniqueId }})) {
-
-                $('#{{ field.uniqueId }}-modal').modal('show');
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        $("#{{ field.uniqueId }}-confirm").on("click", function (e) {
-
-            $('#{{ field.uniqueId }}-modal').modal('hide');
-            onConfirmation_{{ field.uniqueId }} = true;
-
-            var checkbox = $("#{{ field.uniqueId }}")[0];
-                checkbox.click();
-        });
-    </script>
-    
-{% else %}
-
-    <div class="form-check form-switch">
-        <input type="checkbox" class="form-check-input" id="{{ field.uniqueId }}" {{ field.value == true ? 'checked' }}
-            data-toggle-url="{{ field.customOptions.get('toggleUrl') }}"
-            {{ field.formTypeOption('disabled') == true ? 'disabled' }} autocomplete="off">
-        <label class="form-check-label" for="{{ field.uniqueId }}"></label>
     </div>
 
 {% endif %}

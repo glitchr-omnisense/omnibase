@@ -21,8 +21,8 @@ trait BaseTrait
     public static function getService()          : ?BaseService          { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getService(); }
     public static function getSettings()         : ?BaseSettings         { return (self::class === BaseService::class) ? BaseService::$settings       : BaseService::getSettings(); }
 
-    public static function getProjectDir()       : string { return BaseService::$projectDir; }
-    public static function getEnvironment()   : string { return BaseService::$environment; }
+    public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }
+    public static function getEnvironment()   : string { return (self::class === BaseService::class) ? BaseService::$environment   : BaseService::getEnvironment(); }
     public static function getPublicDir()     : string { return BaseService::getProjectDir() . "/public"; }
     public static function getTemplateDir()   : string { return BaseService::getProjectDir() . "/templates"; }
     public static function getTranslationDir(): string { return BaseService::getProjectDir() . "/translations"; }

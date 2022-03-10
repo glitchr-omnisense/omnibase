@@ -39,11 +39,9 @@ class AppVariable
         $this->setProxy($appVariable);
     }
 
-
     public function settings() { return $this->settings->get("app.settings") ?? []; }
     public function referrer() { return $this->referrer; }
-    
-    
+
     public function meta(array $meta = []) { return $this->meta = array_merge($this->meta, $meta); }
 
     public function getGlobals() {

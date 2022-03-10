@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use App\Entity\User;
+use Base\Database\Factory\EntityHydrator;
 use Base\Traits\BaseTrait;
 
 use Base\Service\ParameterBagInterface;
@@ -16,7 +17,6 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Contracts\EventDispatcher\Event;
-
 
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -129,7 +129,9 @@ class BaseService implements RuntimeExtensionInterface
 
         BaseSettings $settings,
         ImageService $imageService,
-        IconService $iconService)
+        IconService $iconService,
+        
+        EntityHydrator $entityHydrator)
     {
         $this->setInstance($this);
 
@@ -147,6 +149,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->csrfTokenManager     = $csrfTokenManager;
         $this->formFactory          = $formFactory;
         $this->requestStack         = $requestStack;
+        $this->entityHydrator         = $entityHydrator;
 
         // Additional containers
         $this->setImageService($imageService);
@@ -175,9 +178,8 @@ class BaseService implements RuntimeExtensionInterface
     /*
      * Stylesheet and javascripts blocks
      */
-    
-    public function settings() { return $this->getSettings(); }
-    
+    public function settings() { return self::$settings->get("base.settings") ?? []; }
+
     public function getParameterTwig(string $name = "")
     {
         if (!isset(self::$twig))
@@ -707,6 +709,10 @@ class BaseService implements RuntimeExtensionInterface
         if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
         else $entity = $eventOrEntity->getObject();
 
-        return self::$entitySerializer->deserialize(json_encode($data), get_class($entity), 'json');
+        $oldEntity = $this->entityHydrator->hydrate($entity, []);
+        foreach ($data as $property => $value)
+            try { $this->propertyAccessor->setValue($oldEntity, $property, $value); } catch(Exception $e) {}
+
+        return $oldEntity;
     }
 }

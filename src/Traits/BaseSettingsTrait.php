@@ -11,6 +11,7 @@ trait BaseSettingsTrait
 {
     protected $settingRepository = null;
 
+    public function getEnvironment(): ?string { return $this->environment; }
     public function getPaths(null|string|array $path = null) 
     { 
         return array_flatten(
@@ -124,10 +125,36 @@ trait BaseSettingsTrait
 
         } catch(TableNotFoundException $e) { return []; }
 
+        $settings = $this->loadAssociations($settings);
+
         $values = $this->normalize($path, $settings);
         $values = $this->read($path, $values); // get formatted values
-        
+
         return $values;
+    }
+
+    public function loadAssociations($settings): array
+    {
+        foreach($settings as $setting) {
+
+            if($setting instanceof Setting) {
+
+                $class = $setting->getClass();
+                if($class === null) continue;
+                if(!$this->classMetadataManipulator->isEntity($class)) continue;
+
+                $repository = $this->entityManager->getRepository($class);
+                foreach($this->getTranslations() as $locale => $translation) {
+
+                    $value = $translation->getValue($locale);
+
+                    $value = $repository->findOneById($value instanceof $class ? $value->getId() : $value);
+                    $translation->setValue($value, $locale);
+                }
+            }
+        }
+
+        return $settings;
     }
 
     public function getRawScalar(null|string|array $path = null, ?string $locale = null)
@@ -242,6 +269,24 @@ trait BaseSettingsTrait
         return $this;
     }
 
+    public function lock(string $path  ) { return $this->setLock($path, true); }
+    public function unlock(string $path) { return $this->setLock($path, false); }
+    public function setLock(string $path, bool $flag = true)
+    {
+        // Compute new label or create setting if missing
+        $setting = $this->getRaw($path)["_self"];
+        if(!$setting instanceof Setting) {
+        
+            $setting = new Setting($path);
+            $this->entityManager->persist($setting);
+        }
+
+        $setting->setLock($flag);
+        $this->entityManager->flush();
+
+        return $this;
+    }
+
     public function secure(string $path  ) { return $this->setSecure($path, true); }
     public function unsecure(string $path) { return $this->setSecure($path, false); }
     public function setSecure(string $path, bool $flag = true)
@@ -254,10 +299,9 @@ trait BaseSettingsTrait
             $this->entityManager->persist($setting);
         }
 
-        $setting->setSecure($flag);
+        $setting->setVault($flag ? $this->getEnvironment() : null);
         $this->entityManager->flush();
 
         return $this;
     }
-
 }

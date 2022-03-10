@@ -49,7 +49,7 @@ class ImageController extends AbstractController
         $args = $this->imageService->decode($hashid);
         if(!$args) $args = [];
 
-        if(str_ends_with($args["path"], "svg"))
+        if(ImageService::mimetype($args["path"]) == "image/svg+xml")
             return $this->redirectToRoute("ux_svg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         return $this->imageService->filter($args["path"] ?? null, [
@@ -66,6 +66,7 @@ class ImageController extends AbstractController
         if(!$args) $args = [];
 
         $path = stream_get_meta_data(tmpfile())['uri'];
+       
         $args = $this->imageService->decode($hashid);
         if(!$args) $args = [];
 

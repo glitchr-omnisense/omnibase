@@ -207,7 +207,7 @@
 
 {# Define slug parameters #}
 {% set attr = attr|merge({
-    'data-slug-field': '',
+    'data-slug-field': target is not null,
     'data-target': form.vars.id
 }) %}
 
@@ -231,6 +231,53 @@
             </button>
         </div>
     </div>
+{%- endblock -%}
+
+{%- block boolean_row -%}
+
+    {% if form.vars.switch %}
+        {%- set row_attr = row_attr|merge({'class': 'form-check form-switch' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    {% endif %}
+
+    {{ form_row(form, { row_attr: row_attr }) }}
+
+{%- endblock -%}
+
+{%- block boolean_widget -%}
+
+    {% if form.vars.switch %}
+        {%- set label_attr = label_attr|merge({'class': 'checkbox-switch' ~ (label_attr.class is defined ? ' ' ~ label_attr.class : '')} ) -%}
+        {%- set attr = attr|merge({'class': 'form-check-input' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {% endif %}
+
+    {%- set attr = attr|merge({
+        'data-boolean-field'   : form.vars.id,
+        'data-boolean-confirmation-check'   : form.vars.confirmation_check,
+        'data-boolean-confirmation-uncheck'   : form.vars.confirmation_uncheck
+    }) -%}
+
+    {{ form_widget(form, { attr: attr }) }}
+
+    {% if form.vars.confirmation_check or form.vars.confirmation_uncheck %}
+    <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">{{ "@fields.boolean.title" | trans([form.vars.label]) }}</h4>
+        </div>
+        <div class="modal-body">
+            {{ "@fields.boolean.text"|trans }}
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="$('#{{ form.vars.id }}-modal').modal('hide');">{{ "@fields.boolean.button.cancel"|trans }}</button>
+            <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
+        </div>
+        </div>
+    </div>
+    </div>
+    {% endif %}
+
 {%- endblock -%}
 
 {%- block avatar_widget -%}
@@ -335,7 +382,7 @@
         {{ form_widget(form.file, { attr: form.file.vars.attr, value: value }) }}
         {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept|join(',') }) }) }}
 
-        {% if allow_delete %}
+        {% if allow_delete and not form.vars.disabled %}
         <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
             <span style="cursor:pointer;">&#x2715;</span>
         </div>

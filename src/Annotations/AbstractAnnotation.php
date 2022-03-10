@@ -22,6 +22,7 @@ use Exception;
 abstract class AbstractAnnotation implements AnnotationInterface
 {
     public static function getAnnotationReader() { return AnnotationReader::getInstance();                    }
+    public static function getEnvironment()      { return AnnotationReader::getInstance()->getEnvironment();   }
     public static function getService()          { return AnnotationReader::getInstance()->getService();   }
     public static function getProjectDir()       { return AnnotationReader::getInstance()->getProjectDir();   }
     public static function getParameterBag()     { return AnnotationReader::getInstance()->getParameterBag(); }

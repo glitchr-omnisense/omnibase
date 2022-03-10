@@ -78,7 +78,7 @@ class ImageService implements ImageServiceInterface
     public function thumbnail_noclone (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
     public function thumbnail_upscale (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
     public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null 
-    { 
+    {
         $filters[] = new ThumbnailFilter(
             $width, $height ?? null, 
             $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET, 
@@ -161,6 +161,7 @@ class ImageService implements ImageServiceInterface
 
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $lastFilter = end($filters);
+
         if($lastFilter !== null) {
             
             if(!class_implements_interface($lastFilter, LastFilterInterface::class))
@@ -232,7 +233,7 @@ class ImageService implements ImageServiceInterface
 
         $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);
         $mimetype = $this->getMimeType($pathPublic);
-    
+
         $response = new Response();
         $response->setContent($content);
         
@@ -253,11 +254,8 @@ class ImageService implements ImageServiceInterface
         if(is_array($fileOrArray)) return array_map(fn($f) => self::mimetype($f), $fileOrArray);
 
         $file = self::getPublic($fileOrArray);
-        if(file_exists($file)) {
-
-            if(str_ends_with($file, "svg")) return "image/svg+xml";
-            return image_type_to_mime_type(exif_imagetype($file));
-        }
+        if(file_exists($file))
+            return mime_content_type($file);
 
         try { return self::$mimeTypes->guessMimeType($fileOrArray); }
         catch (Exception $e) { return null; }

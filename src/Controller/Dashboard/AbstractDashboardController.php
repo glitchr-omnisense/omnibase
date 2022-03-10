@@ -63,6 +63,7 @@ use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -138,6 +139,63 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     }
 
     /**
+     * @Route("/dashboard/apikey", name="dashboard_apikey")
+     * @Iconize({"fas fa-fw fa-fingerprint", "fas fa-fw fa-key"})
+     */
+    public function ApiKey(Request $request, array $fields = []): Response
+    {
+        $fields = array_merge([
+            "api.spam.akismet" => [],
+            "api.currency.exchange_rates_api" => [],
+            "api.currency.fixer" => [],
+            "api.currency.currency_layer" => [],
+            "api.currency.abstract_api" => [],
+        ], $fields);
+
+        if(empty($fields))
+            $fields = array_fill_keys($this->baseService->getSettings()->getPaths("api"), []);
+
+        foreach($fields as $key => $field) {
+
+            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = TextType::class;
+            // if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
+            // if ($fields[$key]["form_type"] == PasswordType::class)
+            //     $fields[$key]["revealer"] = true;
+        }
+
+        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
+        $form->handleRequest($request);
+
+        if($form->isSubmitted() && $form->isValid()){
+
+            $data     = array_filter($form->getData(), fn($value) => !is_null($value));
+            $fields   = array_keys($form->getConfig()->getOption("fields"));
+            $settings = array_transforms(
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
+                $this->baseService->getSettings()->getRawScalar($fields)
+            );
+
+            foreach($settings as $setting)
+                $setting->setSecure(true);
+
+            foreach(array_diff_key($data, $settings) as $name => $setting)
+                $this->settingRepository->persist($setting);
+
+            $this->settingRepository->flush();
+
+            $notification = new Notification("@controllers.dashboard_apikey.success");
+            $notification->setUser($this->getUser());
+            $notification->send("success");
+
+            return $this->baseService->refresh();
+        }
+
+        return $this->render('dashboard/apikey.html.twig', [
+            "form" => $form->createView()
+        ]);
+    }
+    
+    /**
      * Link to this controller to start the "connect" process
      *
      * @Route("/dashboard/settings", name="dashboard_settings")
@@ -147,13 +205,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $fields = array_merge([
             "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
+            "base.settings.logo.animation"       => ["translatable" => true, "form_type" => ImageType::class],
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
             "base.settings.title"                => ["translatable" => true],
             "base.settings.title.backoffice"     => ["translatable" => true],
             "base.settings.author"               => ["translatable" => true],
             "base.settings.description"          => ["form_type" => TextareaType::class, "translatable" => true],
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
-            "base.settings.slogan"               => ["translatable" => true],
+            "base.settings.slogan"               => ["translatable" => true, "required" => false],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
@@ -190,48 +249,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         }
 
         return $this->render('dashboard/settings.html.twig', [
-            "form" => $form->createView()
-        ]);
-    }
-
-    /**
-     * @Route("/dashboard/apikey", name="dashboard_apikey")
-     * @Iconize({"fas fa-fw fa-fingerprint", "fas fa-fw fa-key"})
-     */
-    public function ApiKey(Request $request, array $fields = []): Response
-    {
-        if(empty($fields))
-            $fields = array_fill_keys($this->baseService->getSettings()->getPaths("api"), []);
-
-        foreach($fields as $key => $field) {
-
-            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
-            if ($fields[$key]["form_type"] == PasswordType::class)
-                $fields[$key]["revealer"] = true;
-        }
-
-        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
-        $form->handleRequest($request);
-
-        if($form->isSubmitted() && $form->isValid()){
-
-            $settings     = array_filter($form->getData(), fn($value) => !is_null($value));
-            foreach($settings as $setting) {
-            
-                if(!$this->settingRepository->contains($setting))
-                    $this->settingRepository->persist($setting);
-            }
-
-            $this->settingRepository->flush();
-
-            $notification = new Notification("@controllers.dashboard_apikey.success");
-            $notification->setUser($this->getUser());
-            $notification->send("success");
-
-            return $this->baseService->refresh();
-        }
-
-        return $this->render('dashboard/apikey.html.twig', [
             "form" => $form->createView()
         ]);
     }
@@ -284,7 +301,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureDashboard(): Dashboard
     {
-
         $logo  = $this->baseService->getSettings()->getScalar("base.settings.logo.backoffice");
         if(!$logo) $logo = $this->baseService->getSettings()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
