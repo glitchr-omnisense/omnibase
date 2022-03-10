@@ -14,11 +14,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CurrencyType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public const DISPLAY_SYMBOL = "symbol";
     public const DISPLAY_CODE   = "code";
+
+    public function getParent() { return SelectType::class; }
+    public function getBlockPrefix(): string { return 'currency'; }
+
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
@@ -54,21 +55,5 @@ class CurrencyType extends AbstractType
         ]);
 
         $resolver->setAllowedTypes('choice_translation_locale', ['null', 'string']);
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getParent()
-    {
-        return SelectType::class;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getBlockPrefix()
-    {
-        return 'currency';
     }
 }

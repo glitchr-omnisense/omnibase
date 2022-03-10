@@ -100,6 +100,8 @@ class Vault extends AbstractAnnotation
             if($propertyAccessor->isReadable($entity, $field)) {
 
                 $value = $propertyAccessor->getValue($entity, $field);
+                if($value === null) continue;
+
                 $propertyAccessor->setValue($entity, $field, base64_encode($this->seal($marshaller, $value)));
             }
         }
@@ -117,6 +119,8 @@ class Vault extends AbstractAnnotation
             if($propertyAccessor->isReadable($entity, $field)) {
 
                 $value = $propertyAccessor->getValue($entity, $field);
+                if($value === null) continue;
+
                 $propertyAccessor->setValue($entity, $field, base64_encode($this->seal($marshaller, $value)));
             }
         }

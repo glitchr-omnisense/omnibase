@@ -7,6 +7,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait VaultTrait
 {
+    use BaseTrait;
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */

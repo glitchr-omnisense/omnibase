@@ -219,7 +219,7 @@ trait BaseSettingsTrait
 
     public function set(string $path, $value, ?string $locale = null)
     {
-        $setting = $this->generateRaw($path);
+        $setting = $this->generateRaw($path, $locale);
 
         if($setting->isLocked()) 
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
@@ -241,7 +241,7 @@ trait BaseSettingsTrait
 
     public function setHelp(string $path, ?string $help = null, ?string $locale = null)
     {
-        $setting = $this->generateRaw($path);
+        $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
 
         $this->entityManager->flush();

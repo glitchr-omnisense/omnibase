@@ -91,7 +91,7 @@ trait TranslatableTrait
         $translations = $this->getTranslations();
 
         $translation = $translations[$normLocale] ?? null;
-        if(!$translation) {
+        if(!$translation && $normLocale != $defaultLocale) {
 
             // No locale requested, then get the first entry you can find among the available locales
             if($locale === null) {
@@ -103,15 +103,15 @@ trait TranslatableTrait
                     if($translation) break;
                 }
             }
+        }
 
-            // Create a new locale if still not found..
-            if(!$translation) {
+        // Create a new locale if still not found..
+        if(!$translation) {
 
-                $translation = new $translationClass;
-                $translation->setLocale($normLocale);
+            $translation = new $translationClass;
+            $translation->setLocale($normLocale);
 
-                $this->addTranslation($translation);
-            }
+            $this->addTranslation($translation);
         }
 
         return $translation;
