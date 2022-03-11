@@ -52,6 +52,8 @@
 
             <style>
 
+                html, body { scroll-padding-top: 11em; }
+
                 {# #widget_list > div { margin-bottom:1.5em !important; } #}
                 .row>* { padding-left:0 !important;}
 
@@ -184,7 +186,11 @@
                 }
 
                 .content-header {
-                    padding: 1em 2.5em 2em 2.5em !important;
+                    padding: 1em 2.5em 1em 2.5em !important;
+                    position: sticky;
+                    background-color: white !important;
+                    top: 0;
+                    z-index:2000;
                 }
                 
                 .datalist dd, .datalist dt {

@@ -22,7 +22,7 @@ class SlotCrudController extends WidgetCrudController
     {
         yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
         yield SlugField::new('path')->setColumns(6)->setTargetFieldName("translations.label");
-        yield SelectField::new("widgets")->setColumns(6)->setClass(Widget::class)->setFilter("^".Slot::class);
+        yield SelectField::new("widget")->setColumns(6)->setClass(Widget::class)->setFilter("^".Slot::class);
         
         yield TranslationField::new('label')->autoload(false)->setFields([
             "label" => TextType::class,

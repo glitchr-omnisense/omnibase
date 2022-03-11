@@ -17,7 +17,7 @@ class CurrencyType extends AbstractType
     public const DISPLAY_SYMBOL = "symbol";
     public const DISPLAY_CODE   = "code";
 
-    public function getParent() { return SelectType::class; }
+    public function getParent():?string { return SelectType::class; }
     public function getBlockPrefix(): string { return 'currency'; }
 
     public function configureOptions(OptionsResolver $resolver)

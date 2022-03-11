@@ -346,9 +346,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                     $active = daydiff($user->isActive()) == -1 ? "first" : "back";
 
-                         if(time_is_between($user->isActiveAt(), "05:00:00", "10:00:00")) $period = "morning";
-                    else if(time_is_between($user->isActiveAt(), "12:00:00", "15:00:00")) $period = "afternoon";
-                    else if(time_is_between($user->isActiveAt(), "19:00:00", "05:00:00")) $period = "evening";
+                         if(time_is_between($user->getActiveAt(), "05:00:00", "10:00:00")) $period = "morning";
+                    else if(time_is_between($user->getActiveAt(), "12:00:00", "15:00:00")) $period = "afternoon";
+                    else if(time_is_between($user->getActiveAt(), "19:00:00", "05:00:00")) $period = "evening";
                     else $period = "day";
                     
                     $title = "@notifications.login.success.$period.$active";

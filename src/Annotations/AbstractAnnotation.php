@@ -32,7 +32,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getTypeOfField($className, string $property) { return AnnotationReader::getInstance()->getClassMetadataManipulator()->getTypeOfField($className, $property);  }
 
     public static function getClassMetadata($objectOrClass): ?ClassMetadata { return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);     }
-    public static function getClassMetadataManipulator(): ClassMetadataManipulator { return AnnotationReader::getInstance()->getClassMetadataManipulator();  }
+    public static function getClassMetadataManipulator(): ?ClassMetadataManipulator { return AnnotationReader::getInstance()->getClassMetadataManipulator();  }
 
     public static function getFilesystem(string $storage): Filesystem { return AnnotationReader::getInstance()->getFilesystem($storage);      }
     

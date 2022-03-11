@@ -1073,6 +1073,8 @@ namespace {
     function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null) 
     {
         $datetime  = castdatetime($datetime);
+        if($datetime === null) return false;
+
         $datetime1 = castdatetime($dt1);
         $datetime2 = castdatetime($dt2);
 
@@ -1084,6 +1086,8 @@ namespace {
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null) {
 
         $datetime  = castdatetime($datetime);
+        if($datetime === null) return false;
+
         $datetime->setTime(0,0,0);
         $datetime1 = castdatetime($d1);
         $datetime1->setTime(0,0,0);
@@ -1096,6 +1100,8 @@ namespace {
     function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
     {
         $datetime  = castdatetime($datetime);
+        if($datetime === null) return false;
+
         $datetime->setDate(0,0,0);
         $datetime1 = castdatetime($t1);
         $datetime1->setDate(0,0,0);

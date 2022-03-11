@@ -51,9 +51,10 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             $targetType = $target->getConfig()->getType()->getInnerType();
             
             if($targetType instanceof TranslationType) {
+                
                 $availableLocales = array_keys($target->all());
-                $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0]);
-                $target = $target->get($locale);
+                $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0] ?? null);
+                if($locale) $target = $target->get($locale);
             }
         }
         
