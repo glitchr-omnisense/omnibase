@@ -4,7 +4,18 @@ login:
     success:
         normal: "Hi {0}! You just logged in."
         alien :  "Welcome, visitor from the outside! Please consider signing up!"
-        back  :   "Welcome back {0} !"
+        day: 
+            first: "Good day, {0} !"
+            back: "Good day again, {0} !"
+        morning: 
+            first: "Good morning, {0} !"
+            back: "Good morning again, {0} !"
+        afternoon: 
+            first: "Good afternoon, {0} !"
+            back: "Good afternoon again, {0} !"
+        evening: 
+            first: "Good evening, {0} !"
+            back: "Good evening again, {0} !"
 
     already: "You are already logged in !"
     partial: "You're partially logged in ! You can sign in."

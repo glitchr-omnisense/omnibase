@@ -144,13 +144,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      */
     public function ApiKey(Request $request, array $fields = []): Response
     {
-        $fields = array_merge([
+        $fields = array_reverse(array_merge(array_reverse([
             "api.spam.akismet" => [],
-            "api.currency.exchange_rates_api" => [],
             "api.currency.fixer" => [],
-            "api.currency.currency_layer" => [],
-            "api.currency.abstract_api" => [],
-        ], $fields);
+            "api.currency.exchange_rates_api" => ["required" => false],
+            "api.currency.currency_layer" => ["required" => false],
+            "api.currency.abstract_api" => ["required" => false],
+        ]), array_reverse($fields)));
 
         if(empty($fields))
             $fields = array_fill_keys($this->baseService->getSettings()->getPaths("api"), []);
@@ -203,7 +203,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      */
     public function Settings(Request $request, array $fields = []): Response
     {
-        $fields = array_merge([
+        $fields = array_reverse(array_merge(array_reverse([
             "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
             "base.settings.logo.animation"       => ["translatable" => true, "form_type" => ImageType::class],
             "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
@@ -222,7 +222,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.domain.base_dir"      => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => ["translatable" => true],
-        ], $fields);
+        ]), array_reverse($fields)));
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);

@@ -341,12 +341,22 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             } else if($user->isVerified()) {
 
-                if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY'))
-                    $title = "@notifications.login.success.normal";
-                else if ($this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED'))
-                    $title = "@notifications.login.success.back";
-                else
+                $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
+                if($isAuthenticated) {
+
+                    $active = daydiff($user->isActive()) == -1 ? "first" : "back";
+
+                         if(time_is_between($user->isActiveAt(), "05:00:00", "10:00:00")) $period = "morning";
+                    else if(time_is_between($user->isActiveAt(), "12:00:00", "15:00:00")) $period = "afternoon";
+                    else if(time_is_between($user->isActiveAt(), "19:00:00", "05:00:00")) $period = "evening";
+                    else $period = "day";
+                    
+                    $title = "@notifications.login.success.$period.$active";
+
+                } else {
+                
                     $title = "@notifications.login.success.alien";
+                }
 
                 $notification = new Notification($title, [$user]);
                 $notification->send("success");

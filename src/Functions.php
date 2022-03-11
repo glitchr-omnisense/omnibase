@@ -1053,4 +1053,55 @@ namespace {
 
         return true;
     }
+
+    function castdatetime(null|string|int|DateTime $datetime)
+    {
+        if($datetime === null) return null;
+        return is_int($datetime)    ? (new DateTime())->setTimestamp($datetime) : 
+             ( is_string($datetime) ?  new DateTime($datetime) : (clone $datetime));
+    }
+
+    function daydiff(null|string|int|DateTime $datetime):int
+    {
+        $datetime = castdatetime($datetime);
+        
+        $today = new DateTime("today");
+        $diff  = $today->diff( $datetime->setTime( 0, 0, 0 ) );
+        return (integer) $diff->format( "%R%a" );
+    }
+
+    function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null) 
+    {
+        $datetime  = castdatetime($datetime);
+        $datetime1 = castdatetime($dt1);
+        $datetime2 = castdatetime($dt2);
+
+        if($datetime1 !== null && $datetime <= $datetime1) return false;
+        if($datetime2 !== null && $datetime > $datetime2) return false;
+        return true;
+    }
+
+    function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null) {
+
+        $datetime  = castdatetime($datetime);
+        $datetime->setTime(0,0,0);
+        $datetime1 = castdatetime($d1);
+        $datetime1->setTime(0,0,0);
+        $datetime2 = castdatetime($d2);
+        $datetime2->setTime(0,0,0);
+
+        return datetime_is_between($datetime, $datetime1, $datetime2);
+    }
+    
+    function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
+    {
+        $datetime  = castdatetime($datetime);
+        $datetime->setDate(0,0,0);
+        $datetime1 = castdatetime($t1);
+        $datetime1->setDate(0,0,0);
+        $datetime2 = castdatetime($t2);
+        $datetime2->setDate(0,0,0);
+
+        return datetime_is_between($datetime, $datetime1, $datetime2);
+    }
 }

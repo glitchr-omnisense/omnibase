@@ -4,7 +4,18 @@ login:
     success:
         normal: Bravo {0}, tu es à présent connecté.
         alien: "Bienvenue visiteur venu d'ailleurs ! Pense à t'inscrire :)"
-        back: "Re-bonjour {0} !"
+        day: 
+            first: "Bonjour {0} !"
+            back: "Re-bonjour {0} !"
+        morning: 
+            first: "@notifications.login.success.day.first"
+            back: "@notifications.login.success.day.back"
+        afternoon: 
+            first: "@notifications.login.success.day.first"
+            back: "@notifications.login.success.day.back"
+        evening: 
+            first: "Bonsoir {0} !"
+            back: "Re-bonsoir {0} !"
 
     already: Oh, mais tu es déjà connecté !
     partial: Tu es partiellement connecté, connecte toi à nouveau pour modifier les informations sensibles de ton compte
