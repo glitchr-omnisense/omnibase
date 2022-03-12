@@ -224,6 +224,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
 
+        // $fields = [
+        //     "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
+        //     "base.settings.domain.scheme"        => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
+        // ];
+
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
@@ -236,8 +241,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
 
-            foreach(array_diff_key($data, $settings) as $name => $setting)
+            dump($settings, $data);
+            foreach(array_diff_key($data, $settings) as $name => $setting) 
+            {
+                dump("ADDED..", $name);
                 $this->settingRepository->persist($setting);
+            }
 
             $this->settingRepository->flush();
 

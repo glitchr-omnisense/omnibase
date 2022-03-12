@@ -26,8 +26,6 @@ class Setting implements TranslatableInterface, IconizeInterface
     public function __construct(string $path, $value = null, $locale = null)
     {
         $this->setPath($path);
-        $this->setClass(null);
-
         $this->setLocked(false);
         $this->setBag(null);
 
@@ -54,18 +52,6 @@ class Setting implements TranslatableInterface, IconizeInterface
     public function setPath(string $path)
     {
         $this->path = $path;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    protected $class;
-
-    public function getClass(): ?string { return $this->class; }
-    public function setClass(?string $class)
-    {
-        $this->class = $class;
         return $this;
     }
 

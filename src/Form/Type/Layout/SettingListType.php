@@ -79,7 +79,6 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-                
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
             }
 
@@ -193,31 +192,22 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     $field = str_replace("-", ".", $formattedField);
                     foreach($translations as $locale => $translation) {
 
-                        $viewData[$field] = $viewData[$field] ?? $this->baseSettings->getRawScalar($formattedField) ?? new Setting($field);
-
+                        $viewData[$field] = $viewData[$field] ?? new Setting($field);
                         if($viewData[$field]->isLocked()) 
                             throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
 
-                        $value = $translation->getValue();
-                        if(is_object($value) && $this->classMetadataManipulator->isEntity($value)) {
-
-                            $viewData[$field]->setClass(get_class($value))
-                                ->translate($locale)
-                                ->setValue($translation->getValue()->getId());
-
-                        } else {
-
-                            $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
-                        }
+                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
                     }
-                 }
+                }
 
                 unset($viewData[$formName]);
-                
+
             } else {
 
+                $field = str_replace("-", ".", $formName);
+
                 if(!$viewData[$formName] instanceof Setting)
-                    $viewData[$formName] = $viewData[$formName] ?? $this->baseSettings->getRawScalar($formName) ?? new Setting($formName);
+                    $viewData[$formName] = $viewData[$formName] ?? new Setting($formName);
 
                 if($viewData[$formName]->isLocked()) 
                     throw new \Exception("Setting \"".$viewData[$formName]->getPath()."\" is currently locked.");
@@ -225,19 +215,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 $translation = $form->getViewData();
                 $locale      = $translation->getLocale();
 
-                $field = str_replace("-", ".", $formName);
-
-                $value = $translation->getValue();
-                if(is_object($value) && $this->classMetadataManipulator->isEntity($value)) {
-
-                    $viewData[$formName]->setClass(get_class($value))
-                        ->translate($locale)
-                        ->setValue($translation->getValue()->getId());
-                      
-                } else {
-
-                    $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
-                }
+                $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
             }
         }
     }

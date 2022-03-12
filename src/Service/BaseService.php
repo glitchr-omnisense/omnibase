@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use App\Entity\User;
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Traits\BaseTrait;
 
@@ -131,7 +132,8 @@ class BaseService implements RuntimeExtensionInterface
         ImageService $imageService,
         IconService $iconService,
         
-        EntityHydrator $entityHydrator)
+        EntityHydrator $entityHydrator,
+        ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->setInstance($this);
 
@@ -144,14 +146,15 @@ class BaseService implements RuntimeExtensionInterface
         self::$twigExtension       = $baseTwigExtension->setBase($this);
 
         // Symfony basics
-        $this->authorizationChecker = $authorizationChecker;
-        $this->tokenStorage         = $tokenStorage;
-        $this->csrfTokenManager     = $csrfTokenManager;
-        $this->formFactory          = $formFactory;
-        $this->requestStack         = $requestStack;
-        $this->entityHydrator         = $entityHydrator;
-
+        $this->authorizationChecker     = $authorizationChecker;
+        $this->tokenStorage             = $tokenStorage;
+        $this->csrfTokenManager         = $csrfTokenManager;
+        $this->formFactory              = $formFactory;
+        $this->requestStack             = $requestStack;
+        $this->entityHydrator           = $entityHydrator;
+        
         // Additional containers
+        $this->setClassMetadataManipulator($classMetadataManipulator);
         $this->setImageService($imageService);
         $this->setIconService($iconService);
         $this->setSettings($settings);
@@ -537,15 +540,7 @@ class BaseService implements RuntimeExtensionInterface
         return !empty($eaParents);
     }
 
-    public function isEntity($entityOrClass) : bool
-    {
-        if ($entityOrClass instanceof ClassMetadataInterface)
-            return isset($entityOrClass->isMappedSuperclass) && $entityOrClass->isMappedSuperclass === false;
-        else if (is_object($entityOrClass))
-            $entityOrClass = ($entityOrClass instanceof Proxy) ? get_parent_class($entityOrClass) : get_class($entityOrClass);
-
-        return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClass);
-    }
+    public function isEntity($entityOrClassOrMetadata) : bool { return $this->getClassMetadataManipulator()->isEntity($entityOrClassOrMetadata); }
 
 
     /**

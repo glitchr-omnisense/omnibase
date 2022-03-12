@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\BaseSettings;
 use Base\Service\IconService;
 use Base\Service\ImageService;
@@ -64,6 +65,12 @@ trait BaseCommonTrait {
      */
     protected static $iconService = null;
     public static function setIconService(?IconService $iconService) {  self::$iconService = $iconService; }
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected static $classMetadataManipulator = null;
+    public static function setClassMetadataManipulator(?ClassMetadataManipulator $classMetadataManipulator) {  self::$classMetadataManipulator = $classMetadataManipulator; }
 
     /**
      * @var ImageServiceInterface

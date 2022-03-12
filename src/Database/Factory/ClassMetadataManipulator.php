@@ -56,6 +56,8 @@ class ClassMetadataManipulator
     {
         if (is_object($entityOrClassOrMetadata))
             $entityOrClassOrMetadata = ($entityOrClassOrMetadata instanceof Proxy) ? get_parent_class($entityOrClassOrMetadata) : get_class($entityOrClassOrMetadata);
+        
+        if(!is_string($entityOrClassOrMetadata) || !class_exists($entityOrClassOrMetadata)) return false;
 
         return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
     }
@@ -147,8 +149,11 @@ class ClassMetadataManipulator
         $fields = array_map(fn($f) => is_array($f) ? $f : ["form_type" => $f], $fields);
         foreach($fields as $fieldName => $field) {
 
-            if(is_array($fields[$fieldName]) && !empty($fields[$fieldName]))
+            if(is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
+                
                 $validFields[$fieldName] = array_merge($validFields[$fieldName] ?? [], $fields[$fieldName] ?? []);
+                unset($fields[$fieldName]);
+            }
         }
 
         $validFields = $this->filteringFields($validFields, $excludedFields);

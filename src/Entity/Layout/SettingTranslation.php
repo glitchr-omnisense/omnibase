@@ -51,11 +51,25 @@ class SettingTranslation implements TranslationInterface
      */
     protected $value;
 
-    public function getValue()     { return Uploader::getPublic($this, "value") ?? $this->value; }
+    public function getValue() { return Uploader::getPublic($this, "value") ?? $this->value; }
     public function getValueFile() { return Uploader::get($this, "value"); }
     public function setValue($value)
     {
-        $this->value = $value;
+        $this->value  = $this->isEntity($value) ? $value->getId() : $value;
+        $this->setClass($this->isEntity($value) ? get_class($value) : null); 
+
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $class;
+
+    public function getClass(): ?string { return $this->class; }
+    public function setClass(?string $class)
+    {
+        $this->class = $class;
         return $this;
     }
 }

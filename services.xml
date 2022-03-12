@@ -113,6 +113,7 @@
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="base.database.entity_hydrator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">

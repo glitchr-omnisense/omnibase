@@ -118,7 +118,6 @@ class SelectType extends AbstractType implements DataMapperInterface
             "containerCssClass"  => null,
 
             'href'               => null,
-            'repeater'           => false,
 
             // Autocomplete
             'autocomplete'          => null,
@@ -204,6 +203,12 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 $innerType = get_class($form->getConfig()->getType()->getInnerType());
                 $dataset = $form->getData() instanceof Collection ? $form->getData()->toArray() : ( !is_array($form->getData()) ? [$form->getData()] : $form->getData() );
+                if($this->classMetadataManipulator->isEntity($options["class"])) {
+
+                    $classRepository = $this->entityManager->getRepository($options["class"]);
+                    $dataset = $classRepository->findById($dataset)->getResult();
+                }
+                
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options) : Generator {
 
                     if($choices === null) return null;
@@ -251,12 +256,6 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     if(!in_array($data, $knownData))
                         $missingData[] = $data;
-                }
-
-                if($this->classMetadataManipulator->isEntity($options["class"])) {
-
-                    $classRepository = $this->entityManager->getRepository($options["class"]);
-                    $missingData = $classRepository->findById($missingData)->getResult();
                 }
 
                 $innerType = $form->getConfig()->getType()->getInnerType();
@@ -321,7 +320,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'choices'  => $choices,
                 'multiple' => $options["multiple"]
             ];
-
+            
             $form->remove('choice')->add('choice', ChoiceType::class, $formOptions);
         });
     }
@@ -388,6 +387,24 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["choices"]       = $this->formFactory->guessChoices($form, $options);
         
         $data = $form->getData();
+        if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && (!$data instanceof Collection)) {
+
+            $classRepository = $this->entityManager->getRepository($options["class"]);
+            if($options["multiple"]) {
+
+                $orderBy = array_flip($data);
+                $default = count($orderBy);
+                $viewData = $classRepository->findById($data, [])->getResult();
+                usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+
+            } else {
+
+                $data = $classRepository->findOneById($data);
+            }
+
+            $form->setData($data);
+        }
+
         if($options["select2"] !== null) {
 
             $multipleExpected = $data instanceof Collection || is_array($data);

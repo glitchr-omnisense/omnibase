@@ -33,8 +33,6 @@ use Symfony\Component\Uid\Uuid;
  */
 class Uploader extends AbstractAnnotation
 {
-    use BaseTrait;
-
     private string $storage;
     private string $pool;
 

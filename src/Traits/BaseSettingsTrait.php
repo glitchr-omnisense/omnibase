@@ -14,7 +14,7 @@ trait BaseSettingsTrait
 
     public function getEnvironment(): ?string { return $this->environment; }
     public function getPaths(null|string|array $path = null) 
-    { 
+    {
         return array_flatten(
                     array_map_recursive(
                         fn($s) => $s instanceof Setting ? $s->getPath() : null, 
@@ -105,38 +105,14 @@ trait BaseSettingsTrait
 
         return array_filter($settings);
     }
-    
-    public function loadAssociations($settings): array
-    {
-        foreach($settings as $setting) {
 
-            if($setting instanceof Setting) {
-
-                $class = $setting->getClass();
-                if($class === null) continue;
-                if(!$this->classMetadataManipulator->isEntity($class)) continue;
-
-                $repository = $this->entityManager->getRepository($class);
-                foreach($this->getTranslations() as $locale => $translation) {
-
-                    $value = $translation->getValue($locale);
-
-                    $value = $repository->findOneById($value instanceof $class ? $value->getId() : $value);
-                    $translation->setValue($value, $locale);
-                }
-            }
-        }
-
-        return $settings;
-    }
-
-    public function getRaw(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true)
+    public function getRaw(null|string|array $path = null, ?bool $useCache = true)
     {
         if(is_array($paths = $path)) {
-            
+
             $settings = [];
             foreach($paths as $path)
-                $settings[] = $this->getRaw($path, $locale);
+                $settings[] = $this->getRaw($path);
 
             return $settings;
         }
@@ -152,8 +128,6 @@ trait BaseSettingsTrait
 
         } catch(TableNotFoundException  $e) { return []; }
 
-        $settings = $this->loadAssociations($settings);
-
         $values = $this->normalize($path, $settings);
         $values = $this->read($path, $values); // get formatted values
 
@@ -163,28 +137,33 @@ trait BaseSettingsTrait
     public function generateRaw(string $path, ?string $locale = null, ?bool $useCache = false): Setting
     {
         $locale = $this->localeProvider->getLocale($locale);
-        $setting = $this->getRaw($path, $locale, $useCache)["_self"];
+        $setting = $this->getRawScalar($path, $useCache);
+        // if($path == "base.settings.domain.scheme")
+        // dump($path, $setting);
+
         if(!$setting instanceof Setting) {
 
-            $setting = new Setting($path);
+            $setting = new Setting($path, null, $locale);
             $this->entityManager->persist($setting);
         }
+        // if($path == "base.settings.domain.scheme")
+        //     dump($path, $setting);
 
         return $setting;
     }
 
-    public function getRawScalar(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true)
+    public function getRawScalar(null|string|array $path = null, ?bool $useCache = true)
     {
         if(is_array($paths = $path)) {
             
             $settings = [];
             foreach($paths as $path)
-                $settings[] = $this->getRawScalar($path, $locale);
+                $settings[] = $this->getRawScalar($path);
 
             return $settings;
         }
 
-        return $this->getRaw($path, $locale, $useCache)["_self"] ?? null;
+        return $this->getRaw($path, $useCache)["_self"] ?? null;
     }
 
     public function getScalar(null|string|array $path, ?string $locale = null): string|array|object|null
@@ -212,7 +191,7 @@ trait BaseSettingsTrait
             return $settings;
         }
 
-        $values = $this->getRaw($path, $locale) ?? [];
+        $values = $this->getRaw($path) ?? [];
 
         return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
     }
@@ -220,7 +199,6 @@ trait BaseSettingsTrait
     public function set(string $path, $value, ?string $locale = null)
     {
         $setting = $this->generateRaw($path, $locale);
-
         if($setting->isLocked()) 
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
 
@@ -268,7 +246,7 @@ trait BaseSettingsTrait
         if($settings instanceof Setting) {
 
             $this->entityManager->remove($settings);
-            $this->entityManager->flush();    
+            $this->entityManager->flush();
         }
 
         return $this;

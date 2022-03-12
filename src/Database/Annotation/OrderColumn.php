@@ -28,8 +28,6 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  */
 class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 {
-    use BaseTrait;
-
     public const ASC  = "ASC";
     public const DESC = "DESC";
     

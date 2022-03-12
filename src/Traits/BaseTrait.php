@@ -3,6 +3,7 @@
 namespace Base\Traits;
 
 use Base\Annotations\AnnotationReader;
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Notifier\NotifierInterface;
 use Base\Service\BaseService;
 use Base\Service\BaseSettings;
@@ -21,6 +22,8 @@ trait BaseTrait
     public static function getService()          : ?BaseService          { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getService(); }
     public static function getSettings()         : ?BaseSettings         { return (self::class === BaseService::class) ? BaseService::$settings       : BaseService::getSettings(); }
 
+    public static function isEntity($entity)     : bool { return BaseService::getClassMetadataManipulator()->isEntity($entity); }
+
     public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }
     public static function getEnvironment()   : string { return (self::class === BaseService::class) ? BaseService::$environment   : BaseService::getEnvironment(); }
     public static function getPublicDir()     : string { return BaseService::getProjectDir() . "/public"; }
@@ -30,6 +33,7 @@ trait BaseTrait
     public static function getLogDir()        : string { return BaseService::getProjectDir() . "/var/log"; }
     public static function getDataDir()       : string { return BaseService::getProjectDir() . "/data"; }
 
+    public static function getClassMetadataManipulator()  : ?ClassMetadataManipulator { return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator   : BaseService::getClassMetadataManipulator(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
     public static function getIconService()   : ?IconService             { return (self::class === BaseService::class) ? BaseService::$iconService    : BaseService::getIconService(); }
     public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
