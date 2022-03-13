@@ -35,6 +35,7 @@ class AppVariable
         $this->twig     = $twig;
         
         $this->meta     = [];
+        $this->random   = new RandomVariable();
 
         $this->setProxy($appVariable);
     }

@@ -95,6 +95,10 @@
             <argument type="service" id="base.settings" />
         </service>
 
+        <service id="Base\DependencyInjection\CacheWarmer" public="true" >
+            <tag name="kernel.cache_warmer" />
+        </service>
+
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
             <argument type="service" id="request_stack" />
@@ -393,6 +397,7 @@
             <tag name="twig.loader" />
             <argument type="service" id="twig" />
             <argument type="service" id="base.twig.app_variable" />
+            <argument type="service" id="base.twig.random_variable" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -411,6 +416,7 @@
             <argument type="service" id="twig" />
         </service>
 
+        <service id="Base\Twig\RandomVariable" public="true"><tag name="twig.runtime" /></service>
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />

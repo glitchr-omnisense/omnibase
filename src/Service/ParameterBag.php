@@ -3,8 +3,9 @@
 namespace Base\Service;
 
 use Psr\Container\ContainerInterface;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 
-class ParameterBag extends \Symfony\Component\DependencyInjection\ParameterBag\ContainerBag implements ParameterBagInterface, ContainerInterface
+class ParameterBag extends ContainerBag implements ParameterBagInterface, ContainerInterface
 {
     public const __SEPARATOR__ = ".";
     

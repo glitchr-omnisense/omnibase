@@ -30,7 +30,7 @@ class BaseExtension extends Extension
 
         // Configuration file: ./config/package/base.yaml
         $processor = new Processor();
-        $configuration = new BaseConfiguration();
+        $configuration = new Configuration();
         $config = $processor->processConfiguration($configuration, $configs);
         $this->setConfiguration($container, $config, $configuration->getTreeBuilder()->getRootNode()->getNode()->getName());
 

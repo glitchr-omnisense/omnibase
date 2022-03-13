@@ -9,7 +9,7 @@ use Twig\Source;
 
 use Base\Service\BaseService;
 use Base\Twig\AppVariable;
-
+use Base\Twig\RandomVariable;
 use Exception;
 
 /**
@@ -23,12 +23,14 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct(Environment $twig, AppVariable $appVariable, BaseService $baseService)
+    public function __construct(Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable, BaseService $baseService)
     {
         $this->twig = $twig;
 
         // Add base service to the default variables
         $this->twig->addGlobal("server", $_SERVER);
+
+        $this->twig->addGlobal("random", $randomVariable);
         $this->twig->addGlobal("base",   $baseService);
         $this->twig->addGlobal("app" ,   $appVariable);
 

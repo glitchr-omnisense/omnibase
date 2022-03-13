@@ -6,7 +6,7 @@ use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
-class BaseConfiguration implements ConfigurationInterface
+class Configuration implements ConfigurationInterface
 {
     private $treeBuilder;
     public function getTreeBuilder() : TreeBuilder { return $this->treeBuilder; }
