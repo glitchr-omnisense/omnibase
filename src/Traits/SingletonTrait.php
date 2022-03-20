@@ -2,11 +2,13 @@
 
 namespace Base\Traits;
 
+use ArgumentCountError;
+
 trait SingletonTrait
 {
     private static $_instance = null;
 
-    // protected function __construct() { }
+    protected function __construct() { }
 
     public static function hasInstance()
     {
@@ -21,7 +23,8 @@ trait SingletonTrait
     public static function getInstance(bool $instanciateIfNotFound = true): ?self
     {
         if ($instanciateIfNotFound && !self::$_instance)
-            self::setInstance(new self());
+            try { self::setInstance(new self()); }
+            catch (ArgumentCountError $e) { return null; }
 
         return self::$_instance;
     }
