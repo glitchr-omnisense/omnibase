@@ -36,7 +36,6 @@ class Page extends Widget implements IconizeInterface, UrlInterface
 
     public function __toString() { return $this->getTitle(); }
     
-
     public function __construct(string $title, ?string $slug = null)
     {
         parent::__construct($title);
@@ -81,7 +80,7 @@ class Page extends Widget implements IconizeInterface, UrlInterface
      * Compute table of content
      */
 
-    public function getHeadlines($max = 6): array
+    public function getTableOfContent($max = 6): array
     {
         $headlines = [];
         $max = min($max, 6);

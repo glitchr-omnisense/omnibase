@@ -5,6 +5,7 @@ namespace Base\Twig;
 use Base\Component\HttpFoundation\Referrer;
 use Base\Service\BaseSettings;
 use Base\Traits\ProxyTrait;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Twig\Environment;
 
 class AppVariable
@@ -27,15 +28,16 @@ class AppVariable
      * @var BaseSettings
      */
     protected $settings;
-    
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, BaseSettings $settings, Referrer $referrer, Environment $twig)
+
+    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, BaseSettings $settings, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
     {
-        $this->settings = $settings;
-        $this->referrer = $referrer;
-        $this->twig     = $twig;
+        $this->settings  = $settings;
+        $this->referrer  = $referrer;
+        $this->twig      = $twig;
         
-        $this->meta     = [];
-        $this->random   = new RandomVariable();
+        $this->meta      = [];
+        $this->random    = new RandomVariable();
+        $this->easyadmin = new EasyAdminVariable($adminUrlGenerator);
 
         $this->setProxy($appVariable);
     }

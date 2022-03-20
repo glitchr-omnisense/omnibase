@@ -418,8 +418,8 @@ namespace {
     }
 
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
-    function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_strtoupper(mb_substr($string, 0, 1, $encoding)).mb_substr($string, 1, null, $encoding); }
-    function mb_ucwords(string $string, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string 
+    function mb_ucfirst (string $string, ?string $encoding = null): string { return mb_strtoupper(mb_substr($string, 0, 1, $encoding)).mb_substr($string, 1, null, $encoding); }
+    function mb_ucwords (string $string, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string 
     { 
         $separators = str_split($separators);
         foreach($separators as $separator)  

@@ -97,6 +97,7 @@
 
         <service id="Base\DependencyInjection\CacheWarmer" public="true" >
             <tag name="kernel.cache_warmer" />
+            <argument type="service" id="base.service.icon" />
         </service>
 
         <service id="Base\Service\BaseService" public="true">
@@ -414,9 +415,11 @@
             <argument type="service" id="base.settings" />
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Twig\RandomVariable" public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Twig\RandomVariable"    public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Twig\EasyAdminVariable" public="true"><tag name="twig.runtime" /></service>
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />

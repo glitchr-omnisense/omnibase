@@ -380,18 +380,21 @@ class Thread implements TranslatableInterface, IconizeInterface
      * Add article content with reshaped titles
      */
     public const MAX_ANCHOR = 6;
-    public function getContentWithAnchor($suffix = "", $max = self::MAX_ANCHOR): ?string
+    public function getContentWithAnchors(array $options = [], $suffix = "", $max = self::MAX_ANCHOR): ?string
     {
         $max = min($max, self::MAX_ANCHOR);
-        return preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use ($suffix) {
+        return preg_replace_callback("/\<(h[1-".$max."])\>([^\<\>]*)\<\/h[1-".$max."]\>/", function ($match) use ($suffix, $options) {
 
             $tag = $match[1];
             $content = $match[2];
-            $slug = $this->getSlugger()->slug($content);
+            $slug = strtolower($this->getSlugger()->slug($content));
 
-            return "<".$tag." id='".$slug. "'><a class='anchor' href='#" . $slug . "'>&nbsp".$content."&nbsp</a>$suffix</".$tag.">";
+            $options["attr"]["class"] = $options["attr"]["class"] ?? "";
+            $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
+            
+            return "<".$tag." ".html_attributes($options["row_attr"] ?? [], ["id" => $slug])."><a ".html_attributes($options["attr"] ?? [])." href='#" . $slug . "'>".$content."</a><a href='#" . $slug . "'>".$suffix."</a></".$tag.">";
 
-        }, $this->getContent());
+        }, $this->content);
     }
 
     /**

@@ -30,6 +30,18 @@ class ThreadTranslation implements TranslationInterface
     }
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $headline;
+    public function getHeadline(): ?string { return $this->headline ?? $this->title; }
+    public function setHeadline(?string $headline)
+    {
+        $this->headline = $headline;
+
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     protected $excerpt;

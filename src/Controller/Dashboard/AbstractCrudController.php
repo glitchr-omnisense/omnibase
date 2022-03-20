@@ -4,7 +4,6 @@ namespace Base\Controller\Dashboard;
 
 use Base\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Field\Filter\AssociationFilter;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;

@@ -120,7 +120,9 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('filter',         [$this, 'filter'], ['needs_environment' => true]),
             new TwigFilter('transforms',     [$this, 'transforms'], ['needs_environment' => true]),
             new TwigFilter('pad',            [$this, 'pad']),
-
+            new TwigFilter('mb_ucfirst',   [$this, 'mb_ucfirst']),
+            new TwigFilter('mb_ucwords',   [$this, 'mb_ucwords']),
+            
             new TwigFilter('is_uuid', [Translator::class, 'is_uuid']),
             new TwigFilter('trans',   [Translator::class, 'trans']),
             new TwigFilter('time',    [Translator::class, 'time']),
@@ -150,6 +152,9 @@ final class BaseTwigExtension extends AbstractExtension
         ];
     }
 
+    public function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_ucfirst($string, $encoding); }
+    public function mb_ucwords(string $string, ?string $encoding = null, ?string $separator = null): string { return mb_ucwords($string, $encoding, $separator); }
+    
     public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
     public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
     public function filter(Environment $env,  $array = [], $arrow = null) 

@@ -1,9 +1,9 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}{{ page.title }}{% endblock %}
+{% block title %}{{ page.headline }}{% endblock %}
 {% block content %}
 <article>
-    <h1>{{ page.title }}</h1>
+    <h1>{{ page.headline }}</h1>
     <h3>{{ page.excerpt }}</h3>
     <div>{{page.content|raw}}</div>
 </article>

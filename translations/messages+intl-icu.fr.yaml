@@ -9,6 +9,13 @@ paginator:
     last: "Dernière page"
     page: "Page {0}"
 
+words:
+    by: par
+    and: et
+    see_also: "à voir également: {0}"
+    see_more: voir plus
+    read_more: lire plus
+
 locale:
     lang:
         singular: Langue

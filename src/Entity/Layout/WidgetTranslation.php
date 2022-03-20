@@ -27,6 +27,17 @@ class WidgetTranslation implements TranslationInterface
     }
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $headline;
+    public function getHeadline(): ?string { return $this->headline; }
+    public function setHeadline(?string $headline): self
+    {
+        $this->headline = $headline;
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     protected $excerpt;

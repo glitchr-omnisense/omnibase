@@ -303,11 +303,11 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     $id    = $choices;
                     $label = $formattedData[$id] ?? null;
-                    if($label === null) return null;
 
                     return [$label, $choices];
 
                 }, $choicesData));
+
 
             } else {
 
@@ -320,7 +320,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'choices'  => $choices,
                 'multiple' => $options["multiple"]
             ];
-            
             $form->remove('choice')->add('choice', ChoiceType::class, $formOptions);
         });
     }
