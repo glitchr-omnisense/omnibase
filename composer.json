@@ -57,7 +57,7 @@
 	    "florianv/swap": "^4.3",
 
         "easycorp/easyadmin-bundle": "^4.0",
-        "league/flysystem-bundle": "^3.0",
+        "league/flysystem-bundle": "^2.2",
 
         "nelmio/security-bundle": "^3.0",
         "hashids/hashids": "^4.1",
