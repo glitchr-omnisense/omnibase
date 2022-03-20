@@ -193,7 +193,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(!$isOwningSide) {
 
                     foreach($viewData as $entry)
-                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                 }
             }
         }

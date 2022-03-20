@@ -532,6 +532,7 @@
                     flex-direction:row;
                     justify-content:center;
                     align-items:center;
+                    flex-wrap: wrap;
                 }
                 .content-header-title .title {
                     color: var(--sidebar-logo-color);
@@ -643,12 +644,31 @@
                 {# .content-panel-body.without-footer, .content-panel-footer { border: none; } #}
                 .content-panel-footer { border: var(--border-width) var(--border-style) var(--border-color) !important; }
 
-                @media (min-width: 992px) {
-                    .content-header { 
-                        background: transparent;
+                .content-header .page-actions { flex-wrap:wrap; justify-content:center; }
+                .content-header .page-actions a,
+                .content-header .page-actions button { margin:0.5em; }
+
+                @media (max-width: 992px) {
+                
+                    .imageupload { flex-direction: column !important; align-items: center !important; }
+                    .imageupload > * { margin:0.5em 0 ; }
+
+                    .lightbox-thumbnail .img-fluid { margin: 0 !important; } 
+                    .actions { display: flex !important; justify-content: center; flex-wrap:wrap;}
+
+                    .content-panel-footer {
+                        display: flex;
+                        justify-content: center;
                     }
                 }
-        </style>
+
+                @media (min-width: 992px)
+                {
+                    .responsive-header-menu { display:none; }
+                }
+
+                .main-header { display: block; }
+            </style>
     
 </head>
 
@@ -712,40 +732,6 @@
 
         <div class="wrapper">
             {% block wrapper %}
-                <div class="responsive-header">
-                    {% block responsive_header %}
-                        
-                        <div class="responsive-menu">
-                            <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
-                                <i class="fa fa-2x fa-bars"></i>
-                            </button>
-                        </div>
-
-                        <div id="responsive-header-logo" class="text-truncate">
-                            {% block responsive_header_logo %}
-                                <div class="responsive-logo">
-                                    <a title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
-                                    {{ ea.dashboardTitle|raw }}
-                                    </a>
-                                </div>
-                            {% endblock responsive_header_logo %}
-                        </div>
-
-                        <div class="dropdown user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
-                            <a class="user-details" type="button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
-                                {# to make the site design consistent, always display the user avatar in responsive header
-                                   and hide the user name (because there's no space left) regardless of the user config #}
-                                {% if ea.userMenu.avatarDisplayed %}
-                                    {{ user_menu_avatar }}
-                                {% else %}
-                                    <i class="user-avatar fa fa-fw {{ ea.user is not null ? 'fa-user' : 'fa-user-times' }}"></i>
-                                {% endif %}
-                            </a>
-
-                            {{ user_menu_dropdown }}
-                        </div>
-                    {% endblock responsive_header %}
-                </div>
 
                 <div class="sidebar-wrapper">
                     <aside class="sidebar">
@@ -781,6 +767,7 @@
                     <aside class="content-top {{ has_search ? 'ea-search-enabled' : 'ea-search-disabled' }}">
 
                         {% block content_top_header %}
+
                             <div class="content-search">
                                 {% if has_search %}
                                     {% block search %}
@@ -830,9 +817,23 @@
                                     </div>
                                 </div>
                                 {% endblock header_custom_menu %}
-                                <div class=" user-menu-wrapper {{ is_granted(impersonator_permission) ? 'user-is-impersonated' }}">
+
+                                <div class=" user-menu-wrapper">
                                     {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }} 
                                 </div>
+
+                                <div class="user-menu-wrapper responsive-header-menu">
+                                    {% block responsive_header %}
+                                        
+                                        <div class="responsive-menu">
+                                            <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
+                                                <i class="fa fa fa-bars"></i>
+                                            </button>
+                                        </div>
+
+                                    {% endblock responsive_header %}
+                                </div>
+
                             </div>
                         {% endblock content_top_header %}
                     </aside>

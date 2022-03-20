@@ -99,13 +99,16 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+
         // 
         // Set controller url
         $options["class"]    = $this->formFactory->guessType($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
-        $isNullable = $this->classMetadataManipulator->getMapping($options["class"], $form->getName())["nullable"] ?? false;
-        
+
+        $parentForm = $form->getParent();
+        $dataClass = $parentForm ? $this->formFactory->guessType($parentForm, $parentForm->getConfig()->getOptions()) : null;
+        $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
         $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
 
         $href = null;
@@ -149,8 +152,10 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
             
             $fieldName = $options["entity_file"];
-            $isNullable = $this->classMetadataManipulator->getMapping($options["class"], $fieldName)["nullable"] ?? false;
-
+            $parentForm = $form->getParent();
+            $dataClass = $parentForm ? $this->formFactory->guessType($parentForm, $parentForm->getConfig()->getOptions()) : null;
+            $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
+            
             $form->add($fieldName, $options["form_type"], [
                 'class'         => $options["class"],
                 'allow_delete'  => $isNullable,
@@ -263,6 +268,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     $viewData->clear();
                     foreach($newData as $entry) {
 
+                        $viewData->add($entry);
                         if(!$isOwningSide) 
                             $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                     }
