@@ -14,7 +14,7 @@ class IconService
     protected $routeIcons = [];
     public function getRouteIcons(string $route) { return $this->routeIcons[$route] ?? null; }
 
-    public function __construct(ImageService $imageService, CacheInterface $cache, RouterInterface $router)
+    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, CacheInterface $cache, RouterInterface $router)
     {
         $this->imageService = $imageService;
 
@@ -25,7 +25,7 @@ class IconService
         $this->routeIcons = $cacheRouteIcons->get();
         if($this->routeIcons === null) {
 
-            $this->routeIcons = array_transforms(function($route, $controller):?array {
+            $this->routeIcons = array_transforms(function($route, $controller) use ($annotationReader) : ?array {
 
                 $controller = $controller->getDefault("_controller");
                 if(!$controller) return null;
@@ -33,7 +33,7 @@ class IconService
                 list($class, $method) = explode("::", $controller);
                 if(!class_exists($class)) return null;
 
-                $iconAnnotations = AnnotationReader::getInstance()->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
+                $iconAnnotations = $annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
                 if(!$iconAnnotations) return null;
 
                 return [$route, end($iconAnnotations)->getIcons()];

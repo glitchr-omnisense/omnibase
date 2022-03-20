@@ -8,11 +8,10 @@ use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 class CacheWarmer implements CacheWarmerInterface
 {
-    public function __construct(IconService $iconService, AnnotationReader $annotationReader)
+    public function __construct(IconService $iconService)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
         $this->iconService = $iconService;
-        $this->annotationReader = $annotationReader;
     }
 
     public function isOptional():bool { return false; }
@@ -20,6 +19,6 @@ class CacheWarmer implements CacheWarmerInterface
     {
         if($this->shellVerbosity > 0) echo " // Warming up cache... Base bundle".PHP_EOL.PHP_EOL;
 
-        return [get_class($this->iconService), get_class($this->annotationReader)];
+        return [get_class($this->iconService)];
     }
 }

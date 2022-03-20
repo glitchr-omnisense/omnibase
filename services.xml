@@ -327,6 +327,7 @@
 
         <service id="Base\Service\IconService" public="true">
             <tag name="twig.runtime" />
+            <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="cache.adapter" />
             <argument type="service" id="router.default" />
