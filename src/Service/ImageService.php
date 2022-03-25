@@ -92,7 +92,7 @@ class ImageService implements ImageServiceInterface
     public static $i = 0;
     public function resolve(string $route, array|string|null $source, array $filters = [], array $config = []): array|string|null
     {
-        if(!$source) return $source;
+        if(!$source || $source == "/") return $source;
         if(is_array($source)) return array_map(fn($s) => $this->resolve($route, $s, $filters, $config), $source);
 
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
@@ -143,6 +143,7 @@ class ImageService implements ImageServiceInterface
 
     public function filter(?string $path, array $filters = []): null|bool|Response
     {
+        dump($path);
         do {
 
             $nestedPath = $this->decode(basename($path));

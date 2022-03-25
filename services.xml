@@ -97,6 +97,7 @@
 
         <service id="Base\DependencyInjection\CacheWarmer" public="true" >
             <tag name="kernel.cache_warmer" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service.icon" />
         </service>
 

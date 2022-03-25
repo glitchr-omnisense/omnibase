@@ -3,14 +3,15 @@
 namespace Base\DependencyInjection;
 
 use Base\Service\IconService;
-use Base\Annotations\AnnotationReader;
+use Base\Service\LocaleProvider;
 use Symfony\Component\HttpKernel\CacheWarmer\CacheWarmerInterface;
 
 class CacheWarmer implements CacheWarmerInterface
 {
-    public function __construct(IconService $iconService)
+    public function __construct(LocaleProvider $localeProvider, IconService $iconService)
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
+        $this->localeProvider = $localeProvider;
         $this->iconService = $iconService;
     }
 
@@ -19,6 +20,6 @@ class CacheWarmer implements CacheWarmerInterface
     {
         if($this->shellVerbosity > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Base bundle".PHP_EOL.PHP_EOL;
 
-        return [get_class($this->iconService)];
+        return [get_class($this->localeProvider), get_class($this->iconService)];
     }
 }

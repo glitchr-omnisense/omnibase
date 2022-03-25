@@ -29,7 +29,7 @@ class ImageController extends AbstractController
     public function Imagine($hashid): Response
     {
         $args = $this->imageService->decode($hashid);
-        if(!$args) $args = [];
+        if(!$args) throw $this->createNotFoundException();
 
         if(!$this->imageService->isWebpEnabled())
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $this->imageService->getExtension($args["path"])], Response::HTTP_MOVED_PERMANENTLY);
@@ -47,7 +47,8 @@ class ImageController extends AbstractController
 
         $path = stream_get_meta_data(tmpfile())['uri'];
         $args = $this->imageService->decode($hashid);
-        if(!$args) $args = [];
+
+        if(!$args) throw $this->createNotFoundException();
 
         if(ImageService::mimetype($args["path"]) == "image/svg+xml")
             return $this->redirectToRoute("ux_svg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
@@ -63,12 +64,12 @@ class ImageController extends AbstractController
     public function Svg($hashid): Response
     {
         $args = $this->imageService->decode($hashid);
-        if(!$args) $args = [];
+        if(!$args) throw $this->createNotFoundException();
 
         $path = stream_get_meta_data(tmpfile())['uri'];
        
         $args = $this->imageService->decode($hashid);
-        if(!$args) $args = [];
+        if(!$args) throw $this->createNotFoundException();
 
         return $this->imageService->filter($args["path"] ?? null, [
             new SvgFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
@@ -83,7 +84,7 @@ class ImageController extends AbstractController
     {
         $path = stream_get_meta_data(tmpfile())['uri'];
         $args = $this->imageService->decode($hashid);
-        if(!$args) $args = [];
+        if(!$args) throw $this->createNotFoundException();
 
         $_extension = $this->imageService->getExtension($args["path"]);
         if($extension === null && $_extension != $extension)
