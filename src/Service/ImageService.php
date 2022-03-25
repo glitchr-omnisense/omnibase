@@ -275,7 +275,7 @@ class ImageService implements ImageServiceInterface
 
             try { $imagetype = exif_imagetype($file); }
             catch (Exception $e) { $imagetype = false; }
-            return $imagetype !== false ? substr(image_type_to_extension($imagetype), 1) : pathinfo($file, PATHINFO_EXTENSION) ?? null;
+            return $imagetype !== false ? mb_substr(image_type_to_extension($imagetype), 1) : pathinfo($file, PATHINFO_EXTENSION) ?? null;
         }
         
         return self::$mimeTypes->getExtensions($mimetypeOrFileOrArray)[0] ?? pathinfo($mimetypeOrFileOrArray, PATHINFO_EXTENSION) ?? null;

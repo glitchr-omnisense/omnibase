@@ -33,8 +33,8 @@ class LocaleProvider implements LocaleProviderInterface
                 // Only keep xx-YY locale format
                 if(!preg_match('/[a-z]{2}.[A-Z]{2}/', $locale)) continue;
                 
-                $lang    = substr($locale,0,2);
-                $country = substr($locale,3,2);
+                $lang    = mb_substr($locale,0,2);
+                $country = mb_substr($locale,3,2);
 
                 if(!array_key_exists($lang, self::$locales)) self::$locales[$lang] = [];
                 self::$locales[$lang][] = $country;
@@ -97,9 +97,9 @@ class LocaleProvider implements LocaleProviderInterface
     public static function getLangName(?string $locale = null): string { return Languages::getName(self::getLang($locale)); }
     public static function getLang(?string $locale = null): string
     {
-        $lang = substr($locale,0,2);
+        $lang = mb_substr($locale,0,2);
         if(!array_key_exists($lang, self::getLocales()))
-            $lang = substr(self::getDefaultLocale(),0,2);
+            $lang = mb_substr(self::getDefaultLocale(),0,2);
 
         return $lang;
     }
@@ -107,13 +107,13 @@ class LocaleProvider implements LocaleProviderInterface
     public static function getCountryName(?string $locale = null): string { return Countries::getName(self::getCountry($locale)); }
     public static function getCountry(?string $locale = null): string
     {
-        $defaultCountry     = substr(self::getDefaultLocale(),3,2);
-        $availableCountries = array_transforms(fn($k, $l):array => [substr($l,0,2), [substr($l,3,2)]], self::getAvailableLocales());
+        $defaultCountry     = mb_substr(self::getDefaultLocale(),3,2);
+        $availableCountries = array_transforms(fn($k, $l):array => [mb_substr($l,0,2), [mb_substr($l,3,2)]], self::getAvailableLocales());
 
         $lang           = self::getLang($locale);
         $langCountries  = $availableCountries[$lang] ?? self::getLocales()[$lang] ?? [];
 
-        $country = substr($locale,3,2);
+        $country = mb_substr($locale,3,2);
         $country = in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);        
 
         return $country;

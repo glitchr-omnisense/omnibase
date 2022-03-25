@@ -109,13 +109,13 @@ namespace {
             switch($position) {
                 
                 case SHORTEN_FRONT:
-                    return ltrim($separator) . substr($str, $nChr, $length+1);
+                    return ltrim($separator) . mb_substr($str, $nChr, $length+1);
 
                 case SHORTEN_MIDDLE:
-                    return substr($str, 0, $length/2). $separator . substr($str, $nChr-$length/2, $length/2+1);
+                    return mb_substr($str, 0, $length/2). $separator . mb_substr($str, $nChr-$length/2, $length/2+1);
 
                 case SHORTEN_BACK:
-                    return substr($str, 0, $length) . rtrim($separator);
+                    return mb_substr($str, 0, $length) . rtrim($separator);
             }
         }
 
@@ -268,7 +268,7 @@ namespace {
         }
 
         while(!empty($needle) && strlen($haystack) === strrpos($haystack, $needle)+strlen($needle)) {
-            $haystack = substr($haystack, 0, strlen($haystack)-strlen($needle));
+            $haystack = mb_substr($haystack, 0, strlen($haystack)-strlen($needle));
             if(!$recursive) break;
         }
 
@@ -292,7 +292,7 @@ namespace {
         }
 
         while(!empty($needle) && 0 === strpos($haystack, $needle)) {
-            $haystack = substr($haystack, strlen($needle));
+            $haystack = mb_substr($haystack, strlen($needle));
             if(!$recursive) break;
         }
 

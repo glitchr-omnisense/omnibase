@@ -74,7 +74,7 @@ class Uploader extends AbstractAnnotation
             $namespace = (is_string($entity) ? $entity : get_class($entity));
             $namespaceRoot = "Entity";
             $namespaceDir = implode("/", array_map("lcfirst", explode("\\", 
-                                substr($namespace, strpos($namespace, $namespaceRoot)-1)) 
+                                mb_substr($namespace, strpos($namespace, $namespaceRoot)-1)) 
                             ));
         }
 

@@ -80,9 +80,9 @@ class WidgetItem
     {
         return new UrlMenuItem($label, $icon, $url);
     }
-    public static function section(?string $label = null, ?string $icon = null, int $width = 1): SectionWidgetItem
+    public static function section(?string $label = null, ?string $icon = null, int $width = 1, int $column = null): SectionWidgetItem
     {
-        return new SectionWidgetItem($label, $icon, $width);
+        return new SectionWidgetItem($label, $icon, $width, $column);
     }
 
     public static function subMenu(string $label, ?string $icon = null): SubMenuItem

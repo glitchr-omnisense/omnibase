@@ -136,7 +136,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
             if(str_starts_with($pattern, "{") && str_ends_with($pattern, "}")) {
 
-                $pattern = substr($pattern, 1, -1);
+                $pattern = mb_substr($pattern, 1, -1);
                 $routeParameters[$pattern] = $urlParts[$key] ?? null;
                 continue;
             }
@@ -155,7 +155,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $baseDir = $this->getRouter()->getContext()->getBaseUrl();
         $path = parse_url($url, PHP_URL_PATH);
         if ($baseDir && strpos($path, $baseDir) === 0)
-            $path = substr($path, strlen($baseDir));
+            $path = mb_substr($path, strlen($baseDir));
 
         try { $routeMatch = $this->router->match($path); }
         catch (ResourceNotFoundException $e) { return ''; }
@@ -171,7 +171,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $baseDir = $this->getRouter()->getContext()->getBaseUrl();
         $path = parse_url($url, PHP_URL_PATH);
         if ($baseDir && strpos($path, $baseDir) === 0)
-            $path = substr($path, strlen($baseDir));
+            $path = mb_substr($path, strlen($baseDir));
 
         try { $routeMatch = $this->router->match($path); }
         catch (ResourceNotFoundException $e) { return ''; }

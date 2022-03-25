@@ -118,7 +118,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                         if (false === $pos = strrpos($dataClass, '\\__CG__\\'))
                             return $dataClass;
 
-                        return substr($dataClass, $pos + 8);
+                        return mb_substr($dataClass, $pos + 8);
                     }
 
                     // Advanced case, loop parent form to get closest data view assuming data is inherited (e.g. TranslationType)

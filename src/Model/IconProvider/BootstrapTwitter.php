@@ -37,7 +37,7 @@ class BootstrapTwitter extends AbstractIconProvider
             $label = str_replace("-", " ", $key);
             $style = str_ends_with($key, "-fill") ? self::STYLE_FILL : self::STYLE_REGULAR;
             if($style == self::STYLE_FILL) 
-                $label  = substr($label, 0, strlen($label) - 5);
+                $label  = mb_substr($label, 0, strlen($label) - 5);
             
             $label = ucwords($label);
 

@@ -23,7 +23,7 @@ trait TranslatableTrait
         
         $prefix = "Proxies\__CG__\\";
         if (strpos($class, $prefix) === 0) 
-            $class = substr($class, strlen($prefix));
+            $class = mb_substr($class, strlen($prefix));
 
         if($withInheritance) {
 
@@ -127,7 +127,7 @@ trait TranslatableTrait
         // Call magic setter
         if (str_starts_with($method, "set")) {
 
-            $property = lcfirst(substr($method, 3));
+            $property = lcfirst(mb_substr($method, 3));
         
             if (empty($arguments))
                 throw new \BadMethodCallException("Missing argument for setter property \"$property\" in ". $className);
@@ -148,14 +148,14 @@ trait TranslatableTrait
             $property = $method;
         else if(property_exists($translationClassName, $method))
             $property = $method;
-        else if(str_starts_with($method, "get") && property_exists($className, lcfirst(substr($method, 3))))
-            $property = lcfirst(substr($method, 3));
-        else if(str_starts_with($method, "get") && property_exists($translationClassName, lcfirst(substr($method, 3))))
-            $property = lcfirst(substr($method, 3));
-        else if(str_starts_with($method, "is" ) && property_exists($className, lcfirst(substr($method, 2))))
-            $property = lcfirst(substr($method, 2));
-        else if(str_starts_with($method, "is" ) && property_exists($translationClassName, lcfirst(substr($method, 2))))
-            $property = lcfirst(substr($method, 2));
+        else if(str_starts_with($method, "get") && property_exists($className, lcfirst(mb_substr($method, 3))))
+            $property = lcfirst(mb_substr($method, 3));
+        else if(str_starts_with($method, "get") && property_exists($translationClassName, lcfirst(mb_substr($method, 3))))
+            $property = lcfirst(mb_substr($method, 3));
+        else if(str_starts_with($method, "is" ) && property_exists($className, lcfirst(mb_substr($method, 2))))
+            $property = lcfirst(mb_substr($method, 2));
+        else if(str_starts_with($method, "is" ) && property_exists($translationClassName, lcfirst(mb_substr($method, 2))))
+            $property = lcfirst(mb_substr($method, 2));
 
         //
         // Call magic getter

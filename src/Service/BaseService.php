@@ -436,7 +436,7 @@ class BaseService implements RuntimeExtensionInterface
         $baseDir = $this->getAsset("/");
         $path = parse_url($url, PHP_URL_PATH);
         if ($baseDir && strpos($path, $baseDir) === 0)
-            $path = substr($path, strlen($baseDir));
+            $path = mb_substr($path, strlen($baseDir));
 
         try { return $this->getRouter()->match($path)['_route']; }
         catch (ResourceNotFoundException $e) { return null; }

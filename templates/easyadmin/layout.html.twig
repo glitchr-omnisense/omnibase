@@ -511,7 +511,7 @@
                 ul.sidebar-menu {
                     list-style:none;
                 }
-
+                ul.sidebar-menu a { white-space: nowrap; }
                 .content-header-icon {
                     background-color:var(--fieldset-bg);
                     border: var(--border-width) var(--border-style) var(--border-color);
@@ -940,8 +940,9 @@
 
                                                 {% endif %}
 
-                                            {% set content_widget_closure = true %}
-                                            {% set col = content_widget.getWidth() %}
+                                            {% set content_widget_closure = true      %}
+                                            {% set width = content_widget.getWidth()  %}
+                                            {% set col   = content_widget.getColumn() %}
 
                                                 <div class="col-md-{{ 2*col }} p-0">
                                                 <div class="content-panel m-md-1 with-background without-header without-footer"
@@ -950,13 +951,13 @@
                                                 <fieldset style="height: 100%; margin:0; padding:0.5em 0 1.5em 0.5em;">
                                                     <legend>{{content_widget.getAsDto().getLabel()|trans|upper }}</legend>
                                                 <hr>
-                                                <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{col}};">
+                                                <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{width}};">
 
                                             {% else %}
                                                 <li>
                                                     <a href="{{ content_widget.generateUrl() }}">
                                                         <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        {{ content_widget.getAsDto().getLabel()|trans|capitalize }}
+                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst|str_shorten(15, 1, ".") }}</span>
                                                     </a>
                                                 </li>
                                             {% endif %}
