@@ -4,9 +4,9 @@
         {% for item in widget.widgets %}
         <li><a href="{{ item.__toUrl() }}" class="{{ class|default(null) }}">{{item|raw}}</a></li>
         {% endfor %}
-
-        {% for item in tail ?? [] %}
-        <li>{{ item }}</li>
-        {% endfor %}
+        
+        {% if tail is defined %}
+            {% for item in tail %}<li>{{ item }}</li>{% endfor %}
+        {% endif %}
     </ul>
 </div>
