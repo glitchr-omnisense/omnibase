@@ -143,14 +143,13 @@ class ImageService implements ImageServiceInterface
 
     public function filter(?string $path, array $filters = []): null|bool|Response
     {
-        dump($path);
         do {
 
             $nestedPath = $this->decode(basename($path));
             $nestedPath = $nestedPath ? $nestedPath : $this->decode(basename(dirname($path)));
-            
+
             if(is_array($nestedPath)) {
-            
+
                 $path = $nestedPath["path"] ?? $path;
                 $filters = array_key_exists("filters", $nestedPath) ? array_merge($nestedPath["filters"], $filters) : $filters;
             }
