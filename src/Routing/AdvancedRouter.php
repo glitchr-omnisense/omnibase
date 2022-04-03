@@ -18,7 +18,12 @@ class AdvancedRouter implements AdvancedRouterInterface
 {
     protected $router;
 
-    public function warmUp(string $cacheDir) { return $this->router->warmUp(); }
+    public function warmUp(string $cacheDir) 
+    { 
+        if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
+        
+        return $this->router->warmUp($cacheDir);
+    }
 
     public function __construct(RouterInterface $router, RequestStack $requestStack, BaseSettings $baseSettings)
     {
