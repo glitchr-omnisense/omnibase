@@ -199,7 +199,6 @@ class AdvancedRouter implements AdvancedRouterInterface
     // NB: dump(); seems not to be working in here..
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
-
         // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
         if(str_starts_with($routeName, "_")) {
         
@@ -262,7 +261,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         // Clean up double slashes..
         $parts = parse_url($routeUrl);
-        $parts["path"] = str_rstrip(str_replace("//", "/", $parts["path"]), "/");
+        $parts["path"] = "/".str_strip(str_replace("//", "/", $parts["path"]), "/");
         $routeUrl = build_url($parts);
 
         return $routeUrl;

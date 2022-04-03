@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
@@ -8,7 +8,7 @@ use Base\BaseBundle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\AutocompleteInterface;
 use Base\Service\BaseService;

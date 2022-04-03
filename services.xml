@@ -158,55 +158,55 @@
         </service>
 
         <!-- Commands -->
-        <service id="Base\Component\Console\Command\Command" public="true">
+        <service id="Base\Console\Command" public="true">
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Command\BaseMappingCommand"><tag name="console.command" /></service>
-        <service id="Base\Command\ThreadPublishableCommand">
+        <service id="Base\Console\Command\BaseMappingCommand"><tag name="console.command" /></service>
+        <service id="Base\Console\Command\ThreadPublishableCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Command\UserLogCommand">
+        <service id="Base\Console\Command\UserLogCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.service" />
         </service>
-        <service id="Base\Command\UserNotificationCommand">
-            <tag name="console.command" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.service" />
-        </service>
-
-        <service id="Base\Command\UploaderEntitiesCommand">
+        <service id="Base\Console\Command\UserNotificationCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Command\TranslationControllersCommand">
+        <service id="Base\Console\Command\UploaderEntitiesCommand">
+            <tag name="console.command" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Console\Command\TranslationControllersCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
         </service>
-        <service id="Base\Command\TranslationEntitiesCommand">
+        <service id="Base\Console\Command\TranslationEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
         </service>
-        <service id="Base\Command\TranslationCrudCommand">
+        <service id="Base\Console\Command\TranslationCrudCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
         </service>
-        <service id="Base\Command\TranslationEnumsCommand">
+        <service id="Base\Console\Command\TranslationEnumsCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
         </service>
-        <service id="Base\Command\TranslationSettingsCommand">
+        <service id="Base\Console\Command\TranslationSettingsCommand">
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
@@ -214,19 +214,19 @@
         </service>
 
 
-        <service id="Base\Command\IconCrudCommand"><tag name="console.command" /></service>
-        <service id="Base\Command\IconEnumsCommand"><tag name="console.command" /></service>
-        <service id="Base\Command\IconControllersCommand">
+        <service id="Base\Console\Command\IconCrudCommand"><tag name="console.command" /></service>
+        <service id="Base\Console\Command\IconEnumsCommand"><tag name="console.command" /></service>
+        <service id="Base\Console\Command\IconControllersCommand">
             <tag name="console.command" />
             <argument type="service" id="router" />
         </service>
-        <service id="Base\Command\IconEntitiesCommand">
+        <service id="Base\Console\Command\IconEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         
-        <service id="Base\Command\AutocompleteEntitiesCommand">
+        <service id="Base\Console\Command\AutocompleteEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />

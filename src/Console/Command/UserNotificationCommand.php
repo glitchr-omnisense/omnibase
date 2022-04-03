@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
 use App\Entity\User;
 use Base\Entity\User\Notification;
@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Doctrine\ORM\EntityManagerInterface;
 
 class UserNotificationCommand extends Command

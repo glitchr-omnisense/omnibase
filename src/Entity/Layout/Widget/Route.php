@@ -24,23 +24,22 @@ class Route extends Widget implements IconizeInterface, UrlInterface
     public function __toUrl(): ?string { return $this->generate(); }
     public function __toString() { return $this->getTitle(); }
     
-    public function __construct(string $title, string $route, array $routeParameters = []) 
+    public function __construct(string $title, string $routeName, array $routeParameters = []) 
     {
         parent::__construct($title);
         
-        $this->route = $route;
+        $this->routeName = $routeName;
         $this->routeParameters = $routeParameters;
     }
     
     /**
      * @ORM\Column(type="text")
      */
-    protected $route;
-    public function getRouteName(): ?string { return $this->route; }
-    public function getRouteIcons() { return $this->getIconProvider()->getRouteIcons($this->route); }
-    public function setRoute(?string $route): self
+    protected $routeName;
+    public function getRouteName(): ?string { return $this->routeName; }
+    public function setRouteName(?string $routeName): self
     {
-        $this->route = $route;
+        $this->routeName = $routeName;
         return $this;
     }
 
@@ -57,21 +56,21 @@ class Route extends Widget implements IconizeInterface, UrlInterface
 
     public function getPath() 
     {
-        $route = $this->getRouter()->getRouteCollection()->get($this->route);
+        $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
         return $route ? $route->getPath() : null;
     }
 
+    public function getRoute(): ?string { return $this->getRouter()->getRoute($this->getUrl()); }
+    public function getRouteIcons() { return $this->getIconProvider()->getRouteIcons($this->routeName); }
     public function getUrl(): ?string { return $this->generate(); }
 
     public function generate(): ?string
     {
-        try { return $this->getRouter()->generate($this->route, $this->routeParameters ?? []); }
+        try { return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? []); }
         catch (\Exception $e) { 
 
-            if($this->getService()->isGranted(UserRole::EDITOR)) {
-
-                return "@widget_route(.".$this->route.", [".implode(",", $this->routeParameters)."]) not found";
-            }
+            if($this->getService()->isGranted(UserRole::EDITOR)) 
+                throw $e;
         }
         
         return null;

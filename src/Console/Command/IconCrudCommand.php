@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\BaseBundle;
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;

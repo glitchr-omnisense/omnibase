@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Base\Entity\Thread;
 use Base\Enum\ThreadState;
 

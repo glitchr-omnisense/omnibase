@@ -1,12 +1,12 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;

@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
 use Base\BaseBundle;
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;

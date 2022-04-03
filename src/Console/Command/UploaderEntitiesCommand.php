@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Command;
+namespace Base\Console\Command;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\AnnotationReader;
@@ -8,7 +8,7 @@ use Base\Annotations\AnnotationReader;
 use Base\Service\BaseService;
 
 use League\Flysystem\FileAttributes;
-use Base\Component\Console\Command\Command;
+use Base\Console\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

@@ -60,7 +60,7 @@ class ArrayType extends CollectionType
             if (null !== $options['entry_required'])
                 $prototypeOptions['required'] = $options['entry_required'];
 
-            $prototypeOptions['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->baseService->getTranslator()->trans("@fields.array.value");
+           // $prototypeOptions['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->baseService->getTranslator()->trans("@fields.array.value");
             $prototype = $builder->create($options['prototype_name'], FormType::class, ["label" => false])
                 ->add($options["prototype_key"], TextType::class, ["label" => false, "attr" => ["placeholder" => $this->baseService->getTranslator()->trans("@fields.array.key")]])
                 ->add($options['prototype_name'], $options['entry_type'], $prototypeOptions);
