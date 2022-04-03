@@ -45,18 +45,16 @@ class Vault extends AbstractAnnotation
         if($vault === null) $vault = $this->getEnvironment();
 
         $pathPrefix = $this->getProjectDir()."/config/secrets/".$vault."/".$vault.".";
-        if (is_file($pathPrefix.'decrypt.private.php')) {
-            $decryptionKey = (string) include $pathPrefix.'decrypt.private.php';
-        }
+        $decryptionKey = is_file($pathPrefix.'decrypt.private.php') ? (string) include $pathPrefix.'decrypt.private.php' : null;
 
         /* Rotation keys ? Encryption key ? Probably not needed.. input very welcome here :o) */
-        if (is_file($pathPrefix.'encrypt.public.php')) {
-            $encryptionKey = (string) include $pathPrefix.'encrypt.public.php';
-        } elseif ('' !== $this->decryptionKey) {
-            $encryptionKey = sodium_crypto_box_publickey($this->decryptionKey);
-        } else {
-            throw new \RuntimeException(sprintf('Encryption key not found in "%s".', \dirname($pathPrefix)));
-        }
+        // if (is_file($pathPrefix.'encrypt.public.php')) {
+        //     $encryptionKey = (string) include $pathPrefix.'encrypt.public.php';
+        // } elseif ('' !== $decryptionKey) {
+        //     $encryptionKey = sodium_crypto_box_publickey($decryptionKey);
+        // } else {
+        //     throw new \RuntimeException(sprintf('Encryption key not found in "%s".', \dirname($pathPrefix)));
+        // }
 
         return [$decryptionKey];
     }
