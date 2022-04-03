@@ -18,6 +18,12 @@ class AdvancedRouter implements AdvancedRouterInterface
 {
     protected $router;
 
+    public function warmUp(string $cacheDir)
+    {
+        $this->getRouteCollection();
+        return [self::class];
+    }
+
     public function __construct(RouterInterface $router, RequestStack $requestStack, BaseSettings $baseSettings)
     {
         $this->router = $router;
