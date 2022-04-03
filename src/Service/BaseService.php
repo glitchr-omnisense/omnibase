@@ -417,7 +417,7 @@ class BaseService implements RuntimeExtensionInterface
         foreach($exceptions as $pattern) 
             if (preg_match($pattern, $currentRoute)) return null;
 
-        $response = new RedirectResponse($this->getUrl($urlOrRoute, $opts), $state, $headers);
+        $response = new RedirectResponse($this->getUrl($urlOrRoute, $opts) ?? $urlOrRoute, $state, $headers);
         if($event && method_exists($event, "setResponse")) $event->setResponse($response);
 
         // Callable action if redirection happens
