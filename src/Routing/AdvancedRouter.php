@@ -160,7 +160,7 @@ class AdvancedRouter implements AdvancedRouterInterface
                     $kSplit = explode(".", $k);
                     $isLocalized = array_key_exists("_locale", $route->getDefaults());
                     if($isLocalized && count($kSplit) < 3) $k = "";
-                    else $k = explode(".", $k)[1];
+                    else $k = explode(".", $k)[1] ?? "";
 
                     return [$k, $route];
                 }
