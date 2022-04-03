@@ -4,7 +4,7 @@ namespace Base\Twig\Extension;
 
 use Base\Component\Intl\Colors;
 use Base\Service\BaseService;
-use Base\Service\IconService;
+use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
@@ -12,6 +12,7 @@ use Base\Service\TranslatorInterface;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -40,25 +41,25 @@ final class BaseTwigExtension extends AbstractExtension
     protected $imageService;
 
     /**
-     * @var IconService
+     * @var IconProvider
      */
-    protected $iconService;
+    protected $iconProvider;
 
     /**
      * @var string
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator, RoutingExtension $routingExtension, IconService $iconService, ImageService $imageService) {
+    public function __construct(TranslatorInterface $translator, RequestStack $requestStack, RoutingExtension $routingExtension, IconProvider $iconProvider, ImageService $imageService) {
 
-        $this->translator               = $translator;
-        $this->routingExtension         = $routingExtension;
+        $this->translator       = $translator;
+        $this->routingExtension = $routingExtension;
+        $this->requestStack     = $requestStack;
+        $this->intlExtension    = new IntlExtension();
+        $this->mimeTypes        = new MimeTypes();
 
-        $this->intlExtension            = new IntlExtension();
-        $this->mimeTypes                = new MimeTypes();
-
-        $this->iconService  = $iconService;
-        $this->imageService = $imageService;
+        $this->iconProvider     = $iconProvider;
+        $this->imageService     = $imageService;
     }
 
     public function setBase(BaseService $baseService) 
@@ -78,7 +79,6 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('exit',  'exit'),
 
             new TwigFunction('synopsis',        'synopsis'),
-            new TwigFunction("path",            [$this, 'path'   ]),
             new TwigFunction('title',           [$this, 'title'  ], ['is_safe' => ['all']]),
             new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
@@ -88,7 +88,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('static_call',     [$this, 'static_call'  ]),
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
 
-            new TwigFunction('iconify',         [IconService::class, 'iconify'], ["is_safe" => ['all']]),
+            new TwigFunction('iconify',         [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFunction('asset',           [AssetExtension::class, 'getAssetUrl']),
         ];
     }
@@ -134,7 +134,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('country',      [LocaleProvider::class, 'getCountry']),
             new TwigFilter('country_name', [LocaleProvider::class, 'getCountryName']),
 
-            new TwigFilter('iconify',    [IconService::class, 'iconify'], ["is_safe" => ['all']]),
+            new TwigFilter('iconify',    [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',    [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
 
             new TwigFilter('mimetype',   [ImageService::class, 'mimetype']),
@@ -255,17 +255,6 @@ final class BaseTwigExtension extends AbstractExtension
         }
 
         return $url;
-    }
-
-    public function path(string $name, array $parameters = [], bool $relative = false): string
-    {
-        $baseDir = null;
-        if(is_cli()) {
-            $baseDir    = $_SERVER['BASE']        ?? $_SERVER["CONTEXT_PREFIX"] ?? $this->baseService->getSettings()->base_dir();
-            $baseDir    = "/".trim($baseDir, "/");
-        }
-
-        return $baseDir . $this->routingExtension->getPath($name, $parameters, $relative);
     }
 
     public function title(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string

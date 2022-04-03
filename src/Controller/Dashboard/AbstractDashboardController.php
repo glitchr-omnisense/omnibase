@@ -100,7 +100,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         MenuItem::$translator = $translator;
 
         MenuItem::$router = $router;
-        MenuItem::$iconService = $baseService->getIconService();
+        MenuItem::$iconProvider = $baseService->getIconProvider();
 
         $this->baseService           = $baseService;
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
@@ -241,12 +241,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
 
-            dump($settings, $data);
             foreach(array_diff_key($data, $settings) as $name => $setting) 
-            {
-                dump("ADDED..", $name);
                 $this->settingRepository->persist($setting);
-            }
 
             $this->settingRepository->flush();
 

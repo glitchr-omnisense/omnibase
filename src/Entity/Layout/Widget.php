@@ -24,7 +24,7 @@ use Doctrine\Common\Collections\Collection;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * 
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ *     @DiscriminatorEntry
  */
 
 class Widget implements TranslatableInterface, IconizeInterface

@@ -3,8 +3,10 @@
 namespace Base\Traits;
 
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Routing\AdvancedRouter;
+use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseSettings;
-use Base\Service\IconService;
+use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -61,10 +63,10 @@ trait BaseCommonTrait {
     public static function setSlugger(?SluggerInterface $slugger) {  self::$slugger = $slugger; }
 
     /**
-     * @var IconServiceInterface
+     * @var IconProviderInterface
      */
-    protected static $iconService = null;
-    public static function setIconService(?IconService $iconService) {  self::$iconService = $iconService; }
+    protected static $iconProvider = null;
+    public static function setIconProvider(?IconProvider $iconProvider) {  self::$iconProvider = $iconProvider; }
 
     /**
      * @var ClassMetadataManipulator
@@ -79,10 +81,10 @@ trait BaseCommonTrait {
     public static function setImageService(?ImageService $imageService) {  self::$imageService = $imageService; }
 
     /**
-     * @var RouterInterface
+     * @var AdvancedRouterInterface
      */
     protected static $router = null;
-    public static function setRouter(RouterInterface $router) { self::$router = $router; }
+    public static function setRouter(AdvancedRouterInterface $router) { self::$router = $router; }
     
     /**
      * @var Environment

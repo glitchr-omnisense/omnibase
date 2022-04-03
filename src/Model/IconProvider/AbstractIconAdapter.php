@@ -1,11 +1,10 @@
 <?php
 
-namespace Base\Model\IconProvider\Abstract;
+namespace Base\Model\IconProvider;
 
-use Base\Model\IconProviderInterface;
 use Symfony\Component\Yaml\Yaml;
 
-abstract class AbstractIconProvider implements IconProviderInterface
+abstract class AbstractIconAdapter implements IconAdapterInterface
 {   
     protected string $metadata;
 

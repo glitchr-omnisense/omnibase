@@ -4,7 +4,7 @@ namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
 use Base\Database\Factory\EntityExtensionInterface;
-use Base\Model\IconProviderInterface;
+use Base\Model\IconProvider\IconAdapterInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
@@ -42,7 +42,8 @@ class BaseExtension extends Extension
 
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
-        $container->registerForAutoconfiguration(IconProviderInterface::class)->addTag('base.icon_provider');
+        $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
+        $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.social_sharer');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('base.currency_api');
     }
 

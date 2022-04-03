@@ -326,21 +326,35 @@
             <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
-        <service id="Base\Service\IconService" public="true">
+        <service id="Base\Service\SocialSharer" public="true">
+            <tag name="twig.runtime" />
+        </service>
+        
+        <service id="Base\Model\SocialSharer\Adapter\FacebookAdapter">
+            <tag name="base.social_sharer" />
+        </service>
+        <service id="Base\Model\SocialSharer\Adapter\TwitterAdapter">
+            <tag name="base.social_sharer" />
+        </service>
+        <service id="Base\Model\SocialSharer\Adapter\PinterestAdapter">
+            <tag name="base.social_sharer" />
+        </service>
+
+        <service id="Base\Service\IconProvider" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="cache.adapter" />
             <argument type="service" id="router.default" />
         </service>
-        
-        <service id="Base\Model\IconProvider\FontAwesome">
+
+        <service id="Base\Model\IconProvider\Adapter\FontAwesomeAdapter">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
             <bind key="$javascript">%base.vendor.font_awesome.javascript%</bind>
             <bind key="$stylesheet">%base.vendor.font_awesome.stylesheet%</bind>
         </service>
-        <service id="Base\Model\IconProvider\BootstrapTwitter">
+        <service id="Base\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
             <tag name="base.icon_provider" />
             <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
@@ -425,9 +439,16 @@
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
+            <argument type="service" id="request_stack" />
             <argument type="service" id="twig.extension.routing" />
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="base.service.image" />
+       </service>
+
+        <service id="Base\Routing\AdvancedRouter" decorates="router">
+            <argument type="service" id=".inner" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="base.settings" />
        </service>
 
         <service id="Base\Twig\Extension\ClassTwigExtension" >
@@ -724,7 +745,8 @@
             <argument type="service" id="translator" />
         </service>
 
-        <service id="Base\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>
+        <service id="Base\Serializer\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>
+        <service id="Base\Serializer\Encoder\ExcelEncoder"><tag name="serializer.encoder" /></service>
 
         <service id="Base\Field\Configurator\CropperConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>

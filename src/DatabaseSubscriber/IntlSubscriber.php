@@ -2,6 +2,8 @@
 
 namespace Base\DatabaseSubscriber;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper\SampleTranslation;
+use App\Entity\Marketplace\ReviewTranslation;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
@@ -48,6 +50,7 @@ class IntlSubscriber implements EventSubscriber
     private function removeIfEmpty(TranslationInterface $translation)
     {
         $translatable = $translation->getTranslatable();
+
         if($translation->isEmpty())
             $translatable->removeTranslation($translation);
     }

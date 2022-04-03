@@ -11,7 +11,7 @@ use Base\Repository\User\AddressRepository;
  * @ORM\Entity(repositoryClass=AddressRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "default" )
+ *     @DiscriminatorEntry
 */
 
 class Address implements IconizeInterface

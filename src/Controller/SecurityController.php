@@ -75,7 +75,7 @@ class SecurityController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         $targetPath = strval($referrer);
-        $targetRoute = $this->baseService->getRoute($targetPath);
+        $targetRoute = $this->baseService->getRouteName($targetPath);
 
         // Redirect to the right page when access denied
         if ( ($user = $this->getUser()) && $user->isPersistent() ) {
@@ -84,11 +84,11 @@ class SecurityController extends AbstractController
 
                 // Check if target path provided via $_POST..
                 $targetPath = strval($referrer);
-                $targetRoute = $this->baseService->getRoute($targetPath);
+                $targetRoute = $this->baseService->getRouteName($targetPath);
                 if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
                     return $this->baseService->redirect($targetPath);
 
-                return $this->redirectToRoute($request->isMethod('POST') ? "user_settings" : $this->baseService->getRoute("/"));
+                return $this->redirectToRoute($request->isMethod('POST') ? "user_settings" : $this->baseService->getRouteName("/"));
             }
 
             $notification = new Notification("login.partial");
@@ -322,7 +322,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountGoodbye.already");  
             $notification->send("warning");
 
-            return $this->redirectToRoute($this->baseService->getRoute("/"));
+            return $this->redirectToRoute($this->baseService->getRouteName("/"));
 
         } else {
 
@@ -331,7 +331,7 @@ class SecurityController extends AbstractController
             $this->baseService->Logout();
 
             $this->entityManager->flush();
-            return $this->redirectToRoute($this->baseService->getRoute("/"));
+            return $this->redirectToRoute($this->baseService->getRouteName("/"));
         }
     }
 
@@ -353,7 +353,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountWelcomeBack.invalidToken");
             $notification->send("danger");
 
-            return $this->redirectToRoute($this->baseService->getRoute("/"));
+            return $this->redirectToRoute($this->baseService->getRouteName("/"));
 
         } else if(!$user->isDisabled()) {
 
@@ -362,7 +362,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("accountWelcomeBack.already");
             $notification->send("warning");
 
-            return $this->redirectToRoute($this->baseService->getRoute("/"));
+            return $this->redirectToRoute($this->baseService->getRouteName("/"));
 
         } else if ($user->getValidToken("welcome-back")){
 
@@ -432,7 +432,7 @@ class SecurityController extends AbstractController
             $notification = new Notification("resetPassword.invalidToken");
             $notification->send("danger");
 
-            return $this->redirectToRoute($this->baseService->getRoute("/"));
+            return $this->redirectToRoute($this->baseService->getRouteName("/"));
 
         } else {
 

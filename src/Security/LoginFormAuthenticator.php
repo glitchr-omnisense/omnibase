@@ -104,14 +104,14 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
         // Check if target path provided via $_POST..
         $targetPath = $this->referrer;
-        $targetRoute = $this->baseService->getRoute($targetPath);
+        $targetRoute = $this->baseService->getRouteName($targetPath);
 
         $request->getSession()->remove("_target_path");
 
         if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
             return $this->baseService->redirect($targetPath);
 
-        return $this->baseService->redirectToRoute($this->baseService->getRoute("/"));
+        return $this->baseService->redirectToRoute($this->baseService->getRouteName("/"));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

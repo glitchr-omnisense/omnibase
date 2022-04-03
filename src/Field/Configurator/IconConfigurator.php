@@ -11,10 +11,10 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class IconConfigurator extends SelectConfigurator
 {
-    protected $iconService;
+    protected $iconProvider;
     public function __construct(...$args)
     {
-        $this->iconService = array_pop($args);
+        $this->iconProvider = array_pop($args);
         parent::__construct(...$args);
     }
 
@@ -32,7 +32,7 @@ class IconConfigurator extends SelectConfigurator
             $icon = $propertyAccessor->getValue($entityDto->getInstance(), $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME));
 
         $provider = $field->getFormTypeOption("provider") ?? $this->baseService->getParameterBag("base.icon_provider.default_provider");
-        $iconProvider = $this->iconService->getProvider($provider);
+        $iconProvider = $this->iconProvider->getProvider($provider);
 
         foreach($iconProvider->getAssets() as $asset) {
 

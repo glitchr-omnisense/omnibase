@@ -33,7 +33,7 @@ use Base\Repository\ThreadRepository;
  * @ORM\InheritanceType( "JOINED" )
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ *     @DiscriminatorEntry( value = "common" )
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  * @Hierarchify(null, separator = "/" )

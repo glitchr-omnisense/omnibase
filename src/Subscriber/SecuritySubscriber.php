@@ -185,7 +185,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onSwitchUser(SwitchUserEvent $event) { }
 
-    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
+    public function getCurrentRouteName($event) { return $event->getRequest()->get('_route'); }
 
     public function isException($route)
     {
@@ -202,9 +202,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         if($this->baseService->isProfiler()) return;
 
         $targetPath = strval($this->referrer);
-        $targetRoute = $this->baseService->getRoute($targetPath);
+        $targetRoute = $this->baseService->getRouteName($targetPath);
 
-        $currentRoute = $this->getCurrentRoute($event);
+        $currentRoute = $this->getCurrentRouteName($event);
         if($this->isException($currentRoute)) return;
         
         $event->getRequest()->getSession()->remove('_security.main.target_path');

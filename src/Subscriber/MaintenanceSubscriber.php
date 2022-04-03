@@ -43,7 +43,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         return [ RequestEvent::class => ['onRequestEvent'] ];
     }
 
-    public function getCurrentRoute($event) { return $event->getRequest()->get('_route'); }
+    public function getCurrentRouteName($event) { return $event->getRequest()->get('_route'); }
 
     public function onRequestEvent(RequestEvent $event)
     {
@@ -51,11 +51,11 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         if ($this->baseService->isProfiler($event->getRequest())) return;
 
         // Exception triggered
-        if( empty($this->getCurrentRoute($event)) ) return;
+        if( empty($this->getCurrentRouteName($event)) ) return;
 
         if(!$this->baseService->isMaintenance()) {
 
-            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event)))
+            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRouteName($event)))
                 $this->baseService->redirectToRoute($this->homepageRoute, [], 302, ["event" => $event]);
 
             return;
@@ -72,9 +72,9 @@ class MaintenanceSubscriber implements EventSubscriberInterface
         $this->baseService->Logout();
 
         // Apply redirection to maintenance page
-        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRoute($event));
+        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->getCurrentRouteName($event));
         foreach($this->exceptionRoute as $exception)
-            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentRoute($event));
+            $isException |= preg_match('/^'.$exception.'/', $this->getCurrentRouteName($event));
 
         if (!$isException)
             $this->baseService->redirectToRoute($this->maintenanceRoute, [], 302, ["event" => $event]);

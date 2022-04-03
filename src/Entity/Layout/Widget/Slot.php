@@ -15,7 +15,7 @@ use Base\Repository\Layout\Widget\SlotRepository;
 
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
- * @DiscriminatorEntry( value = "slot" )
+ * @DiscriminatorEntry
  * 
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 

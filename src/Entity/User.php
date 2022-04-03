@@ -53,7 +53,7 @@ use Doctrine\ORM\Mapping\OrderBy;
  * @ORM\InheritanceType( "JOINED" )
  * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ *     @DiscriminatorEntry( value = "common" )
  *
  * @AssertBase\UniqueEntity(fields={"email"}, groups={"new", "edit"})
  */

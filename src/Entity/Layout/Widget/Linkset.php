@@ -16,7 +16,7 @@ use Base\Repository\Layout\Widget\LinksetRepository;
 /**
  * @ORM\Entity(repositoryClass=LinksetRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
- * @DiscriminatorEntry( value = "linkset" )
+ * @DiscriminatorEntry
  */
 class Linkset extends Widget implements IconizeInterface
 {

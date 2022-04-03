@@ -11,7 +11,8 @@
         <service id="base.command" alias="Base\Component\Console\Command\Command" />
 
         <service id="base.service" alias="Base\Service\BaseService" />
-        <service id="base.service.icon" alias="Base\Service\IconService" />
+        <service id="base.service.icon" alias="Base\Service\IconProvider" />
+        <service id="base.service.sharer" alias="Base\Service\SocialSharer" />
 
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageInterface" alias="base.service.image"/>

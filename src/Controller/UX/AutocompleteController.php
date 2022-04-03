@@ -118,7 +118,7 @@ class AutocompleteController extends AbstractController
             $term = mb_strtolower($request->get("term")) ?? "";
             $page = $request->get("page") ?? 1;
 
-            $iconProvider = $this->getIconService()->getProvider($provider);
+            $iconProvider = $this->getIconProvider()->getProvider($provider);
             $entries = $iconProvider->getChoices($term);
 
             $book = $this->paginator->paginate($entries, $page, $pageSize);

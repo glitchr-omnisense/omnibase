@@ -2,6 +2,7 @@
 
 namespace Base\Database\Traits;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper\SampleTranslation;
 use Base\Database\TranslatableInterface;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -64,7 +65,8 @@ trait TranslationTrait
             if (in_array($var, ['id', 'translatable', 'locale'], true))
                 continue;
             
-            if (!empty($value)) return false;
+            if (!empty($value))
+                return false;
         }
 
         return true;

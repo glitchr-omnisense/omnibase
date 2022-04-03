@@ -13,7 +13,7 @@ use Base\Repository\Layout\Widget\LinkRepository;
 /**
  * @ORM\Entity(repositoryClass=LinkRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
- * @DiscriminatorEntry( value = "hyperlink" )
+ * @DiscriminatorEntry
  */
 
 class Link extends Widget implements IconizeInterface, UrlInterface
@@ -42,7 +42,7 @@ class Link extends Widget implements IconizeInterface, UrlInterface
         return $this;
     }
 
-    public function __toUrl(): string { return $this->getHyperlink()->generateUrl(); }
+    public function __toUrl(): ?string { return $this->getHyperlink()->generateUrl(); }
     public function __toString() 
     {
         return $this->getTitle() ?? $this->getHyperlink()->getLabel() ?? $this->__iconize();

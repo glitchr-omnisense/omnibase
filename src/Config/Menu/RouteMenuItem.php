@@ -26,8 +26,8 @@ class RouteMenuItem implements MenuItemInterface
         $this->dto->setLabel($label ?? MenuItem::$translator->trans("@controllers.".$routeName.".title"));
         $this->dto->setType(MenuItemDto::TYPE_URL);
         $this->dto->setIcon($icon);
-        if($icon === null && MenuItem::$iconService != null) {
-            $icons = MenuItem::$iconService->getRouteIcons($routeName);
+        if($icon === null && MenuItem::$iconProvider != null) {
+            $icons = MenuItem::$iconProvider->getRouteIcons($routeName);
             if($icons) $this->dto->setIcon(closest($icons, 1) ?? null);
         }
     }

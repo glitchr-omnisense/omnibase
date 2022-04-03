@@ -17,7 +17,7 @@ class ColorExtractor
 
     public function extract(int $colorCount = 1): array
     {
-        if (!$this->isInitialized()) {
+        if(!$this->isInitialized()) {
             $this->initialize();
         }
 

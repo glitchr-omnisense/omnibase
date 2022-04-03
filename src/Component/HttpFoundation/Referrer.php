@@ -39,7 +39,7 @@ class Referrer
         return $path;
     }
 
-    public function getRoute(?string $path = null, ?string $requestUri = null): string
+    public function getRouteName(?string $path = null, ?string $requestUri = null): string
     {
         if($path === null) return "";
 
@@ -71,35 +71,35 @@ class Referrer
 
         // Target path fallbacks
         $targetPath = $request->request->get('_target_path');
-        $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+        $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
 
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_target_path');
-            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+            $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
 
         // Security fallbacks
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.main.target_path');
-            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+            $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.account.target_path');
-            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+            $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
 
         // Default referrer
         if(!$targetRoute) {
             $targetPath = $request->headers->get("referer"); // Yes, with the legendary misspelling.
-            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+            $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
         if(!$targetRoute) {
             $targetPath = $request->request->get('referer');
-            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+            $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
         if(!$targetRoute) {
             $targetPath = $request->request->get('referrer');
-            $targetRoute = $this->getRoute($targetPath, $request->getRequestUri());
+            $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
 
         return $targetPath;

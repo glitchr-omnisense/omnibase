@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Model\IconProvider;
+namespace Base\Model\IconProvider\Adapter;
 
-use Base\Model\IconProvider\Abstract\AbstractIconProvider;
+use Base\Model\IconProvider\AbstractIconAdapter;
 
-class FontAwesome extends AbstractIconProvider
+class FontAwesomeAdapter extends AbstractIconAdapter
 {
     public const STYLE_SOLID   = "solid";
     public const STYLE_REGULAR = "regular";
@@ -29,15 +29,15 @@ class FontAwesome extends AbstractIconProvider
     {
         return [
             "<script type='text/javascript'>window.FontAwesomeConfig = { autoReplaceSvg: false }</script>", 
-            $this->javascript, 
+            $this->javascript,
             $this->stylesheet
         ];
     }
-    
+
     public function supports(string $icon): bool
     {
         $knownPrefix = array_merge([$this->getName()], array_map(
-            fn($s) => $this->getClass($s), 
+            fn($s) => $this->getClass($s),
             [self::STYLE_SOLID, self::STYLE_REGULAR, self::STYLE_LIGHT, self::STYLE_THIN, self::STYLE_DUOTONE, self::STYLE_BRANDS, self::STYLE_KIT]
         ));
 
@@ -54,7 +54,7 @@ class FontAwesome extends AbstractIconProvider
 
         throw new \Exception("Version ". $this->getVersion()." is not supported.");
     }
-    
+
     public function getChoices(string $term = ""): array
     {
         $choices = [];

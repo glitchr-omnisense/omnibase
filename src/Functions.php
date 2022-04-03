@@ -30,6 +30,14 @@ namespace {
         return is_a($object_or_class, $class, !is_object($object_or_class));
     }
 
+    function is_abstract(mixed $object_or_class) : bool
+    {
+        if(!class_exists($object_or_class))
+            throw new Exception("Class \"$object_or_class\" doesn't exists.");
+
+        $class = new ReflectionClass($object_or_class);
+        return $class->isAbstract();
+    }
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
@@ -250,6 +258,17 @@ namespace {
         return $path["dirname"].$prefix.$path["filename"].$path["extension"];
     }
 
+    function str_explode(array|string $separator, string $string, int $limit = -1)
+    {
+        if($limit == 0) return [$string];
+        if(is_string($separator)) $separator = [$separator];
+
+        if (preg_match('/(.*)(?:'.implode("|", array_map("preg_quote", $separator)).')(.*)/', $string, $matches))
+            return array_merge([$matches[1]], str_explode($separator, $matches[2], --$limit));
+
+        return [$string];
+    }
+
     function str_strip(?string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true): ?string { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
     function str_rstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
@@ -309,7 +328,7 @@ namespace {
     }
 
     function head(object|array &$array):mixed { return array_slice($array, 0, 1)[0] ?? null; }
-    function tail(object|array &$array, int $offset = 1):array  { return array_slice($array, $offset); }
+    function tail(object|array &$array, int $length = -1, bool $preserve_keys = false):array  { return array_slice($array, -min(count($array)-1, $length), null, $preserve_keys); }
 
     function distance(array $arr1, array $arr2)
     { 
@@ -418,6 +437,16 @@ namespace {
     }
 
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
+    function mb_lcfirst (string $string, ?string $encoding = null): string { return mb_strtolower(mb_substr($string, 0, 1, $encoding)).mb_substr($string, 1, null, $encoding); }
+    function mb_lcwords (string $string, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string 
+    {
+        $separators = str_split($separators);
+        foreach($separators as $separator)  
+            $string = implode($separator, array_map(fn($s) => mb_lcfirst($s, $encoding), explode($separator, $string)));
+
+        return $string;
+    }
+    
     function mb_ucfirst (string $string, ?string $encoding = null): string { return mb_strtoupper(mb_substr($string, 0, 1, $encoding)).mb_substr($string, 1, null, $encoding); }
     function mb_ucwords (string $string, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string 
     { 
@@ -1109,5 +1138,44 @@ namespace {
         $datetime2->setDate(0,0,0);
 
         return datetime_is_between($datetime, $datetime1, $datetime2);
+    }
+
+    function http_parse_query($query) {
+        $parameters = array();
+        $queryParts = explode('&', $query);
+        foreach ($queryParts as $queryPart) {
+            $keyValue = explode('=', $queryPart, 2);
+            $parameters[$keyValue[0]] = $keyValue[1];
+        }
+        return $parameters;
+    }
+    
+    function build_url(array $parts) {
+        return (isset($parts['scheme']) ? "{$parts['scheme']}:" : '') . 
+            ((isset($parts['user']) || isset($parts['host'])) ? '//' : '') . 
+            (isset($parts['user']) ? "{$parts['user']}" : '') . 
+            (isset($parts['pass']) ? ":{$parts['pass']}" : '') . 
+            (isset($parts['user']) ? '@' : '') . 
+            (isset($parts['host']) ? "{$parts['host']}" : '') . 
+            (isset($parts['port']) ? ":{$parts['port']}" : '') . 
+            (isset($parts['path']) ? "{$parts['path']}" : '') . 
+            (isset($parts['query']) ? "?{$parts['query']}" : '') . 
+            (isset($parts['fragment']) ? "#{$parts['fragment']}" : '');
+    }
+    
+    /**
+     * Handling resource files
+     */
+    function valid_url(string $url): bool
+    {
+        $regex  = "((https?|ftp)\:\/\/)?"; // SCHEME
+        $regex .= "([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?"; // User and Pass
+        $regex .= "([a-z0-9-.]*)\.([a-z]{2,3})"; // Host or IP
+        $regex .= "(\:[0-9]{2,5})?"; // Port
+        $regex .= "(([a-z0-9+\$_-]\.?)+)*\/?"; // Path
+        $regex .= "(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?"; // GET Query
+        $regex .= "(#[a-z_.-][a-z0-9+\$_.-]*)?"; // Anchor
+
+        return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
     }
 }

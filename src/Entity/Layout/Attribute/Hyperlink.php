@@ -14,7 +14,7 @@ use Base\Repository\Layout\Attribute\HyperlinkRepository;
 
 /**
  * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
- * @DiscriminatorEntry( value = "hyperlink" )
+ * @DiscriminatorEntry
  * 
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */

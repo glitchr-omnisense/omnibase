@@ -16,7 +16,7 @@ use Base\Repository\Layout\Widget\AttachmentRepository;
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
- * @DiscriminatorEntry( value = "attachment" )
+ * @DiscriminatorEntry
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */

@@ -23,7 +23,7 @@ use Base\Entity\Layout\Attribute;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
- *     @DiscriminatorEntry( value = "abstract" )
+ *     @DiscriminatorEntry
  * 
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */

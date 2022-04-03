@@ -3,7 +3,7 @@
 namespace Base\Config;
 
 use Base\Config\Menu\RouteMenuItem;
-use Base\Service\IconService;
+use Base\Service\IconProvider;
 use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\CrudMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
@@ -16,13 +16,13 @@ use Symfony\Component\Routing\RouterInterface;
 
 class MenuItem
 {
-    public static $iconService;
+    public static $iconProvider;
     public static $translator;
     public static $router;
     
-    public static function setIconService(IconService $iconService)
+    public static function setIconProvider(IconProvider $iconProvider)
     {
-        self::$iconService = $iconService;
+        self::$iconProvider = $iconProvider;
     }
 
     public static function setTranslator(TranslatorInterface $translator)

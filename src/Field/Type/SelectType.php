@@ -155,13 +155,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Guess some options
             $options["class"]    = $this->formFactory->guessType($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-            $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
-
-            $multipleExpected = $data instanceof Collection || is_array($data);
-            if($options["multiple"] == false &&  $multipleExpected && $data !== null)
-                $data = null;
-            else if($options["multiple"] == true  && !$multipleExpected && $data !== null)
-                $data = null;
+            $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
 
             $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
             if(!$options["choices"] && $options["choice_loader"] === null) {
@@ -324,7 +318,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         });
     }
 
-    public function mapDataToForms($viewData, Traversable $forms) { }
+    public function mapDataToForms($viewData, Traversable $forms) { /* done in buildView due to select2 extend */ }
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choicesType = current(iterator_to_array($forms));
@@ -391,7 +385,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
 
-                $orderBy = array_flip($data);
+                $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);
                 $viewData = $classRepository->findById($data, [])->getResult();
                 usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
@@ -406,10 +400,16 @@ class SelectType extends AbstractType implements DataMapperInterface
 
         if($options["select2"] !== null) {
 
+            // Double-check "multiple" option
+            // * If database can accept multiples, it can also accept single elements
+            // * But database with single entry cannot accept multiple elements.. So I arbitrarily keep only the first element.. 
             $multipleExpected = $data instanceof Collection || is_array($data);
-            if($options["multiple"] == false &&  $multipleExpected && $data !== null)
-                $data = null;
-            else if($options["multiple"] == true  && !$multipleExpected && $data !== null)
+            if($options["multiple"] == false &&  $multipleExpected && $data !== null) {
+                $data = $data instanceof Collection ? $data->toArray() : $data;
+                $data = first($data);
+            }
+
+            if($options["multiple"] == true  && !$multipleExpected && $data !== null)
                 $data = null;
 
             //
@@ -485,7 +485,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Format preselected values
             $selectedData  = [];
             $dataset = $data instanceof Collection ? $data->toArray() : ( !is_array($data) ? [$data] : $data );
-
+           
             $innerType = get_class($form->getConfig()->getType()->getInnerType());
             $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, $dataset, &$options, &$selectedData) : Generator { 
 

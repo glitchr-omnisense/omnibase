@@ -1,8 +1,11 @@
 <?php
 
+// DRAFT: To be rewritten (especially parse/dump parameter)
+// => To be implemented into Colors.php as well
 namespace Base\Serializer;
 
 use Exception;
+use Symfony\Component\CssSelector\Exception\ParseException;
 
 class Aco
 {
@@ -48,7 +51,7 @@ class Aco
                default: $colors = self::parseBinary($handle, $flags);
           }
 
-          self::sortByColor($hsl);
+          self::sortByColor($handle);
 
           return $colors;
      }
@@ -325,9 +328,9 @@ class Aco
           return [$palette, $array, $hexcode, array_map("trim", explode(",", $name))];
      }
 
-     function sortByColor($array)
+     public static function sortByColor($array)
      {
-          usort_column($colors, 1, function ($a, $b) {
+          usort_column($array, 1, function ($a, $b) {
 
                $a = rgb2hsl($a);
                $b = rgb2hsl($b);

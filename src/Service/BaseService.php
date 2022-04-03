@@ -8,16 +8,7 @@ use Base\Database\Factory\EntityHydrator;
 use Base\Traits\BaseTrait;
 
 use Base\Service\ParameterBagInterface;
-use InvalidArgumentException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
-
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-
-
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpKernel\Event\KernelEvent;
-use Symfony\Contracts\EventDispatcher\Event;
 
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -26,12 +17,14 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
 use Base\Twig\Extension\BaseTwigExtension;
-use Doctrine\Common\Proxy\Proxy;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use Exception;
+use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 use Twig\Environment; //https://symfony.com/doc/current/templating/twig_extension.html
@@ -46,10 +39,12 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Mapping\ClassMetadataInterface;
+
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Contracts\EventDispatcher\Event;
 
+// TODO: Clean up advanced router proxy methods;
 class BaseService implements RuntimeExtensionInterface
 {   
     use BaseTrait;
@@ -130,7 +125,7 @@ class BaseService implements RuntimeExtensionInterface
 
         BaseSettings $settings,
         ImageService $imageService,
-        IconService $iconService,
+        IconProvider $iconProvider,
         
         EntityHydrator $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator)
@@ -156,7 +151,7 @@ class BaseService implements RuntimeExtensionInterface
         // Additional containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
         $this->setImageService($imageService);
-        $this->setIconService($iconService);
+        $this->setIconProvider($iconProvider);
         $this->setSettings($settings);
         $this->setLocaleProvider($localeProvider);
         $this->setTwig($twig);
@@ -238,40 +233,6 @@ class BaseService implements RuntimeExtensionInterface
         if(is_string($parameter)) self::$twig->addGlobal($name, $parameter.$value);
         if( is_array($parameter)) self::$twig->addGlobal($name, array_merge($parameter,$value));
         throw new Exception("Unknown merging method for \"$name\"");
-    }
-
-    /**
-     * Handling resource files
-     */
-    public function isValidUrl($url): bool
-    {
-        $regex  = "((https?|ftp)\:\/\/)?"; // SCHEME
-        $regex .= "([a-z0-9+!*(),;?&=\$_.-]+(\:[a-z0-9+!*(),;?&=\$_.-]+)?@)?"; // User and Pass
-        $regex .= "([a-z0-9-.]*)\.([a-z]{2,3})"; // Host or IP
-        $regex .= "(\:[0-9]{2,5})?"; // Port
-        $regex .= "(([a-z0-9+\$_-]\.?)+)*\/?"; // Path
-        $regex .= "(\?[a-z+&\$_.-][a-z0-9;:@&%=+\/\$_.-]*)?"; // GET Query
-        $regex .= "(#[a-z_.-][a-z0-9+\$_.-]*)?"; // Anchor
-
-        return preg_match("/^$regex$/i", $url); // `i` flag for case-insensitive
-    }
-
-    public function getAsset(string $url): string
-    {
-        $url = trim($url);
-        $parseUrl = parse_url($url);
-        if($parseUrl["scheme"] ?? false)
-            return $url;
-
-        $request = $this->requestStack->getCurrentRequest();
-        $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
-
-        $path = trim($parseUrl["path"]);
-        if($path == "/") return $baseDir;
-        else if(!str_starts_with($path, "/"))
-            $path = $baseDir."/".$path;
-
-        return $path;
     }
 
     private $htmlContent = [];
@@ -397,52 +358,28 @@ class BaseService implements RuntimeExtensionInterface
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
     
-    public function getRequest(): ?Request { return $this->getCurrentRequest(); }
-    public function getCurrentRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
-
     public function getParameter(string $name): array|bool|string|int|float|null { return $this->kernel->getContainer()->getParameter($name); }
     public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
     public function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
 
+    public function getRequest(): ?Request { return $this->getCurrentRequest(); }
+    public function getCurrentRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
+
     public function generateUrl(string $route = "", array $routeParameters = []): ?string { return $this->getUrl($route, $routeParameters); }
     public function getCurrentUrl(): ?string { return $this->getUrl(); }
-    public function getUrl(?string $route = "", array $routeParameters = []): ?string
-    {
-        if (!empty($route)) {
+    public function getUrl(?string $route = "", array $routeParameters = []): ?string { return $this->getRouter()->getUrl($route, $routeParameters); }
 
-            try { return self::$router->generate($route, $routeParameters); }
-            catch (RouteNotFoundException $e) { return $route; }
-        }
+    public function getAsset(string $url): string { return $this->getRouter()->getAsset($url); }
+    public function getCurrentRoute(): ?string { return $this->getRouter()->getCurrentRoute(); }
+    public function getCurrentRouteName(): ?string { return $this->getRouter()->getCurrentRouteName(); }
 
-        $request = $this->getRequest();
-        return $request ? self::$router->generate($request->get('_route')) : null;
-    }
+    public function hasRoute(string $route): bool { return $this->getRouter()->hasRoute($route); }
+    public function getRoute(?string $url): ?string { return $this->getRouter()->getRoute($url); }
+    public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
 
-    public function getCurrentRoute(): ?string {
-        
-        $request = $this->getRequest();
-        if(!$request) return null;
-
-        return $this->getRoute($request->getRequestUri());
-    }
-
-    public function isRoute(string $route): bool { return $this->getRouter()->getRouteCollection()->get($route) !== null; }
-    public function getRoute(?string $url): ?string
-    {
-        if(!$url) return null;
-
-        $baseDir = $this->getAsset("/");
-        $path = parse_url($url, PHP_URL_PATH);
-        if ($baseDir && strpos($path, $baseDir) === 0)
-            $path = mb_substr($path, strlen($baseDir));
-
-        try { return $this->getRouter()->match($path)['_route']; }
-        catch (ResourceNotFoundException $e) { return null; }
-    }
-
-    public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->getUrl($urlOrRoute, $opts), $state, $headers); }
+    public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->getUrl($urlOrRoute, $opts) ?? $urlOrRoute, $state, $headers); }
     public function redirectToRoute(string $route, array $opts = [], int $state = 302, array $headers = []): ?RedirectResponse
     { 
         $event = null;
@@ -470,10 +407,10 @@ class BaseService implements RuntimeExtensionInterface
         }
 
         $urlOrRoute   = $this->getUrl($route, $opts) ?? $route;
-        $route = $this->getRoute($urlOrRoute);
+        $route = $this->getRouteName($urlOrRoute);
         if (!$route) return null;
         
-        $currentRoute = $this->getCurrentRoute();
+        $currentRoute = $this->getCurrentRouteName();
         if ($route == $currentRoute) return null;
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
@@ -489,7 +426,7 @@ class BaseService implements RuntimeExtensionInterface
         return $response;
     }
 
-    public function refresh(?Request $request = null): RedirectResponse 
+    public function refresh(?Request $request = null): RedirectResponse
     {
         $request = $request ?? $this->getRequest();
         return $this->redirect($request->get('_route'));
@@ -501,45 +438,8 @@ class BaseService implements RuntimeExtensionInterface
 
     public function isCli() { return is_cli(); }
     public function isDebug() { return $this->kernel->isDebug(); }
-    public function isProfiler($request = null)
-    {
-        if(!$request) $request = $this->getRequest();
-        if($request instanceof KernelEvent)
-            $request = $request->getRequest();
-        else if($request instanceof RequestStack)
-            $request = $request->getCurrentRequest();
-        else if(!$request instanceof Request)
-            throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
-
-        $route = $request->get('_route');
-
-        return $route == "_wdt" || $route == "_profiler";
-    }
-
-    public function isEasyAdmin($request = null)
-    {
-        if(!$request) $request = $this->getRequest();
-        if($request instanceof KernelEvent)
-            $request = $request->getRequest();
-        else if($request instanceof RequestStack)
-            $request = $request->getCurrentRequest();
-        else if(!$request instanceof Request)
-            throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
-
-        $controllerAttribute = $request->attributes->get("_controller");
-        $array = is_array($controllerAttribute) ? $controllerAttribute : explode("::", $request->attributes->get("_controller"));
-        $controller = explode("::", $array[0])[0];
-
-        $parents = [];
-
-        $parent = $controller;
-        while(class_exists($parent) && ( $parent = get_parent_class($parent)))
-            $parents[] = $parent;
-
-        $eaParents = array_filter($parents, fn($c) => str_starts_with($c, "EasyCorp\Bundle\EasyAdminBundle"));
-        return !empty($eaParents);
-    }
-
+    public function isEasyAdmin() { return $this->getRouter()->isEasyAdmin(); }
+    public function isProfiler() { return $this->getRouter()->isProfiler(); }
     public function isEntity($entityOrClassOrMetadata) : bool { return $this->getClassMetadataManipulator()->isEntity($entityOrClassOrMetadata); }
 
 

@@ -5,7 +5,7 @@ namespace Base\Enum;
 use Base\Database\Type\EnumType;
 use Base\Model\IconizeInterface;
 
-class Gender extends EnumType implements IconizeInterface
+class UserGender extends EnumType implements IconizeInterface
 {
     const MALE       = "MALE";
     const FEMALE     = "FEMALE";

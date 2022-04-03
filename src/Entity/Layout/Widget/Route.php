@@ -12,7 +12,7 @@ use Base\Repository\Layout\Widget\RouteRepository;
 
 /**
  * @ORM\Entity(repositoryClass=RouteRepository::class)
- * @DiscriminatorEntry( value = "route" )
+ * @DiscriminatorEntry
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  */
 
@@ -21,7 +21,7 @@ class Route extends Widget implements IconizeInterface, UrlInterface
     public        function __iconize()       : ?array { return $this->getRouteIcons(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-road"]; } 
 
-    public function __toUrl(): string { return $this->generate(); }
+    public function __toUrl(): ?string { return $this->generate(); }
     public function __toString() { return $this->getTitle(); }
     
     public function __construct(string $title, string $route, array $routeParameters = []) 
@@ -36,8 +36,8 @@ class Route extends Widget implements IconizeInterface, UrlInterface
      * @ORM\Column(type="text")
      */
     protected $route;
-    public function getRoute(): ?string { return $this->route; }
-    public function getRouteIcons() { return $this->getIconService()->getRouteIcons($this->route); }
+    public function getRouteName(): ?string { return $this->route; }
+    public function getRouteIcons() { return $this->getIconProvider()->getRouteIcons($this->route); }
     public function setRoute(?string $route): self
     {
         $this->route = $route;

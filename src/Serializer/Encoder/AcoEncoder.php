@@ -19,6 +19,6 @@ class AcoEncoder implements EncoderInterface, DecoderInterface
      public function supportsDecoding(string $format) { return self::FORMAT === $format; }
      public function decode(string $data, string $format, array $context = []): mixed
      {
-          return unserialize($data);
+          return Aco::parse($data, $context["flags"] ?? 0);
      }
 }

@@ -14,7 +14,7 @@ use Base\Repository\Layout\Widget\MenuRepository;
 /**
  * @ORM\Entity(repositoryClass=MenuRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
- * @DiscriminatorEntry( value = "menu" )
+ * @DiscriminatorEntry
  */
 
 class Menu extends Widget implements IconizeInterface

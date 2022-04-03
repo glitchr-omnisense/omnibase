@@ -19,7 +19,7 @@ use Base\Traits\BaseTrait;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * 
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- *     @DiscriminatorEntry( value = "generic" )
+ *     @DiscriminatorEntry
  */
 
 class Attribute implements TranslatableInterface, IconizeInterface

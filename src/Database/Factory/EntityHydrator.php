@@ -200,7 +200,6 @@ class EntityHydrator
     protected function hydrateAssociations(mixed $entity, array $data, bool $deepcopy = true): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-
         foreach ($classMetadata->associationMappings as $association => $mapping) {
 
             $associationData = $this->getAssociatedId($association, $mapping, $data);
@@ -213,7 +212,7 @@ class EntityHydrator
 
                     if($classMetadata->getFieldName($association) === $association && $deepcopy)
                         $this->setPropertyValue($entity, $association, new ArrayCollection());
-
+                    
                     $this->hydrateToManyAssociation($entity, $association, $mapping, $associationData, $deepcopy);
                 }
             }
@@ -260,7 +259,7 @@ class EntityHydrator
         else {
 
             $associationObjects = [];
-            foreach ($values as $value) {
+            foreach ($values as $key => $value) {
 
                 if($value instanceof Collection) {
 
@@ -269,17 +268,16 @@ class EntityHydrator
 
                 } else if (is_array($value)) {
 
-                    $associationObjects[] = $this->hydrate($mapping['targetEntity'], $value);
+                    $associationObjects[$key] = $this->hydrate($mapping['targetEntity'], $value);
 
                 } elseif ($associationObject = $this->fetchAssociationEntity($mapping['targetEntity'], $value)) {
                 
-                    $associationObjects[] = $associationObject;
+                    $associationObjects[$key] = $associationObject;
                 }
             }
         }
 
         $this->setPropertyValue($entity, $propertyName, $associationObjects, $reflEntity);
-
         return $this;
     }
 

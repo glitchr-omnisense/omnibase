@@ -12,11 +12,11 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class IconType extends SelectType implements SelectInterface
 {
-    public static $iconService = null;
+    public static $iconProvider = null;
     public function __construct(...$args)
     {
         parent::__construct(...$args);
-        self::$iconService = $this->baseService->getIconService();
+        self::$iconProvider = $this->baseService->getIconProvider();
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -40,7 +40,7 @@ class IconType extends SelectType implements SelectInterface
     {
         parent::buildForm($builder, $options);
 
-        $iconProvider = self::$iconService->getProvider($options["provider"]);
+        $iconProvider = self::$iconProvider->getProvider($options["provider"]);
         foreach($iconProvider->getAssets() as $asset) {
 
             $relationship = pathinfo_relationship($asset);
@@ -51,13 +51,13 @@ class IconType extends SelectType implements SelectInterface
 
     public static function getIcon(string $id, int $index = -1): ?string
     {
-        $provider = self::$iconService->getProvider($id);
+        $provider = self::$iconProvider->getProvider($id);
         return $provider ? $id : null;
     }
 
     public static function getText(string $id): ?string
     {
-        $provider = self::$iconService->getProvider($id);
+        $provider = self::$iconProvider->getProvider($id);
         if($provider) {
 
             $choices = $provider->getChoices();

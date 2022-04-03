@@ -16,7 +16,7 @@ use Base\Service\BaseService;
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
- * @DiscriminatorEntry( value = "page" )
+ * @DiscriminatorEntry
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
@@ -26,7 +26,7 @@ class Page extends Widget implements IconizeInterface, UrlInterface
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; } 
 
-    public function __toUrl(): string
+    public function __toUrl(): ?string
     {
         return $this->getTwigExtension()->getRoutingExtension()->getPath(
             "widget_page", 

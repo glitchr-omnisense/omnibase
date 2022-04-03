@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Model;
+namespace Base\Model\IconProvider;
 
-interface IconProviderInterface
+interface IconAdapterInterface
 {
     public function load(): array;
     public function supports(string $icon): bool;

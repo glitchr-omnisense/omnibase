@@ -38,11 +38,9 @@ class SearchController extends AbstractController
      */
     public function Main(Request $request, ?FormInterface $formSearch = null, ?FormInterface $formSearchbar = null)
     {
-        $threads = [];
-
-        $formSearch = $formSearch ?? $this->createForm(SearchType::class, new SearchData());
+        $formSearch = $formSearch ?? $this->formProxy->getForm("thread:search") ?? $this->createForm(SearchType::class, new SearchData());
         $formSearch->handleRequest($request);
-        $formSearchbar = $formSearchbar ?? $this->createForm(SearchbarType::class, new SearchData());
+        $formSearchbar = $formSearchbar ?? $this->formProxy->getForm("thread:searchbar") ?? $this->createForm(SearchbarType::class, new SearchData());
         $formSearchbar->handleRequest($request);
 
         $formattedData = null;
@@ -60,6 +58,8 @@ class SearchController extends AbstractController
             $formattedData->title   = $formattedData->title   ?? $formattedData->generic;
             $formattedData->excerpt = $formattedData->excerpt ?? $formattedData->generic;
         }
+
+        $threads = [];
 
         if($formattedData) {
             

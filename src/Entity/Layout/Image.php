@@ -17,11 +17,11 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\DiscriminatorColumn( name = "context", type = "string" )
- *     @DiscriminatorEntry( value = "generic" )
+ *
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @ORM\DiscriminatorColumn( name = "type", type = "string" )
+ *     @DiscriminatorEntry
  */
 class Image
 {
