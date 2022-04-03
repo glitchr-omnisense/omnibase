@@ -36,12 +36,12 @@ class AdvancedRouter implements AdvancedRouterInterface
         return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : $this->getRouteCollection();
     }
 
-    public function getAsset(string $url): string
+    public function getAsset(string $routeUrl): string
     {
-        $url = trim($url);
-        $parseUrl = parse_url($url);
+        $routeUrl = trim($routeUrl);
+        $parseUrl = parse_url($routeUrl);
         if($parseUrl["scheme"] ?? false)
-            return $url;
+            return $routeUrl;
 
         $request = $this->requestStack->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
@@ -112,12 +112,12 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $route ? $this->router->generate($route) : null;
     }
 
-    public function getRouteArray(?string $url): ?array
+    public function getRouteArray(?string $routeUrl): ?array
     {
-        if(!$url) return null;
+        if(!$routeUrl) return null;
 
         $baseDir = $this->getAsset("/");
-        $path = parse_url($url, PHP_URL_PATH);
+        $path = parse_url($routeUrl, PHP_URL_PATH);
         if ($baseDir && strpos($path, $baseDir) === 0)
             $path = mb_substr($path, strlen($baseDir));
 
@@ -125,27 +125,55 @@ class AdvancedRouter implements AdvancedRouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
-    public function getRoute(?string $url): ?Route 
+    public function getRoute(?string $routeUrl): ?Route 
     { 
-        $routeArray = $this->getRouteArray($url);
+        $routeArray = $this->getRouteArray($routeUrl);
         if(!$routeArray) return null;
 
         $routeName = $routeArray["_route"];
+        if(array_key_exists("_group", $routeArray)) 
+            $routeName .= ".".$routeArray["_group"];
+        
+        $routeName = $routeArray["_route"];
         if(array_key_exists("_locale", $routeArray)) 
             $routeName .= ".".$routeArray["_locale"];
-        
+            
         return $this->router->getRouteCollection()->get($routeName);
     }
 
-    public function getRouteName(?string $url): ?string
+    public function getRouteName(?string $routeUrl): ?string
     {
-        $routeArray = $this->getRouteArray($url);
+        $routeArray = $this->getRouteArray($routeUrl);
         return $routeArray ? $routeArray["_route"] : null;
     }
 
-    public function getRouteParameters(?string $url): array
+    public function getRouteGroups(?string $routeName): array
     {
-        $route = $this->getRoute($url);
+        $routeName = explode(".", $routeName ?? "")[0];
+        return array_unique(array_keys(array_transforms(
+
+            function($k, $route) use ($routeName) :?array {
+
+                if($k == $routeName) return ["", $route];
+                if(str_starts_with($k.".", $routeName)) {
+
+                    $kSplit = explode(".", $k);
+                    $isLocalized = array_key_exists("_locale", $route->getDefaults());
+                    if($isLocalized && count($kSplit) < 3) $k = "";
+                    else $k = explode(".", $k)[1];
+
+                    return [$k, $route];
+                }
+
+                return null;
+
+            }, $this->router->getRouteCollection()->all()
+        )));
+    }
+
+    public function getRouteParameters(?string $routeUrl): array
+    {
+        $route = $this->getRoute($routeUrl);
         return $route ? $route->getDefaults() : [];
     }
 
@@ -169,12 +197,12 @@ class AdvancedRouter implements AdvancedRouterInterface
 
 
     // NB: dump(); seems not to be working in here..
-    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
+    public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
-        if(str_starts_with($name, "_")) {
+        if(str_starts_with($routeName, "_")) {
         
-            try { return $this->router->generate($name, $parameters, $referenceType); }
+            try { return $this->router->generate($routeName, $routeParameters, $referenceType); }
             catch (Exception $e) { return null; }
         }
 
@@ -199,35 +227,43 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations
-        $routeName = explode(".", $name);
+        $routeName = explode(".", $routeName);
         $currentRouteName = explode(".", $this->getCurrentRouteName());
 
-        $name = $routeName[0];
-        $group = count($routeName) > 1 ? tail($routeName) : null;
-        $group = $group ?? count($currentRouteName) > 1 ? tail($currentRouteName) : null;
-        $group = $group ?? [];
-        $group = $group ? ".".implode(".",$group) : null;
+        $routeGroup = count($routeName) > 1 ? tail($routeName) : null;
+        $routeGroup = $routeGroup ?? count($currentRouteName) > 1 ? tail($currentRouteName) : null;
+        $routeGroup = $routeGroup ?? [];
+        $routeGroup = $routeGroup ? ".".implode(".",$routeGroup) : null;
+
+        $routeBase = $routeName[0];
+        $routeName = $routeBase.$routeGroup;
+
+        // Prepare the default route if not found.
+        // In case a group doesn't exists, it will be replaced by the first group found in the route collection list.
+        $routeGroups = $this->getRouteGroups($routeName);
+        $routeDefaultGroup = first($routeGroups);
+        $routeDefaultName = $routeBase.($routeDefaultGroup ? ".".$routeDefaultGroup : "");
 
         //
         // Strip unused variables from main group
-        $url = $this->getUrl($name, $parameters);
-        $groupUrl = $this->getUrl($name.$group, $parameters);
+        $routeUrl = $this->getUrl($routeName, $routeParameters);
+        $routeGroupUrl = $this->getUrl($routeName.$routeGroup, $routeParameters);
+        
+        if($routeGroupUrl !== null && $routeUrl !== null) {
 
-        if($groupUrl !== null && $url !== null) {
-
-            $keys = array_keys(array_diff_key($this->getRouteParameters($url), $this->getRouteParameters($groupUrl)));
-            $parameters = array_key_removes($parameters, ...$keys);
+            $keys = array_keys(array_diff_key($this->getRouteParameters($routeUrl), $this->getRouteParameters($routeGroupUrl)));
+            $routeParameters = array_key_removes($routeParameters, ...$keys);
         }
         
         // Try to compute subgroup (or base one)
-        try { $url = $baseDir . $this->router->generate($name.$group, $parameters, $referenceType); }
-        catch (Exception $e) { $url = $baseDir . $this->router->generate($name, $parameters, $referenceType); }
+        try { $routeUrl = $baseDir . $this->router->generate($routeName, $routeParameters, $referenceType); }
+        catch (Exception $e) { $routeUrl = $baseDir . $this->router->generate($routeDefaultName, $routeParameters, $referenceType); }
 
         // Clean up double slashes..
-        $parts = parse_url($url);
+        $parts = parse_url($routeUrl);
         $parts["path"] = str_rstrip(str_replace("//", "/", $parts["path"]), "/");
-        $url = build_url($parts);
+        $routeUrl = build_url($parts);
 
-        return $url;
+        return $routeUrl;
     }
 }
