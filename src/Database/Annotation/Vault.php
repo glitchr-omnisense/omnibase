@@ -47,6 +47,7 @@ class Vault extends AbstractAnnotation
         $pathPrefix = $this->getProjectDir()."/config/secrets/".$vault."/".$vault.".";
         $decryptionKey = is_file($pathPrefix.'decrypt.private.php') ? (string) include $pathPrefix.'decrypt.private.php' : null;
 
+        if($decryptionKey === null) throw new Exception('Decryption key not found in "'.dirname($pathPrefix).'".');
         /* Rotation keys ? Encryption key ? Probably not needed.. input very welcome here :o) */
         // if (is_file($pathPrefix.'encrypt.public.php')) {
         //     $encryptionKey = (string) include $pathPrefix.'encrypt.public.php';
