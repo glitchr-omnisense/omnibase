@@ -22,8 +22,18 @@ namespace {
         }, $input);
     }
 
-    function is_instanceof(mixed $object_or_class, string $class): bool
+    function is_instanceof(mixed $object_or_class, string|array $class): bool
     {
+        // At least one class detection
+        if(is_array($class)) {
+
+            foreach($class as $_class)
+                if(is_instanceof($object_or_class, $_class)) return true;
+
+            return false;
+        }
+
+        // Default one
         if(!class_exists($class))
             throw new Exception("Class \"$class\" doesn't exists.");
 
