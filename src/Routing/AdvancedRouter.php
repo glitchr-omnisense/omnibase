@@ -11,7 +11,7 @@ use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
-
+use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\RouterInterface;
 
 class AdvancedRouter implements AdvancedRouterInterface
@@ -25,12 +25,12 @@ class AdvancedRouter implements AdvancedRouterInterface
         $this->baseSettings = $baseSettings;
     }
 
-    public function getRouteCollection() { return $this->router->getRouteCollection(); }
+    public function getRouteCollection(): RouteCollection { return $this->router->getRouteCollection(); }
     public function getContext(): RequestContext { return $this->router->getContext(); }
     public function setContext(RequestContext $context) { $this->router->setContext($context); }
     public function match(string $pathinfo): array { return $this->router->match($pathinfo); }
     public function matchRequest(Request $request): array { return $this->router->matchRequest($request); }
-    public function warmUp(string $cacheDir) 
+    public function warmUp(string $cacheDir): array 
     { 
         if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
         return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : $this->getRouteCollection();

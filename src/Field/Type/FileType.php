@@ -8,7 +8,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\BaseService;
 use Base\Validator\Constraints\FileMimeType;
 use Base\Validator\Constraints\FileSize;
-
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -236,6 +236,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $fileForm = current(iterator_to_array($forms));
         if(is_array($viewData)) $viewData = array_map("basename", $viewData);
+        else if($viewData instanceof Collection) $viewData = $viewData->map(function($f) { return basename($f); });
         else $viewData = basename($viewData);
 
         $fileForm->setData($viewData);

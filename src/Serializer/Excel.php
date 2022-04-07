@@ -270,11 +270,9 @@ class Excel
 
                 foreach ($cells as $key => $value) {
 
-                    if (array_key_exists($key, $headers)) 
-                        $labelledRows[$rowIndex - 1] = array_merge_recursive($labelledRows[$rowIndex - 1] ?? [], self::expand((string) $headers[$key], $value));
-                    else 
-                        $labelledRows[$rowIndex - 1][''][$key] = $value;
-
+                    if (array_key_exists($key, $headers))  $labelledRows[$rowIndex - 1][(string) $headers[$key]] = $value;
+                    else $labelledRows[$rowIndex - 1][''][$key] = $value;
+                    
                     unset($sheetData[$rowIndex][$key]);
                 }
 
@@ -285,18 +283,5 @@ class Excel
         }
 
         return $data;
-    }
-
-    public static function expand($header, $value)
-    {
-        $subheader = null;
-        if (preg_match('#(.+)\[(.*?)\]#', $header, $matches)) {
-            $header    = $matches[1] ?? "";
-            $subheader = $matches[2] ?? null;
-        }
-
-        if (!$subheader) return [$header => $value];
-
-        return self::expand($header, [$subheader => $value]);
     }
 }

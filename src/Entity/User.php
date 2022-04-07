@@ -129,7 +129,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->followedThreads = new ArrayCollection();
 
         $this->mentions = new ArrayCollection();
-        $this->authoredMentions = new ArrayCollection();
 
         $this->likes = new ArrayCollection();
 

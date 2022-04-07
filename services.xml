@@ -378,7 +378,6 @@
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\DatabaseSubscriber\EnumSubscriber">

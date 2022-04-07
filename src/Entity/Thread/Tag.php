@@ -7,7 +7,9 @@ use App\Entity\Thread;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
+use Base\Validator\Constraints as AssertBase;
 use Base\Annotations\Annotation\Slugify;
+use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\TranslatableInterface;
@@ -60,9 +62,9 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="string", length=9, nullable=true)
      */
-    protected $icon;
+    protected $color;
     public function getColor(): ?string { return $this->color; }
     public function setColor(?string $color): self
     {
@@ -71,11 +73,14 @@ class Tag implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\Column(type="string", length=9, nullable=true)
+     * @ORM\Column(type="text", nullable=true)
+     * @Uploader(storage="local.storage", public="/storage", size="2MB", mime={"image/*"})
+     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
      */
-    protected $color;
-    public function getIcon(): ?string { return $this->icon; }
-    public function setIcon(?string $icon): self
+    protected $icon;
+    public function getIcon() { return Uploader::getPublic($this, "icon"); }
+    public function getIconFile() { return Uploader::get($this, "icon"); }
+    public function setIcon($icon)
     {
         $this->icon = $icon;
         return $this;

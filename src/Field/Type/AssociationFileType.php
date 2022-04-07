@@ -211,7 +211,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     if($file instanceof File) {
 
                         $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
-                        $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"]);
+                        $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
 
                     } else if( ($pos = array_search($file, $viewDataFileIndexes)) ){
 
@@ -220,11 +220,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                     if($entity) {
 
-                        $entity = $this->entityHydrator->hydrate($entity, $options["entity_data"] ?? []);
+                        $entity = $this->entityHydrator->hydrate($entity, $options["entity_data"] ?? [], [], EntityHydrator::DEEPCOPY);
                         if($options["entity_data"] ?? false) {
 
                             if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);
-                            else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]));
+                            else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::DEEPCOPY);
 
                         } else {
 
@@ -242,11 +242,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 if(!$entity) {
 
                     $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
-                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"]);
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
                 }
 
                 if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);
-                else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]));
+                else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::DEEPCOPY);
 
                 $newData[] = $entity;
             }

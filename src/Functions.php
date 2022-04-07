@@ -767,7 +767,7 @@ namespace {
 
                 foreach($ret as $key => $yield)
                     $tArray[!empty($key) ? $key : count($tArray)] = $yield;
-               
+
                 $ret = $ret->getReturn();
             }
 
@@ -782,7 +782,16 @@ namespace {
         return $tArray;
     }
 
-    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) { return array_transforms(fn($k,$v,$fn):?array => [$k, is_array($v) ? array_transforms($fn, array_filter($v, $callback, $mode)) : $v], $array); }
+    function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) 
+    { 
+        return array_transforms(function ($k,$v,$fn) use ($callback, $mode) :?array {
+
+            $v = is_array($v) ? array_transforms($fn, array_filter($v, $callback, $mode)) : $v;
+            return $v === [] || $v === null ? null : [$k, $v];
+
+        }, $array);
+    }
+
     function array_slice_recursive(array $array, int $offset, ?int $length, bool $preserve_keys = false): array
     {
         $offsetCounter = 0;

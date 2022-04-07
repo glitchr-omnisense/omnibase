@@ -2,17 +2,10 @@
 
 namespace Base\Database\Repository;
 
-use Base\Entity\Thread;
-use Doctrine\DBAL\Query;
+use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Factory\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @method Thread|null find($id, $lockMode = null, $lockVersion = null)
- * @method Thread|null findOneBy(array $criteria, array ?array $orderBy = null, $groupBy = null)
- * @method Thread|null findLastBy(array $criteria, array ?array $orderBy = null, $groupBy = null)
- * @method Thread[]    findAll(?array $orderBy = null, $groupBy = null)
- * @method Thread[]    findBy(array $criteria, array ?array $orderBy = null, $groupBy = null, $limit = null, $offset = null)
- */
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
     public static function getFqcnEntityName()
@@ -28,21 +21,28 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public function __construct(ManagerRegistry $registry, ?string $entityName = null)
     {
         parent::__construct($registry, $entityName ?? $this->getFqcnEntityName());
-        $this->serviceParser = new ServiceEntityParser($this, $this->getClassMetadata());
+
+        $entityManager = $this->getEntityManager();
+        $classMetadata = $entityManager->getClassMetadata($this->getEntityName());
+        $classMetadataManipulator = new ClassMetadataManipulator($this->getEntityManager());
+        $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
+
+        $this->serviceParser = new ServiceEntityParser($this, $classMetadata, $entityHydrator);
     }
 
-    public function __call($method, $arguments) : mixed
-    {
-        return $this->serviceParser->parse($method, $arguments);
-    }
-
+    public function __call($method, $arguments) : mixed { return $this->serviceParser->parse($method, $arguments); }
+    public function find($id, $lockMode = null, $lockVersion = null):?object { return $this->findOneById($id, $lockMode, $lockVersion); }
+    public function findAll():array { return $this->__call(__METHOD__, [])->getResult(); }
+    public function findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null):array { return $this->__call(__METHOD__, [$criteria, $orderBy, $limit, $offset])->getResult(); }
+    public function findOneBy(array $criteria, ?array $orderBy = null):?object { return $this->__call(__METHOD__, [$criteria, $orderBy]); }
+    public function count(array $criteria):int { return $this->__call(__METHOD__, [$criteria]); }
+    
     public function flush() { return $this->getEntityManager()->flush(); }
     public function persist($entity) {
 
-        $entityName = self::getFqcnEntityName();
-        if(!is_object($entity) || (!$entity instanceof $entityName && !is_subclass_of($entity, $entityName))) {
+        if(!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {
             $class = (is_object($entity) ? get_class($entity) : "null");
-            throw new \Exception("Repository \"".static::class."\" is expected \"".$entityName."\" entity, you passed \"".$class."\"");
+            throw new \Exception("Repository \"".static::class."\" is expected \"".$this->_entityName."\" entity, you passed \"".$class."\"");
         }
 
         $this->getEntityManager()->persist($entity);

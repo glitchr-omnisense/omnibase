@@ -29,4 +29,10 @@ class ImageField extends FileField implements FieldInterface
             ->setCustomOption(self::OPTION_SHOWFIRST, true)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "image");
     }
+
+    public function setCropper(?array $cropper = [])
+    {
+        $this->setFormTypeOption("cropper", $cropper);
+        return $this;
+    }
 }

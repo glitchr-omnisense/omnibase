@@ -28,6 +28,7 @@ class CropperField implements FieldInterface
             ->setTextAlign(TextAlign::CENTER)
             ->setFormTypeOptionIfNotSet("data_class", null)
             ->setCustomOption(self::OPTION_SHOWFIRST, true)
+            ->setFormTypeOption("cropper", [])
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count");
     }
 }

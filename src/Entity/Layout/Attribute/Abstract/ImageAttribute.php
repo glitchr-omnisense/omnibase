@@ -24,5 +24,4 @@ class ImageAttribute extends AbstractAttribute implements IconizeInterface
     ]; }
 
     public function resolve(mixed $value): mixed { return $value; }
-
 }

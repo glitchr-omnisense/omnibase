@@ -165,7 +165,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
      * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @OrderColumn()
+     * @OrderColumn
      */
     protected $owners;
     public function getOwner(): ?User { return $this->owners[0] ?? null; }
@@ -210,6 +210,7 @@ class Thread implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="threads", cascade={"persist", "remove"})
+     * @OrderColumn
      */
     protected $tags;
     public function getPrimaryTag() { $first = $this->tags->first(); return ($first ? $first : null); }

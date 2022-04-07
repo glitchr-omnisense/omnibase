@@ -2,6 +2,7 @@
 
 namespace Base\Database\Repository;
 
+use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\PersistentCollection;
@@ -60,12 +61,15 @@ class ServiceEntityParser
     public const OPTION_NOT_ENDING_WITH   = "NotEndingWith";
 
     // Custom options
-    public const OPTION_INSENSITIVE   = "Insensitive";
-    public const OPTION_WITH_ROUTE    = "WithRoute";
-    public const OPTION_PARTIAL       = "Partial";
-    public const OPTION_MODEL         = "Model";
-    public const OPTION_INSTANCEOF    = "InstanceOf";
-    public const OPTION_BUT           = "But";
+    public const OPTION_INSENSITIVE    = "Insensitive";
+    public const OPTION_WITH_ROUTE     = "WithRoute";
+    public const OPTION_PARTIAL        = "Partial";
+    public const OPTION_MODEL          = "Model";
+    public const OPTION_INSTANCEOF     = "InstanceOf";
+    public const OPTION_NOT_INSTANCEOF = "NotInstanceOf";
+    public const OPTION_MEMBEROF       = "MemberOf";
+    public const OPTION_NOT_MEMBEROF   = "NotMemberOf";
+    public const OPTION_BUT            = "But";
     
     // Separators
     public const SEPARATOR     = ":"; // Field separator
@@ -85,12 +89,12 @@ class ServiceEntityParser
     protected array $options  = [];
 
     protected $classMetadata = null;
-    public function getClassMetadata(): ClassMetadata { return $this->classMetadata; }
 
-    public function __construct(ServiceEntityRepository $serviceEntity, ClassMetadata $classMetadata) 
+    public function __construct(ServiceEntityRepository $serviceEntity, ClassMetadata $classMetadata,  EntityHydrator $entityHydrator) 
     {
-        $this->serviceEntity = $serviceEntity;
-        $this->classMetadata = $classMetadata;
+        $this->serviceEntity  = $serviceEntity;
+        $this->classMetadata  = $classMetadata;
+        $this->entityHydrator = $entityHydrator;
 
         $this->criteria = [];
         $this->options = [];
@@ -146,8 +150,8 @@ class ServiceEntityParser
 
     protected function getAlias($alias) { 
 
-        $this->getClassMetadata()->fieldNames[$alias] ?? $alias;
-        return $this->getClassMetadata()->fieldNames[$alias] ?? $alias;
+        $this->classMetadata->fieldNames[$alias] ?? $alias;
+        return $this->classMetadata->fieldNames[$alias] ?? $alias;
     }
 
     protected function addCriteria(?string $by, $value)
@@ -215,6 +219,7 @@ class ServiceEntityParser
     protected function __parse($method, $arguments)
     {
         $method = str_strip($method, "__");
+        $method = explode("::", $method)[1] ?? $method;
 
         // Head parameters (depends on the method name) + default ones
         // Default parameters:
@@ -224,46 +229,51 @@ class ServiceEntityParser
         // - "MAGIC ARGUMENTS"+2: groupBy
         // - "MAGIC ARGUMENTS"+3: limit
         // - "MAGIC ARGUMENTS"+4: offset
-        
+
         // Definition of the returned values
         $magicFn = null;
         $magicArgs = [];
 
         // TODO: Safety check in dev mode only (maybe..)
-        foreach($this->getClassMetadata()->getFieldNames() as $field) {
+        foreach($this->classMetadata->getFieldNames() as $field) {
 
-            if (str_contains($field, self::OPTION_WITH_ROUTE )   ||
-                str_contains($field, self::OPTION_BUT        )   ||
-                str_contains($field, self::OPTION_MODEL      )   ||
-                str_contains($field, self::OPTION_INSTANCEOF )   ||
-                str_contains($field, self::OPTION_PARTIAL    )   ||
-                str_contains($field, self::OPTION_INSENSITIVE)   ||
-                str_contains($field, self::OPTION_STARTING_WITH) ||
-                str_contains($field, self::OPTION_ENDING_WITH)   ||
+            if (str_contains($field, self::OPTION_WITH_ROUTE )       ||
+                str_contains($field, self::OPTION_BUT        )       ||
+                str_contains($field, self::OPTION_MODEL      )       ||
+
+                str_contains($field, self::OPTION_INSTANCEOF )       ||
+                str_contains($field, self::OPTION_NOT_INSTANCEOF )   ||
+                str_contains($field, self::OPTION_MEMBEROF )         ||
+                str_contains($field, self::OPTION_NOT_MEMBEROF )     ||
+
+                str_contains($field, self::OPTION_PARTIAL    )       ||
+                str_contains($field, self::OPTION_INSENSITIVE)       ||
+                str_contains($field, self::OPTION_STARTING_WITH)     ||
+                str_contains($field, self::OPTION_ENDING_WITH)       ||
                 str_contains($field, self::OPTION_NOT_STARTING_WITH) ||
                 str_contains($field, self::OPTION_NOT_ENDING_WITH)   ||
 
-                str_contains($field, self::OPTION_LOWER)         ||
-                str_contains($field, self::OPTION_GREATER)       ||
-                str_contains($field, self::OPTION_LOWER_EQUAL)   ||
-                str_contains($field, self::OPTION_GREATER_EQUAL) ||
+                str_contains($field, self::OPTION_LOWER)             ||
+                str_contains($field, self::OPTION_GREATER)           ||
+                str_contains($field, self::OPTION_LOWER_EQUAL)       ||
+                str_contains($field, self::OPTION_GREATER_EQUAL)     ||
 
-                str_contains($field, self::OPTION_OVER)          ||
-                str_contains($field, self::OPTION_NOT_OVER)      ||
-                str_contains($field, self::OPTION_YOUNGER)       ||
-                str_contains($field, self::OPTION_OLDER)         ||
-                str_contains($field, self::OPTION_YOUNGER_EQUAL) ||
-                str_contains($field, self::OPTION_OLDER_EQUAL)   ||
+                str_contains($field, self::OPTION_OVER)              ||
+                str_contains($field, self::OPTION_NOT_OVER)          ||
+                str_contains($field, self::OPTION_YOUNGER)           ||
+                str_contains($field, self::OPTION_OLDER)             ||
+                str_contains($field, self::OPTION_YOUNGER_EQUAL)     ||
+                str_contains($field, self::OPTION_OLDER_EQUAL)       ||
 
-                str_contains($field, self::OPTION_EQUAL)         ||
-                str_contains($field, self::OPTION_NOT_EQUAL)     ||
+                str_contains($field, self::OPTION_EQUAL)             ||
+                str_contains($field, self::OPTION_NOT_EQUAL)         ||
 
-                str_contains($field, self::SEPARATOR_AND      )  ||
-                str_contains($field, self::SEPARATOR_OR       )  ||
+                str_contains($field, self::SEPARATOR_AND      )      ||
+                str_contains($field, self::SEPARATOR_OR       )      ||
                 str_contains($field, self::SEPARATOR         ))
 
                 throw new Exception(
-                    "\"".$this->serviceEntity->getEntityName(). "\" entity has a field called \"$field\". ".
+                    "\"".$this->serviceEntity->getFqcnEntityName(). "\" entity has a field called \"$field\". ".
                     "This is unfortunate, because this word is used to customize DQL queries. ".
                     "Please build your own DQL query or change your database field name"
                 );
@@ -386,12 +396,14 @@ class ServiceEntityParser
         $operator = self::OPTION_EQUAL; // Default case (e.g. "findBy" alone)
         foreach($byNames as $id => $by) {
 
-            $oldBy = null;
+            $oldBy = false;
 
-            $isModel = $isInsensitive = $isPartial = false;
-            $withRoute = null;
-            $but = null;
-            $instanceOf = null;
+            $isModel    = $isInsensitive = $isPartial = false;
+            $withRoute  = false;
+            $but        = false;
+
+            $instanceOf = $notInstanceOf = false;
+            $memberOf   = $notMemberOf   = false;
 
             $operator = self::OPTION_EQUAL;
             while ($oldBy != $by) {
@@ -409,6 +421,12 @@ class ServiceEntityParser
                     $option = self::OPTION_BUT;
                 else if ( str_ends_with($by, self::OPTION_INSTANCEOF) )
                     $option = self::OPTION_INSTANCEOF;
+                else if ( str_ends_with($by, self::OPTION_NOT_INSTANCEOF) )
+                    $option = self::OPTION_NOT_INSTANCEOF;
+                else if ( str_ends_with($by, self::OPTION_MEMBEROF) )
+                    $option = self::OPTION_MEMBEROF;
+                else if ( str_ends_with($by, self::OPTION_NOT_MEMBEROF) )
+                    $option = self::OPTION_NOT_MEMBEROF;
 
                 else if ( str_ends_with($by, self::OPTION_STARTING_WITH) )
                     $option = self::OPTION_STARTING_WITH;
@@ -467,6 +485,21 @@ class ServiceEntityParser
 
                     case self::OPTION_INSTANCEOF:
                         $instanceOf = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
+                        break;
+
+                    case self::OPTION_NOT_INSTANCEOF:
+                        $notInstanceOf = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
+                        break;
+
+                    case self::OPTION_MEMBEROF:
+                        $memberOf = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
+                        break;
+
+                    case self::OPTION_NOT_MEMBEROF:
+                        $notMemberOf = true;
                         list($method, $by) = $this->stripByEnd($method, $by, $option);
                         break;
 
@@ -542,10 +575,42 @@ class ServiceEntityParser
                 if(!empty($fieldValue)) {
 
                     $by = lcfirst(self::OPTION_INSTANCEOF);
-                    $operator = self::OPTION_INSTANCEOF;
 
                     $id = $this->addCriteria($by, $fieldValue);
-                    $this->addCustomOption($id, $operator);
+                    $this->addCustomOption($id, $instanceOf);
+                }
+
+            } else if ($notInstanceOf) {
+
+                $fieldValue = array_shift($arguments);
+                if(!empty($fieldValue)) {
+
+                    $by = lcfirst(self::OPTION_NOT_INSTANCEOF);
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    $this->addCustomOption($id, $notInstanceOf);
+                }
+
+            } else if ($memberOf) {
+
+                $fieldValue = array_shift($arguments);
+                if(!empty($fieldValue)) {
+
+                    $by = lcfirst(self::OPTION_MEMBEROF);
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    $this->addCustomOption($id, $memberOf);
+                }
+
+            } else if ($notMemberOf) {
+
+                $fieldValue = array_shift($arguments);
+                if(!empty($fieldValue)) {
+
+                    $by = lcfirst(self::OPTION_NOT_MEMBEROF);
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    $this->addCustomOption($id, $notMemberOf);
                 }
 
             } else if ($isModel) {
@@ -556,7 +621,7 @@ class ServiceEntityParser
 
                 $modelCriteria = [];
                 $model = array_shift($arguments);
-
+                dump($model);
                 if(is_object($model)) {
 
                     $reflClass = new ReflectionClass(get_class($model));
@@ -568,14 +633,14 @@ class ServiceEntityParser
                         if (!$field->isInitialized($model)) continue;
                         if (!($fieldValue = $field->getValue($model)) ) continue;
 
-                        if ($this->getClassMetadata()->hasAssociation($fieldName)) {
+                        if ($this->classMetadata->hasAssociation($fieldName)) {
 
-                            $associationField = $this->getClassMetadata()->getAssociationMapping($fieldName);
+                            $associationField = $this->classMetadata->getAssociationMapping($fieldName);
                             if (!array_key_exists("targetEntity", $associationField) || $field->getType() != $associationField["targetEntity"])
-                                throw new Exception("Invalid association mapping \"$fieldName\" found (found \"".$field->getType()."\", expected type \"". $associationField["targetEntity"]."\") in \"" . $this->getClassMetadata()->getName() . "\" entity, \"" . $reflClass->getName() . " cannot be applied\"");
+                                throw new Exception("Invalid association mapping \"$fieldName\" found (found \"".$field->getType()."\", expected type \"". $associationField["targetEntity"]."\") in \"" . $this->classMetadata->getName() . "\" entity, \"" . $reflClass->getName() . " cannot be applied\"");
 
-                        } else if(!$this->getClassMetadata()->hasField($fieldName))
-                            throw new Exception("No field \"$fieldName\" (or association mapping) found in \"".$this->getClassMetadata()->getName(). "\" entity, \"".$reflClass->getName()." cannot be applied\"");
+                        } else if(!$this->classMetadata->hasField($fieldName))
+                            throw new Exception("No field \"$fieldName\" (or association mapping) found in \"".$this->classMetadata->getName(). "\" entity, \"".$reflClass->getName()." cannot be applied\"");
 
                         if (( $fieldValue = $field->getValue($model) ))
                             $modelCriteria[$fieldName] = $fieldValue;
@@ -583,8 +648,8 @@ class ServiceEntityParser
 
                 } else if(is_array($model)) {
 
-                    $modelCriteria = $model;
-
+                    $modelCriteria = $this->entityHydrator->hydrate($this->classMetadata->getName(), $model);
+                    dump($modelCriteria);
                 } else {
 
                     throw new Exception("Model expected to be an object or an array, currently \"". gettype($model)."\"");
@@ -649,12 +714,20 @@ class ServiceEntityParser
         $fieldID   = implode("_", $field);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
 
-        $isInstanceOf  = $this->findCustomOption($fieldRoot, self::OPTION_INSTANCEOF);
-        $isPartial     = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
-        $isInsensitive = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
-        $tableOperator =
+        $isPartial       = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
+        $isInsensitive   = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
 
-            ($this->findCustomOption ($fieldRoot, self::OPTION_INSTANCEOF)    ? self::OPTION_INSTANCEOF    :
+        $isMemberOf      = $this->findCustomOption($fieldRoot, self::OPTION_MEMBEROF);
+        $isNotMemberOf   = $this->findCustomOption($fieldRoot, self::OPTION_NOT_MEMBEROF);
+        $isInstanceOf    = $this->findCustomOption($fieldRoot, self::OPTION_INSTANCEOF);
+        $isNotInstanceOf = $this->findCustomOption($fieldRoot, self::OPTION_NOT_INSTANCEOF);
+
+        $tableOperator   =
+
+            ($this->findCustomOption ($fieldRoot, self::OPTION_INSTANCEOF)   ? self::OPTION_INSTANCEOF        :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_MEMBEROF)     ? self::OPTION_MEMBEROF          :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_INSTANCEOF)   ? self::OPTION_NOT_INSTANCEOF:
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_MEMBEROF)     ? self::OPTION_NOT_MEMBEROF  :
 
             // Datetime related options
             ($this->findCustomOption ($fieldRoot, self::OPTION_OVER)          ? self::OPTION_OVER          :
@@ -676,19 +749,22 @@ class ServiceEntityParser
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER         :
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   : 
             ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL     : self::OPTION_EQUAL
-        ))))))))))))))));
+        )))))))))))))))))));
 
         if(is_array($tableOperator))
             throw new Exception("Too many operator requested for \"$fieldName\": ".implode(",", $tableOperator));
 
-        if($tableOperator == self::OPTION_INSTANCEOF) $tableColumn = self::ALIAS_ENTITY;
-        else {
-            
-            $tableColumn = self::ALIAS_ENTITY . ($this->getClassMetadata()->hasAssociation($fieldName) ? "_" : ".") . $fieldName;
+        switch($tableOperator) {
 
-            // Regular field: string, datetime..
-            if ($this->getClassMetadata()->hasAssociation($fieldName))
-                $qb = $this->innerJoin($qb, $fieldName);
+            case self::OPTION_MEMBEROF: 
+            case self::OPTION_NOT_MEMBEROF: 
+            case self::OPTION_INSTANCEOF: 
+            case self::OPTION_NOT_INSTANCEOF: 
+                $tableColumn = self::ALIAS_ENTITY;
+                break;
+
+            default:
+                $tableColumn = self::ALIAS_ENTITY . ($this->classMetadata->hasAssociation($fieldName) ? "_" : ".") . $fieldName;
         }
 
         $regexRequested    = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
@@ -698,7 +774,7 @@ class ServiceEntityParser
 
             if($datetimeRequested) {
 
-                if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
+                     if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
                 else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
                 else if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
 
@@ -711,7 +787,7 @@ class ServiceEntityParser
 
                 $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
-                    if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
+                     if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
                 else if($tableOperator == self::OPTION_ENDING_WITH      ) $fieldValue = "%".$fieldValue;
                 else if($tableOperator == self::OPTION_NOT_STARTING_WITH) $fieldValue = $fieldValue."%";
                 else if($tableOperator == self::OPTION_NOT_ENDING_WITH  ) $fieldValue = "%".$fieldValue;
@@ -720,7 +796,7 @@ class ServiceEntityParser
             }
         }
 
-        if($isInstanceOf) {
+        if($isInstanceOf || $isNotInstanceOf) {
             
             // Cast to array
             if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
@@ -729,18 +805,75 @@ class ServiceEntityParser
             $notInstanceOf = [];
             foreach ($fieldValue as $value) {
 
-                if( str_starts_with($value, "^") )
-                    $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^")));
-                else 
-                    $instanceOf[]    = $qb->expr()->isInstanceOf($tableColumn, $value);
+                if($isInstanceOf) {
+
+                    if( str_starts_with($value, "^") ) $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^")));
+                    else $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, $value);
+
+                } else {
+
+                    if( str_starts_with($value, "^") ) $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^"));
+                    else $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value));
+                }
             }
 
             if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
             return $qb->expr()->orX(...$instanceOf);
 
+        } else if($isMemberOf || $isNotMemberOf) {
+
+            // Cast to array
+            if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
+
+               $memberOf = [];
+            $notMemberOf = [];
+            foreach ($fieldValue as $value) {
+
+                if($isMemberOf) $memberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
+                else $notMemberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
+            }
+
+            if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
+            return $qb->expr()->orX(...$memberOf);
+        
         } else {
 
+            if ($this->classMetadata->hasAssociation($fieldName)) 
+                $qb = $this->innerJoin($qb, $fieldName);
+
             $qb->setParameter($fieldID, $fieldValue);
+            // Association field: check if it is inverse or owning side..
+            //    $qb = $this->innerJoin($qb, $fieldName);
+            // if(!$this->classMetadata->isAssociationInverseSide($fieldName))
+            //  $qb = $this->innerJoin($qb, $fieldName);
+            // else {
+            //     if(is_object($fieldValue)) { dump("MEMBER OF"); } // MEMBEROF ?
+            //     else {
+
+            //         if(!is_array($fieldValue)) $fieldValue = ["id" => $fieldValue];
+
+            //         foreach($fieldValue as $subFieldName => $subFieldValue) {
+
+            //             $subTableColumn = $tableColumn."_".$subFieldName;
+            //             $subFieldID = $fieldID."_".$subFieldName;
+
+            //             dump($fieldName);
+
+            //             $subQuery = $this->serviceEntity->createQueryBuilder(self::ALIAS_ENTITY)
+            //                 ->join(self::ALIAS_ENTITY.'.'.$fieldName, $tableColumn, 'WITH' , $subTableColumn .' = :'.$subFieldID)
+            //                 ->getDQL();
+
+            //             $qb->setParameter($subFieldID, $subFieldValue);
+                        
+            //             if($tableOperator == self::OPTION_EQUAL) 
+            //                 $qb->where($qb->expr()->in(self::ALIAS_ENTITY, $subQuery));
+            //             else if($tableOperator == self::OPTION_NOT_EQUAL) 
+            //                 $qb->where($qb->expr()->notIn(self::ALIAS_ENTITY, $subQuery));
+            //         }
+            //     }
+            // }
+            //}
+            
 
             if ($isInsensitive) $tableColumn = "LOWER(" . $tableColumn . ")";
             if ($isPartial) {
@@ -835,7 +968,7 @@ class ServiceEntityParser
                     $queryExpr = $this->buildQueryExpr($qb, $newField, $entryValue);
 
                     // In case of association field, compare value directly
-                    if ($this->getClassMetadata()->hasAssociation($entryID)) $qb->andWhere($queryExpr);
+                    if ($this->classMetadata->hasAssociation($entryID)) $qb->andWhere($queryExpr);
                     // If standard field, check for partial information
                     else $expr[] = $queryExpr;
                 }
@@ -911,7 +1044,7 @@ class ServiceEntityParser
         $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy);
         $this->innerJoin($qb, $column);
 
-        $column = self::ALIAS_ENTITY . ($this->getClassMetadata()->hasAssociation($column) ? "_".$column : "");
+        $column = self::ALIAS_ENTITY . ($this->classMetadata->hasAssociation($column) ? "_".$column : "");
         $qb->select('COUNT('.trim($mode.' '.$column).') AS count');
         
         $this->orderBy($qb, $orderBy);
@@ -923,7 +1056,7 @@ class ServiceEntityParser
     protected function getQueryWithLength(array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
     {
         $column = $this->getAlias($this->getColumn());
-        $column = self::ALIAS_ENTITY . ($this->getClassMetadata()->hasAssociation($column) ? "_".$column : "");
+        $column = self::ALIAS_ENTITY . ($this->classMetadata->hasAssociation($column) ? "_".$column : "");
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset);
         $this->innerJoin($qb, $column);
@@ -940,7 +1073,7 @@ class ServiceEntityParser
     {
         if($groupBy) {
 
-            $column = explode("\\", $this->getClassMetadata()->getName());
+            $column = explode("\\", $this->classMetadata->getName());
             $column = lcfirst(end($column));
 
             if(is_string($groupBy)) $groupBy = [$groupBy];
@@ -952,7 +1085,7 @@ class ServiceEntityParser
                 $value = implode(".", array_map(fn ($value) => $this->getAlias($value), explode(".", $value)));
 
                 $firstValue = explode(".", $value)[0] ?? $value;
-                $groupBy[$name] = self::ALIAS_ENTITY . ($this->getClassMetadata()->hasAssociation($firstValue) ? "_" : ".") . $value;
+                $groupBy[$name] = self::ALIAS_ENTITY . ($this->classMetadata->hasAssociation($firstValue) ? "_" : ".") . $value;
                 
                 if($groupBy[$name] == self::ALIAS_ENTITY.".".$alias) $qb->addSelect($groupBy[$name]);
                 else $qb->addSelect("(".$groupBy[$name].") AS ".$alias);
@@ -970,7 +1103,7 @@ class ServiceEntityParser
     protected function innerJoin($qb, $innerJoin)
     {
         if(in_array($innerJoin, $this->innerJoinList[spl_object_hash($qb)])) return $qb;
-        if ($this->getClassMetadata()->hasAssociation($innerJoin)) {
+        if ($this->classMetadata->hasAssociation($innerJoin)) {
 
             $qb->innerJoin(self::ALIAS_ENTITY.".".$innerJoin, self::ALIAS_ENTITY."_".$innerJoin);
             $this->innerJoinList[spl_object_hash($qb)][] = $innerJoin;
@@ -983,7 +1116,7 @@ class ServiceEntityParser
     {
         if($orderBy) {
 
-            $column = explode("\\", $this->getClassMetadata()->getName());
+            $column = explode("\\", $this->classMetadata->getName());
             $column = lcfirst(end($column));
 
             if(is_string($orderBy)) $orderBy = [$orderBy => "ASC"];
@@ -999,7 +1132,7 @@ class ServiceEntityParser
                 $isRandom = ($name == "id" && strtolower($value) == "rand");
                 if(!$isRandom) {
                 
-                    $formattedName = self::ALIAS_ENTITY . ($this->getClassMetadata()->hasAssociation($entity) ? "_" : ".") . $name;
+                    $formattedName = self::ALIAS_ENTITY . ($this->classMetadata->hasAssociation($entity) ? "_" : ".") . $name;
                     $qb = $this->innerJoin($qb, $entity);
                 }
 

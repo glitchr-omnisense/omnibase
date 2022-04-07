@@ -34,7 +34,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
     public        function __iconize()       : ?array { return $this->icon ? [$this->icon] : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __toString() { return $this->getLabel(); }
+    public function __toString() { return $this->getLabel() ?? get_class($this); }
 
     public function __autocomplete():?string { return $this->getLabel(); }
     public function __autocompleteData():array { return $this->getOptions(); }

@@ -40,13 +40,10 @@ class ClassMetadataManipulator
      */
     protected array $globalExcludedFields;
 
-    public function __construct(EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
+    public function __construct(EntityManagerInterface $entityManager, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
         $this->entityManager = $entityManager;
-
-        $this->globalExcludedFields = [];
-        if ( ($matches = preg_grep('/^base.database.excluded_fields\.[0-9]*$/', array_keys($parameterBag->all()))) )
-            foreach ($matches as $match) $this->globalExcludedFields[] = $parameterBag->get($match);
+        $this->globalExcludedFields = $globalExcludedFields;
     }
 
     public function getEntityManager()        : EntityManagerInterface { return $this->entityManager; }
@@ -542,7 +539,6 @@ class ClassMetadataManipulator
     public function isInverseSide($entityOrClassOrMetadata, string $fieldName):bool
     {
         if(!$this->hasAssociation($entityOrClassOrMetadata, $fieldName)) return false;
-
         $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
