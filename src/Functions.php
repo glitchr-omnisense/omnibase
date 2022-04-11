@@ -22,6 +22,11 @@ namespace {
         }, $input);
     }
 
+    function is_parent(mixed $object_or_class, string|array $class): bool
+    {
+        return is_a($object_or_class, $class, true);
+    }
+
     function is_instanceof(mixed $object_or_class, string|array $class): bool
     {
         // At least one class detection
@@ -110,6 +115,21 @@ namespace {
                     $methods . "\n}\n\nMore information in the ReflectionMethod below.."
             );
         }
+    }
+
+    function debug_backtrace_short()
+    {
+        $backtrace = [];
+        foreach(debug_backtrace() as $key => $trace) {
+
+            $backtrace[$key] = [];
+            $backtrace[$key][] = $trace["file"].":".$trace["line"];
+            $backtrace[$key][] = 
+                (array_key_exists("class"   , $trace) ? $trace["class"   ]."::" : "").
+                (array_key_exists("function", $trace) ? $trace["function"]."()" : "");
+        }
+    
+        return $backtrace;
     }
 
     define("SHORTEN_FRONT", -1); // [..] dolor sit amet
@@ -268,13 +288,13 @@ namespace {
         return $path["dirname"].$prefix.$path["filename"].$path["extension"];
     }
 
-    function str_explode(array|string $separator, string $string, int $limit = -1)
+    function explodeByArray(array|string $separator, string $string, int $limit = PHP_INT_MAX)
     {
         if($limit == 0) return [$string];
         if(is_string($separator)) $separator = [$separator];
 
         if (preg_match('/(.*)(?:'.implode("|", array_map("preg_quote", $separator)).')(.*)/', $string, $matches))
-            return array_merge([$matches[1]], str_explode($separator, $matches[2], --$limit));
+            return array_merge(explodeByArray($separator, $matches[1], --$limit), [$matches[2]]);
 
         return [$string];
     }
@@ -328,16 +348,11 @@ namespace {
         return $haystack;
     }
 
-    function first(object|array &$array) { return begin($array) ?? false; }
-    function last(object|array &$array)  { return end($array)   ?? false; }
+    function begin(object|array &$array) { return array_values(array_slice($array, 0, 1))[0] ?? null; }
+    function first(object|array &$array) { return begin($array) ?? null; }
+    function head(object|array &$array):mixed { return begin($array); }
 
-    function begin(object|array &$array) 
-    {
-        $first = array_key_first($array);
-        return $first !== null ? $array[$first] : null;
-    }
-
-    function head(object|array &$array):mixed { return array_slice($array, 0, 1)[0] ?? null; }
+    function last(object|array &$array)  { return end($array)   ?? null; }
     function tail(object|array &$array, int $length = -1, bool $preserve_keys = false):array  { return array_slice($array, -min(count($array)-1, $length), null, $preserve_keys); }
 
     function distance(array $arr1, array $arr2)
@@ -558,7 +573,7 @@ namespace {
         $arrays = func_get_args();
         $base = array_shift($arrays);
 
-        if (!is_array($base)) $base = empty($base) ? array() : array($base);
+        if (!is_array($base)) $base = empty($base) ? [] : array($base);
 
         foreach ($arrays as $append) {
             if (!is_array($append)) $append = array($append);
@@ -725,7 +740,11 @@ namespace {
         }
     }
 
-    function array_transforms(callable $callback, array $array, int $depth = 0): array {
+    
+    define('ARRAY_TRANSFORMS_OVERRIDE', 1);
+    define('ARRAY_TRANSFORMS_MERGE'   , 2);
+
+    function array_transforms(callable $callback, array $array, int $depth = 0, int $prevent_conflicts = ARRAY_TRANSFORMS_OVERRIDE): array {
 
         $reflection = new ReflectionFunction($callback);
         if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['array', 'Generator'])) 
@@ -763,18 +782,59 @@ namespace {
                     throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
             }
 
+            // Process generators
             if($ret instanceof Generator) {
 
-                foreach($ret as $key => $yield)
-                    $tArray[!empty($key) ? $key : count($tArray)] = $yield;
+                foreach($ret as $tKey => $yield)
+                {
+                    $tKey = !empty($tKey) ? $tKey : count($tArray);
+                    switch($prevent_conflicts) {
+
+                        case ARRAY_TRANSFORMS_MERGE:
+
+                            $yield ??= [];
+
+                            $tArray[$tKey] ??= [];
+                            $tArray[$tKey] = array_merge(
+                                is_array($tArray[$tKey]) ? $tArray[$tKey] : [$tArray[$tKey]], 
+                                is_array($yield) ? $yield : [$yield]
+                            );
+
+                            break;
+
+                        default:
+                        case ARRAY_TRANSFORMS_OVERRIDE:
+                            $tArray[$tKey] = $yield;
+                    }
+                }
 
                 $ret = $ret->getReturn();
             }
 
+            // Process returned value if found
             if($ret === null) continue;
 
             list($tKey, $tEntry) = [$ret[0] ?? count($tArray), $ret[1] ?? $entry];
-            $tArray[$tKey] = $tEntry;
+            switch($prevent_conflicts) {
+
+                case ARRAY_TRANSFORMS_MERGE:
+
+                    if(!is_array($tEntry)) $tArray[$tKey] = $tEntry;
+                    else {
+                    
+                        $tArray[$tKey] ??= [];
+                        $tArray[$tKey] = array_merge_recursive(
+                            is_array($tArray[$tKey]) ? $tArray[$tKey] : [$tArray[$tKey]], 
+                            is_array($tEntry) ? $tEntry : [$tEntry]
+                        );
+                    }
+
+                    break;
+
+                default:
+                case ARRAY_TRANSFORMS_OVERRIDE:
+                    $tArray[$tKey] = $tEntry;
+            }
 
             $counter++;
         }
@@ -818,42 +878,64 @@ namespace {
 
     define('ARRAY_FLATTEN_PRESERVE_KEYS', 1);
     define('ARRAY_FLATTEN_PRESERVE_DUPLICATES', 2);
-    function array_flatten(?array $array = null, int $mode = 0)
+    function array_key_flattens(string $separator, ?array $array, int $limit = PHP_INT_MAX) { return array_flatten($separator, $array, $limit, ARRAY_FLATTEN_PRESERVE_KEYS); }
+    function array_flatten(string $separator, ?array $array, int $limit = PHP_INT_MAX, int $mode = 0)
     {
-        $result = [];
+        $ret = [];
         if (!is_array($array)) $array = func_get_args();
 
+        if (!$limit) return $array;
         foreach ($array as $key => $value) {
-        
+            
             switch($mode) {
 
+                default:
                 case ARRAY_FLATTEN_PRESERVE_KEYS:
-                    $flattenValues = is_array($value) ? array_flatten($value, $mode) : $value;
-                    if(!is_array($flattenValues)) $result[$key] = $value;
+                    $flattenValues = is_array($value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode) : $value;
+
+                    if(!is_array($flattenValues)) $ret[$key] = $value;
                     else {
                         
                         foreach($flattenValues as $key2 => $flattenValue)
-                            $result[$key.".".$key2] = $flattenValue;
+                            $ret[$key.".".$key2] = $flattenValue;
                     }
 
                     break;
 
                 case ARRAY_FLATTEN_PRESERVE_DUPLICATES:
-                    $flattenValues = is_array($value) ? array_flatten($value) : [$key => $value];
+                    $flattenValues = is_array($value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit) : [$key => $value];
                     foreach($flattenValues as $key2 => $flattenValue) {
 
-                        if(!array_key_exists($key2, $result)) $result[$key2] = [$flattenValue];
-                        else $result[$key2][] = $flattenValue;
+                        if(!array_key_exists($key2, $ret)) 
+                            $ret[$key.".".$key2] = [];
+                            
+                        $ret[$key.".".$key2][] = $flattenValue;
                     }
                     break;
-
-                default: case 0: 
-                    $flattenValues = is_array($value) ? array_flatten($value) : [$key => $value];
-                    $result = array_merge($result, $flattenValues);
             }
         }
 
-        return $result;
+        return $ret;
+    }
+
+    function array_inflate(string $separator, ?array $array, int $limit = PHP_INT_MAX) {
+
+        if(!is_array($array)) return $array;
+
+        $ret = [];
+        foreach ($array as $key => $value) {
+
+            $keys = explode($separator, $key, $limit);
+            list($head, $tail) = [head($keys), implode($separator, tail($keys))];
+            $ret[$head] ??= [];
+
+            $limit = ($limit == PHP_INT_MAX) ? PHP_INT_MAX : $limit - count($keys);
+            if($tail !== "") $ret[$head] = array_merge_recursive($ret[$head], array_inflate($separator, [$tail => $value], $limit));
+            else if(is_array($value)) $ret[$head] = array_inflate($separator, $value);
+            else $ret[$head] = $value;
+        }
+
+        return $ret;
     }
 
     function array_class($objectOrClass, array $haystack): string|int|false 
@@ -911,12 +993,38 @@ namespace {
         return $entry;
     }
 
-    function array_key_removes  (array $array, string ...$keys  ): array
+    function array_keys_recursive(array $array): array
+    {
+        $keys = [];
+
+        foreach($array as $key => $value) {
+            
+            if (is_array($value)) $keys[$key] = array_keys_recursive($value);
+            else $keys[] = $key;
+        }
+
+        return $keys;
+    }
+
+    function array_key_removes(array $array, string ...$keys  ): array
     { 
         foreach($keys as $key) 
             unset($array[$key]);
 
         return $array;
+    }
+
+    function array_key_explodes(array|string $separator, array $array, int $limit = PHP_INT_MAX)
+    {
+        return array_transforms(function($k, $v, $callback, $_, $depth) use ($separator, $limit) :array { 
+
+            if($limit >= 0 && $depth >= $limit) 
+                return [$k, $v];
+
+            $subk = explodeByArray($separator, $k);
+            return [head($subk), count($subk) > 1 ? array_transforms($callback, [implode(".", tail($subk)) => $v], ++$depth, ARRAY_TRANSFORMS_MERGE) : $v];
+
+        }, $array, 0, ARRAY_TRANSFORMS_MERGE);
     }
 
     function array_values_remove(array $array, ...$values):array { return array_filter($array, fn($v) => !in_array($v, $values)); }
@@ -1160,7 +1268,7 @@ namespace {
     }
 
     function http_parse_query($query) {
-        $parameters = array();
+        $parameters = [];
         $queryParts = explode('&', $query);
         foreach ($queryParts as $queryPart) {
             $keyValue = explode('=', $queryPart, 2);

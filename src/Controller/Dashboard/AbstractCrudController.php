@@ -57,6 +57,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->crud = null;
     }
 
+    public function getDiscriminatorMap(): array
+    {
+        return $this->classMetadataManipulator->getDiscriminatorMap(self::getEntityFqcn());
+    }
+
     public static function getEntityFqcn(): string
     {
         $entityFqcn = mb_substr(get_called_class(), 0, -strlen("CrudController"));
@@ -332,7 +337,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $yields = array_insert($yields, $yieldPosNext, $yield);
         }
 
-        foreach(array_flatten(array_concat($yields, $restYields), ARRAY_FLATTEN_PRESERVE_KEYS) ?? [] as $yield)
+        foreach(array_flatten(".", array_concat($yields, $restYields), -1, ARRAY_FLATTEN_PRESERVE_KEYS) ?? [] as $yield)
             yield $yield;
     }
 
@@ -340,10 +345,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         $args = array_map_recursive(
                 fn($v) => is_callable($v) ? $v() : $v,
-                array_flatten(array_filter_recursive($args,
+                array_flatten(".", array_filter_recursive($args,
                     fn($v, $k) => ($field === null || $k == $field) && !empty($v),
                     ARRAY_FILTER_USE_BOTH)
-                , ARRAY_FLATTEN_PRESERVE_KEYS)
+                , -1, ARRAY_FLATTEN_PRESERVE_KEYS)
             );
 
         $yields = [];

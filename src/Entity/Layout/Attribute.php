@@ -10,6 +10,7 @@ use Base\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\AttributeRepository;
+use Base\Traits\AttributeTrait;
 use Base\Traits\BaseTrait;
 
 /**
@@ -22,46 +23,23 @@ use Base\Traits\BaseTrait;
  *     @DiscriminatorEntry
  */
 
-class Attribute implements TranslatableInterface, IconizeInterface
+class Attribute implements TranslatableInterface, IconizeInterface, AttributeInterface
 {
     use BaseTrait;
+    use AttributeTrait;
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return $this->attributePattern ? $this->attributePattern->__iconize() : null; } 
+    public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconize() : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __construct(AbstractAttribute $attributePattern, mixed $value = null)
+    public function __construct(AbstractAttribute $adapter, mixed $value = null)
     {
-        $this->setAttributePattern($attributePattern);
+        $this->setAdapter($adapter);
         $this->setValue($value);
     }
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
-    protected $id;
-    public function getId(): ?int { return $this->id; }
-
-    /**
-     * @ORM\ManyToOne(targetEntity=AbstractAttribute::class, inversedBy="attributes")
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    protected $attributePattern;
-    public function getAttributePattern(): ?AbstractAttribute { return $this->attributePattern; }
-    public function setAttributePattern(?AbstractAttribute $attributePattern): self
-    {
-        $this->attributePattern = $attributePattern;
-        return $this;
-    }
-
-    public function getCode(): ?string { return $this->getAttributePattern()->getCode(); }
-    public function getType(): ?string { return get_class($this->getAttributePattern()); }
-    public function getOptions(): array { return $this->getAttributePattern()->getOptions(); }
     public function resolve(?string $locale = null): mixed 
     {
-        return $this->attributePattern->resolve($this->translate($locale)->getValue()) ?? null;
+        return $this->adapter->resolve($this->translate($locale)->getValue()) ?? null;
     }
 }

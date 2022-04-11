@@ -30,7 +30,7 @@ class Hyperlink extends Attribute implements IconizeInterface
     }
 
     /**
-      * @ColumnAlias(column = "attributePattern")
+      * @ColumnAlias(column = "adapter")
       * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
       */
     protected $hyperpattern;

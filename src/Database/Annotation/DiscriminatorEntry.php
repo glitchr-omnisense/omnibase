@@ -31,7 +31,7 @@ class DiscriminatorEntry extends AbstractAnnotation
 
             // Formatting input object
             $className = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
-            $namespace = str_explode("\\Entity\\", $className);
+            $namespace = explodeByArray("\\Entity\\", $className);
 
             // Special case for App and Base entities
             switch (($namespaceRoot = array_shift($namespace))) {
@@ -58,7 +58,7 @@ class DiscriminatorEntry extends AbstractAnnotation
                     $parentNamespace = null;
                     if( $parentClassName = get_parent_class($className) ) {
 
-                        $parentNamespace = str_explode("\\Entity\\", $parentClassName)[1] ?? null;
+                        $parentNamespace = explodeByArray("\\Entity\\", $parentClassName)[1] ?? null;
                         $parentAnnotations = $this->getAnnotationReader()->getAnnotations($parentClassName, $this);
                         $parentAnnotations = $parentAnnotations[AnnotationReader::TARGET_CLASS][$parentClassName];
                         if(($parentAnnotation  = $parentAnnotations ? end($parentAnnotations) : null)) {

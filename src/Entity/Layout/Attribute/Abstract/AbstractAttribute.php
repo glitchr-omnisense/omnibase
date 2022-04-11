@@ -56,7 +56,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\OneToMany(targetEntity=Attribute::class, mappedBy="attributePattern")
+     * @ORM\OneToMany(targetEntity=Attribute::class, mappedBy="adapter")
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }
@@ -64,7 +64,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
     {
         if (!$this->attributes->contains($attribute)) {
             $this->attributes[] = $attribute;
-            $attribute->setAttributePattern($this);
+            $attribute->setAdapter($this);
         }
 
         return $this;
@@ -74,8 +74,8 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
     {
         if ($this->attributes->removeElement($attribute)) {
             // set the owning side to null (unless already changed)
-            if ($attribute->getAttributePattern() === $this) {
-                $attribute->setAttributePattern(null);
+            if ($attribute->getAdapter() === $this) {
+                $attribute->setAdapter(null);
             }
         }
 

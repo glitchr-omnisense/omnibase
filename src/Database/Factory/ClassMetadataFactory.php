@@ -71,10 +71,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     /**
      * @return void
      */
-    public function setEntityManager(EntityManagerInterface $em)
-    {
-        $this->em = $em;
-    }
+    public function setEntityManager(EntityManagerInterface $em) { $this->em = $em; }
 
     /**
      * {@inheritDoc}

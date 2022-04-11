@@ -171,7 +171,7 @@ class UploaderEntitiesCommand extends Command
 
         }, $this->getEntries($class));
 
-        return array_values(array_diff($fileList, array_flatten($fileListInDatabase)));
+        return array_values(array_diff($fileList, array_flatten(".", $fileListInDatabase)));
     }
 
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)

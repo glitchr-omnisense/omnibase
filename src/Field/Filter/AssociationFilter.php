@@ -43,7 +43,7 @@ class AssociationFilter implements FilterInterface
       $property = str_replace($this->alias.'_', '', $filterDataDto->getProperty());
       $comparison = $filterDataDto->getComparison();
       $parameterName = $filterDataDto->getParameterName();
-      $countries = $filterDataDto->getValue();
+      $parameter = $filterDataDto->getValue();
 
       $em = $queryBuilder->getEntityManager();
       $meta = $em->getClassMetadata($entityDto->getFqcn());
@@ -52,6 +52,6 @@ class AssociationFilter implements FilterInterface
       $queryBuilder
          ->innerJoin($mappingInfo['targetEntity'], $this->alias, Expr\Join::WITH, 'entity.'. $this->alias.' = '. $this->alias.'')
          ->andWhere(sprintf('%s.%s %s :%s', $this->alias, $property, $comparison, $parameterName))
-         ->setParameter($parameterName, $countries);
+         ->setParameter($parameterName, $parameter);
    }
 }

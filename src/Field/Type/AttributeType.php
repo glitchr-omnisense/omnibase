@@ -123,8 +123,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 else if(!is_array($data))
                     $data = [$data];
 
-                $fields   = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), array_merge($v->getAttributePattern()->getOptions(), ["label" => $v->getAttributePattern()->getLabel(), "help" => $v->getAttributePattern()->getHelp(), "form_type" => $v->getAttributePattern()::getType()])], $data);
-                $intlData = array_transforms(fn($k, $v): array => [$v->getAttributePattern()->getCode(), $v->getTranslations()], $data);
+                $fields   = array_transforms(fn($k, $v): array => [$v->getAdapter()->getCode(), array_merge($v->getAdapter()->getOptions(), ["label" => $v->getAdapter()->getLabel(), "help" => $v->getAdapter()->getHelp(), "form_type" => $v->getAdapter()::getType()])], $data);
+                $intlData = array_transforms(fn($k, $v): array => [$v->getAdapter()->getCode(), $v->getTranslations()], $data);
 
                 if(!empty($fields)) {
 
@@ -149,9 +149,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $choiceForm = iterator_to_array($forms)["choice"];
         if ($viewData instanceof PersistentCollection)
-            $choiceForm->setData($viewData->map(fn($e) => $e->getAttributePattern()));
+            $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));
         else if($viewData instanceof Attribute)
-            $choiceForm->setData($viewData->getAttributePattern());
+            $choiceForm->setData($viewData->getAdapter());
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
@@ -180,7 +180,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $viewData->clear();
             foreach($choiceData as $data) {
 
-                $existingData = $bakData->filter(fn(Attribute $e) => $e->getAttributePattern() === $data)->first() ?? null;
+                $existingData = $bakData->filter(fn(Attribute $e) => $e->getAdapter() === $data)->first() ?? null;
                 if($existingData) $viewData->add($existingData);
                 else if ($data instanceof AbstractAttribute) $viewData->add(new ($attributeClass)($data));
                 else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);

@@ -36,7 +36,7 @@ trait TranslationTrait
     protected $translatable;
 
     public function getTranslatable(): ?TranslatableInterface { return $this->translatable; }
-    public function setTranslatable(TranslatableInterface $translatable)
+    public function setTranslatable(?TranslatableInterface $translatable)
     {
         $this->translatable = $translatable;
         return $this;

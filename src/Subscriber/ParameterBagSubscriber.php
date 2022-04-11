@@ -26,7 +26,7 @@ class ParameterBagSubscriber implements EventSubscriberInterface
     {
         if(!$this->parameterBag instanceof HotParameterBag) return;
 
-        $settings = array_flatten($this->baseSettings->getRaw(), ARRAY_FLATTEN_PRESERVE_KEYS);
+        $settings = array_flatten(".", $this->baseSettings->getRaw(), -1, ARRAY_FLATTEN_PRESERVE_KEYS);
         foreach($settings as $setting) {
 
             if($setting->getBag() === null) continue;

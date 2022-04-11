@@ -59,7 +59,7 @@ class UserNotificationCommand extends Command
         
         } else {
 
-            $notifications  = $notificationRepository->findAll()->getResult();
+            $notifications  = $notificationRepository->findAll();
             $notifications_toErase  = $notificationRepository->findByIsReadAndSentAtOlderThan(true, $notificationExpiry, [], "user.id")->getResult();
             $notifications_isRead  = $notificationRepository->findByIsRead(true, [], "user.id")->getResult();
         }

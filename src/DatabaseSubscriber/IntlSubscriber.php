@@ -13,6 +13,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Exception;
 
 class IntlSubscriber implements EventSubscriber
 {
@@ -37,21 +38,39 @@ class IntlSubscriber implements EventSubscriber
 
     public function prePersist(LifecycleEventArgs $event)
     {
+        if (is_subclass_of($event->getEntity(), TranslatableInterface::class, true))
+            $this->normalize($event->getEntity());
+
         if (is_subclass_of($event->getEntity(), TranslationInterface::class, true))
             $this->removeIfEmpty($event->getEntity());
     }
 
     public function preUpdate(LifecycleEventArgs $event)
     {
+        if (is_subclass_of($event->getEntity(), TranslatableInterface::class, true))
+            $this->normalize($event->getEntity());
+
         if (is_subclass_of($event->getEntity(), TranslationInterface::class, true)) 
             $this->removeIfEmpty($event->getEntity());
     }
 
-    private function removeIfEmpty(TranslationInterface $translation)
+    protected function normalize(TranslatableInterface $translatable)
+    {
+        foreach($translatable->getTranslations() as $locale => $translation) {
+
+            $translation->setTranslatable($translatable);
+
+            if($translation->getLocale() === null) $translation->setLocale($locale);
+            else if($translation->getLocale() !== $locale) 
+                throw new Exception("Unexpected locale \"".$translation->getLocale()."\" attached with respect to collection key \"".$locale."\".");
+        }
+    }
+
+    protected function removeIfEmpty(TranslationInterface $translation)
     {
         $translatable = $translation->getTranslatable();
 
-        if($translation->isEmpty())
+        if ($translatable && $translation->isEmpty())
             $translatable->removeTranslation($translation);
     }
 

@@ -148,8 +148,8 @@ class ServiceEntityParser
         return $ret;
     }
 
-    protected function getAlias($alias) { 
-
+    protected function getAlias($alias) 
+    {
         $this->classMetadata->fieldNames[$alias] ?? $alias;
         return $this->classMetadata->fieldNames[$alias] ?? $alias;
     }
@@ -842,6 +842,7 @@ class ServiceEntityParser
                 $qb = $this->innerJoin($qb, $fieldName);
 
             $qb->setParameter($fieldID, $fieldValue);
+
             // Association field: check if it is inverse or owning side..
             //    $qb = $this->innerJoin($qb, $fieldName);
             // if(!$this->classMetadata->isAssociationInverseSide($fieldName))
@@ -873,7 +874,6 @@ class ServiceEntityParser
             //     }
             // }
             //}
-            
 
             if ($isInsensitive) $tableColumn = "LOWER(" . $tableColumn . ")";
             if ($isPartial) {

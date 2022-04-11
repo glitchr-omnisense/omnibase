@@ -2,6 +2,7 @@
 
 namespace Base\Database\Factory;
 
+use ArgumentCountError;
 use Base\Database\Factory\AggregateHydrator\PopulableInterface;
 use Base\Database\Factory\AggregateHydrator\SerializableInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -45,22 +46,14 @@ class EntityHydrator
     protected $hydrateAssociationReferences = true;
 
     /**
-     * Tells whether the input data array keys are entity field names or database column names
-     *
-     * @var int one of EntityHydrator::HYDRATE_BY_* constants
-     */
-    protected $hydrateBy = self::HYDRATE_BY_FIELD;
-
-    /**
      * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback
      */
     const DEFAULT_AGGREGATE  = 0;
     const CLASS_METHODS      = 1;
     const OBJECT_PROPERTIES  = 2;
-    const ARRAY_SERIALIZABLE = 4;
+    const ARRAY_OBJECT       = 4;
     const DEEPCOPY           = 8;
-    const FALLBACKS          = 16;
-    const CONSTRUCT          = 32;
+    const CONSTRUCT          = 16;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -80,8 +73,10 @@ class EntityHydrator
         $data = array_filter($this->toArray($data), fn($e) => $e !== null);
         $data = array_key_removes($data, ...$dataExceptions);
 
-        $this->hydrateProperties($entity, $data, $aggregateModel);
-        $this->hydrateAssociations($entity, $data, $aggregateModel);
+        if(!$this->hydrateByArrayObject($entity, $data, $aggregateModel)) {
+            $this->hydrateProperties($entity, $data, $aggregateModel);
+            $this->hydrateAssociations($entity, $data, $aggregateModel);
+        }
 
         return $entity;
     }
@@ -139,12 +134,6 @@ class EntityHydrator
         return $this;
     }
 
-    public function setHydrateBy(int $hydrateBy)
-    {
-        $this->hydrateBy = $hydrateBy;
-        return $this;
-    }
-
     protected function hydrateId(object $entity, object $data): object
     {
         $reflEntity = new ReflectionObject($entity);
@@ -162,70 +151,57 @@ class EntityHydrator
         return $entity;
     }
 
+    protected function hydrateByArrayObject(object $entity, array $data, int $aggregateModel): bool
+    {
+        // Hydrate by ArrayObject
+        if($aggregateModel & self::ARRAY_OBJECT) {
+
+            if(class_implements_interface(PopulableInterface::class, $entity)) {
+                $entity->populate($data);
+                return true;
+            } else if(class_implements_interface(SerializableInterface::class, $entity)) {
+                $entity->exchangeArray($data);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected function hydrateProperties(object $entity, array $data, int $aggregateModel): self
     {
         $reflEntity = new ReflectionObject($entity);
 
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        $skipFields = $classMetadata->identifier;
+        foreach ($classMetadata->fieldMappings as $fieldName => $fieldMapping) {
 
-        $useFallbacks = $aggregateModel & self::FALLBACKS;
-
-        foreach ($data as $field => $value) {
-
-            if($this->classMetadataManipulator->hasAssociation($entity, $field))
+            if($this->getPropertyValue($entity, $fieldName) !== null)
                 continue;
 
-            $gotHydrated = false;
-            $defaultAggregate = !($aggregateModel & self::ARRAY_SERIALIZABLE) && !($aggregateModel & self::CLASS_METHODS) && !($aggregateModel & self::OBJECT_PROPERTIES); 
+            $type = $this->classMetadataManipulator->getTypeOfField($entity, $fieldName);
+            $this->setPropertyValue($entity, $fieldName, null, new ReflectionObject($entity));
+        }
 
-            if($aggregateModel & self::ARRAY_SERIALIZABLE && !$gotHydrated) {
+        foreach ($data as $propertyName => $value) {
 
-                if(class_implements_interface(PopulableInterface::class, $entity)) {
+            if($this->classMetadataManipulator->hasAssociation($entity, $propertyName))
+                continue;
 
-                    $entity->populate($data);
-                    $gotHydrated = true;
+            if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
 
-                } else if(class_implements_interface(SerializableInterface::class, $entity)) {
+                $this->propertyAccessor->setValue($entity, $propertyName, $value);
 
-                    $entity->exchangeArray($data);
-                    $gotHydrated = true;
+            } else if($aggregateModel & self::OBJECT_PROPERTIES || !($aggregateModel & self::CLASS_METHODS)) {
 
-                } else {
-
-                    throw new Exception("\"Failed to use ARRAY_SERIALIZABLE option to aggregate data into ".get_class($entity)."\". This class doesn't implements neither \"".PopulableInterface::class."\" nor \"".SerializableInterface::class."\"");
-                }
-
-                if(!$gotHydrated && !$useFallbacks) continue;
-            }
-            
-            if(($defaultAggregate || $aggregateModel & self::OBJECT_PROPERTIES) && !$gotHydrated) {
-
-                $reflProperty = $reflEntity->hasProperty($field) ? $reflEntity->getProperty($field) : null;
+                $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
                 if($reflProperty !== null) {
 
                     $propertyName = $reflProperty->getName();
                     $this->setPropertyValue($entity, $propertyName, $reflProperty->getType() == "array" ? [] : null);
 
-                    $dataKey = $this->hydrateBy === self::HYDRATE_BY_FIELD ? $propertyName : $classMetadata->getColumnName($propertyName);
-                    if (array_key_exists($dataKey, $data) && !in_array($propertyName, $skipFields, true))
-                        $this->setPropertyValue($entity, $propertyName, $data[$dataKey], $reflEntity);
-
-                    $gotHydrated = true;
+                    if (!in_array($propertyName, $classMetadata->identifier, true))
+                        $this->setPropertyValue($entity, $propertyName, $data[$propertyName], $reflEntity);
                 }
-
-                if(!$useFallbacks) continue;
-            }
-
-            if($aggregateModel & self::CLASS_METHODS && !$gotHydrated) {
-
-                if($this->propertyAccessor->isWritable($entity, $field)) {
-                    
-                    $this->propertyAccessor->setValue($entity, $field, $data[$field]);
-                    $gotHydrated = true;
-                }
-
-                if(!$gotHydrated && !$useFallbacks) continue;
             }
         }
 
@@ -235,92 +211,84 @@ class EntityHydrator
     protected function hydrateAssociations(mixed $entity, array $data, int $aggregateModel): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach ($classMetadata->associationMappings as $association => $mapping) {
+        foreach ($classMetadata->associationMappings as $fieldName => $associationMapping) {
 
-            $associationData = $this->getAssociatedId($association, $mapping, $data);
-            if (!empty($associationData)) {
+            if($this->getPropertyValue($entity, $fieldName) !== null)
+                continue;
 
-                if ($this->classMetadataManipulator->isToOneSide($entity, $association))
-                    $this->hydrateToOneAssociation($entity, $association, $mapping, $associationData, $aggregateModel);
+            if(!$this->classMetadataManipulator->isToManySide($entity, $fieldName))
+                continue;
 
-                if ($this->classMetadataManipulator->isToManySide($entity, $association)) {
+            $this->setPropertyValue($entity, $fieldName, new ArrayCollection(), new ReflectionObject($entity));
+        }
 
-                    if($classMetadata->getFieldName($association) === $association && $aggregateModel & self::DEEPCOPY)
-                        $this->setPropertyValue($entity, $association, new ArrayCollection());
-                    
-                    $this->hydrateToManyAssociation($entity, $association, $mapping, $associationData, $aggregateModel);
-                }
-            }
+        foreach ($data as $propertyName => $value) {
+
+            if(!$this->classMetadataManipulator->hasAssociation($entity, $propertyName))
+                return $this;
+
+            $associationMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
+
+            if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
+                $this->hydrateToOneAssociation($entity, $propertyName, $associationMapping, $value, $aggregateModel);
+
+            if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
+                $this->hydrateToManyAssociation($entity, $propertyName, $associationMapping, $value, $aggregateModel);
         }
 
         return $this;
-    }
-
-    protected function getAssociatedId(string $column, array $mapping, array $data): mixed
-    {
-        if ($this->hydrateBy === self::HYDRATE_BY_FIELD)
-            return isset($data[$column]) ? $data[$column] : null;
-
-        // from this point it is self::HYDRATE_BY_COLUMN
-        // we do not support compound foreign keys (yet)
-        if (isset($mapping['joinColumns']) && count($mapping['joinColumns']) === 1) {
-
-            $columnName = $mapping['joinColumns'][0]['name'];
-            return isset($data[$columnName]) ? $data[$columnName] : null;
-        }
-
-        // If joinColumns does not exist, then this is not the owning side of an association
-        // This should not happen with column based hydration
-        return null;
     }
 
     protected function hydrateToOneAssociation(mixed $entity, string $propertyName, array $mapping, mixed $value, int $aggregateModel): self
     {
-        $reflEntity = new ReflectionObject($entity);
+        if(!($aggregateModel & self::DEEPCOPY)) $association = $value;
+        else $association = $this->findAssociation($mapping['targetEntity'], $value);
 
-        if(!($aggregateModel & self::DEEPCOPY)) $associationObject = $value;
-        else $associationObject = $this->fetchAssociationEntity($mapping['targetEntity'], $value);
+        if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
 
-        if ($associationObject !== null)
-            $this->setPropertyValue($entity, $propertyName, $associationObject, $reflEntity);
+            if(is_array($association))
+                $association = $this->hydrate($mapping['targetEntity'], $association, [], $aggregateModel);
+
+            $this->propertyAccessor->setValue($entity, $propertyName, $association);
+
+        } else if($aggregateModel & self::OBJECT_PROPERTIES || !($aggregateModel & self::CLASS_METHODS)) {
+
+            $this->setPropertyValue($entity, $propertyName, $association, new ReflectionObject($entity));
+        }
 
         return $this;
     }
 
-    protected function hydrateToManyAssociation(mixed $entity, string $propertyName, array $mapping, mixed $value, int $aggregateModel): self
+    protected function hydrateToManyAssociation(mixed $entity, string $propertyName, array $mapping, mixed $values, int $aggregateModel): self
     {
-        $reflEntity = new ReflectionObject($entity);
-        if($value !== null && !is_object($value) && !is_array($value)) 
-            throw new Exception("Failed to turn \"$value\" into an association in \"".get_class($entity)."\". Did you pass an object?");
+        if($values !== null && !is_object($values) && !is_array($values)) 
+            throw new Exception("Failed to turn \"$values\" into an association in \"".get_class($entity)."\". Did you pass an object?");
 
-        $values = is_array($value) ? $value : [$value];
-        
-        if(!($aggregateModel & self::DEEPCOPY)) $associationObjects = $value;
-        else {
+        $values = new ArrayCollection(is_array($values) ? $values : [$values]);
 
-            $associationObjects = [];
-            foreach ($values as $key => $value) {
+        $associations = [];
+        foreach ($values as $key => $value) {
 
-                if($value instanceof Collection) {
+            if($value instanceof Collection) {
 
-                    $entityValue = $this->getPropertyValue($entity, $propertyName)->toArray();
-                    $associationObjects = new ArrayCollection($entityValue + $value->toArray());
+                $entityValue = $this->getPropertyValue($entity, $propertyName)->toArray();
+                $associations = new ArrayCollection($entityValue + $value->toArray());
 
-                } else if (is_array($value)) {
+            } else if (is_array($value)) {
 
-                    $associationObjects[$key] = $this->hydrate($mapping['targetEntity'], $value);
+                $associations[$key] = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
 
-                } elseif ($associationObject = $this->fetchAssociationEntity($mapping['targetEntity'], $value)) {
-                
-                    $associationObjects[$key] = $associationObject;
-                }
+            } elseif ($association = $this->findAssociation($mapping['targetEntity'], $value)) {
+            
+                $associations[$key] = $association;
             }
         }
 
-        if(!$associationObjects instanceof ArrayCollection)
-            $associationObjects = new ArrayCollection($associationObjects);
+        if(!$associations instanceof ArrayCollection)
+            $associations = new ArrayCollection($associations);
 
-        $this->setPropertyValue($entity, $propertyName, $associationObjects, $reflEntity);
+        $this->setPropertyValue($entity, $propertyName, $associations, new ReflectionObject($entity));
+
         return $this;
     }
 
@@ -366,7 +334,27 @@ class EntityHydrator
         return $this;
     }
 
-    protected function fetchAssociationEntity($entityName, $identifier): mixed
+    public function fetchEntityName(string $entityName, array|string $propertyPath, ?array &$data = null): ?string { return $this->fetchEntityMapping($entityName, $propertyPath, $data)["targetEntity"] ?? null; }
+    public function fetchEntityMapping(string $entityName, array|string $propertyPath): ?array
+    {
+        $propertyPath = is_array($propertyPath) ? $propertyPath : explode(".", $propertyPath);
+        $propertyName = head($propertyPath);
+
+        $classMetadata = $this->entityManager->getClassMetadata($entityName);
+        if ($classMetadata->hasAssociation($classMetadata->getFieldName($propertyName)))
+            $entityMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
+        else if ($classMetadata->hasField($classMetadata->getFieldName($propertyName)))
+            $entityMapping = $classMetadata->fieldMappings[$classMetadata->getFieldName($propertyName)];
+        else return null;
+
+        $propertyName = $propertyPath ? head($propertyPath) : $propertyName;
+        $propertyPath = tail($propertyPath, $this->classMetadataManipulator->isToManySide($entityName, $propertyName) ? -2 : -1);
+        if(!$propertyPath) return $entityMapping;
+
+        return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $propertyPath));
+    }
+
+    protected function findAssociation($entityName, $identifier): mixed
     {
         if(is_object($identifier))
             $identifier = $this->propertyAccessor->isReadable($identifier, "id") 

@@ -13,13 +13,13 @@ trait BaseSettingsTrait
     protected $settingRepository = null;
 
     public function getEnvironment(): ?string { return $this->environment; }
-    public function getPaths(null|string|array $path = null) 
+    public function getPaths(null|string|array $path = null)
     {
-        return array_flatten(
+        return array_flatten(".",
                     array_map_recursive(
-                        fn($s) => $s instanceof Setting ? $s->getPath() : null, 
+                        fn($s) => $s instanceof Setting ? $s->getPath() : null,
                         array_filter($this->getRaw($path)) ?? []
-                    ), ARRAY_FLATTEN_PRESERVE_KEYS
+                    ), -1, ARRAY_FLATTEN_PRESERVE_KEYS
         );
     }
 
@@ -86,7 +86,7 @@ trait BaseSettingsTrait
 
         $settings = array_transforms(
             fn($k, $v):?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v], 
-            array_flatten($settings, ARRAY_FLATTEN_PRESERVE_KEYS)
+            array_flatten(".", $settings, -1, ARRAY_FLATTEN_PRESERVE_KEYS)
         );
 
         foreach($settings as $key => $setting) {

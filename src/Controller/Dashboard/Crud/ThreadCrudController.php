@@ -3,9 +3,11 @@
 namespace Base\Controller\Dashboard\Crud;
 
 use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Entity\Thread;
 use Base\Enum\ThreadState;
 use Base\Field\DateTimePickerField;
 use Base\Field\DiscriminatorField;
+use Base\Field\Filter\DiscriminatorFilter;
 use Base\Field\IdField;
 
 use Base\Field\SelectField;
@@ -15,7 +17,7 @@ use Base\Field\TranslationField;
 use Base\Field\Type\QuillType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
@@ -25,6 +27,7 @@ class ThreadCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
+    public function configureFilters(Filters $filters): Filters { return $filters->add(DiscriminatorFilter::new('class', null, self::getEntityFqcn())); }
     public function configureActions(Actions $actions): Actions
     {
         $approveThread = Action::new('approve', 'Approve', 'fa fa-user-check')
