@@ -5,19 +5,28 @@
 
     {% set index_min = 0 %}
     {% set index_max = 0 %}
+    {% set infinite = false %}
 
     {% for price in field.formattedValue %}
-
         {% set price_int = price|intval %}
-        {% set index_min = field.formattedValue[index_min]|intval > price_int ? loop.index0 : index_min %}
-        {% set index_max = field.formattedValue[index_max]|intval < price_int ? loop.index0 : index_max %}
-
+        {% if price_int < 0 %}
+            {% set infinite = true %}
+        {% else %}
+            {% set index_min = field.formattedValue[index_min]|intval > price_int ? loop.index0 : index_min %}
+            {% set index_max = field.formattedValue[index_max]|intval < price_int ? loop.index0 : index_max %}
+        {% endif %}
     {% endfor %}
 
     {% set price_min = field.formattedValue[index_min] %}
     {% set price_max = field.formattedValue[index_max] %}
 
-    {{ price_min != price_max ? price_min ~ ' - ' ~ price_max : price_min }}
+    {% if infinite %}
+        {{ '+' ~ price_min }}
+    {% elseif price_min != price_max %}
+        {{ price_min ~ ' - ' ~ price_max }}
+    {% else %}
+        {{ price_min }}
+    {% endif %}
 
 {% else %}
 

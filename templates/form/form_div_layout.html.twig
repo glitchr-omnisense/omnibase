@@ -487,6 +487,7 @@
             </div>
         </div>
     {% else %}
+
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
         {%- set attr = attr|merge({'class': 'form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
@@ -494,16 +495,16 @@
             {{ form_widget(form, {attr: attr}) }}
         {% else %}
 
-        <div class="form-group">
-            {{ form_label(form)}}
-            <div {{ block('widget_attributes') }}>
-            {{ form_widget(form, {attr: attr}) }}
+            <div class="form-group">
+                {{ form_label(form)}}
+                <div {{ block('widget_attributes') }}>
+                {{ form_widget(form) }}
+                </div>
             </div>
-        </div>
-        {# <fieldset>
-            <legend>{{ form_label(form) }}</legend>
-            {{ form_widget(form, {attr: attr}) }}
-        </fieldset> #}
+            {# <fieldset>
+                <legend>{{ form_label(form) }}</legend>
+                {{ form_widget(form, {attr: attr}) }}
+            </fieldset> #}
         {% endif %}
     {% endif %}
     
