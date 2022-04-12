@@ -3,9 +3,6 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\CollectionField;
-use Base\Field\Type\CollectionType;
-use Doctrine\ORM\PersistentCollection;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -38,8 +35,6 @@ class CollectionConfigurator implements FieldConfiguratorInterface
             $field->setFormTypeOption('entry_options.attr.data-widget', 'autocomplete');
         }
 
-        $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(CollectionField::OPTION_ALLOW_ADD));
-        $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(CollectionField::OPTION_ALLOW_DELETE));
         $field->setFormTypeOptionIfNotSet('by_reference', false);
         $field->setFormTypeOptionIfNotSet('delete_empty', true);
 

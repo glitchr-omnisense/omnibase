@@ -76,8 +76,28 @@ class WidgetItem
         return new RouteMenuItem($label, $icon, $routeName, $routeParameters);
     }
 
-    public static function linkToUrl(string $label, ?string $icon, string $url): UrlMenuItem
+    public static function linkToUrl(string $labelOrEntityFqcn, ?string $icon, string $url): UrlMenuItem
     {
+        if(class_exists($labelOrEntityFqcn)) {
+            
+            $crudController          = AbstractCrudController::getCrudControllerFqcn($labelOrEntityFqcn);
+            if(!class_exists($crudController))
+                throw new \Exception("CRUD controller for \"".$labelOrEntityFqcn."\" not found");
+            
+            $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
+            $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
+
+            $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural");
+            if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural");
+            if($label == $entityTranslationPrefix.".plural") $label = camel_to_snake(class_basename($labelOrEntityFqcn), " ");
+
+            if(!$icon) {
+                $icon = class_implements_interface($labelOrEntityFqcn, IconizeInterface::class) ? $labelOrEntityFqcn::__iconizeStatic()[0] : null;
+                $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
+            }
+
+        } else $label = $labelOrEntityFqcn;
+
         return new UrlMenuItem($label, $icon, $url);
     }
     public static function section(?string $label = null, ?string $icon = null, int $width = 1, int $column = null): SectionWidgetItem

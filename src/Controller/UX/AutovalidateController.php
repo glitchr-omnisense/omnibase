@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+// e.g. Validate field while typing (todo..)
 class AutovalidateController extends AbstractController
 {
     use BaseTrait;

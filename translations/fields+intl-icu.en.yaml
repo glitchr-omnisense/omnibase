@@ -43,6 +43,7 @@ fileupload:
   dropzone:
     title: "Upload files here"
     description: "Drop files here or click to upload"
+    spinner: "Please wait a little bit.."
 
   max_file: "The maximum file size allowed is {0}."
   mime_type: "{0, plural,

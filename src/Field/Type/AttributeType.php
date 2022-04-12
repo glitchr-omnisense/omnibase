@@ -8,7 +8,6 @@ use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\AttributeTranslation;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
 use InvalidArgumentException;
@@ -66,14 +65,26 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'allow_delete' => true,
         ]);
 
-
         $resolver->setNormalizer('class', function (Options $options, $value) {
 
+            if($value !== null && !class_exists($value))
+                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't exists");
             if($value !== null && !is_instanceof($value, Attribute::class))
-                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but doesn't inherit from \"".Attribute::class."\"");
+                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't inherit from \"".Attribute::class."\"");
             
             return $value;
         });
+
+        $resolver->setNormalizer('abstract_class', function (Options $options, $value) {
+
+            if($value !== null && !class_exists($value))
+                throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but the class itself doesn't exists");
+            if($value !== null && !is_instanceof($value, AbstractAttribute::class))
+                throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but doesn't inherit from \"".AbstractAttribute::class."\"");
+            
+            return $value;
+        });
+    
 
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
             if($options["multiple"]) return null;
@@ -101,7 +112,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
-            $options["abstract_class"]    = $options["abstract_class"] ?? AbstractAttribute::class;
+            $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAttribute::class;
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 

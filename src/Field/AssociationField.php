@@ -31,6 +31,7 @@ final class AssociationField implements FieldInterface
 
     public const OPTION_ALLOW_ADD = 'allowAdd';
     public const OPTION_ALLOW_DELETE = 'allowDelete';
+    public const OPTION_LENGTH = 'length';
 
     public const OPTION_RELATED_URL = 'relatedUrl';
     public const OPTION_DOCTRINE_ASSOCIATION_TYPE = 'associationType';
@@ -146,4 +147,21 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
+    public function setLength(int $length): self 
+    {
+        $this->setFormTypeOption(self::OPTION_LENGTH, max(0, $length));
+        return $this;
+    }
+
+    public function showInline($inline = true): self
+    {
+        $this->setFormTypeOption("inline", $inline);
+        return $this;
+    }
+
+    public function showRowInline($inline = true): self
+    {
+        $this->setFormTypeOption("row_inline", $inline);
+        return $this;
+    }
 }

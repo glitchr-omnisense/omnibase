@@ -3,6 +3,8 @@
 namespace Base\Field\Type;
 
 use Base\Service\BaseService;
+
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -34,7 +36,7 @@ class CollectionType extends AbstractType
             'entry_type' => TextType::class,
             'entry_inline' => false,
             'entry_row_inline' => false,
-            'entry_label' => null,
+            'entry_label' => function($i) { return " #".$i; },
             'entry_options' => [],
             'entry_required' => null,
             'delete_empty' => false,
@@ -56,6 +58,9 @@ class CollectionType extends AbstractType
             //     Collection is not supposed to knows about child requirements
             return true;
         });
+
+        $resolver->setNormalizer('allow_add',     fn(Options $options, $value) => $options["length"] == 0 && $value);
+        $resolver->setNormalizer('allow_delete',  fn(Options $options, $value) => $options["length"] == 0 && $value);
 
         $resolver->setAllowedTypes('delete_empty', ['bool', 'callable']);
     }
@@ -81,12 +86,15 @@ class CollectionType extends AbstractType
         }
         
         // Resize collection according to length option
-        if($options["length"] > 0) {
+        if(is_int($options["length"]) && $options["length"] > 0) {
         
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
                 $data = $event->getData() ?? [];
-                $data = array_pad($data, $options["length"], null);
+                if($data instanceof Collection)
+                    while(count($data) < $options["length"]) $data->add(null);
+                else if(is_array($data))
+                    $data = array_pad($data, $options["length"], null);
 
                 $event->setData($data);
             });
@@ -107,7 +115,8 @@ class CollectionType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['href']         = $options["href"];
-        $view->vars['entry_label'] = $options['entry_label'] ?? null;
+        $view->vars['entry_label']  = $options['entry_label'] ?? null;
+        $view->vars['entry_options']  = $options['entry_options'] ?? null;
         $view->vars['entry_inline'] = $options['entry_inline'] ?? false;
         $view->vars['entry_row_inline'] = $options['entry_row_inline'] ?? false;
         $view->vars['allow_add'] = $options['allow_add'] ?? false;
@@ -124,6 +133,8 @@ class CollectionType extends AbstractType
      */
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
+        $view->vars['length'] = $options["length"];
+
         $prefixOffset = -2;
         // check if the entry type also defines a block prefix
         /** @var FormInterface $entry */

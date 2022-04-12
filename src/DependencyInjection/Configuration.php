@@ -5,7 +5,7 @@ namespace Base\DependencyInjection;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
-
+use Base\Model\IconProvider\Adapter\FontAwesomeAdapter;
 class Configuration implements ConfigurationInterface
 {
     private $treeBuilder;
@@ -153,9 +153,9 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('icon_provider')->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('default_provider')
+                        ->scalarNode('default_adapter')
                             ->info('Default icon provider class')
-                            ->defaultValue("Base\Model\IconProvider\FontAwesome")
+                            ->defaultValue(FontAwesomeAdapter::class)
                             ->end()
                     ->end()
                 ->end()
@@ -408,6 +408,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                         ->end()
                     ->end()
+
 
                     ->arrayNode('jquery')->addDefaultsIfNotSet()
                         ->children()

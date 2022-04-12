@@ -19,6 +19,8 @@ class CollectionField implements FieldInterface
     public const OPTION_SHOW_ENTRY_LABEL = 'showEntryLabel';
     public const OPTION_RENDER_EXPANDED = 'renderExpanded';
 
+    public const OPTION_LENGTH = 'length';
+
     /**
      * @param string|false|null $label
      */
@@ -35,9 +37,7 @@ class CollectionField implements FieldInterface
             ->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, null)
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
             ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
-            ->setCustomOption(self::OPTION_RENDER_EXPANDED, false)
-            ->setFormTypeOption("allow_add", true)
-            ->setFormTypeOption("allow_delete", true);
+            ->setCustomOption(self::OPTION_RENDER_EXPANDED, false);
     }
 
     public function allowAdd(bool $allow = true): self
@@ -90,6 +90,24 @@ class CollectionField implements FieldInterface
     {
         $this->setCustomOption(self::OPTION_RENDER_EXPANDED, $renderExpanded);
 
+        return $this;
+    }
+
+    public function setLength(int $length): self 
+    {
+        $this->setFormTypeOption(self::OPTION_LENGTH, max(0, $length));
+        return $this;
+    }
+
+    public function showInline($inline = true): self
+    {
+        $this->setFormTypeOption("inline", $inline);
+        return $this;
+    }
+
+    public function showRowInline($inline = true): self
+    {
+        $this->setFormTypeOption("row_inline", $inline);
         return $this;
     }
 }

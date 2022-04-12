@@ -39,7 +39,7 @@ class ArrayType extends CollectionType
             if($options["pattern"] !== null && $value !== null)
             throw new \Exception("Option \"target\" cannot be set at the same time as \"pattern\"");
         });
-        
+
         $resolver->setNormalizer('length',        fn(Options $options, $value) => $options["pattern"] ? $this->getNumberOfArguments($options["pattern"]) : $value);
         $resolver->setNormalizer('allow_add',     fn(Options $options, $value) => $options["length"] == 0 && $value);
         $resolver->setNormalizer('allow_delete',  fn(Options $options, $value) => $options["length"] == 0 && $value);
@@ -78,6 +78,7 @@ class ArrayType extends CollectionType
     {
         parent::finishView($view, $form, $options);
 
+        $view->vars['length'] = is_string($options["length"]) ? explode(".", $options["length"]) : $options["length"];
         $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
 

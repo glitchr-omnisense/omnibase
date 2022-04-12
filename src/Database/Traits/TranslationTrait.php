@@ -2,10 +2,9 @@
 
 namespace Base\Database\Traits;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper\SampleTranslation;
 use Base\Database\TranslatableInterface;
 use Doctrine\ORM\Mapping as ORM;
-
+use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 trait TranslationTrait
@@ -51,7 +50,16 @@ trait TranslationTrait
      */
     protected $locale;
 
-    public function getLocale(): string { return $this->locale; }
+    public function getLocale(): string 
+    { 
+        if($this->locale) return $this->locale;
+
+        if($this->getTranslatable() === null)
+            throw new InvalidArgumentException("Cannot determine translation locale and no translatable object provided.");
+
+        return $this->getTranslatable()->getTranslations()->indexOf($this);
+    }
+
     public function setLocale(string $locale)
     {
         $this->locale = $locale;

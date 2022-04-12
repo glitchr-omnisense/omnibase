@@ -178,7 +178,6 @@ class EntityHydrator
             if($this->getPropertyValue($entity, $fieldName) !== null)
                 continue;
 
-            $type = $this->classMetadataManipulator->getTypeOfField($entity, $fieldName);
             $this->setPropertyValue($entity, $fieldName, null, new ReflectionObject($entity));
         }
 
@@ -225,21 +224,21 @@ class EntityHydrator
         foreach ($data as $propertyName => $value) {
 
             if(!$this->classMetadataManipulator->hasAssociation($entity, $propertyName))
-                return $this;
+                continue;
 
             $associationMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
 
             if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
-                $this->hydrateToOneAssociation($entity, $propertyName, $associationMapping, $value, $aggregateModel);
+                $this->hydrateAssociationToOne($entity, $propertyName, $associationMapping, $value, $aggregateModel);
 
             if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
-                $this->hydrateToManyAssociation($entity, $propertyName, $associationMapping, $value, $aggregateModel);
+                $this->hydrateAssociationToMany($entity, $propertyName, $associationMapping, $value, $aggregateModel);
         }
 
         return $this;
     }
 
-    protected function hydrateToOneAssociation(mixed $entity, string $propertyName, array $mapping, mixed $value, int $aggregateModel): self
+    protected function hydrateAssociationToOne(mixed $entity, string $propertyName, array $mapping, mixed $value, int $aggregateModel): self
     {
         if(!($aggregateModel & self::DEEPCOPY)) $association = $value;
         else $association = $this->findAssociation($mapping['targetEntity'], $value);
@@ -259,7 +258,7 @@ class EntityHydrator
         return $this;
     }
 
-    protected function hydrateToManyAssociation(mixed $entity, string $propertyName, array $mapping, mixed $values, int $aggregateModel): self
+    protected function hydrateAssociationToMany(mixed $entity, string $propertyName, array $mapping, mixed $values, int $aggregateModel): self
     {
         if($values !== null && !is_object($values) && !is_array($values)) 
             throw new Exception("Failed to turn \"$values\" into an association in \"".get_class($entity)."\". Did you pass an object?");

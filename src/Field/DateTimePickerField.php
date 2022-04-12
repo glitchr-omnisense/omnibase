@@ -3,7 +3,7 @@
 namespace Base\Field;
 
 use Base\Field\Type\DateTimePickerType;
-
+use DateTime;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Form\Type\TextEditorType;
@@ -44,7 +44,8 @@ final class DateTimePickerField implements FieldInterface
     public const OPTION_DATE_PATTERN = 'datePattern';
     public const OPTION_TIME_PATTERN = 'timePattern';
     public const OPTION_TIMEZONE = 'timezone';
-    public const OPTION_WIDGET = 'widget';
+    public const OPTION_WIDGET   = 'widget';
+    public const OPTION_DEFAULT  = 'default_value';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -155,5 +156,16 @@ final class DateTimePickerField implements FieldInterface
         }
 
         return $this;
+    }
+
+    public function setDefault(\DateTime $datetime = null)
+    {
+        $this->setCustomOption(self::OPTION_DEFAULT, $datetime);
+        return $this;
+    }
+
+    public function now() 
+    {
+        return $this->setDefault(new DateTime());
     }
 }

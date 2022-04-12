@@ -5,6 +5,7 @@ namespace Base\Field\Type;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;
+use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
@@ -28,6 +29,8 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class AssociationType extends AbstractType implements DataMapperInterface
 {
+    use BaseTrait;
+    
     /**
      * @var ClassMetadataManipulator
      */
@@ -60,6 +63,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'href'      => null,
 
             'fields' => [],
+            'length' => 0,
             'excluded_fields' => [],
 
             'recursive' => false,
@@ -81,11 +85,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['href']         = $options["href"];
-        $view->vars["multiple"] = $options["multiple"];
-        $view->vars["inline"] = $options["inline"];
-        $view->vars["row_inline"] = $options["row_inline"];
+        $view->vars["inline"]       = $options["inline"];
+        $view->vars["multiple"]     = $options["multiple"];
+        $view->vars["allow_add"]    = $options["allow_add"];
+        $view->vars["inline"]       = $options["inline"];
+        $view->vars["row_inline"]   = $options["row_inline"];
         $view->vars["allow_delete"] = $options["allow_delete"];
-        $view->vars["allow_add"] = $options["allow_add"];
+        $view->vars['length']       = $options["length"];
     }
     
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -103,14 +109,17 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 $collectionOptions = [
                     "data_class" => null,
                     'by_reference' => false,
+                    'length' => $options["length"],
                     "entry_inline" => $options["inline"],
                     "entry_row_inline" => $options["row_inline"],
                     'entry_type' => AssociationType::class,
+                    'entry_label' => function($i, $className = null, $href = null) { 
+                        return $this->getTranslator()->entity($className). " #".$i; 
+                    },
                     'entry_options' => array_merge($options, [
                         'allow_entity' => $options["allow_entity"],
                         'data_class'   => $dataClass,
                         'multiple'     => false,
-                        'label'        => false,
                         'href'         => $options["href"] ?? null,
                     ]),
                 ];

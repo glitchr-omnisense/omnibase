@@ -11,6 +11,7 @@ use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
@@ -98,7 +99,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'select2-js'       => $this->baseService->getParameterBag("base.vendor.select2.javascript"),
             'select2-css'      => $this->baseService->getParameterBag("base.vendor.select2.stylesheet"),
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
-
+            'empty_data'       => null,
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
             'capitalize'         => true,
@@ -117,6 +118,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             "dropdownCssClass"   => null,
             "containerCssClass"  => null,
 
+            'html'               => true,
             'href'               => null,
 
             // Autocomplete
@@ -142,7 +144,6 @@ class SelectType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
             $form = $event->getForm();
-            $data = $event->getData();
             $options = $form->getConfig()->getOptions();
 
             // Guess class without data in the first place..
@@ -234,8 +235,12 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         // Format values
                         $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                        $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
-                        if($entry === null) return null;
+                        $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
+                            "html" => $options["html"],
+                            "format" => $entryFormat
+                        ]);
+
+                    if($entry === null) return null;
 
                         if(!$options["class"]) $entry["text"] = $key;
                         yield $entry["id"] => $entry["text"];
@@ -281,8 +286,11 @@ class SelectType extends AbstractType implements DataMapperInterface
                     } else {
 
                         // Format values
-                        $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                        $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, $entryFormat);
+                        $entry = $this->autocomplete->resolve($choices, $options["class"] ?? $innerType, [
+                            "html" => $options["html"],
+                            "format" => $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE
+                        ]);
+
                         if($entry === null) return null;
 
                         if(!$options["class"]) $entry["text"] = $key;
@@ -380,6 +388,30 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["choices"]       = $this->formFactory->guessChoices($form, $options);
         
         $data = $form->getData();
+
+        // Set default data
+        if($options["multiple"]) {
+
+            if($options["empty_data"] === null)
+                $options["empty_data"] = new ArrayCollection();
+            else if (is_array($options["empty_data"]))
+                $options["empty_data"] = new ArrayCollection($options["empty_data"]);
+            else if(!$options["empty_data"] instanceof Collection)
+                $options["empty_data"] = new ArrayCollection([$options["empty_data"]]);
+
+            if($data instanceof Collection && $data->isEmpty()) {
+
+               foreach($options["empty_data"] as $emptyData)
+                    $data->add($emptyData);
+            }
+
+        } else if($data === null) {
+
+            if (is_array($options["empty_data"])) $data = $options["empty_data"];
+            else if ($options["empty_data"] instanceof Collection) $data = $options["empty_data"]->first();
+            else $data = $options["empty_data"];
+        }
+
         if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && (!$data instanceof Collection)) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
@@ -419,6 +451,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "fields"     => $options["autocomplete_fields"],
                 "filters"    => $options["choice_filter"],
                 'capitalize' => $options["capitalize"],
+                "html"       => $options["html"],
                 "token"      => $this->csrfTokenManager->getToken("select2")->getValue()
             ];
 
@@ -436,7 +469,8 @@ class SelectType extends AbstractType implements DataMapperInterface
                     "delay" => $options["autocomplete_delay"],
                     "data" => "function (args) { return {term: args.term, page: args.page || 1}; }",
                     "dataType" => "json",
-                    "cache" => true,
+                    "html" => $options["html"],
+                    "cache" => true
                 ];
             }
 
@@ -516,7 +550,11 @@ class SelectType extends AbstractType implements DataMapperInterface
                     // Format values
                     $entry = $choices;
                     $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
-                    $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, $entryFormat);
+                    $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, [
+                        "html" => $options["html"],
+                        "format" => $entryFormat
+                    ]);
+                
                     if(!$entry) return null;
 
                     // Special text formatting

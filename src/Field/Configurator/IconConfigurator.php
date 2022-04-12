@@ -11,7 +11,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class IconConfigurator extends SelectConfigurator
 {
-    protected $iconProvider;
+    protected $adapter;
     public function __construct(...$args)
     {
         $this->iconProvider = array_pop($args);
@@ -31,10 +31,10 @@ class IconConfigurator extends SelectConfigurator
         if( null !== $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME))
             $icon = $propertyAccessor->getValue($entityDto->getInstance(), $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME));
 
-        $provider = $field->getFormTypeOption("provider") ?? $this->baseService->getParameterBag("base.icon_provider.default_provider");
-        $iconProvider = $this->iconProvider->getProvider($provider);
+        $adapter = $field->getFormTypeOption("adapter") ?? $this->baseService->getParameterBag("base.icon_provider.default_adapter");
+        $adapter = $this->iconProvider->getAdapter($adapter);
 
-        foreach($iconProvider->getAssets() as $asset) {
+        foreach($adapter->getAssets() as $asset) {
 
             $relationship = pathinfo_relationship($asset);
             $location = $relationship == "javascript" ? "javascripts" : "stylesheets";

@@ -38,11 +38,11 @@ class TagTranslation implements TranslationInterface
     /**
      * @ORM\Column(type="string", length=255)
      */
-    protected $name;
-    public function getName(): ?string { return $this->name; }
-    public function setName(?string $name): self
+    protected $label;
+    public function getLabel(): ?string { return $this->label; }
+    public function setLabel(?string $label): self
     {
-        $this->name = $name;
+        $this->label = $label;
 
         return $this;
     }

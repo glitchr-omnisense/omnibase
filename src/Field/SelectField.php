@@ -3,6 +3,7 @@
 namespace Base\Field;
 
 use Base\Field\Type\SelectType;
+use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
@@ -40,8 +41,10 @@ class SelectField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel($label)
+            ->useHtml(false)
             ->setTemplateName('crud/field/text')
             ->setFormType(SelectType::class)
+            ->useHtml(false) // Do not use HTML by default in EasyAdmin.. (line height are constrained)
             ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
@@ -49,6 +52,13 @@ class SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "count")
             ->setTextAlign(TextAlign::CENTER)
             ->addCssClass('field-select');
+    }
+
+
+    public function useHtml(bool $useHtml = true)
+    {
+        $this->setFormTypeOption("html", $useHtml);
+        return $this;
     }
 
     public function setTextAlign(string $textAlign)
@@ -166,9 +176,10 @@ class SelectField implements FieldInterface
 
     public function setDefault($defaultChoices)
     {
-        if(!is_array($defaultChoices))
+        if(!is_array($defaultChoices) && !$defaultChoices instanceof Collection)
             $defaultChoices = [$defaultChoices];
 
+        $this->setFormTypeOption("empty_data", $defaultChoices);
         $this->setCustomOption(self::OPTION_DEFAULT_CHOICE, $defaultChoices);
         return $this;
     }

@@ -23,8 +23,8 @@ class IconType extends SelectType implements SelectInterface
     {
         parent::configureOptions($resolver);
         $resolver->setDefaults([
-            'class'   => null,
-            'provider'   => $this->baseService->getParameterBag("base.icon_provider.default_provider"),
+            "class"   => null,
+            "adapter"   => $this->baseService->getParameterBag("base.icon_provider.default_adapter"),
 
             "autocomplete" => true,
             "autocomplete_endpoint" => null,
@@ -32,7 +32,7 @@ class IconType extends SelectType implements SelectInterface
         ]);
 
         $resolver->setNormalizer('autocomplete_endpoint', function (Options $options, $value) {
-            return $value ?? "autocomplete/".$options["provider"]::getName()."/".$options["autocomplete_pagesize"];
+            return $value ?? "autocomplete/".$options["adapter"]::getName()."/".$options["autocomplete_pagesize"];
         });
     }
 
@@ -40,8 +40,8 @@ class IconType extends SelectType implements SelectInterface
     {
         parent::buildForm($builder, $options);
 
-        $iconProvider = self::$iconProvider->getProvider($options["provider"]);
-        foreach($iconProvider->getAssets() as $asset) {
+        $adapter = self::$iconProvider->getAdapter($options["adapter"]);
+        foreach($adapter->getAssets() as $asset) {
 
             $relationship = pathinfo_relationship($asset);
             $location = $relationship == "javascript" ? "javascripts" : "stylesheets";
@@ -51,16 +51,16 @@ class IconType extends SelectType implements SelectInterface
 
     public static function getIcon(string $id, int $index = -1): ?string
     {
-        $provider = self::$iconProvider->getProvider($id);
-        return $provider ? $id : null;
+        $adapter = self::$iconProvider->getAdapter($id);
+        return $adapter ? $id : null;
     }
 
     public static function getText(string $id): ?string
     {
-        $provider = self::$iconProvider->getProvider($id);
-        if($provider) {
+        $adapter = self::$iconProvider->getAdapter($id);
+        if($adapter) {
 
-            $choices = $provider->getChoices();
+            $choices = $adapter->getChoices();
             if( ($choicePath = array_search_recursive($id, $choices)) )
                 return $choicePath[count($choicePath)-1]; // Last but one is expected to contain "text" information
         }

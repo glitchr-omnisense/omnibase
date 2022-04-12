@@ -40,8 +40,6 @@ class ArrayConfigurator implements FieldConfiguratorInterface
             $field->setFormTypeOption('entry_options.attr.data-widget', 'autocomplete');
         }
 
-        $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(ArrayField::OPTION_ALLOW_ADD));
-        $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(ArrayField::OPTION_ALLOW_DELETE));
         $field->setFormTypeOptionIfNotSet('delete_empty', true);
 
         // TODO: check why this label (hidden by default) is not working properly

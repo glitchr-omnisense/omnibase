@@ -316,10 +316,13 @@
             <figcaption id="{{id}}_figcaption">
                 <i class="fas fa-plus-circle fa-3x"></i>
             </figcaption>
+
+            {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
+            <a href="{{form.vars.value}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
+            {% endif %}
         </figure>
 
         {% if cropper %}
-
             <!-- Modal -->
             <div class="modal fade" id="{{id}}_modal">
             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -345,7 +348,13 @@
         {% endif %}
     {% endif %}
 
-    {{ form_widget(form, { attr: form.vars.attr }) }}
+    <div class="imageupload-field">
+        {% if form.alt is defined %}
+            {{ form_widget(form.alt)}}
+        {% endif %}
+
+        {{ form_widget(form, { attr: form.vars.attr }) }}
+    </div>
 
 </div>
 {%- endblock -%}
@@ -355,9 +364,11 @@
 {% set attr = attr|merge({
     'data-file-sortable'              : form.vars.sortable,
     'data-file-lightbox'              : form.vars.lightbox,
+
     'data-file-ajax'                  : form.vars.ajax,
-    'data-file-max-files'             : form.vars.max_files,
     'data-file-href'                  : form.vars.href|default("")|urldecode,
+    'data-file-max-files'             : form.vars.max_files,
+
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
     'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
@@ -397,15 +408,20 @@
     
     {% set exts = form.vars.accept|extensions %}
     {% if exts is not empty %}
-    <div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>
+    <div class="form-filesize form-text text-muted">
+        {{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}
+    <div>
     {% endif %}
-
+    
     {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {{ form_errors(form.raw, {row_attr:row_attr}) }}
 
     {% if multiple %}
-    <div id="{{id}}_metadata" class="form-text text-muted"></div>
+    <div id="{{id}}_metadata" class="form-text text-muted">
+        <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
+    </div>
     {% endif %}
+
 
 </div>
 
@@ -478,10 +494,16 @@
             {{ form_widget(form, {attr: attr}) }}
         {% else %}
 
-        <fieldset>
+        <div class="form-group">
+            {{ form_label(form)}}
+            <div {{ block('widget_attributes') }}>
+            {{ form_widget(form, {attr: attr}) }}
+            </div>
+        </div>
+        {# <fieldset>
             <legend>{{ form_label(form) }}</legend>
             {{ form_widget(form, {attr: attr}) }}
-        </fieldset>
+        </fieldset> #}
         {% endif %}
     {% endif %}
     
@@ -559,9 +581,10 @@
     {% if inline == true %}
 
         {% if row_inline == false %}
-            {% if form_parent(form).vars.entry_label == true %}
-                <label>{{ value|stringify }}</label>
-            {% endif %}
+
+            {% set label = form_parent(form).vars.entry_label %}
+                {{- form_label(form, null, {'label_html': true})  -}}
+
             <div class="form-collection-inline">
             {{ form_widget(form, {attr:attr}) }}
             </div>
@@ -595,7 +618,12 @@
                     {%- endif -%}
 
                         <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-                        {{ form_parent(form).vars.entry_label|default(value)|stringify|raw }}
+                        {% set label = form_parent(form).vars.entry_label %}
+                        {% if is_callable(label) %}
+                            {{ call_user_func_with_defaults(label, form.vars.name, form_parent(form).vars.entry_options.data_class, form.vars.href)|stringify }}
+                        {% else %}
+                            {{ label|default(value)|stringify }}
+                        {% endif %}
 
                     {{ linkable ? "</a>": "</button>" }}
 
@@ -626,14 +654,7 @@
 {%- endblock collection2_entry_widget -%}
 
 {%- block collection2_empty -%}
-    <div class="empty collection-empty">
-        {% if not form.vars.allow_add %}
-        <button class="accordion-button collapsed" disabled="disabled" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
-            <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-            {{"@fields.collection.empty"|trans}}
-        </button>
-        {% endif %}
-    </div>
+    <div class="empty collection-empty"></div>
 {%- endblock collection2_empty -%}
 
 {%- block array_row -%}

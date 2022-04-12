@@ -14,6 +14,7 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
+use InvalidArgumentException;
 
 class IntlSubscriber implements EventSubscriber
 {
@@ -60,9 +61,10 @@ class IntlSubscriber implements EventSubscriber
 
             $translation->setTranslatable($translatable);
 
-            if($translation->getLocale() === null) $translation->setLocale($locale);
-            else if($translation->getLocale() !== $locale) 
-                throw new Exception("Unexpected locale \"".$translation->getLocale()."\" attached with respect to collection key \"".$locale."\".");
+            if($translation->getLocale() !== $locale) 
+                throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
+
+            $translation->setLocale($locale);
         }
     }
 

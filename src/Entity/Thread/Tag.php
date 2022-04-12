@@ -31,11 +31,11 @@ class Tag implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-tags"]; }
 
-    public function __toString() { return $this->getName() ?? $this->getSlug() ?? get_class($this); }
+    public function __toString() { return $this->getLabel() ?? $this->getSlug() ?? get_class($this); }
 
-    public function __construct(?string $name = null, ?string $slug = null)
+    public function __construct(?string $label = null, ?string $slug = null)
     {
-        $this->setName($name);
+        $this->setLabel($label);
         $this->slug = $slug;
         
         $this->threads = new ArrayCollection();
@@ -51,7 +51,7 @@ class Tag implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(length=255, unique=true)
-     * @Slugify(reference="translations.name")
+     * @Slugify(reference="translations.label")
      */
     protected $slug;
     public function getSlug(): ?string { return $this->slug; }

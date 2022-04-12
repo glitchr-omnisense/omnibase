@@ -168,6 +168,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 'sortable'      => $options["sortable"]
             ]);
 
+            if($options["multiple"]) $data ??= new ArrayCollection();
+
             $files = array_filter(array_map(function($e) use ($fieldName) {
 
                 $public = Uploader::getPublic($e, $fieldName);
@@ -200,8 +202,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         if($form) {
 
             $viewDataFileIndexes = [];
-            if($viewData instanceof PersistentCollection)
-                $viewDataFileIndexes = $viewData->map(fn($e) => $this->propertyAccessor->getValue($e, $fieldName))->toArray();
+            if($viewData instanceof Collection)
+                $viewDataFileIndexes = $viewData->map(fn($e) => basename($this->propertyAccessor->getValue($e, $fieldName)))->toArray();
 
             if($options["multiple"]) {
 
@@ -213,7 +215,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                         $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
                         $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
 
-                    } else if( ($pos = array_search($file, $viewDataFileIndexes)) ){
+                    } else if( ($pos = array_search($file, $viewDataFileIndexes)) !== false ){
 
                         $entity = $viewData[$pos];
                     }

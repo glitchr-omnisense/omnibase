@@ -60,7 +60,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
         $showFirst = $field->getCustomOption(SelectField::OPTION_SHOW_FIRST);
         $displayLimit = $field->getCustomOption(SelectField::OPTION_DISPLAY_LIMIT);
         if($showFirst) $displayLimit--;
-        
+
         if ($values instanceof Collection) {
 
             foreach ($values as $key => $value) {
@@ -82,6 +82,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
         } else {
 
             $value = $field->getValue();
+
             $field->setCustomOption(SelectField::OPTION_RENDER_FORMAT, "text");
             
             $dataClass = $class ?? (is_object($value) ? get_class($value) : null);
@@ -93,14 +94,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
             if ($formattedValues && $dataClassCrudController)
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();
         }
-
         $field->setFormattedValue($formattedValues);
-
-        // Set default value
-        if ($field->getValue() == null)
-            $field->setValue($this->getDefault($field));
-
-        $field->setFormTypeOption("empty_data", $this->getDefault($field));
 
         $fieldValue = $field->getValue();
         $isIndexOrDetail = \in_array($context->getCrud()->getCurrentPage(), [Crud::PAGE_INDEX, Crud::PAGE_DETAIL], true);

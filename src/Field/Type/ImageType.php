@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use InvalidArgumentException;
-
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -18,6 +18,7 @@ class ImageType extends FileType
     {
         $resolver->setDefaults([
             'thumbnail'   => "bundles/base/images.svg",
+            'alt'         => null,
 
             'cropper'     => null,
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
@@ -31,6 +32,7 @@ class ImageType extends FileType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        if($options["alt"] !== null) $builder->add("alt", TextType::class);
         if($options["multiple"] && is_array($options["cropper"]))
             throw new InvalidArgumentException("There can be only one picture if you want to crop, please disable 'multiple' option");
     }

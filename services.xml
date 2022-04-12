@@ -167,6 +167,10 @@
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+         <service id="Base\Console\Command\EntityDiscriminatorCommand">
+            <tag name="console.command" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
 
         <service id="Base\Console\Command\UserLogCommand">
             <tag name="console.command" />

@@ -21,6 +21,7 @@ class TranslationConfigurator implements FieldConfiguratorInterface
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->localeProvider = $localeProvider;
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
@@ -51,8 +52,7 @@ class TranslationConfigurator implements FieldConfiguratorInterface
                     $entity = $childField->get($this->localeProvider->getLocale());
                     if (!$entity) $entity = $childField->get($this->localeProvider->getDefaultLocale());
 
-                    $value = ($entity ? $this->classMetadataManipulator->getFieldValue($entity, $fieldName) : null);
-
+                    $value = ($entity ? $this->propertyAccessor->getValue($entity, $fieldName) : null);
                     $renderAsHtml = $field->getCustomOption(TranslationField::OPTION_RENDER_AS_HTML);
                     $stripTags = $field->getCustomOption(TranslationField::OPTION_STRIP_TAGS);
                     if ($renderAsHtml) {

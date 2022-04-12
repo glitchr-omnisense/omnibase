@@ -104,6 +104,16 @@
                     margin:0;
                 }
 
+                .form-control::-webkit-file-upload-button, .form-control::file-selector-button
+                {
+                    box-shadow: unset !important;
+                    background-color: #f8fafc !important;
+                }
+                .input-group-text {
+                    height: 100%;
+                    background-color: #f8fafc !important;
+                }
+
                 .locale-dropdown .dropdown-toggle
                 {
                     font-size:18pt;
@@ -160,9 +170,10 @@
                 .custom-file-label { margin-top: 0 !important; text-align: left !important; }
 
                 .form-group.field-collection.form-control > div:nth-last-child(-n+2) .accordion-item { border-bottom: 0px solid lightgrey; }
-                .form-select2 { margin-bottom: 0em !important; }
+                
                 .form-errors { margin: 1em 0.5em !important;}
-                .ea .form-group { padding:1em 0em !important; }
+                .ea .content-wrapper .form-group { padding-top:1em ; padding-bottom:1em ; }
+                .ea .content-wrapper .form-collection-items > .form-group { padding-top:0em; padding-bottom:0em; }
                 .ea-edit-form > .form-group, .ea-new-form > .form-group  { padding: 1em 0.5em !important; }
                 .ea-edit-form > .form-translatable.form-group, .ea-new-form > .form-translatable.form-group  { padding: 0em 0.5em !important; }
 
@@ -177,7 +188,7 @@
                     border-bottom: 1px solid white;
                 }
 
-                .select2-container .select2-selection--single { height: 35px !important; }
+                .select2-container .select2-selection--single { height: 37px !important; }
 
                 .content-top { height:90px; }
                 
@@ -778,7 +789,6 @@
                                                 <input type="hidden" name="menuIndex" value="{{ ea.request.query.get('menuIndex') }}">
                                                 <input type="hidden" name="submenuIndex" value="{{ ea.request.query.get('submenuIndex') }}">
                                                 <input type="hidden" name="page" value="1">
-                                                <input type="hidden" name="signature" value="{{ ea_url().unsetAll().setAction('index').setController(ea.request.query.get('crudControllerFqcn')).getSignature() }}">
 
                                                 <div class="form-group">
                                                     <div class="form-widget">
@@ -939,9 +949,9 @@
 
                                                 {% endif %}
 
-                                            {% set content_widget_closure = true      %}
-                                            {% set width = content_widget.getWidth()  %}
-                                            {% set col   = content_widget.getColumn() %}
+                                                {% set content_widget_closure = true      %}
+                                                {% set width = content_widget.getWidth()  %}
+                                                {% set col   = content_widget.getColumn() %}
 
                                                 <div class="col-md-{{ 2*col }} p-0">
                                                 <div class="content-panel m-md-1 with-background without-header without-footer"
@@ -952,6 +962,13 @@
                                                 <hr>
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{width}};">
 
+                                            {% elseif content_widget.getAsDto().getType() == "url" %}
+                                                <li>
+                                                    <a href="{{ content_widget.getAsDto().getLinkUrl() }}">
+                                                        <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
+                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst|str_shorten(15, 1, ".") }}</span>
+                                                    </a>
+                                                </li>
                                             {% else %}
                                                 <li>
                                                     <a href="{{ content_widget.generateUrl() }}">

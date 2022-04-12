@@ -71,6 +71,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
             'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.stylesheet"),
 
+            
             'thumbnailWidth'     => null,
             'thumbnailHeight'    => 120,
             'max_filesize'       => null,
@@ -184,6 +185,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $view->vars["value"] = implode("|", $view->vars["value"]);
 
         $view->vars["sortable"]     = null;
+
         $view->vars['dropzone']     = null;
         $view->vars["ajax"]         = null;
         $view->vars['multiple']     = $options['multiple'];
@@ -217,11 +219,12 @@ class FileType extends AbstractType implements DataMapperInterface
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
             $options["dropzone"]["url"] = $view->vars["ajax"];
+            
+            $view->vars["dropzone"]  = json_encode($options["dropzone"]);
 
-            $view->vars["dropzone"] = json_encode($options["dropzone"]);
-            $view->vars["sortable"] = json_encode($options["sortable"]);
+            $view->vars["sortable"]  = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])
-                $this->baseService->addHtmlContent("javascripts", $options["sortable-js"]);
+            $this->baseService->addHtmlContent("javascripts", $options["sortable-js"]);
         }
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");

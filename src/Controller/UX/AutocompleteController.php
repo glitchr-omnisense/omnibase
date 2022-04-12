@@ -58,6 +58,7 @@ class AutocompleteController extends AbstractController
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
         $class   = $dict["class"] ?? null;
+        $html    = $dict["html"] ?? true;
         $format  = ($dict["capitalize"] ?? false) ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
 
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
@@ -81,13 +82,13 @@ class AutocompleteController extends AbstractController
                 $pagination = $book->getTotalPages() > $book->getPage();
 
                 foreach($book as $i => $entry)
-                    $results[] = $this->autocomplete->resolve($entry, $class, $format);
+                    $results[] = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html]);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = $this->autocomplete->resolve($value, $class, $format);
+                    $results[] = $this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html]);
             }
 
             $array = [];
@@ -118,7 +119,7 @@ class AutocompleteController extends AbstractController
             $term = mb_strtolower($request->get("term")) ?? "";
             $page = $request->get("page") ?? 1;
 
-            $iconProvider = $this->getIconProvider()->getProvider($provider);
+            $iconProvider = $this->getIconProvider()->getAdapter($provider);
             $entries = $iconProvider->getChoices($term);
 
             $book = $this->paginator->paginate($entries, $page, $pageSize);

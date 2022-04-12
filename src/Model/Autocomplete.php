@@ -13,8 +13,11 @@ class Autocomplete
         $this->translator = $translator;
     }
 
-    public function resolve($entry, $class = null, $format = FORMAT_TITLECASE) 
+    public function resolve($entry, $class = null, array $entryOptions = []) 
     {
+        $entryOptions["format"] ??= FORMAT_TITLECASE;
+        $entryOptions["html"] ??= true;
+
         if($entry == null) return null;
         if(is_object($entry) && $class !== null) {
 
@@ -23,16 +26,20 @@ class Autocomplete
 
             $autocomplete     = null;
             $autocompleteData = [];
-            if(class_implements_interface($entry, AutocompleteInterface::class)) {
-                $autocomplete = $entry->__autocomplete() ?? null;
-                $autocompleteData = $entry->__autocompleteData() ?? []; 
+            
+            if($entryOptions["html"]) {
+
+                if(class_implements_interface($entry, AutocompleteInterface::class)) {
+                    $autocomplete = $entry->__autocomplete() ?? null;
+                    $autocompleteData = $entry->__autocompleteData() ?? []; 
+                }
             }
 
             $className = get_class($entry);
             $className = $this->translator->entity($className, Translator::TRANSLATION_SINGULAR);
 
-            $html = is_html($autocomplete) ? $autocomplete : null;
-            $text = is_html($autocomplete) ? null          : $autocomplete;
+            $html = $entryOptions["html"] && is_html($autocomplete) ? $autocomplete : null;
+            $text = $entryOptions["html"] && is_html($autocomplete) ? null          : $autocomplete;
             $data = $autocompleteData;
 
             if(!$text)
@@ -65,8 +72,8 @@ class Autocomplete
         [
             "id"   => $id ?? null,
             "icon" => $icon,
-            "text" => is_string($text) ? castcase($text, $format) : $text,
-            "html" => $html,
+            "text" => is_string($text) ? castcase($text, $entryOptions["format"]) : $text,
+            "html" => $entryOptions["html"] ? $html : null,
             "data" => $data,
         ];
     }

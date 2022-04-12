@@ -26,7 +26,7 @@ class DiscriminatorFilter implements FilterInterface
       $filter = (new self());
 
       $discriminatorMap = self::getClassMetadataManipulator()->getDiscriminatorMap($entityFqcn);
-      $discriminatorMap = array_filter($discriminatorMap, fn($e) => is_parent($e, $entityFqcn));
+      $discriminatorMap = array_filter($discriminatorMap, fn($e) => is_instanceof($e, $entityFqcn));
       $choices = array_flip(array_map(fn($d) => self::getTranslator()->entity($d), $discriminatorMap));
 
       $filter->setFormType(TextFilterType::class);

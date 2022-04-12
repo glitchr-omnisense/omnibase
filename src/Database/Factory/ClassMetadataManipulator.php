@@ -148,7 +148,7 @@ class ClassMetadataManipulator
 
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
                 
-                $validFields[$fieldName] = array_merge($validFields[$fieldName] ?? [], $fields[$fieldName] ?? []);
+                $validFields[$fieldName] = $fields[$fieldName] ?? $validFields[$fieldName] ?? [];
                 unset($fields[$fieldName]);
             }
         }

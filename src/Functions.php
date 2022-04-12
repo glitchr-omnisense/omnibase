@@ -22,11 +22,6 @@ namespace {
         }, $input);
     }
 
-    function is_parent(mixed $object_or_class, string|array $class): bool
-    {
-        return is_a($object_or_class, $class, true);
-    }
-
     function is_instanceof(mixed $object_or_class, string|array $class): bool
     {
         // At least one class detection
@@ -555,6 +550,12 @@ namespace {
         ];
     }
 
+    function array_limit(array &$array, $limit = -1)
+    {
+        if($limit < 0) return $array;
+        return array_splice($array, 0, $limit);
+    }
+
     function array_concat(array ...$arrays): array {
 
         $array = [];
@@ -714,6 +715,17 @@ namespace {
     define("FORMAT_LOWERCASE",    3); // lorem ipsum dolor sit amet
     define("FORMAT_UPPERCASE",    4); // LOREM IPSUM DOLOR SIT AMET
     
+    function call_user_func_with_defaults(callable $fn, ...$args): mixed
+    {
+        $reflectionFn = new ReflectionFunction($fn);
+
+        $nArgs = count($args);
+        if($reflectionFn->getNumberOfRequiredParameters() > $nArgs)
+            throw new InvalidArgumentException("Missing arguments (".$nArgs." provided out of ".$reflectionFn->getNumberOfParameters().")  in the callable function \"". $reflectionFn->getName()."\"");
+
+        return call_user_func($fn, ...array_slice($args, 0, min($nArgs, $reflectionFn->getNumberOfParameters())));
+    }
+
     function castcase(string $str, int $format = 0): string
     {
         switch($format) {
@@ -753,34 +765,9 @@ namespace {
         $tArray = [];
         $counter = 0;
         foreach($array as $key => $entry) {
-        
-            switch($reflection->getNumberOfParameters()) {
-                case 0:
-                    throw new InvalidArgumentException('Missing arguments in the callable function (must be between 1 and 4)');
 
-                case 1:
-                    $ret = call_user_func($callback, $key);
-                    break;
-
-                case 2:
-                    $ret = call_user_func($callback, $key, $entry);
-                    break;
-
-                case 3:
-                    $ret = call_user_func($callback, $key, $entry, $callback);
-                    break;
-
-                case 4:
-                    $ret = call_user_func($callback, $key, $entry, $callback, $counter);
-                    break;
-
-                case 5:
-                    $ret = call_user_func($callback, $key, $entry, $callback, $counter, $depth);
-                    break;
-            
-                default:
-                    throw new InvalidArgumentException('Too many arguments passed to the callable function (must be between 1 and 4)');
-            }
+            // Call user function with defaults parameters if required
+            $ret = call_user_func_with_defaults($callback, $key, $entry, $callback, $counter, $depth);
 
             // Process generators
             if($ret instanceof Generator) {
@@ -1124,6 +1111,7 @@ namespace {
     function rgba2float(array $rgba):float { return ($rgba[0] * 4294967296) + ($rgba[1] * 65536) + ($rgba[2] * 256) + ($rgba[3]); }
     function rgba2hex(array $rgba) :string { return sprintf("#%02X%02X%02X%02X", ...array_pad($rgba,4,0)); }
 
+    function str_blankspace(int $length) { return str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool
     {
         return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); 

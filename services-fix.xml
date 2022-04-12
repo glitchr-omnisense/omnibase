@@ -72,7 +72,6 @@
             <argument type="service" id="Symfony\Component\Routing\Generator\UrlGeneratorInterface" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\DashboardControllerRegistry" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\UrlSigner" />
         </service>
 
         <service id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider"    public="true">

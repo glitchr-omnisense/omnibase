@@ -38,7 +38,8 @@ class DateTimePickerConfigurator implements FieldConfiguratorInterface
         $dateFormat = null;
         $timeFormat = null;
         $icuDateTimePattern = '';
-        $formattedValue = $field->getValue();
+
+        $formattedValue = $field->getValue() ?? $field->getCustomOption(DateTimePickerField::OPTION_DEFAULT);
 
         if (DateTimePickerField::class === $field->getFieldFqcn()) {
             [$defaultDatePattern, $defaultTimePattern] = $crud->getDateTimePattern();

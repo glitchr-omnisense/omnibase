@@ -324,8 +324,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $logo = $this->baseService->getImageService()->thumbnail($logo, 250, 250);
         return parent::configureDashboard()
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
-            ->setTitle('<img src="'.$logo.'" alt="'.$title.'">')
-            ->disableUrlSignatures();
+            ->setTitle('<img src="'.$logo.'" alt="'.$title.'">');
 
     }
 

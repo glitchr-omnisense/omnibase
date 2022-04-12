@@ -31,9 +31,9 @@ class IconField extends SelectField implements FieldInterface
         return $this;
     }
 
-    public function setProvider(IconProviderInterface|string $objectOrClass) 
+    public function setAdapter(IconProviderInterface|string $objectOrClass) 
     {
-        $this->setFormTypeOption("provider", is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);
+        $this->setFormTypeOption("adapter", is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);
         return $this;
     }
 }

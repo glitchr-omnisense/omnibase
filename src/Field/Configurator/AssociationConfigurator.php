@@ -5,9 +5,9 @@ namespace Base\Field\Configurator;
 use Base\Controller\Dashboard\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\AssociationField;
+use Base\Field\CollectionField;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -16,7 +16,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AssociationConfigurator implements FieldConfiguratorInterface
 {
@@ -47,8 +46,6 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         if ($field->getFormTypeOption("class") == null)
             $field->setFormTypeOption("class", $targetEntity);
 
-        $field->setFormTypeOptionIfNotSet('allow_add', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_ADD));
-        $field->setFormTypeOptionIfNotSet('allow_delete', $field->getCustomOptions()->get(AssociationField::OPTION_ALLOW_DELETE));
         $field->setFormattedValue($field->getValue());
 
         $href = [$field->getFormTypeOption("class") => AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"))];

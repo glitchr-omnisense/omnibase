@@ -9,6 +9,7 @@ use Base\Service\ImageService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
@@ -83,7 +84,9 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
             new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('get_class',       [$this, 'get_class']),
-            new TwigFunction('is_countable',       [$this, 'is_countable']),
+            new TwigFunction('is_countable',    [$this, 'is_countable']),
+            new TwigFunction('is_callable',     [$this, 'is_callable']),
+            new TwigFunction('call_user_func_with_defaults',     [$this, 'call_user_func_with_defaults']),
             new TwigFunction('method_exists',   [$this, 'method_exists']),
             new TwigFunction('static_call',     [$this, 'static_call'  ]),
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
@@ -104,6 +107,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('synopsis',    'synopsis'),
             new TwigFilter('closest',     'closest'),
             new TwigFilter('distance',    'distance'),
+            new TwigFilter('nargs',     [$this, 'nargs']),
 
             new TwigFilter('color_name', 'color_name'),
 
@@ -155,6 +159,9 @@ final class BaseTwigExtension extends AbstractExtension
     public function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_ucfirst($string, $encoding); }
     public function mb_ucwords(string $string, ?string $encoding = null, ?string $separator = null): string { return mb_ucwords($string, $encoding, $separator); }
     
+    public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
+    public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
+    public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
     public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
     public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
     public function filter(Environment $env,  $array = [], $arrow = null) 
