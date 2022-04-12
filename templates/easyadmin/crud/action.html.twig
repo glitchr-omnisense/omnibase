@@ -32,8 +32,11 @@
     {% set actionHtmlAttributes = action.htmlAttributes %}
     {% set discriminatorMap     = actionHtmlAttributes["map"] %}
     {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'map') %}
-    {% set rootEntity           = actionHtmlAttributes["root-entity"] %}
-    {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'root-entity') %}
+    {% set crud                 = actionHtmlAttributes["crud"] %}
+    {% set rootCrud             = actionHtmlAttributes["root-crud"] %}
+
+    {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'crud') %}
+    {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'root-crud') %}
 
     {% set singleEntity = false %}
     {% for group, entities in discriminatorMap %}
@@ -45,7 +48,7 @@
     {% set isRootEntityAllowed = false %}
     {% for group, entities in discriminatorMap %}
         {% if not isRootEntityAllowed %}
-            {% set isRootEntityAllowed = (rootEntity in entities) %}
+            {% set isRootEntityAllowed = (rootCrud in entities) %}
         {% endif %}
     {% endfor %}
 
@@ -79,12 +82,11 @@
                 {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans|capitalize }}</li>{% endif %}
             {% endif %}
 
-            {% for entity in entities %}
+            {% for crudEntity in entities %}
 
-                {% set icon    = static_call(entity|urldecode, "getEntityIcon")|default(null) %}
-                {% set label   = static_call(entity|urldecode, "getEntityLabelInSingular")|trans|capitalize %}
-                {% set linkUrl = action.linkUrl|replace({(rootEntity): entity}) %}
-
+                {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
+                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans|capitalize %}
+                {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
                 <li class="dropdown-item label-item"><a href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}

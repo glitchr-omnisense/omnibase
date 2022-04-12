@@ -104,37 +104,57 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return camel_to_snake(str_replace("\\", ".", $entityFqcn));
     }
 
+    public function configureDiscriminatorMap(array $discriminatorMap, string $rootEntity, string $entity): ?array
+    {
+        return null;
+    }
+
+    protected $allowRootEntity = true;
+    public function disallowRootEntity() 
+    { 
+        $this->allowRootEntity = true;
+        return $this->allowRootEntity;
+    }
+    public function allowRootEntity() 
+    { 
+        $this->allowRootEntity = true;
+        return $this;
+    }
+
     public function setDiscriminatorMapAttribute(Action $action)
     {
         $entity     = get_alias($this->getEntityFqcn());
         $rootEntity = get_alias($this->classMetadataManipulator->getRootEntityName($entity));
         $actionDto = $action->getAsDto();
 
-        if($entity == $rootEntity) {
+        $discriminatorMap = $this->configureDiscriminatorMap($this->classMetadataManipulator->getDiscriminatorMap($entity), $rootEntity, $entity);
+        if ($discriminatorMap === null)
+            $discriminatorMap = array_filter($this->classMetadataManipulator->getDiscriminatorMap($entity), fn($e) => is_instanceof($e, $entity));
 
-            $htmlAttributes        = $actionDto->getHtmlAttributes();
-            $htmlAttributes["root-entity"] = urlencode($this->getCrudControllerFqcn($rootEntity));
-            $htmlAttributes["map"] = [];
+        $htmlAttributes        = $actionDto->getHtmlAttributes();
+        $htmlAttributes["crud"] = urlencode($this->getCrudControllerFqcn($entity));
+        $htmlAttributes["root-crud"] = urlencode($this->getCrudControllerFqcn($rootEntity));
+        $htmlAttributes["map"] = [];
 
-            foreach($this->classMetadataManipulator->getDiscriminatorMap($entity) as $key => $class) {
+        foreach($discriminatorMap as $key => $class) {
 
-                $class = get_alias($class);
-                if($class == $rootEntity) continue;
+            $class = get_alias($class);
 
-                $k     = explode("_", $key);
-                $key   = array_shift($k);
+            if(is_abstract($class)) continue;
 
-                if(( $crudClassController = $this->getCrudControllerFqcn($class) )) {
-                    $array = [implode("_", $k) => urlencode($crudClassController)];
-                    $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
-                }
+            $k     = explode("_", $key);
+            $key   = array_shift($k);
+
+            if(( $crudClassController = $this->getCrudControllerFqcn($class) )) {
+                $array = [implode("_", $k) => urlencode($crudClassController)];
+                $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
             }
+        }
 
-            if(!empty($htmlAttributes["map"])) {
+        if(!empty($htmlAttributes["map"])) {
 
-                $actionDto->setHtmlElement("discriminator");
-                $actionDto->setHtmlAttributes($htmlAttributes);
-            }
+            $actionDto->setHtmlElement("discriminator");
+            $actionDto->setHtmlAttributes($htmlAttributes);
         }
 
         return $action;
