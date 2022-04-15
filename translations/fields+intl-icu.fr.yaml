@@ -61,3 +61,6 @@ fileupload:
         none: "Vous ne pouvez plus ajouter de fichier."
         singular: "Vous pouvez encore ajouter {0} fichier."
         plural: "Vous pouvez encore ajouter {0} fichiers."
+
+imageupload:
+  alt: "Alternative"

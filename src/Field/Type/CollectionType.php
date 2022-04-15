@@ -3,7 +3,6 @@
 namespace Base\Field\Type;
 
 use Base\Service\BaseService;
-
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
@@ -25,18 +24,18 @@ class CollectionType extends AbstractType
     {
         $resolver->setDefaults([
             'form2' => false,
-            'length' => 0,
-            'allow_add' => true,
-            'allow_delete' => true,
+            'length' => 1,
+            'allow_add' => false,
+            'allow_delete' => false,
             'href' => null,
-            'collection_required' => true,
             'prototype' => true,
             'prototype_data' => null,
             'prototype_name' => '__prototype__',
+            'group' => true,
+            'row_group' => true,
+            'entry_collapsed' => true,
             'entry_type' => TextType::class,
-            'entry_inline' => false,
-            'entry_row_inline' => false,
-            'entry_label' => function($i) { return " #".$i; },
+            'entry_label' => function($i) { return $i === "__prototype__" ? false : " #".(((int)$i)+1); },
             'entry_options' => [],
             'entry_required' => null,
             'delete_empty' => false,
@@ -51,13 +50,13 @@ class CollectionType extends AbstractType
             return $value;
         });
 
-        $resolver->setNormalizer('required', function (Options $options, $value) {
-            // Collection is always submitted regardless of its options..
-            // It returns at least an empty array..
-            // NB: Child fields "required" options are deduced from parents.
-            //     Collection is not supposed to knows about child requirements
-            return true;
-        });
+        // $resolver->setNormalizer('required', function (Options $options, $value) {
+        //     // Collection is always submitted regardless of its options..
+        //     // It returns at least an empty array..
+        //     // NB: Child fields "required" options are deduced from parents..
+        //     //     .. but collection is not supposed to knows about child requirements, IMO
+        //     return true;
+        // });
 
         $resolver->setNormalizer('allow_add',     fn(Options $options, $value) => $options["length"] == 0 && $value);
         $resolver->setNormalizer('allow_delete',  fn(Options $options, $value) => $options["length"] == 0 && $value);
@@ -79,15 +78,15 @@ class CollectionType extends AbstractType
             if (null !== $options['entry_required'])
                 $prototypeOptions['required'] = $options['entry_required'];
 
+            $prototypeOptions["label"] = "__prototype__";
             $prototypeOptions['attr']['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->baseService->getTranslator()->trans("@fields.array.value");
-
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
             $builder->setAttribute('prototype', $prototype->getForm());
         }
-        
+
         // Resize collection according to length option
         if(is_int($options["length"]) && $options["length"] > 0) {
-        
+
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
                 $data = $event->getData() ?? [];
@@ -114,13 +113,15 @@ class CollectionType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars['href']         = $options["href"];
-        $view->vars['entry_label']  = $options['entry_label'] ?? null;
-        $view->vars['entry_options']  = $options['entry_options'] ?? null;
-        $view->vars['entry_inline'] = $options['entry_inline'] ?? false;
-        $view->vars['entry_row_inline'] = $options['entry_row_inline'] ?? false;
-        $view->vars['allow_add'] = $options['allow_add'] ?? false;
-        $view->vars['allow_delete'] = $options['allow_delete'] ?? false;
+        $view->vars['href']            = $options["href"];
+        $view->vars['entry_collapsed'] = $options['entry_collapsed'];
+        $view->vars['entry_label']     = $options['entry_label'];
+        $view->vars['entry_options']   = $options['entry_options'];
+        $view->vars['data_class']      = $options['data_class'];
+        $view->vars['group']           = $options['group'];
+        $view->vars['row_group']       = $options['row_group'];
+        $view->vars['allow_add']       = $options['allow_add'];
+        $view->vars['allow_delete']    = $options['allow_delete'];
 
         if ($form->getConfig()->hasAttribute('prototype')) {
             $prototype = $form->getConfig()->getAttribute('prototype');

@@ -151,7 +151,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             }
         }
 
-        if(!empty($htmlAttributes["map"])) {
+        if(count(array_filter($discriminatorMap, fn($e) => $e !== $entity)) > 0) {
 
             $actionDto->setHtmlElement("discriminator");
             $actionDto->setHtmlAttributes($htmlAttributes);

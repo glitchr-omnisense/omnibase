@@ -708,8 +708,20 @@
             <argument type="service" id="validator" />
         </service>
 
-        <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
-        <service id="Base\Field\Type\ImageType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
+        <service id="Base\Field\Type\AvatarType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="validator" />
+        </service>
+        <service id="Base\Field\Type\ImageType">
+            <tag name="form.type" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="validator" />
+        </service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />

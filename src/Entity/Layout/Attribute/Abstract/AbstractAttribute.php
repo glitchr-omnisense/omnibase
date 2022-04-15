@@ -11,10 +11,11 @@ use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-
+use Base\Entity\Layout\Attribute;
+use Base\Entity\Layout\Attribute\Common\BaseAttribute;
+use Base\Entity\Layout\AttributeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\AbstractAttributeRepository;
-use Base\Entity\Layout\Attribute;
 
 /**
  * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
@@ -56,11 +57,11 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\OneToMany(targetEntity=Attribute::class, mappedBy="adapter")
+     * @ORM\OneToMany(targetEntity=BaseAttribute::class, mappedBy="adapter")
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }
-    public function addAttribute(Attribute $attribute): self
+    public function addAttribute(AttributeInterface $attribute): self
     {
         if (!$this->attributes->contains($attribute)) {
             $this->attributes[] = $attribute;
@@ -70,7 +71,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
         return $this;
     }
 
-    public function removeAttribute(Attribute $attribute): self
+    public function removeAttribute(AttributeInterface $attribute): self
     {
         if ($this->attributes->removeElement($attribute)) {
             // set the owning side to null (unless already changed)

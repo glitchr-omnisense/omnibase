@@ -44,7 +44,7 @@ dashboard:
 
 dashboard_settings:
   title: "Paramètres du site"
-  excerpt: "Élements configurable du site"
+  excerpt: "Élements configurables du site"
 
   empty: "Il n'y a pas de paramètre à configurer sur ce site, tu peux repartir de là où tu viens !"
   success: "Les paramètres du site ont correctement été modifiés."

@@ -7,7 +7,7 @@ use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 interface AttributeInterface
 {
     public function getAdapter();
-    public function setAdapter(?AbstractAttribute $adapter);
+    public function setAdapter(?AbstractAttribute $adapter): self;
 
     public function getCode(): ?string; 
     public function getType(): ?string; 

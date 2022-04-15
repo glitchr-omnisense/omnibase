@@ -12,6 +12,7 @@ use Doctrine\ORM\PersistentCollection;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -54,42 +55,57 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        parent::configureOptions($resolver);
-        
         $resolver->setDefaults([
             'class'     => null,
             'form_type' => null,
             'autoload'  => true,
             'href'      => null,
 
+            'entry_collapsed' => true,
+            'entry_label' => function($i, $e) { return $i === "__prototype__" ? false : $this->getTranslator()->entity($e). " #".(((int)$i)+1); },
+            'entry_required' => true,
+
             'fields' => [],
             'length' => 0,
             'excluded_fields' => [],
 
-            'recursive' => false,
+            'recursive' => null,
             "multiple" => false,
-            'inline' => false,
-            'row_inline' => false,
+            'group'     => true,
+            'row_group' => true,
 
             'allow_add' => true,
             'allow_delete' => true,
             'allow_entity' => false,
         ]);
 
+        $resolver->setNormalizer('required', function (Options $options, $value) {
+            // Association type must depends on child requirement here.. it marked as false for some reasons..
+            return $options["entry_required"];
+        });
+
         $resolver->setNormalizer('data_class', function (Options $options, $value) {
             if($options["multiple"]) return null;
             return $value ?? null;
+        });
+        
+        $resolver->setNormalizer('allow_add', function (Options $options, $value) {
+            if($options["group"]) return $value ?? null;
+            return false;
+        });
+        $resolver->setNormalizer('allow_delete', function (Options $options, $value) {
+            if($options["group"]) return $value ?? null;
+            return false;
         });
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['href']         = $options["href"];
-        $view->vars["inline"]       = $options["inline"];
         $view->vars["multiple"]     = $options["multiple"];
+        $view->vars["group"]        = $options["group"];
+        $view->vars["row_group"]    = $options["row_group"];
         $view->vars["allow_add"]    = $options["allow_add"];
-        $view->vars["inline"]       = $options["inline"];
-        $view->vars["row_inline"]   = $options["row_inline"];
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars['length']       = $options["length"];
     }
@@ -100,34 +116,38 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options) {
 
             $form = $event->getForm();
+            $data = $event->getData();
 
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
                 unset($options["class"]);
 
+                if(!is_array($data) && !$data instanceof Collection)
+                    $data = [$data];
+
                 $collectionOptions = [
-                    "data_class" => null,
-                    'by_reference' => false,
-                    'length' => $options["length"],
-                    "entry_inline" => $options["inline"],
-                    "entry_row_inline" => $options["row_inline"],
-                    'entry_type' => AssociationType::class,
-                    'entry_label' => function($i, $className = null, $href = null) { 
-                        return $this->getTranslator()->entity($className). " #".$i; 
-                    },
-                    'entry_options' => array_merge($options, [
+                    "data_class"       => null,
+                    "label"            => $options["label"],
+                    'by_reference'     => false,
+                    'length'           => $options["group"] ? $options["length"] : count($data),
+                    "group"            => $options["group"],
+                    "row_group"        => $options["row_group"],
+                    'entry_collapsed'  => $options["entry_collapsed"],
+                    'entry_type'       => AssociationType::class,
+                    'entry_label'      => $options["entry_label"],
+                    'entry_options'    => array_merge($options, [
+                        'href'         => $options["href"] ?? null,
                         'allow_entity' => $options["allow_entity"],
                         'data_class'   => $dataClass,
                         'multiple'     => false,
-                        'href'         => $options["href"] ?? null,
                     ]),
                 ];
-                
+
                 if ($options["allow_add"] !== null) 
-                    $collectionOptions['allow_add'] = $options["allow_add"];
+                    $collectionOptions['allow_add'] = $options["group"] ? $options["allow_add"] : false;
                 if ($options["allow_delete"] !== null) 
-                    $collectionOptions['allow_delete'] = $options["allow_delete"];
+                    $collectionOptions['allow_delete'] = $options["group"] ? $options["allow_delete"] : false;
 
                 $form->add("collection", CollectionType::class, $collectionOptions);
 
@@ -187,7 +207,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if(empty($value)) $value = null;
 
                 $childFormType = get_class($childForm->getConfig()->getType()->getInnerType());
-
                 switch($childFormType) {
                     case ArrayType::class:
                         if(is_serialized($value)) $value = unserialize($value);
@@ -208,15 +227,16 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $form    = current(iterator_to_array($forms))->getParent();
-        $options = current(iterator_to_array($forms))->getParent()->getConfig()->getOptions();
+        $form = current(iterator_to_array($forms));
+        $formParent = $form->getParent();
+        $options    = $formParent->getConfig()->getOptions();
+    
+        $options["class"]    = $options["class"] ?? $this->formFactory->guessType($formParent, $options);
+        $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($formParent, $options);
 
         $data = new ArrayCollection();
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
             $data[$fieldName] = $childForm->getData();
-
-        $options["class"]    = $options["class"] ?? $this->formFactory->guessType($form, $options);
-        $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($form, $options);
 
         if(!$options["multiple"] && $this->classMetadataManipulator->isEntity($options["class"])) {
 
@@ -224,15 +244,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if(!$classMetadata)
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
 
-            $fieldNames  = array_values($classMetadata->getFieldNames());
-            $fields = array_intersect_key($data->toArray(), array_flip($fieldNames));
-            $associations = array_diff_key($data->toArray(), array_flip($fieldNames));
-
-            $viewData = is_object($viewData) ? $viewData : $this->entityHydrator->hydrate($options["class"], []);
-            foreach ($fields as $property => $value)
-                try { $this->propertyAccessor->setValue($viewData, $property, $value); } catch(Exception $e) {}
-            foreach($associations as $property => $value)
-                try { $this->propertyAccessor->setValue($viewData, $property, $value); } catch(Exception $e) {}
+            $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $data);
 
         } else if($viewData instanceof PersistentCollection) {
 
@@ -240,9 +252,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $fieldName = $viewData->getMapping()["fieldName"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
 
-            if($data->containsKey($fieldName)) {
+            if($data->containsKey("collection")) {
 
-                $child = $data[$fieldName];
+                $child = $data["collection"];
                 if(!$isOwningSide) {
 
                     foreach($viewData as $entry)

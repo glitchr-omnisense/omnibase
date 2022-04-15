@@ -153,15 +153,20 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    public function showInline($inline = true): self
+    public function showEmbedded($embed = true): self
     {
-        $this->setFormTypeOption("inline", $inline);
+        $this->setFormTypeOption("group", $embed);
         return $this;
     }
 
-    public function showRowInline($inline = true): self
+    public function showEmbeddedRow($embed = true): self
     {
-        $this->setFormTypeOption("row_inline", $inline);
+        $this->setFormTypeOption("row_group", $embed);
+        return $this;
+    }
+    public function showCollapsed($collapsed = true): self
+    {
+        $this->setFormTypeOption("entry_collapsed", $collapsed);
         return $this;
     }
 }

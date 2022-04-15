@@ -65,6 +65,8 @@
                     outline: none !important;
                 }
 
+                .field-association.form-group { padding: 0 !important; }
+
                 @media (max-width: 992px)
                 {
                     .text-center { text-align:left !important; }
@@ -73,9 +75,9 @@
 
                 .navbar-custom-menu {
                     display:flex !important;
-                    overflow: scroll;
+                    z-index:2001;
                 }
-                .dropdown-menu { min-width: 200px;}
+                .dropdown-menu { min-width: 200px; margin-top:5em; }
                 .dropdown-item.label-group:hover { background-color: transparent;  }
                 .dropdown-item.label-group
                 {
@@ -111,6 +113,7 @@
                 .input-group-text {
                     height: 100%;
                     background-color: #f8fafc !important;
+                    padding: .425rem .75rem !important;
                 }
 
                 .locale-dropdown .dropdown-toggle
@@ -170,11 +173,14 @@
 
                 .form-group.field-collection.form-control > div:nth-last-child(-n+2) .accordion-item { border-bottom: 0px solid lightgrey; }
                 
+                .ea .content-wrapper .form-attribute-items .form-collection-items > .form-group { padding:0.5em 0;}
+
                 .form-errors { margin: 1em 0.5em !important;}
-                .ea .content-wrapper .form-group { padding-top:1em ; padding-bottom:1em ; }
+                {# .ea .content-wrapper .form-group { padding-top:1em ; padding-bottom:1em ; } #}
                 .ea .content-wrapper .form-collection-items > .form-group { padding-top:0em; padding-bottom:0em; }
-                .ea-edit-form > .form-group, .ea-new-form > .form-group  { padding: 1em 0.5em !important; }
-                .ea-edit-form > .form-translatable.form-group, .ea-new-form > .form-translatable.form-group  { padding: 0em 0.5em !important; }
+                .ea-edit-form > .form-group, .ea-new-form > .form-group  { padding: 1em 0.5em; }
+                .ea-edit-form > .form-group > .form-entity, .ea-new-form > .form-group > .form-entity  { padding: 0em 0em !important; }
+                .ea-edit-form > .form-group > .form-entity > .form-group, .ea-new-form > .form-group > .form-entity > .form-group  { padding: 1em 0em !important; }
 
                 #filters { padding: .5em !important; }
                 .form-translatable .tab-pane > div:first-child { padding: 0.5em 0 0 0 !important; }
@@ -187,7 +193,7 @@
                     border-bottom: 1px solid white;
                 }
 
-                .select2-container .select2-selection--single { height: 37px !important; }
+                .select2-container .select2-selection--single { height: 38px !important; }
 
                 .content-top { height:90px; }
                 
@@ -264,8 +270,6 @@
                     opacity:0;
                     transition: opacity 0.5s;
                 }
-
-                .input-group-text { padding: .375rem .75rem !important; }
 
                 .dropdown-menu.show, .dropdown-menu.bootstrap-datetimepicker-widget {
 

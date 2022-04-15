@@ -41,9 +41,6 @@ trait TranslationTrait
         return $this;
     }
 
-    protected $translationId;
-    public function getTranslationId() { return $this->translationId; }
-
     /**
      * @ORM\Column(type="string", length=5)
      * @Assert\Locale(canonicalize = true)

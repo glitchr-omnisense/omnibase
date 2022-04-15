@@ -138,6 +138,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             : $this->entityFactory->createForEntityInstance($field->getValue());
         $field->setFormTypeOptionIfNotSet('class', $targetEntityDto->getFqcn());
 
+        $field->setFormTypeOptionIfNotSet('multiple', false);
         $field->setFormTypeOptionIfNotSet('empty_data', null);
 
         $field->setCustomOption(AssociationField::OPTION_RELATED_URL, $this->generateLinkToAssociatedEntity($targetCrudControllerFqcn, $targetEntityDto));

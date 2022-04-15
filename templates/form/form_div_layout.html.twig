@@ -75,11 +75,16 @@
 {%- block attribute_widget -%}
 <div class="form-control form-attribute">
     {{ form_widget(form.choice) }}
-    {% if form.intl is defined %}
-        {{ form_widget(form.intl) }}
-    {% else %}
+    <div class="form-attribute-items">
+
+    {% for fieldName in form.children|keys|filter(k => k != "choice") %}
+        {{ form_widget(form.children[fieldName]) }}
+    {% endfor %}
+
+    {% if form.children|keys|filter(k => k != "choice") is empty %}
         <div class="form-text text-muted">{{"@fields.attribute.empty"|trans}}</span></div>
     {% endif %}
+    </div>
 </div>
 {% endblock attribute_widget %}
 
@@ -142,12 +147,7 @@
     {% if form.children|length == 1 and single_locale %}
 
         {% for row in form.children %}
-        
-            {% if form.vars.row_inline == false %}
-                {{ form_widget(row) }}
-            {% else %}
-                {{ form_row(row) }}
-            {% endif %}
+            {{ form_widget(row) }}
         {% endfor %}
 
     {% else %}
@@ -312,7 +312,9 @@
 
     {% if not multiple %}
         <figure>
+
             <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(200,200) | default(thumbnail) }}" />
+
             <figcaption id="{{id}}_figcaption">
                 <i class="fas fa-plus-circle fa-3x"></i>
             </figcaption>
@@ -349,8 +351,11 @@
     {% endif %}
 
     <div class="imageupload-field">
+
         {% if form.alt is defined %}
-            {{ form_widget(form.alt)}}
+            {%- set row_attr = row_attr|merge({'class': 'alt' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')}) -%}
+
+            {{ form_row(form.alt, {'label': form.alt.vars.label ?? "@fields.imageupload.alt"|trans, row_attr:row_attr})}}
         {% endif %}
 
         {{ form_widget(form, { attr: form.vars.attr }) }}
@@ -453,6 +458,7 @@
 {%- endblock -%}
 
 {%- block association_row -%}
+
     {% if form.parent.parent is null and multiple %}
     
         {% if form.children is iterable %}
@@ -472,39 +478,40 @@
             'data-collection-field': 'true',
             'data-allow-add': formChild.vars.allow_add ? 'true' : 'false',
             'data-allow-delete': formChild.vars.allow_delete ? 'true' : 'false',
-            'data-num-items': formChild is empty ? 0 : max(formChild|keys),
+            'data-num-items': formChild.children|length,
             'data-form-type-name-placeholder': formChild.vars.prototype is defined ? formChild.vars.prototype.vars.name : '',
             'data-empty-collection': block('collection2_empty') 
         }) %}
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
-        {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
-        <div class="form-group">
-            {{ form_label(form)}}
-            <div {{ block('widget_attributes') }}>
-                {{ form_widget(formChild) }}
-            </div>
+        <div class="field-association form-group">
+            {% if row_group %}
+                {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+                {{ form_label(form)}}
+                <div {{ block('widget_attributes') }}>
+                    {{ form_widget(formChild) }}
+                </div>
+            {% else %}
+                {{ form_widget(form, {attr: attr}) }}
+            {% endif %}
         </div>
+
     {% else %}
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
         {%- set attr = attr|merge({'class': 'form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
-        {% if inline %}
+        {% if group %}
             {{ form_widget(form, {attr: attr}) }}
         {% else %}
 
-            <div class="form-group">
+            <div class="form-group form-association">
                 {{ form_label(form)}}
                 <div {{ block('widget_attributes') }}>
                 {{ form_widget(form) }}
                 </div>
             </div>
-            {# <fieldset>
-                <legend>{{ form_label(form) }}</legend>
-                {{ form_widget(form, {attr: attr}) }}
-            </fieldset> #}
         {% endif %}
     {% endif %}
     
@@ -521,7 +528,7 @@
         'data-collection-field': 'true',
         'data-allow-add': allow_add ? 'true' : 'false',
         'data-allow-delete': allow_delete ? 'true' : 'false',
-        'data-num-items': form.children is empty ? 0 : max(form.children|keys),
+        'data-num-items': form.children|length,
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
         'data-empty-collection': block('collection2_empty')
     }) %}
@@ -529,10 +536,8 @@
     {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
     {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
-    {% set inline = form.vars.entry_inline|default(false) %}
-    {% if inline == true %}
-        {{ form_widget(form, {attr:attr}) }}
-    {% else %}
+    {% set group = form.vars.group %}
+    {% if group == true %}
         {% if form.children is not empty or allow_add != false %}
         <div class="form-group">
             {{ form_label(form)}}
@@ -541,6 +546,8 @@
             </div>
         </div>
         {% endif %}
+    {% else %}
+        {{ form_widget(form) }}
     {% endif %}
 
 {%- endblock collection2_row -%}
@@ -559,10 +566,13 @@
         {{ block('collection2_empty') }}
     {% else %}
         {% set attr = attr|merge({'class': 'form-collection-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
+        {% if allow_add == false %}
+            {% set attr = attr|merge({'class': 'form-collection-no-add-button' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
+        {% endif %}
         {{ form_widget(form, {attr: attr}) }}
     {% endif %}
     
-    {% if allow_add|default(false) %}
+    {% if group and allow_add %}
         <button type="button" class="btn btn-link form-collection-add-button">
             <i class="fa fa-plus pr-1"></i>
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
@@ -577,26 +587,13 @@
 
 {%- block collection2_entry_widget -%}
 
-    {% set inline = form_parent(form).vars.entry_inline|default(false) %}
-    {% set row_inline = form_parent(form).vars.entry_row_inline|default(false) %}
-    {% if inline == true %}
+    {% set group = form_parent(form).vars.group ?? false %}
+    {% set row_group = form_parent(form).vars.row_group ?? false %}
+    {% set collapsed = form_parent(form).vars.entry_collapsed ?? true %}
+    {% if group %}
 
-        {% if row_inline == false %}
-
-            {% set label = form_parent(form).vars.entry_label %}
-                {{- form_label(form, null, {'label_html': true})  -}}
-
-            <div class="form-collection-inline">
-            {{ form_widget(form, {attr:attr}) }}
-            </div>
-        {% else %}
-            {{ form_widget(form, {attr:attr}) }}
-        {% endif %}
-        
-    {% else %}
-
-        {% set href = form_parent(form).vars.href %}
-        {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
+        {% set href = form_parent(form).vars.href ?? null %}
+        {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
@@ -612,17 +609,16 @@
                     {% set linkable = _href is not null and form.vars.value is not null and form.children is empty %}
 
                     {%- if linkable -%}
-                        <a class="accordion-button collapsed" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
+                        <a class="accordion-button {{ collapsed ? 'collapse' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {%- else -%}
-                        <button class="accordion-button collapsed" {{ form.children is empty ? 'style="cursor:default;"' : '' }} 
+                        <button class="accordion-button {{ collapsed ? 'collapse' : ''}}" {{ form.children is empty ? 'style="cursor:default;"' : '' }} 
                                 type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {%- endif -%}
 
                         <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-                        {% set label = form_parent(form).vars.entry_label %}
-                        {% if is_callable(label) %}
-                            {{ call_user_func_with_defaults(label, form.vars.name, form_parent(form).vars.entry_options.data_class, form.vars.href)|stringify }}
-                        {% else %}
+                        {% set label = form_parent(form).vars.entry_label ?? null %}
+                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form_parent(form).vars.entry_options.data_class ?? null, form.vars.href ?? null) : null %}
+                        {% if  label != false %}
                             {{ label|default(value)|stringify }}
                         {% endif %}
 
@@ -641,7 +637,7 @@
                 </h2>
 
                 {% if form.children is not empty %}
-                <div id="{{ id }}-contents" class="accordion-collapse collapse">
+                <div id="{{ id }}-contents" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
                     <div class="accordion-body">
                         {{ form_widget(form, {attr:attr}) }}
                     </div>
@@ -650,6 +646,24 @@
             </div>
         </div>
 
+    {% else %}
+
+        {% if row_group %}
+
+            {% set label = form_parent(form).vars.entry_label %}
+            {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form_parent(form).vars.entry_options.data_class ?? null, form.vars.href ?? null) : null %}
+            {% if  label != false %}
+                <label>{{ label|default(value)|stringify }}</label>
+            {% endif %}
+
+            <div class="form-collection-group">
+            {{ form_widget(form, {attr:attr}) }}
+            </div>
+
+        {% else %}
+            {{ form_widget(form, {attr:attr}) }}
+        {% endif %}
+        
     {% endif %}
 
 {%- endblock collection2_entry_widget -%}
@@ -669,7 +683,7 @@
         'data-array-field': 'true',
         'data-allow-add': allow_add ? 'true' : 'false',
         'data-allow-delete': allow_delete ? 'true' : 'false',
-        'data-num-items': form.children is empty ? 0 : max(form.children|keys),
+        'data-num-items': form.children|length,
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
         'data-empty-array': block('array_empty')
     }) %}
@@ -723,7 +737,7 @@
         {{ form_widget(form, {attr: attr}) }}
     {% endif %}
     
-    {% if allow_add|default(false) %}
+    {% if allow_add %}
         <button type="button" class="btn btn-link form-array-add-button">
             <i class="fa fa-plus pr-1"></i>
             {{ '@EasyAdminBundle.action.add_new_item'|trans }}
@@ -752,7 +766,7 @@
 
     {% else %}
 
-        {% set allows_deleting_items = form_parent(form).vars.allow_delete|default(false) %}
+        {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">

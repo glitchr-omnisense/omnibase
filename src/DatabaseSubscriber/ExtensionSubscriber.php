@@ -111,18 +111,19 @@ class ExtensionSubscriber implements EventSubscriber
                         switch($action) {
 
                             case EntityAction::INSERT:
-                                $this->entityManager->persist($entry);
+                                if($entry->count() > 1) $this->entityManager->persist($entry);
                                 $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 break;
 
                             case EntityAction::UPDATE:
                                 if($this->entityManager->contains($entry)) {
 
-                                    $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
+                                    if($entry->count() > 1) $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
+                                    else $this->entityManager->remove($entry);
 
                                 } else {
 
-                                    $this->entityManager->persist($entry);
+                                    if($entry->count() > 1) $this->entityManager->persist($entry);
                                     $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);    
                                 }  
                                 break;

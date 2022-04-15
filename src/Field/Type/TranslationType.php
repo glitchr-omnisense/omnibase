@@ -58,7 +58,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             'locale'            => $this->localeProvider->getLocale(),
             'locale_options'    => [],
             
-            "row_inline"        => true,
+            
             'single_locale'     => false,
             'default_locale'    => $this->localeProvider->getDefaultLocale(),
             'required_locales'  =>  [],
@@ -114,15 +114,15 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     $defaultLocale = $locale = $dataLocale[0];
 
                 if($locale == $defaultLocale || in_array($locale, $options['required_locales'], true))
-                    $entityOptions["required"] = true;
+                    $entityOptions["entry_required"] = true;
                 else if(!empty($options['required_locales'])) // /!\ Telling required locales explicitely makes all subfields optionals
-                    $entityOptions["required"] = in_array($locale, $options['required_locales'], true);
+                    $entityOptions["entry_required"] = in_array($locale, $options['required_locales'], true);
 
                 if($options["multiple"]) {
 
                     $entityOptions["multiple"] = true;
-                    $entityOptions["inline"] = true;
-                    $entityOptions["row_inline"] = true;
+                    $entityOptions["group"] = false;
+                    $entityOptions["row_group"] = false;
                     $entityOptions["allow_add"] = false;
                     $entityOptions["allow_delete"] = false;
                     $entityOptions["recursive"] = true;
@@ -164,7 +164,6 @@ class TranslationType extends AbstractType implements DataMapperInterface
     {
         $view->vars["locale"]            = $options["locale"];
         $view->vars["single_locale"]     = $options["single_locale"];
-        $view->vars["row_inline"]        = $options["row_inline"];
     
         $view->vars["default_locale"]    = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];

@@ -13,7 +13,7 @@ class OrderedArrayCollection extends ArrayCollection
     public function __construct(array $elements = [], array $ordering = [])
     {
         parent::__construct($elements);
-        $this->ordering = $ordering;
+        $this->ordering = array_slice($ordering, 0, count($elements));
     }
 
     public function getOrdering() { return $this->ordering; }

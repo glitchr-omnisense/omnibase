@@ -92,13 +92,13 @@ class ClassMetadataManipulator
     public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : []; }
     public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null; }
 
-    public function getClassMetadata($entityOrClassOrMetadataMetadata)
+    public function getClassMetadata($entityOrClassOrMetadata)
     {
-        if($entityOrClassOrMetadataMetadata === null) return null;
-        if($entityOrClassOrMetadataMetadata instanceof ClassMetadataInfo) 
-            return $entityOrClassOrMetadataMetadata;
+        if($entityOrClassOrMetadata === null) return null;
+        if($entityOrClassOrMetadata instanceof ClassMetadataInfo) 
+            return $entityOrClassOrMetadata;
 
-        $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadataMetadata) ? get_class($entityOrClassOrMetadataMetadata) : $entityOrClassOrMetadataMetadata;
+        $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
         $metadata  = $this->entityManager->getClassMetadata($entityOrClassOrMetadataName);
         
         if (!$metadata)
@@ -332,7 +332,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($entityOrClassOrMetadata, $fieldName) ?? null;
+        $fieldName = $metadata->fieldNames[$fieldName] ?? null;
         return ($fieldName != null);
     } 
 
@@ -507,6 +507,16 @@ class ClassMetadataManipulator
         $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName) ?? null;
     }
+    
+    public function hasTranslation($entityOrClassOrMetadata): bool { return $this->hasAssociation($entityOrClassOrMetadata, "translations"); }
+    public function getTranslationMapping($entityOrClassOrMetadata, string $fieldName): ?array
+    {
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$metadata) return false;
+
+        if ($this->hasAssociation($entityOrClassOrMetadata, "translations"))
+            return $this->getMapping($metadata->getAssociationMapping("translations")["targetEntity"], $fieldName);
+    }
 
     public function getMapping($entityOrClassOrMetadata, string $fieldName): ?array
     {
@@ -514,7 +524,9 @@ class ClassMetadataManipulator
             return $this->getAssociationMapping($entityOrClassOrMetadata, $fieldName);
         else if($this->hasField($entityOrClassOrMetadata, $fieldName))
             return $this->getFieldMapping($entityOrClassOrMetadata, $fieldName);
-    
+        else if($this->hasTranslation($entityOrClassOrMetadata))
+            return $this->getTranslationMapping($entityOrClassOrMetadata, $fieldName);
+
         return null;
     }
     

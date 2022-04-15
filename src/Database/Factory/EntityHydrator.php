@@ -54,6 +54,7 @@ class EntityHydrator
     const ARRAY_OBJECT       = 4;
     const DEEPCOPY           = 8;
     const CONSTRUCT          = 16;
+    const IGNORE_NULLS       = 32;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -70,8 +71,7 @@ class EntityHydrator
         if (!is_object($entity))
             throw new Exception('Entity passed to EntityHydrator::hydrate() must be a class name or entity object');
 
-        $data = array_filter($this->toArray($data), fn($e) => $e !== null);
-        $data = array_key_removes($data, ...$dataExceptions);
+        $data = array_key_removes($data instanceof Collection ? $data->toArray() : $data, ...$dataExceptions);
 
         if(!$this->hydrateByArrayObject($entity, $data, $aggregateModel)) {
             $this->hydrateProperties($entity, $data, $aggregateModel);
@@ -171,19 +171,14 @@ class EntityHydrator
     protected function hydrateProperties(object $entity, array $data, int $aggregateModel): self
     {
         $reflEntity = new ReflectionObject($entity);
-
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach ($classMetadata->fieldMappings as $fieldName => $fieldMapping) {
-
-            if($this->getPropertyValue($entity, $fieldName) !== null)
-                continue;
-
-            $this->setPropertyValue($entity, $fieldName, null, new ReflectionObject($entity));
-        }
 
         foreach ($data as $propertyName => $value) {
 
             if($this->classMetadataManipulator->hasAssociation($entity, $propertyName))
+                continue;
+
+            if ($value === null && $aggregateModel & self::IGNORE_NULLS)
                 continue;
 
             if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
@@ -209,16 +204,16 @@ class EntityHydrator
 
     protected function hydrateAssociations(mixed $entity, array $data, int $aggregateModel): self
     {
+        $reflEntity = new ReflectionObject($entity);
+
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($classMetadata->associationMappings as $fieldName => $associationMapping) {
 
-            if($this->getPropertyValue($entity, $fieldName) !== null)
+            if ($this->getPropertyValue($entity, $fieldName) !== null)
                 continue;
 
-            if(!$this->classMetadataManipulator->isToManySide($entity, $fieldName))
-                continue;
-
-            $this->setPropertyValue($entity, $fieldName, new ArrayCollection(), new ReflectionObject($entity));
+            if ($this->classMetadataManipulator->isToManySide($entity, $fieldName))
+                $this->setPropertyValue($entity, $fieldName, new ArrayCollection(), $reflEntity);
         }
 
         foreach ($data as $propertyName => $value) {
@@ -226,8 +221,10 @@ class EntityHydrator
             if(!$this->classMetadataManipulator->hasAssociation($entity, $propertyName))
                 continue;
 
-            $associationMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
+            if ($data === null && $aggregateModel & self::IGNORE_NULLS)
+                continue;
 
+            $associationMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
             if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
                 $this->hydrateAssociationToOne($entity, $propertyName, $associationMapping, $value, $aggregateModel);
 
@@ -325,7 +322,7 @@ class EntityHydrator
     protected function setPropertyValue(mixed $entity, string $propertyName, $value, ?ReflectionObject $reflEntity = null): mixed
     {
         $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
-
+        
         $reflProperty = $this->getProperty($entity, $propertyName, $reflEntity);
         $reflProperty->setAccessible(true);
         $reflProperty->setValue($entity, $value);
