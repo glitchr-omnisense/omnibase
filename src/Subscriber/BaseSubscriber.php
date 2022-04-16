@@ -16,14 +16,12 @@ class BaseSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
-        $this->autoAppend  = $this->baseService->getParameterBag("base.twig.autoappend");
     }
 
     public static function getSubscribedEvents(): array
     {
         return [
             ConsoleEvents::COMMAND => ['onConsoleCommand'],
-            KernelEvents::REQUEST  => ['onKernelRequest', 128],
             KernelEvents::RESPONSE => ['onKernelResponse'],
         ];
     }
@@ -31,42 +29,8 @@ class BaseSubscriber implements EventSubscriberInterface
     // Make sure base service is called eagerly in the very early stage 
     public function onConsoleCommand() { return null; }
 
-    public function onKernelRequest(RequestEvent $event)
-    {
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));
-
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
-
-        if($this->baseService->isProfiler($event) && !$this->baseService->isDebug())
-            throw new NotFoundHttpException("Page not found.");
-    }
-
-    private function allowRender(ResponseEvent $event)
-    {
-        if (!$this->autoAppend)
-            return false;
-
-        $contentType = $event->getResponse()->headers->get('content-type');
-        if ($contentType && !str_contains($contentType, "text/html"))
-            return false;
-    
-        if ($this->baseService->isProfiler())
-            return false;
-
-        if (!$event->isMainRequest())
-            return false;
-        
-        return true;
-    }
-
     public function onKernelResponse(ResponseEvent $event)
     {
-        $ret = false;
         if ($this->baseService->isDebug()) {
 
             $request = $event->getRequest();
@@ -75,34 +39,10 @@ class BaseSubscriber implements EventSubscriberInterface
                 $response = $event->getResponse();
                 $response->headers->set('Symfony-Debug-Toolbar-Replace', true);
 
-                $ret = true;
+                return true;
             }
         }
 
-        if ($this->allowRender($event)) {
-
-            $response = $event->getResponse();
-            $content = $response->getContent();
-
-            $noscripts   = $this->baseService->getHtmlContent("noscripts");
-            $content = preg_replace('/<body\b[^>]*>/', "$0".$noscripts, $content, 1);
-
-            $stylesheets = $this->baseService->getHtmlContent("stylesheets");
-            $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets."$0", $content, 1);
-
-            $javascripts = $this->baseService->getHtmlContent("javascripts");
-            $content = preg_replace('/<\/head\b[^>]*>/', $javascripts."$0", $content, 1);
-
-            $javascriptsHead = $this->baseService->getHtmlContent("javascripts:head");
-            $content = preg_replace('/<\/head\b[^>]*>/', $javascriptsHead."$0", $content, 1);
-
-            $javascriptsBody = $this->baseService->getHtmlContent("javascripts:body");
-            $content = preg_replace('/<\/body\b[^>]*>/', "$0".$javascriptsBody, $content, 1);
-
-            $response->setContent($content);
-            $ret = true;
-        }
-
-        return $ret;
+        return false;
     }
 }

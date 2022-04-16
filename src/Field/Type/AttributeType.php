@@ -2,30 +2,33 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\TranslatableInterface;
-use Base\Entity\Layout\Attribute;
-use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
-use Base\Entity\Layout\Attribute\Common\BaseAttribute;
-use Base\Entity\Layout\AttributeTranslation;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\PersistentCollection;
 use InvalidArgumentException;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\DataMapperInterface;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\FormEvent;
-use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormInterface;
+use Base\Field\Type\SelectType;
+use Base\Entity\Layout\Attribute;
+use Base\Field\Type\AssociationType;
+use Base\Field\Type\TranslationType;
 use Symfony\Component\Form\FormView;
-
+use Symfony\Component\Form\FormEvent;
+use Doctrine\ORM\PersistentCollection;
+use Symfony\Component\Form\FormEvents;
+use Base\Database\TranslatableInterface;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormInterface;
+use Doctrine\Common\Collections\Collection;
+use Base\Entity\Layout\AttributeTranslation;
 use Symfony\Component\OptionsResolver\Options;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\DataMapperInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+
+use Symfony\Component\Form\FormBuilderInterface;
+use Base\Database\Factory\ClassMetadataManipulator;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Base\Entity\Layout\Attribute\Common\BaseAttribute;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 
 class AttributeType extends AbstractType implements DataMapperInterface
 {
@@ -58,7 +61,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
             'abstract_class' => null,
             'class'          => null,
 
-            'required' => false,
             'recursive'    => false,
             "multiple"     => null,
             'filter'       => null, 
@@ -110,24 +112,26 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
-            $form = $event->getForm();
-            $data = $event->getData();
-
             $options["class"]  = $options["class"] ?? Attribute::class;
             $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAttribute::class;
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-
+            
+            $form = $event->getForm();
             $form->add("choice", SelectType::class, [
                 "class"               => $options["abstract_class"],
                 "autocomplete_fields" => ["code" => $options["filter_code"]], 
                 "choice_filter"       => $options["filter"],
                 "multiple"            => $options["multiple"],
                 "href" => false,
+
                 "sortable"            => $options["sortable"],
                 "dropdownCssClass"    => "field-attribute-dropdown",
                 "containerCssClass"   => "field-attribute-selection"
             ]);
+
+            $data = $event->getData() ?? [];
+            $event->setData($data);
 
             if($data !== null) {
 
@@ -144,6 +148,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 $unvFields  = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), array_merge($v->getAdapter()->getOptions(), [
                     "label" => $v->getAdapter()->getLabel(), 
                     "help" => $v->getAdapter()->getHelp(), 
+                    "required" => false,
                     "form_type" => $v->getAdapter()::getType()])
                 ] : null, $data);
                 
@@ -170,6 +175,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 $intlFields  = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), array_merge($v->getAdapter()->getOptions(), [
                     "label" => $v->getAdapter()->getLabel(), 
                     "help" => $v->getAdapter()->getHelp(), 
+                    "required" => false,
                     "form_type" => $v->getAdapter()::getType()])
                 ] : null, $data);
 
@@ -202,12 +208,17 @@ class AttributeType extends AbstractType implements DataMapperInterface
         if ($viewData instanceof PersistentCollection) {
 
             $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));
-            foreach($viewData as $attribute)
-                $forms[$attribute->getAdapter()->getCode()]->setData($attribute);
+            foreach($viewData as $attribute) {
+
+                if(array_key_exists($attribute->getAdapter()->getCode(), $forms)) 
+                    $forms[$attribute->getAdapter()->getCode()]->setData($attribute);
+            }
 
         } else if($viewData instanceof Attribute) {
+            
             $choiceForm->setData($viewData->getAdapter());
-            $forms[$viewData->getAdapter()->getCode()]->setData($viewData);
+            if(array_key_exists($viewData->getAdapter()->getCode(), $forms)) 
+                $forms[$viewData->getAdapter()->getCode()]->setData($viewData);
         }
     }
 
@@ -215,7 +226,6 @@ class AttributeType extends AbstractType implements DataMapperInterface
     {
         $form = iterator_to_array($forms)["choice"]->getParent();
         $options = $form->getConfig()->getOptions();
-        
         $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessType($form, $options) ?? BaseAttribute::class;
         $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($form, $options);
 

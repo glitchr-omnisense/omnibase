@@ -61,6 +61,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Subscriber\TwigSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.service" />
+        </service>
+
 
         <service id="Base\Subscriber\ParameterBagSubscriber">
             <tag name="kernel.event_subscriber" />

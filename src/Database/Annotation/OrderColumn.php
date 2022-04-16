@@ -103,22 +103,22 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     try { $entityValue = $propertyAccessor->getValue($entity, $column); }
                     catch (Exception $e) { continue; }
                     
-                    // dump($column, $orderedIndexes, $entityValue->toArray());
-                    // if(is_array($entityValue)) {
+                    dump($column, $orderedIndexes, $entityValue->toArray());
+                    if(is_array($entityValue)) {
 
-                    //     $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
-                    //     if($this->order == "DESC") $entityValue = array_reverse($entityValue);
+                        $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
+                        if($this->order == "DESC") $entityValue = array_reverse($entityValue);
 
-                    //     $propertyAccessor->setValue($entity, $column, $entityValue);
+                        $propertyAccessor->setValue($entity, $column, $entityValue);
 
-                    // } else if($entityValue instanceof PersistentCollection) {
+                    } else if($entityValue instanceof PersistentCollection) {
 
-                    //     $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
-                    //     $reflProp->setAccessible(true);
-                    //     dump($reflProp->getValue($entityValue));
-                    //     $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
-                    //     dump($reflProp->getValue($entityValue));
-                    // }
+                        $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
+                        $reflProp->setAccessible(true);
+                        dump($reflProp->getValue($entityValue));
+                        $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
+                        dump($reflProp->getValue($entityValue));
+                    }
                 }
             }
         }

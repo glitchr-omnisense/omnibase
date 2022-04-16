@@ -36,8 +36,8 @@ class CropperType extends FileType
         $view->vars["cropper"] = null;
         if(is_array($options["cropper"])) {
 
-            $this->baseService->addHtmlContent("javascripts", $options["cropper-js"]);
-            $this->baseService->addHtmlContent("stylesheets", $options["cropper-css"]);
+            $this->baseService->addHtmlContent("javascripts:head", $options["cropper-js"]);
+            $this->baseService->addHtmlContent("stylesheets:head", $options["cropper-css"]);
 
             if(!array_key_exists('viewMode', $options["cropper"])) $options["cropper"]['viewMode'] = 2;
             if(!array_key_exists('aspectRatio', $options["cropper"])) $options["cropper"]['aspectRatio'] = 1;

@@ -134,13 +134,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     "group"            => $options["group"],
                     "row_group"        => $options["row_group"],
                     'entry_collapsed'  => $options["entry_collapsed"],
-                    'entry_type'       => AssociationType::class,
+                    'entry_type'       => AssociationType::class, 
                     'entry_label'      => $options["entry_label"],
                     'entry_options'    => array_merge($options, [
                         'href'         => $options["href"] ?? null,
                         'allow_entity' => $options["allow_entity"],
                         'data_class'   => $dataClass,
-                        'multiple'     => false,
+                        'multiple'     => false
                     ]),
                 ];
 
@@ -149,7 +149,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if ($options["allow_delete"] !== null) 
                     $collectionOptions['allow_delete'] = $options["group"] ? $options["allow_delete"] : false;
 
-                $form->add("collection", CollectionType::class, $collectionOptions);
+                $form->add("__collection__", CollectionType::class, $collectionOptions);
 
             } else {
 
@@ -177,10 +177,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"] ?? false;
                     unset($field['allow_entity']);
 
-                    if ($fieldEntity || ($fieldType !== null && $fieldType != AssociationType::class)) {
-                        
+                    if ($fieldEntity || ($fieldType !== null && $fieldType != AssociationType::class))
                         $form->add($fieldName, $fieldType, $field);
-                    }
                 }
             }
         });
@@ -231,7 +229,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
     {
         $form = current(iterator_to_array($forms));
         $formParent  = $form->getParent();
-        $formGParent = $formParent->getParent();
 
         $options     = $formParent->getConfig()->getOptions();
         $options["class"]    = $options["class"] ?? $this->formFactory->guessType($formParent, $options);
@@ -255,22 +252,21 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $fieldName = $viewData->getMapping()["fieldName"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
 
-            if($data->containsKey("collection")) {
+            if ($data->containsKey("__collection__"))
+                $data = $data->get("__collection__");
+            
+            if(!$isOwningSide) {
 
-                $child = $data["collection"];
-                if(!$isOwningSide) {
+                foreach($viewData as $entry)
+                    $this->propertyAccessor->setValue($entry, $mappedBy, null);
+            }
 
-                    foreach($viewData as $entry)
-                        $this->propertyAccessor->setValue($entry, $mappedBy, null);
-                }
+            $viewData->clear();
+            foreach($data as $n => $entry) {
 
-                $viewData->clear();
-                foreach($child as $n => $entry) {
-
-                    $viewData->add($entry);
-                    if(!$isOwningSide) 
-                        $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
-                }
+                $viewData->add($entry);
+                if(!$isOwningSide) 
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
             }
 
         } else if($options["multiple"]) {

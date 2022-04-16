@@ -589,7 +589,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $themeCssFile = $themeArray[0];
                 }
 
-                $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
+                $this->baseService->addHtmlContent("stylesheets:head", $themeCssFile);
             }
 
             // 
@@ -615,8 +615,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             $view->vars["tabulation"]       = $options["tabulation"];
 
             // Import select2
-            $this->baseService->addHtmlContent("javascripts", $options["select2-js"]);
-            $this->baseService->addHtmlContent("stylesheets", $options["select2-css"]);
+            $this->baseService->addHtmlContent("javascripts:head", $options["select2-js"]);
+            $this->baseService->addHtmlContent("stylesheets:head", $options["select2-css"]);
             $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
     }

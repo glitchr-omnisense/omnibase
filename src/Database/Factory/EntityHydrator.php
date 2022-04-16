@@ -327,8 +327,18 @@ class EntityHydrator
             }
         }
 
+        // Set value
         if($aggregateModel & self::DEEPCOPY) $association = clone $association;
         $this->setPropertyValue($entity, $propertyName, $association, $reflEntity);
+
+        // Fix identification in owning side definition
+        $isOwningSide = $mapping["isOwningSide"];
+        if(!$isOwningSide) {
+
+            $mappedBy =  $mapping["mappedBy"];
+            foreach($association as $entry)
+                $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
+        }
 
         return $this;
     }

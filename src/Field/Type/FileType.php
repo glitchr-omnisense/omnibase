@@ -145,8 +145,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["lightbox"] = null;
         if(is_array($options["lightbox"])) {
 
-            $this->baseService->addHtmlContent("javascripts", $options["lightbox-js"]);
-            $this->baseService->addHtmlContent("stylesheets", $options["lightbox-css"]);
+            $this->baseService->addHtmlContent("javascripts:head", $options["lightbox-js"]);
+            $this->baseService->addHtmlContent("stylesheets:head", $options["lightbox-css"]);
 
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);
         }
@@ -194,8 +194,8 @@ class FileType extends AbstractType implements DataMapperInterface
 
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
-            if($options["dropzone-js"] ) $this->baseService->addHtmlContent("javascripts", $options["dropzone-js"]);
-            if($options["dropzone-css"]) $this->baseService->addHtmlContent("stylesheets", $options["dropzone-css"]);
+            if($options["dropzone-js"] ) $this->baseService->addHtmlContent("javascripts:head", $options["dropzone-js"]);
+            if($options["dropzone-css"]) $this->baseService->addHtmlContent("stylesheets:head", $options["dropzone-css"]);
 
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             $view->vars["attr"]["class"] = "dropzone";
@@ -224,7 +224,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
             $view->vars["sortable"]  = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])
-            $this->baseService->addHtmlContent("javascripts", $options["sortable-js"]);
+            $this->baseService->addHtmlContent("javascripts:head", $options["sortable-js"]);
         }
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");

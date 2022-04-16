@@ -59,9 +59,9 @@ class DateTimePickerType extends AbstractType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         // Import datetimepicker
-        $this->baseService->addHtmlContent("javascripts", $options["moment-js"]);
-        $this->baseService->addHtmlContent("javascripts", $options["datetimepicker-js"]);
-        $this->baseService->addHtmlContent("stylesheets", $options["datetimepicker-css"]);
+        $this->baseService->addHtmlContent("javascripts:head", $options["moment-js"]);
+        $this->baseService->addHtmlContent("javascripts:head", $options["datetimepicker-js"]);
+        $this->baseService->addHtmlContent("stylesheets:head", $options["datetimepicker-css"]);
 
         //
         // Datetime picker Options

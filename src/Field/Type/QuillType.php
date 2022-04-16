@@ -77,11 +77,11 @@ class QuillType extends AbstractType implements DataMapperInterface
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         // Import highlight
-        $this->baseService->addHtmlContent("javascripts", $options["highlight-js"]);
-        $this->baseService->addHtmlContent("stylesheets", $options["highlight-css"]);
+        $this->baseService->addHtmlContent("javascripts:head", $options["highlight-js"]);
+        $this->baseService->addHtmlContent("stylesheets:head", $options["highlight-css"]);
 
         // Import quill
-        $this->baseService->addHtmlContent("javascripts", $options["quill-js"]);
+        $this->baseService->addHtmlContent("javascripts:head", $options["quill-js"]);
 
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
 
@@ -94,7 +94,7 @@ class QuillType extends AbstractType implements DataMapperInterface
             $themeCssFile = $themeArray[0];
         }
         
-        $this->baseService->addHtmlContent("stylesheets", $themeCssFile);
+        $this->baseService->addHtmlContent("stylesheets:head", $themeCssFile);
         $modules = $options["modules"] ?? [];
 
         $quillOpts = [];

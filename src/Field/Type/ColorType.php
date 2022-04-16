@@ -71,7 +71,7 @@ final class ColorType extends AbstractType
         $options["value"] = $view->vars['value'];
 
         // Import JSColor
-        $this->baseService->addHtmlContent("javascripts", $options["jscolor-js"]);
+        $this->baseService->addHtmlContent("javascripts:head", $options["jscolor-js"]);
 
     }
 

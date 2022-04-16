@@ -238,7 +238,7 @@ final class ColorPickerType extends AbstractType
         }
         $options["value"] = $view->vars['value'];
 
-        $this->baseService->addHtmlContent("javascripts", $options["pickr-js"]);
+        $this->baseService->addHtmlContent("javascripts:head", $options["pickr-js"]);
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-color.js");
     }
 }

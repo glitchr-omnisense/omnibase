@@ -90,6 +90,7 @@ class CollectionType extends AbstractType
             $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
                 $data = $event->getData() ?? [];
+                
                 if($data instanceof Collection)
                     while(count($data) < $options["length"]) $data->add(null);
                 else if(is_array($data))
