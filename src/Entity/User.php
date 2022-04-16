@@ -232,12 +232,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
     
     /**
-     * @ORM\Column(type="string", length=16)
+     * @ORM\Column(type="string", length=16, nullable=true)
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
 
-    public function getLocale(): string { return $this->locale; }
+    public function getLocale(): ?string { return $this->locale ?? LocaleProvider::getDefaultLocale(); }
     public function setLocale(?string $locale = null): self
     {
         if(empty($locale)) $locale = null;
@@ -250,11 +250,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $timezone;
 
-    public function getTimezone(): string { return $this->timezone; }
+    public function getTimezone(): string { return $this->timezone ?? "UTC"; }
     public function setTimezone(string $timezone = null): self
     {
         $this->timezone = $timezone ?? User::getCookie("timezone") ?? "UTC";
@@ -397,7 +397,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\ManyToMany(targetEntity=Penalty::class, inversedBy="uid", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $penalties;
-    public function getPenalties(): array { return $this->penalties; }
+    public function getPenalties(): Collection { return $this->penalties; }
     public function addPenalty(Penalty $penalty): self
     {
         if (!$this->penalties->contains($penalty)) {
@@ -444,13 +444,12 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $tokens;
-    public function getExpiredTokens(): ?array { return $this->getTokens(Token::EXPIRED); }
-    public function getValidTokens(): ?array { return $this->getTokens(Token::VALID); }
-    public function getTokens($type = Token::ALL): ?array
+    public function getExpiredTokens(): Collection { return $this->getTokens(Token::EXPIRED); }
+    public function getValidTokens(): Collection { return $this->getTokens(Token::VALID); }
+    public function getTokens($type = Token::ALL): Collection
     {
-        $tokens = [];
-        foreach($this->tokens as $token)
-        {
+        return $this->tokens->filter(function($token) use ($type) {
+
             switch($type)
             {
                 case Token::ALL:
@@ -462,10 +461,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
                 case Token::EXPIRED:
                     if (!$token->isValid()) $tokens[] = $token;
                     break;
-                }
-        }
-
-        return $tokens;
+            }
+        });
     }
 
     public function removeExpiredTokens(): self
@@ -554,7 +551,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="followers", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $followedThreads;
-    public function getFollowedThreads(): ArrayCollection { return $this->followedThreads; }
+    public function getFollowedThreads(): Collection { return $this->followedThreads; }
     public function addFollowedThread(Thread $followedThread): self
     {
         if (!$this->followedThreads->contains($followedThread)) {
@@ -578,7 +575,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="target", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $mentions;
-    public function getMentions(): array { return $this->mentions; }
+    public function getMentions(): Collection { return $this->mentions; }
     public function addMention(Mention $mention): self
     {
         if (!$this->mentions->contains($mention)) {

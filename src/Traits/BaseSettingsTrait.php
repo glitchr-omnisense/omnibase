@@ -6,6 +6,7 @@ use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 
 trait BaseSettingsTrait
@@ -123,10 +124,10 @@ trait BaseSettingsTrait
                           (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheAll" : "findAll");
 
             $settings = $this->settingRepository->$fn($path);
-            if ($settings instanceof Query) 
+            if ($settings instanceof Query)
                 $settings = $settings->getResult();
 
-        } catch(TableNotFoundException  $e) { return []; }
+        } catch(TableNotFoundException|EntityNotFoundException $e) { return []; }
 
         $values = $this->normalize($path, $settings);
         $values = $this->read($path, $values); // get formatted values
@@ -138,17 +139,13 @@ trait BaseSettingsTrait
     {
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRawScalar($path, $useCache);
-        // if($path == "base.settings.domain.scheme")
-        // dump($path, $setting);
-
+        
         if(!$setting instanceof Setting) {
 
             $setting = new Setting($path, null, $locale);
             $this->entityManager->persist($setting);
         }
-        // if($path == "base.settings.domain.scheme")
-        //     dump($path, $setting);
-
+        
         return $setting;
     }
 

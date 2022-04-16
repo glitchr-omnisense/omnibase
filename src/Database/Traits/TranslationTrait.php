@@ -47,12 +47,12 @@ trait TranslationTrait
      */
     protected $locale;
 
-    public function getLocale(): string 
+    public function getLocale(): ?string 
     { 
         if($this->locale) return $this->locale;
 
         if($this->getTranslatable() === null)
-            throw new InvalidArgumentException("Cannot determine translation locale and no translatable object provided.");
+            return null;
 
         return $this->getTranslatable()->getTranslations()->indexOf($this);
     }

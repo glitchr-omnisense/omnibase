@@ -96,36 +96,37 @@ class ExtensionSubscriber implements EventSubscriber
                         $properties[] = explode("::", $columns)[1];
                     
                     $array = $extension->payload($action, $className, $properties, $entity);
+                    // dump($array);
                     foreach($array as $entry) {
 
-                        if($entry === null || $entry->isEmpty()) {
+                        if($entry === null) continue;
+                        if(!$entry->supports()) {
                         
-                            $this->entityManager->remove($entry);
+                            if ($this->entityManager->contains($entry)) 
+                                $this->entityManager->remove($entry);
+
                             continue;
                         }
-                        
+
                         $entry->setEntityClass($className);
                         $entry->setEntityId($entity->getId());
                         $entry->setAction($action);
-                        
+
+                        // dump($entry);
                         switch($action) {
 
                             case EntityAction::INSERT:
-                                if($entry->count() > 1) $this->entityManager->persist($entry);
+                                $this->entityManager->persist($entry);
                                 $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 break;
 
                             case EntityAction::UPDATE:
-                                if($this->entityManager->contains($entry)) {
-
-                                    if($entry->count() > 1) $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
-                                    else $this->entityManager->remove($entry);
-
-                                } else {
-
-                                    if($entry->count() > 1) $this->entityManager->persist($entry);
+                                if($this->entityManager->contains($entry))
+                                    $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
+                                else {
+                                    $this->entityManager->persist($entry);
                                     $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);    
-                                }  
+                                }
                                 break;
 
                             case EntityAction::DELETE:

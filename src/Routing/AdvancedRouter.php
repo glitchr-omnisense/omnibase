@@ -227,8 +227,8 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations
-        $routeName = explode(".", $routeName);
         $currentRouteName = explode(".", $this->getCurrentRouteName());
+        $routeName = explode(".", $routeName) ?? $currentRouteName;
 
         $routeGroup = count($routeName) > 1 ? tail($routeName) : null;
         $routeGroup = $routeGroup ?? count($currentRouteName) > 1 ? tail($currentRouteName) : null;
@@ -256,6 +256,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         }
         
         // Try to compute subgroup (or base one)
+        
         try { $routeUrl = $baseDir . $this->router->generate($routeName, $routeParameters, $referenceType); }
         catch (Exception $e) { $routeUrl = $baseDir . $this->router->generate($routeDefaultName, $routeParameters, $referenceType); }
 

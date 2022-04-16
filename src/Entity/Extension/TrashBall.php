@@ -2,22 +2,18 @@
 
 namespace Base\Entity\Extension;
 
-use Base\Annotations\Annotation\Timestamp;
-use Base\Database\Traits\EntityExtensionTrait;
-use Base\Model\IconizeInterface;
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\OrderingRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TrashBallRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @DiscriminatorEntry(value="trash_ball")
  */
-class TrashBall implements IconizeInterface
+class TrashBall extends AbstractExtension
 {
-    use EntityExtensionTrait;
-
-    public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-trash-alt"]; } 
 
     /**
@@ -30,4 +26,6 @@ class TrashBall implements IconizeInterface
         $this->permanentAfter = $permanentAfter;
         return $this;
     }
+
+    public function supports(): bool { return true; }
 }

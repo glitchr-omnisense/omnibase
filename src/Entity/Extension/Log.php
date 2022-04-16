@@ -3,9 +3,9 @@
 namespace Base\Entity\Extension;
 
 use App\Entity\User;
-use Base\Database\Traits\EntityExtensionTrait;
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Enum\LogLevel;
-use Base\Model\IconizeInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -15,13 +15,10 @@ use Base\Repository\Extension\LogRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @DiscriminatorEntry(value="log")
  */
-class Log implements IconizeInterface
+class Log extends AbstractExtension
 {
-    use EntityExtensionTrait;
-
-    public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-info-circle"]; } 
 
     public function __construct(array $listener, Request $request = null)
@@ -45,6 +42,8 @@ class Log implements IconizeInterface
     }
 
     public function __toString() { return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt; }
+   
+    public function supports():bool { return true; }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="logs")

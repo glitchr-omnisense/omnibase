@@ -196,12 +196,19 @@ class AttributeType extends AbstractType implements DataMapperInterface
         if (null === $viewData)
             return;
 
-        $choiceForm = iterator_to_array($forms)["choice"];
-        if ($viewData instanceof PersistentCollection)
-            $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));
-        else if($viewData instanceof Attribute)
-            $choiceForm->setData($viewData->getAdapter());
+        $forms = iterator_to_array($forms);
+        $choiceForm = $forms["choice"];
 
+        if ($viewData instanceof PersistentCollection) {
+
+            $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));
+            foreach($viewData as $attribute)
+                $forms[$attribute->getAdapter()->getCode()]->setData($attribute);
+
+        } else if($viewData instanceof Attribute) {
+            $choiceForm->setData($viewData->getAdapter());
+            $forms[$viewData->getAdapter()->getCode()]->setData($viewData);
+        }
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
@@ -215,7 +222,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $choiceForm     = iterator_to_array($forms)["choice"];
         $choiceMultiple = $choiceForm->getConfig()->getOption("multiple") ?? false;
         $choiceData     = $choiceForm->getData();
-
+        
         if($choiceMultiple !=  $options["multiple"])
             throw new \Exception("Unexpected mismatching between choices and attributes");
 
@@ -231,12 +238,23 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $bakData = is_object($viewData) ? clone $viewData : null;
             $viewData->clear();
 
-            foreach($choiceData as $data) {
+            foreach($choiceData as $key => $choice) {
 
-                $existingData = $bakData->filter(fn(BaseAttribute $e) => $e->getAdapter() === $data)->first() ?? null;
-                if($existingData) $viewData->add($existingData);
-                else if ($data instanceof AbstractAttribute) $viewData->add(new ($attributeClass)($data));
-                else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);
+                if(( $attribute = $bakData->filter(fn(BaseAttribute $e) => $e->getAdapter() === $choice)->first() )) {
+
+                    if(( $attributeForm = iterator_to_array($forms)[$attribute->getCode()] ?? null )) {
+                    
+                        $data = $attributeForm->getData();
+                        $attribute->set($data ? $data->get() : null);
+                    }
+
+                    $viewData->add($attribute);
+
+                } else if($choice instanceof AbstractAttribute) {
+                
+                    $viewData->add(new ($attributeClass)($choice));
+                
+                } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);
             }
 
             if($viewData instanceof PersistentCollection) {

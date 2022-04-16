@@ -55,4 +55,5 @@ abstract class BaseAttribute implements IconizeInterface, AttributeInterface
     public function getCode(): ?string { return $this->getAdapter()->getCode(); }
     public function getType(): ?string { return get_class($this->getAdapter()); }
     public function getOptions(): array { return $this->getAdapter()->getOptions(); }
+
 }

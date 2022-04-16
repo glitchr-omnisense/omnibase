@@ -21,6 +21,8 @@ class Attribute extends BaseAttribute implements TranslatableInterface
 {
     use TranslatableTrait;
 
+    public function get(?string $locale = null): mixed { return $this->getValue($locale); }
+    public function set(...$args): self { return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this; }
     public function resolve(?string $locale = null): mixed 
     {
         return $this->adapter->resolve($this->translate($locale)->getValue()) ?? null;

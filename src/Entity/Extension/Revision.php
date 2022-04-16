@@ -3,23 +3,18 @@
 namespace Base\Entity\Extension;
 
 use Base\Annotations\Annotation\Hashify;
-use Base\Database\Traits\EntityExtensionTrait;
-use Base\Model\IconizeInterface;
-use Base\Traits\BaseTrait;
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\RevisionRepository;
 
 /**
  * @ORM\Entity(repositoryClass=RevisionRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @DiscriminatorEntry(value="revision")
  */
-class Revision implements IconizeInterface
+class Revision extends AbstractExtension
 {
-    use BaseTrait;
-    use EntityExtensionTrait;
-
-    public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-sort-numeric-down"]; } 
 
     /**
@@ -29,4 +24,6 @@ class Revision implements IconizeInterface
     protected $hash;
     public function getHash() { return $this->hash; }
     public function getHashShort() { return mb_substr($this->hash, 0, 7); }
+
+    public function supports(): bool { return true; }
 }

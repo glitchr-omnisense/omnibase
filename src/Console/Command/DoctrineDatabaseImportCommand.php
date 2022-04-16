@@ -269,7 +269,7 @@ class DoctrineDatabaseImportCommand extends Command
                                 
                                 $isToManySide = in_array($associationMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
                                 if($isToManySide) {
-                                    
+
                                     foreach($association as $i => $associationEntry)
                                         $association[$i] = $associationRepository->findOneBy($associationEntry);
 
@@ -344,6 +344,7 @@ class DoctrineDatabaseImportCommand extends Command
         }
 
         $output->writeln(' <info>New data found: </info>'.implode(", ", array_map(function($spreadsheet) use ($baseClass, $entityData, $newEntityData) {
+          
             $countData = 0;
             foreach(array_keys($entityData[$spreadsheet]) as $className)
                 $countData    += count($entityData[$spreadsheet][$className] ?? []);

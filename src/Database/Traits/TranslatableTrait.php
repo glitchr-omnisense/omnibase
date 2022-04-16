@@ -63,9 +63,6 @@ trait TranslatableTrait
     {
         if($translation !== null) {
 
-            if(!$translation->getLocale())
-                throw new MissingLocaleException("Missing locale information.");
-
             $this->getTranslations()->set($translation->getLocale(), $translation);
             $translation->setTranslatable($this);
         }

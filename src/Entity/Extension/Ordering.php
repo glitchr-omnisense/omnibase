@@ -2,20 +2,23 @@
 
 namespace Base\Entity\Extension;
 
-use Base\Database\Traits\EntityExtensionTrait;
-use Base\Model\IconizeInterface;
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\OrderingRepository;
 
 /**
  * @ORM\Entity(repositoryClass=OrderingRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @DiscriminatorEntry(value="ordering")
  */
-class Ordering implements IconizeInterface
+class Ordering extends AbstractExtension
 {
-    use EntityExtensionTrait;
-
-    public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-sort-alpha-down"]; } 
+
+    public function supports(): bool 
+    { 
+        $needsOrdering = array_filter($this->getEntityData(), fn($v) => !is_identity($v));
+        return $needsOrdering !== []; 
+    }
 }

@@ -2,8 +2,6 @@
 
 namespace Base\DatabaseSubscriber;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper\SampleTranslation;
-use App\Entity\Marketplace\ReviewTranslation;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
@@ -13,7 +11,7 @@ use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Exception;
+
 use InvalidArgumentException;
 
 class IntlSubscriber implements EventSubscriber

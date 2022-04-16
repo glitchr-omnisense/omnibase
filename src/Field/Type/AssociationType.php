@@ -130,7 +130,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     "data_class"       => null,
                     "label"            => $options["label"],
                     'by_reference'     => false,
-                    'length'           => $options["group"] ? $options["length"] : count($data),
+                    'length'           => $options["group"] ? $options["length"] : max(1, $options["length"]),
                     "group"            => $options["group"],
                     "row_group"        => $options["row_group"],
                     'entry_collapsed'  => $options["entry_collapsed"],
@@ -177,8 +177,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"] ?? false;
                     unset($field['allow_entity']);
 
-                    if ($fieldEntity || ($fieldType !== null && $fieldType != AssociationType::class))
+                    if ($fieldEntity || ($fieldType !== null && $fieldType != AssociationType::class)) {
+                        
                         $form->add($fieldName, $fieldType, $field);
+                    }
                 }
             }
         });
@@ -228,9 +230,10 @@ class AssociationType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $form = current(iterator_to_array($forms));
-        $formParent = $form->getParent();
-        $options    = $formParent->getConfig()->getOptions();
-    
+        $formParent  = $form->getParent();
+        $formGParent = $formParent->getParent();
+
+        $options     = $formParent->getConfig()->getOptions();
         $options["class"]    = $options["class"] ?? $this->formFactory->guessType($formParent, $options);
         $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($formParent, $options);
 
@@ -245,7 +248,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
 
             $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $data);
-
+            
         } else if($viewData instanceof PersistentCollection) {
 
             $mappedBy =  $viewData->getMapping()["mappedBy"];
@@ -262,7 +265,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 }
 
                 $viewData->clear();
-                foreach($child as $entry) {
+                foreach($child as $n => $entry) {
 
                     $viewData->add($entry);
                     if(!$isOwningSide) 

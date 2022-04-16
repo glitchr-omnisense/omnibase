@@ -1,17 +1,30 @@
 <?php
 
-namespace Base\Database\Traits;
-
-use App\Entity\User;
+namespace Base\Entity\Extension\Abstract;
 
 use Base\Annotations\Annotation\Blameable;
 use Base\Annotations\Annotation\Timestamp;
+use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\User;
+use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 
-trait EntityExtensionTrait
+/**
+ * @ORM\Entity(repositoryClass=AbstractExtensionRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @ORM\InheritanceType( "JOINED" )
+ * 
+ * @ORM\DiscriminatorColumn( name = "class", type = "string" )
+ *     @DiscriminatorEntry( value = "abstract" )
+ */
+
+abstract class AbstractExtension implements AbstractExtensionInterface, IconizeInterface
 {
     use BaseTrait;
+
+    public        function __iconize()       : ?array { return null; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-external-link"]; } 
 
     /**
      * @ORM\Id
@@ -32,8 +45,8 @@ trait EntityExtensionTrait
      * @ORM\ManyToOne(targetEntity=User::class)
      * @Blameable(on="create")
      */
-    protected $user;
-    public function getUser(): ?User { return $this->user; }
+    protected $initiator;
+    public function getInitiator(): ?User { return $this->initiator; }
 
     /**
      * @ORM\Column(type="integer", nullable=true)
