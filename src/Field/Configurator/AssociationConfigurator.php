@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\AssociationField;
 use Base\Field\CollectionField;

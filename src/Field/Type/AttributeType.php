@@ -182,7 +182,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(!empty($intlFields)) {
 
                     $intlData = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), $v->getTranslations()] : null, $data);
-
+                    
                     $form->add("intl", TranslationType::class, [
                         "multiple" => true,
                         "autoload" => false,
@@ -237,7 +237,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             throw new \Exception("Unexpected mismatching between choices and attributes");
 
         if(!$choiceMultiple) {
-        
+
             $viewData = new ($attributeClass)($choiceData);
 
         } else {
@@ -248,7 +248,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $bakData = is_object($viewData) ? clone $viewData : null;
             $viewData->clear();
 
-            foreach($choiceData as $key => $choice) {
+            foreach($choiceData as $choice) {
 
                 if(( $attribute = $bakData->filter(fn(BaseAttribute $e) => $e->getAdapter() === $choice)->first() )) {
 

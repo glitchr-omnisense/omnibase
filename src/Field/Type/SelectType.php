@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use App\Enum\UserRole;
-use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Model\Autocomplete;

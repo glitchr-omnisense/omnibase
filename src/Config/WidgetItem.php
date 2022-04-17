@@ -7,8 +7,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use Base\Config\Menu\CrudWidgetItem;
 use Base\Config\Menu\SectionWidgetItem;
-use Base\Controller\Dashboard\AbstractCrudController;
-use Base\Controller\Dashboard\AbstractDashboardController;
+use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backoffice\AbstractDashboardController;
 use Base\Model\IconizeInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;

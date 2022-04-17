@@ -3,7 +3,7 @@
 
 {% set _content_title = block('content_title') ?? null %}
 {% if _content_title is empty %}
-    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? null)|default("Dashboard") %}
+    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? null)|default("Back Office") %}
 {% endif %}
 <!DOCTYPE html>
 <html lang="{{ ea.i18n.htmlLocale }}" dir="{{ ea.i18n.textDirection }}">

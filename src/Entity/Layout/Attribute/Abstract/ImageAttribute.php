@@ -20,8 +20,7 @@ class ImageAttribute extends AbstractAttribute implements IconizeInterface
 
     public static function getType(): string { return ImageType::class; }
     public function getOptions(): array { return [
-        "alt" => $this->getAlt() ?? "",
-        "alt_options" => ["label" => "Nom"]
+        //"alt" => ["label" => "Nom"]
     ]; }
 
     public function resolve(mixed $value): mixed { return $value; }

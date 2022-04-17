@@ -3,7 +3,7 @@
 namespace Base\Subscriber;
 
 use Base\Component\HttpFoundation\Referrer;
-use Base\Controller\Dashboard\AbstractCrudController;
+use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\ForbiddenActionException;

@@ -3,7 +3,11 @@ alphanumeric_plus: "It can only contain letters (a-zA-Z), numbers (0-9) and spec
 
 abstract_attribute:
    code:
-      unique: "This code is already used"
+      unique: "Code \"{value}\" is already used"
+
+barcode:
+   value:
+      unique: "Barcode \"{value}\" is already used"
 
 user:
    email:

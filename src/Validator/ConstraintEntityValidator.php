@@ -117,10 +117,9 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
 
         $class = $em->getClassMetadata(\get_class($entity));
         $buildViolation
-//            ->atPath($errorPath)
-            ->setParameter('{{ entity }}', $entityName ?? "")
-            ->setParameter('{{ value }}', $this->formatWithIdentifiers($em, $class, $value))
-            ->setParameter('{{ field }}', $constraint->fields[0] ?? "unknown")
+            ->setParameter('{{ entity }}', $entityName ?? "")->setParameter('{entity}', $entityName ?? "")
+            ->setParameter('{{ value }}', $this->formatWithIdentifiers($em, $class, $value))->setParameter('{value}', $this->formatWithIdentifiers($em, $class, $value))
+            ->setParameter('{{ field }}', $constraint->fields[0] ?? "unknown")->setParameter('{field}', $constraint->fields[0] ?? "unknown")
             ->setInvalidValue($value)
             ->setTranslationDomain('validators')
             ->addViolation();

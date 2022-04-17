@@ -107,6 +107,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                     'autoload' => $options["autoload"],
                     'fields' => $translationFields[$locale],
                     'excluded_fields' => $options['excluded_fields'],
+                    'keep_indexes' => false
                 ];
 
                 $defaultLocale = $options["default_locale"];

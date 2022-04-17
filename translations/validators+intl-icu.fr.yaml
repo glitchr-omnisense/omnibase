@@ -3,7 +3,11 @@ alphanumeric_plus: "Utilisez uniquement des caractères de \"a\" à \"Z\" et (_,
 
 abstract_attribute:
    code:
-      unique: "Ce code est déjà utilisé"
+      unique: "Code {value} est déjà utilisé"
+
+barcode:
+   value:
+      unique: "Le code barre {value} est déjà utilisé"
 
 user:
    email:

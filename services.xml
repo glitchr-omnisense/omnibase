@@ -713,20 +713,8 @@
             <argument type="service" id="validator" />
         </service>
 
-        <service id="Base\Field\Type\AvatarType">
-            <tag name="form.type" />
-            <argument type="service" id="base.service" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="validator" />
-        </service>
-        <service id="Base\Field\Type\ImageType">
-            <tag name="form.type" />
-            <argument type="service" id="base.service" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="validator" />
-        </service>
+        <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\ImageType" parent="Base\Field\Type\FileType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />
@@ -832,7 +820,7 @@
         </service>
         
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
-        <service id="Base\Controller\Dashboard\AbstractDashboardController">
+        <service id="Base\Controller\Backoffice\AbstractDashboardController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
@@ -847,7 +835,7 @@
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
-        <service id="Base\Controller\Dashboard\AbstractCrudController">
+        <service id="Base\Controller\Backoffice\AbstractCrudController">
             <tag name="ea.crud_controller" />
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
@@ -863,47 +851,47 @@
             <argument type="service" id="base.service" />
         </service>
       
-        <service id="Base\Controller\Dashboard\Crud\ThreadCrudController"         parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Thread\LikeCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Thread\MentionCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Thread\TagCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\ThreadCrudController"         parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Thread\LikeCrudController"    parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Thread\MentionCrudController" parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Thread\TagCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         
-        <service id="Base\Controller\Dashboard\Crud\User\TokenCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\User\TokenCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Extension\LogCrudController"          parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>        
-        <service id="Base\Controller\Dashboard\Crud\Extension\OrderingCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Extension\TrashBallCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Extension\RevisionCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Extension\LogCrudController"          parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>        
+        <service id="Base\Controller\Backoffice\Crud\Extension\OrderingCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Extension\TrashBallCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Extension\RevisionCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         
-        <service id="Base\Controller\Dashboard\Crud\UserCrudController"              parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\GroupCrudController"        parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\NotificationCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\PermissionCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\User\PenaltyCrudController"      parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /> </service>
+        <service id="Base\Controller\Backoffice\Crud\UserCrudController"              parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\User\GroupCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\User\NotificationCrudController" parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\User\PermissionCrudController"   parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\User\PenaltyCrudController"      parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /> </service>
         
-        <service id="Base\Controller\Dashboard\Crud\Layout\SettingCrudController"   parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"    parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\ImageCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\SettingCrudController"   parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"    parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\ImageCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\SlotCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\MenuCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\AttachmentCrudController" parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\LinkCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\LinksetCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\PageCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Widget\RouteCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\SlotCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\MenuCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\AttachmentCrudController" parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\LinkCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\LinksetCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\PageCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\RouteCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\HyperlinkCrudController" parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\HyperlinkCrudController" parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Dashboard\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\ImageAttributeCrudController"         parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\ColorAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\ArrayAttributeCrudController"        parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\TextareaAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Dashboard\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\ImageAttributeCrudController"         parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\ColorAttributeCrudController"        parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\ArrayAttributeCrudController"        parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\TextareaAttributeCrudController"     parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         </services>
 </container>

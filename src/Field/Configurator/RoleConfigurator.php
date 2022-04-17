@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use App\Controller\Dashboard\Crud\UserCrudController;
+use App\Controller\Backoffice\Crud\UserCrudController;
 use Base\Field\RoleField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;

@@ -45,11 +45,9 @@ abstract class ConstraintEntity extends Constraint
 
     public function getTranslation($entity, TranslatorInterface $translator)
     {
-        $parentClass = null;
         $class = get_class($entity);
-        while($class !== $parentClass) {
+        while($class !== false) {
 
-            $parentClass = $class;
             $classname = explode("\\", $class);
             $classname = array_pop($classname);
 
@@ -57,13 +55,23 @@ abstract class ConstraintEntity extends Constraint
 
             $constraintName = explode("\\", get_called_class());
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
-            
-            $id = camel_to_snake($classname).".".camel_to_snake($firstField).".".camel_to_snake($constraintName);
+
+            $id = "@validators.".camel_to_snake($classname).".".camel_to_snake($firstField).".".camel_to_snake($constraintName);
             $this->message = $translator->trans($id);
+            if ($this->message != $id) {
+                $this->message = $id;
+                break; // Translation found
+            }
 
-            if($this->message != $id) break;
+            $class = get_parent_class($class);
+        }
 
-            $class = get_parent_class($entity);
+        if ($class === false) {
+
+            $classname = explode("\\", get_class($entity));
+            $classname = array_pop($classname);
+
+            $this->message = "@validators.".camel_to_snake($classname).".".camel_to_snake($firstField).".".camel_to_snake($constraintName);
         }
 
         return $this->message;
