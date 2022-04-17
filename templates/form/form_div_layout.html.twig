@@ -591,6 +591,7 @@
     {% set group = form_parent(form).vars.group ?? false %}
     {% set row_group = form_parent(form).vars.row_group ?? false %}
     {% set collapsed = form_parent(form).vars.entry_collapsed ?? true %}
+
     {% if group %}
 
         {% set href = form_parent(form).vars.href ?? null %}
@@ -610,9 +611,9 @@
                     {% set linkable = _href is not null and form.vars.value is not null and form.children is empty %}
 
                     {%- if linkable -%}
-                        <a class="accordion-button {{ collapsed ? 'collapse' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
+                        <a class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {%- else -%}
-                        <button class="accordion-button {{ collapsed ? 'collapse' : ''}}" {{ form.children is empty ? 'style="cursor:default;"' : '' }} 
+                        <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ form.children is empty ? 'style="cursor:default;"' : '' }} 
                                 type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {%- endif -%}
 

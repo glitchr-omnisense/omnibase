@@ -321,10 +321,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         );
 
         $logo = $this->baseService->getAsset($logo);
-        $logo = $this->baseService->getImageService()->thumbnail($logo, 250, 250);
+        $logo = $this->baseService->getImageService()->thumbnail($logo, 500, 500);
         return parent::configureDashboard()
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
-            ->setTitle('<img src="'.$logo.'" alt="'.$title.'">');
+            ->setTitle('<img src="'.$logo.'">');
 
     }
 

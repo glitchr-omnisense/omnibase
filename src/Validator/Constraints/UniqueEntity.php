@@ -47,6 +47,7 @@ class UniqueEntity extends ConstraintEntity
     ) {
         parent::__construct($fields, $options, $groups, $payload);
 
+        dump($fields, $options);
         $this->message = $message ?? $this->message;
         $this->service = $service ?? $this->service;
         $this->em = $em ?? $this->em;

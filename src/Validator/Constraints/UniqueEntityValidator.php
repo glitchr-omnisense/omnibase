@@ -28,6 +28,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
     {
         parent::validate($entity, $constraint);
 
+        dump($entity, $constraint);
         $em = $constraint->em ?? $this->getEntityManager(\get_class($entity));
         if (!$em)
             throw new ConstraintDefinitionException(sprintf('Unable to find the object manager associated with an entity of class "%s".', get_debug_type($entity)));
@@ -39,6 +40,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
 
         $fields = array_map(fn($f) => $classMetadata->getFieldName($f), $constraint->fields);
         foreach ($fields as $fieldName) {
+    
             if (!$classMetadata->hasField($fieldName) && !$classMetadata->hasAssociation($fieldName)) {
                 throw new ConstraintDefinitionException(sprintf('The field "%s" is not mapped by Doctrine, so it cannot be validated for uniqueness.', $fieldName));
             }
@@ -54,7 +56,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             }
 
             $criteria[$fieldName] = $fieldValue;
-
+            dump($fieldName, $fieldValue);
             if (null !== $criteria[$fieldName] && $classMetadata->hasAssociation($fieldName)) {
                 /* Ensure the Proxy is initialized before using reflection to
                  * read its identifiers. This is necessary because the wrapped

@@ -237,12 +237,14 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         $routeBase = $routeName[0];
         $routeName = $routeBase.$routeGroup;
+        if(!$routeName) $routeName = $this->getRouteName($this->getUrl($routeBase, $routeParameters));
 
         // Prepare the default route if not found.
         // In case a group doesn't exists, it will be replaced by the first group found in the route collection list.
         $routeGroups = $this->getRouteGroups($routeName);
         $routeDefaultGroup = first($routeGroups);
         $routeDefaultName = $routeBase.($routeDefaultGroup ? ".".$routeDefaultGroup : "");
+        if(!$routeDefaultName) $routeDefaultName = $this->getRouteName($this->getUrl($routeBase, $routeParameters));
 
         //
         // Strip unused variables from main group
@@ -256,7 +258,6 @@ class AdvancedRouter implements AdvancedRouterInterface
         }
         
         // Try to compute subgroup (or base one)
-        
         try { $routeUrl = $baseDir . $this->router->generate($routeName, $routeParameters, $referenceType); }
         catch (Exception $e) { $routeUrl = $baseDir . $this->router->generate($routeDefaultName, $routeParameters, $referenceType); }
 

@@ -521,6 +521,15 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
 
+                    ->arrayNode('cookie-consent')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('javascript')
+                                ->info('')
+                                ->defaultValue("bundles/base/vendor/cookie-consent/cookie-consent.js") 
+                                ->end()
+                        ->end()
+                    ->end()
+
                     ->arrayNode('lightbox')->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('javascript')

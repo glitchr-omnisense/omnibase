@@ -154,6 +154,12 @@ class Thread implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
+    public function setIsPublished (bool $newState): self
+    { 
+        $this->states = $newState ? array_values_insert($this->states, ThreadState::PUBLISH) : array_values_remove($this->states, ThreadState::PUBLISH);
+        return $this;
+    }
+
     public function isScheduled(): bool { return $this->publishedAt && !$this->isPublished(); }
     public function isPublished(): bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
     public function isPublishable(): bool

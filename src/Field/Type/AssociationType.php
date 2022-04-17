@@ -12,6 +12,7 @@ use Doctrine\ORM\PersistentCollection;
 use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -66,6 +67,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'entry_required' => true,
 
             'fields' => [],
+            'keep_indexes' => true,
             'length' => 0,
             'excluded_fields' => [],
 
@@ -76,7 +78,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             'allow_add' => true,
             'allow_delete' => true,
-            'allow_entity' => false,
+            'allow_entity' => true,
         ]);
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
@@ -107,6 +109,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $view->vars["row_group"]    = $options["row_group"];
         $view->vars["allow_add"]    = $options["allow_add"];
         $view->vars["allow_delete"] = $options["allow_delete"];
+        $view->vars["keep_indexes"] = $options["keep_indexes"];
         $view->vars['length']       = $options["length"];
     }
     
@@ -117,7 +120,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
@@ -140,7 +142,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
                         'href'         => $options["href"] ?? null,
                         'allow_entity' => $options["allow_entity"],
                         'data_class'   => $dataClass,
-                        'multiple'     => false
+                        'multiple'     => false,
+                        'keep_indexes' => $options["keep_indexes"],
                     ]),
                 ];
 
@@ -149,7 +152,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 if ($options["allow_delete"] !== null) 
                     $collectionOptions['allow_delete'] = $options["group"] ? $options["allow_delete"] : false;
 
-                $form->add("__collection__", CollectionType::class, $collectionOptions);
+                $form->add("_collection", CollectionType::class, $collectionOptions);
 
             } else {
 
@@ -177,9 +180,11 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     $fieldEntity = $field['allow_entity'] ?? $options["allow_entity"] ?? false;
                     unset($field['allow_entity']);
 
-                    if ($fieldEntity || ($fieldType !== null && $fieldType != AssociationType::class))
+                    if ($fieldType !== null && ($fieldEntity || $fieldType != AssociationType::class))
                         $form->add($fieldName, $fieldType, $field);
                 }
+
+                if($options["keep_indexes"]) $form->add("_index", HiddenType::class, ["mapped" => false, "required" => false]);
             }
         });
     }
@@ -192,7 +197,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         $data = $viewData;
-
+        
         if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));
@@ -202,6 +207,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $childForms = iterator_to_array($forms);
             foreach($childForms as $fieldName => $childForm) {
+
+                if(!$childForm->getConfig()->getOption("mapped")) continue;
 
                 $value = $this->propertyAccessor->getValue($entity, $fieldName);
                 if(empty($value)) $value = null;
@@ -252,8 +259,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
             $fieldName = $viewData->getMapping()["fieldName"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
 
-            if ($data->containsKey("__collection__"))
-                $data = $data->get("__collection__");
+            if ($data->containsKey("_collection"))
+                $data = $data->get("_collection");
             
             if(!$isOwningSide) {
 

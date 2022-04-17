@@ -22,24 +22,8 @@ class TwigSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => ['onKernelRequest', 128],
             KernelEvents::RESPONSE => ['onKernelResponse'],
         ];
-    }
-
-    public function onKernelRequest(RequestEvent $event)
-    {
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));
-
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
-
-        if($this->baseService->isProfiler($event) && !$this->baseService->isDebug())
-            throw new NotFoundHttpException("Page not found.");
     }
 
     private function allowRender(ResponseEvent $event)
@@ -71,13 +55,13 @@ class TwigSubscriber implements EventSubscriberInterface
             $content = preg_replace('/<body\b[^>]*>/', "$0".$noscripts, $content, 1);
 
             $stylesheetsHead = $this->baseService->getHtmlContent("stylesheets:head");
-            $content = preg_replace('/(head\b[^>]*>)(.*)(<link|<style)/s', "$1$2".$stylesheetsHead."$3", $content, 1);
+            $content = preg_replace('/(head\b[^>]*>)(.*?)(<link|<style)/s', "$1$2".$stylesheetsHead."$3", $content, 1);
 
             $stylesheets = $this->baseService->getHtmlContent("stylesheets");
             $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets."$0", $content, 1);
 
             $javascriptsHead = $this->baseService->getHtmlContent("javascripts:head");
-            $content = preg_replace('/(head\b[^>]*>)(.*)(<script)/s', "$1$2".$javascriptsHead."$3", $content, 1);
+            $content = preg_replace('/(head\b[^>]*>)(.*?)(<script)/s', "$1$2".$javascriptsHead."$3", $content, 1);
 
             $javascripts = $this->baseService->getHtmlContent("javascripts");
             $content = preg_replace('/<\/head\b[^>]*>/', $javascripts."$0", $content, 1);
