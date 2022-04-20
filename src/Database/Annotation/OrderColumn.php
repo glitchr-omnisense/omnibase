@@ -10,6 +10,7 @@ use Base\Database\Type\EnumType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
 use Base\Traits\BaseTrait;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -89,7 +90,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $orderingRepository = $this->getRepository(Ordering::class);
         foreach($this->getOrderedColumns($entity) as $column) {
 
-            // dump($column);
             if(!str_ends_with($column, $property)) continue;
 
             list($className, $property) = explode("::", $column);
@@ -103,8 +103,14 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     try { $entityValue = $propertyAccessor->getValue($entity, $column); }
                     catch (Exception $e) { continue; }
                     
-                    dump($column, $orderedIndexes, $entityValue->toArray());
                     if(is_array($entityValue)) {
+
+                        $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
+                        if($this->order == "DESC") $entityValue = array_reverse($entityValue);
+
+                        $propertyAccessor->setValue($entity, $column, $entityValue);
+
+                    } else if($entityValue instanceof ArrayCollection) {
 
                         $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
                         if($this->order == "DESC") $entityValue = array_reverse($entityValue);
@@ -115,14 +121,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                         $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
                         $reflProp->setAccessible(true);
-                        dump($reflProp->getValue($entityValue));
                         $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
-                        dump($reflProp->getValue($entityValue));
                     }
                 }
             }
         }
-        // dump($entity);
     }
 
     public function payload(string $action, string $className, array $properties, object $entity): array
@@ -178,9 +181,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             default:
                 throw new Exception("Unknown action \"$action\" passed to ".__CLASS__);
         }
-
-        // dump($entity);
-        // exit(1);
 
         return isset($this->ordering[$className][$id]) ? [$this->ordering[$className][$id]] : [];
     }

@@ -332,59 +332,6 @@ class ClassMetadataManipulator
         return ($fieldName != null);
     } 
 
-//     public function getFieldName($entityOrClassOrMetadata, string $fieldPath): ?string
-//     {
-//         $entityName = $entityOrClassOrMetadata instanceof ClassMetadataInfo ? $entityOrClassOrMetadata->getName() : null;
-//         if($entityName === null) $entityName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
-
-//         // Prepare field path information
-//         if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
-//         if(empty($fieldPath)) throw new \Exception("No field path provided for \"".$entityName."\" ");
-
-//         // Extract leading field && get metadata
-//         $fieldName = array_shift($fieldPath);
-//         dump($fieldName, $fieldPath);
-// exit(1);
-//         // Extract key information
-//         $fieldRegex = ["/(\w*)\[(\w*)\]/", "/(\w*)%(\w*)%/", "/(\w*){(\w*)}/", "/(\w*)\((\w*)\)/"];
-//         $fieldKey   = preg_replace($fieldRegex, "$2", $fieldName, 1);
-//         if($fieldKey) $fieldName = preg_replace($fieldRegex, "$1", $fieldName, 1);
-//         else $fieldKey = null;
-
-//         // Check entity validity
-//         if($entity === null || !is_object($entity)) {
-//             if(!empty($fieldName)) throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
-//             else return null;
-//         }
-
-//         // Go get class metadata
-//         $metadata = $this->getClassMetadata($entity);
-//         if(!$metadata) return false;
-
-//         $entity = $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
-
-//         if(class_implements_interface($entity, TranslatableInterface::class)) 
-//             $entity = $entity->getTranslations();
-
-//         if(is_array($entity)) {
-//             $entity = $fieldKey ? $entity[$fieldKey] ?? null : null;
-//             $entity = $entity ?? begin($entity);
-//         } else if(class_implements_interface($entity, Collection::class)) {
-//             $entity = $entity->has($fieldKey ?? 0) ? $entity->get($fieldKey ?? 0) : null;
-//         }
-
-//         if($entity === null || !is_object($entity)) {
-//             if(empty($fieldPath)) return $entity;
-//             throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
-//         }
-
-//         // If field path is empty
-//         if(empty($fieldPath))
-//             return $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
-
-//         return $this->getFieldValue($entity, implode(".", $fieldPath));
-//     }
-
     public function hasProperty($entityOrClassOrMetadata, string $fieldName): ?string { return property_exists($entityOrClassOrMetadata, $fieldName); }
 
     public function getType($entityOrClassOrMetadata, string $property) 
@@ -466,6 +413,60 @@ class ClassMetadataManipulator
         }
 
         return ($metadata->hasAssociation($property) ? $metadata->getAssociationMapping($property)["type"] ?? null : null);
+    }
+
+    public function fetchEntityName(string $entityName, array|string $fieldPath, ?array &$data = null): ?string { return $this->fetchEntityMapping($entityName, $fieldPath, $data)["targetEntity"] ?? null; }
+    public function fetchEntityMapping(string $entityName, array|string $fieldPath): ?array
+    {
+        $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
+        $fieldName = head($fieldPath);
+        $classMetadata = $this->entityManager->getClassMetadata($entityName);
+        
+        if ($classMetadata->hasAssociation($classMetadata->getFieldName($fieldName)))
+            $entityMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($fieldName)];
+        else if ($classMetadata->hasField($classMetadata->getFieldName($fieldName)))
+            $entityMapping = $classMetadata->fieldMappings[$classMetadata->getFieldName($fieldName)];
+        else return null;
+
+        $fieldName = $fieldPath ? head($fieldPath) : $fieldName;
+        $fieldPath = tail($fieldPath, $this->isToManySide($entityName, $fieldName) ? -2 : -1);
+        if(!$fieldPath) return $entityMapping;
+
+        if(!array_key_exists("targetEntity", $entityMapping)) 
+            return null; // Fallback, invalid pass provided
+
+        return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
+    }
+    
+    public function getFieldName(string $entityName, array|string $fieldPath): ?string { return $this->resolveFieldPath($entityName, $fieldPath); }
+    public function resolveFieldPath(string $entityName, array|string $fieldPath): ?string
+    {
+        $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
+        $fieldName = head($fieldPath);
+
+        $classMetadata = $this->getClassMetadata($entityName);
+        $associationFields = array_keys($classMetadata->associationMappings);
+        $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->fieldNames);
+        
+        while(!array_key_exists($fieldName, $columnNames)) {
+
+            if(!get_parent_class($classMetadata->getName())) break; 
+
+            $classMetadata = $this->getClassMetadata(get_parent_class($classMetadata->getName()));
+            $associationFields = array_keys($classMetadata->associationMappings);
+            $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->fieldNames);
+        }
+
+        $fieldName = $columnNames[$fieldName] ?? $fieldName;
+        if(!$fieldName) return null;
+
+        $fieldPath = tail($fieldPath, $this->isToManySide($entityName, $fieldName) ? -2 : -1);
+        if(!$fieldPath) return $fieldName;
+
+        $filePath = $this->resolveFieldPath($this->getAssociationTargetClass($entityName, $fieldName), $fieldPath);
+        if(!$filePath) return null;
+
+        return $fieldName.".".$filePath;
     }
 
     public function getAssociationTargetClass($entityOrClassOrMetadata, string $fieldName): string 

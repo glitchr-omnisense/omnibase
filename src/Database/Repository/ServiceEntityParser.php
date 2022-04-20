@@ -797,7 +797,7 @@ class ServiceEntityParser
         }
 
         if($isInstanceOf || $isNotInstanceOf) {
-            
+
             // Cast to array
             if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
 

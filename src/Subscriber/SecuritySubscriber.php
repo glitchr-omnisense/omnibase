@@ -233,6 +233,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!($token = $this->tokenStorage->getToken()) ) return;
         if(!($user = $token->getUser())) return;
 
+        // $notification = new Notification("@notifications.login.success.morning.back", [$user]);
+        // dump($notification->send("danger"));
+
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 
@@ -261,7 +264,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $user->approve();
             $this->entityManager->flush($user);
         }
-        
+    
         if (! $user->isVerified()) {
 
             $callbackFn = function () use ($user) {

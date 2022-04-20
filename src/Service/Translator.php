@@ -55,11 +55,12 @@ class Translator implements TranslatorInterface
             $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans($id, $parameters, $domain, $locale, false); };
 
             $ret = preg_replace_callback("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $fn, $id, -1, $count);
-            if($ret != $id) return $ret;
+            if ($ret != $id)
+                return str_starts_with($ret, "@") ? $this->translator->trans($ret, $parameters) : $ret;
 
             $ret = $this->translator->trans($ret, $parameters, $domain, $locale);
             if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) return $id;
-
+            
             return $ret;
         }
 

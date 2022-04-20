@@ -232,7 +232,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $choiceForm     = iterator_to_array($forms)["choice"];
         $choiceMultiple = $choiceForm->getConfig()->getOption("multiple") ?? false;
         $choiceData     = $choiceForm->getData();
-        
+
         if($choiceMultiple !=  $options["multiple"])
             throw new \Exception("Unexpected mismatching between choices and attributes");
 
@@ -253,7 +253,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(( $attribute = $bakData->filter(fn(BaseAttribute $e) => $e->getAdapter() === $choice)->first() )) {
 
                     if(( $attributeForm = iterator_to_array($forms)[$attribute->getCode()] ?? null )) {
-                    
+
                         $data = $attributeForm->getData();
                         $attribute->set($data ? $data->get() : null);
                     }
@@ -261,9 +261,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
                     $viewData->add($attribute);
 
                 } else if($choice instanceof AbstractAttribute) {
-                
+
                     $viewData->add(new ($attributeClass)($choice));
-                
+
                 } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);
             }
 

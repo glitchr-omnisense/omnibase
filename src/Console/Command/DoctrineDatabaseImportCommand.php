@@ -9,16 +9,19 @@ use Base\Serializer\Encoder\ExcelEncoder;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
+
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Exception;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Serializer;
@@ -38,6 +41,11 @@ class DoctrineDatabaseImportCommand extends Command
      */
     protected $entityHydrator;
 
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
     public function __construct(EntityManagerInterface $entityManager, EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator)
     {
         parent::__construct();
@@ -56,7 +64,7 @@ class DoctrineDatabaseImportCommand extends Command
 
     public function normalize($entityName, $entityData)
     {
-        return  array_inflate(".", array_transforms(function($propertyPath, $entry, $fn, $i) use ($entityName):array {
+        return array_inflate(".", array_transforms(function($propertyPath, $entry, $fn, $i) use ($entityName):array {
 
             $propertyPath = trim(explode('\n', $propertyPath)[0]); // Only keeps headline
             $fieldName = explodeByArray([":", "["], $propertyPath)[0];
@@ -65,6 +73,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                 $propertyPath    = $matches[1].$matches[3] ?? "";
                 $entrySeparator = $matches[2];
+
                 if(!is_array($entry))
                     $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, $entry));
             }
@@ -72,6 +81,7 @@ class DoctrineDatabaseImportCommand extends Command
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);
             if(substr_count($propertyName, "[") > 1)
                 throw new Exception("Backets \"[]\" are expected to appear only once at the end.. \"".$propertyName."\"");
+            
             if (preg_match('/(.+)(?:\[(.*?)\])(?:\((.)\))*(.*)/', $propertyPath, $matches)) {
 
                 $propertyPath = str_replace(["[", "]"], [".", ""], $matches[1].$matches[4] ?? "");
@@ -79,7 +89,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $fieldSeparator = $matches[3] ?? null;
 
                 $subFieldName = preg_replace("/\:[^\.]*/", "", $propertyPath);
-                $entityMapping = $this->entityHydrator->fetchEntityMapping($entityName, $subFieldName);
+                $entityMapping = $this->classMetadataManipulator->fetchEntityMapping($entityName, $subFieldName);
                 $classMetadata = $this->entityManager->getClassMetadata($entityName);
                 if(!$classMetadata->hasAssociation($classMetadata->getFieldName($subFieldName))) 
                     throw new Exception("Field \"".$subFieldName."\" is expected to be an association.");
@@ -97,10 +107,11 @@ class DoctrineDatabaseImportCommand extends Command
                             $entries = explode($fieldSeparator, $e, count($propertyNames));
 
                             $e = [];
-                            foreach($propertyNames as $i => $p) 
-                                $e[$p] = $entries[$i] ?? null;
+                            foreach($propertyNames as $i => $p)
+                                $e[trim($p)] = array_key_exists($i, $entries) && $entries[$i] ? trim($entries[$i]) : null;
                         }
                     }
+
                 }
             }
 
@@ -126,27 +137,22 @@ class DoctrineDatabaseImportCommand extends Command
         $this->addArgument('path',            InputArgument::OPTIONAL    , 'Path or URL');
        
         $this->addOption('spreadsheet', null, InputOption::VALUE_OPTIONAL, 'Import selected spreadsheet (e.g. 1,3,4 [NB: starts from 1])');
-        $this->addOption('rows',         null, InputOption::VALUE_OPTIONAL, 'Only read N rows');
+        $this->addOption('extension',   null, InputOption::VALUE_OPTIONAL, 'Specify file extension to be used');
+        $this->addOption('rows',        null, InputOption::VALUE_OPTIONAL, 'Only read N rows');
         $this->addOption('show',        null, InputOption::VALUE_NONE, 'Show all details');
 
         parent::configure();
     }
 
-    public function extension(string $path) {
-
-        try { $extension = exif_imagetype($path); }
-        catch (Exception $e) { $extension = false; }
-        return $extension !== false ? mb_substr(image_type_to_extension($extension), 1) : pathinfo($path, PATHINFO_EXTENSION) ?? null;
-    }
-
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if($input->hasArgument("path")) $path = $input->getArgument("path");
-
-        $show = $input->getOption("show");
-        $spreadsheetKeys = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
-        $nRows = $input->getOption("rows");
         
+        $show            = $input->getOption("show");
+        $nRows           = $input->getOption("rows");
+        $extension       = $input->getOption("extension");
+        $spreadsheetKeys = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
+
         $output->writeln("");
         if($path) $output->writeln(' <info>You have just selected:</info> '.$path);
         else {
@@ -159,25 +165,28 @@ class DoctrineDatabaseImportCommand extends Command
         }
         $output->writeln("");
 
-        $extension = $this->extension($path);
+        $output->writeln(' Decoding spreadsheets..');        
+        $mimeTypes = new MimeTypes();
+        $extension = $extension ?? $mimeTypes->getExtensions(mime_content_type2($path))[0] ?? null;
         switch($extension)
         {
             case "xml":
             case "xls": case "xlsx": case "xlsm":
-                $rawData = $this->serializer->decode(file_get_contents($path), $extension);
+                $rawData = $this->serializer->decode(file_get_contents2($path), $extension);
                 break;
 
-            case "csv": case "txt": default:
-                $rawData = $this->serializer->decode(file_get_contents($path), 'csv');
+            case "csv": case "txt":
+                $rawData = $this->serializer->decode(file_get_contents2($path), 'csv');
+
+            default:
+                throw new Exception("Missing extension in filename. Please use \"--extension\" option.");
         }
 
         $baseClass = [];
         $entityData = [];
-        $entityGroups = [];
         $existingEntityData = [];
         $newEntityData = [];
 
-        
         // Shrink and restrict according to options
         $keys = [];
         if($spreadsheetKeys !== null) 
@@ -193,6 +202,7 @@ class DoctrineDatabaseImportCommand extends Command
         }
 
         // Process spreadsheet
+        $output->writeln(' Normalizing rows..');
         foreach($rawData as $spreadsheet => &$import) {
 
             $entityData[$spreadsheet] = [];
@@ -216,8 +226,7 @@ class DoctrineDatabaseImportCommand extends Command
             $beforeKeys = array_keys($rawData[$spreadsheet]);
             $rawData[$spreadsheet] = array_filter_recursive($rawData[$spreadsheet]);
             $afterKeys = array_keys($rawData[$spreadsheet]);
-            $entityGroups[$spreadsheet] = array_diff($beforeKeys, $afterKeys);
-
+            
             foreach($rawData[$spreadsheet] as &$data) {
 
                 if($discriminatorMap) {
@@ -234,108 +243,102 @@ class DoctrineDatabaseImportCommand extends Command
             }
         }
 
-        $allData = [];
+        $output->writeln(' Hydrating entities..');
         foreach($rawData as $spreadsheet => &$import) {
 
             foreach($entityData[$spreadsheet] ?? [] as $entityName => &$_) {
 
                 //
-                // Determine the expected outgoing entity
-                $entityRepository = $this->entityManager->getRepository($entityName);
-                $classMetadata = $this->entityManager->getClassMetadata($entityName);
-
-                //
-                // Collecting existing data for comparison
-                $allData[$entityName] = $allData[$entityName] ?? $entityRepository->findAll();
-
-                //
                 // Loop over entries
                 foreach($_ as &$entry) {
 
-                    //
-                    // Look up for existing entities and replace
-                    $entry = array_key_flattens(".", $entry);
-                    $entry = array_key_explodes([":find.", ":find"], $entry);
-                    foreach($entry as $propertyPath => &$association) {
-
-                        $fieldName = $classMetadata->getFieldName(preg_replace("/\:[^\.]*/", "", $propertyPath));
-                        if(is_array($association)) {
-
-                            if(($associationMapping = $this->entityHydrator->fetchEntityMapping($entityName, $fieldName))) {
-
-                                $associationName = $associationMapping["targetEntity"];
-                                $associationRepository = $this->entityManager->getRepository($associationName);
-                                $association = array_inflate(".", $association);
-                                
-                                $isToManySide = in_array($associationMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
-                                if($isToManySide) {
-
-                                    foreach($association as $i => $associationEntry)
-                                        $association[$i] = $associationRepository->findOneBy($associationEntry);
-
-                                    $association = array_filter($association);
-
-                                } else {
-
-                                    $association = $associationRepository->findOneBy($association);
-                                    if($association === null) unset($entry[$propertyPath]);
-                                }
-                            } 
-                        }
-                    }
-
-                    // Lookup for enum values and replace it 
-                    $entry = array_key_flattens(".", $entry);
-                    $entry = array_key_explodes([":enum.", ":enum"], $entry);
-                    foreach($entry as $propertyPath => &$enum) {
-
-                        $fieldName = $classMetadata->getFieldName(preg_replace("/\:[^\.]*/", "", $propertyPath));
-                        if(is_array($enum)) {
-
-                            foreach($enum as $className => $key) {
-
-                                $className = substr($className, 1, strlen($className)-2);
-                                if(is_instanceof($className, EnumType::class))
-                                    $enum = $className::getValue($key);
-                                else if(is_instanceof($className, SetType::class))
-                                    $enum = array_map(fn($k) => $className::getValue($k), explode(",", $key));
-                                else throw new Exception("Class must be either ".EnumType::class." or ".SetType::class);
-                            }
-                        }
-                    }
-
-                    // Lookup for unique values and put data into the existing list, if found 
-                    $entry = array_inflate(".", $entry);
-                    $entry = array_key_flattens(".", $entry);
-                    $entry = array_key_explodes([":unique.", ":unique"], $entry);
-
+                    $keyDepth = [];
+                    $entityDepth = [];
                     $inDatabase = false;
-                    foreach($entry as $propertyPath => &$field) {
+                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($entityName, &$entityDepth, &$keyDepth, &$inDatabase) : ?array {
 
-                        $fieldName = $classMetadata->getFieldName(preg_replace("/\:[^\.]*/", "", $propertyPath));
+                        list($fieldName, $special) = array_pad(explode(":", $k, 2),2,null);
+                        $keyDepth[$d] = $fieldName;
+                        
+                        $fieldPath = implode(".", $keyDepth);
+                        $targetName = $this->classMetadataManipulator->fetchEntityName($entityName, $fieldPath);
+                        $entityDepth[$d] = $targetName;
+                        if(is_array($v)) $v = array_transforms($fn, $v, $d+1);
 
-                        if(is_array($field)) {
+                        if(!$v) {
 
-                            $field = array_inflate(".", $field);
-                            if($this->entityHydrator->fetchEntityMapping($entityName, $fieldName)) {
+                            array_pop($keyDepth);
+                            array_pop($entityDepth);
 
-                                if($classMetadata->hasAssociation($fieldName))
-                                    $inDatabase |= ($entityRepository->findOneBy(array_inflate(".", $field)) !== null);
-                                else if($classMetadata->hasField($fieldName)) {
-                                    $field = first($field);
-                                    $inDatabase |= ($entityRepository->findOneBy([$fieldName => $field]) !== null);
+                            return $d > 5 ? null : [$fieldName, null];
+                        }
+
+                        if ($special) {
+
+                            $resolvedFieldPath = $this->classMetadataManipulator->resolveFieldPath($entityName, $fieldPath);
+                            if($resolvedFieldPath === null) throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\"");
+                            
+                            $fieldName = explode(".", $resolvedFieldPath);
+                            $fieldName = end($fieldName);
+                            
+                            $entityName = $entityDepth[$d-1] ?? $entityName;
+
+                            $mapping = $this->classMetadataManipulator->getMapping($entityName, $fieldName);
+                            if ($entityName) {
+
+                                $entityRepository = $this->entityManager->getRepository($entityName);
+                                
+                                switch ($special) {
+                                    case "find":
+
+                                        if($this->classMetadataManipulator->hasAssociation($entityName, $fieldName)) {
+                                            
+                                            $targetRepository = $this->entityManager->getRepository($mapping["targetEntity"]);
+                                            $isToOneSide = in_array($mapping["type"], [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
+
+                                            if($isToOneSide) $v = $targetRepository->findOneBy($v);
+                                            else $v = array_filter(array_map(fn($e) => $targetRepository->findOneBy($e), $v));
+                                        }
+
+                                        break;
+
+                                    case "unique":
+                                            
+                                            if($this->classMetadataManipulator->hasAssociation($entityName, $fieldName))
+                                                $inDatabase |= ($entityRepository->findOneBy($v) !== null);
+                                            else if($this->classMetadataManipulator->hasField($entityName, $fieldName))
+                                                $inDatabase |= ($entityRepository->findOneBy([$fieldName => $v]) !== null);
+                                        break;
+
+                                    case "enum":
+
+                                        foreach($v as $className => $key) {
+
+                                            $className = substr($className, 1, strlen($className)-2);
+                                            if(is_instanceof($className, EnumType::class))
+                                                $v[$className] = $className::getValue($key);
+                                            else if(is_instanceof($className, SetType::class))
+                                                $v[$className] = array_map(fn($k) => $className::getValue($k), explode(",", $key));
+                                            else throw new Exception("Class must be either ".EnumType::class." or ".SetType::class);
+                                        }
+
+                                        break;
                                 }
                             }
                         }
-                    }
 
-                    $entry = array_inflate(".", $entry);
+                        array_pop($keyDepth);
+                        array_pop($entityDepth);
+
+                        return $v ? [$fieldName, $v] : null;
+
+                    }, $entry);
 
                     $aggregateModel = EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES;
                     if ($entry) {
 
                         $entity = $this->entityHydrator->hydrate($entityName, $entry, [], $aggregateModel);
-
+                        
                         if($inDatabase) $existingEntityData[$spreadsheet][$entityName][] = $entity;
                         else $newEntityData[$spreadsheet][$entityName][] = $entity;
                     }
@@ -373,7 +376,7 @@ class DoctrineDatabaseImportCommand extends Command
                     }
                     if($newEntityData[$spreadsheet][$className] ?? false) {
                         foreach($newEntityData[$spreadsheet][$className] as $entry)
-                            $output->writeln("\t<ln>".$className.": </ln>\"". $entry."\"");
+                            $output->writeln("\t<ln>".$className.": </ln>\"". $entry."\" is ready for import !");
                     }
                 }
             }

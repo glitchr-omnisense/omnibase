@@ -17,7 +17,8 @@ class AvatarType extends ImageType
     {
         $resolver->setDefaults([
             'thumbnail'   => "bundles/base/user.svg",
-            'cropper'     => null
+            'cropper'     => null,
+            "lightbox" => null
         ]);
     }
 

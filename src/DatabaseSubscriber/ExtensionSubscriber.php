@@ -96,10 +96,11 @@ class ExtensionSubscriber implements EventSubscriber
                         $properties[] = explode("::", $columns)[1];
                     
                     $array = $extension->payload($action, $className, $properties, $entity);
-                    // dump($array);
+                    dump($array);
                     foreach($array as $entry) {
 
                         if($entry === null) continue;
+                        dump($entry->supports());
                         if(!$entry->supports()) {
                         
                             if ($this->entityManager->contains($entry)) 

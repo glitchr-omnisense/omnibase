@@ -6,6 +6,7 @@ use Base\Database\TranslationInterface;
 use Base\Exception\MissingLocaleException;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -59,6 +60,7 @@ trait TranslatableTrait
         return $this->translations;
     }
 
+    public function removeTranslation(TranslationInterface $translation): void { $this->getTranslations()->removeElement($translation); }
     public function addTranslation(TranslationInterface $translation)
     {
         if($translation !== null) {
@@ -68,11 +70,6 @@ trait TranslatableTrait
         }
 
         return $this;
-    }
-
-    public function removeTranslation(TranslationInterface $translation): void
-    {
-        $this->getTranslations()->removeElement($translation);
     }
 
     public function translate(?string $locale = null)

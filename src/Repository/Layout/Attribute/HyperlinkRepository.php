@@ -4,7 +4,7 @@ namespace Base\Repository\Layout\Attribute;
 
 use Base\Entity\Layout\Attribute\Hyperlink;
 
-use Base\Repository\Layout\WidgetRepository;
+use Base\Repository\Layout\AttributeRepository;
 
 /**
  * @method Hyperlink|null find($id, $lockMode = null, $lockVersion = null)
@@ -13,7 +13,7 @@ use Base\Repository\Layout\WidgetRepository;
  * @method Hyperlink[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
  */
 
-class HyperlinkRepository extends WidgetRepository
+class HyperlinkRepository extends AttributeRepository
 {
 
 }

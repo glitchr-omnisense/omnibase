@@ -118,7 +118,9 @@ namespace {
         foreach(debug_backtrace() as $key => $trace) {
 
             $backtrace[$key] = [];
-            $backtrace[$key][] = $trace["file"].":".$trace["line"];
+            if(array_key_exists("file", $trace))
+                $backtrace[$key][] = $trace["file"].":".$trace["line"];
+            
             $backtrace[$key][] = 
                 (array_key_exists("class"   , $trace) ? $trace["class"   ]."::" : "").
                 (array_key_exists("function", $trace) ? $trace["function"]."()" : "");
@@ -406,25 +408,92 @@ namespace {
         return BaseBundle::getAlias($arrayOrObjectOrClass);
     }
 
-    function alias_exists(array|object|string|null $arrayOrObjectOrClass): bool
+    function alias_exists(mixed $objectOrClass): bool
     {
-        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
-        if(is_array($arrayOrObjectOrClass))
-            return array_map(fn($a) => alias_exists($a), $arrayOrObjectOrClass);
+        if(!is_object($objectOrClass) && !is_string($objectOrClass)) return false;
 
-        $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
+        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
         if(!class_exists($class)) return false;
 
         return BaseBundle::getAlias($class) != $class;
     }
 
-    function class_implements_interface(array|object|string|null $arrayOrObjectOrClass, $interface)
-    {
-        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
-        if(is_array($arrayOrObjectOrClass))
-            return array_map(fn($a) => class_implements_interface($a, $interface), $arrayOrObjectOrClass);
+    define("HEADER_FOLLOW_REDIRECT", 1);
+    function file_get_contents2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT, bool $use_include_path = false, $context = null, int $offset = 0, ?int $length = null) {
 
-        $class = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
+        if($mode == HEADER_FOLLOW_REDIRECT) get_headers2($filename, $filename);
+        return file_get_contents($filename, $use_include_path, $context, $offset, $length);
+    }
+
+    function get_headers2(string $url, &$redirect = null, int $mode = HEADER_FOLLOW_REDIRECT) {
+
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) return null;
+        if ($mode != HEADER_FOLLOW_REDIRECT)
+            return get_headers($url, false);
+
+        do {
+
+            $http_response_header = []; // Special PHP variable
+            $context = stream_context_create(["http" => ["follow_location" => false]]);
+            get_headers($url, false, $context);
+        
+            $pattern = "/^Location:\s*(.*)$/i";
+            $location_headers = preg_grep($pattern, $http_response_header);
+
+            $repeat = !empty($location_headers) && preg_match($pattern, array_values($location_headers)[0], $matches);
+            if($repeat) $url = $matches[1];
+
+        } while ($repeat);
+
+        $redirect = $url;
+
+        return $http_response_header;
+    }
+
+    function mime_content_type2(string $filename, int $mode = HEADER_FOLLOW_REDIRECT)
+    {
+        // Search by looking at the header if url format
+        if (filter_var($filename, FILTER_VALIDATE_URL)) {
+
+            $headers = get_headers2($filename, $filename, $mode);
+            if (strpos($headers[0], '200'))
+                return explode("Content-Type: ", $headers[1])[1] ?? null;
+        }
+
+        try { return mime_content_type($filename); }
+        catch (Exception $e) { return null; }
+    }
+
+    function str2bin($string)
+    {
+        $characters = str_split($string);
+     
+        $binary = [];
+        foreach ($characters as $character) {
+            $data = unpack('H*', $character);
+            $binary[] = base_convert($data[1], 16, 2);
+        }
+     
+        return implode(' ', $binary);    
+    }
+     
+    function bin2str($binary)
+    {
+        $binaries = explode(' ', $binary);
+     
+        $string = null;
+        foreach ($binaries as $binary) {
+            $string .= pack('H*', dechex(bindec($binary)));
+        }
+     
+        return $string;    
+    }
+
+    function class_implements_interface(mixed $objectOrClass, $interface)
+    {
+        if(!is_object($objectOrClass) && !is_string($objectOrClass)) return false;
+
+        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
         if(!class_exists($class)) return false;
 
         $classImplements = class_implements($class); 
@@ -782,7 +851,7 @@ namespace {
                             $yield ??= [];
 
                             $tArray[$tKey] ??= [];
-                            $tArray[$tKey] = array_merge(
+                            $tArray[$tKey] = array_merge_recursive2(
                                 is_array($tArray[$tKey]) ? $tArray[$tKey] : [$tArray[$tKey]], 
                                 is_array($yield) ? $yield : [$yield]
                             );
@@ -801,7 +870,7 @@ namespace {
             // Process returned value if found
             if($ret === null) continue;
 
-            list($tKey, $tEntry) = [$ret[0] ?? count($tArray), $ret[1] ?? $entry];
+            list($tKey, $tEntry) = [$ret[0] ?? count($tArray), $ret[1] ?? null];
             switch($prevent_conflicts) {
 
                 case ARRAY_TRANSFORMS_MERGE:
@@ -905,7 +974,8 @@ namespace {
         return $ret;
     }
 
-    function array_inflate(string $separator, ?array $array, int $limit = PHP_INT_MAX) {
+    define('ARRAY_INFLATE_INCREMENT_INTKEYS', 1);
+    function array_inflate(string $separator, ?array $array, int $mode = 0, int $limit = PHP_INT_MAX) {
 
         if(!is_array($array)) return $array;
 
@@ -917,14 +987,55 @@ namespace {
             $ret[$head] ??= [];
 
             $limit = ($limit == PHP_INT_MAX) ? PHP_INT_MAX : $limit - count($keys);
-            if($tail !== "") $ret[$head] = array_merge_recursive($ret[$head], array_inflate($separator, [$tail => $value], $limit));
-            else if(is_array($value)) $ret[$head] = array_inflate($separator, $value);
+            if($tail !== "") {
+            
+                switch($mode) {
+
+                    case ARRAY_INFLATE_INCREMENT_INTKEYS:
+                        $ret[$head] = array_merge_recursive($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
+                        break;
+
+                    default:
+                        $ret[$head] = array_merge_recursive2($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
+                }
+
+            } else if(is_array($value)) $ret[$head] = array_inflate($separator, $value, $mode, $limit);
             else $ret[$head] = $value;
         }
 
         return $ret;
     }
 
+    function array_merge_recursive2(array ...$arrays) {
+
+        $ret = head($arrays);
+        foreach (tail($arrays) as $_) {
+
+            foreach ($_ as $key => $value) {
+
+                if(!array_key_exists($key, $ret)) $ret[$key] = $value;
+                else {
+
+                    if(is_array($value)) $ret[$key] = array_merge_recursive2($ret[$key], $value);
+                    else {
+
+                        if(!empty($ret[$key])) {
+
+                            if(is_array($ret[$key])) array_push($ret[$key], $value);
+                            else {
+                                $ret[$key] = [$ret[$key]];
+                                $ret[$key][] = $value;
+                            }
+
+                        } else if(empty($ret[$key])) $ret[$key] = $value;
+                    }
+                }
+            }
+        }
+
+        return $ret;
+    }
+    
     function array_class($objectOrClass, array $haystack): string|int|false 
     {
         $className = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;

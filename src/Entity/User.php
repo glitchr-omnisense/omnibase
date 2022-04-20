@@ -735,6 +735,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function isActive(): bool { return ($this->getActiveAt() && $this->getActiveAt() < new \DateTime(self::__ACTIVE_TIME__.' seconds ago')); }
-    public function isOnline(): bool { return ($this->getActiveAt() && $this->getActiveAt() < new \DateTime(self::__ONLINE_TIME__.' seconds ago')); }
+    public function isActive(): bool { return ($this->getActiveAt() && $this->getActiveAt() > new \DateTime(self::__ACTIVE_TIME__.' seconds ago')); }
+    public function isOnline(): bool { return ($this->getActiveAt() && $this->getActiveAt() > new \DateTime(self::__ONLINE_TIME__.' seconds ago')); }
 }

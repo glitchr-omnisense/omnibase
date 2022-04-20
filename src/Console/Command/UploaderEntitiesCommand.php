@@ -66,6 +66,7 @@ class UploaderEntitiesCommand extends Command
         $annotations = array_merge($appAnnotations, $baseAnnotations);
         foreach($annotations as $class => $_) {
 
+            $dirName = str_replace(["\\_", "\\", "_"], ["/", "/", ""], camel_to_snake("./".str_lstrip($class, ["App\\Entity\\", "Base\\Entity\\"])));
             foreach($_ as $field => $annotation) {
 
                 if($this->property && $field != $this->property) continue;
@@ -91,7 +92,7 @@ class UploaderEntitiesCommand extends Command
                     $orphanFiles = $this->getOrphanFiles($class, $field, $annotation);
                     $nFiles = count($orphanFiles);
 
-                    $output->section()->writeln("- Looking for orphan files in $class::$field <warning>$nFiles orphan file(s) found.</warning>");            
+                    $output->section()->writeln("- Looking for orphan files in $dirName <warning>$nFiles orphan file(s) found.</warning>");            
                     if($this->showOrphans) {
                         foreach($orphanFiles as $file)
                             $output->section()->writeln("  <warning>* $file</warning>");
@@ -136,8 +137,8 @@ class UploaderEntitiesCommand extends Command
     public function getEntries($class)
     {
         $repository    = $this->entityManager->getRepository($class);
-        $this->allEntries[$class] = $this->allEntries[$class] ?? $repository->findAll();
-        return $this->allEntries[$class];
+        $this->allEntries[$class] = $this->allEntries[$class] ?? $repository->findAll($class);
+        return array_filter($this->allEntries[$class], fn($e) => get_class($e) === $class);
     }
 
     private $fileList = [];
@@ -148,10 +149,14 @@ class UploaderEntitiesCommand extends Command
 
         $property = $class."::".$field;
         if(!array_key_exists($property, $this->fileList))
-            $this->fileList[$property] = array_values(array_filter(
-                array_map(fn($f) => ($f instanceof FileAttributes) ? "/".$f->path() : null, 
-                $filesystem->listContents($classPath)->toArray()
-            )));
+            $this->fileList[$property] = array_values(array_filter(array_map(function($f) use ($annotation) {
+
+                if(!$f instanceof FileAttributes) return null;
+
+                $publicPath = $annotation->public ? "/".$annotation->public : "";
+                return $publicPath . "/" . $f->path();
+
+            }, $filesystem->getOperator()->listContents($classPath)->toArray())));
 
         if($this->uuid)
             $this->fileList[$property] = array_filter($this->fileList[$property], fn($f) => basename($f) == $this->uuid);
@@ -162,23 +167,21 @@ class UploaderEntitiesCommand extends Command
     public function getOrphanFiles(string $class, string $field, Uploader $annotation)
     {
         $fileList = $this->getFileList($class, $field, $annotation);
-
-        $fileListInDatabase = array_map(function($entity) use ($field, $annotation) { 
-
-            $uuid = $this->propertyAccessor->getValue($entity, $field);
-            if(is_array($uuid)) return array_map(fn($uuid) => $annotation->getPath($entity, $uuid), $uuid);
-            else return $annotation->getPath($entity, $uuid);
-
-        }, $this->getEntries($class));
+        $fileListInDatabase = array_map(
+            fn($e) => $this->propertyAccessor->getValue($e, $field), 
+            $this->getEntries($class)
+        );
 
         return array_values(array_diff($fileList, array_flatten(".", $fileListInDatabase)));
     }
 
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)
     {
+        $publicPath = $annotation->public ? "/".$annotation->public : "";
+
         $filesystem = Uploader::getFilesystem($annotation->getStorage());
         foreach($fileList as $file)
-            $filesystem->delete($file);
+            $filesystem->delete(str_lstrip($file, $publicPath . "/"));
 
         return true;
     }
