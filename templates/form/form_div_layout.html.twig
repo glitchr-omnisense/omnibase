@@ -101,7 +101,7 @@
         'data-select2-options' : select2,
         'data-select2-href'    : form.vars["select2-href"]|default("")|urldecode,
         'data-select2-sortable': form.vars["select2-sortable"],
-        'data-tabulation'      : form.vars["tabulation"],
+        'data-tabulation'      : form.vars["tabulation"]
     }) %}
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
@@ -505,7 +505,7 @@
     {% else %}
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
-        {%- set attr = attr|merge({'class': 'form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+        {%- set attr = attr|merge({'class': 'form-group form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
         {% if group %}
             {{ form_widget(form, {attr: attr}) }}

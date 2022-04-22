@@ -64,7 +64,6 @@ class EntityHydrator
     const CONSTRUCT          = 16;
     const IGNORE_NULLS       = 32;
     const AUTOTYPE           = 64;
-    const AUTOTYPE_NULLABLES = 128;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -82,7 +81,7 @@ class EntityHydrator
         if (!is_object($entity))
             throw new Exception('Entity passed to EntityHydrator::hydrate() must be a class name or entity object');
 
-        $this->setDefaults($entity);
+        $this->setDefaults($entity, $aggregateModel);
 
         $data = $this->dehydrate($data, $fieldExceptions);
         if($data === null) return null;
@@ -225,21 +224,73 @@ class EntityHydrator
         return $this;
     }
     
-    protected function setDefaults(object $entity)
+    protected function setDefaults(object $entity, int $aggregateModel)
     {
         $reflEntity = new ReflectionObject($entity);
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
 
+        //
+        // Set default values for fields
         foreach ($classMetadata->fieldMappings as $fieldName => $fieldMapping) {
 
             if ($this->getPropertyValue($entity, $fieldName) !== null)
-                continue;
+                continue; // Only if null
 
+            //
+            // Default values for the specific array cases
             $doctrineType = $this->classMetadataManipulator->getDoctrineType($fieldMapping["type"]);
             if(is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, SetType::class))
                 $this->setPropertyValue($entity, $fieldName, [], $reflEntity);
+
+            //
+            // Advanced typing detection to be enabled using autotype
+            $reflProperty = $reflEntity->hasProperty($fieldName) ? $reflEntity->getProperty($fieldName) : null;
+            if ($aggregateModel & self::AUTOTYPE) {
+
+                // Find field type
+                $type = null;
+                if ($this->classMetadataManipulator->hasField($entity, $fieldName)) {
+
+                    $mapping = $this->classMetadataManipulator->getMapping($entity, $fieldName);
+                    if($mapping["nullable"]) continue; // Skip nullable elements
+                    
+                    $type = $this->classMetadataManipulator->getTypeOfField($entity, $fieldName);
+
+                } else if ($reflProperty !== null) {
+                    
+                    $type = $reflProperty->getType();
+                }
+
+                switch ($type) {
+
+                    case "array":
+                        $value = [];
+                        break;
+                    
+                    case "bool":
+                        $value = false;
+                        break;
+                    
+                    case "string":
+                        $value = "";
+                        break;
+
+                    case "number":
+                    case "integer":
+                    case "float":
+                        $value = 0;
+                        break;
+
+                    default: $value = null;
+                }
+
+                $this->setPropertyValue($entity, $fieldName, $value, $reflEntity);
+            }
+            
         }
 
+        //
+        // Set default values for associations
         foreach ($classMetadata->associationMappings as $fieldName => $associationMapping) {
 
             if ($this->getPropertyValue($entity, $fieldName) !== null)
@@ -265,37 +316,6 @@ class EntityHydrator
             
             $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
 
-            
-            if ($value === null && $aggregateModel & self::AUTOTYPE) {
-
-                $type = null;
-                if ($this->classMetadataManipulator->hasField($entity, $propertyName)) {
-
-                    $mapping = $this->classMetadataManipulator->getMapping($entity, $propertyName);
-                    if(!($aggregateModel & self::AUTOTYPE_NULLABLES) && $mapping["nullable"]) $type = "nullable";
-                    else $type = $this->classMetadataManipulator->getTypeOfField($entity, $propertyName);
-
-                } else if ($reflProperty !== null) $type = $reflProperty->getType();
-
-                switch ($type) {
-
-                    case "array":
-                        $value = [];
-                        break;
-                    case "bool":
-                        $value = false;
-                        break;
-                    case "string":
-                        $value = "";
-                        break;
-                    case "number":
-                        $value = 0;
-                        break;
-                    case "nullable": // LMFAO: Not a real type
-                    default: $value = null;
-                }
-            }
-            
             $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
             if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
 

@@ -3,7 +3,7 @@
 namespace Base\Service;
 
 use Base\Database\Type\SetType;
-use Base\Traits\BaseTrait;
+
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -55,12 +55,11 @@ class Translator implements TranslatorInterface
             $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans($id, $parameters, $domain, $locale, false); };
 
             $ret = preg_replace_callback("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $fn, $id, -1, $count);
-            if ($ret != $id)
-                return str_starts_with($ret, "@") ? $this->translator->trans($ret, $parameters) : $ret;
+            if ($ret != $id) return $ret;
 
             $ret = $this->translator->trans($ret, $parameters, $domain, $locale);
             if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) return $id;
-            
+
             return $ret;
         }
 
@@ -88,7 +87,16 @@ class Translator implements TranslatorInterface
         }
 
         // Call for translation with custom parameters
-        $trans = $this->translator->trans($id, $parameters, $domain, $locale);
+        $trans  = $this->translator->trans($id, $parameters, $domain, $locale);
+        $trans2 = null;
+
+        // Lookup for nested translations
+        while($trans != $trans2 && $recursive) {
+
+            $trans2 = $this->trans($trans, $parameters, $domain, $locale, false);
+            if($trans != $trans2) $trans = $trans2;
+        }
+
         if ($trans == $id && !$this->isDebug)
             $trans = $this->translator->trans($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
 
@@ -119,7 +127,7 @@ class Translator implements TranslatorInterface
         }
     }
 
-    public function enum(?string $value, $class, string $noun = self::TRANSLATION_SINGULAR): string
+    public function enum(?string $value, string $class, string $noun = self::TRANSLATION_SINGULAR): string
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
@@ -140,11 +148,13 @@ class Translator implements TranslatorInterface
         return mb_ucfirst($this->trans(mb_strtolower($class.$value.$noun), [], self::DOMAIN_ENUM));
     }
 
-    public function entity($class, string $noun = self::TRANSLATION_SINGULAR): string
+    public function entity($entityOrClassName, string $noun = self::TRANSLATION_SINGULAR): string
     {
-        $class = $this->parseClass($class, self::PARSE_NAMESPACE);
+        if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
+
+        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
         $noun  = !empty($noun)  ? ".".$noun  : $noun;
-        return mb_ucfirst($this->trans(mb_strtolower($class.$noun), [], self::DOMAIN_ENTITY));
+        return mb_ucfirst($this->trans(mb_strtolower($entityOrClassName.$noun), [], self::DOMAIN_ENTITY));
     }
 
     public function time(int $time): string

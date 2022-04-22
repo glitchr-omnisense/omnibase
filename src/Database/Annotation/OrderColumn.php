@@ -7,10 +7,10 @@ use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Factory\EntityExtensionInterface;
 use Base\Database\Type\EnumType;
+use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
 use Base\Traits\BaseTrait;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -110,13 +110,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                         $propertyAccessor->setValue($entity, $column, $entityValue);
 
-                    } else if($entityValue instanceof ArrayCollection) {
-
-                        $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
-                        if($this->order == "DESC") $entityValue = array_reverse($entityValue);
-
-                        $propertyAccessor->setValue($entity, $column, $entityValue);
-
                     } else if($entityValue instanceof PersistentCollection) {
 
                         $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
@@ -147,7 +140,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
 
                     $value = $propertyAccessor->getValue($entity, $property);
-                    if($doctrineType instanceof EnumType) {
+                    if($doctrineType instanceof SetType) {
 
                         $data[$property] = array_keys($doctrineType::getOrderingKeys($value));
                         if(!is_identity($data[$property]))

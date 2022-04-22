@@ -52,6 +52,20 @@ namespace {
     function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
+    function array_unique_object(array $array): array
+    {
+        $unique = array_keys(array_unique(array_map(fn($e) => spl_object_hash($e), $array)));
+        return array_filter($array, fn($k) => in_array($k, $unique), ARRAY_FILTER_USE_KEY);
+    }
+
+    function tempurl(string $url, string $prefix = "php", string $tmpdir = "/tmp")
+    {
+        $tmpfname = tempnam($tmpdir, $prefix);
+        file_put_contents($tmpfname, file_get_contents($url));
+
+        return $tmpfname;
+    }
+
     function is_uuidv4(?string $uuid) { return is_string($uuid) && !(preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid) !== 1); }
     function synopsis(...$args) { return class_synopsis(...$args); }
     function class_synopsis(...$args)

@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\Criteria;
 class OrderedArrayCollection extends ArrayCollection
 {
     protected $ordering;
-    public function __construct(array $elements = [], array $ordering = [])
+    public function __construct(ArrayCollection|array $elements = [], array $ordering = [])
     {
         parent::__construct($elements);
         $this->ordering = $ordering;
@@ -20,7 +20,7 @@ class OrderedArrayCollection extends ArrayCollection
     public function applyOrdering() {
 
         if(!is_identity($this->ordering)) {
-            
+
             $elements = parent::toArray();
             if(empty($elements)) return $this;
 

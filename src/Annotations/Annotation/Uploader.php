@@ -248,9 +248,8 @@ class Uploader extends AbstractAnnotation
         $fileList = array_values(array_intersect($newList, $oldList));
         foreach (array_diff($newList, $oldList) as $index => $entry) {
 
-            dump("YAYYAYAYAYYAYAYA ! ");
-            dump($entry);
-            exit(1);
+            if (filter_var($entry, FILTER_VALIDATE_URL))
+                $entry = tempurl($entry);
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..

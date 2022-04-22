@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\DatabaseSubscriber;
+namespace Base\EntitySubscriber;
 
 use Base\Database\Factory\EntityExtension;
 
@@ -10,6 +10,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\UnitOfWork;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
 class ExtensionSubscriber implements EventSubscriber
@@ -39,7 +40,7 @@ class ExtensionSubscriber implements EventSubscriber
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
-
+        
         $this->scheduledEntityInsertions = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
             $this->scheduledEntityInsertions[] = $entity;
@@ -47,10 +48,16 @@ class ExtensionSubscriber implements EventSubscriber
         $this->scheduledEntityUpdates = [];
         foreach ($uow->getScheduledEntityUpdates() as $entity)
             $this->scheduledEntityUpdates[] = $entity;
+        foreach ($uow->getScheduledCollectionUpdates() as $entity)
+            $this->scheduledEntityUpdates[] = $entity->getOwner();
 
         $this->scheduledEntityDeletions = [];
         foreach ($uow->getScheduledEntityDeletions() as $entity)
             $this->scheduledEntityDeletions[] = $entity;
+        
+        $this->scheduledEntityInsertions = array_unique_object($this->scheduledEntityInsertions);
+        $this->scheduledEntityUpdates    = array_unique_object($this->scheduledEntityUpdates);
+        $this->scheduledEntityDeletions  = array_unique_object($this->scheduledEntityDeletions);
 
         $this->entriesPendingForIds = $this->payload(EntityAction::INSERT, $this->scheduledEntityInsertions);
         $this->payload(EntityAction::UPDATE, $this->scheduledEntityUpdates);
@@ -76,6 +83,7 @@ class ExtensionSubscriber implements EventSubscriber
         foreach($entities as $entity) {
 
             $id = spl_object_id($entity);
+
             foreach($this->entityExtension->getExtensions() as $extension) {
 
                 $matches = [];
@@ -96,11 +104,10 @@ class ExtensionSubscriber implements EventSubscriber
                         $properties[] = explode("::", $columns)[1];
                     
                     $array = $extension->payload($action, $className, $properties, $entity);
-                    dump($array);
+
                     foreach($array as $entry) {
 
                         if($entry === null) continue;
-                        dump($entry->supports());
                         if(!$entry->supports()) {
                         
                             if ($this->entityManager->contains($entry)) 
@@ -113,7 +120,6 @@ class ExtensionSubscriber implements EventSubscriber
                         $entry->setEntityId($entity->getId());
                         $entry->setAction($action);
 
-                        // dump($entry);
                         switch($action) {
 
                             case EntityAction::INSERT:

@@ -95,8 +95,7 @@ class ClassMetadataManipulator
             return $entityOrClassOrMetadata;
 
         $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
-        $metadata  = $this->entityManager->getClassMetadata($entityOrClassOrMetadataName);
-        
+        $metadata  = class_exists($entityOrClassOrMetadataName) ? $this->entityManager->getClassMetadata($entityOrClassOrMetadataName) : null;
         if (!$metadata)
             throw new InvalidArgumentException("Entity expected, '" . $entityOrClassOrMetadataName . "' is not an entity.");
         
@@ -271,8 +270,15 @@ class ClassMetadataManipulator
         if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
         if(empty($fieldPath)) throw new \Exception("No field path provided for \"".get_class($entity)."\" ");
 
+        $entityName = get_class($entity);
         // Extract leading field && get metadata
         $fieldName = array_shift($fieldPath);
+
+        // Check entity validity
+        if($entity === null || !is_object($entity)) {
+            if(!empty($fieldName)) throw new \Exception("Failed to find property \"".implode('.', array_merge([$fieldName],$fieldPath))."\" using \"".(is_object($entity) ? get_class($entity) : "NULL")."\" data");
+            else return null;
+        }
 
         // Extract key information
         $fieldRegex = ["/(\w*)\[(\w*)\]/", "/(\w*)%(\w*)%/", "/(\w*){(\w*)}/", "/(\w*)\((\w*)\)/"];
@@ -280,31 +286,27 @@ class ClassMetadataManipulator
         if($fieldKey) $fieldName = preg_replace($fieldRegex, "$1", $fieldName, 1);
         else $fieldKey = null;
 
-        // Check entity validity
-        if($entity === null || !is_object($entity)) {
-            if(!empty($fieldName)) throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
-            else return null;
-        }
-
         // Go get class metadata
         $metadata = $this->getClassMetadata($entity);
         if(!$metadata) return false;
 
         $entity = $metadata->getFieldValue($entity, $metadata->getFieldName($fieldName));
-
         if(class_implements_interface($entity, TranslatableInterface::class)) 
             $entity = $entity->getTranslations();
 
         if(is_array($entity)) {
+
             $entity = $fieldKey ? $entity[$fieldKey] ?? null : null;
             $entity = $entity ?? begin($entity);
+
         } else if(class_implements_interface($entity, Collection::class)) {
-            $entity = $entity->has($fieldKey ?? 0) ? $entity->get($fieldKey ?? 0) : null;
+
+            $entity = $entity->containsKey($fieldKey) ? $entity->get($fieldKey ?? 0) : null;
         }
 
         if($entity === null || !is_object($entity)) {
             if(empty($fieldPath)) return $entity;
-            throw new \Exception("Failed to find a property path \"$fieldPath\" using \"".get_class($entity)."\" data");
+            throw new \Exception("Failed to resolve property path \"".implode('.', array_merge([$fieldName],$fieldPath))."\" in \"".$entityName."\"");
         }
 
         // If field path is empty
@@ -323,7 +325,7 @@ class ClassMetadataManipulator
         return $metadata->setFieldValue($entity, $fieldName, $value);
     }
 
-    public function hasField($entityOrClassOrMetadata, string $fieldName): ?string
+    public function hasField($entityOrClassOrMetadata, string $fieldName): bool
     {
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
@@ -437,10 +439,14 @@ class ClassMetadataManipulator
 
         return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
     }
-    
+
     public function getFieldName(string $entityName, array|string $fieldPath): ?string { return $this->resolveFieldPath($entityName, $fieldPath); }
-    public function resolveFieldPath(string $entityName, array|string $fieldPath): ?string
+    public function resolveFieldPath($entityOrClassOrMetadata, array|string $fieldPath): ?string
     {
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$metadata) return false;
+
+        $entityName = $metadata->getName();
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
         $fieldName = head($fieldPath);
 
@@ -505,6 +511,26 @@ class ClassMetadataManipulator
         return $metadata->getAssociationMapping($fieldName) ?? null;
     }
     
+    public function getUniqueKeys($entityOrClassOrMetadata, bool $inherits = false):array
+    {
+        $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$metadata) return false;
+
+        $uniqueKeys = [];
+
+        do {
+
+            foreach($metadata->fieldNames as $fieldName) 
+                if($this->getMapping($entityOrClassOrMetadata, $fieldName)["unique"] ?? false) $uniqueKeys[] = $fieldName;
+            
+            $parentName = get_parent_class($metadata->getName());
+            $metadata = $parentName ? $this->getClassMetadata($parentName) : null;
+
+        } while($metadata && $metadata->getName() && $inherits);
+        
+        return $uniqueKeys;
+    }
+
     public function hasTranslation($entityOrClassOrMetadata): bool { return $this->hasAssociation($entityOrClassOrMetadata, "translations"); }
     public function getTranslationMapping($entityOrClassOrMetadata, string $fieldName): ?array
     {

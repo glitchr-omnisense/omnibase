@@ -9,13 +9,17 @@ use Base\Serializer\Encoder\ExcelEncoder;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
-
+use Base\Entity\Thread;
+use Base\Service\BaseService;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Exception;
-use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Symfony\Component\Console\Cursor;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -46,10 +50,11 @@ class DoctrineDatabaseImportCommand extends Command
      */
     protected $classMetadataManipulator;
 
-    public function __construct(EntityManagerInterface $entityManager, EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator)
+    public function __construct(EntityManagerInterface $entityManager, EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, BaseService $baseService)
     {
         parent::__construct();
 
+        $this->baseService    = $baseService;
         $this->entityManager  = $entityManager;
         $this->entityHydrator = $entityHydrator;
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -64,7 +69,7 @@ class DoctrineDatabaseImportCommand extends Command
 
     public function normalize($entityName, $entityData)
     {
-        return array_inflate(".", array_transforms(function($propertyPath, $entry, $fn, $i) use ($entityName):array {
+        return array_inflate(".", array_transforms(function($propertyPath, $entry, $fn, $i) use ($entityName):?array {
 
             $propertyPath = trim(explode('\n', $propertyPath)[0]); // Only keeps headline
             $fieldName = explodeByArray([":", "["], $propertyPath)[0];
@@ -93,7 +98,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $classMetadata = $this->entityManager->getClassMetadata($entityName);
                 if(!$classMetadata->hasAssociation($classMetadata->getFieldName($subFieldName))) 
                     throw new Exception("Field \"".$subFieldName."\" is expected to be an association.");
-
+                    
                 $isToManySide = in_array($entityMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
                 if(!is_array($entry)) $entry = [$propertyName => $entry];
                 else if($isToManySide) {
@@ -127,10 +132,11 @@ class DoctrineDatabaseImportCommand extends Command
                 }
             }
 
-            return [$propertyPath, $entry];
+            return $propertyPath ? [$propertyPath, $entry] : null;
 
         }, $entityData));
     }
+
 
     protected function configure(): void
     {
@@ -140,6 +146,7 @@ class DoctrineDatabaseImportCommand extends Command
         $this->addOption('extension',   null, InputOption::VALUE_OPTIONAL, 'Specify file extension to be used');
         $this->addOption('rows',        null, InputOption::VALUE_OPTIONAL, 'Only read N rows');
         $this->addOption('show',        null, InputOption::VALUE_NONE, 'Show all details');
+        $this->addOption('notify',      null, InputOption::VALUE_NONE, 'Send notification if needed');
 
         parent::configure();
     }
@@ -148,11 +155,14 @@ class DoctrineDatabaseImportCommand extends Command
     {
         if($input->hasArgument("path")) $path = $input->getArgument("path");
         
+        $notify            = $input->getOption("notify");
+        if(!$notify) $this->baseService->getNotifier()->disable();
+
         $show            = $input->getOption("show");
         $nRows           = $input->getOption("rows");
         $extension       = $input->getOption("extension");
         $spreadsheetKeys = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
-
+        
         $output->writeln("");
         if($path) $output->writeln(' <info>You have just selected:</info> '.$path);
         else {
@@ -182,10 +192,11 @@ class DoctrineDatabaseImportCommand extends Command
                 throw new Exception("Missing extension in filename. Please use \"--extension\" option.");
         }
 
-        $baseClass = [];
+        $baseClass  = [];
         $entityData = [];
-        $existingEntityData = [];
-        $newEntityData = [];
+        $entityUniqueKeys = [];
+        $existingEntities = [];
+        $newEntities      = [];
 
         // Shrink and restrict according to options
         $keys = [];
@@ -203,12 +214,14 @@ class DoctrineDatabaseImportCommand extends Command
 
         // Process spreadsheet
         $output->writeln(' Normalizing rows..');
+        $totalData = 0;
         foreach($rawData as $spreadsheet => &$import) {
 
+            $parentThread = null;
             $entityData[$spreadsheet] = [];
-            $existingEntityData[$spreadsheet] = [];
-            $existingEntityData[$spreadsheet] = [];
-            $newEntityData[$spreadsheet] = [];
+            $existingEntities[$spreadsheet] = [];
+            $newEntities[$spreadsheet] = [];
+            $entityUniqueKeys[$spreadsheet] = [];
 
             //
             // Import type
@@ -223,10 +236,7 @@ class DoctrineDatabaseImportCommand extends Command
 
             //
             // Clean up empty fields
-            $beforeKeys = array_keys($rawData[$spreadsheet]);
             $rawData[$spreadsheet] = array_filter_recursive($rawData[$spreadsheet]);
-            $afterKeys = array_keys($rawData[$spreadsheet]);
-            
             foreach($rawData[$spreadsheet] as &$data) {
 
                 if($discriminatorMap) {
@@ -240,35 +250,45 @@ class DoctrineDatabaseImportCommand extends Command
             
                 unset($data[$className]);
                 $entityData[$spreadsheet][$entityName][] = $this->normalize($entityName, $data);
+                $totalData++;
+
             }
         }
-
+                
         $output->writeln(' Hydrating entities..');
+
+        // creates a new progress bar (50 units)
+        $progressBar = new ProgressBar($output, $totalData);
+
+        $entityUniqueValues = [];
         foreach($rawData as $spreadsheet => &$import) {
 
-            foreach($entityData[$spreadsheet] ?? [] as $entityName => &$_) {
+            foreach($entityData[$spreadsheet] ?? [] as $entityName => &$entries) {
 
                 //
                 // Loop over entries
-                foreach($_ as &$entry) {
+                foreach($entries as &$entry) {
+
+                    $progressBar->advance();
 
                     $keyDepth = [];
-                    $entityDepth = [];
+                    $targetEntity = [];
                     $inDatabase = false;
-                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($entityName, &$entityDepth, &$keyDepth, &$inDatabase) : ?array {
+                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($spreadsheet, &$entityUniqueValues, $entityName, &$entityUniqueKeys, &$targetEntity, &$keyDepth, &$inDatabase) : ?array {
 
                         list($fieldName, $special) = array_pad(explode(":", $k, 2),2,null);
                         $keyDepth[$d] = $fieldName;
                         
                         $fieldPath = implode(".", $keyDepth);
                         $targetName = $this->classMetadataManipulator->fetchEntityName($entityName, $fieldPath);
-                        $entityDepth[$d] = $targetName;
+                        $targetEntity[$d] = $targetName;
+
                         if(is_array($v)) $v = array_transforms($fn, $v, $d+1);
 
                         if(!$v) {
 
                             array_pop($keyDepth);
-                            array_pop($entityDepth);
+                            array_pop($targetEntity);
 
                             return $d > 5 ? null : [$fieldName, null];
                         }
@@ -280,19 +300,30 @@ class DoctrineDatabaseImportCommand extends Command
                             
                             $fieldName = explode(".", $resolvedFieldPath);
                             $fieldName = end($fieldName);
+
+                            $targetName = $targetEntity[$d-1] ?? $entityName;
+                            if(!array_key_exists($targetName, $entityUniqueKeys[$spreadsheet]))
+                                $entityUniqueKeys[$spreadsheet][$targetName] = [];
+
+                            $mapping = $this->classMetadataManipulator->getMapping($targetName, $fieldName);
+                            if ($targetName) {
+
+                                if(!array_key_exists($targetName, $entityUniqueValues))
+                                    $entityUniqueValues[$targetName] = [];
+                                if(!array_key_exists($fieldName, $entityUniqueValues[$targetName]))
+                                    $entityUniqueValues[$targetName][$fieldName] = [];
                             
-                            $entityName = $entityDepth[$d-1] ?? $entityName;
+                                switch (explode("(", $special)[0]) {
 
-                            $mapping = $this->classMetadataManipulator->getMapping($entityName, $fieldName);
-                            if ($entityName) {
+                                    case "unique":
+                                        $entityUniqueKeys[$spreadsheet][$entityName][] = [$targetName, $resolvedFieldPath];
+                                        $entityUniqueValues[$targetName][$fieldName][] = $v;
+                                        break;
 
-                                $entityRepository = $this->entityManager->getRepository($entityName);
-                                
-                                switch ($special) {
                                     case "find":
 
-                                        if($this->classMetadataManipulator->hasAssociation($entityName, $fieldName)) {
-                                            
+                                        if($this->classMetadataManipulator->hasAssociation($targetName, $fieldName)) {
+
                                             $targetRepository = $this->entityManager->getRepository($mapping["targetEntity"]);
                                             $isToOneSide = in_array($mapping["type"], [ClassMetadataInfo::ONE_TO_ONE, ClassMetadataInfo::MANY_TO_ONE], true);
 
@@ -302,25 +333,19 @@ class DoctrineDatabaseImportCommand extends Command
 
                                         break;
 
-                                    case "unique":
-                                            
-                                            if($this->classMetadataManipulator->hasAssociation($entityName, $fieldName))
-                                                $inDatabase |= ($entityRepository->findOneBy($v) !== null);
-                                            else if($this->classMetadataManipulator->hasField($entityName, $fieldName))
-                                                $inDatabase |= ($entityRepository->findOneBy([$fieldName => $v]) !== null);
-                                        break;
-
                                     case "enum":
 
-                                        foreach($v as $className => $key) {
+                                        $special = str_lstrip($special, "enum(");
+                                        $className = substr($special, 0, strlen($special)-1);
+                                        
+                                        $typeOfField = $this->classMetadataManipulator->getTargetClass($targetName, $fieldName);
+                                        if(!is_instanceof($typeOfField, $className)) throw new Exception("Incompatibility between EnumType provided \"".$className."\" and database type \"".$typeOfField."\"");
 
-                                            $className = substr($className, 1, strlen($className)-2);
-                                            if(is_instanceof($className, EnumType::class))
-                                                $v[$className] = $className::getValue($key);
-                                            else if(is_instanceof($className, SetType::class))
-                                                $v[$className] = array_map(fn($k) => $className::getValue($k), explode(",", $key));
-                                            else throw new Exception("Class must be either ".EnumType::class." or ".SetType::class);
-                                        }
+                                        if (is_instanceof($className, SetType::class))
+                                            $v = array_map(fn($k) => $className::getValue($k), $v);
+                                        else if (is_instanceof($className, EnumType::class))
+                                            $v = $className::getValue($v);
+                                        else throw new Exception("Class must be either ".EnumType::class." or ".SetType::class);
 
                                         break;
                                 }
@@ -328,33 +353,87 @@ class DoctrineDatabaseImportCommand extends Command
                         }
 
                         array_pop($keyDepth);
-                        array_pop($entityDepth);
-
+                        array_pop($targetEntity);
                         return $v ? [$fieldName, $v] : null;
 
                     }, $entry);
 
-                    $aggregateModel = EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES;
                     if ($entry) {
 
-                        $entity = $this->entityHydrator->hydrate($entityName, $entry, [], $aggregateModel);
-                        
-                        if($inDatabase) $existingEntityData[$spreadsheet][$entityName][] = $entity;
-                        else $newEntityData[$spreadsheet][$entityName][] = $entity;
+                        $entity = $this->entityHydrator->hydrate($entityName, $entry, [], EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES);
+                        if($entity instanceof Thread) {
+
+                            if($entity->getParent()) $parentThread = $entity;
+                            else $entity->setParent($parentThread);
+                        }
+
+                        if(!array_key_exists($entityName, $newEntities[$spreadsheet]))
+                            $newEntities[$spreadsheet][$entityName] = [];
+
+                            
+                        //
+                        // Check if duplicates found in the processed list
+                        foreach($entityUniqueKeys[$spreadsheet][$entityName] ?? [] as $_) {
+
+                            list($targetName, $resolvedFieldPath) = $_;
+                            $fieldPath = explode(".", $resolvedFieldPath);
+
+                            // Extract target entity
+                            $targetValue = [$entity];
+                            foreach($fieldPath as $fieldName) {
+
+                                $targetValue = array_flatten('.', array_map(function($e) use ($fieldName) {
+                                
+                                    $e = $this->entityHydrator->dehydrate($e)[$fieldName] ?? null;
+                                    if($e instanceof Collection) $e = $e->toArray();
+
+                                    return $e;
+
+                                }, $targetValue), PHP_INT_MAX, ARRAY_FLATTEN_PRESERVE_KEYS);
+                            }
+
+                            // Check out database
+                            $targetRepository = $this->entityManager->getRepository($targetName);
+                            $targetFieldName = end($fieldPath);
+                            $targetValue = array_values($targetValue);
+
+                            if($this->classMetadataManipulator->hasAssociation($targetName, $targetFieldName))
+                                $inDatabase |= ($targetRepository->findOneBy($targetValue) !== null);
+                            else if($this->classMetadataManipulator->hasField($targetName, $targetFieldName))
+                                $inDatabase |= ($targetRepository->findOneBy([$targetFieldName => $targetValue]) !== null);
+                        }
+
+                        if($inDatabase) $existingEntities[$spreadsheet][$entityName][] = $entity;
+                        else $newEntities[$spreadsheet][$entityName][] = $entity;
                     }
+                }
+            }
+
+            //
+            // Check if duplicates found in the entity data list
+            foreach($entityUniqueValues as $targetName => $_) {
+                foreach($_ as $uniqueKey => $values) {
+
+                    $occurences = array_filter(array_count_values($values), fn($v) => $v > 1);
+                    $duplicates = !empty($occurences);
+                    if($duplicates)
+                        throw new Exception("Duplicate entries \"".implode(",", array_unique(array_keys($occurences)))."\" found for $targetName::$".$uniqueKey);
                 }
             }
         }
 
-        $output->writeln(' <info>New data found: </info>'.implode(", ", array_map(function($spreadsheet) use ($baseClass, $entityData, $newEntityData) {
+        $progressBar->finish();
+        $output->writeln('');
+
+        $output->writeln(' <info>New data found: </info>'.implode(", ", array_map(function($spreadsheet) use ($baseClass, $entityData, $newEntities) {
           
             $countData = 0;
             foreach(array_keys($entityData[$spreadsheet]) as $className)
                 $countData    += count($entityData[$spreadsheet][$className] ?? []);
 
             $countNewData = 0;
-            foreach(array_keys($newEntityData[$spreadsheet]) as $className)
-                $countNewData += count($newEntityData[$spreadsheet][$className] ?? []);
+            foreach(array_keys($newEntities[$spreadsheet]) as $className)
+                $countNewData += count($newEntities[$spreadsheet][$className] ?? []);
 
             $count = $countData > 0 ? $countNewData."/".$countData : "0";
             $plural       = ($countNewData > 1);
@@ -367,16 +446,16 @@ class DoctrineDatabaseImportCommand extends Command
 
             foreach($entityData as $spreadsheet => $_) {
 
-                $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>");
+                $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $className");
                 foreach($_ as $className => $_) {
 
-                    if($existingEntityData[$spreadsheet][$className] ?? false) {
-                        foreach($existingEntityData[$spreadsheet][$className] as $entry)
-                            $output->writeln("\t<warning>".$className.": </warning>\"". $entry."\" found in database");
+                    if($existingEntities[$spreadsheet][$className] ?? false) {
+                        foreach($existingEntities[$spreadsheet][$className] as $entry)
+                            $output->writeln("\t<warning>".$this->translator->entity($entry).": </warning>\"". $entry."\" found in database");
                     }
-                    if($newEntityData[$spreadsheet][$className] ?? false) {
-                        foreach($newEntityData[$spreadsheet][$className] as $entry)
-                            $output->writeln("\t<ln>".$className.": </ln>\"". $entry."\" is ready for import !");
+                    if($newEntities[$spreadsheet][$className] ?? false) {
+                        foreach($newEntities[$spreadsheet][$className] as $entry)
+                            $output->writeln("\t<ln>".$this->translator->entity($entry).": </ln><info>\"". $entry."\"</info> is ready for import !");
                     }
                 }
             }
@@ -387,7 +466,7 @@ class DoctrineDatabaseImportCommand extends Command
         $helper   = $this->getHelper('question');
         $question = new Question(' > ');
 
-        if(empty(array_filter($newEntityData))) {
+        if(empty(array_filter_recursive($newEntities))) {
 
             $msg = ' [OK] Nothing to update - your database is already in sync with the current dataset. ';
             $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
@@ -402,7 +481,7 @@ class DoctrineDatabaseImportCommand extends Command
             if(strtolower($apply) != "y" && strtolower($apply) != "yes")
                 return Command::FAILURE;
 
-            foreach($newEntityData as $spreadsheet => &$_) {
+            foreach($newEntities as $spreadsheet => &$_) {
                 foreach($_ as $className => $entries) {
 
                     foreach($entries as $entry) $this->entityManager->persist($entry);

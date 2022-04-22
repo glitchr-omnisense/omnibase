@@ -100,12 +100,15 @@ class SelectType extends AbstractType implements DataMapperInterface
             'select2-css'      => $this->baseService->getParameterBag("base.vendor.select2.stylesheet"),
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
             'empty_data'       => null,
+
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
             'capitalize'         => true,
             'language'           => null,
             'required'           => true,
             'multiple'           => null,
+            'multivalue'         => false,
+
             'vertical'           => false,
             'maximum'            => 0,
             'tabulation'         => "1.75em",
@@ -122,11 +125,13 @@ class SelectType extends AbstractType implements DataMapperInterface
             'href'               => null,
 
             // Autocomplete
-            'autocomplete'          => null,
-            'autocomplete_endpoint' => "autocomplete",
-            'autocomplete_fields'   => [],
-            'autocomplete_delay'    => 500,
-            'autocomplete_type'     => $this->baseService->isDebug() ? "GET" : "POST",
+            'autocomplete'                => null,
+            'autocomplete_endpoint'       => "autocomplete",
+            'autocomplete_fields'         => [],
+            'autocomplete_data'           => null,
+            'autocomplete_processResults' => null,
+            'autocomplete_delay'          => 500,
+            'autocomplete_type'           => $this->baseService->isDebug() ? "GET" : "POST",
 
             // Sortable option
             'sortable'              => null
@@ -329,34 +334,38 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, Traversable $forms) { /* done in buildView due to select2 extend */ }
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
-        $choicesType = current(iterator_to_array($forms));
-        $choicesData = $choicesType->getViewData();
-
-        $options = $choicesType->getConfig()->getOptions();
-        $options["class"] = $this->formFactory->guessType($choicesType->getParent());
-
-        $bakMultiple = $options["multiple"];
+        
+        $choiceType = current(iterator_to_array($forms));
+        $options = $choiceType->getParent()->getConfig()->getOptions();
+        $options["class"] = $this->formFactory->guessType($choiceType->getParent());
+        
+        $choicesData = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
+        $multiple = $options["multiple"];
 
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
-            $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choicesType->getParent(), $options);
-
             $classRepository = $this->entityManager->getRepository($options["class"]);
-            if($options["multiple"]) {
+
+            $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
+            if(!$options["multiple"]) $choicesData = $classRepository->findOneById($choicesData);
+            else {
 
                 $orderBy = array_flip($choicesData);
                 $default = count($orderBy);
-                $choicesData = $classRepository->findById($choicesData, [])->getResult();
+
+                $entities = $classRepository->findById($choicesData, [])->getResult();
+                foreach($entities as $entity) {
+
+                    foreach(array_keys(array_filter($choicesData, fn($d) => (int)$d === $entity->getId())) as $pos)
+                        $choicesData[$pos] = $entity;
+                }
+                
                 usort($choicesData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
-
-            } else {
-
-                $choicesData = $classRepository->findOneById($choicesData);
-            }
+            } 
         }
 
-        $options["multiple"] = $bakMultiple !== null ? $bakMultiple : null;
-        $options["multiple"] = $this->formFactory->guessMultiple($choicesType->getParent(), $options);
+        $options["multiple"] = $multiple !== null ? $multiple : null;
+        $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
         if($viewData instanceof Collection) {
 
@@ -467,13 +476,18 @@ class SelectType extends AbstractType implements DataMapperInterface
                     "url" => $this->baseService->getAsset($options["autocomplete_endpoint"])."/".$hash,
                     "type" => $options["autocomplete_type"],
                     "delay" => $options["autocomplete_delay"],
-                    "data" => "function (args) { return {term: args.term, page: args.page || 1}; }",
                     "dataType" => "json",
                     "html" => $options["html"],
                     "cache" => true
                 ];
+
+                if(!array_key_exists("autocomplete_data", $selectOpts) && $options["autocomplete_data"] !== null)
+                    $selectOpts["ajax"]["data"] = $options["autocomplete_data"];
+                if(!array_key_exists("autocomplete_processResults", $selectOpts) && $options["autocomplete_processResults"] !== null)
+                    $selectOpts["ajax"]["processResults"] = $options["autocomplete_processResults"];
             }
 
+           
             if(!array_key_exists("minimumResultsForSearch", $selectOpts))
                      $selectOpts["minimumResultsForSearch"] = $options["minimumResultsForSearch"];
             if(!array_key_exists("closeOnSelect", $selectOpts))
@@ -499,6 +513,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             if(!array_key_exists("placeholder", $selectOpts) && $options["placeholder"] !== null)
                      $selectOpts["placeholder"] = $this->translator->trans($options["placeholder"] ?? "", [], "@fields");
+
+            if(!array_key_exists("multivalue", $selectOpts) && $options["multivalue"] !== null)
+                $selectOpts["multivalue"] = $options["multivalue"];
 
             if(!array_key_exists("language", $selectOpts))
                      $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));
