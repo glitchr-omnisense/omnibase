@@ -11,7 +11,7 @@ final class AttributeField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_CLASS          = 'class';
+    public const OPTION_CLASS   = 'class';
     public const OPTION_CHOICES = 'choices';
     public const OPTION_ICONS   = 'icons';
     public const OPTION_FILTER  = 'filter';
@@ -34,7 +34,7 @@ final class AttributeField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/text')
-            ->setTemplatePath('@EasyAdmin/crud/field/select.html.twig')
+            ->setTemplatePath('@EasyAdmin/crud/field/attribute.html.twig')
             ->setFormType(AttributeType::class)
             ->setCustomOption(self::OPTION_DISPLAY_LIMIT, 2)
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ICON_ONLY)
@@ -87,7 +87,12 @@ final class AttributeField implements FieldInterface
 
     public function allowMultipleChoices(bool $allow = true)
     {
-        $this->setFormTypeOptionIfNotSet("multiple", $allow);
+        $this->setFormTypeOption("multiple", $allow);
+        return $this;
+    }
+    public function allowMultiValues(bool $allow = true)
+    {
+        $this->setFormTypeOption("multivalue", $allow);
         return $this;
     }
 

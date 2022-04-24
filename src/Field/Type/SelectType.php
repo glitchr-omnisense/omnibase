@@ -339,7 +339,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options = $choiceType->getParent()->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessType($choiceType->getParent());
         
-        $choicesData = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
+        if(!$options["multiple"]) $choicesData = $choiceType->getViewData();
+        else $choicesData = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
         $multiple = $options["multiple"];
 
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
@@ -354,10 +355,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $default = count($orderBy);
 
                 $entities = $classRepository->findById($choicesData, [])->getResult();
-                foreach($entities as $entity) {
+                foreach($choicesData as $pos => $id) {
 
-                    foreach(array_keys(array_filter($choicesData, fn($d) => (int)$d === $entity->getId())) as $pos)
-                        $choicesData[$pos] = $entity;
+                    foreach($entities as $entity) 
+                        if($entity->getId() == $id) $choicesData[$pos] = $entity;
                 }
                 
                 usort($choicesData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));

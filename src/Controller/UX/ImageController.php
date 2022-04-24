@@ -94,4 +94,25 @@ class ImageController extends AbstractController
             new ImageFilter($path, $args["filters"] ?? [], [])
         ]);
     }
+
+    /**
+     * @Route("/{hashid}/{width}/{height}/image", name="image_crop")
+     * @Route("/{hashid}/{width}/{height}/image.{extension}", name="imageExtension_crop")
+     */
+    public function ImageCrop($hashid, string|int|null $width, string|int|null $height, string $extension = null): Response
+    {
+        $path = stream_get_meta_data(tmpfile())['uri'];
+        $args = $this->imageService->decode($hashid);
+        if(!$args) throw $this->createNotFoundException();
+
+        $_extension = $this->imageService->getExtension($args["path"]);
+        if($extension === null && $_extension != $extension)
+            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
+
+        dump($width, $height);
+
+        return $this->imageService->filter($args["path"], [
+            new ImageFilter($path, $args["filters"] ?? [], [])
+        ]);
+    }
 }

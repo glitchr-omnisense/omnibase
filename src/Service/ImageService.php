@@ -95,6 +95,7 @@ class ImageService implements ImageServiceInterface
         if(!$source || $source == "/") return $source;
         if(is_array($source)) return array_map(fn($s) => $this->resolve($route, $s, $filters, $config), $source);
 
+        dump($source);
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
 
         $config["path"] = $path;
@@ -111,21 +112,6 @@ class ImageService implements ImageServiceInterface
         }
 
         return $this->router->generate($route, ["hashid" => $this->encode($config)]);
-    }
-
-    /**
-     * Check if a JPEG image file uses the CMYK colour space.
-     * @param string $path The path to the file.
-     * @return bool
-     */
-    function isCMYK($path) 
-    {
-        if(!$path || !file_exists($path)) 
-            return false;
-
-        $imagesize = @getimagesize($path);
-        return array_key_exists('mime', $imagesize) && 'image/jpeg' == $imagesize['mime'] &&
-               array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
 
     public static function getPublic(?string $path) 
@@ -177,7 +163,7 @@ class ImageService implements ImageServiceInterface
             $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
             $pathPublic = self::getPublic($path);
             $path = path_suffix($path, $pathSuffixes);
-
+            
             // Handle null path case
             if ($path === null) {
 
@@ -188,10 +174,15 @@ class ImageService implements ImageServiceInterface
             // No public path can be created.. so just apply filter to the image
             if($pathPublic === null) {
 
+                // GD does not support other palette than RGB..
+                //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($path))
+                //   cmyk2rgb($path); // Not working..
+
                 try { $image = $this->imagine->open($path); }
                 catch (Exception $e ) { return false; }
 
-                $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB());
+                // Trigger exception on purpose (if GD is used)
+                $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB());
                 foreach ($filters as $filter)
                     $image = $filter->apply($image);
 
@@ -209,17 +200,24 @@ class ImageService implements ImageServiceInterface
 
                 } else {
 
+                    // GD does not support other palette than RGB..
+                    //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
+                    //   cmyk2rgb($pathPublic); // Not working yet..
+
                     /**
                      * @var ImageInterface
                      */
                     try { $image = $this->imagine->open($pathPublic); } 
                     catch (Exception $e) {
 
+                        $path = $this->noImage;
                         $pathPublic = self::getPublic($this->noImage);
+
                         $image = $this->imagine->open($pathPublic);
                     }
 
-                    $image->usePalette($this->isCMYK($pathPublic) ? new CMYK() : new RGB());
+                    // Trigger exception on purpose (if GD is used with CMYK palette)
+                    $image->usePalette(is_cmyk($pathPublic) ? new CMYK() : new RGB()); 
                     foreach ($filters as $filter)
                         $image = $filter->apply($image);
 

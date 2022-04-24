@@ -76,7 +76,7 @@ class SelectField implements FieldInterface
 
     public function allowCrudLink(bool $allow = true)
     {
-        $this->setCustomOption(self::OPTION_CRUD_LINK, $iconAlign);
+        $this->setCustomOption(self::OPTION_CRUD_LINK, $allow);
         return $this;
     }
 

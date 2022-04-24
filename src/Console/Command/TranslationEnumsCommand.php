@@ -71,8 +71,8 @@ class TranslationEnumsCommand extends Command
 
                 $path = explode("\\", $enum);
                 $path = implode(".", tail($path, 2));
-                $translationPath = "@enums.".camel_to_snake($path, "_").".".$suffix;
-                $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel_to_snake($path, "_").".".$suffix."</ln>";
+                $translationPath = "@enums.".camel2snake($path, "_").".".$suffix;
+                $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel2snake($path, "_").".".$suffix."</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                 if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
@@ -100,8 +100,8 @@ class TranslationEnumsCommand extends Command
                         $space = str_repeat(" ", max($maxValueLength-strlen($enum."::".$value), 0));
                     }
     
-                    $translationPath = "@enums.".camel_to_snake($path, "_").".".strtolower($value).".".$suffix;
-                    $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel_to_snake($path,"_").".".strtolower($value).".".$suffix."</ln>";
+                    $translationPath = "@enums.".camel2snake($path, "_").".".strtolower($value).".".$suffix;
+                    $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel2snake($path,"_").".".strtolower($value).".".$suffix."</ln>";
                     $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
     
                     if($translation == $translationPath) $trans2 .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";

@@ -81,8 +81,8 @@ class TranslationEntitiesCommand extends Command
             
                 $path = explode("\\", $entity);
                 $path = implode(".", tail($path, 2));
-                $translationPath = "@entities.".camel_to_snake($path, ".").".".$suffix;
-                $translationPathStr = $prefix."@entities[$currentLocale].<ln>".camel_to_snake($path, ".").".".$suffix."</ln>";
+                $translationPath = "@entities.".camel2snake($path, ".").".".$suffix;
+                $translationPathStr = $prefix."@entities[$currentLocale].<ln>".camel2snake($path, ".").".".$suffix."</ln>";
                 $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                 if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";

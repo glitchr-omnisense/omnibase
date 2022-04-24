@@ -63,6 +63,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             'recursive'    => false,
             "multiple"     => null,
+            'multivalue'   => false,
             'filter'       => null, 
             'filter_code'  => null,
             'sortable'     => null, 
@@ -123,7 +124,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 "autocomplete_fields" => ["code" => $options["filter_code"]], 
                 "choice_filter"       => $options["filter"],
                 "multiple"            => $options["multiple"],
-                "href" => false,
+                "multivalue"          => $options["multivalue"],
+                "href"                => false,
 
                 "sortable"            => $options["sortable"],
                 "dropdownCssClass"    => "field-attribute-dropdown",
@@ -205,6 +207,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $forms = iterator_to_array($forms);
         $choiceForm = $forms["choice"];
 
+        dump($viewData);
         if ($viewData instanceof PersistentCollection) {
 
             $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));

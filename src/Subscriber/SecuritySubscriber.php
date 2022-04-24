@@ -157,11 +157,11 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
-            $this->baseService->getEntityManager()->flush();
+            $this->baseService->getEntityManager()->flush($user);
             $notification->send("email")->send("success");
         }
 
-        $this->baseService->getEntityManager()->flush();
+        $this->baseService->getEntityManager()->flush($user);
         $this->baseService->redirectToRoute("user_profile", [], 302);
     }
 
@@ -180,7 +180,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("email");
         }
 
-        $this->baseService->getEntityManager()->flush();
+        $this->baseService->getEntityManager()->flush($user);
     }
 
     public function onSwitchUser(SwitchUserEvent $event) { }
@@ -307,7 +307,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ( !($user->isActive()) ) {
     
             $user->poke(new \DateTime("now"));
-            $this->entityManager->flush();
+            $this->entityManager->flush($user);
         }
     }
     
@@ -469,7 +469,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $log->setUser($user);
 
                 $entityManager->persist($log);
-                $entityManager->flush();
+                $entityManager->flush($log);
             }
         }
     }

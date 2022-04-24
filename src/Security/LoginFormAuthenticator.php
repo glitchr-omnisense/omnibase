@@ -99,7 +99,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
             $user->setLocale();
             $user->kick(0);
 
-            $this->entityManager->flush();
+            $this->entityManager->flush($user);
         }
 
         // Check if target path provided via $_POST..

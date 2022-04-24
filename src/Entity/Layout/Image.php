@@ -61,7 +61,7 @@ class Image
     public function set($source): self { return $this->setSource($source); }
 
     /**
-     * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image")
+     * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $crops;
     public function getCrops(): Collection { return $this->crops; }

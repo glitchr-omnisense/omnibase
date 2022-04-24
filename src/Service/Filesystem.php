@@ -70,7 +70,7 @@ class Filesystem
         if(!$filesystemOperator->fileExists($location)) return null;
 
         try { return $filesystemOperator->read($location); }
-        catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$location\""); }
+        catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$location\".. ".$e->getMessage()); }
     }
 
     public function write(string $location, string $contents, ?FilesystemOperator $filesystemOperator = null, array $config = [])
@@ -79,7 +79,7 @@ class Filesystem
         if ($filesystemOperator->fileExists($location)) return false;
 
         try { $filesystemOperator->write($location, $contents, $config); }
-        catch (UnableToWriteFile $e) { throw new NotWritableException("Unable to write file \"$location\".."); }
+        catch (UnableToWriteFile $e) { throw new NotWritableException("Unable to write file \"$location\".. ".$e->getMessage()); }
         return true;
     }
 
@@ -89,7 +89,7 @@ class Filesystem
         if(!$filesystemOperator->fileExists($location)) return false;
 
         try { $filesystemOperator->delete($location); }
-        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to delete file \"$location\".."); }
+        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to delete file \"$location\".. ".$e->getMessage()); }
         return true;
     }
 
@@ -105,7 +105,7 @@ class Filesystem
         if($filesystemOperator->fileExists($location)) return false;
 
         try { $filesystemOperator->createDirectory($location, $config); }
-        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to create directory \"$location\".."); }
+        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to create directory \"$location\".. ".$e->getMessage()); }
         return true;
     }
 
@@ -115,7 +115,7 @@ class Filesystem
         if(!$filesystemOperator->fileExists($location)) return null;
 
         try { $filesystemOperator->mimeType($location); }
-        catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$location\".."); }
+        catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$location\".. ".$e->getMessage()); }
         return null;
     }
 }

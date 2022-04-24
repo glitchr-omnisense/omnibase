@@ -37,7 +37,14 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public function findOneBy(array $criteria, ?array $orderBy = null):?object { return $this->__call(__METHOD__, [$criteria, $orderBy]); }
     public function count(array $criteria):int { return $this->__call(__METHOD__, [$criteria]); }
     
-    public function flush() { return $this->getEntityManager()->flush(); }
+    public function flush($entity = null) 
+    { 
+        $entity = self::getFqcnEntityName();
+        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entity);
+
+        if(count($entityList))
+            $this->getEntityManager()->flush($entityList); 
+    }
     public function persist($entity) {
 
         if(!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {

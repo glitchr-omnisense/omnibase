@@ -26,6 +26,11 @@ abstract class BaseAttribute implements IconizeInterface, AttributeInterface
     public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconize() : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
+    public function __toString() 
+    {
+      return "<b>".$this->getAdapter()." #".$this->getId()."</b>"; 
+    }
+
     public function __construct(AbstractAttribute $adapter, mixed $value = null)
     {
         $this->setAdapter($adapter);

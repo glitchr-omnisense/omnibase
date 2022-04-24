@@ -2,7 +2,7 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% if field.formattedValue is iterable %}
-
+<span>
     {% set index_min = 0 %}
     {% set index_max = 0 %}
     {% set infinite = false %}
@@ -27,7 +27,7 @@
     {% else %}
         {{ price_min }}
     {% endif %}
-
+</span>
 {% else %}
 
     {{ field.formattedValue }}

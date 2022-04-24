@@ -57,6 +57,7 @@ trait TranslatableTrait
         if ($this->translations === null)
             $this->translations = new ArrayCollection();
 
+            dump("OHOH ?");
         return $this->translations;
     }
 
@@ -193,7 +194,7 @@ trait TranslatableTrait
     {
         $accessor = PropertyAccess::createPropertyAccessor();
         $translationClassName = $this->getTranslationEntityClass();
-        $property = snake_to_camel($property);
+        $property = snake2camel($property);
         $entity = $this;
         
         //
@@ -233,7 +234,7 @@ trait TranslatableTrait
     public function __get($property)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
-        $property = snake_to_camel($property);
+        $property = snake2camel($property);
 
         //
         // Getter method in called class

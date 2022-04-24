@@ -314,7 +314,7 @@
     {% if not multiple %}
         <figure>
 
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(200,200) | default(thumbnail) }}" />
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(600,600) | default(thumbnail) }}" />
 
             <figcaption id="{{id}}_figcaption">
                 {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
@@ -866,6 +866,38 @@
 </div>
 
 {%- endblock -%}
+
+
+{%- block cropper_widget -%}
+    CROPPER
+{%- endblock -%}
+
+{%- block quadrant_widget -%}
+    QUADRANT
+{#
+     {% set attr = attr|merge({
+    'data-number-field': form.vars.id,
+    "data-number-up": form.vars.stepUp ?? 1,
+    "data-number-down": form.vars.stepDown ?? 1,
+    "data-number-min": form.vars.min is defined and form.vars.max > 0 ? form.vars.max : 0,
+}) %}
+
+{% if form.vars.max is defined %}
+    {% set attr = attr|merge({"data-number-max": form.vars.max}) %}
+{% endif %}
+
+<div class="input-group form-number">
+    {{ form_widget(form, {attr:attr}) }} 
+    <div class="input-group-text">
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
+    </div>
+     <div class="input-group-text">
+        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
+    </div>
+</div> #}
+
+{%- endblock -%}
+
 
 {%- block password_row -%}
 

@@ -54,10 +54,10 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
             }
 
             $tableName = str_replace("\\", "", $tableName);
-            $tableName = explode("_", camel_to_snake($tableName));
+            $tableName = explode("_", camel2snake($tableName));
             $tableName = array_unique($tableName);
 
-            $tableName = snake_to_camel(implode("_", $tableName));
+            $tableName = snake2camel(implode("_", $tableName));
             $tableName = lcfirst($tableName);
             $tableName = preg_replace('/Translation$/', 'Intl', $tableName);
         }

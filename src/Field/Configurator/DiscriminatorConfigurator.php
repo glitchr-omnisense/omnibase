@@ -70,7 +70,7 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
             if ($class) {
 
                 $class = str_replace(["App\\", "Base\\Entity\\"], ["Base\\", ""], $class);
-                $text  = implode(".", array_map("camel_to_snake", explode("\\", $class)));
+                $text  = implode(".", array_map("camel2snake", explode("\\", $class)));
             }
 
             $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);

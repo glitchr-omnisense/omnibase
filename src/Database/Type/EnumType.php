@@ -51,7 +51,7 @@ abstract class EnumType extends Type implements SelectInterface
     public function getName() : string { return self::getStaticName(); }
     public static function getStaticName() { 
         $array = explode('\\', get_called_class());
-        return camel_to_snake(end($array));
+        return camel2snake(end($array));
     }
 
     public static function hasKey  (string $key,   bool $inheritance = true) { return array_key_exists($key, self::getPermittedValues($inheritance, true)); }

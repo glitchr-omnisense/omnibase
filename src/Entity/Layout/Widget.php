@@ -51,7 +51,7 @@ class Widget implements TranslatableInterface, IconizeInterface
     {
         if($this->template) return $this->template;
 
-        $defaultTemplate = camel_to_snake(class_basename(get_called_class()));
+        $defaultTemplate = camel2snake(class_basename(get_called_class()));
         $defaultTemplate = "widget/".$defaultTemplate.".html.twig";
 
         return $defaultTemplate;

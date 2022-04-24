@@ -15,7 +15,7 @@ class Constraint extends \Symfony\Component\Validator\Constraint
 
             $classname = explode("\\", get_called_class());
             $classname = array_pop($classname);
-            $this->message = camel_to_snake($classname);
+            $this->message = camel2snake($classname);
         }
 
         parent::__construct($options, $groups, $payload);

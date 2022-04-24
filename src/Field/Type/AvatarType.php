@@ -30,6 +30,8 @@ class AvatarType extends ImageType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        parent::buildView($view, $form, $options);
+        
         //
         // VIEW: 
         // - <id>_raw  = file,

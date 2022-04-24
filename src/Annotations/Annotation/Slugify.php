@@ -106,7 +106,7 @@ class Slugify extends AbstractAnnotation
     {
         // Check if field already set.. get field value or by default class name
         if(!$input && $this->referenceColumn) $input = $this->getPropertyValue($entity, $this->referenceColumn);
-        if(!$input) $input = camel_to_snake(class_basename($entity), "-");
+        if(!$input) $input = camel2snake(class_basename($entity), "-");
 
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 

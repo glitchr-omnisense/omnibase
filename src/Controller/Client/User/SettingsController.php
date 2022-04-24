@@ -97,7 +97,7 @@ class SettingsController extends AbstractController
                 // $newUser->setTotpSecret($form->get('totpSecret')->getData());
                 // $entityManager = $this->getDoctrine()->getManager();
                 // $entityManager->persist($newUser);
-                // $entityManager->flush();
+                // $entityManager->flush($newUser);
 
                 // if($user && $user->getIsVerified()) {
 

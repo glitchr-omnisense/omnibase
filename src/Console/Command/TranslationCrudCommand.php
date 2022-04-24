@@ -81,8 +81,8 @@ class TranslationCrudCommand extends Command
                     $path = explode("\\", $crud);
                     $path = str_strip(implode(".", tail($path, 4)), "", "CrudController");
 
-                    $translationPath = "@dashboard.crud.".camel_to_snake($path).".".$action.".".$suffix;
-                    $translationPathStr = $prefix."@dashboard[$currentLocale].<ln>crud.".camel_to_snake($path).".".$action.".".$suffix."</ln>";
+                    $translationPath = "@dashboard.crud.".camel2snake($path).".".$action.".".$suffix;
+                    $translationPathStr = $prefix."@dashboard[$currentLocale].<ln>crud.".camel2snake($path).".".$action.".".$suffix."</ln>";
                     $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                     if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red> (possible entity fallback)";

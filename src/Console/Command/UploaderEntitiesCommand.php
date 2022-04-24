@@ -66,12 +66,12 @@ class UploaderEntitiesCommand extends Command
         $annotations = array_merge($appAnnotations, $baseAnnotations);
         foreach($annotations as $class => $_) {
 
-            $dirName = str_replace(["\\_", "\\", "_"], ["/", "/", ""], camel_to_snake("./".str_lstrip($class, ["App\\Entity\\", "Base\\Entity\\"])));
+            $dirName = str_replace(["\\_", "\\", "_"], ["/", "/", ""], camel2snake("./".str_lstrip($class, ["App\\Entity\\", "Base\\Entity\\"])));
             foreach($_ as $field => $annotation) {
 
                 if($this->property && $field != $this->property) continue;
 
-                $output->section()->write("<info>Processing entityName $class..</info>");
+                $output->section()->write("<info>Processing $class..</info>");
                 if(count($annotation) > 1)
                     throw new \LogicException("Unexpected \"Uploader\" annotation found twice in $class..");
 
@@ -146,7 +146,7 @@ class UploaderEntitiesCommand extends Command
     {
         $classPath  = $annotation->getPath($class, "");
         $filesystem = Uploader::getFilesystem($annotation->getStorage());
-
+        
         $property = $class."::".$field;
         if(!array_key_exists($property, $this->fileList))
             $this->fileList[$property] = array_values(array_filter(array_map(function($f) use ($annotation) {
@@ -154,6 +154,7 @@ class UploaderEntitiesCommand extends Command
                 if(!$f instanceof FileAttributes) return null;
 
                 $publicPath = $annotation->public ? "/".$annotation->public : "";
+                dump($publicPath, Uploader::getPublic($entity, $field));
                 return $publicPath . "/" . $f->path();
 
             }, $filesystem->getOperator()->listContents($classPath)->toArray())));
@@ -172,16 +173,14 @@ class UploaderEntitiesCommand extends Command
             $this->getEntries($class)
         );
 
-        return array_values(array_diff($fileList, array_flatten(".", $fileListInDatabase)));
+        return array_values(array_diff($fileList,array_flatten(".", $fileListInDatabase)));
     }
 
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)
     {
-        $publicPath = $annotation->public ? "/".$annotation->public : "";
-
         $filesystem = Uploader::getFilesystem($annotation->getStorage());
-        foreach($fileList as $file)
-            $filesystem->delete(str_lstrip($file, $publicPath . "/"));
+        foreach ($fileList as $file)
+            $filesystem->delete($file);
 
         return true;
     }

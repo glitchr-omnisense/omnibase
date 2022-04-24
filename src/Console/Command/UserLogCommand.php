@@ -120,8 +120,10 @@ class UserLogCommand extends Command
         if($actionClear || $actionClearAll) {
 
             $output->section()->writeln('<warning>These logs are now erased..</warning>');
-            foreach($filteredLogs as $log) $this->entityManager->remove($log);
-            $this->entityManager->flush();
+            foreach($filteredLogs as $log) {
+                $this->entityManager->remove($log);
+                $this->entityManager->flush($log);
+            }
         }
 
         return Command::SUCCESS;

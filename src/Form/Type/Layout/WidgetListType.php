@@ -93,7 +93,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
                 // Set default label
                 if(!array_key_exists("label", $widgetOptions)) {
                     $label = explode("-", $formattedWidget);
-                    $widgetOptions["label"] = $slot->getLabel() ?? mb_ucwords(str_replace("_", " ", camel_to_snake(end($label))));
+                    $widgetOptions["label"] = $slot->getLabel() ?? mb_ucwords(str_replace("_", " ", camel2snake(end($label))));
                 }
 
                 if(!array_key_exists("help", $widgetOptions))

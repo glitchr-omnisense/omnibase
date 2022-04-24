@@ -30,7 +30,7 @@
             {% endif %}
 
             <span class="badge badge-secondary">
-                <span>{% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+                {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if showFirst == 1 %}
                     {{formattedValue.text|striptags|default("-")}}  
                 {% elseif showFirst == 2 %}
@@ -44,7 +44,7 @@
                     {% endif %}
                     {{ iconAlign != "left" ? icon|raw : "" }}
                 {% endif %}
-                {% if fieldLink is not null %}</a>{% endif %}</span>
+                {% if fieldLink is not null %}</a>{% endif %}
             </span>
             {% set formattedValues = formattedValues|slice(1) %}
         {% endif %}
@@ -90,7 +90,7 @@
 
             {% set fieldLink = formattedValue['url'] ?? null %}
             <span class="badge badge-secondary">
-                <span>{% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
+                {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if show == 1 %}
                     {{formattedValue.text|striptags|default("-")}}  
                 {% elseif show == 2 %}
@@ -106,7 +106,6 @@
                 {% endif %}
 
                 {% if fieldLink is not null %}</a>{% endif %}
-                </span>
             </span>
         {% endfor %}
 
@@ -139,21 +138,19 @@
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if showFirst == 1 %}
-            <span>{{formattedValue.text|striptags|default("-")}}</span>
+           {{formattedValue.text|striptags|default("-")}}
         {% elseif showFirst == 2 %}
             <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text|striptags }}">{{ icon ? icon|raw : formattedValue.text|striptags|default("-") }}</div>
         {% else %}
-            <span>
-                {{ iconAlign == "left" ? icon|raw : "" }}
-                {% if icon is not null %}
-                    <span class="label">{{formattedValue.text|striptags|default("-")}}</span>
-                {% elseif formattedValue is iterable %}
-                    {{formattedValue.text|striptags|default("-")}}
-                {% else %}
-                    {{formattedValue|striptags|default("-")}}
-                {% endif %}
-                {{ iconAlign != "left" ? icon|raw : "" }}
-            </span>
+            {{ iconAlign == "left" ? icon|raw : "" }}
+            {% if icon is not null %}
+                <span class="label">{{formattedValue.text|striptags|default("-")}}</span>
+            {% elseif formattedValue is iterable %}
+                {{formattedValue.text|striptags|default("-")}}
+            {% else %}
+                {{formattedValue|striptags|default("-")}}
+            {% endif %}
+            {{ iconAlign != "left" ? icon|raw : "" }}
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>
@@ -180,21 +177,19 @@
         <span class="badge badge-secondary">
         {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
         {% if show == 1 %}
-            <span>{{formattedValue.text|striptags|default("-")}}</span>
+            {{formattedValue.text|striptags|default("-")}}
         {% elseif show == 2 %}
             <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text|striptags }}">{{ icon ? icon|raw : formattedValue.text|striptags|default("-") }}</div>
         {% else %}
-            <span>
-                {{ iconAlign == "left" ? icon|raw : "" }}
+            {{ iconAlign == "left" ? icon|raw : "" }}
 
-                {% if icon is not null %}
-                    <span class="label">{{formattedValue.text|striptags|default("-")}}</span>
-                {% else %}
-                    {{formattedValue.text|striptags|default("-")}}
-                {% endif %}
+            {% if icon is not null %}
+                <span class="label">{{formattedValue.text|striptags|default("-")}}</span>
+            {% else %}
+                {{formattedValue.text|striptags|default("-")}}
+            {% endif %}
 
-                {{ iconAlign != "left" ? icon|raw : "" }}
-            </span>
+            {{ iconAlign != "left" ? icon|raw : "" }}
         {% endif %}
         {% if fieldLink is not null %}</a>{% endif %}
         </span>

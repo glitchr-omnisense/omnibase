@@ -57,7 +57,7 @@ class IntlSubscriber implements EventSubscriber
     {
         foreach($translatable->getTranslations() as $locale => $translation) {
 
-            $translation->setTranslatable($translatable);
+           // $translation->setTranslatable($translatable);
 
             if($translation->getLocale() !== $locale) 
                 throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
@@ -72,6 +72,14 @@ class IntlSubscriber implements EventSubscriber
 
         if ($translatable && $translation->isEmpty())
             $translatable->removeTranslation($translation);
+    }
+
+    protected function removeIfDuplicates(TranslationInterface $translation)
+    {
+        $translatable = $translation->getTranslatable();
+        dump($translatable);
+        // if ($translatable && $translation->isEmpty())
+        //     $translatable->removeTranslation($translation);
     }
 
     /**

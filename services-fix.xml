@@ -7,8 +7,8 @@
 
         <defaults />
 
-        <!-- ImagineInterface instances -->
-        <service id="imagine" alias="imagine.gd" />
+        <!-- ImagineInterface instance use imagick by default (NB: GD do not support CMYK) -->
+        <service id="imagine" alias="imagine.imagick" />
         <service id="imagine.meta_data.reader" class="Imagine\Image\Metadata\ExifMetadataReader" />
 
         <service id="imagine.gd" class="Imagine\Gd\Imagine">

@@ -99,6 +99,7 @@ class EntityHydrator
     public function dehydrate(mixed $entity, array $fieldExceptions = []) {
     
         if($entity === null) return null;
+
         $data = $entity ?? [];
         $data = $data instanceof Collection ? $data->toArray() : $data;
         if(is_object($data)) $data = array_filter(array_transforms(
@@ -313,7 +314,7 @@ class EntityHydrator
                 continue;
             if ($value === null && $aggregateModel & self::IGNORE_NULLS)
                 continue;
-            
+
             $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
 
             $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
@@ -409,7 +410,8 @@ class EntityHydrator
         $association = $values instanceof Collection ? $values : new ArrayCollection($values ?? []);
         foreach ($association as $key => $value) {
 
-            if (is_array($value)) $association[$key] = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
+            if (is_array($value))
+                $association[$key] = $this->hydrate($mapping['targetEntity'], $value, [], $aggregateModel);
             else if ($targetEntity = $this->findAssociation($mapping['targetEntity'], $value))
                 $association[$key] = $targetEntity;
 
@@ -426,7 +428,7 @@ class EntityHydrator
             foreach($association as $entry)
                 $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
         }
-
+        
         // Commit association
         $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
         if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {

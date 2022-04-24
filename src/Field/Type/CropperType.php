@@ -2,17 +2,22 @@
 
 namespace Base\Field\Type;
 
+use Base\Service\BaseService;
 use InvalidArgumentException;
-
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CropperType extends FileType
+class CropperType extends AbstractType
 {
-    public function getBlockPrefix(): string { return 'imageupload'; }
-    public function getParent() : ?string { return FileType::class; }
+    public function getBlockPrefix(): string { return 'cropper'; }
+    
+    public function __construct(BaseService $baseService) 
+    {
+        $this->baseService = $baseService;
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -23,12 +28,6 @@ class CropperType extends FileType
         ]);
 
         $resolver->setAllowedTypes("cropper", ['null', 'array']);
-    }
-
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        if($options["multiple"] && is_array($options["cropper"]))
-            throw new InvalidArgumentException("There can be only one picture if you want to crop, please disable 'multiple' option");
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)

@@ -469,7 +469,7 @@ class ClassMetadataManipulator
         $fieldPath = tail($fieldPath, $this->isToManySide($entityName, $fieldName) ? -2 : -1);
         if(!$fieldPath) return $fieldName;
 
-        $filePath = $this->resolveFieldPath($this->getAssociationTargetClass($entityName, $fieldName), $fieldPath);
+        $filePath = $this->hasAssociation($entityName, $fieldName) ? $this->resolveFieldPath($this->getAssociationTargetClass($entityName, $fieldName), $fieldPath) : null;
         if(!$filePath) return null;
 
         return $fieldName.".".$filePath;

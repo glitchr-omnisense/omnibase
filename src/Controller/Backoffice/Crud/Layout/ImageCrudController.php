@@ -5,10 +5,7 @@ namespace Base\Controller\Backoffice\Crud\Layout;
 use Base\Field\TranslationField;
 
 use Base\Controller\Backoffice\AbstractCrudController;
-use Base\Entity\Layout\ImageCrop;
 use Base\Field\AssociationField;
-use Base\Field\CollectionField;
-use Base\Field\CropperField;
 use Base\Field\ImageField;
 use Base\Field\Type\CropperType;
 
@@ -21,7 +18,10 @@ class ImageCrudController extends AbstractCrudController
         return parent::configureFields($pageName, function () {
 
             yield ImageField::new('source')->setCropper([]);
-            // yield CropperField::new('crops');
+            yield AssociationField::new('crops')->showCollapsed(false)->autoload(false)->setFields([
+                "cropper" => ["form_type" => CropperType::class]
+            ])->hideOnIndex();
+
         }, $args);
     }
 }

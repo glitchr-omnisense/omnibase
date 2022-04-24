@@ -86,8 +86,10 @@ class UserNotificationCommand extends Command
 
             $output->section()->writeln('<warning>These notifications are now erased..</warning>');
 
-            foreach($notifications as $notification) $this->entityManager->remove($notification);
-            $this->entityManager->flush();
+            foreach($notifications as $notification) {
+                $this->entityManager->remove($notification);
+                $this->entityManager->flush($notification);
+            }
         }
 
         return Command::SUCCESS;

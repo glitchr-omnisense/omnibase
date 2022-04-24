@@ -39,6 +39,8 @@ class ImageType extends FileType
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        parent::buildView($view, $form, $options);
+
         if(!($view->vars["accept"] ?? false) ) 
              $view->vars["accept"] = "image/*";
 

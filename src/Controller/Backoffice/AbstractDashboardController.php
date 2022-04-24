@@ -178,10 +178,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach($settings as $setting)
                 $setting->setSecure(true);
 
-            foreach(array_diff_key($data, $settings) as $name => $setting)
+            foreach(array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);
-
-            $this->settingRepository->flush();
+	        $this->settingRepository->flush($setting);
+	    }
 
             $notification = new Notification("@controllers.dashboard_apikey.success");
             $notification->setUser($this->getUser());
@@ -241,10 +241,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
 
-            foreach(array_diff_key($data, $settings) as $name => $setting) 
+            foreach(array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);
-
-            $this->settingRepository->flush();
+                $this->settingRepository->flush($setting);
+	    }
 
             $notification = new Notification("@controllers.dashboard_settings.success");
             $notification->setUser($this->getUser());
@@ -281,13 +281,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 if(!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
+	            $this->slotRepository->flush($widgetSlot);
                 }
 
                 $widgets = $data[$path] ?? [];
                 $widgetSlot->setWidgets($widgets);
             }
 
-            $this->slotRepository->flush();
 
             $notification = new Notification("@controllers.dashboard_widgets.success");
             $notification->setUser($this->getUser());

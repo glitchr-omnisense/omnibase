@@ -201,7 +201,7 @@ trait BaseSettingsTrait
 
         $setting->translate($locale)->setValue($value);
 
-        $this->entityManager->flush();
+        $this->entityManager->flush($setting);
         return $this;
     }
 
@@ -210,7 +210,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
         
-        $this->entityManager->flush();
+        $this->entityManager->flush($setting);
         return $this;
     }
 
@@ -219,7 +219,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
 
-        $this->entityManager->flush();
+        $this->entityManager->flush($setting);
         return $this;
     }
 
@@ -228,7 +228,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setBag($parameterName);
         
-        $this->entityManager->flush();
+        $this->entityManager->flush($setting);
         return $this;
     }
 
@@ -239,11 +239,11 @@ trait BaseSettingsTrait
     
     public function remove(string $path)
     {
-        $settings = $this->settingRepository->findOneByInsensitivePath($path);
-        if($settings instanceof Setting) {
+        $setting = $this->settingRepository->findOneByInsensitivePath($path);
+        if($setting instanceof Setting) {
 
-            $this->entityManager->remove($settings);
-            $this->entityManager->flush();
+            $this->entityManager->remove($setting);
+            $this->entityManager->flush($setting);
         }
 
         return $this;
@@ -256,7 +256,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setLocked($flag);
 
-        $this->entityManager->flush();
+        $this->entityManager->flush($setting);
         return $this;
     }
 
@@ -267,7 +267,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
 
-        $this->entityManager->flush();
+        $this->entityManager->flush($setting);
         return $this;
     }
 }

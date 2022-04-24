@@ -118,12 +118,12 @@ class Translator implements TranslatorInterface
                 while(class_exists($parent) && ( $parent = get_parent_class($parent) ))
                     $class .= ".".class_basename($parent);
 
-                return camel_to_snake($class);
+                return camel2snake($class);
 
             break;
 
             case self::PARSE_NAMESPACE:
-            default: return camel_to_snake(implode(".", array_slice(explode("\\", $class), 2)));
+            default: return camel2snake(implode(".", array_slice(explode("\\", $class), 2)));
         }
     }
 

@@ -49,8 +49,8 @@ namespace {
         return $class->isAbstract();
     }
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
-    function camel_to_snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
-    function snake_to_camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
+    function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
+    function snake2camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
     function array_unique_object(array $array): array
     {
@@ -792,6 +792,54 @@ namespace {
         return $counter;
     }
 
+    /**
+     * Check if a JPEG image file uses the CMYK colour space.
+     * @param string $path The path to the file.
+     * @return bool
+     */
+    function is_cmyk($path) 
+    {
+        if(!$path || !file_exists($path)) 
+            return false;
+
+        $imagesize = @getimagesize($path);
+        return array_key_exists('mime', $imagesize) && 'image/jpeg' == $imagesize['mime'] &&
+               array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
+    }
+    
+    function is_rgb($path) 
+    {
+        if(!$path || !file_exists($path)) 
+            return false;
+
+        $imagesize = @getimagesize($path);
+        return array_key_exists('channels', $imagesize) && 3 == $imagesize['channels'];
+    }
+
+    function cmyk2rgb($path) // Not working... color are distorded
+    {
+        if(is_rgb($path)) return $path;
+        if(!class_exists("Imagick"))
+            throw new Exception(__FUNCTION__."(): Imagick driver not found.");
+
+        $image = new \Imagick($path);
+        $image->transformImageColorspace(\Imagick::COLORSPACE_SRGB);
+        $image->writeImage($path);
+        $image->destroy();
+    }
+    
+    function rgb2cmyk($path)
+    {
+        if(is_cmyk($path)) return $path;
+        if(!class_exists("Imagick"))
+            throw new Exception(__FUNCTION__."(): Imagick driver not found.");
+
+        $image = new \Imagick($path);
+        $image->transformImageColorspace(\Imagick::COLORSPACE_CMYK);
+        $image->writeImage($path);
+        $image->destroy();
+    }
+    
     define("FORMAT_IDENTITY",     0); // "no changes"
     define("FORMAT_TITLECASE",    1); // Lorem Ipsum Dolor Sit Amet
     define("FORMAT_SENTENCECASE", 2); // Lorem ipsum dolor sit amet

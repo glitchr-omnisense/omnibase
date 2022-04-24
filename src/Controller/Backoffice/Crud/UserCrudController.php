@@ -30,7 +30,7 @@ class UserCrudController extends AbstractCrudController
 
             $extension->setImage($entity->getAvatar());
 
-            $userClass = "user.".mb_strtolower(camel_to_snake(class_basename($entity)));
+            $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
             $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
             if($entityLabel == $userClass.".singular") $entityLabel = null;
             else $extension->setTitle(mb_ucwords($entityLabel));
@@ -59,7 +59,7 @@ class UserCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function() {
 
-            yield AvatarField::new('avatar')->hideOnDetail();
+            yield AvatarField::new('avatar')->hideOnDetail()->setCropper(true);
 
             yield RoleField::new('roles')->setColumns(5);
             yield EmailField::new('email')->setColumns(5);
@@ -89,9 +89,10 @@ class UserCrudController extends AbstractCrudController
         foreach ($batchActionDto->getEntityIds() as $id) {
             $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
             $user->approve();
+
+	    $this->entityManager->flush($user);
         }
 
-        $this->entityManager->flush();
 
         return $this->redirect($batchActionDto->getReferrerUrl());
     }

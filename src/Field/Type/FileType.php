@@ -71,7 +71,6 @@ class FileType extends AbstractType implements DataMapperInterface
             'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
             'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.stylesheet"),
 
-            
             'thumbnailWidth'     => null,
             'thumbnailHeight'    => 120,
             'max_filesize'       => null,
@@ -145,8 +144,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["lightbox"] = null;
         if(is_array($options["lightbox"])) {
 
-            $this->baseService->addHtmlContent("javascripts:head", $options["lightbox-js"]);
-            $this->baseService->addHtmlContent("stylesheets:head", $options["lightbox-css"]);
+            $this->baseService->addHtmlContent("javascripts", $options["lightbox-js"]);
+            $this->baseService->addHtmlContent("stylesheets", $options["lightbox-css"]);
 
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);
         }
@@ -253,8 +252,5 @@ class FileType extends AbstractType implements DataMapperInterface
         $processedData = $childForm['file']->getData() ?? null;
 
         $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
-
-        // dump("---------");
-        // dump($childForm, $viewData);
     }
 }
