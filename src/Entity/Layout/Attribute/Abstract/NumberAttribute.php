@@ -3,8 +3,8 @@
 namespace Base\Entity\Layout\Attribute\Abstract;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Field\Type\NumberType;
 use Base\Model\IconizeInterface;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\NumberAttributeRepository;

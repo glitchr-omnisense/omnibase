@@ -72,7 +72,7 @@ class SelectConfigurator implements FieldConfiguratorInterface
 
                 if($key > $displayLimit) $formattedValues[$key] = $value;
                 else {
-
+           
                     $formattedValues[$key] = $this->autocomplete->resolve($value, $dataClass);
                     if ($formattedValues[$key] && $dataClassCrudController)
                         $formattedValues[$key]["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();

@@ -51,10 +51,11 @@ final class BaseTwigExtension extends AbstractExtension
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator, RequestStack $requestStack, RoutingExtension $routingExtension, IconProvider $iconProvider, ImageService $imageService) {
+    public function __construct(TranslatorInterface $translator, RequestStack $requestStack, RoutingExtension $routingExtension, AssetExtension $assetExtension, IconProvider $iconProvider, ImageService $imageService) {
 
         $this->translator       = $translator;
         $this->routingExtension = $routingExtension;
+        $this->assetExtension   = $assetExtension;
         $this->requestStack     = $requestStack;
         $this->intlExtension    = new IntlExtension();
         $this->mimeTypes        = new MimeTypes();
@@ -92,7 +93,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
 
             new TwigFunction('iconify',         [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-            new TwigFunction('asset',           [AssetExtension::class, 'getAssetUrl']),
+            new TwigFunction('asset',           [$this, 'asset']),
         ];
     }
 
@@ -173,6 +174,11 @@ final class BaseTwigExtension extends AbstractExtension
         return twig_array_filter($env, $array, $arrow);
     }
 
+    public function asset($path, ?string $packageName = null) {
+
+        if($path === false || $path === null) return null;
+        return $this->assetExtension->getAssetUrl($path, $packageName);
+    }
 
     public function color_name(string $hex) {
 

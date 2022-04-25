@@ -13,6 +13,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -62,7 +63,10 @@ class FileType extends AbstractType implements DataMapperInterface
 
             'allow_delete' => true,
             'multiple'     => false,
-            'href' => null,
+
+            'href'         => null,
+            'title'        => null,
+            'allow_url'    => false,
 
             'sortable'     => true,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
@@ -95,6 +99,11 @@ class FileType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
 
             $form->add('file', HiddenType::class, ["required" => $options["required"]]);
+
+            if($options["title"] !== null)
+                $form->add("title", TextType::class, $options["title"]);
+            if($options["allow_url"])
+                $form->add("url", UrlType::class);
 
             $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
             if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
@@ -251,6 +260,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $rawData  = $childForm['raw']->getData() ?? null;
         $processedData = $childForm['file']->getData() ?? null;
 
+        dump($childForm);
         $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
     }
 }

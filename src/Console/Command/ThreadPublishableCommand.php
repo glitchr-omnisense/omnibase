@@ -44,7 +44,7 @@ class ThreadPublishableCommand extends Command
                 $thread->setState(ThreadState::PUBLISH);
 
             // Refresh database with publishable articles
-	    $this->entityManager->flush($thread);
+	    $this->entityManager->flush();
 
             return true;
         });

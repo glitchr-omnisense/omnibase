@@ -61,7 +61,7 @@ class UserChecker implements UserCheckerInterface
             $notification->setHtmlTemplate("@Base/security/email/account_welcomeBack.html.twig", ["token" => $welcomeBackToken]);
             $notification->send("email");
 
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
             throw new CustomUserMessageAccountStatusException("@notifications.login.disabled", ["importance" => "warning"]);
         }
     }

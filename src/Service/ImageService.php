@@ -95,7 +95,6 @@ class ImageService implements ImageServiceInterface
         if(!$source || $source == "/") return $source;
         if(is_array($source)) return array_map(fn($s) => $this->resolve($route, $s, $filters, $config), $source);
 
-        dump($source);
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
 
         $config["path"] = $path;
@@ -228,6 +227,8 @@ class ImageService implements ImageServiceInterface
                 $content = $this->filesystem->write($path, $content);
             }
         }
+
+        unlink_tmpfile($path);
 
         $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);
         $mimetype = $this->getMimeType($pathPublic);

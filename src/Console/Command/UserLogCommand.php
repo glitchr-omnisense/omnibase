@@ -122,7 +122,7 @@ class UserLogCommand extends Command
             $output->section()->writeln('<warning>These logs are now erased..</warning>');
             foreach($filteredLogs as $log) {
                 $this->entityManager->remove($log);
-                $this->entityManager->flush($log);
+                $this->entityManager->flush();
             }
         }
 

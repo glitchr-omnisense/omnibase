@@ -289,8 +289,10 @@ class Uploader extends AbstractAnnotation
             $pathPrefixer = $this->getStorageFilesystem()->getPathPrefixer($this->storage);
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
-            if ($this->getStorageFilesystem()->write($path, $contents))
+            if ($this->getStorageFilesystem()->write($path, $contents)) {
                 $fileList[] = basename($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
+                unlink_tmpfile($file->getPathname());
+            }
         }
 
         $this->setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);

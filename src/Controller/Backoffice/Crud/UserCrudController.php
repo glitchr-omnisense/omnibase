@@ -90,7 +90,7 @@ class UserCrudController extends AbstractCrudController
             $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
             $user->approve();
 
-	    $this->entityManager->flush($user);
+	    $this->entityManager->flush();
         }
 
 

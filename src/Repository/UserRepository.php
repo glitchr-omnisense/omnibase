@@ -47,6 +47,6 @@ class UserRepository extends ServiceEntityRepository implements UserLoaderInterf
         $user->setPassword($newHashedPassword);
 
         // execute the queries on the database
-        $this->getEntityManager()->flush($user);
+        $this->getEntityManager()->flush();
     }
 }

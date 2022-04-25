@@ -201,7 +201,7 @@ trait BaseSettingsTrait
 
         $setting->translate($locale)->setValue($value);
 
-        $this->entityManager->flush($setting);
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -210,7 +210,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
         
-        $this->entityManager->flush($setting);
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -219,7 +219,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
 
-        $this->entityManager->flush($setting);
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -228,7 +228,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setBag($parameterName);
         
-        $this->entityManager->flush($setting);
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -243,7 +243,7 @@ trait BaseSettingsTrait
         if($setting instanceof Setting) {
 
             $this->entityManager->remove($setting);
-            $this->entityManager->flush($setting);
+            $this->entityManager->flush();
         }
 
         return $this;
@@ -256,7 +256,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setLocked($flag);
 
-        $this->entityManager->flush($setting);
+        $this->entityManager->flush();
         return $this;
     }
 
@@ -267,7 +267,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
 
-        $this->entityManager->flush($setting);
+        $this->entityManager->flush();
         return $this;
     }
 }

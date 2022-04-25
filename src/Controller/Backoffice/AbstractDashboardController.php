@@ -180,7 +180,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             foreach(array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);
-	        $this->settingRepository->flush($setting);
+	        $this->settingRepository->flush();
 	    }
 
             $notification = new Notification("@controllers.dashboard_apikey.success");
@@ -243,7 +243,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             foreach(array_diff_key($data, $settings) as $name => $setting) {
                 $this->settingRepository->persist($setting);
-                $this->settingRepository->flush($setting);
+                $this->settingRepository->flush();
 	    }
 
             $notification = new Notification("@controllers.dashboard_settings.success");
@@ -281,7 +281,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 if(!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
-	            $this->slotRepository->flush($widgetSlot);
+	            $this->slotRepository->flush();
                 }
 
                 $widgets = $data[$path] ?? [];

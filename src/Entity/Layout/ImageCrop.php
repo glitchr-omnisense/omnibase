@@ -12,8 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ImageCrop
 {
-    public function getPivotX() { return $this->x+$this->width/2; }
-    public function getPivotY() { return $this->y+$this->height/2; }
+    public function __construct() { }
 
     /**
      * @ORM\Id
@@ -25,16 +24,29 @@ class ImageCrop
     public function getId(): ?int { return $this->id; }
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\ManyToOne(targetEntity=Image::class, inversedBy="crops")
      */
-    protected $y;
-    public function getY(): ?int { return $this->y; }
-    public function setY(int $y): self
+    protected $image;
+    public function getImage(): ?Image { return $this->image; }
+    public function setImage(?Image $image): self
     {
-        $this->y = $y;
+        $this->image = $image;
         return $this;
     }
     
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    protected $label;
+
+    public function getLabel(): ?string { return $this->label; }
+    public function setLabel(string $label): self
+    {
+        $this->label = $label;
+
+        return $this;
+    }
+
     /**
      * @ORM\Column(type="quadrant8")
      */
@@ -45,6 +57,9 @@ class ImageCrop
         $this->quadrant = $quadrant;
         return $this;
     }
+
+    public function getPivotX() { return $this->x+$this->width/2; }
+    public function getPivotY() { return $this->y+$this->height/2; }
 
     /**
      * @ORM\Column(type="integer")
@@ -57,6 +72,17 @@ class ImageCrop
         return $this;
     }
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    protected $y;
+    public function getY(): ?int { return $this->y; }
+    public function setY(int $y): self
+    {
+        $this->y = $y;
+        return $this;
+    }
+    
     /**
      * @ORM\Column(type="integer", nullable=true)
      */
@@ -109,17 +135,6 @@ class ImageCrop
     public function setRotate(int $rotate): self
     {
         $this->rotate = $rotate;
-        return $this;
-    }
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Image::class, inversedBy="crops")
-     */
-    protected $image;
-    public function getImage(): ?Image { return $this->image; }
-    public function setImage(?Image $image): self
-    {
-        $this->image = $image;
         return $this;
     }
 }

@@ -45,7 +45,6 @@ class ImageController extends AbstractController
         if(!$this->imageService->isWebpEnabled())
             return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
-        $path = stream_get_meta_data(tmpfile())['uri'];
         $args = $this->imageService->decode($hashid);
 
         if(!$args) throw $this->createNotFoundException();
@@ -53,6 +52,7 @@ class ImageController extends AbstractController
         if(ImageService::mimetype($args["path"]) == "image/svg+xml")
             return $this->redirectToRoute("ux_svg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
+        $path = stream_get_meta_data(tmpfile())['uri'];
         return $this->imageService->filter($args["path"] ?? null, [
             new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
         ]);
@@ -66,23 +66,21 @@ class ImageController extends AbstractController
         $args = $this->imageService->decode($hashid);
         if(!$args) throw $this->createNotFoundException();
 
-        $path = stream_get_meta_data(tmpfile())['uri'];
-       
         $args = $this->imageService->decode($hashid);
         if(!$args) throw $this->createNotFoundException();
 
+        $path = stream_get_meta_data(tmpfile())['uri'];
         return $this->imageService->filter($args["path"] ?? null, [
             new SvgFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
         ]);
     }
-    
+
     /**
      * @Route("/{hashid}/image", name="image")
      * @Route("/{hashid}/image.{extension}", name="imageExtension")
      */
     public function Image($hashid, string $extension = null): Response
     {
-        $path = stream_get_meta_data(tmpfile())['uri'];
         $args = $this->imageService->decode($hashid);
         if(!$args) throw $this->createNotFoundException();
 
@@ -90,6 +88,7 @@ class ImageController extends AbstractController
         if($extension === null && $_extension != $extension)
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
 
+        $path = stream_get_meta_data(tmpfile())['uri'];
         return $this->imageService->filter($args["path"], [
             new ImageFilter($path, $args["filters"] ?? [], [])
         ]);
@@ -101,7 +100,6 @@ class ImageController extends AbstractController
      */
     public function ImageCrop($hashid, string|int|null $width, string|int|null $height, string $extension = null): Response
     {
-        $path = stream_get_meta_data(tmpfile())['uri'];
         $args = $this->imageService->decode($hashid);
         if(!$args) throw $this->createNotFoundException();
 
@@ -111,6 +109,7 @@ class ImageController extends AbstractController
 
         dump($width, $height);
 
+        $path = stream_get_meta_data(tmpfile())['uri'];
         return $this->imageService->filter($args["path"], [
             new ImageFilter($path, $args["filters"] ?? [], [])
         ]);

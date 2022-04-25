@@ -157,11 +157,11 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
-            $this->baseService->getEntityManager()->flush($user);
+            $this->baseService->getEntityManager()->flush();
             $notification->send("email")->send("success");
         }
 
-        $this->baseService->getEntityManager()->flush($user);
+        $this->baseService->getEntityManager()->flush();
         $this->baseService->redirectToRoute("user_profile", [], 302);
     }
 
@@ -180,7 +180,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("email");
         }
 
-        $this->baseService->getEntityManager()->flush($user);
+        $this->baseService->getEntityManager()->flush();
     }
 
     public function onSwitchUser(SwitchUserEvent $event) { }
@@ -249,17 +249,17 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $event->setResponse($this->baseService->redirectToRoute("security_logoutRequest"));
 
-            if(!$user->isDirty()) $this->entityManager->flush($user);
+            if(!$user->isDirty()) $this->entityManager->flush();
             return $event->stopPropagation();
         }
 
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
             $user->approve();
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
 
         } else if($this->baseService->getParameterBag("base.user.autoapprove")) {
             $user->approve();
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
         }
     
         if (! $user->isVerified()) {
@@ -307,7 +307,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ( !($user->isActive()) ) {
     
             $user->poke(new \DateTime("now"));
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
         }
     }
     
@@ -469,7 +469,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $log->setUser($user);
 
                 $entityManager->persist($log);
-                $entityManager->flush($log);
+                $entityManager->flush();
             }
         }
     }

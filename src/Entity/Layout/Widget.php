@@ -46,7 +46,7 @@ class Widget implements TranslatableInterface, IconizeInterface
         $this->setContent($content);
     }
 
-    protected ?string $template;
+    protected ?string $template = null;
     public function getTemplate()
     {
         if($this->template) return $this->template;

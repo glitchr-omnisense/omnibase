@@ -23,15 +23,15 @@ use Base\Repository\Layout\Attribute\Common\AttributeRepository;
  */
 abstract class BaseAttribute implements IconizeInterface, AttributeInterface
 {
-    public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconize() : null; } 
+    public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconizeStatic() : null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
     public function __toString() 
     {
-      return "<b>".$this->getAdapter()." #".$this->getId()."</b>"; 
+        return "<b>".$this->getAdapter()." #".$this->getId()."</b>"; 
     }
 
-    public function __construct(AbstractAttribute $adapter, mixed $value = null)
+    public function __construct(AbstractAttribute $adapter)
     {
         $this->setAdapter($adapter);
     }

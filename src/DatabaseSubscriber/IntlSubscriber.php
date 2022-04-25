@@ -9,9 +9,10 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
-
+use Doctrine\Persistence\Event\LifecycleEventArgs as EventLifecycleEventArgs;
 use InvalidArgumentException;
 
 class IntlSubscriber implements EventSubscriber
@@ -35,34 +36,40 @@ class IntlSubscriber implements EventSubscriber
         $this->localeProvider = $localeProvider;
     }
 
-    public function prePersist(LifecycleEventArgs $event)
+    public function prePersist(LifecycleEventArgs $args)
     {
-        if (is_subclass_of($event->getEntity(), TranslatableInterface::class, true))
-            $this->normalize($event->getEntity());
+        if (is_subclass_of($args->getEntity(), TranslatableInterface::class, true))
+            $this->normalize($args->getEntity());
 
-        if (is_subclass_of($event->getEntity(), TranslationInterface::class, true))
-            $this->removeIfEmpty($event->getEntity());
+        if (is_subclass_of($args->getEntity(), TranslationInterface::class, true)) 
+            $this->removeIfEmpty($args->getEntity());
     }
 
-    public function preUpdate(LifecycleEventArgs $event)
+    public function preUpdate(LifecycleEventArgs $args)
     {
-        if (is_subclass_of($event->getEntity(), TranslatableInterface::class, true))
-            $this->normalize($event->getEntity());
+        if (is_subclass_of($args->getEntity(), TranslatableInterface::class, true))
+            $this->normalize($args->getEntity());
 
-        if (is_subclass_of($event->getEntity(), TranslationInterface::class, true)) 
-            $this->removeIfEmpty($event->getEntity());
+        if (is_subclass_of($args->getEntity(), TranslationInterface::class, true)) 
+            $this->removeIfEmpty($args->getEntity());
     }
 
     protected function normalize(TranslatableInterface $translatable)
     {
         foreach($translatable->getTranslations() as $locale => $translation) {
 
-           // $translation->setTranslatable($translatable);
+            if($translation->getTranslatable() !== $translatable) {
 
-            if($translation->getLocale() !== $locale) 
+                if(!$translation->getTranslatable())
+                    $translation->setTranslatable($translatable);
+
+                continue;
+            }
+
+            if($translation->getLocale() !== null && $translation->getLocale() !== $locale) 
                 throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
 
-            $translation->setLocale($locale);
+            if($translation->getLocale() === null) $translation->setLocale($locale);
         }
     }
 
@@ -70,16 +77,15 @@ class IntlSubscriber implements EventSubscriber
     {
         $translatable = $translation->getTranslatable();
 
-        if ($translatable && $translation->isEmpty())
-            $translatable->removeTranslation($translation);
-    }
+        if ($translatable && $translation->isEmpty()) {
 
-    protected function removeIfDuplicates(TranslationInterface $translation)
-    {
-        $translatable = $translation->getTranslatable();
-        dump($translatable);
-        // if ($translatable && $translation->isEmpty())
-        //     $translatable->removeTranslation($translation);
+            $translatable->removeTranslation($translation);
+            $this->entityManager->remove($translation);
+
+            $uow = $this->entityManager->getUnitOfWork();
+            $classMetadata = $this->entityManager->getClassMetadata(get_class($translatable));
+            $uow->computeChangeSet($classMetadata, $translatable);    
+        }
     }
 
     /**

@@ -313,6 +313,10 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
+        <service id="Base\DatabaseSubscriber\DoctrineTrackingPolicySubscriber">
+            <tag name="doctrine.event_subscriber" />
+        </service>
+
         <service id="Base\EntitySubscriber\ExtensionSubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -458,6 +462,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="twig.extension.routing" />
+            <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="base.service.image" />
        </service>

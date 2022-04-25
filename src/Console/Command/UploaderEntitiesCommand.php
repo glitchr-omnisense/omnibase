@@ -154,7 +154,6 @@ class UploaderEntitiesCommand extends Command
                 if(!$f instanceof FileAttributes) return null;
 
                 $publicPath = $annotation->public ? "/".$annotation->public : "";
-                dump($publicPath, Uploader::getPublic($entity, $field));
                 return $publicPath . "/" . $f->path();
 
             }, $filesystem->getOperator()->listContents($classPath)->toArray())));
@@ -173,7 +172,9 @@ class UploaderEntitiesCommand extends Command
             $this->getEntries($class)
         );
 
-        return array_values(array_diff($fileList,array_flatten(".", $fileListInDatabase)));
+        $injection = array_values(array_diff($fileList,array_flatten(".", $fileListInDatabase)));
+        $surjection = array_values(array_diff(array_flatten(".", $fileListInDatabase), $fileList));
+        return array_filter(array_unique(array_merge($injection, $surjection)));
     }
 
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)

@@ -57,11 +57,13 @@ trait TranslatableTrait
         if ($this->translations === null)
             $this->translations = new ArrayCollection();
 
-            dump("OHOH ?");
         return $this->translations;
     }
 
-    public function removeTranslation(TranslationInterface $translation): void { $this->getTranslations()->removeElement($translation); }
+    public function removeTranslation(TranslationInterface $translation): void { 
+        $this->getTranslations()->removeElement($translation);
+       
+    }
     public function addTranslation(TranslationInterface $translation)
     {
         if($translation !== null) {

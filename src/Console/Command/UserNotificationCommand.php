@@ -88,7 +88,7 @@ class UserNotificationCommand extends Command
 
             foreach($notifications as $notification) {
                 $this->entityManager->remove($notification);
-                $this->entityManager->flush($notification);
+                $this->entityManager->flush();
             }
         }
 

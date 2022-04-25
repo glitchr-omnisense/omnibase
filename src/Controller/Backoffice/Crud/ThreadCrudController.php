@@ -67,7 +67,7 @@ class ThreadCrudController extends AbstractCrudController
         foreach ($batchActionDto->getEntityIds() as $id) {
             $thread = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
             $thread->setState(ThreadState::PUBLISH);
-	    $this->entityManager->flush($thread);
+	    $this->entityManager->flush();
         }
 
         return $this->redirect($batchActionDto->getReferrerUrl());

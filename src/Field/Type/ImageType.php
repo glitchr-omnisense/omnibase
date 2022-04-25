@@ -32,7 +32,7 @@ class ImageType extends FileType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        if($options["alt"] !== null) $builder->add("alt", TextType::class, $options["alt"]);
+        if($options["alt"]   !== null) $builder->add("alt",   TextType::class, $options["alt"]);
         if($options["multiple"] && is_array($options["cropper"]))
             throw new InvalidArgumentException("There can be only one picture if you want to crop, please disable 'multiple' option");
     }

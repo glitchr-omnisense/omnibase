@@ -66,6 +66,14 @@ namespace {
         return $tmpfname;
     }
 
+    function is_tmpfile(string $fname):bool { return belongs_to($fname, sys_get_temp_dir()); }
+    function unlink_tmpfile(string $fname):bool { return is_tmpfile($fname) && file_exists($fname) ? unlink($fname) : false; }
+    function belongs_to(string $fname, string $base):bool
+    {
+        $fname = realpath($fname);
+        return $fname !== false && strncmp($fname, $base, strlen($base)) === 0;
+    }
+
     function is_uuidv4(?string $uuid) { return is_string($uuid) && !(preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid) !== 1); }
     function synopsis(...$args) { return class_synopsis(...$args); }
     function class_synopsis(...$args)
@@ -1166,6 +1174,23 @@ namespace {
         return $keys;
     }
 
+    function array_occurence_removes(array $array, $value, int $limit = 1) 
+    { 
+        while($limit-- > 0 && ($pos = array_search($value, $array)) !== false) 
+            array_splice($array, $pos, 1); 
+    }
+
+    function array_search_user($array, $fn) {
+
+        foreach ($array as $key => $entry) {
+
+            if (call_user_func($fn, $key, $entry) === true)
+                return $key;
+        }
+
+        return false;
+    }
+
     function array_key_removes(array $array, string ...$keys  ): array
     { 
         foreach($keys as $key) 
@@ -1429,7 +1454,7 @@ namespace {
         }
         return $parameters;
     }
-    
+
     function build_url(array $parts) {
         return (isset($parts['scheme']) ? "{$parts['scheme']}:" : '') . 
             ((isset($parts['user']) || isset($parts['host'])) ? '//' : '') . 

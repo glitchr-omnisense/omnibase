@@ -181,7 +181,7 @@ class SecurityController extends AbstractController
                 $newUser->verify($user->isVerified());
 
             $this->entityManager->persist($newUser);
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
 
             return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
         }
@@ -228,7 +228,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->entityManager->flush($user);
+        $this->entityManager->flush();
         return $this->redirectToRoute('user_profile');
     }
 
@@ -270,7 +270,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->entityManager->flush($user);
+        $this->entityManager->flush();
         return $this->redirectToRoute('user_profile');
     }
 
@@ -306,7 +306,7 @@ class SecurityController extends AbstractController
             }
         }
 
-        $this->entityManager->flush($user);
+        $this->entityManager->flush();
         return $this->redirectToRoute('user_profile');
     }
 
@@ -330,7 +330,7 @@ class SecurityController extends AbstractController
 
             $this->baseService->Logout();
 
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
             return $this->redirectToRoute($this->baseService->getRouteName("/"));
         }
     }
@@ -370,7 +370,7 @@ class SecurityController extends AbstractController
 
             $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
 
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
             return $authenticateUser;
         }
     }
@@ -407,7 +407,7 @@ class SecurityController extends AbstractController
                 }
             }
 
-            $this->entityManager->flush($user);
+            $this->entityManager->flush();
             $notification->send("success");
         }
 
@@ -449,7 +449,7 @@ class SecurityController extends AbstractController
 
                 $notification = new Notification("resetPassword.success");
                
-                $this->entityManager->flush($user);
+                $this->entityManager->flush();
                 $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
                 $notification->send("success");
 

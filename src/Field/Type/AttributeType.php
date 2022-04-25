@@ -117,7 +117,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAttribute::class;
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-            
+
             $form = $event->getForm();
             $form->add("choice", SelectType::class, [
                 "class"               => $options["abstract_class"],
@@ -147,7 +147,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 //
                 // First process universal data..
-                $unvFields  = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), array_merge($v->getAdapter()->getOptions(), [
+                $unvFields  = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), array_merge($v->getAdapter()->getOptions(), [
                     "label" => $v->getAdapter()->getLabel(), 
                     "help" => $v->getAdapter()->getHelp(), 
                     "required" => false,
@@ -156,7 +156,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 
                 if(!empty($unvFields)) {
 
-                    $unvData = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), $v->getValue() ?? ""] : null, $data);
+                    $unvData = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getValue() ?? ""] : null, $data);
                     foreach($unvFields as $code => $field) {
 
                         $form->add($code, AssociationType::class, [
@@ -174,7 +174,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 //
                 // Then process translatable data
-                $intlFields  = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), array_merge($v->getAdapter()->getOptions(), [
+                $intlFields  = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), array_merge($v->getAdapter()->getOptions(), [
                     "label" => $v->getAdapter()->getLabel(), 
                     "help" => $v->getAdapter()->getHelp(), 
                     "required" => false,
@@ -183,7 +183,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 if(!empty($intlFields)) {
 
-                    $intlData = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode(), $v->getTranslations()] : null, $data);
+                    $intlData = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getTranslations()] : null, $data);
                     
                     $form->add("intl", TranslationType::class, [
                         "multiple" => true,
@@ -207,21 +207,28 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $forms = iterator_to_array($forms);
         $choiceForm = $forms["choice"];
 
-        dump($viewData);
         if ($viewData instanceof PersistentCollection) {
 
             $choiceForm->setData($viewData->map(fn($e) => $e->getAdapter()));
             foreach($viewData as $attribute) {
 
-                if(array_key_exists($attribute->getAdapter()->getCode(), $forms)) 
-                    $forms[$attribute->getAdapter()->getCode()]->setData($attribute);
+                $key = array_search_user($forms, fn(string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
+                if ( $key !== false ) {
+
+                    $forms[$key]->setData($attribute);
+                    array_key_removes($forms, $key);
+                }
             }
 
         } else if($viewData instanceof Attribute) {
             
             $choiceForm->setData($viewData->getAdapter());
-            if(array_key_exists($viewData->getAdapter()->getCode(), $forms)) 
-                $forms[$viewData->getAdapter()->getCode()]->setData($viewData);
+            $key = array_search_user($forms, fn(string $k, $_) => str_starts_with($k, $viewData->getAdapter()->getCode()));
+            if ( $key !== false ) {
+
+                $forms[$key]->setData($viewData);
+                array_key_removes($forms, $key);
+            }
         }
     }
 
@@ -255,13 +262,15 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 if(( $attribute = $bakData->filter(fn(BaseAttribute $e) => $e->getAdapter() === $choice)->first() )) {
 
-                    if(( $attributeForm = iterator_to_array($forms)[$attribute->getCode()] ?? null )) {
+                    $key = array_search_user(iterator_to_array($forms), fn(string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
+                    if(( $attributeForm = iterator_to_array($forms)[$key] ?? null )) {
 
                         $data = $attributeForm->getData();
                         $attribute->set($data ? $data->get() : null);
                     }
 
                     $viewData->add($attribute);
+                    $bakData->removeElement($attribute);
 
                 } else if($choice instanceof AbstractAttribute) {
 
