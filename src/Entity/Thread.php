@@ -133,7 +133,7 @@ class Thread implements TranslatableInterface, IconizeInterface
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnexe(self $connexes): self
+    public function addConnex(self $connexes): self
     {
         if(!$this->connexes->contains($connexes))
             $this->connexes[] = $connexes;
@@ -141,7 +141,7 @@ class Thread implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    public function removeConnexe(self $connexes): self
+    public function removeConnex(self $connexes): self
     {
         $this->connexes->removeElement($connexes);
         return $this;

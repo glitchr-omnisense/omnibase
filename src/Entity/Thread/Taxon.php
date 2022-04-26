@@ -61,7 +61,7 @@ abstract class Taxon extends Tag implements TranslatableInterface
      * @ORM\OneToMany(targetEntity=Taxon::class, mappedBy="parent", orphanRemoval=true, cascade={"persist"}))
      */
     protected $children;
-    public function getChildren(): ?self { return $this->children; }
+    public function getChildren() { return $this->children; }
     public function addChild(self $child): self
     {
         if (!$this->children->contains($child)) {
