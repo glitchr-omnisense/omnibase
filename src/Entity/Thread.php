@@ -58,6 +58,7 @@ class Thread implements TranslatableInterface, IconizeInterface
         $this->mentions = new ArrayCollection();
         $this->likes = new ArrayCollection();
         $this->owners = new ArrayCollection();
+        $this->connexes = new ArrayCollection();
 
         $this->setParent($parent);
         $this->addOwner($owner);
@@ -126,6 +127,26 @@ class Thread implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Thread::class)
+     * @ORM\JoinColumn(onDelete="SET NULL")
+     */
+    protected $connexes;
+    public function getConnexes(): Collection { return $this->connexes; }
+    public function addConnexe(self $connexes): self
+    {
+        if(!$this->connexes->contains($connexes))
+            $this->connexes[] = $connexes;
+
+        return $this;
+    }
+
+    public function removeConnexe(self $connexes): self
+    {
+        $this->connexes->removeElement($connexes);
+        return $this;
+    }
+    
     /**
      * @ORM\Column(type="string", length=255, unique=true, nullable=true)
      * @Slugify(reference="title")
@@ -201,7 +222,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     public function getFollowers(): Collection { return $this->followers; }
     public function addFollower(User $follower): self
     {
-        if (!$this->followers->contains($follower)) {
+        if(!$this->followers->contains($follower)) {
             $this->followers[] = $follower;
         }
 
@@ -224,7 +245,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     public function getTags(): Collection { return $this->tags; }
     public function addTag(Tag $tag): self
     {
-        if (!$this->tags->contains($tag))
+        if(!$this->tags->contains($tag))
             $this->tags[] = $tag;
 
         return $this;
@@ -244,7 +265,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     public function getMentions(): Collection { return $this->mentions; }
     public function addMention(Mention $mention): self
     {
-        if (!$this->mentions->contains($mention)) {
+        if(!$this->mentions->contains($mention)) {
             $this->mentions[] = $mention;
             $mention->setThread($this);
         }
@@ -280,7 +301,7 @@ class Thread implements TranslatableInterface, IconizeInterface
         }
 
         // Attach new like !
-        if (!$this->likes->contains($like)) {
+        if(!$this->likes->contains($like)) {
             $this->likes[] = $like;
             $like->setThread($this);
         }

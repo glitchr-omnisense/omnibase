@@ -98,8 +98,8 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @OrderColumn
      */
     protected $similars;
-    public function getSimilars(): Collection { return $this->similars; }
-    public function addSimilar(Widget $similar): self
+    public function getConnexes(): Collection { return $this->similars; }
+    public function addConnexe(Widget $similar): self
     {
         if(!$this->similars->contains($similar))
             $this->similars[] = $similar;
@@ -107,7 +107,7 @@ class Widget implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
-    public function removeSimilar(Widget $similar): self
+    public function removeConnexe(Widget $similar): self
     {
         $this->similars->removeElement($similar);
         return $this;
