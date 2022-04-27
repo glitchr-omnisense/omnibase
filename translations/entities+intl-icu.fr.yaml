@@ -46,6 +46,9 @@ thread:
   like:
     singular: "j'aime"
     plural: "j'aime"
+  taxon:
+    singular: "taxonomie"
+    plural: "taxonomies"
 
 layout:
   widget:

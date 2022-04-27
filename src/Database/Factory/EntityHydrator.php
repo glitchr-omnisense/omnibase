@@ -12,6 +12,7 @@ use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionObject;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -76,8 +77,14 @@ class EntityHydrator
     public function hydrate(mixed $entity, null|array|object $data = [], array $fieldExceptions = [], int $aggregateModel = self::DEFAULT_AGGREGATE, ...$constructArguments): mixed
     {
         $reflClass = new ReflectionClass($entity);
-        if (is_string($entity) && class_exists($entity))
+        if (is_string($entity) && class_exists($entity)) {
+
+            if(is_abstract($entity))
+                throw new InvalidArgumentException("Cannot instantiate abstract class \"$entity\"");
+
             $entity = ($aggregateModel & self::CONSTRUCT) ? new $entity(...$constructArguments) : $reflClass->newInstanceWithoutConstructor();
+        }
+
         if (!is_object($entity))
             throw new Exception('Entity passed to EntityHydrator::hydrate() must be a class name or entity object');
 
@@ -364,11 +371,18 @@ class EntityHydrator
                 continue;
 
             $mapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
-            if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
-                $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
+            try {
+    
+                if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
+                    $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
 
-            if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
-                $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
+                if ($this->classMetadataManipulator->isToManySide($entity, $propertyName))
+                    $this->hydrateAssociationToMany($entity, $propertyName, $mapping, $value, $aggregateModel);
+
+            } catch (Exception $e) {
+
+                throw new Exception($e->getMessage()." for \"".$propertyName."\" (".serialize($value).") in \"".strip_tags((string) $entity)."\"");
+            }
         }
 
         return $this;
@@ -494,8 +508,8 @@ class EntityHydrator
     protected function findAssociation($entityName, $identifier): mixed
     {
         if(is_object($identifier)) return $identifier;
-        // $identifier = $this->propertyAccessor->isReadable($identifier, "id") 
-        //             ? $this->propertyAccessor->getValue($identifier, "id") : null;
+        $identifier = $this->propertyAccessor->isReadable($identifier, "id") 
+                    ? $this->propertyAccessor->getValue($identifier, "id") : null;
 
         if(!$identifier) return null;
 

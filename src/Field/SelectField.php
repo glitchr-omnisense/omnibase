@@ -97,6 +97,14 @@ class SelectField implements FieldInterface
     {
         return $this->setFormTypeOption("vertical", $vertical);
     }
+    
+    public function allowTags(bool $tags = true, array $tokenSeparators = [])
+    {
+        $this->setFormTypeOption("tags", $tags);
+        if($tokenSeparators) $this->setFormTypeOption("tokenSeparators", $tokenSeparators);
+
+        return $this;
+    }
 
     public function setChoices($choiceGenerator)
     {

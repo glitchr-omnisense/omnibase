@@ -17,7 +17,6 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Exception;
-use Symfony\Component\Console\Cursor;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -79,7 +78,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $entrySeparator = $matches[2];
 
                 if(!is_array($entry))
-                    $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, str_rstrip($entry, $entrySeparator)));
+                    $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, str_rstrip(trim($entry), $entrySeparator)));
             }
 
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);
@@ -109,13 +108,12 @@ class DoctrineDatabaseImportCommand extends Command
 
                             $propertyNames = explode(",", $propertyName);
                             $entries = explode($fieldSeparator, $e, count($propertyNames));
-
+                            
                             $e = [];
                             foreach($propertyNames as $i => $p)
                                 $e[trim($p)] = array_key_exists($i, $entries) && $entries[$i] ? trim($entries[$i]) : null;
                         }
                     }
-
                 }
             }
 
@@ -161,14 +159,14 @@ class DoctrineDatabaseImportCommand extends Command
         $notify            = $input->getOption("notify");
         if(!$notify) $this->baseService->getNotifier()->disable();
 
-        $show            = $input->getOption("show");
-        $force           = $input->getOption("force");
-        $extension       = $input->getOption("extension");
-        $batch           = $input->getOption("batch");
-        $onFly           = $input->getOption("on-fly");
+        $show         = $input->getOption("show");
+        $force        = $input->getOption("force");
+        $extension    = $input->getOption("extension");
+        $batch        = $input->getOption("batch");
+        $onFly        = $input->getOption("on-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
-        $nrows           = (int) $input->getOption("nrows");
-        $iskip           = (int) $input->getOption("iskip");
+        $nrows        = (int) $input->getOption("nrows");
+        $iskip        = (int) $input->getOption("iskip");
         
         if(!$nrows) $nrows = null;
         
@@ -219,7 +217,7 @@ class DoctrineDatabaseImportCommand extends Command
             // Remove comments: 2nd line
             array_shift($rawData[$spreadsheet]);
         }
-        
+
         // Process spreadsheet
         $output->writeln(' Normalizing rows..');
         $totalData = 0;
@@ -273,7 +271,7 @@ class DoctrineDatabaseImportCommand extends Command
         
         $output->writeln(' Hydrating entities..'.($onFly ? " and import them on the fly" : null));
 
-        $progressBar = new ProgressBar($output, $totalData);
+        if($totalData) $progressBar = new ProgressBar($output, $totalData);
 
         $entityParentColumn = null;
         $entityUniqueValues = [];
@@ -283,6 +281,8 @@ class DoctrineDatabaseImportCommand extends Command
 
             foreach($entityData[$spreadsheet] ?? [] as $baseName => &$entries) {
 
+                $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName");
+                    
                 //
                 // Loop over entries
                 foreach($entries as &$_) {
@@ -356,8 +356,12 @@ class DoctrineDatabaseImportCommand extends Command
                                             if(empty($v)) $v = null;
                                             else {
 
-                                                if($isToOneSide) $v = $targetRepository->findOneBy($v);
-                                                else $v = array_filter(array_map(fn($e) => $targetRepository->findOneBy($e), $v));
+                                                $vBak = $v;
+                                                if($isToOneSide) $v = $targetRepository->findOneBy($vBak);
+                                                else $v = array_filter(array_map(fn($e) => $targetRepository->findOneBy($e), $vBak));
+
+                                                if($v === null) 
+                                                    throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\"");
                                             }
                                         }
 
@@ -452,12 +456,15 @@ class DoctrineDatabaseImportCommand extends Command
 
                             if ($onFly) {
                                 try {
+
                                     $this->entityManager->persist($entity);
                                     if ($counter && ($counter % $batch) == 0) {
                                         $this->entityManager->flush();
+                                        $this->entityManager->clear();
                                     }
-                                    
+
                                     $counter++;
+
                                 } catch (\Exception $e) {
                                     $msg = " Failed to write ".$this->translator->entity($entity)."(".$entity.")  ";
                                     $output->writeln('');
@@ -554,7 +561,8 @@ class DoctrineDatabaseImportCommand extends Command
             }
 
             $counter = 0;
-            $progressBar = new ProgressBar($output, count_leaves($newEntities));
+            $totalNewEntries = count_leaves($newEntities);
+            $progressBar = new ProgressBar($output, $totalNewEntries);
             foreach($newEntities as $spreadsheet => &$_) {
 
                 foreach($_ as $baseName => $entries) {
@@ -565,9 +573,9 @@ class DoctrineDatabaseImportCommand extends Command
                         try {
                             
                             $this->entityManager->persist($entity);
-                            if ($counter && ($counter % $batch) == 0) 
+                            if ($counter && ($counter % $batch) == 0)
                                 $this->entityManager->flush();
-                            
+
                             $counter++;
 
                         } catch (\Exception $e) {
@@ -589,8 +597,17 @@ class DoctrineDatabaseImportCommand extends Command
         
             $progressBar->finish();
         }
+
+        $output->section()->writeln("\n\n Updating database schema...");
+        $output->section()->writeln("\n\t <info>".$totalNewEntries."</info> entries were added\n");
         
-        $output->section()->writeln("\n <warning>/!\\ This dataset has been imported into database..</warning>");
+        $msg = ' [OK] Database content imported successfully! ';
+        $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+        $output->writeln($msg);
+        $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+
+        $output->section()->writeln("");
+        return Command::SUCCESS;
 
         $output->section()->writeln("");
         return Command::SUCCESS;

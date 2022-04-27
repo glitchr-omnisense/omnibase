@@ -137,7 +137,8 @@ class ExtensionSubscriber implements EventSubscriber
                                 break;
 
                             case EntityAction::DELETE:
-                                $this->entityManager->remove($entry);
+                                if ($this->entityManager->contains($entry))
+                                    $this->entityManager->remove($entry);
                                 break;
                         }
 

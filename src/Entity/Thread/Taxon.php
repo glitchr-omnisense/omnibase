@@ -1,33 +1,64 @@
 <?php
 
 namespace Base\Entity\Thread;
-
+use App\Entity\Thread;
+use Base\Annotations\Annotation\Slugify;
 use Doctrine\Common\Collections\ArrayCollection;
 use Base\Database\Annotation\DiscriminatorEntry;
 
 use Base\Database\Traits\TranslatableTrait;
 
 use Base\Database\TranslatableInterface;
-use Base\Entity\Thread\Tag;
+use Base\Model\IconizeInterface;
+use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\Marketplace\TaxonRepository;
+use Base\Repository\Thread\TaxonRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TaxonRepository::class)
- * @DiscriminatorEntry
+ * @ORM\InheritanceType( "JOINED" )
+ * @ORM\DiscriminatorColumn( name = "class", type = "string" )
+ *     @DiscriminatorEntry( value = "abstract" )
  */
-
-abstract class Taxon extends Tag implements TranslatableInterface
+class Taxon implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
-    public static function __iconizeStatic() : ?array { return ['fas fa-sitemap']; } 
+    public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-sitemap"]; }
 
-    public function __construct(?string $label, ?string $slug = null)
+    public function __toString() { return $this->getLabel() ?? $this->getSlug() ?? get_class($this); }
+
+
+    public function __construct(?string $label = null, ?string $slug = null)
     {
-        parent::__construct($label, $slug);
+        $this->setLabel($label);
+        $this->slug = $slug;
+        
+        $this->threads  = new ArrayCollection();
         $this->children = new ArrayCollection();
+        $this->isVisible  = true;
+    }
+
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    protected $id;
+    public function getId(): ?int { return $this->id; }
+
+    /**
+     * @ORM\Column(length=255, unique=true)
+     * @Slugify(reference="translations.label")
+     */
+    protected $slug;
+    public function getSlug(): ?string { return $this->slug; }
+    public function setSlug(?string $slug): self
+    {
+        $this->slug = $slug;
+        return $this;
     }
 
     /**
@@ -81,6 +112,44 @@ abstract class Taxon extends Tag implements TranslatableInterface
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Thread::class, mappedBy="taxa")
+     */
+    protected $threads;
+    public function getThreads(): Collection { return $this->threads; }
+    public function addThread(Thread $thread): self
+    {
+        if (!$this->threads->contains($thread)) {
+            $this->threads[] = $thread;
+            $thread->addTag($this);
+        }
+
+        return $this;
+    }
+
+    public function removeThread(Thread $thread): self
+    {
+        if ($this->threads->removeElement($thread)) {
+            $thread->removeTag($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $isVisible;
+    public function isVisible() : bool { return $this->visible; }
+    public function getVisible(): bool { return $this->isVisible(); }
+
+    public function markAsVisible(bool $visible) { return $this->setIsVisible($visible); }
+    public function setVisible(bool $visible)
+    {
+        $this->visible = $visible;
         return $this;
     }
 }

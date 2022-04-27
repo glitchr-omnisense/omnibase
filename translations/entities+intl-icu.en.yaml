@@ -44,6 +44,9 @@ thread:
   like:
     singular: "like"
     plural: "likes"
+  taxon:
+    singular: "taxonomy"
+    plural: "taxonomies"
 
 layout:
   widget:

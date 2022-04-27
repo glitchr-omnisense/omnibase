@@ -39,7 +39,7 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)
     {
-        $this->similars = new ArrayCollection();
+        $this->connexes = new ArrayCollection();
 
         $this->setTitle($title);
         $this->setExcerpt($excerpt);
@@ -97,19 +97,19 @@ class Widget implements TranslatableInterface, IconizeInterface
      * @ORM\ManyToMany(targetEntity=Widget::class)
      * @OrderColumn
      */
-    protected $similars;
-    public function getConnexes(): Collection { return $this->similars; }
+    protected $connexes;
+    public function getConnexes(): Collection { return $this->connexes; }
     public function addConnex(Widget $similar): self
     {
-        if(!$this->similars->contains($similar))
-            $this->similars[] = $similar;
+        if(!$this->connexes->contains($similar))
+            $this->connexes[] = $similar;
 
         return $this;
     }
 
     public function removeConnex(Widget $similar): self
     {
-        $this->similars->removeElement($similar);
+        $this->connexes->removeElement($similar);
         return $this;
     }
 }

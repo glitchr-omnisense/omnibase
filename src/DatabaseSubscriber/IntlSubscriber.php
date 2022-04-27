@@ -40,9 +40,6 @@ class IntlSubscriber implements EventSubscriber
     {
         if (is_subclass_of($args->getEntity(), TranslatableInterface::class, true))
             $this->normalize($args->getEntity());
-
-        if (is_subclass_of($args->getEntity(), TranslationInterface::class, true)) 
-            $this->removeIfEmpty($args->getEntity());
     }
 
     public function preUpdate(LifecycleEventArgs $args)
@@ -80,11 +77,8 @@ class IntlSubscriber implements EventSubscriber
         if ($translatable && $translation->isEmpty()) {
 
             $translatable->removeTranslation($translation);
-            $this->entityManager->remove($translation);
-
-            $uow = $this->entityManager->getUnitOfWork();
-            $classMetadata = $this->entityManager->getClassMetadata(get_class($translatable));
-            $uow->computeChangeSet($classMetadata, $translatable);    
+            if ($this->entityManager->contains($translation))
+                $this->entityManager->remove($translation);
         }
     }
 

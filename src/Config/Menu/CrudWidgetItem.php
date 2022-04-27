@@ -18,7 +18,7 @@ final class CrudWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait;
 
-    public function __construct(string $label, ?string $icon, string $entityFqcn)
+    public function __construct(string $label, ?string $icon, string $crudController)
     {
         $this->dto = new MenuItemDto();
 
@@ -27,8 +27,7 @@ final class CrudWidgetItem implements MenuItemInterface
         $this->dto->setIcon($icon);
         $this->dto->setRouteParameters([
             EA::CRUD_ACTION => 'index',
-            EA::CRUD_CONTROLLER_FQCN => null,
-            EA::ENTITY_FQCN => $entityFqcn,
+            EA::CRUD_CONTROLLER_FQCN => $crudController,
             EA::ENTITY_ID => null,
         ]);
     }

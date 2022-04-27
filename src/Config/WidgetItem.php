@@ -6,18 +6,17 @@ use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
 use Base\Config\Menu\CrudWidgetItem;
+use Base\Config\Menu\EntityWidgetItem;
 use Base\Config\Menu\SectionWidgetItem;
 use Base\Controller\Backoffice\AbstractCrudController;
-use Base\Controller\Backoffice\AbstractDashboardController;
+
 use Base\Model\IconizeInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\LogoutMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\RouteMenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SectionMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class WidgetItem
 {
@@ -35,25 +34,32 @@ class WidgetItem
         self::$adminContextProvider = $adminContextProvider;
     }
 
-    public static function linkToCrud(string $entityFqcn, ?string $label = null, ?string $icon = null): CrudWidgetItem
+    public static function linkToCrud(string $entityFqcnOrCrudController, ?string $label = null, ?string $icon = null)
     {
-        $crudController          = AbstractCrudController::getCrudControllerFqcn($entityFqcn);
-        if(!class_exists($crudController))
-            throw new \Exception("CRUD controller for \"".$entityFqcn."\" not found");
+        if (!is_instanceof($entityFqcnOrCrudController, \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController::class)) {
+            $crudController = AbstractCrudController::getCrudControllerFqcn($entityFqcnOrCrudController);
+            $widgetItem     = EntityWidgetItem::class;
+        } else {
+            $crudController = $entityFqcnOrCrudController;
+            $widgetItem     = CrudWidgetItem::class;
+        }
         
+        if(!class_exists($crudController))
+            throw new \Exception("CRUD controller for \"".$entityFqcnOrCrudController."\" not found");
+
         $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
         $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural");
         if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural");
-        if($label == $entityTranslationPrefix.".plural") $label = camel2snake(class_basename($entityFqcn), " ");
+        if($label == $entityTranslationPrefix.".plural") $label = camel2snake(class_basename($entityFqcnOrCrudController), " ");
 
         if(!$icon) {
-            $icon = class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__iconizeStatic()[0] : null;
+            $icon = class_implements_interface($entityFqcnOrCrudController, IconizeInterface::class) ? $entityFqcnOrCrudController::__iconizeStatic()[0] : null;
             $icon = $crudController::getPreferredIcon() ?? $icon ?? "fas fa-question-circle";
         }
 
-        return new CrudWidgetItem($label, $icon, $entityFqcn);
+        return new $widgetItem($label, $icon, $crudController);
     }
 
     public static function linkToDashboard(string $label, ?string $icon = null): DashboardMenuItem

@@ -59,7 +59,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public function getDiscriminatorMap(): array
     {
-        return $this->classMetadataManipulator->getDiscriminatorMap(self::getEntityFqcn());
+        return $this->classMetadataManipulator->getDiscriminatorMap(get_called_class()::getEntityFqcn());
     }
 
     public static function getEntityFqcn(): string
@@ -100,7 +100,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getEntityTranslationPrefix() { return "@".AbstractDashboardController::TRANSLATION_ENTITY   .".".self::getTranslationPrefix(); }
     public static function getTranslationPrefix(?string $prefix = "")
     {
-        $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", self::getEntityFqcn());
+        $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", get_called_class()::getEntityFqcn());
         return camel2snake(str_replace("\\", ".", $entityFqcn));
     }
 
@@ -132,7 +132,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $discriminatorMap = array_filter($this->classMetadataManipulator->getDiscriminatorMap($entity), fn($e) => is_instanceof($e, $entity));
 
         $htmlAttributes        = $actionDto->getHtmlAttributes();
-        $htmlAttributes["crud"] = urlencode($this->getCrudControllerFqcn($entity));
+        $htmlAttributes["crud"] = urlencode(get_class($this));
         $htmlAttributes["root-crud"] = urlencode($this->getCrudControllerFqcn($rootEntity));
         $htmlAttributes["map"] = [];
 
@@ -146,6 +146,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $key   = array_shift($k);
 
             if(( $crudClassController = $this->getCrudControllerFqcn($class) )) {
+
                 $array = [implode("_", $k) => urlencode($crudClassController)];
                 $htmlAttributes["map"][$key] = array_merge($htmlAttributes["map"][$key] ?? [], $array);
             }
@@ -190,7 +191,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getEntityIcon()
     {
         $icon = get_called_class()::getPreferredIcon() ?? null;
-        return $icon ?? class_implements_interface(self::getEntityFqcn(), IconizeInterface::class) ? self::getEntityFqcn()::__iconizeStatic()[0] : null;
+        $entityFqcn = get_called_class()::getEntityFqcn();
+
+        return $icon ?? (class_implements_interface($entityFqcn, IconizeInterface::class) ? $entityFqcn::__iconizeStatic()[0] : null);
     }
 
     public function configureCrud(Crud $crud): Crud

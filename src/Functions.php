@@ -906,8 +906,8 @@ namespace {
         foreach($array as $key => $entry) {
 
             // Call user function with defaults parameters if required
-            $ret = call_user_func_with_defaults($callback, $key, $entry, $callback, $counter, $depth);
-
+            try { $ret = call_user_func_with_defaults($callback, $key, $entry, $callback, $counter, $depth); }
+            catch(Exception $e) { throw $e; }
             // Process generators
             if($ret instanceof Generator) {
 
@@ -1191,6 +1191,15 @@ namespace {
         return false;
     }
 
+    function array_key_keeps(array $array, string ...$keys  ): array
+    {
+        $keys =array_diff(array_keys($array), $keys);
+        foreach($keys as $key) 
+            unset($array[$key]);
+
+        return $array;
+    }
+
     function array_key_removes(array $array, string ...$keys  ): array
     { 
         foreach($keys as $key) 
@@ -1210,6 +1219,17 @@ namespace {
             return [head($subk), count($subk) > 1 ? array_transforms($callback, [implode(".", tail($subk)) => $v], ++$depth, ARRAY_TRANSFORMS_MERGE) : $v];
 
         }, $array, 0, ARRAY_TRANSFORMS_MERGE);
+    }
+
+    function array_values_keep(array $array, string ...$values  ): array
+    {
+        foreach($array as $key => $value) {
+
+            if(!in_array($value, $values))
+                unset($array[$key]);
+        }
+
+        return $array;
     }
 
     function array_values_remove(array $array, ...$values):array { return array_filter($array, fn($v) => !in_array($v, $values)); }

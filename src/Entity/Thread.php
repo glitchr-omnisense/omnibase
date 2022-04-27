@@ -6,6 +6,8 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
+use App\Entity\Thread\Taxon;
+
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -52,13 +54,14 @@ class Thread implements TranslatableInterface, IconizeInterface
     public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
-        $this->tags = new ArrayCollection();
-        $this->children = new ArrayCollection();
+        $this->tags      = new ArrayCollection();
+        $this->children  = new ArrayCollection();
         $this->followers = new ArrayCollection();
-        $this->mentions = new ArrayCollection();
-        $this->likes = new ArrayCollection();
-        $this->owners = new ArrayCollection();
-        $this->connexes = new ArrayCollection();
+        $this->mentions  = new ArrayCollection();
+        $this->likes     = new ArrayCollection();
+        $this->owners    = new ArrayCollection();
+        $this->connexes  = new ArrayCollection();
+        $this->taxa      = new ArrayCollection();
 
         $this->setParent($parent);
         $this->addOwner($owner);
@@ -255,6 +258,27 @@ class Thread implements TranslatableInterface, IconizeInterface
     {
         $this->tags->removeElement($tag);
 
+        return $this;
+    }
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Taxon::class, inversedBy="threads", cascade={"persist", "remove"})
+     * @OrderColumn
+     */
+    protected $taxa;
+    public function getTaxa(): Collection { return $this->taxa; }
+    public function getTaxonomy(): Collection { return $this->getTaxa(); }
+    public function addTaxon($taxon): self
+    {
+        if(!$this->taxa->contains($taxon))
+            $this->taxa[] = $taxon;
+
+        return $this;
+    }
+
+    public function removeTaxon($taxon): self
+    {
+        $this->taxa->removeElement($taxon);
         return $this;
     }
 

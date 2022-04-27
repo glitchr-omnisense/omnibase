@@ -28,7 +28,7 @@ abstract class BaseAttribute implements IconizeInterface, AttributeInterface
 
     public function __toString() 
     {
-        return "<b>".$this->getAdapter()." #".$this->getId()."</b>"; 
+        return $this->getId() ? "<b>".($this->getAdapter() ? $this->getAdapter() : "Attribute")." #".$this->getId()."</b>" : get_class($this); 
     }
 
     public function __construct(AbstractAttribute $adapter)

@@ -148,7 +148,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
      * @ORM\Column(type="boolean")
      */
     protected $isRead = false;
-    public function getIsRead(): bool { return $this->isRead; }
+    public function isRead(): bool { return $this->isRead; }
     public function setIsRead(bool $isRead): self
     {
         $this->isRead = $isRead;
@@ -164,7 +164,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         foreach($this->channels as $channel) {
 
-            if(array_key_exists($channel, $options) && !$this->getIsRead())
+            if(array_key_exists($channel, $options) && !$this->isRead())
                 $this->markAsRead($options[$channel]["markAsRead"]);
         }
     }

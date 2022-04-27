@@ -64,4 +64,16 @@ class ThreadTranslation implements TranslationInterface
 
         return $this;
     }
+
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $keywords;
+    public function getKeywords(): ?string { return $this->keywords; }
+    public function setKeywords(?string $keywords)
+    {
+        $this->keywords = $keywords;
+
+        return $this;
+    }
 }
