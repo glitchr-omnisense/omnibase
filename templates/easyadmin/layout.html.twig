@@ -359,14 +359,14 @@
                                                 <li>
                                                     <a href="{{ content_widget.getAsDto().getLinkUrl() }}">
                                                         <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst|str_shorten(15, 1, ".") }}</span>
+                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst }}</span>
                                                     </a>
                                                 </li>
                                             {% else %}
                                                 <li>
                                                     <a href="{{ content_widget.generateUrl() }}">
                                                         <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst|str_shorten(15, 1, ".") }}</span>
+                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst }}</span>
                                                     </a>
                                                 </li>
                                             {% endif %}

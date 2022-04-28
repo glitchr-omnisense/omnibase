@@ -58,6 +58,7 @@ use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
+use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -223,11 +224,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
-
-        // $fields = [
-        //     "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
-        //     "base.settings.domain.scheme"        => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
-        // ];
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
@@ -531,6 +527,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(Thread::class),
                 WidgetItem::linkToCrud(Mention::class),
                 WidgetItem::linkToCrud(Tag::class),
+                WidgetItem::linkToCrud(Taxon::class),
                 WidgetItem::linkToCrud(Like::class),
             ]);
 

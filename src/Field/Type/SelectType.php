@@ -411,8 +411,10 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             if($data instanceof Collection && $data->isEmpty()) {
 
-               foreach($options["empty_data"] as $emptyData)
-                    $data->add($emptyData);
+                foreach($options["empty_data"] as $emptyData) {
+                    if ($options["class"] && $emptyData instanceof $options["class"]) 
+                        $data->add($emptyData);
+                }
             }
 
         } else if($data === null) {
@@ -420,6 +422,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             if (is_array($options["empty_data"])) $data = $options["empty_data"];
             else if ($options["empty_data"] instanceof Collection) $data = $options["empty_data"]->first();
             else $data = $options["empty_data"];
+
+            if ($options["class"] && !$data instanceof $options["class"]) 
+                    $data = null;
         }
 
         if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && (!$data instanceof Collection)) {

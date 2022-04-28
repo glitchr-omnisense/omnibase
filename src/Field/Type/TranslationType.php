@@ -197,7 +197,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $fields = $this->classMetadataManipulator->getFields($translationClass, $options["fields"], $options["excluded_fields"]);
         if(!$options["autoload"])
             $fields = array_filter($fields, fn($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
-
+        
         // Compute fields including locale information
         $translationFields = [];
         foreach ($fields as $fieldName => $fieldConfig) {

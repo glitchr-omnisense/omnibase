@@ -64,7 +64,7 @@ class Translator implements TranslatorInterface
         }
 
         // Replace parameter between brackets
-        $bracketList = ['{}', "%%", "[]", "()"];
+        $bracketList = ['{}', "%%", "[]", "()", "<>"];
         foreach ($parameters as $key => $element) {
 
             $brackets = -1;
@@ -72,7 +72,7 @@ class Translator implements TranslatorInterface
             else if(is_string($key)) {
 
                 $pos = array_search($key[0].$key[strlen($key) - 1], $bracketList);
-                if($pos !== false) $brackets = $bracketList[$pos];
+                if($pos !== false) continue; // already formatted
             }
 
             if ( preg_match("/^[a-zA-Z0-9_.]+$/", $key) && $brackets < 0 )
@@ -82,7 +82,7 @@ class Translator implements TranslatorInterface
             $leftBracket  = $brackets[0];
             $rightBracket = $brackets[1];
 
-            $parameters[$leftBracket.((string) $key).$rightBracket] = $element; //htmlspecialchars($element);
+            $parameters[$leftBracket.trim($key, $leftBracket.$rightBracket." ").$rightBracket] = $element; //htmlspecialchars($element);
             unset($parameters[$key]);
         }
 

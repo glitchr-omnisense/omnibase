@@ -120,6 +120,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
+            
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];

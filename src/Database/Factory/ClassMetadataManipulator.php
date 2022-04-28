@@ -142,7 +142,8 @@ class ClassMetadataManipulator
         foreach($fields as $fieldName => $field) {
 
             if(is_array($fields[$fieldName]) && !empty($fields[$fieldName])) {
-                
+
+                $fields[$fieldName]["form_type"] = $fields[$fieldName]["form_type"] ?? $validFields[$fieldName]["form_type"] ?? null;
                 $validFields[$fieldName] = $fields[$fieldName] ?? $validFields[$fieldName] ?? [];
                 unset($fields[$fieldName]);
             }

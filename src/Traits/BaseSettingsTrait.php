@@ -139,13 +139,11 @@ trait BaseSettingsTrait
     {
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRawScalar($path, $useCache);
-        
-        if(!$setting instanceof Setting) {
 
+        if(!$setting instanceof Setting)
             $setting = new Setting($path, null, $locale);
-            $this->entityManager->persist($setting);
-        }
         
+        $this->entityManager->persist($setting);
         return $setting;
     }
 
@@ -200,8 +198,10 @@ trait BaseSettingsTrait
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
 
         $setting->translate($locale)->setValue($value);
-
+        
+        $this->entityManager->persist($setting);
         $this->entityManager->flush();
+        
         return $this;
     }
 
@@ -210,6 +210,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
         
+        $this->entityManager->persist($setting);
         $this->entityManager->flush();
         return $this;
     }
@@ -219,6 +220,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
 
+        $this->entityManager->persist($setting);
         $this->entityManager->flush();
         return $this;
     }
@@ -227,7 +229,8 @@ trait BaseSettingsTrait
     {
         $setting = $this->generateRaw($path);
         $setting->setBag($parameterName);
-        
+
+        $this->entityManager->persist($setting);
         $this->entityManager->flush();
         return $this;
     }
@@ -256,6 +259,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setLocked($flag);
 
+        $this->entityManager->persist($setting);
         $this->entityManager->flush();
         return $this;
     }
@@ -267,6 +271,7 @@ trait BaseSettingsTrait
         $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
 
+        $this->entityManager->persist($setting);
         $this->entityManager->flush();
         return $this;
     }

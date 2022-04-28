@@ -101,7 +101,6 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-
         // 
         // Set controller url
         $options["class"]    = $this->formFactory->guessType($form, $options);
@@ -123,11 +122,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     ->setEntityId("{0}")
                     ->generateUrl();
         }
-        $view->vars["href"]     = $options["href"] ?? $href;
 
+        $view->vars["href"]     = $options["href"] ?? $href;
         $view->vars["multiple"]     = $options["multiple"];
         $view->vars["allow_delete"] = $isNullable;
-        $view->vars["required"]     = !$isNullable;
+        $view->vars["required"]     = !$isNullable && !$this->classMetadataManipulator->isToManySide($dataClass, $form->getName());
 
         $data = $form->getData();
         $view->vars["entityId"] = json_encode(array_transforms(function($k, $e) use ($options):array {

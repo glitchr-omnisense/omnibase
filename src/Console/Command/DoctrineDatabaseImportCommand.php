@@ -94,6 +94,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $subFieldName = preg_replace("/\:[^\.]*/", "", $propertyPath);
                 $entityMapping = $this->classMetadataManipulator->fetchEntityMapping($entityName, $subFieldName);
                 $classMetadata = $this->entityManager->getClassMetadata($entityName);
+                
                 if(!$classMetadata->hasAssociation($classMetadata->getFieldName($subFieldName))) 
                     throw new Exception("Field \"".$subFieldName."\" is expected to be an association.");
                     

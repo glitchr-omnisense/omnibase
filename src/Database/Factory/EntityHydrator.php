@@ -508,11 +508,12 @@ class EntityHydrator
     protected function findAssociation($entityName, $identifier): mixed
     {
         if(is_object($identifier)) return $identifier;
-        $identifier = $this->propertyAccessor->isReadable($identifier, "id") 
-                    ? $this->propertyAccessor->getValue($identifier, "id") : null;
-
         if(!$identifier) return null;
 
+        $identifier = $this->propertyAccessor->isReadable($identifier, "id") 
+                    ? $this->propertyAccessor->getValue($identifier, "id") : null;
+        
+        if(!$identifier) return null;
         if ($this->hydrateAssociationReferences && $identifier !== null) 
             return $this->entityManager->getReference($entityName, $identifier);
 
