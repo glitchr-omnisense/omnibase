@@ -6,7 +6,7 @@
 {% set showFirst    = field.customOptions.get('showFirst') %}
 {% set show         = field.customOptions.get('show') %}
 {% set iconAlign    = field.customOptions.get('iconAlign') %}
-
+<span>
 {% if field.value is iterable %}
 
     {% if showFirst %}
@@ -194,5 +194,5 @@
         {% if fieldLink is not null %}</a>{% endif %}
         </span>
     {% endif %}
-
 {% endif %}
+</span>

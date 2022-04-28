@@ -231,6 +231,8 @@ class ImageService implements ImageServiceInterface
         unlink_tmpfile($path);
 
         $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);
+        unlink_tmpfile($path);
+
         $mimetype = $this->getMimeType($pathPublic);
 
         $response = new Response();
