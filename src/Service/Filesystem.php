@@ -53,6 +53,7 @@ class Filesystem
     public function getPathPrefixer(?string $storage = null): PathPrefixer
     {
         $adapter = $this->getAdapter($storage);
+
         if($adapter instanceof LocalFilesystemAdapter) {
 
             $reflProperty = new \ReflectionProperty(LocalFilesystemAdapter::class, 'prefixer');

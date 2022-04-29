@@ -56,6 +56,7 @@ class DoctrineDatabaseImportCommand extends Command
         $this->entityManager  = $entityManager;
         $this->entityHydrator = $entityHydrator;
         $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
 
         $this->translator = $translator;
         $this->serializer = new Serializer([], [

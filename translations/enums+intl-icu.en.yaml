@@ -143,3 +143,16 @@ spam_api:
   akismet: 
     singular: "akismet"
     plural: "akismet"
+
+quadrant:
+  singular: "cardinal quadrant"
+  plural: "cardinal quadrants"
+quadrant8:
+  singular: "ordinal quadrant"
+  plural: "ordinal quadrants"
+quadrant16:
+  singular: "intercardinal quadrant"
+  plural: "intercardinal quadrants"
+quadrant32:
+  singular: "32-wind quadrant"
+  plural: "32-wind quadrants"

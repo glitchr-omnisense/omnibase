@@ -340,39 +340,37 @@ class SecurityController extends AbstractController
      */
     public function EnableAccountRequest(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, string $token = null): Response
     {
-        $user = null;
+        $welcomeBackToken = $this->tokenRepository->findOneByValueAndName($token, "welcome-back");
+        $user = $welcomeBackToken ? $welcomeBackToken->getUser() : $this->getUser();
 
-        $welcomeBackToken = $this->tokenRepository->findOneByValue($token);
-        if($welcomeBackToken) $user = $welcomeBackToken->getUser();
-
-        if($user === null || !$welcomeBackToken || !$welcomeBackToken->isValid()) {
-
-            if ($welcomeBackToken)
-                $welcomeBackToken->revoke();
-
-            $notification = new Notification("accountWelcomeBack.invalidToken");
-            $notification->send("danger");
-
-            return $this->redirectToRoute($this->baseService->getRouteName("/"));
-
-        } else if(!$user->isDisabled()) {
+        if($user && !$user->isDisabled()) {
 
             $welcomeBackToken->revoke();
 
             $notification = new Notification("accountWelcomeBack.already");
             $notification->send("warning");
 
-            return $this->redirectToRoute($this->baseService->getRouteName("/"));
-
-        } else if ($user->getValidToken("welcome-back")){
+        } else if ($user && $user->getValidToken("welcome-back")){
 
             $user->enable();
-
             $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
 
             $this->entityManager->flush();
             return $authenticateUser;
+
+        } else {
+
+            if ($welcomeBackToken) {
+
+                $welcomeBackToken->revoke();
+                $this->entityManager->flush();
+            }
+
+            $notification = new Notification("accountWelcomeBack.invalidToken");
+            $notification->send("danger");
         }
+
+        return $this->redirectToRoute($this->baseService->getRouteName("/"));
     }
 
     /**

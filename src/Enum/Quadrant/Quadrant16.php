@@ -19,14 +19,14 @@ class Quadrant16 extends Quadrant8 implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return array_merge(parent::__iconizeStatic(), [
-            self::ENE => ["fas fa-location-circle fa-22p5 "],
-            self::ESE => ["fas fa-location-circle fa-67p5 "],
-            self::SSE => ["fas fa-location-circle fa-22p5 fa-flip-horizontal"],
-            self::SSW => ["fas fa-location-circle fa-67p5 fa-flip-horizontal"],
-            self::WSW => ["fas fa-location-circle fa-67p5 fa-flip-horizontal fa-flip-vertical"],
-            self::WNW => ["fas fa-location-circle fa-45   fa-flip-horizontal fa-flip-vertical"],
-            self::NNW => ["fas fa-location-circle fa-22p5 fa-flip-vertical"],
-            self::NNE => ["fas fa-location-circle fa-67p5 fa-flip-vertical"],
+            self::ENE => ["fas fa-location-arrow fa-22p5 "],
+            self::ESE => ["fas fa-location-arrow fa-67p5 "],
+            self::SSE => ["fas fa-location-arrow fa-22p5 fa-flip-horizontal"],
+            self::SSW => ["fas fa-location-arrow fa-67p5 fa-flip-horizontal"],
+            self::WSW => ["fas fa-location-arrow fa-67p5 fa-flip-horizontal fa-flip-vertical"],
+            self::WNW => ["fas fa-location-arrow fa-45   fa-flip-horizontal fa-flip-vertical"],
+            self::NNW => ["fas fa-location-arrow fa-22p5 fa-flip-vertical"],
+            self::NNE => ["fas fa-location-arrow fa-67p5 fa-flip-vertical"],
         ]);
     }
 

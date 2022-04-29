@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Base\Filter\Advanced\Thumbnail\HighDefinitionFilter;
 use Base\Filter\Advanced\ThumbnailFilter;
 use Base\Filter\Base\SvgFilter;
 use Base\Filter\LastFilterInterface;
@@ -54,9 +55,10 @@ class ImageService implements ImageServiceInterface
         try { $this->filesystem->mkdir("imagine"); } 
         catch(\Exception $e) {}
 
-        $this->maxQuality = $parameterBag->get("base.image.max_quality") ?? 1;
-        $this->enableWebp = $parameterBag->get("base.image.enable_webp") ?? true;
-        $this->noImage    = $parameterBag->get("base.image.no_image") ?? null;
+        $this->maxResolution = $parameterBag->get("base.image.max_resolution");
+        $this->maxQuality = $parameterBag->get("base.image.max_quality");
+        $this->enableWebp = $parameterBag->get("base.image.enable_webp");
+        $this->noImage    = $parameterBag->get("base.image.no_image");
 
         $this->hashIds = new Hashids($parameterBag->get("kernel.secret"));
         self::$mimeTypes = new MimeTypes();
@@ -114,7 +116,7 @@ class ImageService implements ImageServiceInterface
     }
 
     public static function getPublic(?string $path) 
-    { 
+    {
         if(!self::$projectDir)
             self::$projectDir = dirname(__FILE__, 6);
         if(!self::$publicDir)
@@ -126,8 +128,10 @@ class ImageService implements ImageServiceInterface
         return $path !== null ? self::$publicDir."/".$stripPath : null; 
     }
 
-    public function filter(?string $path, array $filters = []): null|bool|Response
+    public function filter(?string $path, array $filters = [], bool $httpCache = true): null|bool|Response
     {
+        //
+        // Resolve nested paths
         do {
 
             $nestedPath = $this->decode(basename($path));
@@ -141,12 +145,20 @@ class ImageService implements ImageServiceInterface
 
         } while(is_array($nestedPath));
 
-        $content = null;
-        $pathPublic = null;
+        //
+        // Apply image resolution limitation
+        if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
+            throw new Exception("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
 
+        array_unshift($filters, new $this->maxResolution());
+
+        //
+        // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $lastFilter = end($filters);
 
+        $content = null;
+        $pathPublic = null;
         if($lastFilter !== null) {
             
             if(!class_implements_interface($lastFilter, LastFilterInterface::class))
@@ -228,23 +240,29 @@ class ImageService implements ImageServiceInterface
             }
         }
 
-        unlink_tmpfile($path);
-
+        //
+        // Read image content 
         $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);
+        $pathPrefixer = $this->filesystem->getPathPrefixer();
+        $mimetype = $this->getMimeType($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
+
         unlink_tmpfile($path);
+        unlink_tmpfile($pathPublic);
 
-        $mimetype = $this->getMimeType($pathPublic);
-
+        //
+        // Prepare response
         $response = new Response();
         $response->setContent($content);
         
-        $response->setMaxAge(365*24*3600);
-        $response->setPublic();
-        $response->setEtag(md5($response->getContent()));
+        if($httpCache) {
 
-        $response->headers->addCacheControlDirective('must-revalidate', true);
+            $response->setMaxAge(365*24*3600);
+            $response->setPublic();
+            $response->setEtag(md5($response->getContent()));
+            $response->headers->addCacheControlDirective('must-revalidate', true);
+        }
+
         $response->headers->set('Content-Type', $mimetype);
-
         return $response;
     }
 

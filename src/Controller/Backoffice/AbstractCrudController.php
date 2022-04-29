@@ -165,9 +165,9 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         return $actions
                 ->update(Crud::PAGE_INDEX, Action::NEW ,    fn(Action $a) => $this->setDiscriminatorMapAttribute($a))
-                ->setPermission(Action::NEW, 'ROLE_EDITOR')
-                ->setPermission(Action::EDIT, 'ROLE_EDITOR')
-                ->setPermission(Action::DELETE, 'ROLE_EDITOR');
+                ->setPermission(Action::NEW, 'ROLE_ADMIN')
+                ->setPermission(Action::EDIT, 'ROLE_ADMIN')
+                ->setPermission(Action::DELETE, 'ROLE_ADMIN');
     }
 
     public function configureExtension(Extension $extension) : Extension

@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=CropRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
-class ImageCrop
+class ImageCrop implements ImageCropInterface
 {
     public function __construct() { }
 
@@ -51,8 +51,8 @@ class ImageCrop
      * @ORM\Column(type="quadrant8")
      */
     protected $quadrant;
-    public function getQuadrant(): ?int { return $this->quadrant; }
-    public function setQuadrant(int $quadrant): self
+    public function getQuadrant(): ?string { return $this->quadrant; }
+    public function setQuadrant(string $quadrant): self
     {
         $this->quadrant = $quadrant;
         return $this;
@@ -61,8 +61,11 @@ class ImageCrop
     public function getPivotX() { return $this->x+$this->width/2; }
     public function getPivotY() { return $this->y+$this->height/2; }
 
+    public function getCropper():array { dump($this); return []; }
+    public function setCropper($cropper) { dump($cropper); exit(1); return $this; }
+
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     protected $x;
     public function getX(): ?int { return $this->x; }
@@ -73,7 +76,7 @@ class ImageCrop
     }
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     protected $y;
     public function getY(): ?int { return $this->y; }
@@ -106,7 +109,7 @@ class ImageCrop
     }
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $scaleX;
     public function getScaleX(): ?float { return $this->scaleX; }
@@ -117,7 +120,7 @@ class ImageCrop
     }
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $scaleY;
     public function getScaleY(): ?float { return $this->scaleY; }
@@ -128,7 +131,7 @@ class ImageCrop
     }
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     protected $rotate;
     public function getRotate(): ?int { return $this->rotate; }

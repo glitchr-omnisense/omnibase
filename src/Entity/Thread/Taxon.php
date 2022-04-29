@@ -3,6 +3,7 @@
 namespace Base\Entity\Thread;
 use App\Entity\Thread;
 use Base\Annotations\Annotation\Slugify;
+use Base\Annotations\Annotation\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Base\Database\Annotation\DiscriminatorEntry;
 
@@ -58,6 +59,19 @@ class Taxon implements TranslatableInterface, IconizeInterface
     public function setSlug(?string $slug): self
     {
         $this->slug = $slug;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="text", nullable=true)
+     * @Uploader(storage="local.storage", public="/storage", size="2MB", mime={"image/*"})
+     */
+    protected $icon;
+    public function getIcon() { return Uploader::getPublic($this, "icon"); }
+    public function getIconFile() { return Uploader::get($this, "icon"); }
+    public function setIcon($icon)
+    {
+        $this->icon = $icon;
         return $this;
     }
 

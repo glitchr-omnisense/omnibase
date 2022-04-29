@@ -51,6 +51,13 @@ thread:
     plural: "taxonomies"
 
 layout:
+  image:
+    singular: "image"
+    plural: "images"
+  image_crop:
+    singular: "découpage d'image"
+    plural: "découpages d'images"
+
   widget:
     singular: "personnalisation"
     plural: "personnalisations"

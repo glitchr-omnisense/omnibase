@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
 
@@ -23,9 +24,12 @@ use Doctrine\ORM\Mapping\DiscriminatorColumn;
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry
  */
-class Image
+class Image implements IconizeInterface
 {
     use BaseTrait;
+
+    public        function __iconize()       : ?array { return null; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-images"]; }
 
     public function __toString() { return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.image.no_image") ?? ""; }
     public function __construct($src) 

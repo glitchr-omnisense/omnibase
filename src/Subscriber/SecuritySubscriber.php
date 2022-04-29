@@ -261,40 +261,41 @@ class SecuritySubscriber implements EventSubscriberInterface
             $user->approve();
             $this->entityManager->flush();
         }
-    
-        if (! $user->isVerified()) {
 
-            $callbackFn = function () use ($user) {
+        //
+        // Check if user is verified
+        // (NB:exception in debut mode for user matching test_recipient emails)
+        if (!$user->isVerified() && !$user->isTester()) {
 
-                $verifyEmailToken = $user->getToken("verify-email");
-                if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
+                $callbackFn = function () use ($user) {
 
-                    $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getDeadtimeStr()]);
-                    $notification->send("info");
+                    $verifyEmailToken = $user->getToken("verify-email");
+                    if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-                } else {
+                        $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getDeadtimeStr()]);
+                        $notification->send("info");
 
-                    $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("security_verifyEmail")]);
-                    $notification->send("warning");
-                }
-            };
+                    } else {
 
-            $response    = $event->getResponse();
-            $redirection = $response && $response->getStatusCode() == 302;
-            if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
-            else $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
+                        $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("security_verifyEmail")]);
+                        $notification->send("warning");
+                    }
+                };
 
-        } else {
+                $response    = $event->getResponse();
+                $redirection = $response && $response->getStatusCode() == 302;
+                if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
+                else $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
+        }
 
-            if (! $user->isApproved()) {
+        if (! $user->isApproved()) {
 
-                $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
+            $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
 
-                    $notification = new Notification("login.pending");
-                    $notification->send("warning");
-                }]);
+                $notification = new Notification("login.pending");
+                $notification->send("warning");
+            }]);
 
-            }
         }
     }
 

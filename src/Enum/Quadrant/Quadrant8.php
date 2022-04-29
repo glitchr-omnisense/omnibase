@@ -15,10 +15,10 @@ class Quadrant8 extends Quadrant implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return array_merge(parent::__iconizeStatic(), [
-            self::NE => ["fas fa-location-circle         "],
-            self::SE => ["fas fa-location-circle         fa-flip-horizontal"],
-            self::SW => ["fas fa-location-circle         fa-flip-horizontal fa-flip-vertical"],
-            self::NW => ["fas fa-location-circle fa-67p5 fa-flip-vertical"],
+            self::NE => ["fas fa-chevron-up    fa-rotate-45"],
+            self::SE => ["fas fa-chevron-right fa-rotate-45"],
+            self::SW => ["fas fa-chevron-down  fa-rotate-45"],
+            self::NW => ["fas fa-chevron-left  fa-rotate-45"],
         ]);
     }
 
@@ -27,13 +27,12 @@ class Quadrant8 extends Quadrant implements IconizeInterface
     public static function getRotation(string $quadrant): ?float { return self::getRotations()[$quadrant] ?? self::getRotations()[self::O]; }
     public static function getRotations(): array
     {
-        $theta = 180/8;
         return array_merge(parent::getRotations(), [
 
-            self::NE  => /* 2 **/ self::getTheta(),
-            self::NW  => /* 6 **/ self::getTheta(),
-            self::SW  => /*10 **/ self::getTheta(),
-            self::SE  => /*14 **/ self::getTheta(),
+            self::NE  =>  1 * self::getTheta(),
+            self::NW  =>  3 * self::getTheta(),
+            self::SW  =>  5 * self::getTheta(),
+            self::SE  =>  7 * self::getTheta(),
         ]);
     }
 

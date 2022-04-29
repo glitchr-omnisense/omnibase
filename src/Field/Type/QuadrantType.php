@@ -2,56 +2,41 @@
 
 namespace Base\Field\Type;
 
-use InvalidArgumentException;
+use Base\Enum\Quadrant\Quadrant8;
+use Base\Service\BaseService;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Traversable;
 
-class QuadrantType extends ImageType
+class QuadrantType extends AbstractType
 {
     public function getBlockPrefix(): string { return 'quadrant'; }
-    public function getParent() : ?string { return ImageType::class; }
+    public function getParent() : ?string { return HiddenType::class; }
+
+    public function __construct(BaseService $baseService) 
+    {
+        $this->baseService = $baseService;
+    }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'   => "bundles/base/user.svg",
-            'cropper'     => null,
-            "lightbox" => null
+            "class" => Quadrant8::class
         ]);
-    }
-
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
-        if($options["multiple"])
-            throw new InvalidArgumentException("There can be only one picture for quadrant type, please disable 'multiple' option");
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
-        
-        //
-        // VIEW: 
-        // - <id>_raw  = file,
-        // - <id>_file = hidden,
-        // - <id>_deleteBtn = btn "x",
-        // - <id>_deleteQuadrantBtn = btn "x",
-        // - <id>_figcaption = btn "+"
-        // - dropzone: <id>_dropzone = btn "x",
-        // - cropper: <id>_modal     = modal
-        // - cropper: <id>_cropper   = cropper
-        // - cropper: <id>_thumbnail = thumbnail
-        //
-        $view->vars['quadrant'] = $view->vars['files'][0] ?? null;
-        $view->vars['files']  = [];
 
-        if(!($view->vars["accept"] ?? false) ) 
-             $view->vars["accept"] = "image/*";
-
-        $view->vars["thumbnail"] = $options["thumbnail"];
-        $view->vars["cropper"] = ($options["cropper"] !== null);
+        $view->vars['quadrants'] = $options["class"]::getPermittedValues();
+        $view->vars['icons'] = $options["class"]::__iconizeStatic();
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
     }

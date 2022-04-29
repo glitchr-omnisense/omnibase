@@ -2,12 +2,14 @@
 
 namespace Base\Controller\Backoffice\Crud\Layout;
 
-use Base\Field\TranslationField;
 
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Field\AssociationField;
 use Base\Field\ImageField;
 use Base\Field\Type\CropperType;
+use Base\Field\Type\NumberType;
+use Base\Field\Type\QuadrantType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class ImageCrudController extends AbstractCrudController
 {
@@ -19,8 +21,22 @@ class ImageCrudController extends AbstractCrudController
 
             yield ImageField::new('source')->setCropper([]);
             yield AssociationField::new('crops')->showCollapsed(false)->autoload(false)->setFields([
-                "cropper" => ["form_type" => CropperType::class]
-            ])->hideOnIndex();
+                "label" => [],
+                "quadrant" => ["form_type" => QuadrantType::class],
+                "cropper" => [
+                    "form_type" => CropperType::class,
+                    "target" => "source",
+                    "parameters" => [
+                        "x"      => ["form_type" => TextType::class, "disabled" => false],
+                        "y"      => ["form_type" => TextType::class, "disabled" => false],
+                        "width"  => ["form_type" => TextType::class, "disabled" => false],
+                        "height" => ["form_type" => TextType::class, "disabled" => false],
+                        "rotate" => [],
+                        "scaleX" => [],
+                        "scaleY" => []
+                    ]
+                ],
+            ]);
 
         }, $args);
     }

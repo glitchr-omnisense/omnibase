@@ -35,6 +35,7 @@ class BaseSubscriber implements EventSubscriberInterface
         $this->baseService->addHtmlContent("javascripts:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery.javascript")));
         $this->baseService->addHtmlContent("javascripts:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.javascript")));
         $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox2b.javascript")));
         $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.cookie-consent.javascript")));
         $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
 

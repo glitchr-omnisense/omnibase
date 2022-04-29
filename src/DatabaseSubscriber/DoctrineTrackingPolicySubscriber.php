@@ -2,6 +2,7 @@
 
 namespace Base\DatabaseSubscriber;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -9,6 +10,11 @@ use Doctrine\ORM\Events;
 
 class DoctrineTrackingPolicySubscriber implements EventSubscriber
 {
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator)
+    {
+        $this->classMetadataManipulator = $classMetadataManipulator;
+    }
+
     public function getSubscribedEvents()
     {
         return [
@@ -19,8 +25,8 @@ class DoctrineTrackingPolicySubscriber implements EventSubscriber
     public function loadClassMetadata(LoadClassMetadataEventArgs $args)
     {
         $classMetadata = $args->getClassMetadata();
-        $classMetadata->setChangeTrackingPolicy(
-            ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT
-        );
+
+        if ( ($this->classMetadataManipulator->getTrackingPolicy($classMetadata->getName())) )
+            $classMetadata->setChangeTrackingPolicy($trackingPolicy);
     }
 }

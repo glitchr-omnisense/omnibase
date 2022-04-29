@@ -22,6 +22,7 @@ use App\Entity\Layout\Widget\Menu;
 use App\Entity\Layout\Widget\Page;
 
 use App\Controller\Backoffice\Crud\UserCrudController;
+use Base\Entity\Layout\Image;
 use Base\Config\WidgetItem;
 use Base\Config\MenuItem;
 use Base\Service\BaseService;
@@ -397,6 +398,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if ($this->isGranted('ROLE_EDITOR')) {
 
             $menu[] = MenuItem::section('MEMBERSHIP');
+
             $menu   = $this->addRoles($menu, \Base\Enum\UserRole::class);
             $menu[] = MenuItem::linkToCrud(User::class, "All users", 'fas fa-fw fa-tags', );
             $menu[] = MenuItem::linkToCrud(User::class, 'Add user', 'fas fa-fw fa-plus-circle')->setPermission('ROLE_EDITOR')
@@ -507,20 +509,21 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
                 WidgetItem::linkToCrud(Setting::class  ),
-                WidgetItem::linkToCrud(Widget::class   ),
                 WidgetItem::linkToCrud(Slot::class     ),
-                WidgetItem::linkToCrud(AbstractAttribute::class),
+                WidgetItem::linkToCrud(Attachment::class),
+                WidgetItem::linkToCrud(Link::class ),
             ]);
         }
 
         $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
             WidgetItem::linkToCrud(Menu::class      ),
-            WidgetItem::linkToCrud(Attachment::class),
             WidgetItem::linkToCrud(Page::class      ),
-            WidgetItem::linkToCrud(Link::class ),
+            WidgetItem::linkToCrud(Widget::class   ),
+            WidgetItem::linkToCrud(Image::class ),
+            WidgetItem::linkToCrud(AbstractAttribute::class),
         ]);
 
-        if ($this->isGranted('ROLE_ADMIN')) {
+        if ($this->isGranted('ROLE_EDITOR')) {
 
             $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('THREADS', null, 1));
             $widgets = $this->addWidgetItem($widgets, "THREADS", [
@@ -548,9 +551,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(UserPenalty::class),
                 WidgetItem::linkToCrud(UserToken::class),
             ]);
-
-        }
         
+        }
+
         return $widgets;
     }
 }

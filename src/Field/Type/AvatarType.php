@@ -51,7 +51,6 @@ class AvatarType extends ImageType
              $view->vars["accept"] = "image/*";
 
         $view->vars["thumbnail"] = $options["thumbnail"];
-        $view->vars["cropper"] = ($options["cropper"] !== null);
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-avatar.js");
     }

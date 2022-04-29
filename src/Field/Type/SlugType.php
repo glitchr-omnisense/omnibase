@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Model\AutovalidateInterface;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
@@ -15,15 +16,14 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 final class SlugType extends AbstractType implements AutovalidateInterface
 {
-    public function __construct(BaseService $baseService) {
 
+    public function __construct(BaseService $baseService)
+    {
         $this->baseService = $baseService;
     }
 
-    public function getBlockPrefix(): string
-    {
-        return 'slug';
-    }
+    public function getParent() : ?string { return TextType::class; }
+    public function getBlockPrefix(): string { return 'slug'; }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -35,13 +35,26 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             ]);
     }
 
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
+    }
+
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $target = $form->getParent();
-        $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
-        $view->vars['target'] = $targetPath;
+        // Get oldest parent form available..
+        $ancestor = $view;
+        while($ancestor->parent !== null)
+            $ancestor = $ancestor->parent; 
         
-        // Check if child exists.. this just trigger an exception..
+        $view->ancestor = $ancestor;
+
+        // Check if path is reacheable..
+        $target = $form->getParent();
+        while($target && ($target->getViewData() instanceof Collection || $target->getViewData() === null))
+            $target = $target->getParent();
+        
+        $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
         foreach($targetPath ?? [] as $path) {
             
             if(!$target->has($path))
@@ -58,11 +71,6 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             }
         }
         
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
-    }
-
-    public function getParent() : ?string
-    {
-        return TextType::class;
+        $view->vars['target'] = $targetPath;
     }
 }

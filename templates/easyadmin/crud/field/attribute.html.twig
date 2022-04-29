@@ -89,12 +89,13 @@
                 {% set icon = formattedValue.icon|iconify|default(null) %}
             {% endif %}
 
+            <div>
             {% set fieldLink = formattedValue['url'] ?? null %}
                 {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if show == 1 %}
                     {{formattedValue.text|striptags|default("-")}}  
                 {% elseif show == 2 %}
-                    <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text|striptags }}">{{ icon ? icon|raw : formattedValue.text|striptags|default("-") }}</div>
+                    <span data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text|striptags }}">{{ icon ? icon|raw : formattedValue.text|striptags|default("-") }}</span>
                 {% else %}
                     {{ iconAlign == "left" ? icon|raw : "" }}
                     {% if icon is not null %}
@@ -106,6 +107,7 @@
                 {% endif %}
 
                 {% if fieldLink is not null %}</a>{% endif %}
+            </div>
         {% endfor %}
 
         {% set sign = (formattedValues|length - others|length > 0) ? "+" : "" %}

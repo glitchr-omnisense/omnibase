@@ -52,10 +52,9 @@ class ImageController extends AbstractController
         if(ImageService::mimetype($args["path"]) == "image/svg+xml")
             return $this->redirectToRoute("ux_svg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
-        $path = stream_get_meta_data(tmpfile())['uri'];
-        return $this->imageService->filter($args["path"] ?? null, [
-            new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
-        ]);
+        $path   = stream_get_meta_data(tmpfile())['uri'];
+        $filter = new WebpFilter($path, $args["filters"] ?? [], $args["options"] ?? []);
+        return $this->imageService->filter($args["path"] ?? null, [$filter]);
     }
     
     /**
@@ -69,10 +68,9 @@ class ImageController extends AbstractController
         $args = $this->imageService->decode($hashid);
         if(!$args) throw $this->createNotFoundException();
 
-        $path = stream_get_meta_data(tmpfile())['uri'];
-        return $this->imageService->filter($args["path"] ?? null, [
-            new SvgFilter($path, $args["filters"] ?? [], $args["options"] ?? [])
-        ]);
+        $path   = stream_get_meta_data(tmpfile())['uri'];
+        $filter = new SvgFilter($path, $args["filters"] ?? [], $args["options"] ?? []);
+        return $this->imageService->filter($args["path"], [$filter]);
     }
 
     /**
@@ -88,10 +86,9 @@ class ImageController extends AbstractController
         if($extension === null && $_extension != $extension)
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
 
-        $path = stream_get_meta_data(tmpfile())['uri'];
-        return $this->imageService->filter($args["path"], [
-            new ImageFilter($path, $args["filters"] ?? [], [])
-        ]);
+        $path   = stream_get_meta_data(tmpfile())['uri'];
+        $filter = new ImageFilter($path, $args["filters"] ?? [], []);
+        return $this->imageService->filter($args["path"], [$filter]);
     }
 
     /**
@@ -105,13 +102,10 @@ class ImageController extends AbstractController
 
         $_extension = $this->imageService->getExtension($args["path"]);
         if($extension === null && $_extension != $extension)
-            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->redirectToRoute("ux_imageExtension_crop", ["hashid" => $hashid, "extension" => $_extension], Response::HTTP_MOVED_PERMANENTLY);
 
-        dump($width, $height);
-
-        $path = stream_get_meta_data(tmpfile())['uri'];
-        return $this->imageService->filter($args["path"], [
-            new ImageFilter($path, $args["filters"] ?? [], [])
-        ]);
+        $path   = stream_get_meta_data(tmpfile())['uri'];
+        $filter = new ImageFilter($path, $args["filters"] ?? [], []);
+        return $this->imageService->filter($args["path"], [$filter], false);
     }
 }

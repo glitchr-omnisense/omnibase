@@ -220,7 +220,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     /**
      * @ORM\Column(type="text", nullable=true)
      * @Uploader(storage="local.storage", public="/storage", size="2MB", mime={"image/*"})
-     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
      */
     protected $avatar;
     public function getAvatar() { return Uploader::getPublic($this, "avatar"); }
@@ -440,6 +439,16 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
+    public function isTester() {
+
+        if(!$this->getService()->isDebug()) return false;
+
+        foreach($this->getService()->getParameterBag("base.notifier.test_recipients") as $testRecipient)
+            if( preg_match("/".$testRecipient."/", $this->getEmail()) ) return true;
+
+        return false;
+    }
+
     /**
      * @ORM\OneToMany(targetEntity=Token::class, mappedBy="user", orphanRemoval=true, cascade={"persist", "remove"})
      */
@@ -452,16 +461,13 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
             switch($type)
             {
-                case Token::ALL:
-                    $tokens[] = $token;
-                    break;
                 case Token::VALID:
-                    if($token->isValid()) $tokens[] = $token;
-                    break;
+                    return $token->isValid();
                 case Token::EXPIRED:
-                    if (!$token->isValid()) $tokens[] = $token;
-                    break;
+                    return !$token->isValid();
             }
+
+            return true;
         });
     }
 

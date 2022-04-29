@@ -28,22 +28,22 @@ class Quadrant32 extends Quadrant16 implements IconizeInterface
     {
         return array_merge(parent::__iconizeStatic(), [
 
-            self::NbW  => ["fas fa-location-circle"],
-            self::NbE  => ["fas fa-location-circle"],
-            self::NEbN => ["fas fa-location-circle"],
-            self::NEbE => ["fas fa-location-circle"],
-            self::EbN  => ["fas fa-location-circle"],
-            self::EbS  => ["fas fa-location-circle"],
-            self::SEbE => ["fas fa-location-circle"],
-            self::SEbS => ["fas fa-location-circle"],
-            self::SbE  => ["fas fa-location-circle"],
-            self::SbW  => ["fas fa-location-circle"],
-            self::SWbS => ["fas fa-location-circle"],
-            self::SWbW => ["fas fa-location-circle"],
-            self::WbS  => ["fas fa-location-circle"],
-            self::WbN  => ["fas fa-location-circle"],
-            self::NWbW => ["fas fa-location-circle"],
-            self::NWbN => ["fas fa-location-circle"],
+            self::NbW  => ["fas fa-location-arrow"],
+            self::NbE  => ["fas fa-location-arrow"],
+            self::NEbN => ["fas fa-location-arrow"],
+            self::NEbE => ["fas fa-location-arrow"],
+            self::EbN  => ["fas fa-location-arrow"],
+            self::EbS  => ["fas fa-location-arrow"],
+            self::SEbE => ["fas fa-location-arrow"],
+            self::SEbS => ["fas fa-location-arrow"],
+            self::SbE  => ["fas fa-location-arrow"],
+            self::SbW  => ["fas fa-location-arrow"],
+            self::SWbS => ["fas fa-location-arrow"],
+            self::SWbW => ["fas fa-location-arrow"],
+            self::WbS  => ["fas fa-location-arrow"],
+            self::WbN  => ["fas fa-location-arrow"],
+            self::NWbW => ["fas fa-location-arrow"],
+            self::NWbN => ["fas fa-location-arrow"],
         ]);
     }
 

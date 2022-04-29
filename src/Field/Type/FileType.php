@@ -72,8 +72,9 @@ class FileType extends AbstractType implements DataMapperInterface
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
-            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
             'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.stylesheet"),
+            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
+            'lightbox2b-js'  => $this->baseService->getParameterBag("base.vendor.lightbox2b.javascript"),
 
             'thumbnailWidth'     => null,
             'thumbnailHeight'    => 120,
@@ -154,6 +155,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if(is_array($options["lightbox"])) {
 
             $this->baseService->addHtmlContent("javascripts", $options["lightbox-js"]);
+            $this->baseService->addHtmlContent("javascripts", $options["lightbox2b-js"]);
             $this->baseService->addHtmlContent("stylesheets", $options["lightbox-css"]);
 
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);

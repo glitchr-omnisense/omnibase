@@ -2,10 +2,10 @@
 
 namespace Base\Enum\Quadrant;
 
-use Base\Database\Type\SetType;
+use Base\Database\Type\EnumType;
 use Base\Model\IconizeInterface;
 
-class Quadrant extends SetType implements IconizeInterface
+class Quadrant extends EnumType implements IconizeInterface
 {
     const O    = "ORIGIN";
 
@@ -18,11 +18,11 @@ class Quadrant extends SetType implements IconizeInterface
     public static function __iconizeStatic(): ?array
     {
         return [
-            self::O   => ["fas fa-circle"],
-            self::E   => ["fas fa-location-circle fa-45   "],
-            self::S   => ["fas fa-location-circle fa-45   fa-flip-horizontal"],
-            self::W   => ["fas fa-location-circle fa-22p5 fa-flip-horizontal fa-flip-vertical"],
-            self::N   => ["fas fa-location-circle fa-45   fa-flip-vertical"],
+            self::O   => ["fas fa-crosshairs"],
+            self::E   => ["fas fa-chevron-right"],
+            self::S   => ["fas fa-chevron-down"],
+            self::W   => ["fas fa-chevron-left"],
+            self::N   => ["fas fa-chevron-up"],
         ];
     }
 
@@ -33,10 +33,10 @@ class Quadrant extends SetType implements IconizeInterface
     {
         return [
             self::O   => null, 
-            self::N   => /* 4 **/ self::getTheta(),
-            self::W   => /* 8 **/ self::getTheta(),
-            self::S   => /*12 **/ self::getTheta(),
-            self::E   => /*16 **/ self::getTheta(),
+            self::N   => 1 * self::getTheta(),
+            self::W   => 2 * self::getTheta(),
+            self::S   => 3 * self::getTheta(),
+            self::E   => 4 * self::getTheta(),
         ];
     }
 

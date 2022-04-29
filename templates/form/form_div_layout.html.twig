@@ -192,7 +192,8 @@
 {%- block slug_widget -%}
 
 {# Search for target inside form based on parent including translation #}
-{% set form = form.parent %}
+{% set form = form.ancestor %}
+
 {% for child in target %}
 
     {% set form = form[child] %}
@@ -302,10 +303,11 @@
 
 {%- block imageupload_widget -%}
 {% set attr = attr|merge({
-    'data-image-field'         : form.vars.id,
-    'data-image-cropper'       : form.vars.cropper,
-    'data-image-lightbox'       : form.vars.lightbox,
-    'data-image-thumbnail'     : form.vars.thumbnail,
+    'data-image-field'     : form.vars.id,
+    'data-image-modal'     : form.vars.modal,
+    'data-image-cropper'   : form.vars.cropper,
+    'data-image-lightbox'  : form.vars.lightbox,
+    'data-image-thumbnail' : form.vars.thumbnail,
     'data-image-ajax'      : form.vars.ajax,
 }) %}
 
@@ -325,33 +327,27 @@
             </figcaption>
 
             {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-            <a href="{{form.vars.value}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
+            <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
             {% endif %}
         </figure>
 
         {% if cropper %}
-            <!-- Modal -->
-            <div class="modal fade" id="{{id}}_modal">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal fade" id="{{id}}_modal">
+            <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Image cropper</h5>
-                    <button type="button" class="btn-close {{id}}_modalClose" aria-label="Close">
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="img-container">
-                        <img id="{{id}}_cropper" src="" style="visibility:hidden">
+                    <div class="modal-header"><h5 class="modal-title">Image cropper</h5></div>
+                    <div class="modal-body">
+                        <div class="imageupload-cropper">
+                            <img id="{{id}}_cropper" src="" class="imageupload-cropper-image" style="visibility:hidden">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary {{id}}_modalClose">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary {{id}}_modalClose">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
-                </div>
-                </div>
             </div>
-            </div>
-
+        </div>
         {% endif %}
     {% endif %}
 
@@ -492,7 +488,7 @@
 
         <div class="field-association form-group">
             {% if row_group %}
-                {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+                {%- set attr = attr|merge({'class': 'form-collection form-group-row' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
                 {{ form_label(form)}}
                 <div {{ block('widget_attributes') }}>
                     {{ form_widget(formChild) }}
@@ -511,7 +507,7 @@
             {{ form_widget(form, {attr: attr}) }}
         {% else %}
 
-            <div class="form-group form-association">
+            <div class="form-association form-group">
                 {{ form_label(form)}}
                 <div {{ block('widget_attributes') }}>
                 {{ form_widget(form) }}
@@ -855,13 +851,14 @@
 {% endif %}
 
 <div class="input-group form-number">
+
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
     <div class="input-group-text">
-        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
+        <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
     </div>
      <div class="input-group-text">
-        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
+        <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
     </div>
 </div>
 
@@ -869,32 +866,56 @@
 
 
 {%- block cropper_widget -%}
-    CROPPER
+
+{# Search for target inside form based on parent including translation #}
+{% set form0 = form %}
+{% set form = form.ancestor %}
+
+{% for child in target %}
+
+    {% set form = form[child] %}
+
+    {% if child == "translations" %}
+        {% if form.vars.default_locale is defined and form.vars.default_locale in form|keys %}
+            {% set form = form[form.vars.default_locale] %}
+        {% else %} 
+            {% set form = form|first %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% set attr = attr|merge({'data-cropper': form0.vars.cropper,'data-cropper-field': form0.vars.id}) %}
+
+<div class="form-group form-cropper">
+    <div class="cropper">
+        <img id="{{id}}_image" src="{{form.vars.value|imagine|image}}">
+        <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
+    </div>
+
+    {%- set attr = attr|merge({'class': 'form-cropper-parameters' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {{ form_widget(form0, {attr:attr}) }} 
+</div>
+
 {%- endblock -%}
 
 {%- block quadrant_widget -%}
-    QUADRANT
-{#
-     {% set attr = attr|merge({
-    'data-number-field': form.vars.id,
-    "data-number-up": form.vars.stepUp ?? 1,
-    "data-number-down": form.vars.stepDown ?? 1,
-    "data-number-min": form.vars.min is defined and form.vars.max > 0 ? form.vars.max : 0,
+
+{% set nquadrants = count(form.vars.quadrants)-1 %}
+{% set quadrants  = nquadrants < 8 ? "" : nquadrants %}
+<div class="form-group form-quadrant">
+    {{ form_label(form) }}
+    <div id="{{id}}_matrix">
+    {% include '@Base/form/quadrant/quadrant'~quadrants~'.html.twig' %}
+    </div>
+</div>
+
+{% set attr = attr|merge({
+    'data-quadrant-field': form.vars.id,
+    'data-quadrant-winds': nquadrants,
+    'data-quadrant-value': form.vars.value
 }) %}
 
-{% if form.vars.max is defined %}
-    {% set attr = attr|merge({"data-number-max": form.vars.max}) %}
-{% endif %}
-
-<div class="input-group form-number">
-    {{ form_widget(form, {attr:attr}) }} 
-    <div class="input-group-text">
-        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
-    </div>
-     <div class="input-group-text">
-        <button class="btn btn-outline-secondary" id="{{form.vars.id}}-up" type="button"><i class="fas fa-plus"></i></button>
-    </div>
-</div> #}
+{{ form_widget(form, {attr:attr}) }}
 
 {%- endblock -%}
 

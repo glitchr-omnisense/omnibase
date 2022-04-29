@@ -2,6 +2,8 @@
 
 namespace Base\DependencyInjection;
 
+use Base\Filter\Advanced\Thumbnail\UltraHighDefinitionFilter;
+
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
@@ -161,6 +163,9 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('image')->addDefaultsIfNotSet()
                     ->children()
+                        ->scalarNode('max_resolution')
+                            ->defaultValue(UltraHighDefinitionFilter::class)
+                            ->end()
                         ->scalarNode('max_quality')
                             ->defaultValue(1)
                             ->end()
@@ -530,17 +535,26 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
 
+                    ->arrayNode('lightbox2b')->addDefaultsIfNotSet()
+                        ->children()
+                            ->scalarNode('javascript')
+                                ->info('')
+                                ->defaultValue("bundles/base/vendor/lightbox2b/lightbox2b.js") 
+                                ->end()
+                        ->end()
+                    ->end()
+
                     ->arrayNode('lightbox')->addDefaultsIfNotSet()
                         ->children()
                             ->scalarNode('javascript')
                                 ->info('')
-                                ->defaultValue("bundles/base/vendor/lightbox/2.11.3/dist/js/lightbox.js") 
+                                ->defaultValue("bundles/base/vendor/lightbox2b/2.11.3/dist/js/lightbox.js") 
                                 ->end()
                         ->end()
                         ->children()
                             ->scalarNode('stylesheet')
                                 ->info('')
-                                ->defaultValue("bundles/base/vendor/lightbox/2.11.3/dist/css/lightbox.css") 
+                                ->defaultValue("bundles/base/vendor/lightbox2b/2.11.3/dist/css/lightbox.css") 
                                 ->end()
                         ->end()
                     ->end()

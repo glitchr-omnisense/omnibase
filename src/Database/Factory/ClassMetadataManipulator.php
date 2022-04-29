@@ -65,6 +65,32 @@ class ClassMetadataManipulator
         return is_subclass_of($entityOrClassOrMetadata, EnumType::class);
     }
 
+    const DEFAULT_TRACKING = 0;
+
+    protected $globalTrackingPolicy = self::DEFAULT_TRACKING;
+    public function getGlobalTrackingPolicy() { return $this->globalTrackingPolicy; }
+    public function setGlobalTrackingPolicy(int $policy)
+    {
+        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
+        if(!in_array($policy, $trackingPolicies))
+            throw new \Exception("Invalid global tracking policy \"$policy\" provided");
+
+        $this->globalTrackingPolicy = $policy;
+        return $this;
+    }
+    
+    protected $trackingPolicy = [];
+    public function getTrackingPolicy($className) { return $this->trackingPolicy[$className] ?? $this->globalTrackingPolicy; }
+    public function setTrackingPolicy($className, int $policy)
+    {
+        $trackingPolicies = [self::DEFAULT_TRACKING, ClassMetadataInfo::CHANGETRACKING_DEFERRED_IMPLICIT, ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT, ClassMetadataInfo::CHANGETRACKING_NOTIFY];
+        if(!in_array($policy, $trackingPolicies))
+            throw new \Exception("Invalid tracking policy \"$policy\" provided for \"$className\"");
+
+        $this->trackingPolicy[$className] = $policy;
+        return $this;
+    }
+
     public function isSetType($entityOrClassOrMetadata) : bool
     {
         if ($entityOrClassOrMetadata instanceof ClassMetadata)
@@ -106,6 +132,8 @@ class ClassMetadataManipulator
     {
         if(!empty($fields) && !is_associative($fields))
             throw new \Exception("Associative array expected for 'fields' parameter, '".gettype($fields)."' received");
+
+        $fieldKeys = array_keys($fields);
 
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         $validFields  = array_fill_keys(array_merge($metadata->getFieldNames()), []);
@@ -150,7 +178,7 @@ class ClassMetadataManipulator
         }
 
         $validFields = $this->filteringFields($validFields, $excludedFields);
-        if (empty($fields)) return $validFields;
+        if (empty($fields)) return array_filter(array_replace(array_fill_keys($fieldKeys, null), $validFields));
 
         $unmappedFields = $this->filteringRemainingFields($validFields, $fields, $excludedFields, $entityOrClassOrMetadata);
         foreach ($fields as $fieldName => $field) {
@@ -181,7 +209,8 @@ class ClassMetadataManipulator
         $aliasFields = array_filter($fields, fn($k) => in_array($k, $aliasNames), ARRAY_FILTER_USE_KEY);
 
         $fields = array_transforms(fn($k,$v): ?array => array_key_exists($k, $aliasNames) ? [$aliasNames[$k], $aliasFields[$aliasNames[$k]]] : [$k,$v], $fields);
-        return $fields;
+
+        return array_filter(array_replace(array_fill_keys($fieldKeys, null), $fields));
     }
 
     private function filteringFields(array $fields, array $excludedFields): array

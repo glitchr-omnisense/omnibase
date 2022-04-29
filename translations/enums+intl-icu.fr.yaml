@@ -143,3 +143,16 @@ spam_api:
   akismet: 
     singular: "akismet"
     plural: "akismet"
+
+quadrant:
+  singular: "cadran cardinal"
+  plural: "cadrans cardinaux"
+quadrant8:
+  singular: "cadran ordinal"
+  plural: "cadrans ordinaux"
+quadrant16:
+  singular: "cadran intercardinal"
+  plural: "cadrans intercardinaux"
+quadrant32:
+  singular: "cadran 32-point"
+  plural: "cadrans 32-points"
