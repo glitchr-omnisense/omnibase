@@ -269,8 +269,9 @@ class DoctrineDatabaseImportCommand extends Command
 
                         if(!str_contains($fieldPath, ":unique")) continue;
 
-                        $fieldName = explodeByArray([".", "["], $fieldPath)[0];
-                        $entityRequiredFields[$spreadsheet][$baseName][] = $fieldName;
+                        $fieldName = explodeByArray([".", "[", ":"], $fieldPath)[0];
+                        if(!in_array($fieldName, $entityRequiredFields[$spreadsheet][$baseName]))
+                            $entityRequiredFields[$spreadsheet][$baseName][] = $fieldName;
                     }
                 }
             }
@@ -332,7 +333,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                     list($entityName, $entry) = $_;
 
-                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($spreadsheet, &$entityParentColumn, &$entityUniqueValues, $entityName, &$entityUniqueKeys, &$targetEntity, &$keyDepth, &$inDatabase) : ?array {
+                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($spreadsheet, &$entityParentColumn, &$entityUniqueValues, $entityName, &$entityUniqueKeys, &$targetEntity, &$keyDepth) : ?array {
 
                         list($fieldName, $special) = array_pad(explode(":", $k, 2),2,null);
                         $keyDepth[$d] = $fieldName;

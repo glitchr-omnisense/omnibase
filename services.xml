@@ -301,12 +301,15 @@
             <tag name="kernel.event_subscriber" />
         </service>
 
+        <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_subscriber" priority="1024" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.annotation_reader" />
         </service>
+
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" />
+            <tag name="doctrine.event_subscriber" priority="256" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
@@ -346,19 +349,11 @@
             <argument type="service" id="flysystem.adapter.lazy.factory" />
         </service>
 
-        <service id="Base\Service\SocialSharer" public="true">
-            <tag name="twig.runtime" />
-        </service>
-        
-        <service id="Base\Model\SocialSharer\Adapter\FacebookAdapter">
-            <tag name="base.social_sharer" />
-        </service>
-        <service id="Base\Model\SocialSharer\Adapter\TwitterAdapter">
-            <tag name="base.social_sharer" />
-        </service>
-        <service id="Base\Model\SocialSharer\Adapter\PinterestAdapter">
-            <tag name="base.social_sharer" />
-        </service>
+        <service id="Base\Service\SocialSharer" public="true"><tag name="twig.runtime" /></service>
+
+        <service id="Base\Model\SocialSharer\Adapter\FacebookAdapter" ><tag name="base.social_sharer" /></service>
+        <service id="Base\Model\SocialSharer\Adapter\TwitterAdapter"  ><tag name="base.social_sharer" /></service>
+        <service id="Base\Model\SocialSharer\Adapter\PinterestAdapter"><tag name="base.social_sharer" /></service>
 
         <service id="Base\Service\IconProvider" public="true">
             <tag name="twig.runtime" />
@@ -398,13 +393,6 @@
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
-
-        <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
-        <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\Annotations\AnnotationReader" public="true">

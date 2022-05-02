@@ -39,7 +39,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
-        dump("----> ".$className);
+       
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
         

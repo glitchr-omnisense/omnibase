@@ -219,8 +219,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", max_size="1KB", mime_types={"image/*"})
-     * @AssertBase\File(max_size="1KB", mime_types={"image/*"})
+     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/*"})
+     * @AssertBase\File(max_size="2MB", mime_types={"image/*"})
      */
     protected $avatar;
     public function getAvatar() { return Uploader::getPublic($this, "avatar"); }

@@ -100,7 +100,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $icon;
-    public function getIcon(): ?string { return $this->icon; }
+    public function getIcon(): ?string { return $this->icon ?? $this->__iconize()[0] ?? $this->__iconizeStatic()[0] ?? null; }
     public function setIcon(?string $icon)
     {
         $this->icon = $icon;

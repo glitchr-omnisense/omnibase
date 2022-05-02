@@ -23,7 +23,6 @@ class DiscriminatorEntry extends AbstractAnnotation
     public function __construct( array $data ) 
     { 
         $this->value = $data['value'] ?? null;
-        dump($data, $this);
     }
 
     public function getValue(object|string $object_or_class): string 
