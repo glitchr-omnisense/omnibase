@@ -12,7 +12,7 @@ class CacheWarmer implements CacheWarmerInterface
     {
         $this->shellVerbosity = getenv("SHELL_VERBOSITY");
         $this->localeProvider = $localeProvider;
-        $this->iconProvider = $iconProvider;
+        $this->iconProvider   = $iconProvider;
     }
 
     public function isOptional():bool { return false; }

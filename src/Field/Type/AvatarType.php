@@ -18,7 +18,9 @@ class AvatarType extends ImageType
         $resolver->setDefaults([
             'thumbnail'   => "bundles/base/user.svg",
             'cropper'     => null,
-            "lightbox" => null
+            "lightbox" => null,
+
+            "aspectRatio" => 1
         ]);
     }
 
@@ -31,26 +33,9 @@ class AvatarType extends ImageType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
-        
-        //
-        // VIEW: 
-        // - <id>_raw  = file,
-        // - <id>_file = hidden,
-        // - <id>_deleteBtn = btn "x",
-        // - <id>_deleteAvatarBtn = btn "x",
-        // - <id>_figcaption = btn "+"
-        // - dropzone: <id>_dropzone = btn "x",
-        // - cropper: <id>_modal     = modal
-        // - cropper: <id>_cropper   = cropper
-        // - cropper: <id>_thumbnail = thumbnail
-        //
+
         $view->vars['avatar'] = $view->vars['files'][0] ?? null;
         $view->vars['files']  = [];
-
-        if(!($view->vars["accept"] ?? false) ) 
-             $view->vars["accept"] = "image/*";
-
-        $view->vars["thumbnail"] = $options["thumbnail"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-avatar.js");
     }

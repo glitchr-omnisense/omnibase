@@ -27,10 +27,10 @@ class ImageCrudController extends AbstractCrudController
                     "form_type" => CropperType::class,
                     "target" => "source",
                     "parameters" => [
-                        "x"      => ["form_type" => TextType::class, "disabled" => false],
-                        "y"      => ["form_type" => TextType::class, "disabled" => false],
-                        "width"  => ["form_type" => TextType::class, "disabled" => false],
-                        "height" => ["form_type" => TextType::class, "disabled" => false],
+                        "x"      => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
+                        "y"      => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
+                        "width"  => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
+                        "height" => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
                         "rotate" => [],
                         "scaleX" => [],
                         "scaleY" => []

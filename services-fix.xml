@@ -29,7 +29,7 @@
             <argument type="service" id="assets.packages" />
         </service>
 
-        <!-- DOCTRINE FIX -->
+        <!-- DOCTRINE FIX (incl. decoration to get same behavior as Symfony) -->
         <service id="Doctrine\Bundle\DoctrineBundle\ConnectionFactory"  alias="doctrine.dbal.connection_factory"/>
         <service id="Doctrine\Persistence\Mapping\ClassMetadataFactory">
             <factory service="doctrine.orm.default_entity_manager" method="getMetadataFactory" />

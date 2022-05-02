@@ -51,8 +51,8 @@ class Attachment extends Widget implements IconizeInterface
 
     /**
      * @ORM\Column(type="text")
-     * @Uploader(storage="local.storage", public="/storage", size="4096K")
-     * @AssertBase\FileSize(max="4096K", groups={"new", "edit"})
+     * @Uploader(storage="local.storage", public="/storage", max_size="4096K")
+     * @AssertBase\File(max_size="4096K", groups={"new", "edit"})
      */
     protected $download;
     public function getDownload() { return Uploader::getPublic($this, "download"); }

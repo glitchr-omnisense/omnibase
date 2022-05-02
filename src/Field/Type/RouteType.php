@@ -20,13 +20,14 @@ class RouteType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
+            "capitalize" => null,
             'choice_loader' => function (Options $options) {
 
                 $routeList = [];
                 return ChoiceList::loader($this, new CallbackChoiceLoader(function () {
 
                     return array_flip(array_transforms(
-                        fn($k, $r):array => [$k, "<b>Name:</b> ".$k." | <b>Path:</b> ".$r->getPath()], 
+                        fn($k, $r):array => [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()], 
                         $this->router->getRouteCollection()->all(),
                     ));
 

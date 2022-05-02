@@ -1,6 +1,7 @@
 user:
   singular: "user"
   plural: "users"
+
   group:
     singular: "group"
     plural: "groups"

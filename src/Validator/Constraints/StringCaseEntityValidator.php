@@ -11,13 +11,10 @@
 
 namespace Base\Validator\Constraints;
 
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
-use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 use Base\Validator\ConstraintEntityValidator;
-use Base\Validator\Constraints\StringCaseEntity;
 
 class StringCaseEntityValidator extends ConstraintEntityValidator
 {
@@ -41,9 +38,7 @@ class StringCaseEntityValidator extends ConstraintEntityValidator
             $fieldValue = $entityChanges[$fieldName][1] ?? "";
 
             if(mb_strtolower($fieldValue) != mb_strtolower($originalFieldValue))
-                $this->buildViolation($fieldName ?? "unknown", $constraint)
-                ->setTranslationDomain('validators')
-                ->addViolation();
+                $this->buildViolation($constraint, $fieldValue)->addViolation();
         }
     }
 }

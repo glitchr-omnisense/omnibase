@@ -13,6 +13,7 @@ use Base\Repository\Layout\Widget\RouteRepository;
 /**
  * @ORM\Entity(repositoryClass=RouteRepository::class)
  * @DiscriminatorEntry
+ * 
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  */
 
@@ -24,7 +25,7 @@ class Route extends Widget implements IconizeInterface, UrlInterface
     public function __toUrl(): ?string { return $this->generate(); }
     public function __toString() { return $this->getTitle(); }
     
-    public function __construct(string $title, string $routeName, array $routeParameters = []) 
+    public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = []) 
     {
         parent::__construct($title);
         

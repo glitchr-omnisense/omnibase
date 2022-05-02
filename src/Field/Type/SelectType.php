@@ -393,10 +393,13 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["class"]         = $this->formFactory->guessType($form, $options);
         $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
-        $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
+
         $options["choice_filter"] = $this->formFactory->guessChoiceFilter($form, $options);
-        $options["choices"]       = $this->formFactory->guessChoices($form, $options);
-        
+        if(!$options["choices"] && $options["choice_loader"] === null) {
+            $options["choices"]       = $this->formFactory->guessChoices($form, $options);
+            $options["autocomplete"]  = $this->formFactory->guessChoiceAutocomplete($form, $options);
+        }
+
         $data = $form->getData();
 
         // Set default data
@@ -572,7 +575,10 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     // Format values
                     $entry = $choices;
-                    $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                    $entryFormat = FORMAT_IDENTITY;
+                    if ($options["capitalize"] !== null)
+                        $entryFormat = $options["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;
+                    
                     $entry = $this->autocomplete->resolve($entry, $options["class"] ?? $innerType, [
                         "html" => $options["html"],
                         "format" => $entryFormat

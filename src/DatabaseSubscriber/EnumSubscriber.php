@@ -3,11 +3,11 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\Database\Type\EnumType;
-use Doctrine\Common\EventSubscriber;
+use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Doctrine\ORM\Tools\ToolEvents;
 
-class EnumSubscriber implements EventSubscriber
+class EnumSubscriber implements EventSubscriberInterface
 {
     public function getSubscribedEvents(): array
     {

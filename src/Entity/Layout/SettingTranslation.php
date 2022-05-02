@@ -43,11 +43,10 @@ class SettingTranslation implements TranslationInterface
         $this->help = $help;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="array")
-     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", size="2MB", keepNotFound=true)
+     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", missable=true)
      */
     protected $value;
 

@@ -52,24 +52,8 @@ class SecurityController extends AbstractController
     public function Login(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
-        if($this->baseService->isMaintenance()) {
-
-            if ( ($user = $this->getUser()) && $user->isPersistent() )
-                return $this->redirectToRoute("dashboard");
-
-            $lastUsername = $authenticationUtils->getLastUsername();
-
-            $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
-            return $this->render('@EasyAdmin/page/login.html.twig', [
-                'last_username' => $lastUsername,
-                'translation_domain' => 'forms',
-                'csrf_token_intention' => 'authenticate',
-                'target_path' => $this->baseService->getUrl('dashboard'),
-                'username_label' => 'login.identifier',
-                'password_label' => 'login.password',
-                'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
-            ]);
-        }
+        if($this->baseService->isMaintenance())
+            return $this->redirectToRoute("dashboard_login");
 
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();

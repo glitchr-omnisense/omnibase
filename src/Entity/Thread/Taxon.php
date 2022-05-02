@@ -11,6 +11,7 @@ use Base\Database\Traits\TranslatableTrait;
 
 use Base\Database\TranslatableInterface;
 use Base\Model\IconizeInterface;
+use Base\Model\GraphInterface;
 use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -22,7 +23,7 @@ use Base\Repository\Thread\TaxonRepository;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
-class Taxon implements TranslatableInterface, IconizeInterface
+class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 {
     use TranslatableTrait;
 
@@ -64,7 +65,7 @@ class Taxon implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", size="2MB", mime={"image/*"})
+     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/*"})
      */
     protected $icon;
     public function getIcon() { return Uploader::getPublic($this, "icon"); }
@@ -106,7 +107,7 @@ class Taxon implements TranslatableInterface, IconizeInterface
      * @ORM\OneToMany(targetEntity=Taxon::class, mappedBy="parent", orphanRemoval=true, cascade={"persist"}))
      */
     protected $children;
-    public function getChildren() { return $this->children; }
+    public function getChildren():Collection { return $this->children; }
     public function addChild(self $child): self
     {
         if (!$this->children->contains($child)) {
@@ -153,6 +154,25 @@ class Taxon implements TranslatableInterface, IconizeInterface
         return $this;
     }
 
+    /**
+     * @ORM\ManyToMany(targetEntity=Taxon::class)
+     */
+    protected $connexes;
+    public function getConnexes(): Collection { return $this->connexes; }
+    public function addConnex(self $connexes): self 
+    {
+        if(!$this->connexes->contains($connexes))
+            $this->connexes[] = $connexes;
+
+        return $this;
+    }
+
+    public function removeConnex(self $connexes): self
+    {
+        $this->connexes->removeElement($connexes);
+        return $this;
+    }
+    
     /**
      * @ORM\Column(type="boolean")
      */

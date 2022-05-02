@@ -48,8 +48,8 @@ class Image implements IconizeInterface
 
     /**
      * @ORM\Column(type="text")
-     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", size="2MB")
+     * @AssertBase\File(max_size="2MB", groups={"new", "edit"})
+     * @Uploader(storage="local.storage", public="/storage", max_size="2MB")
      */
     protected $source;
     public function getSource()     { return Uploader::getPublic($this, "source"); }

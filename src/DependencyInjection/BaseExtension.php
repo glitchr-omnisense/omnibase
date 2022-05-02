@@ -27,6 +27,7 @@ class BaseExtension extends Extension
         $loader->load('services.xml');
         $loader->load('services-public.xml');
         $loader->load('services-fix.xml');
+        $loader->load('services-decoration.xml');
 
         // Configuration file: ./config/package/base.yaml
         $processor = new Processor();

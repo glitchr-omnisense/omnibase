@@ -27,6 +27,7 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\Traits\TrasheableTrait;
 use Base\Model\IconizeInterface;
+use Base\Model\GraphInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
 
@@ -42,7 +43,7 @@ use Base\Repository\ThreadRepository;
  * @Trasheable
  */
 
-class Thread implements TranslatableInterface, IconizeInterface
+class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 {
     use BaseTrait;
     use TrasheableTrait;
@@ -67,9 +68,10 @@ class Thread implements TranslatableInterface, IconizeInterface
         $this->addOwner($owner);
         $this->setTitle($title);
 
+        $this->setState(ThreadState::DRAFT);
+
         $this->slug = $slug;
 
-        $this->setState(ThreadState::DRAFT);
     }
 
     /**
@@ -132,11 +134,10 @@ class Thread implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Thread::class)
-     * @ORM\JoinColumn(onDelete="SET NULL")
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnex(self $connexes): self
+    public function addConnex(self $connexes): self 
     {
         if(!$this->connexes->contains($connexes))
             $this->connexes[] = $connexes;
@@ -164,7 +165,6 @@ class Thread implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="thread_state")
-     * 
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $state;
@@ -239,7 +239,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="threads", cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity=Tag::class, inversedBy="threads", cascade={"persist"})
      * @OrderColumn
      */
     protected $tags;
@@ -262,7 +262,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity=Taxon::class, inversedBy="threads", cascade={"persist", "remove"})
+     * @ORM\ManyToMany(targetEntity=Taxon::class, inversedBy="threads", cascade={"persist"})
      * @OrderColumn
      */
     protected $taxa;
@@ -283,7 +283,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})
      */
     protected $mentions;
     public function getMentions(): Collection { return $this->mentions; }
@@ -310,7 +310,7 @@ class Thread implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="thread", orphanRemoval=true, cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity=Like::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})
      */
     protected $likes;
     public function getLikes(): Collection { return $this->likes; }

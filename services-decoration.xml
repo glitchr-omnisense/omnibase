@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+
+        <defaults public="false" />
+
+        <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
+        <service id="Base\Service\ParameterBag"    parent="parameter_bag"      decorates="parameter_bag" public="true" />
+        <service id="Base\Service\HotParameterBag" parent="base.parameter_bag" decorates="parameter_bag" public="true" />
+
+        <service id="Base\Service\TranslatorInterface" alias="Base\Service\Translator"/>
+        <service id="Base\Service\Translator" decorates="translator" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="kernel" />
+        </service>
+
+        <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id=".inner"/>
+            <argument type="service" id="base.settings" />
+            <argument type="service" id="referrer" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Routing\AdvancedRouter" decorates="router">
+            <argument type="service" id=".inner" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="base.settings" />
+        </service>
+    </services>
+</container>

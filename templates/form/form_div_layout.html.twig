@@ -264,17 +264,17 @@
     <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">{{ "@fields.boolean.title" | trans([form.vars.label]) }}</h4>
-        </div>
-        <div class="modal-body">
-            {{ "@fields.boolean.text"|trans }}
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="$('#{{ form.vars.id }}-modal').modal('hide');">{{ "@fields.boolean.button.cancel"|trans }}</button>
-            <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
-        </div>
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">{{ "@fields.boolean.title" | trans([form.vars.label]) }}</h4>
+            </div>
+            <div class="modal-body">
+                {{ "@fields.boolean.text"|trans }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" onclick="$('#{{ form.vars.id }}-modal').modal('hide');">{{ "@fields.boolean.button.cancel"|trans }}</button>
+                <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.boolean.button.confirm"|trans }}</button>
+            </div>
         </div>
     </div>
     </div>
@@ -289,7 +289,7 @@
     'data-avatar-cropper' : form.vars.cropper,
 }) %}
 
-<div class="avatarupload" {{ block('attributes') }}>
+<div class="avatarupload">
 
     {{ form_widget(form, { attr: form.vars.attr }) }}
 
@@ -303,12 +303,16 @@
 
 {%- block imageupload_widget -%}
 {% set attr = attr|merge({
-    'data-image-field'     : form.vars.id,
-    'data-image-modal'     : form.vars.modal,
-    'data-image-cropper'   : form.vars.cropper,
-    'data-image-lightbox'  : form.vars.lightbox,
-    'data-image-thumbnail' : form.vars.thumbnail,
-    'data-image-ajax'      : form.vars.ajax,
+    'data-image-field'             : form.vars.id,
+    'data-image-modal'             : form.vars.modal,
+    'data-image-cropper'           : form.vars.cropper,
+    'data-image-lightbox'          : form.vars.lightbox,
+    'data-image-mimetypes'         : form.vars.mime_types|join(','),
+    'data-image-thumbnail'         : form.vars.thumbnail,
+    'data-image-ajax'              : form.vars.ajax,
+    'data-image-maxsize'           : form.vars.max_size,
+    'data-image-maxsize[feedback]' : "@fields.fileupload.max_size_feedback"   | trans(["{0}"]),
+    'data-image-uploadFailed'      : "@fields.fileupload.error.cannot_upload" | trans(),
 }) %}
 
 <div class="imageupload" {{ block('attributes') }}>
@@ -342,8 +346,16 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary {{id}}_modalClose">Cancel</button>
-                        <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
+                        <div class="form-text text-muted">
+                        {% if form.vars.max_size %}
+                            {{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}
+                            <div id="{{id}}_modal_feedback" class="invalid-image"></div>
+                        {% endif %}
+                        </div>
+                        <div>
+                            <button type="button" class="btn btn-secondary {{id}}_modalClose">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -397,22 +409,24 @@
         {% set filesLabel = 'files'|trans %}
 
         {{ form_widget(form.file, { attr: form.file.vars.attr, value: value }) }}
-        {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({ accept: accept|join(',') }) }) }}
 
-        {% if allow_delete and not form.vars.disabled %}
-        <div id="{{id}}_deleteBtn" class="deleteBtn" style="{% if files is empty %}display:none;{% endif %}">
-            <span style="cursor:pointer;">&#x2715;</span>
+        <div class="input-group">
+            {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}
+            {% if allow_delete and not form.vars.disabled %}
+            <div id="{{id}}_deleteBtn" class="input-group-text deleteBtn {% if files is empty %}hidden{% endif %}">
+                <span  style="cursor:pointer;">&#x2715;</span>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
 
     {% endif %}
     </div>
 
-    {% if form.vars.max_filesize %}
-    <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_file"|trans([form.vars.max_filesize|filesize])}}</div>
+    {% if form.vars.max_size %}
+    <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}</div>
     {% endif %}
     
-    {% set exts = form.vars.accept|extensions %}
+    {% set exts = form.vars.mime_types|extensions %}
     {% if exts is not empty %}
     <div class="form-filesize form-text text-muted">
         {{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}
@@ -843,10 +857,17 @@
     'data-number-field': form.vars.id,
     "data-number-up": form.vars.stepUp ?? 1,
     "data-number-down": form.vars.stepDown ?? 1,
-    "data-number-min": form.vars.min is defined and form.vars.max > 0 ? form.vars.max : 0,
 }) %}
 
-{% if form.vars.max is defined %}
+{% if form.vars.disabled %}
+    {% set attr = attr|merge({"disabled": form.vars.disabled}) %}
+{% endif %}
+
+{% if form.vars.min %}
+    {% set attr = attr|merge({"data-number-min": form.vars.min}) %}
+{% endif %}
+
+{% if form.vars.max %}
     {% set attr = attr|merge({"data-number-max": form.vars.max}) %}
 {% endif %}
 
@@ -854,6 +875,7 @@
 
     {{ form_widget(form, {attr:attr}) }} {# NumberType is returning and input type text... #}
     {# <input type="number" {% with {attr: attr} %}{{ block('attributes') }}{% endwith %} id="{{form.vars.id}}"  name="{{form.vars.id}}" value="{{form.vars.value}}"> #}
+
     <div class="input-group-text">
         <button class="btn btn-outline-secondary" {{form.vars.disabled ? "disabled=disabled" : ""}} id="{{form.vars.id}}-down" type="button"><i class="fas fa-minus"></i></button>
     </div>

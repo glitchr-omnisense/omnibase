@@ -1329,7 +1329,7 @@ namespace {
     function rgba2float(array $rgba):float { return ($rgba[0] * 4294967296) + ($rgba[1] * 65536) + ($rgba[2] * 256) + ($rgba[3]); }
     function rgba2hex(array $rgba) :string { return sprintf("#%02X%02X%02X%02X", ...array_pad($rgba,4,0)); }
 
-    function str_blankspace(int $length) { return str_repeat(" ", $length); }
+    function str_blankspace(int $length) { return $length < 1 ? "" : str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool { return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); }
     function usort_key(array $array, array $ordering = []) { return array_replace(array_flip($ordering), $array); }
 

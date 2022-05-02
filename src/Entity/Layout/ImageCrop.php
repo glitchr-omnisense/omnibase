@@ -61,6 +61,7 @@ class ImageCrop implements ImageCropInterface
     public function getPivotX() { return $this->x+$this->width/2; }
     public function getPivotY() { return $this->y+$this->height/2; }
 
+    protected $cropper;
     public function getCropper():array { dump($this); return []; }
     public function setCropper($cropper) { dump($cropper); exit(1); return $this; }
 

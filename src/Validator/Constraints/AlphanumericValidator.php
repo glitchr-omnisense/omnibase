@@ -3,9 +3,8 @@
 namespace Base\Validator\Constraints;
 
 use Base\Validator\Constraints\Alphanumeric;
-
+use Base\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
@@ -22,12 +21,7 @@ class AlphanumericValidator extends ConstraintValidator
         if (!is_string($entry))
             throw new UnexpectedValueException($entry, 'string');
 
-        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $entry, $matches)) {
-            // the argument must be a string or an object implementing __toString()
-            $this->context->buildViolation($constraint->message)
-            ->setParameter('{{ entry }}', $entry)
-            ->setTranslationDomain('validators')
-            ->addViolation();
-        }
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $entry, $matches))
+            $this->buildViolation($constraint, $entry)->addViolation();
     }
 }

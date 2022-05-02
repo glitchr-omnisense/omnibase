@@ -6,8 +6,7 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Database\Factory\ClassMetadataManipulator;
 
 use Base\Service\BaseService;
-use Base\Validator\Constraints\FileMimeType;
-use Base\Validator\Constraints\FileSize;
+use Base\Validator\Constraints\File;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -30,14 +29,13 @@ class FileType extends AbstractType implements DataMapperInterface
     protected $baseService;
     protected $translator;
 
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, ValidatorInterface $validator)
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->baseService              = $baseService;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->translator       = $baseService->getTranslator();
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->validator        = $validator;
     }
 
     /**
@@ -78,9 +76,9 @@ class FileType extends AbstractType implements DataMapperInterface
 
             'thumbnailWidth'     => null,
             'thumbnailHeight'    => 120,
-            'max_filesize'       => null,
+            'max_size'       => null,
             'max_files'          => null,
-            'mime_types'         => null,
+            'mime_types'         => [],
             "data_mapping"       => null,
         ]);
 
@@ -107,18 +105,14 @@ class FileType extends AbstractType implements DataMapperInterface
                 $form->add("url", UrlType::class);
 
             $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
-            if(array_key_exists('max_filesize', $options) && $options["max_filesize"])
-                $maxFilesize = min($maxFilesize, $options["max_filesize"]);
+            if(array_key_exists('max_size', $options) && $options["max_size"])
+                $maxFilesize = min($maxFilesize, $options["max_size"]);
 
-            $constraints = [new FileSize(["max" => $maxFilesize])];
-            if($options["mime_types"])
-                $constraints[] = new FileMimeType(["type" => $options["mime_types"]]);
-
-            if(!$options["dropzone"] || !$options["multiple"])
+            if(!$options["dropzone"])
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                     "required"    => $options["required"] && ($data === null),
                     "multiple"    => $options["multiple"],
-                    "constraints" => $constraints
+                    "constraints" => [new File(["max_size" => $maxFilesize,"mime_types" => $options["mime_types"]])]
             ]);
 
             if($options["allow_delete"])
@@ -181,14 +175,15 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['files'] = array_filter($files);
 
         $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
-        $view->vars['max_filesize'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
-        if($options["max_filesize"] !== null)
-            $view->vars['max_filesize'] = min($view->vars['max_filesize'], $options["max_filesize"]);
-        $acceptedFiles = $options["mime_types"] ?? [];
-        if(!$acceptedFiles && $entity)
-            $acceptedFiles = Uploader::getMimeTypes($options["class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
+        $view->vars['max_size'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+        if($options["max_size"] !== null)
+            $view->vars['max_size'] = min($view->vars['max_size'], $options["max_size"]);
+        
+        $mimeTypes = $options["mime_types"];
+        if(!$mimeTypes && $entity)
+            $mimeTypes = Uploader::getMimeTypes($options["class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
 
-        $view->vars["accept"] = $acceptedFiles;
+        $view->vars["mime_types"] = $mimeTypes;
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
         if(is_array($view->vars['value']))
@@ -213,9 +208,9 @@ class FileType extends AbstractType implements DataMapperInterface
             $options["dropzone"] = $options["dropzone"];
             if(!array_key_exists("url", $options["dropzone"])) $options["dropzone"]["url"] = $action;
             if($options['allow_delete'] !== null) $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
-            if($options['max_filesize'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_filesize"];
+            if($options['max_size'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_size"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
-            if($acceptedFiles) $options["dropzone"]["acceptedFiles"]  = implode(",", $acceptedFiles);
+            if($mimeTypes) $options["dropzone"]["mimeTypes"]  = implode(",", $mimeTypes);
 
             $options["dropzone"]["thumbnailWidth"]  = $options['thumbnailWidth'] ?? null;
             $options["dropzone"]["thumbnailHeight"] = $options['thumbnailHeight'] ?? null;

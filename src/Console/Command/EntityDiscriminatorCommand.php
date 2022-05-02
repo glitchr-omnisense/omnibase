@@ -21,7 +21,7 @@ class EntityDiscriminatorCommand extends Command
 
     protected function configure(): void
     {
-        $this->addArgument('entity', null, InputArgument::REQUIRED, 'Which entity should be considered ?');
+        $this->addArgument('entity', InputArgument::REQUIRED, 'Which entity should be considered ?');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

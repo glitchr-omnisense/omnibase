@@ -2,25 +2,26 @@
 
 namespace Base\Validator\Constraints;
 
-use Base\Validator\Constraints\FileMimeType;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Base\Validator\Constraints\File as ConstraintsFile;
+use Base\Validator\Constraints\FileSize;
+use Base\Validator\ConstraintValidator;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
-class FileMimeTypeValidator extends ConstraintValidator
+class FileValidator extends ConstraintValidator
 {
     public function validate($entry, Constraint $constraint)
     {
-        if (!$constraint instanceof FileMimeType)
-            throw new UnexpectedTypeException($constraint, FileMimeType::class);
-
         if (null === $entry || '' === $entry)
             return;
 
-        if (!$entry instanceof UploadedFile)
+        if (!$entry instanceof File)
             return;
+
+        if (!$constraint instanceof ConstraintsFile)
+            throw new UnexpectedTypeException($constraint, FileSize::class);
 
         $mimeTypes = $constraint->getAllowedMimeTypes();
         $types = array_map(function($mimeType) {
@@ -34,10 +35,18 @@ class FileMimeTypeValidator extends ConstraintValidator
 
         if (!$compatibleMimeType) {
 
-            $this->context->buildViolation($constraint->message)
+            $constraint->message = $constraint->messageMimeType;
+            $this->buildViolation($constraint, $entry)
                 ->setParameter('{0}', count($mimeTypes))
                 ->setParameter('{1}', implode(", ", $types))
-                ->setTranslationDomain('validators')
+                ->addViolation();
+
+        } else if ($entry->getSize() > $constraint->getMaxSize()) {
+
+            $constraint->message = $constraint->messageMaxSize;
+            $this->buildViolation($constraint, $entry)
+                ->setParameter('{0}', byte2str($constraint->getMaxSize()))
+                ->setParameter('{1}', byte2str($entry->getSize()))
                 ->addViolation();
         }
     }

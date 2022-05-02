@@ -46,8 +46,8 @@ class ImageType extends FileType
     {
         parent::buildView($view, $form, $options);
 
-        if(!($view->vars["accept"] ?? false) ) 
-             $view->vars["accept"] = "image/*";
+        if(!($view->vars["mime_types"] ?? false) ) 
+             $view->vars["mime_types"] = "image/*";
 
         $view->vars["thumbnail"] = $this->baseService->getAsset($options["thumbnail"]);
         $view->vars["modal"]     = json_encode($options["modal"]);
@@ -63,6 +63,7 @@ class ImageType extends FileType
 
             if(!array_key_exists('viewMode', $options["cropper"])) $options["cropper"]['viewMode']         = 2;
             if(!array_key_exists('autoCropArea', $options["cropper"])) $options["cropper"]['autoCropArea'] = true;
+            if(!array_key_exists('aspectRatio', $options["cropper"])) $options["cropper"]['aspectRatio'] = true;
             if(!array_key_exists('movable'    , $options["cropper"])) $options["cropper"]['movable']       = false;
             if(!array_key_exists('zoomable'   , $options["cropper"])) $options["cropper"]['zoomable']      = false;
             if(!array_key_exists('rotatable'  , $options["cropper"])) $options["cropper"]['rotatable']     = false;

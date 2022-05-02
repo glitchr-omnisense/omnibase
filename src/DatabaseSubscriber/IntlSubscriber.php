@@ -5,17 +5,15 @@ namespace Base\DatabaseSubscriber;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
-use Doctrine\Common\EventSubscriber;
+use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\Persistence\Event\LifecycleEventArgs as EventLifecycleEventArgs;
 use InvalidArgumentException;
 
-class IntlSubscriber implements EventSubscriber
+class IntlSubscriber implements EventSubscriberInterface
 {
     /**
      * @var string

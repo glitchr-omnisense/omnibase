@@ -67,7 +67,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'allow_delete' => true,
             'href'         => null,
 
-            'max_filesize' => null,
+            'max_size' => null,
             'max_files'    => null,
             'mime_types'   => null,
             'sortable'     => null
@@ -123,10 +123,10 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     ->generateUrl();
         }
 
-        $view->vars["href"]     = $options["href"] ?? $href;
+        $view->vars["href"]         = $options["href"] ?? $href;
         $view->vars["multiple"]     = $options["multiple"];
         $view->vars["allow_delete"] = $isNullable;
-        $view->vars["required"]     = !$isNullable && !$this->classMetadataManipulator->isToManySide($dataClass, $form->getName());
+        $view->vars["required"]     = $options["required"] ?? (!$isNullable && !$this->classMetadataManipulator->isToManySide($dataClass, $form->getName()));
 
         $data = $form->getData();
         $view->vars["entityId"] = json_encode(array_transforms(function($k, $e) use ($options):array {
@@ -163,7 +163,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 'required'      => !$isNullable,
                 'multiple'      => $options["multiple"] ?? false,
                 'href'          => $options["href"] ?? null,
-                'max_filesize'  => $options["max_filesize"],
+                'max_size'  => $options["max_size"],
                 'max_files'     => $options["max_files"],
                 'mime_types'    => $options["mime_types"],
                 'sortable'      => $options["sortable"]

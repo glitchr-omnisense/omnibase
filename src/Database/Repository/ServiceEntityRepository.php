@@ -39,10 +39,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     
     public function flush($entity = null) 
     { 
-        $entity = self::getFqcnEntityName();
-        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entity);
+        $entityFqcn = self::getFqcnEntityName();
+        $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entityFqcn);
 
-        if(count($entityList))
+        if(count($entityList) || $entity === null)
             $this->getEntityManager()->flush(); 
     }
     public function persist($entity) {

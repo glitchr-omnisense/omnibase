@@ -3,10 +3,8 @@
 
 namespace Base\Validator\Constraints;
 
-use Base\Entity\User\Notification;
-use Doctrine\ORM\PersistentCollection;
+use Base\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class NotBlankValidator extends ConstraintValidator
@@ -28,12 +26,7 @@ class NotBlankValidator extends ConstraintValidator
             $object = ($constraint->normalizer)($object);
         }
         
-        if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray()))) {
-
-            $this->context->buildViolation($constraint->message . ".property")
-                ->setParameter('{label}', is_object($object) ? $object->getMapping()["fieldName"] ?? "null" : "null")
-                ->setTranslationDomain('validators')
-                ->addViolation();
-        }
+        if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray())))
+            $this->buildViolation($constraint, $object)->addViolation();
     }
 }

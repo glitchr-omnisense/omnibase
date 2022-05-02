@@ -4,18 +4,12 @@ namespace Base\EntitySubscriber;
 
 use Base\Entity\Thread;
 use Base\EntityEvent\ThreadEvent;
-use Base\Entity\Thread as EntityThread;
 use Base\Enum\ThreadState;
-use Base\Service\BaseService;
-use Base\Form\Type\RoleType;
-
+use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Events;
-use Doctrine\Common\EventSubscriber;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
-use Symfony\Component\EventDispatcher\EventDispatcher;
 
-class ThreadSubscriber implements EventSubscriber
+class ThreadSubscriber implements EventSubscriberInterface
 {
     protected array $events;
     public function __construct($dispatcher) {

@@ -68,6 +68,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /* "abstract" (remove because of routes) */
@@ -117,6 +118,31 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $this->extension = $extension;
         return $this;
+    }
+
+    
+    /**
+     * Link to this controller to start the "connect" process
+     *
+     * @Route("/login/rescue", name="dashboard_login")
+     */
+    public function Login(AuthenticationUtils $authenticationUtils): Response
+    {
+        if ( ($user = $this->getUser()) && $user->isPersistent() )
+            return $this->redirectToRoute("dashboard");
+
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
+        return $this->render('@EasyAdmin/page/login.html.twig', [
+            'last_username' => $lastUsername,
+            'translation_domain' => 'forms',
+            'csrf_token_intention' => 'authenticate',
+            'target_path' => $this->baseService->getUrl('dashboard'),
+            'username_label' => 'login.identifier',
+            'password_label' => 'login.password',
+            'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
+        ]);
     }
 
     /**
@@ -196,7 +222,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "form" => $form->createView()
         ]);
     }
-    
+
     /**
      * Link to this controller to start the "connect" process
      *
@@ -238,14 +264,14 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
 
-            foreach(array_diff_key($data, $settings) as $name => $setting) {
+            foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
-                $this->settingRepository->flush();
-	    }
 
             $notification = new Notification("@controllers.dashboard_settings.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
+
+            $this->settingRepository->flush();
 
             return $this->baseService->refresh();
         }

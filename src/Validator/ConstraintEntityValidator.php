@@ -88,15 +88,12 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         return $this->getEntityManager($class)->getClassMetadata($class);
     }
 
-    public function buildViolation($value, Constraint $constraint): ConstraintViolationBuilderInterface
+    public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface
     {
-        $buildViolation = $this->context
-            ->buildViolation($constraint->message);
+        $buildViolation = parent::buildViolation($constraint, $value);
 
         $entity = $constraint->entity;
         if(!$entity) return $buildViolation;
-
-       // $errorPath = (null !== $constraint->errorPath ? $constraint->errorPath : $constraint->fields[0]);
 
         $entityExploded = explode("\\", \get_class($entity));
         $entityName = mb_strtolower(array_pop($entityExploded));
@@ -116,15 +113,11 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         }
 
         $class = $em->getClassMetadata(\get_class($entity));
-        $buildViolation
-            ->setParameter('{{ entity }}', $entityName ?? "")->setParameter('{entity}', $entityName ?? "")
-            ->setParameter('{{ value }}', $this->formatWithIdentifiers($em, $class, $value))->setParameter('{value}', $this->formatWithIdentifiers($em, $class, $value))
-            ->setParameter('{{ field }}', $constraint->fields[0] ?? "unknown")->setParameter('{field}', $constraint->fields[0] ?? "unknown")
-            ->setInvalidValue($value)
-            ->setTranslationDomain('validators')
-            ->addViolation();
+        $value = $this->formatWithIdentifiers($em, $class, $value);
 
-        return $buildViolation;
+        $this->setParameter("entity", $this->translator->entity($entityName));
+
+        return $buildViolation->addViolation();
     }
 
     public function validate($entity, Constraint $constraint)
@@ -144,8 +137,8 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         if (!\is_array($constraint->fields) && !\is_string($constraint->fields))
             throw new UnexpectedTypeException($constraint->fields, 'array');
 
-    //    if (null !== $constraint->errorPath && !\is_string($constraint->errorPath))
-      //      throw new UnexpectedTypeException($constraint->errorPath, 'string or null');
+        // if (null !== $constraint->errorPath && !\is_string($constraint->errorPath))
+        //     throw new UnexpectedTypeException($constraint->errorPath, 'string or null');
 
         $this->em = $this->getDoctrine()->getManagerForClass(get_class($entity));
     }

@@ -31,6 +31,7 @@ color:
 
 fileupload:
     error:
+      cannot_upload: "Impossible de téléverser le fichier"
       invalid_token: Jeton expiré.
       too_many: Trop de fichiers mis en ligne.
       too_big: "Fichier trop volumineux."
@@ -45,7 +46,8 @@ fileupload:
         description: "Déposez les fichiers ici ou cliquez pour télécharger"
         spinner: "Merci de patienter.."
 
-    max_file: "La taille de fichier maximale autorisée est de {0}."
+    max_size: "La taille de fichier maximale autorisée est de {0}."
+    max_size_feedback: "L'image selectionnée est trop volumineuse ({0})."
     mime_type: "{0, plural,
             =0 {}
             =1 {Seulement les fichiers {1} sont autorisés }

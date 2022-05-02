@@ -4,8 +4,10 @@ namespace Base\Annotations\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\Exception\InvalidMimeTypeException;
+use Base\Exception\InvalidSizeException;
 use Base\Exception\MissingPublicPathException;
-use Base\Traits\BaseTrait;
+use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -25,10 +27,10 @@ use Symfony\Component\Uid\Uuid;
  *   @Attribute("storage",      type = "string"),
  *   @Attribute("pool",         type = "string"),
  *   @Attribute("public",       type = "string"),
- *   @Attribute("keepNotFound", type = "boolean"),
+ *   @Attribute("missable", type = "boolean"),
  *
- *   @Attribute("size",         type = "string"),
- *   @Attribute("mime",         type = "array")
+ *   @Attribute("max_size",         type = "string"),
+ *   @Attribute("mime_types",         type = "array")
  * })
  */
 class Uploader extends AbstractAnnotation
@@ -42,15 +44,15 @@ class Uploader extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $this->public       = (!empty($data["public"] ?? null) ? ltrim($data["public"],"/") : null);
-        $this->pool         = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
+        $this->public    = (!empty($data["public"] ?? null) ? ltrim($data["public"],"/") : null);
+        $this->pool      = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
 
-        $this->storage      = $data["storage"] ?? null;
-        $this->keepNotFound = $data["keepNotFound"] ?? false;
-        $this->config       = $data["config"] ?? [];
-        $this->mimeTypes    = $data["mime"] ?? [];
+        $this->storage   = $data["storage"] ?? null;
+        $this->missable  = $data["missable"] ?? false;
+        $this->config    = $data["config"] ?? [];
+        $this->mimeTypes = $data["mime_types"] ?? [];
 
-        $this->maxSize      = str2dec($data["size"] ?? UploadedFile::getMaxFilesize());
+        $this->maxSize   = str2dec($data["max_size"] ?? UploadedFile::getMaxFilesize());
     }
 
     protected function getContents(): string { return file_get_contents($this->file["tmp_name"]); }
@@ -263,16 +265,16 @@ class Uploader extends AbstractAnnotation
             $file = is_string($entry) && file_exists($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
                 
-                if($this->keepNotFound) 
+                if($this->missable) 
                     $fileList[] = $entry;
          
                 continue;
             }
-            
+
             //
             // Check size restriction
-            if ($file->getSize() > $this->maxSize) continue;
-            // throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity).".");
+            if ($file->getSize() > $this->maxSize)
+                throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity).".");
 
             //
             // Check mime restriction
@@ -280,8 +282,8 @@ class Uploader extends AbstractAnnotation
             foreach($this->mimeTypes as $mimeType)
                 $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
 
-            if(!$compatibleMimeType) continue;
-            // throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." (expected: \"".implode(", ", $this->mimeTypes)."\").");
+            if(!$compatibleMimeType)
+                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." (expected: \"".implode(", ", $this->mimeTypes)."\").");
 
             //
             // Upload files
@@ -296,7 +298,6 @@ class Uploader extends AbstractAnnotation
         }
 
         $this->setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
-        
         return true;
     }
 
@@ -345,6 +346,8 @@ class Uploader extends AbstractAnnotation
 
             $this->deleteFiles([], $entity, $fieldName);
             self::setFieldValue($entity, $fieldName, null);
+
+            throw $e;
         }
     }
 
@@ -362,6 +365,8 @@ class Uploader extends AbstractAnnotation
             $this->deleteFiles($oldEntity, $entity, $fieldName);
             $old = self::getFieldValue($oldEntity, $fieldName);
             self::setFieldValue($entity, $fieldName, $old);
+
+            throw $e;
         }
     }
 

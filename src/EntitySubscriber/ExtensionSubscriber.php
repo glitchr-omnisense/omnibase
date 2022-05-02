@@ -5,15 +5,14 @@ namespace Base\EntitySubscriber;
 use Base\Database\Factory\EntityExtension;
 
 use Base\Enum\EntityAction;
+use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventArgs;
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\UnitOfWork;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class ExtensionSubscriber implements EventSubscriber
+class ExtensionSubscriber implements EventSubscriberInterface
 {
     /**
      * @return string[]

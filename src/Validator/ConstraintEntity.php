@@ -56,7 +56,7 @@ abstract class ConstraintEntity extends Constraint
             $constraintName = explode("\\", get_called_class());
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
 
-            $id = "@validators.".camel2snake($classname).".".camel2snake($firstField).".".camel2snake($constraintName);
+            $id = camel2snake($classname).".".camel2snake($firstField).".".camel2snake($constraintName);
             $this->message = $translator->trans($id);
             if ($this->message != $id) {
                 $this->message = $id;
@@ -71,7 +71,7 @@ abstract class ConstraintEntity extends Constraint
             $classname = explode("\\", get_class($entity));
             $classname = array_pop($classname);
 
-            $this->message = "@validators.".camel2snake($classname).".".camel2snake($firstField).".".camel2snake($constraintName);
+            $this->message = camel2snake($classname).".".camel2snake($firstField).".".camel2snake($constraintName);
         }
 
         return $this->message;

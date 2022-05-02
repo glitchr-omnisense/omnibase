@@ -31,6 +31,7 @@ color:
 
 fileupload:
   error:
+    cannot_upload: "Failed to upload the file"
     invalid_token: Token expired.
     too_many: Unexpected number of files provided.
     too_big: "File too big."
@@ -45,7 +46,8 @@ fileupload:
     description: "Drop files here or click to upload"
     spinner: "Please wait a little bit.."
 
-  max_file: "The maximum file size allowed is {0}."
+  max_size: "The maximum file size allowed is {0}."
+  max_size_feedback: "Image submitted is too big {0}."
   mime_type: "{0, plural,
           =0 {}
           =1 {Only {1} files are allowed }

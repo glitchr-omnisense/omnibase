@@ -40,7 +40,7 @@ class ImageService implements ImageServiceInterface
 
     protected static $projectDir;
     protected static $publicDir;
-    
+
     public function __construct(Environment $twig, AssetExtension $assetExtension, RouterInterface $router, ParameterBagInterface $parameterBag, ImagineInterface $imagine, Filesystem $filesystem)
     {
         self::$projectDir = dirname(__FILE__, 6);
@@ -56,9 +56,9 @@ class ImageService implements ImageServiceInterface
         catch(\Exception $e) {}
 
         $this->maxResolution = $parameterBag->get("base.image.max_resolution");
-        $this->maxQuality = $parameterBag->get("base.image.max_quality");
-        $this->enableWebp = $parameterBag->get("base.image.enable_webp");
-        $this->noImage    = $parameterBag->get("base.image.no_image");
+        $this->maxQuality    = $parameterBag->get("base.image.max_quality");
+        $this->enableWebp    = $parameterBag->get("base.image.enable_webp");
+        $this->noImage       = $parameterBag->get("base.image.no_image");
 
         $this->hashIds = new Hashids($parameterBag->get("kernel.secret"));
         self::$mimeTypes = new MimeTypes();
@@ -156,7 +156,7 @@ class ImageService implements ImageServiceInterface
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $lastFilter = end($filters);
-
+        
         $content = null;
         $pathPublic = null;
         if($lastFilter !== null) {
@@ -171,18 +171,15 @@ class ImageService implements ImageServiceInterface
                     throw new \Exception("Only last filter must implement \"".LastFilterInterface::class."\"");
             }
 
-            $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-            $pathPublic = self::getPublic($path);
-            $path = path_suffix($path, $pathSuffixes);
-            
             // Handle null path case
             if ($path === null) {
 
                 $path = $this->noImage;
                 $pathPublic = self::getPublic($this->noImage);
             }
-
+            
             // No public path can be created.. so just apply filter to the image
+            $pathPublic = self::getPublic($path);
             if($pathPublic === null) {
 
                 // GD does not support other palette than RGB..
@@ -203,6 +200,10 @@ class ImageService implements ImageServiceInterface
             //
             // Compute a response..
             // Cache not found
+            $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+            $pathPublic = self::getPublic($path);
+            $path = path_suffix($path, $pathSuffixes);
+
             if (!$this->filesystem->getOperator()->fileExists($path)) {
 
                 if($lastFilter instanceof SvgFilter) {

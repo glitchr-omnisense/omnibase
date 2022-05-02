@@ -3,14 +3,15 @@
 namespace Base\DatabaseSubscriber;
 
 use Base\Annotations\AnnotationReader;
+use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
+use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManager;
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
-class AnnotationSubscriber implements EventSubscriber {
+class AnnotationSubscriber implements EventSubscriberInterface {
 
     private $entityManager;
     protected array $subscriberHistory = [];
@@ -24,7 +25,7 @@ class AnnotationSubscriber implements EventSubscriber {
     public function getSubscribedEvents(): array
     {
         return [
-            
+
             Events::loadClassMetadata,
             Events::postLoad,
 
@@ -38,7 +39,7 @@ class AnnotationSubscriber implements EventSubscriber {
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
-
+        dump("----> ".$className);
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
         

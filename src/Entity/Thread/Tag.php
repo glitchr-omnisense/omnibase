@@ -74,8 +74,8 @@ class Tag implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", size="2MB", mime={"image/*"})
-     * @AssertBase\FileSize(max="2MB", groups={"new", "edit"})
+     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/*"})
+     * @AssertBase\File(max_size="2MB", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $icon;
     public function getIcon() { return Uploader::getPublic($this, "icon"); }

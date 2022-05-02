@@ -106,7 +106,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 }
 
                 if ($fieldOptions["form_type"] == FileType::class || $fieldOptions["form_type"] == ImageType::class || $fieldOptions["form_type"] == AvatarType::class) {
-                    $fieldOptions["max_filesize"] = $fieldOptions["max_filesize"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
+                    $fieldOptions["max_size"] = $fieldOptions["max_size"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
                     $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
                     $fieldOptions["empty_data"]   = $settingValue ?? "";
                 }
