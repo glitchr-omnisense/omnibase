@@ -289,7 +289,7 @@
     'data-avatar-cropper' : form.vars.cropper,
 }) %}
 
-<div class="avatarupload">
+<div class="avatarupload" {{ block('attributes') }}>
 
     {{ form_widget(form, { attr: form.vars.attr }) }}
 
