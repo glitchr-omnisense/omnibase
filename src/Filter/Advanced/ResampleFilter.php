@@ -2,11 +2,11 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
-use Liip\ImagineBundle\Exception\Imagine\Filter\LoadFilterException;
-use Liip\ImagineBundle\Exception\InvalidArgumentException;
+use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -17,6 +17,12 @@ class ResampleFilter implements FilterInterface
      * @var ImagineInterface
      */
     private $imagine;
+
+    
+    public function __toString() { 
+        $md5sum = md5(serialize($this->options));
+        return mod($this->angle, 360) ? "resample:".$md5sum : "";
+    }
 
     public function __construct(ImagineInterface $imagine, array $options = [])
     {
@@ -34,7 +40,7 @@ class ResampleFilter implements FilterInterface
             $this->delTemporaryFile($tmpFile);
         } catch (\Exception $exception) {
             $this->delTemporaryFile($tmpFile);
-            throw new LoadFilterException('Unable to save/open file in resample filter loader.', $exception->getCode(), $exception);
+            throw new FileNotFoundException('Unable to save/open file in resample filter loader.', $exception->getCode(), $exception);
         }
 
         return $image;

@@ -2,9 +2,9 @@
 
 namespace Base\Filter\Advanced;
 
+use Base\Filter\FilterInterface;
 use Imagine\Filter\Basic\Crop;
 use Imagine\Filter\Basic\Resize;
-use Imagine\Filter\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\Point;
@@ -12,6 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FixedFilter implements FilterInterface
 {
+    public function __toString() { return ($this->options["width"] ?? "auto")."x".($this->options["height"] ?? "auto"); }
     public function __construct(array $options = [])
     {
         $this->options = $options;

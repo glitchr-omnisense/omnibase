@@ -7,9 +7,6 @@ use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Repository\Layout\Widget\SlotRepository as WidgetSlotRepository;
 use Base\Repository\Layout\WidgetRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Exception;
-use Symfony\Component\Uid\Uuid;
 
 class WidgetProvider implements WidgetProviderInterface
 {

@@ -3,6 +3,7 @@
 namespace Base\Routing;
 
 use Base\Service\BaseSettings;
+use Base\Service\LocaleProvider;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -18,9 +19,11 @@ class AdvancedRouter implements AdvancedRouterInterface
 {
     protected $router;
 
-    public function __construct(RouterInterface $router, RequestStack $requestStack, BaseSettings $baseSettings)
+    public function __construct(RouterInterface $router, RequestStack $requestStack, BaseSettings $baseSettings, string $debug)
     {
         $this->router = $router;
+        $this->debug  = $debug;
+
         $this->requestStack = $requestStack;
         $this->baseSettings = $baseSettings;
     }
@@ -97,19 +100,22 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function generateUrl(string $route = "", array $routeParameters = []): ?string { return $this->getUrl($route, $routeParameters); }
     public function getCurrentUrl(): ?string { return $this->getUrl(); }
-    public function getUrl(?string $route = null, array $routeParameters = []): ?string
+    public function getUrl(?string $routeName = null, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
     {
-        if (!empty($route)) {
+        if (!empty($routeName)) {
 
-            try { return $this->router->generate($route, $routeParameters); }
+            try { return $this->router->generate($routeName, $routeParameters, $referenceType); }
+            catch (RouteNotFoundException $e) { }
+
+            try { return $this->router->generate($routeName.".".LocaleProvider::getDefaultLang(), $routeParameters, $referenceType); }
             catch (RouteNotFoundException $e) { return null; }
         }
 
         $request = $this->getRequest();
         if(!$request) return null;
 
-        $route = $request->get('_route');
-        return $route ? $this->router->generate($route) : null;
+        $routeName = $request->get('_route');
+        return $routeName ? $this->router->generate($routeName, [], $referenceType) : null;
     }
 
     public function getRouteArray(?string $routeUrl): ?array
@@ -121,12 +127,12 @@ class AdvancedRouter implements AdvancedRouterInterface
         if ($baseDir && strpos($path, $baseDir) === 0)
             $path = mb_substr($path, strlen($baseDir));
 
-        try { return $this->router->match($path); }
+        try { return $this->router->match(rtrim($path, "/")); }
         catch (ResourceNotFoundException $e) { return null; }
     }
 
     public function getRoute(?string $routeUrl): ?Route 
-    { 
+    {
         $routeArray = $this->getRouteArray($routeUrl);
         if(!$routeArray) return null;
 
@@ -135,9 +141,9 @@ class AdvancedRouter implements AdvancedRouterInterface
             $routeName .= ".".$routeArray["_group"];
         
         $routeName = $routeArray["_route"];
-        if(array_key_exists("_locale", $routeArray)) 
+        if(array_key_exists("_locale", $routeArray))
             $routeName .= ".".$routeArray["_locale"];
-            
+
         return $this->router->getRouteCollection()->get($routeName);
     }
 
@@ -200,11 +206,8 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
-        if(str_starts_with($routeName, "_")) {
-        
-            try { return $this->router->generate($routeName, $routeParameters, $referenceType); }
-            catch (Exception $e) { return null; }
-        }
+        if(str_starts_with($routeName, "_")) 
+            return $this->getUrl($routeName, $routeParameters, $referenceType);
 
         // Handle CLI case using either $_SERVER variables,
         // or base settting database information, if available.
@@ -242,6 +245,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         // Prepare the default route if not found.
         // In case a group doesn't exists, it will be replaced by the first group found in the route collection list.
         $routeGroups = $this->getRouteGroups($routeName);
+
         $routeDefaultGroup = first($routeGroups);
         $routeDefaultName = $routeBase.($routeDefaultGroup ? ".".$routeDefaultGroup : "");
         if(!$routeDefaultName) $routeDefaultName = $this->getRouteName($this->getUrl($routeBase, $routeParameters));
@@ -258,11 +262,11 @@ class AdvancedRouter implements AdvancedRouterInterface
         }
         
         // Try to compute subgroup (or base one)
-        try { $routeUrl = $baseDir . $this->router->generate($routeName, $routeParameters, $referenceType); }
-        catch (Exception $e) { $routeUrl = $baseDir . $this->router->generate($routeDefaultName, $routeParameters, $referenceType); }
+        $routeUrl ??= $this->getUrl($routeName, $routeParameters, $referenceType);
+        $routeUrl ??= $this->getUrl($routeDefaultName, $routeParameters, $referenceType);
 
         // Clean up double slashes..
-        $parts = parse_url($routeUrl);
+        $parts = filter_var($routeUrl, FILTER_VALIDATE_URL) ? parse_url($routeUrl) : ["path" => $routeUrl];
         $parts["path"] = "/".str_strip(str_replace("//", "/", $parts["path"]), "/");
         $routeUrl = build_url($parts);
 

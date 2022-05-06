@@ -8,17 +8,16 @@ use Base\Service\LocaleProviderInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
-    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, RouterInterface $router)
+    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator)
     {
         $this->localeProvider = $localeProvider;
-        $this->router         = $router;
         $this->translator     = $translator;
     }
+
     public static function getSubscribedEvents(): array
     {
          /* 

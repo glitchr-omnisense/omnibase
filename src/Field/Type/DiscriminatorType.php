@@ -42,7 +42,7 @@ class DiscriminatorType extends AbstractType
 
             $form = $event->getForm();
 
-            $class = $options["data_class"] ?? $this->formFactory->guessType($form->getParent());
+            $class = $options["data_class"] ?? $this->formFactory->guessClass($form->getParent());
             if(!$class) throw new \Exception("Entity cannot be determined for " . $form->getName());
 
             $discriminatorMap   = $this->classMetadataManipulator->getDiscriminatorMap($class);

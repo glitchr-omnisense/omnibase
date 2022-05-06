@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Enum\Quadrant\Quadrant;
 use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
@@ -49,11 +50,12 @@ class Image implements IconizeInterface
     /**
      * @ORM\Column(type="text")
      * @AssertBase\File(max_size="2MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", max_size="2MB")
+     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
      */
     protected $source;
     public function getSource()     { return Uploader::getPublic($this, "source"); }
     public function getSourceFile() { return Uploader::get($this, "source"); }
+    public function getSourceMeta() { return getimagesize($this->getSource()); }
     public function setSource($source): self
     {
         $this->source = $source;
@@ -63,6 +65,17 @@ class Image implements IconizeInterface
     public function get()     { return $this->getSource(); }
     public function getFile() { return $this->getSourceFile(); }
     public function set($source): self { return $this->setSource($source); }
+
+    /**
+     * @ORM\Column(type="quadrant8")
+     */
+    protected $quadrant = Quadrant::O;
+    public function getQuadrant(): string { return $this->quadrant; }
+    public function setQuadrant(string $quadrant): self
+    {
+        $this->quadrant = $quadrant;
+        return $this;
+    }
 
     /**
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})

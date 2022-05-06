@@ -2,7 +2,6 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Model\PaginationInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -10,27 +9,18 @@ use Twig\TwigFilter;
 
 final class ShareTwigExtension extends AbstractExtension
 {
-    public function getName() { return 'paginator_extension'; }
-
-    public function __construct(Environment $twig, TranslatorInterface $translator)
-    {
-        $this->twig = $twig;
-        $this->translator = $translator;
-    }
-
+    public function getName() { return 'share_extension'; }
     public function getFilters()
     {
         return [
-            new TwigFilter('share',            [$this, 'share'   ], ['is_safe' => ['all']]),
+            new TwigFilter('share',            [$this, 'share'   ], ["needs_environment" => true, 'is_safe' => ['all']]),
         ];
     }
 
-    public function share(string $url,  array $options = [], ?array $shareList = null): ?string
+    public function share(Environment $twig, string $url,  array $options = [], ?string $template = null): ?string
     {
-        if ($shareList === null)
-            $shareList = $this->baseService->get("base.share");
-
-        dump($shareList);
+        $adapters = $this->baseService->get("base.share");
+        dump($adapters);
 
         return null;
     }

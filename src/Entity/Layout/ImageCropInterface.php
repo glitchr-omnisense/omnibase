@@ -4,9 +4,6 @@ namespace Base\Entity\Layout;
 
 interface ImageCropInterface
 {
-    public function getQuadrant();
-    public function setQuadrant(string $quadrant);
-
     public function getPivotX();
     public function getPivotY();
     

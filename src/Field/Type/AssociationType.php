@@ -157,7 +157,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             } else {
 
-                $dataClass = $options["class"] ?? $this->formFactory->guessType($event, $options);
+                $dataClass = $options["class"] ?? $this->formFactory->guessClass($event, $options);
                 if(!$dataClass)
                     throw new \RuntimeException(
                         'Unable to get "class" or compute "data_class" from form "'.$form->getName().'" or any of its parents. '.
@@ -239,7 +239,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $formParent  = $form->getParent();
 
         $options     = $formParent->getConfig()->getOptions();
-        $options["class"]    = $options["class"] ?? $this->formFactory->guessType($formParent, $options);
+        $options["class"]    = $options["class"] ?? $this->formFactory->guessClass($formParent, $options);
         $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($formParent, $options);
 
         $data = new ArrayCollection();

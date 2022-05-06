@@ -4,7 +4,7 @@
         {% for item in widget.widgets %}
             {% set url = item.__toUrl() %}
             {% if url is not empty %} 
-                <li><a href="{{ item.__toUrl() }}" class="{{ class|default(null) }}">{{item|raw}}</a></li>
+                <li>{{ urlify(url, item|raw, {"class": class|default(null)}) }}</li>
             {% endif %}
         {% endfor %}
         

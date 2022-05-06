@@ -4,6 +4,7 @@ namespace Base\Filter\Advanced;
 
 class DownscaleFilter extends ScaleFilter
 {
+    public function __toString() { return "dwn".parent::__toString(); }
     public function __construct()
     {
         parent::__construct([], 'max', 'by', false);

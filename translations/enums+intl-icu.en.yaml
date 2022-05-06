@@ -147,9 +147,35 @@ spam_api:
 quadrant:
   singular: "cardinal quadrant"
   plural: "cardinal quadrants"
+  east:
+    singular: east
+    plural: quadrant.east.singular
+  south:
+    singular: south
+    plural: quadrant.south.singular
+  west:
+    singular: west
+    plural: quadrant.west.singular
+  north:
+    singular: north
+    plural: quadrant.north.singular
+
 quadrant8:
   singular: "ordinal quadrant"
   plural: "ordinal quadrants"
+  northeast:
+    singular: north-east
+    plural: quadrant.northeast.singular
+  northwest:
+    singular: north-west
+    plural: quadrant.northwest.singular
+  southeast:
+    singular: south-east
+    plural: quadrant.southeast.singular
+  southwest:
+    singular: south-west
+    plural: quadrant.southwest.singular
+
 quadrant16:
   singular: "intercardinal quadrant"
   plural: "intercardinal quadrants"

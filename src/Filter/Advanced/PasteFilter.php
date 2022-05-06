@@ -2,7 +2,7 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Point;
@@ -13,6 +13,8 @@ class PasteFilter implements FilterInterface
      * @var ImagineInterface
      */
     protected $imagine;
+
+    public function __toString() { return "paste:".$this->x."x".$this->y; }
 
     public function __construct(ImageInterface $destination, int $x = 0, int $y = 0)
     {

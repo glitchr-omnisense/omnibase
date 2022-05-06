@@ -8,6 +8,7 @@ use Base\Entity\Layout\AttributeTranslation;
 
 /**
  * @ORM\Entity()
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  */
 class HyperlinkTranslation extends AttributeTranslation
 {

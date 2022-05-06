@@ -2,11 +2,13 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 
 class InterlaceFilter implements FilterInterface
 {
+    public function __toString() { return "interlace:".$this->mode; }
+
     public function __construct(string $mode = ImageInterface::INTERLACE_LINE)
     {
         $this->mode = $mode;

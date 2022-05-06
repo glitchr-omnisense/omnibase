@@ -6,10 +6,19 @@
 {% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
 
 {% block body_class 'page-login' %}
+{% block head_stylesheets %}
+    <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
+    <link rel="stylesheet" href="{{ asset('bundles/base/easyadmin.css') }}">
+{% endblock %}
+{% block page_title %} {{ea is defined ? ea.dashboardTitle|raw : ''}} {% endblock %}
+
+{% block flash_messages %}
+    {{ include(ea.templatePath('flash_messages')) }}
+{% endblock flash_messages %}
 
 {% block wrapper_wrapper %}
     {% set page_title = page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '') %}
-    {% set _username_label = username_label is defined ? username_label|trans : 'login_page.username'|trans({}, 'EasyAdminBundle') %}
+    {% set _identifier_label = identifier_label is defined ? identifier_label|trans : 'login_page.identifier'|trans({}, 'EasyAdminBundle') %}
     {% set _password_label = password_label is defined ? password_label|trans : 'login_page.password'|trans({}, 'EasyAdminBundle') %}
     {% set _sign_in_label = sign_in_label is defined ? sign_in_label|trans : 'login_page.sign_in'|trans({}, 'EasyAdminBundle') %}
 
@@ -34,8 +43,6 @@
                 {% endblock header_logo %}
             </div>
         </header>
-        
-        {{ include('@EasyAdmin/flash_messages.html.twig') }}
 
         {% if error|default(false) %}
             <div class="w-100 alert alert-danger">
@@ -53,13 +60,13 @@
                 <input type="hidden" name="{{ target_path_parameter|default('_target_path') }}" value="{{ target_path|default(ea is defined ? path(ea.dashboardRouteName) : '/') }}" />
 
                 <div class="input-group mt-4 mb-3">
-                    <span class="input-group-text h-auto" id="username-addons"><i class="fa fa-fw fa-user"></i></span>
-                    <input type="text" id="username" name="{{ username_parameter|default('username') }}" class="form-control" placeholder="{{ _username_label }}" value="{{ last_username|default('') }}" required autofocus>
+                    <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-user"></i></span>
+                    <input type="text" id="identifier" name="{{ identifier_parameter|default('identifier') }}" class="form-control" placeholder="{{ _identifier_label|trans }}" value="{{ last_identifier|default('') }}" required autofocus>
                 </div>
 
                 <div class="input-group field-password mb-3">
-                    <span class="input-group-text h-auto" id="username-addons"><i class="fa fa-fw fa-lock"></i></span>
-                    <input type="password" id="password" name="{{ password_parameter|default('password') }}" class="form-control" placeholder="{{ _password_label }}" required>
+                    <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-lock"></i></span>
+                    <input type="password" id="password" name="{{ password_parameter|default('password') }}" class="form-control" placeholder="{{ _password_label|trans }}" required>
                 </div>
 
                 <div class="text-center form-group field-button">

@@ -16,7 +16,7 @@ trait TranslatableTrait
 {
     private static $translationClass;
     public static function getTranslationEntityClass(
-        bool $withInheritance = true, // Required in some cases where you must access main class without inheritance
+        bool $withInheritance = true, // This is required in some cases, where you must access main class without inheritance
         bool $selfClass = false // Proxies\__CG__ error, if not true during discriminator map building (TranslationType)
     ): ?string
     {

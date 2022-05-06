@@ -50,7 +50,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     public const GUESS_FROM_DATA     = "GUESS_FROM_DATA";
     public const GUESS_FROM_VIEW     = "GUESS_FROM_VIEW";
     
-    public function guessType(FormInterface|FormEvent $form, ?array $options = null) :?string {
+    public function guessClass(FormInterface|FormEvent $form, ?array $options = null) :?string {
 
         if($form instanceof FormEvent) {
             $data = $form->getData();
@@ -158,8 +158,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
     public function followPropertyPath(FormInterface $form, array &$propertyPath): ?FormInterface
     {
-        $originalFormName = 
-        $originalPropertyPathSt = implode(".", $propertyPath);
         foreach($propertyPath as $path) {
 
             if(!$form->has($path)) break;
@@ -251,7 +249,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             }
 
             $annotations = AnnotationReader::getAnnotationReader()->getAnnotations($target, OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
-            $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$target] ?? []));
+            $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$target][$form->getName()] ?? []));
         }
 
         return $options["sortable"] ?? false;

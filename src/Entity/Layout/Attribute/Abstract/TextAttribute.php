@@ -11,6 +11,7 @@ use Base\Repository\Layout\Attribute\Abstract\TextAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TextAttributeRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "text" )
  */
 

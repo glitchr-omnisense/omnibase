@@ -106,8 +106,8 @@
 
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 
-    {% if form.vars["tokenSeparators"] is defined %}
-    <div class="form-filesize form-text text-muted">{{"@fields.select.token_separator"|trans(["'"~form.vars["tokenSeparators"]|join("' '")~"'"])}}</div>
+    {% if form.vars.tokenSeparators is defined %}
+    <div class="form-filesize form-text text-muted">{{"@fields.select.token_separator"|trans(["'"~form.vars.tokenSeparators|join("' '")~"'"])}}</div>
     {% endif %}
 
 {% endblock select2_widget %}
@@ -301,6 +301,12 @@
 </div>
 {%- endblock -%}
 
+{%- block imageupload_label -%}
+    {{ form_label(form, null, {'required': required})}}
+    {{ clipboard("copy", form.vars.value|webp, {style:"margin-left:0.25em;"}) }}
+
+{% endblock imageupload_label %}
+
 {%- block imageupload_widget -%}
 {% set attr = attr|merge({
     'data-image-field'             : form.vars.id,
@@ -367,7 +373,6 @@
 
         {% if form.alt is defined %}
             {%- set row_attr = row_attr|merge({'class': 'alt' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')}) -%}
-
             {{ form_row(form.alt, {'label': form.alt.vars.label ?? "@fields.imageupload.alt"|trans, row_attr:row_attr})}}
         {% endif %}
 
@@ -387,6 +392,7 @@
     'data-file-href'                  : form.vars.href|default("")|urldecode,
     'data-file-max-files'             : form.vars.max_files,
 
+    'data-file-iconify'               : "fas fa-2x fa-search-plus"|iconify,
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
     'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
@@ -408,7 +414,7 @@
         {% set title = '' %}
         {% set filesLabel = 'files'|trans %}
 
-        {{ form_widget(form.file, { attr: form.file.vars.attr, value: value }) }}
+        {{ form_widget(form.file, { attr: form.file.vars.attr}) }}
 
         <div class="input-group">
             {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}
@@ -425,14 +431,10 @@
     {% if form.vars.max_size %}
     <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}</div>
     {% endif %}
-    
+
     {% set exts = form.vars.mime_types|extensions %}
-    {% if exts is not empty %}
-    <div class="form-filesize form-text text-muted">
-        {{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}
-    <div>
-    {% endif %}
-    
+    {% if exts is not empty %}<div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>{% endif %}
+
     {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {{ form_errors(form.raw, {row_attr:row_attr}) }}
 
@@ -548,7 +550,7 @@
         'data-empty-collection': block('collection2_empty')
     }) %}
     
-    {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
+    {%- set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') -%}
     {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
     {% set group = form.vars.group %}
@@ -556,9 +558,11 @@
         {% if form.children is not empty or allow_add != false %}
         <div class="form-group">
             {{ form_label(form)}}
+
             <div {{ block('widget_attributes') }}>
                 {{ form_widget(form) }}
             </div>
+
         </div>
         {% endif %}
     {% else %}
@@ -596,10 +600,8 @@
 
 {%- endblock collection2_widget -%}
 
-{%- block collection2_entry_row -%}
-    {{ form_row(form) }}
-{%- endblock collection2_entry_row -%}
-
+{%- block collection2_entry_row -%}{{ form_row(form) }}{%- endblock collection2_entry_row -%}
+{%- block collection2_entry_label -%}{# Empty label on purpose #}{%- endblock -%}
 {%- block collection2_entry_widget -%}
 
     {% set group = form_parent(form).vars.group ?? false %}
@@ -633,9 +635,14 @@
 
                         <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
                         {% set label = form_parent(form).vars.entry_label ?? null %}
-                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form_parent(form).vars.entry_options.data_class ?? null, form.vars.href ?? null) : null %}
+                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
                         {% if  label != false %}
                             {{ label|default(value)|stringify }}
+                            {% if form.vars.value is defined %}
+                                {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}
+                                {{ url ? " :&nbsp;" : "" }}
+                                {{ clipboard("copy", url, {style:"margin-left:0.25em;"})|raw }}
+                            {% endif %}
                         {% endif %}
 
                     {{ linkable ? "</a>": "</button>" }}
@@ -667,14 +674,19 @@
         {% if row_group %}
 
             {% set label = form_parent(form).vars.entry_label %}
-            {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form_parent(form).vars.entry_options.data_class ?? null, form.vars.href ?? null) : null %}
+            {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
             {% if  label != false %}
-                <label>{{ label|default(value)|stringify }}</label>
+                <label>
+                    {{ label|default(value)|stringify }}
+                    {% if form.vars.value is defined %}
+                        {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}
+                        {{ url ? " :&nbsp;" : "" }}
+                        {{ clipboard("copy", url, {style:"margin-left:0.25em;"})|raw }}
+                    {% endif %}
+                </label>
             {% endif %}
 
-            <div class="form-collection-group">
-            {{ form_widget(form, {attr:attr}) }}
-            </div>
+            <div class="form-collection-group">{{ form_widget(form, {attr:attr}) }}</div>
 
         {% else %}
             {{ form_widget(form, {attr:attr}) }}
@@ -857,19 +869,16 @@
     'data-number-field': form.vars.id,
     "data-number-up": form.vars.stepUp ?? 1,
     "data-number-down": form.vars.stepDown ?? 1,
+    "data-number-up-throttle": form.vars.throttleUp ?? 0,
+    "data-number-down-throttle": form.vars.throttleDown ?? 0,
 }) %}
 
 {% if form.vars.disabled %}
     {% set attr = attr|merge({"disabled": form.vars.disabled}) %}
 {% endif %}
 
-{% if form.vars.min %}
-    {% set attr = attr|merge({"data-number-min": form.vars.min}) %}
-{% endif %}
-
-{% if form.vars.max %}
-    {% set attr = attr|merge({"data-number-max": form.vars.max}) %}
-{% endif %}
+{% if form.vars.min %}{% set attr = attr|merge({"data-number-min": form.vars.min}) %}{% endif %}
+{% if form.vars.max %}{% set attr = attr|merge({"data-number-max": form.vars.max}) %}{% endif %}
 
 <div class="input-group form-number">
 
@@ -886,13 +895,11 @@
 
 {%- endblock -%}
 
-
 {%- block cropper_widget -%}
 
 {# Search for target inside form based on parent including translation #}
 {% set form0 = form %}
 {% set form = form.ancestor %}
-
 {% for child in target %}
 
     {% set form = form[child] %}
@@ -910,12 +917,18 @@
 
 <div class="form-group form-cropper">
     <div class="cropper">
-        <img id="{{id}}_image" src="{{form.vars.value|imagine|image}}">
+        <img id="{{ id }}_image" class="hidden" src="{{form.vars.value|imagine|image}}">
         <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
+
+        <div class="hidden aspect-ratios" id="{{ id }}_aspectRatios">
+        {% for label,aspectRatio in form0.vars.aspectRatios %}
+            <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}">{{label|trans}}</button>
+        {% endfor %}
+        </div>
     </div>
 
-    {%- set attr = attr|merge({'class': 'form-cropper-parameters' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{ form_widget(form0, {attr:attr}) }} 
+    {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {{ form_widget(form0, {attr:attr}) }}
 </div>
 
 {%- endblock -%}
@@ -924,11 +937,8 @@
 
 {% set nquadrants = count(form.vars.quadrants)-1 %}
 {% set quadrants  = nquadrants < 8 ? "" : nquadrants %}
-<div class="form-group form-quadrant">
-    {{ form_label(form) }}
-    <div id="{{id}}_matrix">
-    {% include '@Base/form/quadrant/quadrant'~quadrants~'.html.twig' %}
-    </div>
+<div id="{{id}}_matrix">
+{% include '@Base/form/quadrant/quadrant'~quadrants~'.html.twig' %}
 </div>
 
 {% set attr = attr|merge({
@@ -937,10 +947,9 @@
     'data-quadrant-value': form.vars.value
 }) %}
 
-{{ form_widget(form, {attr:attr}) }}
+{{ form_widget(form.wind, {attr:attr}) }}
 
 {%- endblock -%}
-
 
 {%- block password_row -%}
 

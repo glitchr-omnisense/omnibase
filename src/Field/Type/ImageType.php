@@ -37,6 +37,8 @@ class ImageType extends FileType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        parent::buildForm($builder, $options);
+        
         if($options["alt"]   !== null) $builder->add("alt",   TextType::class, $options["alt"]);
         if($options["multiple"] && is_array($options["cropper"]))
             throw new InvalidArgumentException("There can be only one picture if you want to crop, please disable 'multiple' option");
@@ -55,6 +57,7 @@ class ImageType extends FileType
         $view->vars["cropper"] = null;
         if(is_array($options["cropper"])) {
 
+            
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
             

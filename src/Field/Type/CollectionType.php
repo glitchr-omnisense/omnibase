@@ -25,9 +25,9 @@ class CollectionType extends AbstractType
     {
         $resolver->setDefaults([
             'form2' => false,
-            'length' => 1,
-            'allow_add' => false,
-            'allow_delete' => false,
+            'length' => 0,
+            'allow_add' => true,
+            'allow_delete' => true,
             'href' => null,
             'prototype' => true,
             'prototype_data' => null,
@@ -51,13 +51,13 @@ class CollectionType extends AbstractType
             return $value;
         });
 
-        // $resolver->setNormalizer('required', function (Options $options, $value) {
-        //     // Collection is always submitted regardless of its options..
-        //     // It returns at least an empty array..
-        //     // NB: Child fields "required" options are deduced from parents..
-        //     //     .. but collection is not supposed to knows about child requirements, IMO
-        //     return true;
-        // });
+        $resolver->setNormalizer('required', function (Options $options, $value) {
+            // Collection is always submitted regardless of its options..
+            // It returns at least an empty array..
+            // NB: Child fields "required" options are deduced from parents..
+            //     .. but collection is not supposed to knows about child requirements, IMO
+            return true;
+        });
 
         $resolver->setNormalizer('allow_add',     fn(Options $options, $value) => $options["length"] == 0 && $value);
         $resolver->setNormalizer('allow_delete',  fn(Options $options, $value) => $options["length"] == 0 && $value);
@@ -138,7 +138,7 @@ class CollectionType extends AbstractType
     {
         $view->vars['length'] = $options["length"];
 
-        $prefixOffset = -2;
+        $prefixOffset = -1;
         // check if the entry type also defines a block prefix
         /** @var FormInterface $entry */
         foreach ($form as $entry) {

@@ -152,7 +152,7 @@ class ClassMetadataManipulator
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array")
-                $validFields[$fieldName] = ["form_type" => ArrayType::class];
+                $validFields[$fieldName] = ["form_type" => SelectType::class, "tags" => true];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "integer")
                 $validFields[$fieldName] = ["form_type" => NumberType::class];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "string")

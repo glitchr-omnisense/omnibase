@@ -10,7 +10,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Google\ReCaptcha\Badge\CaptchaBadge;
-
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,23 +43,23 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function __construct(Referrer $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
     {
-        $this->referrer = $referrer;
-        $this->entityManager = $entityManager;
+        $this->referrer       = $referrer;
+        $this->entityManager  = $entityManager;
         $this->userRepository = $entityManager->getRepository(User::class);
 
-        $this->router = $router;
+        $this->router           = $router;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->baseService = $baseService;
+        $this->baseService      = $baseService;
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
-        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
+        return new RedirectResponse($this->router->generate(static::LOGIN_ROUTE));
     }
 
     public function supports(Request $request): ?bool
     {
-        return self::LOGIN_ROUTE === $request->attributes->get('_route') && $request->isMethod('POST');
+        return static::LOGIN_ROUTE === $request->attributes->get('_route') && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport
@@ -116,6 +116,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
-        return new RedirectResponse($this->router->generate(self::LOGIN_ROUTE));
+        return new RedirectResponse($this->router->generate(static::LOGIN_ROUTE));
     }
 }

@@ -9,6 +9,7 @@ use Base\Exception\InvalidSizeException;
 use Base\Exception\MissingPublicPathException;
 use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -53,6 +54,12 @@ class Uploader extends AbstractAnnotation
         $this->mimeTypes = $data["mime_types"] ?? [];
 
         $this->maxSize   = str2dec($data["max_size"] ?? UploadedFile::getMaxFilesize());
+    }
+
+    protected $ancestorEntity;
+    public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    {
+        $this->ancestorEntity = $this->getOldEntity($entity);
     }
 
     protected function getContents(): string { return file_get_contents($this->file["tmp_name"]); }
@@ -223,26 +230,31 @@ class Uploader extends AbstractAnnotation
         $newListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $newList));
 
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
-        // This means that these elements are not meant to be uploaded
+        // These elements are not meant to be uploaded
         if(count($newList) != count($newListStringable))
             return false; 
 
-        $old = self::getFieldValue($oldEntity, $fieldName);
+        // File instances are filtered below, in case of UOW manipulation..
+        $old = self::getFieldValue($this->ancestorEntity, $fieldName) ?? self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
+
+        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File); 
+        if($potentialMemoryLeak)
+            throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName.". Did you called unit of work change set ? Please process file manually");
 
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
         if(count($oldList) != count($oldListStringable))
             return false;
 
-        // No change in the list..
+        // No change in the list.. (NB: Not good approach in case of UOW manipulation)
         if($newList === $oldList) return true;
 
         // Nothing to upload, empty field..
         if ($newList === null) {
 
-            $this->setPropertyValue($entity, $fieldName, null);
+            self::setPropertyValue($entity, $fieldName, null);
             return true;
         }
 
@@ -254,7 +266,7 @@ class Uploader extends AbstractAnnotation
             $newList[$index] = new File(tempurl($entry));
         }
 
-        $this->setPropertyValue($entity, $fieldName, !is_array($new) ? $newList[0] ?? null : $newList);
+        self::setPropertyValue($entity, $fieldName, !is_array($new) ? $newList[0] ?? null : $newList);
 
         // Field value can be an array or just a single path
         $fileList = array_values(array_intersect($newList, $oldList));
@@ -265,9 +277,7 @@ class Uploader extends AbstractAnnotation
             $file = is_string($entry) && file_exists($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
                 
-                if($this->missable) 
-                    $fileList[] = $entry;
-         
+                if($this->missable) $fileList[] = $entry;
                 continue;
             }
 
@@ -292,12 +302,13 @@ class Uploader extends AbstractAnnotation
 
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
             if ($this->getStorageFilesystem()->write($path, $contents)) {
+
                 $fileList[] = basename($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
                 unlink_tmpfile($file->getPathname());
             }
         }
 
-        $this->setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
+        self::setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
         return true;
     }
 
@@ -312,7 +323,7 @@ class Uploader extends AbstractAnnotation
         if(count($newList) != count($newListStringable))
             return false; 
 
-        $old = self::getFieldValue($oldEntity, $fieldName);
+        $old = self::getFieldValue($this->ancestorEntity, $fieldName) ?? self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 

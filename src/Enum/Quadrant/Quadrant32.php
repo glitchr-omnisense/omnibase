@@ -4,7 +4,7 @@ namespace Base\Enum\Quadrant;
 
 use Base\Model\IconizeInterface;
 
-class Quadrant32 extends Quadrant16 implements IconizeInterface
+class Quadrant32 extends Quadrant16
 {
     const NbW  = "NORTH_BY_WEST";
     const NbE  = "NORTH_BY_EAST";
@@ -26,7 +26,7 @@ class Quadrant32 extends Quadrant16 implements IconizeInterface
     public function __iconize(): ?array { return null; }
     public static function __iconizeStatic(): ?array
     {
-        return array_merge(parent::__iconizeStatic(), [
+        return [
 
             self::NbW  => ["fas fa-location-arrow"],
             self::NbE  => ["fas fa-location-arrow"],
@@ -44,7 +44,7 @@ class Quadrant32 extends Quadrant16 implements IconizeInterface
             self::WbN  => ["fas fa-location-arrow"],
             self::NWbW => ["fas fa-location-arrow"],
             self::NWbN => ["fas fa-location-arrow"],
-        ]);
+        ];
     }
 
     public static function getTheta() { return parent::getTheta()/2; }

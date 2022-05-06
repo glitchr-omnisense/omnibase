@@ -2,7 +2,7 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 

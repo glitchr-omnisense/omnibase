@@ -120,31 +120,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         return $this;
     }
 
-    
-    /**
-     * Link to this controller to start the "connect" process
-     *
-     * @Route("/login/rescue", name="dashboard_login")
-     */
-    public function Login(AuthenticationUtils $authenticationUtils): Response
-    {
-        if ( ($user = $this->getUser()) && $user->isPersistent() )
-            return $this->redirectToRoute("dashboard");
-
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
-        return $this->render('@EasyAdmin/page/login.html.twig', [
-            'last_username' => $lastUsername,
-            'translation_domain' => 'forms',
-            'csrf_token_intention' => 'authenticate',
-            'target_path' => $this->baseService->getUrl('dashboard'),
-            'username_label' => 'login.identifier',
-            'password_label' => 'login.password',
-            'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
-        ]);
-    }
-
     /**
      * Link to this controller to start the "connect" process
      *

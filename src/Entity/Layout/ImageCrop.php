@@ -2,17 +2,35 @@
 
 namespace Base\Entity\Layout;
 
+use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Layout\Image;
+use Base\Model\UrlInterface;
 use Base\Repository\Layout\ImageCropRepository;
+use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass=CropRepository::class)
+ * @ORM\Entity(repositoryClass=ImageCropRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
-class ImageCrop implements ImageCropInterface
+class ImageCrop implements ImageCropInterface, UrlInterface
 {
-    public function __construct() { }
+    use BaseTrait;
+
+    public function __toUrl(): ?string {
+
+        $identifier = $this->getLabel() ?? $this->getWidth().":".$this->getHeight();
+        $hashid = $this->getImageService()->getHashId($this->getImage()->getSource());
+
+        return $this->getRouter()->generate("ux_crop", ["identifier" => $identifier, "hashid" => $hashid]);
+    }
+
+    public function __toString() {
+
+        return $this->getLabel() ?? $this->getTranslator()->entity($this).($this->getId() ? " #".$this->getId() : null);
+    }
+
+    public function getRatio() { return $this->getWidth()/$this->getHeight(); }
 
     /**
      * @ORM\Id
@@ -35,7 +53,7 @@ class ImageCrop implements ImageCropInterface
     }
     
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $label;
 
@@ -48,22 +66,34 @@ class ImageCrop implements ImageCropInterface
     }
 
     /**
-     * @ORM\Column(type="quadrant8")
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Slugify
      */
-    protected $quadrant;
-    public function getQuadrant(): ?string { return $this->quadrant; }
-    public function setQuadrant(string $quadrant): self
+    protected $slug;
+
+    public function getSlug(): ?string { return $this->slug; }
+    public function setSlug(string $slug): self
     {
-        $this->quadrant = $quadrant;
+        $this->slug = $slug;
+
         return $this;
     }
 
-    public function getPivotX() { return $this->x+$this->width/2; }
-    public function getPivotY() { return $this->y+$this->height/2; }
+    public function getPivotX() { return $this->width/2; }
+    public function getPivotY() { return $this->height/2; }
 
-    protected $cropper;
-    public function getCropper():array { dump($this); return []; }
-    public function setCropper($cropper) { dump($cropper); exit(1); return $this; }
+    public function getData(): array
+    {
+        return [
+            "x" => $this->getX(),
+            "y" => $this->getY(),
+            "width" => $this->getWidth(),
+            "height" => $this->getHeight(),
+            "scaleX" => $this->getScaleX(),
+            "scaleY" => $this->getScaleY(),
+            "rotate" => $this->getRotate(),
+        ];
+    }
 
     /**
      * @ORM\Column(type="integer", nullable=true)
@@ -86,7 +116,7 @@ class ImageCrop implements ImageCropInterface
         $this->y = $y;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="integer", nullable=true)
      */

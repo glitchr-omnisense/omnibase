@@ -34,14 +34,14 @@ class SlugConfigurator implements FieldConfiguratorInterface
     {
         $targetFieldName = $field->getCustomOption(SlugField::OPTION_TARGET_FIELD_NAME);
         $field->setFormTypeOption('target', $targetFieldName);
-        
+
         if (null !== $unlockConfirmationMessage = $field->getCustomOption(SlugField::OPTION_UNLOCK_CONFIRMATION_MESSAGE)) {
             $field->setFormTypeOption('attr.data-confirm-text', $this->translator->trans($unlockConfirmationMessage, [], $context->getI18n()->getTranslationDomain()));
         }
-        
+
         $entity = $entityDto->getInstance();
         $slug = PropertyAccess::createPropertyAccessor()->getValue($entity, $field->getProperty());
         if(class_implements_interface($entityDto->getInstance(), UrlInterface::class))
-            $field->setFormattedValue(["url" => $entity->__toUrl(), "slug" => $slug]);
+            $field->setFormattedValue(["url" => $entity->__toUrl()[0] ?? null, "slug" => $slug]);
     }
 }

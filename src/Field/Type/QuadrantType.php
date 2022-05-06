@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Enum\Quadrant\Quadrant;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Service\BaseService;
 use Symfony\Component\Form\AbstractType;
@@ -14,10 +15,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
 
-class QuadrantType extends AbstractType
+class QuadrantType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'quadrant'; }
-    public function getParent() : ?string { return HiddenType::class; }
 
     public function __construct(BaseService $baseService) 
     {
@@ -26,9 +26,13 @@ class QuadrantType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults([
-            "class" => Quadrant8::class
-        ]);
+        $resolver->setDefaults(["class" => Quadrant8::class]);
+    }
+
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder->setDataMapper($this);
+        $builder->add("wind", HiddenType::class);
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -36,8 +40,15 @@ class QuadrantType extends AbstractType
         parent::buildView($view, $form, $options);
 
         $view->vars['quadrants'] = $options["class"]::getPermittedValues();
-        $view->vars['icons'] = $options["class"]::__iconizeStatic();
-
+        $view->vars['icons'] = $options["class"]::getIcons();
+        
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
+    }
+
+    public function mapDataToForms($viewData, Traversable $forms) { }
+    public function mapFormsToData(Traversable $forms, &$viewData)
+    {
+        $windType = current(iterator_to_array($forms));
+        $viewData = $windType->getData() ?? Quadrant::O;
     }
 }

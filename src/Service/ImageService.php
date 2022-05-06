@@ -71,7 +71,7 @@ class ImageService implements ImageServiceInterface
     public function encode(array $array): string { return $this->hashIds->encodeHex(bin2hex(serialize($array))); }
     public function decode(string $hash): mixed  { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
-    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("ux_webp", $path, $filters, $config); }
+    public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("ux_imageWebp", $path, $filters, $config); }
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->resolve("ux_image", $path, $filters, $config); }
     public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null { return browser_supports_webp() ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config); }
 
@@ -91,19 +91,15 @@ class ImageService implements ImageServiceInterface
         return $this->imagine($path, $filters, $config); 
     }
 
-    public static $i = 0;
-    public function resolve(string $route, array|string|null $source, array $filters = [], array $config = []): array|string|null
+    public function getHashId(string|null $source, array $filters = [], array $config = []): ?string
     {
-        if(!$source || $source == "/") return $source;
-        if(is_array($source)) return array_map(fn($s) => $this->resolve($route, $s, $filters, $config), $source);
-
+        if($source === null ) return null;
         $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
 
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
         if(!empty($filters)) $config["filters"] = $filters;
 
-        // Config convolution
         while ( ($sourceConfig = $this->decode(basename($source))) ) {
 
             $source = $sourceConfig["path"] ?? $source;
@@ -112,7 +108,49 @@ class ImageService implements ImageServiceInterface
             $config["options"] = ($sourceConfig["options"] ?? []) + ($config["options"] ?? []);
         }
 
-        return $this->router->generate($route, ["hashid" => $this->encode($config)]);
+        return $this->encode($config);
+    }
+
+    public function resolveArguments(string $hashid, array $filters = [], array $args = [])
+    {
+        $path = null;
+        $args = [];
+
+        do {
+        
+            // Path fallback
+            $args0 = null;
+            $hashid0 = $hashid;
+            while(strlen($hashid0) > 1) {
+
+                $args0 = $this->decode(basename($hashid0));
+                if($args0) break;
+
+                $hashid0 = dirname($hashid0);
+            }
+
+            if(!is_array($args0)) $path = $hashid;
+            else {
+
+                $hashid = array_pop_key("path", $args0) ?? $hashid;
+                $filters = array_key_exists("filters", $args0) ? array_merge($args0["filters"], $filters) : $filters;
+                $args = array_merge($args, $args0);
+            }
+
+        } while(is_array($args0));
+
+        $args["path"]    = $path;
+        $args["filters"] = $filters;
+        $args["options"] = $args["options"] ?? [];
+        return $args;
+    }
+    
+    public function resolve(string $route, array|string|null $source, array $filters = [], array $config = []): array|string|null
+    {
+        if(!$source || $source == "/") return $source;
+        if(is_array($source)) return array_map(fn($s) => $this->resolve($route, $s, $filters, $config), $source);
+
+        return $this->router->generate($route, ["hashid" => $this->getHashId($source, $filters, $config)]);
     }
 
     public static function getPublic(?string $path) 
@@ -122,7 +160,7 @@ class ImageService implements ImageServiceInterface
         if(!self::$publicDir)
             self::$publicDir  = self::$projectDir."/public";
 
-        $stripPath = str_strip($path, [self::$publicDir, "imagine/"]);
+        $stripPath = str_lstrip($path, [self::$publicDir, "imagine/"]);
         if($path == $stripPath && str_starts_with($stripPath, "/")) return null;
 
         return $path !== null ? self::$publicDir."/".$stripPath : null; 
@@ -132,18 +170,9 @@ class ImageService implements ImageServiceInterface
     {
         //
         // Resolve nested paths
-        do {
-
-            $nestedPath = $this->decode(basename($path));
-            $nestedPath = $nestedPath ? $nestedPath : $this->decode(basename(dirname($path)));
-
-            if(is_array($nestedPath)) {
-
-                $path = $nestedPath["path"] ?? $path;
-                $filters = array_key_exists("filters", $nestedPath) ? array_merge($nestedPath["filters"], $filters) : $filters;
-            }
-
-        } while(is_array($nestedPath));
+        $args = $this->resolveArguments($path, $filters);
+        $path = $args["path"];
+        $filters = $args["filters"];
 
         //
         // Apply image resolution limitation
@@ -171,23 +200,22 @@ class ImageService implements ImageServiceInterface
                     throw new \Exception("Only last filter must implement \"".LastFilterInterface::class."\"");
             }
 
-            // Handle null path case
-            if ($path === null) {
-
-                $path = $this->noImage;
-                $pathPublic = self::getPublic($this->noImage);
-            }
-            
             // No public path can be created.. so just apply filter to the image
             $pathPublic = self::getPublic($path);
             if($pathPublic === null) {
 
+                try { $image = $this->imagine->open($path); } 
+                catch (Exception $e) {
+
+                    $path = $this->noImage;
+                    $pathPublic = self::getPublic($this->noImage);
+
+                    $image = $this->imagine->open($path);
+                }
+                
                 // GD does not support other palette than RGB..
                 //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($path))
                 //   cmyk2rgb($path); // Not working..
-
-                try { $image = $this->imagine->open($path); }
-                catch (Exception $e ) { return false; }
 
                 // Trigger exception on purpose (if GD is used)
                 $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB());
@@ -202,12 +230,12 @@ class ImageService implements ImageServiceInterface
             // Cache not found
             $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
             $pathPublic = self::getPublic($path);
-            $path = path_suffix($path, $pathSuffixes);
 
             if (!$this->filesystem->getOperator()->fileExists($path)) {
 
                 if($lastFilter instanceof SvgFilter) {
 
+                    // No filter can be applied to SVG images
                     $content = file_get_contents($pathPublic);
 
                 } else {
@@ -219,6 +247,7 @@ class ImageService implements ImageServiceInterface
                     /**
                      * @var ImageInterface
                      */
+
                     try { $image = $this->imagine->open($pathPublic); } 
                     catch (Exception $e) {
 
@@ -237,10 +266,11 @@ class ImageService implements ImageServiceInterface
                 }
 
                 $this->filesystem->mkdir(dirname($path));
-                $content = $this->filesystem->write($path, $content);
+                $content = $this->filesystem->write(path_suffix($path, $pathSuffixes), $content);
             }
         }
 
+        $path = path_suffix($path, $pathSuffixes);
         //
         // Read image content 
         $content = $path == $pathPublic ? @file_get_contents($path) : $this->filesystem->read($path);

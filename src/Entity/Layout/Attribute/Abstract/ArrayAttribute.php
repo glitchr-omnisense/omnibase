@@ -11,6 +11,7 @@ use Base\Repository\Layout\Attribute\Abstract\ArrayAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ArrayAttributeRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "array" )
  */
 

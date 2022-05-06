@@ -103,12 +103,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     {
         // 
         // Set controller url
-        $options["class"]    = $this->formFactory->guessType($form, $options);
+        $options["class"]    = $this->formFactory->guessClass($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
 
         $parentForm = $form->getParent();
-        $dataClass = $parentForm ? $this->formFactory->guessType($parentForm, $parentForm->getConfig()->getOptions()) : null;
+        $dataClass = $parentForm ? $this->formFactory->guessClass($parentForm, $parentForm->getConfig()->getOptions()) : null;
         $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
         $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
 
@@ -116,11 +116,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         if($options["href"] === null && $crudController && $this->getService()->isGranted(UserRole::ADMIN)) {
 
             $href = $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setController($crudController)
-                    ->setAction(Action::EDIT)
-                    ->setEntityId("{0}")
-                    ->generateUrl();
+                ->unsetAll()
+                ->setController($crudController)
+                ->setAction(Action::EDIT)
+                ->setEntityId("{0}")
+                ->generateUrl();
         }
 
         $view->vars["href"]         = $options["href"] ?? $href;
@@ -148,13 +148,13 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $data = $event->getData();
 
-            $options["class"]    = $this->formFactory->guessType($event, $options);
+            $options["class"]    = $this->formFactory->guessClass($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
             
             $fieldName = $options["entity_file"];
             $parentForm = $form->getParent();
-            $dataClass = $parentForm ? $this->formFactory->guessType($parentForm, $parentForm->getConfig()->getOptions()) : null;
+            $dataClass = $parentForm ? $this->formFactory->guessClass($parentForm, $parentForm->getConfig()->getOptions()) : null;
             $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
             
             $form->add($fieldName, $options["form_type"], [
@@ -189,7 +189,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $parentEntity = $parentForm->getParent() ? $parentForm->getParent()->getData() : null;
 
         $options = $parentForm->getConfig()->getOptions();
-        $options["data_class"] = $options["data_class"] ?? $this->formFactory->guessType($parentForm, $options);
+        $options["data_class"] = $options["data_class"] ?? $this->formFactory->guessClass($parentForm, $options);
         $options["multiple"]   = $options["multiple"]   ?? $this->formFactory->guessMultiple($parentForm, $options);
 
         $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
@@ -223,7 +223,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
                     if($entity) {
 
-                        $entity = $this->entityHydrator->hydrate($entity, $options["entity_data"] ?? [], [], EntityHydrator::DEEPCOPY);
+                        $entity = $this->entityHydrator->hydrate($entity);
                         if($options["entity_data"] ?? false) {
 
                             if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);

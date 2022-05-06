@@ -93,6 +93,26 @@ class SecurityController extends AbstractController
         ]);
     }
 
+    /**
+     * Link to this controller to start the "connect" process
+     *
+     * @Route("/login/rescue", name="security_login_rescue")
+     */
+    public function LoginRescue(AuthenticationUtils $authenticationUtils): Response
+    {
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
+        return $this->render('@EasyAdmin/page/login.html.twig', [
+            'last_username' => $lastUsername,
+            'translation_domain' => 'forms',
+            'csrf_token_intention' => 'authenticate',
+            'target_path' => $this->baseService->getUrl('dashboard'),
+            'identifier_label' => '@forms.login.identifier',
+            'password_label' => '@forms.login.password',
+            'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
+        ]);
+    }
 
     /**
      * @Route("/logout", name="security_logout")

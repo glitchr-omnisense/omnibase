@@ -20,6 +20,8 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         parent::buildView($view, $form, $options);
         $view->vars["stepUp"]   = $options["stepUp"] ?? $options["step"];
         $view->vars["stepDown"] = $options["stepDown"] ?? $options["step"];
+        $view->vars["throttleUp"]   = $options["throttleUp"] ?? $options["throttle"];
+        $view->vars["throttleDown"] = $options["throttleDown"] ?? $options["throttle"];
         $view->vars["min"]      = $options["min"];
         $view->vars["max"]      = $options["max"];
         $view->vars["disabled"]      = $options["disabled"];
@@ -34,7 +36,10 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $resolver->setDefaults([
             'stepUp'  => null,
             'stepDown' => null,
-            'step' => 1,
+            'step' => 5,
+            'throttleUp'  => null,
+            'throttleDown' => null,
+            'throttle' => 10,
             "min" => null,
             "max" => null
         ]);

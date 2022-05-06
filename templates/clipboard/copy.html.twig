@@ -1,0 +1,5 @@
+
+{% set attr = attr|merge({ 'href': value}) %}
+<a {{html_attributes(attr) }}>
+    {{ 'fas fa-clipboard'|iconify }}
+</a>

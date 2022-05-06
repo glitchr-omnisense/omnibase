@@ -27,7 +27,9 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         return [Events::loadClassMetadata, Events::prePersist, Events::preUpdate];
     }
-
+    
+    public function getLocaleProvider() { return $this->localeProvider; }
+    
     public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider)
     {
         $this->entityManager  = $entityManager;
@@ -183,7 +185,7 @@ class IntlSubscriber implements EventSubscriberInterface
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
-        if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
+	if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
             $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
 
         if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))

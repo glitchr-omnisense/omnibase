@@ -10,19 +10,14 @@ use Twig\TwigFunction;
 
 final class PaginatorTwigExtension extends AbstractExtension
 {
+    public function __construct(TranslatorInterface $translator) { $this->translator = $translator; }
+
     public function getName() { return 'paginator_extension'; }
-
-    public function __construct(Environment $twig, TranslatorInterface $translator)
-    {
-        $this->twig = $twig;
-        $this->translator = $translator;
-    }
-
     public function getFunctions() : array
     {
         return [
-            new TwigFunction('paginator',                [$this, 'getSlidingControl'], ['is_safe' => ['all']]),
-            new TwigFunction('paginator_slidingcontrol', [$this, 'getSlidingControl'], ['is_safe' => ['all']]),
+            new TwigFunction('paginator',                [$this, 'getSlidingControl'], ["needs_environment" => true, 'is_safe' => ['all']]),
+            new TwigFunction('paginator_slidingcontrol', [$this, 'getSlidingControl'], ["needs_environment" => true, 'is_safe' => ['all']]),
 
             new TwigFunction('paginator_rewind',         [$this, 'getRewind'],         ['is_safe' => ['all']]),
             new TwigFunction('paginator_first',          [$this, 'getFirst'],          ['is_safe' => ['all']]),
@@ -44,9 +39,9 @@ final class PaginatorTwigExtension extends AbstractExtension
         ];
     }
 
-    public function getSlidingControl(PaginationInterface $pagination, string $name, array $parameters = []): ?string
+    public function getSlidingControl(Environment $twig, PaginationInterface $pagination, string $name, array $parameters = []): ?string
     {
-        return $this->twig->render($pagination->getTemplate(), [
+        return $twig->render($pagination->getTemplate(), [
             "pagination" => $pagination,
             "path" => $name,
             "path_parameters" => $parameters,

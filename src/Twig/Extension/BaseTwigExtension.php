@@ -80,27 +80,28 @@ final class BaseTwigExtension extends AbstractExtension
         return [
             new TwigFunction('exit',  'exit'),
 
-            new TwigFunction('synopsis',        'synopsis'),
-            new TwigFunction('title',           [$this, 'title'  ], ['is_safe' => ['all']]),
-            new TwigFunction('excerpt',         [$this, 'excerpt'  ], ['is_safe' => ['all']]),
-            new TwigFunction('image',           [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
-            new TwigFunction('get_class',       [$this, 'get_class']),
-            new TwigFunction('is_countable',    [$this, 'is_countable']),
-            new TwigFunction('is_callable',     [$this, 'is_callable']),
-            new TwigFunction('call_user_func_with_defaults',     [$this, 'call_user_func_with_defaults']),
-            new TwigFunction('method_exists',   [$this, 'method_exists']),
-            new TwigFunction('static_call',     [$this, 'static_call'  ]),
-            new TwigFunction('html_attributes',         'html_attributes', ['is_safe' => ['all']]),
+            new TwigFunction('synopsis', 'synopsis'),
+            new TwigFunction('title',                        [$this, 'title'  ], ['is_safe' => ['all']]),
+            new TwigFunction('excerpt',                      [$this, 'excerpt'  ], ['is_safe' => ['all']]),
+            new TwigFunction('image',                        [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
+            new TwigFunction('get_class',                    [$this, 'get_class']),
+            new TwigFunction('is_countable',                 [$this, 'is_countable']),
+            new TwigFunction('is_callable',                  [$this, 'is_callable']),
+            new TwigFunction('call_user_func_with_defaults', [$this, 'call_user_func_with_defaults']),
+            new TwigFunction('method_exists',                [$this, 'method_exists']),
+            new TwigFunction('static_call',                  [$this, 'static_call'  ]),
 
+            new TwigFunction('html_attributes', 'html_attributes', ["is_safe" => ['all']]),
+
+            new TwigFunction('urlify',          [$this,               'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('iconify',         [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-            new TwigFunction('asset',           [$this, 'asset']),
+            new TwigFunction('asset',           [$this,               'asset']),
         ];
     }
 
     public function getFilters() : array
     {
         return [
-            new TwigFilter('preg_split',  [$this,'preg_split']),
             new TwigFilter('str_shorten', 'str_shorten'),
             new TwigFilter('intval',      'intval'),
             new TwigFilter('strval',      'strval'),
@@ -108,10 +109,11 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('synopsis',    'synopsis'),
             new TwigFilter('closest',     'closest'),
             new TwigFilter('distance',    'distance'),
-            new TwigFilter('nargs',     [$this, 'nargs']),
-
-            new TwigFilter('color_name', 'color_name'),
-
+            new TwigFilter('color_name',  'color_name'),
+            new TwigFilter('is_uuidv4',   'is_uuidv4'),
+            
+            new TwigFilter('preg_split',     [$this,'preg_split']),
+            new TwigFilter('nargs',          [$this, 'nargs']),
             new TwigFilter('instanceof',     [$this, 'instanceof']),
             new TwigFilter('url',            [$this, 'url']),
             new TwigFilter('join_if_exists', [$this, 'joinIfExists']),
@@ -128,7 +130,6 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucfirst',     [$this, 'mb_ucfirst']),
             new TwigFilter('mb_ucwords',     [$this, 'mb_ucwords']),
             
-            new TwigFilter('is_uuidv4',     'is_uuidv4'),
             new TwigFilter('trans',          [Translator::class, 'trans']),
             new TwigFilter('time',           [Translator::class, 'time']),
             new TwigFilter('enum',           [Translator::class, 'enum']),
@@ -139,6 +140,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('country',        [LocaleProvider::class, 'getCountry']),
             new TwigFilter('country_name',   [LocaleProvider::class, 'getCountryName']),
 
+            new TwigFilter('urlify',         [$this,               'urlify' ], ["is_safe" => ['all']]),
             new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
 
@@ -270,6 +272,7 @@ final class BaseTwigExtension extends AbstractExtension
         return $url;
     }
 
+    public function urlify(string $url, ?string $label = null, array $attributes = []) { return "<a href='".$url."' ".html_attributes($attributes).">".($label ?? $url)."</a>"; }
     public function title(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
     {
         $ret = $this->translator->trans($name.".title", $parameters, $domain, $locale);

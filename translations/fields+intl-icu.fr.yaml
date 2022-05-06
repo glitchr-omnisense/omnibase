@@ -8,6 +8,26 @@ boolean:
 stock:
   unlimited: Illimité
 
+clipboard:
+  info:
+    copy: Copier dans le presse-papier
+    cut: Couper dans le presse-papier
+    past: Coller depuis le presse-papier
+
+  click:
+    cut: Coupé !
+    copy: Copié !
+    paste: Collé !
+
+cropper:
+  aspect_ratio:
+    standard: "4:3"
+    large: "16:9"
+    square: "Carré"
+    facebook: "Facebook"
+    pinterest: "Pinterest"
+    free: "Libre"
+
 attribute:
   empty: Sauvegarde pour mettre à jour la liste des attributs selectionnés
 

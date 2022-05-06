@@ -12,6 +12,7 @@ use Base\Repository\Layout\Attribute\Abstract\ColorAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ColorAttributeRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "color" )
  */
 

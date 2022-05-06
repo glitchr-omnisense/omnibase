@@ -137,6 +137,17 @@ class SelectType extends AbstractType implements DataMapperInterface
             'sortable'              => null
         ]);
 
+        $resolver->setNormalizer('required', function (Options $options, $value) {
+            if($value === null) return $options["tags"] !== false;
+            return $value;
+        });
+
+        $resolver->setNormalizer('tokenSeparators', function (Options $options, $value) {
+           
+            if(is_array($options["tags"]) && $options["tags"]) return $options["tags"];
+            return $value;
+        });
+
         $resolver->setNormalizer('class', function (Options $options, $value) {
             if(!$this->classMetadataManipulator->isEntity($value)) return null;
             return $value;
@@ -159,7 +170,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             );
 
             // Guess some options
-            $options["class"]    = $this->formFactory->guessType($event, $options);
+            $options["class"]    = $this->formFactory->guessClass($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
 
@@ -193,7 +204,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"];
-            $options["class"]          = $this->formFactory->guessType($event, $options);
+            $options["class"]          = $this->formFactory->guessClass($event, $options);
 
             $dataChoice = $data["choice"] ?? null;
             $choicesData = $options["multiple"] ? $dataChoice ?? [] : [];
@@ -337,7 +348,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         
         $choiceType = current(iterator_to_array($forms));
         $options = $choiceType->getParent()->getConfig()->getOptions();
-        $options["class"] = $this->formFactory->guessType($choiceType->getParent());
+        $options["class"] = $this->formFactory->guessClass($choiceType->getParent());
         
         if(!$options["multiple"]) $choicesData = $choiceType->getViewData();
         else $choicesData = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
@@ -390,7 +401,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         /* Override options.. I couldn't done that without accessing data */
-        $options["class"]         = $this->formFactory->guessType($form, $options);
+        $options["class"]         = $this->formFactory->guessClass($form, $options);
         $options["multiple"]      = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"]      = $this->formFactory->guessSortable($form, $options);
 

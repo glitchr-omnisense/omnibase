@@ -92,7 +92,19 @@ class LocaleProvider implements LocaleProviderInterface
     {
         return array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales ?? []));
     }
-    
+    public static function getDefaultLang(): ?string { return self::getLang(self::$defaultLocale); }
+    public static function getFallbackLangs(): array { return array_map(fn($l) => self::getLang($l), self::$fallbackLocales); }
+    public static function getAvailableLangs(): array 
+    {
+        return array_unique(array_merge([self::getDefaultLang()], self::getFallbackLangs() ?? []));
+    }
+    public static function getDefaultCountry(): ?string { return self::getCountry(self::$defaultLocale); }
+    public static function getFallbackCountries(): array { return array_map(fn($l) => self::getCountry($l), self::$fallbackLocales); }
+    public static function getAvailableCountries(): array 
+    {
+        return array_unique(array_merge([self::getDefaultCountry()], self::getFallbackCountries() ?? []));
+    }
+
     public static function getLangName(?string $locale = null): string { return Languages::getName(self::getLang($locale)); }
     public static function getLang(?string $locale = null): string
     {

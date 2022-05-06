@@ -10,6 +10,7 @@ use Base\Repository\Extension\OrderingRepository;
 
 /**
  * @ORM\Entity(repositoryClass=OrderingRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry(value="ordering")
  */
 class Ordering extends AbstractExtension

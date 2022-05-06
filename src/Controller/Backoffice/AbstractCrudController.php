@@ -7,6 +7,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
 use Base\Service\BaseService;
+use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
 use EasyCorp\Bundle\EasyAdminBundle\Collection\ActionCollection;
@@ -23,7 +24,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\SearchDto;
 
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController
@@ -57,6 +57,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->crud = null;
     }
 
+    public function getTranslator() { return $this->translator; }
     public function getDiscriminatorMap(): array
     {
         return $this->classMetadataManipulator->getDiscriminatorMap(get_called_class()::getEntityFqcn());

@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Uid\Uuid;
 
@@ -45,11 +46,11 @@ class DropzoneController extends AbstractController
     {
         if(!$token || !$this->isCsrfTokenValid("dropzone", $token)) 
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
-        
+
         // Move.. with flysystem
         if( !($file = $request->files->get("file")) )
-            return new Response($this->translator->trans("fileupload.error.too_many", [], "fields"), 500);
- 
+            return new Response($this->translator->trans("fileupload.error.no_file", [], "fields"), 500);
+        
         switch($file->getError()) {
 
             case UPLOAD_ERR_OK: break;
@@ -119,6 +120,43 @@ class DropzoneController extends AbstractController
         $this->cache->save($cacheDropzone);
 
         return JsonResponse::fromJsonString(json_encode($fileMetadata));
+    }
+
+    /**
+     * Controller example
+     *
+     * @Route("/ux/dropzone/{token}/{uuid}", name="ux_dropzone_preview")
+     */
+    public function Preview(Request $request, string $token, string $uuid): Response
+    {
+        if(!$token) throw new InvalidCsrfTokenException();
+
+        if(!$this->isCsrfTokenValid("dropzone", $token)) 
+            return new Response("Invalid token.", 500);
+
+        if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
+            return new Response("Invalid uuid.", 500);
+
+        $cacheDir = $this->getCacheDir()."/dropzone";
+        $path = $cacheDir."/".$uuid;
+        if(file_exists($path)) {
+                
+            $content = file_get_contents2($path);
+            $mimetype = mime_content_type2($path);
+
+            $response = new Response();
+            $response->setContent($content);
+        
+            $response->setMaxAge(365*24*3600);
+            $response->setPublic();
+            $response->setEtag(md5($response->getContent()));
+            $response->headers->addCacheControlDirective('must-revalidate', true);
+
+            $response->headers->set('Content-Type', $mimetype);
+            return $response;
+        }
+
+        return throw new NotFoundHttpException();
     }
 
     /**

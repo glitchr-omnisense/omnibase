@@ -2,7 +2,7 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
@@ -14,6 +14,11 @@ class WatermarkFilter implements FilterInterface
      * @var ImagineInterface
      */
     protected $imagine;
+
+    public function __toString() { 
+        $md5sum = md5(serialize($this->watermark).serialize($this->options));
+        return mod($this->angle, 360) ? "wmk:".$md5sum : "";
+    }
 
     public function __construct(ImagineInterface $imagine, ImageInterface $watermark, array $options = [])
     {
@@ -33,7 +38,6 @@ class WatermarkFilter implements FilterInterface
         if ('%' === mb_substr($this->options['size'], -1)) {
             $this->options['size'] = mb_substr($this->options['size'], 0, -1) / 100;
         }
-
 
         $size = $image->getSize();
         $this->watermarkSize = $this->watermark->getSize();

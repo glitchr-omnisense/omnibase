@@ -53,6 +53,18 @@ final class NumberField implements FieldInterface
         return $this;
     }
 
+    public function throttle(float $throttle) { return $this->throttleUp($throttle)->throttleDown($throttle); }
+    public function throttleUp(float $throttleUp) 
+    {
+        $this->setFormTypeOption("throttleUp", $throttleUp);
+        return $this;
+    }
+    public function throttleDown(float $throttleDown) 
+    {
+        $this->setFormTypeOption("throttleDown", $throttleDown);
+        return $this;
+    }
+
     public function setRoundingMode(int $mode): self
     {
         $validModes = [

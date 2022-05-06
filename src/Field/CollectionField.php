@@ -11,12 +11,12 @@ class CollectionField implements FieldInterface
 {
     use FieldTrait;
 
-    public const OPTION_ALLOW_ADD = 'allowAdd';
-    public const OPTION_ALLOW_DELETE = 'allowDelete';
+    public const OPTION_ALLOW_ADD = 'allow_add';
+    public const OPTION_ALLOW_DELETE = 'allow_delete';
     public const OPTION_ENTRY_IS_COMPLEX = 'entryIsComplex';
-    public const OPTION_ENTRY_TYPE = 'entryType';
-    public const OPTION_ENTRY_OPTIONS = 'entryOptions';
-    public const OPTION_SHOW_ENTRY_LABEL = 'showEntryLabel';
+    public const OPTION_ENTRY_TYPE = 'entry_type';
+    public const OPTION_ENTRY_OPTIONS = 'entry_options';
+    public const OPTION_ENTRY_LABEL = 'entry_label';
     public const OPTION_RENDER_EXPANDED = 'renderExpanded';
 
     public const OPTION_LENGTH = 'length';
@@ -36,59 +36,47 @@ class CollectionField implements FieldInterface
             ->setCustomOption(self::OPTION_ALLOW_DELETE, true)
             ->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, null)
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
-            ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
             ->setCustomOption(self::OPTION_RENDER_EXPANDED, false);
     }
 
     public function allowAdd(bool $allow = true): self
     {
-        $this->setCustomOption(self::OPTION_ALLOW_ADD, $allow);
+        $this->setFormTypeOption(self::OPTION_ALLOW_ADD, $allow);
 
         return $this;
     }
 
     public function allowDelete(bool $allow = true): self
     {
-        $this->setCustomOption(self::OPTION_ALLOW_DELETE, $allow);
+        $this->setFormTypeOption(self::OPTION_ALLOW_DELETE, $allow);
 
         return $this;
     }
 
-    /**
-     * Set this option to TRUE if the collection items are complex form types
-     * composed of several form fields (EasyAdmin applies a special rendering to make them look better).
-     */
-    public function setEntryIsComplex(bool $isComplex): self
+    public function setEntryType(string $entryType): self
     {
-        $this->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, $isComplex);
+        $this->setFormTypeOption(self::OPTION_ENTRY_TYPE, $entryType);
 
         return $this;
     }
 
-    public function setEntryType(string $formTypeFqcn): self
+    public function setEntryOptions(array $entryOptions): self
     {
-        $this->setCustomOption(self::OPTION_ENTRY_TYPE, $formTypeFqcn);
+        $this->setFormTypeOption(self::OPTION_ENTRY_OPTIONS, $entryOptions);
 
         return $this;
     }
 
-    public function setEntryOptions(array $formOptions): self
+    public function setEntryLabel($entryLabel): self
     {
-        $this->setCustomOption(self::OPTION_ENTRY_OPTIONS, $formOptions);
-
-        return $this;
-    }
-
-    public function showEntryLabel(bool $showLabel = true): self
-    {
-        $this->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, $showLabel);
+        $this->setFormTypeOption(self::OPTION_ENTRY_LABEL, $entryLabel);
 
         return $this;
     }
 
     public function renderExpanded(bool $renderExpanded = true): self
     {
-        $this->setCustomOption(self::OPTION_RENDER_EXPANDED, $renderExpanded);
+        $this->setFormTypeOption(self::OPTION_RENDER_EXPANDED, $renderExpanded);
 
         return $this;
     }

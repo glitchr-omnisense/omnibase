@@ -2,16 +2,15 @@
 
 namespace Base\Entity\Layout\Attribute\Abstract;
 
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Entity\Layout\Attribute;
-use Base\Entity\Layout\AttributeInterface;
 use Base\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\TextareaAttributeRepository;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 /**
  * @ORM\Entity(repositoryClass=TextareaAttributeRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "textarea" )
  */
 

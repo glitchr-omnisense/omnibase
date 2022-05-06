@@ -20,8 +20,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
     {
         $resolver->setDefaults([
             'bootstrap' => $this->baseService->getParameterBag("base.twig.use_bootstrap"),
-            'bootstrap_label' => true,
-            "bootstrap_columns" => 12
+            'bootstrap_label' => true
         ]);
     }
 
@@ -80,13 +79,6 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
             if(!array_key_exists("placeholder", $attr) || $attr["placeholder"] == null) {
                 if(!$options["bootstrap_label"]) $view->vars["attr"]["placeholder"] = $label;
-            }
-
-            if($options["bootstrap_columns"] < 12 && $options["bootstrap_columns"] > 0) {
-
-                $view->vars["attr"] ??= [];
-                $view->vars["attr"]["class"] ??= "";
-                $view->vars["attr"]["class"] = implode(" ", array_unique(explode(" ", trim($view->vars["attr"]["class"]." col-".$options["bootstrap_columns"]))));
             }
     }
 

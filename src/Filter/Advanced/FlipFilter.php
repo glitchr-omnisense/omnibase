@@ -2,15 +2,18 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
+
 use Imagine\Image\ImageInterface;
-use Liip\ImagineBundle\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 use Symfony\Component\OptionsResolver\Exception\ExceptionInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class FlipFilter implements FilterInterface
 {
+    public function __toString() { return "flip:". ($this->options['axis'] ?? "y"); }
+
     public function __construct(array $options = [])
     {
         $this->options = $options;

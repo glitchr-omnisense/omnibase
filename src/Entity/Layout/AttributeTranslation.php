@@ -12,6 +12,7 @@ use Base\Validator\Constraints as AssertBase;
 
 /**
  * @ORM\Entity()
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  */
 class AttributeTranslation implements TranslationInterface
 {

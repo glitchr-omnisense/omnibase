@@ -38,10 +38,6 @@ class CollectionConfigurator implements FieldConfiguratorInterface
         $field->setFormTypeOptionIfNotSet('by_reference', false);
         $field->setFormTypeOptionIfNotSet('delete_empty', true);
 
-        // TODO: check why this label (hidden by default) is not working properly
-        // (generated values are always the same for all elements)
-        $field->setFormTypeOptionIfNotSet('entry_options.label', $field->getCustomOptions()->get(CollectionField::OPTION_SHOW_ENTRY_LABEL));
-
         // collection items range from a simple <input text> to a complex multi-field form
         // the 'entryIsComplex' setting tells if the collection item is so complex that needs a special
         // rendering not applied to simple collection items

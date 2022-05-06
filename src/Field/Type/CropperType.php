@@ -2,13 +2,14 @@
 
 namespace Base\Field\Type;
 
+use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Entity\Layout\ImageCrop;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -21,14 +22,18 @@ class CropperType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'cropper'; }
     
-    public function __construct(BaseService $baseService) 
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, FormFactory $formFactory, BaseService $baseService) 
     {
+        $this->classMetadataManipulator = $classMetadataManipulator;
+        $this->formFactory = $formFactory;
         $this->baseService = $baseService;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            "data_class" => ImageCrop::class,
+            "label" => false,
             'cropper'     => [
                 "dragMode"     => "none",
                 "responsive"   => true,
@@ -45,14 +50,36 @@ class CropperType extends AbstractType implements DataMapperInterface
 
             "target"        => null,
 
-            "parameters" => [
-                "x"     => [],
-                "y"      => [],
+            "fields" => [
+                "label"    => [],
+                "x"        => [],
+                "y"        => [],
                 "width"    => [],
                 "height"   => [],
                 "scaleX"   => [],
                 "scaleY"   => [],
                 "rotate"   => [],
+            ],
+
+            "aspectRatios" => [
+                "@fields.cropper.aspect_ratio.standard"  => 4/3,
+                "@fields.cropper.aspect_ratio.large"     => 16/9,
+                "@fields.cropper.aspect_ratio.square"    => 1,
+                "@fields.cropper.aspect_ratio.facebook"  => 1200/630,  # > 16:9
+                "@fields.cropper.aspect_ratio.pinterest" => 1000/1500, # 2:3
+                "@fields.cropper.aspect_ratio.free"      => NAN
+            ],
+
+            "default_fields" => [
+
+                "label"  => ["label" => "Label"  , "required" => false, "form_type" => TextType::class],
+                "x"      => ["label" => "Left"   , "form_type" => HiddenType::class],
+                "y"      => ["label" => "Top"    , "form_type" => HiddenType::class],
+                "width"  => ["label" => "Width"  , "form_type" => HiddenType::class],
+                "height" => ["label" => "Height" , "form_type" => HiddenType::class],
+                "scaleX" => ["label" => "Scale X", "form_type" => HiddenType::class],
+                "scaleY" => ["label" => "Scale Y", "form_type" => HiddenType::class],
+                "rotate" => ["label" => "Rotate" , "form_type" => HiddenType::class]
             ]
         ]);
 
@@ -67,31 +94,47 @@ class CropperType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
 
-            $parameters = array_keys($options["parameters"]);
-            foreach($parameters as $parameter) {
-                $formType = array_pop_key("form_type", $options["parameters"][$parameter]) ?? HiddenType::class;
-                $form->add($parameter , $formType, $options["parameters"][$parameter]);
+            $fields = array_keys($options["fields"]);
+            foreach($fields as $parameter) {
+
+                $formOptions = array_merge(
+                    $options["default_fields"][$parameter],
+                    $options["fields"][$parameter]
+                );
+                
+                $formType = array_pop_key("form_type", $formOptions) ?? HiddenType::class;
+                $form->add($parameter, $formType, $formOptions);
             }
         });
     }
 
     public function mapDataToForms($viewData, Traversable $forms) {
 
-        foreach(iterator_to_array($forms) as $form)
-            $form->setData($viewData[$form->getName()] ?? null);
+        if($viewData === null) return;
+
+        $form = current(iterator_to_array($forms));
+        $options = $form->getParent()->getConfig()->getOptions();
+        $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
+        foreach(iterator_to_array($forms) as $formName => $form) {
+            $form->setData($classMetadata->getFieldValue($viewData, $formName, $form->getData()));
+        }
     }
 
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
-        foreach(iterator_to_array($forms) as $form) {
-
-            $viewData[$form->getName()] = (int) $form->getViewData();
-        }
+        $form = current(iterator_to_array($forms));
+        $options = $form->getParent()->getConfig()->getOptions();
+        
+        $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
+        foreach(iterator_to_array($forms) as $formName => $form)
+            $classMetadata->setFieldValue($viewData, $formName, $form->getData());
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["cropper"]  = json_encode($options["cropper"]);
+        $view->vars["cropper"]      = json_encode($options["cropper"]);
+        $view->vars["aspectRatios"] = $options["aspectRatios"];
+
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-cropper.js");
     }
 
@@ -110,7 +153,7 @@ class CropperType extends AbstractType implements DataMapperInterface
         foreach($targetPath ?? [] as $path) {
 
             if(!array_key_exists($path, $target->children))
-                throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->vars["name"])."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+                throw new \Exception("Child form \"$path\" related to view data \"".$target->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
 
             $target = $target->children[$path];
             if($target->vars["name"] == "translations") {

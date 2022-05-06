@@ -48,6 +48,8 @@ namespace {
         $class = new ReflectionClass($object_or_class);
         return $class->isAbstract();
     }
+
+    
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake2camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
@@ -567,7 +569,7 @@ namespace {
 
         return $string;
     }
-
+    
     function html_attributes(array ...$attributes) 
     { 
         $attributes = array_merge(...$attributes); 
@@ -968,6 +970,20 @@ namespace {
         return $tArray;
     }
 
+    function curlranger($url, int $start = 0, int $end = 32768){
+
+        $headers = ["Range: bytes=".$start."-".$end];    
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+
+        $data = curl_exec($curl);
+        curl_close($curl);
+
+        return $data;
+    }
+
     function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) 
     { 
         return array_transforms(function ($k,$v,$fn) use ($callback, $mode) :?array {
@@ -978,6 +994,9 @@ namespace {
         }, $array);
     }
 
+    function mod($a,$b) { return $a - floor($a/$b) * $b; }
+    function gcd($a,$b) { return ($a % $b) ? gcd($b,$a % $b) : $b; }
+    
     function array_slice_recursive(array $array, int $offset, ?int $length, bool $preserve_keys = false): array
     {
         $offsetCounter = 0;
@@ -1316,10 +1335,13 @@ namespace {
     }
 
     function hex2rgba(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x%02x"); }
-    function hex2rgb(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x"); }
-    function hex2hsl(string $hex): array { return rgb2hsl(hex2rgb($hex)); }
-    function hex2int(string $hex):int { return hexdec(ltrim($hex, '#')); }
-    
+    function hex2rgb (string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x"); }
+    function hex2hsl (string $hex): array { return rgb2hsl(hex2rgb($hex)); }
+    function hex2int (string $hex): int   { return hexdec(ltrim($hex, '#')); }
+
+    function hex2alpha(string $hex):float   { return hexdec(ltrim($hex, '#')) / 0xFF; }
+    function alpha2hex(float $alpha, bool $hash = true):string { return ($hash ? '#' : ''). ($alpha * 0xFF); }
+
     function int2hex(int $int, bool $hash = true):string { return ($hash ? '#' : '').sprintf('%06X', $int); }
     function int2rgb(int $int):array { return [$int >> 16 & 0xFF, $int >> 8 & 0xFF, $int & 0xFF]; }
     function float2rgba(float $float):array { return [$float >> 24 & 0xFF, $float >> 16 & 0xFF, $float >> 8 & 0xFF, $float & 0xFF]; }

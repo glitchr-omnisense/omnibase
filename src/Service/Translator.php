@@ -127,7 +127,7 @@ class Translator implements TranslatorInterface
         }
     }
 
-    public function enum(?string $value, string $class, string $noun = self::TRANSLATION_SINGULAR): string
+    public function enum(?string $value, string $class, string $noun = self::TRANSLATION_SINGULAR): ?string
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
@@ -145,16 +145,16 @@ class Translator implements TranslatorInterface
         $value = !empty($value) ? ".".$value : $value;
         $noun  = !empty($noun)  ? ".".$noun  : $noun;
 
-        return mb_ucfirst($this->trans(mb_strtolower($class.$value.$noun), [], self::DOMAIN_ENUM));
+        return $class ? mb_ucfirst($this->trans(mb_strtolower($class.$value.$noun), [], self::DOMAIN_ENUM)) : null;
     }
 
-    public function entity($entityOrClassName, string $noun = self::TRANSLATION_SINGULAR): string
+    public function entity($entityOrClassName, string $noun = self::TRANSLATION_SINGULAR): ?string
     {
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
 
         $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
         $noun  = !empty($noun)  ? ".".$noun  : $noun;
-        return mb_ucfirst($this->trans(mb_strtolower($entityOrClassName.$noun), [], self::DOMAIN_ENTITY));
+        return $entityOrClassName ? mb_ucfirst($this->trans(mb_strtolower($entityOrClassName.$noun), [], self::DOMAIN_ENTITY)) : null;
     }
 
     public function time(int $time): string

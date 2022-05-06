@@ -3,7 +3,6 @@
 namespace Base\Entity\Layout\Attribute\Abstract;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\Traits\TranslationTrait;
 use Base\Field\Type\ArrayType;
 use Base\Model\IconizeInterface;
 
@@ -12,6 +11,7 @@ use Base\Repository\Layout\Attribute\Abstract\HyperpatternAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=HyperpatternAttributeRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
 

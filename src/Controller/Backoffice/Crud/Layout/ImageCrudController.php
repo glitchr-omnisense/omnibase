@@ -5,7 +5,9 @@ namespace Base\Controller\Backoffice\Crud\Layout;
 
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Field\AssociationField;
+use Base\Field\CollectionField;
 use Base\Field\ImageField;
+use Base\Field\QuadrantField;
 use Base\Field\Type\CropperType;
 use Base\Field\Type\NumberType;
 use Base\Field\Type\QuadrantType;
@@ -18,26 +20,33 @@ class ImageCrudController extends AbstractCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
+                
+            yield QuadrantField::new('quadrant')->setColumns(2);
+            yield ImageField::new('source')->setColumns(10)->setCropper();
 
-            yield ImageField::new('source')->setCropper([]);
-            yield AssociationField::new('crops')->showCollapsed(false)->autoload(false)->setFields([
-                "label" => [],
-                "quadrant" => ["form_type" => QuadrantType::class],
-                "cropper" => [
-                    "form_type" => CropperType::class,
-                    "target" => "source",
-                    "parameters" => [
-                        "x"      => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
-                        "y"      => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
-                        "width"  => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
-                        "height" => ["form_type" => NumberType::class, "stepUp" => 10, "stepDown" => 10, "min" => -10],
-                        "rotate" => [],
-                        "scaleX" => [],
-                        "scaleY" => []
-                    ]
-                ],
-            ]);
+            yield CollectionField::new('crops')
+                    ->showCollapsed(false)
+                    ->setEntryLabel(function($i, $e) { 
 
+                        if($e === null) return false;
+                        if($i === "__prototype__") return false;
+
+                        $id = " #".(((int) $i) + 1);
+
+                        return $this->getTranslator()->entity($e).$id;
+                    })
+
+                    ->setEntryType(CropperType::class)
+                    ->setEntryOptions([
+                        "target" => "source",
+                        "fields" => [
+                            "label"  => ["form_type" => TextType::class ],
+                            "x"      => ["form_type" => NumberType::class, "min" => -1],
+                            "y"      => ["form_type" => NumberType::class, "min" => -1],
+                            "width"  => ["form_type" => NumberType::class, "min" => -1],
+                            "height" => ["form_type" => NumberType::class, "min" => -1],
+                        ]
+                    ]);
         }, $args);
     }
 }

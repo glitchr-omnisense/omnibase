@@ -2,11 +2,12 @@
 
 namespace Base\Filter\Advanced;
 
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
 
 class RotateFilter implements FilterInterface
 {
+    public function __toString() { return mod($this->angle, 360) ? "rot:".$this->angle : ""; }
     public function __construct(int $angle = 0)
     {
         $this->angle = $angle;

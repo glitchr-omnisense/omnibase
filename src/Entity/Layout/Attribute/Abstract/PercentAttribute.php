@@ -11,6 +11,7 @@ use Base\Repository\Layout\Attribute\Abstract\PercentAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PercentAttributeRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry( value = "percent" )
  */
 

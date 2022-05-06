@@ -2,10 +2,13 @@
 
 namespace Base;
 
+use Base\Database\Walker\TranslatableWalker;
+use Base\Database\Walker\TranslationWalker;
 use Base\DependencyInjection\Compiler\AnnotationPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
 use Doctrine\DBAL\Types\Type;
+use Doctrine\ORM\Query;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -22,6 +25,7 @@ class BaseBundle extends Bundle
     { 
         $this->defineDoctrineTypes();
         $this->defineDoctrineFilters();
+        $this->defineDoctrineWalkers();
     }
 
     public function build(ContainerBuilder $container)
@@ -45,6 +49,14 @@ class BaseBundle extends Bundle
                     ->addArgument(new Reference('doctrine'));
             }
         }
+    }
+
+    public function defineDoctrineWalkers()
+    {
+        $entityManager = $this->container->get('doctrine.orm.entity_manager');
+        $entityManager->getConfiguration()->setDefaultQueryHint(
+            Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
+        );
     }
 
     public function defineDoctrineFilters()

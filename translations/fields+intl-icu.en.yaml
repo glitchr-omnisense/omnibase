@@ -29,6 +29,27 @@ color:
     clear: Clear
     cancel: Cancel
 
+clipboard:
+  info:
+    copy: Copy to clipboard
+    cut: Cut to clipboard
+    past: Paste from clipboard
+
+  click:
+    cut: Cut!
+    copy: Copied!
+    paste: Paste!
+
+
+cropper:
+  aspect_ratio:
+    standard: "4:3"
+    large: "16:9"
+    facebook: "Facebook"
+    square: "Square"
+    pinterest: "Pinterest"
+    free: "Free"
+    
 fileupload:
   error:
     cannot_upload: "Failed to upload the file"

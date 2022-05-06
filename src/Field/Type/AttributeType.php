@@ -236,7 +236,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
     {
         $form = iterator_to_array($forms)["choice"]->getParent();
         $options = $form->getConfig()->getOptions();
-        $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessType($form, $options) ?? BaseAttribute::class;
+        $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessClass($form, $options) ?? BaseAttribute::class;
         $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($form, $options);
 
         $choiceForm     = iterator_to_array($forms)["choice"];

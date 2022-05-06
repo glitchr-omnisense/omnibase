@@ -9,6 +9,7 @@ use Base\Model\IconizeInterface;
 use Base\Model\UrlInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\LinkRepository;
+use Base\Trait\UrlifyTrait;
 
 /**
  * @ORM\Entity(repositoryClass=LinkRepository::class)

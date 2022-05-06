@@ -147,9 +147,35 @@ spam_api:
 quadrant:
   singular: "cadran cardinal"
   plural: "cadrans cardinaux"
+  east:
+    singular: est
+    plural: quadrant.east.singular
+  south:
+    singular: sud
+    plural: quadrant.south.singular
+  west:
+    singular: ouest
+    plural: quadrant.west.singular
+  north:
+    singular: nord
+    plural: quadrant.north.singular
+
 quadrant8:
   singular: "cadran ordinal"
   plural: "cadrans ordinaux"
+  northeast:
+    singular: nord-est
+    plural: quadrant.northeast.singular
+  northwest:
+    singular: nord-ouest
+    plural: quadrant.northwest.singular
+  southeast:
+    singular: sud-est
+    plural: quadrant.southeast.singular
+  southwest:
+    singular: sud-ouest
+    plural: quadrant.southwest.singular
+
 quadrant16:
   singular: "cadran intercardinal"
   plural: "cadrans intercardinaux"

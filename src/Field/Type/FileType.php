@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\Factory\ClassMetadataManipulator;
-
+use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Base\Validator\Constraints\File;
 use Doctrine\Common\Collections\Collection;
@@ -29,13 +29,14 @@ class FileType extends AbstractType implements DataMapperInterface
     protected $baseService;
     protected $translator;
 
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager)
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, FormFactory $formFactory)
     {
         $this->baseService              = $baseService;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
         $this->translator       = $baseService->getTranslator();
         $this->csrfTokenManager = $csrfTokenManager;
+        $this->formFactory      = $formFactory;
     }
 
     /**
@@ -66,7 +67,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'title'        => null,
             'allow_url'    => false,
 
-            'sortable'     => true,
+            'sortable'     => null,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
@@ -74,12 +75,12 @@ class FileType extends AbstractType implements DataMapperInterface
             'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
             'lightbox2b-js'  => $this->baseService->getParameterBag("base.vendor.lightbox2b.javascript"),
 
-            'thumbnailWidth'     => null,
-            'thumbnailHeight'    => 120,
-            'max_size'       => null,
-            'max_files'          => null,
-            'mime_types'         => [],
-            "data_mapping"       => null,
+            'thumbnail_width'  => null,
+            'thumbnail_height' => 120,
+            'max_size'        => null,
+            'max_files'       => null,
+            'mime_types'      => [],
+            "data_mapping"    => null,
         ]);
 
         $resolver->setNormalizer('class', function (Options $options, $value) {
@@ -189,8 +190,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if(is_array($view->vars['value']))
             $view->vars["value"] = implode("|", $view->vars["value"]);
 
-        $view->vars["sortable"]     = null;
-
+        $view->vars["sortable"]     = true;
         $view->vars['dropzone']     = null;
         $view->vars["ajax"]         = null;
         $view->vars['multiple']     = $options['multiple'];
@@ -212,8 +212,8 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
             if($mimeTypes) $options["dropzone"]["mimeTypes"]  = implode(",", $mimeTypes);
 
-            $options["dropzone"]["thumbnailWidth"]  = $options['thumbnailWidth'] ?? null;
-            $options["dropzone"]["thumbnailHeight"] = $options['thumbnailHeight'] ?? null;
+            $options["dropzone"]["thumbnail_width"]  = $options['thumbnail_width'] ?? null;
+            $options["dropzone"]["thumbnail_height"] = $options['thumbnail_height'] ?? null;
 
             $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
                 ?? '<h4>'.$this->translator->trans("@fields.fileupload.dropzone.title").'</h4><p>'.$this->translator->trans("@fields.fileupload.dropzone.description").'</p>';

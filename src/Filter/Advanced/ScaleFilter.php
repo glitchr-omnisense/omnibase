@@ -3,12 +3,13 @@
 namespace Base\Filter\Advanced;
 
 use Imagine\Filter\Basic\Resize;
-use Imagine\Filter\FilterInterface;
+use Base\Filter\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 
 class ScaleFilter implements FilterInterface
 {
+
     /**
      * @var string
      */
@@ -23,6 +24,12 @@ class ScaleFilter implements FilterInterface
      * @var bool
      */
     protected $absoluteRatio;
+
+    public function __toString()
+    {
+        $scale = $this->options[$this->ratioKey] ?? implode("x", $this->options[$this->dimensionKey] ?? []);
+        return "scale:".$scale;
+    }
 
     public function __construct(array $options = [], $dimensionKey = 'dim', $ratioKey = 'to', $absoluteRatio = true)
     {
