@@ -51,14 +51,14 @@ class Quadrant16 extends Quadrant8
     public static function getPositions(): array
     {
         return array_merge(parent::getPositions(), [
-            self::NNE => "top    75% right  25%",
-            self::ENE => "top    25% right  75%",
-            self::ESE => "right  75% bottom 25%",
-            self::SSE => "right  25% bottom 75%",
-            self::SSW => "bottom 75% left   25%",
-            self::WSW => "bottom 25% left   75%",
-            self::WNW => "left   75% top    25%",
-            self::NNW => "left   25% top    75%",
+            self::NNE => "top 75% right 25%",
+            self::ENE => "top 25% right 75%",
+            self::ESE => "right 75% bottom 25%",
+            self::SSE => "right 25% bottom 75%",
+            self::SSW => "bottom 75% left 25%",
+            self::WSW => "bottom 25% left 75%",
+            self::WNW => "left 75% top 25%",
+            self::NNW => "left 25% top 75%",
         ]);
     }
 }

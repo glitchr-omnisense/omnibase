@@ -39,6 +39,7 @@ class ImageCrudController extends AbstractCrudController
                     ->setEntryType(CropperType::class)
                     ->setEntryOptions([
                         "target" => "source",
+                        "pivot"  => "quadrant.wind",
                         "fields" => [
                             "label"  => ["form_type" => TextType::class ],
                             "x"      => ["form_type" => NumberType::class, "min" => -1],

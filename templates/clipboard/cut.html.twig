@@ -1,1 +1,5 @@
-CUT
+
+{% set attr = attr|merge({ 'href': value}) %}
+<a {{html_attributes(attr) }} data-clipboard-cut>
+    {{ 'fas fa-clipboard'|iconify }}
+</a>

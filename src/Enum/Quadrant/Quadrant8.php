@@ -40,10 +40,10 @@ class Quadrant8 extends Quadrant
     public static function getPositions(): array
     {
         return array_merge(parent::getPositions(), [
-            self::NE  => "top    right",
-            self::SE  => "right  bottom",
+            self::NE  => "top right",
+            self::SE  => "right bottom",
             self::SW  => "bottom left",
-            self::NW  => "left   top",
+            self::NW  => "left top",
         ]);
     }
 }

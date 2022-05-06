@@ -303,8 +303,7 @@
 
 {%- block imageupload_label -%}
     {{ form_label(form, null, {'required': required})}}
-    {{ clipboard("copy", form.vars.value|webp, {style:"margin-left:0.25em;"}) }}
-
+    {{ form.vars.value ? clipboard("copy", form.vars.value|webp, {style:"font-size:13pt; margin-left:0.25em;"}) : "" }}
 {% endblock imageupload_label %}
 
 {%- block imageupload_widget -%}
@@ -638,19 +637,20 @@
                         {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
                         {% if  label != false %}
                             {{ label|default(value)|stringify }}
-                            {% if form.vars.value is defined %}
-                                {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}
-                                {{ url ? " :&nbsp;" : "" }}
-                                {{ clipboard("copy", url, {style:"margin-left:0.25em;"})|raw }}
-                            {% endif %}
                         {% endif %}
 
                     {{ linkable ? "</a>": "</button>" }}
 
                     <div class="form-collection-buttons">
-                        {% if form.vars.value is not null and _href is not null %}
+                        {% if form.vars.value is not null %}
+                        
                         <button type="button" class="btn btn-link form-collection-link-button">
-                            <a href="{{ _href }}"><i class="far fa-fw fa-external-link-square-alt"></i></a>
+                            {% if _href is not null %}
+                                <a href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
+                            {% else %}
+                                {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}                                
+                                {{ url ? clipboard("copy", url, {style:"margin-left:0.25em;"})|raw : "" }}
+                            {% endif %}
                         </button>
                         {% endif %}
                         {% if allows_deleting_items %}
@@ -680,7 +680,6 @@
                     {{ label|default(value)|stringify }}
                     {% if form.vars.value is defined %}
                         {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}
-                        {{ url ? " :&nbsp;" : "" }}
                         {{ clipboard("copy", url, {style:"margin-left:0.25em;"})|raw }}
                     {% endif %}
                 </label>
@@ -899,31 +898,51 @@
 
 {# Search for target inside form based on parent including translation #}
 {% set form0 = form %}
-{% set form = form.ancestor %}
+{% set targetForm = form0.ancestor %}
 {% for child in target %}
 
-    {% set form = form[child] %}
+    {% set targetForm = targetForm[child] %}
 
     {% if child == "translations" %}
-        {% if form.vars.default_locale is defined and form.vars.default_locale in form|keys %}
-            {% set form = form[form.vars.default_locale] %}
+        {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
+            {% set targetForm = targetForm[targetForm.vars.default_locale] %}
         {% else %} 
-            {% set form = form|first %}
+            {% set targetForm = targetForm|first %}
         {% endif %}
     {% endif %}
 {% endfor %}
 
-{% set attr = attr|merge({'data-cropper': form0.vars.cropper,'data-cropper-field': form0.vars.id}) %}
+{% set pivotForm = form0.ancestor %}
+{% for child in pivot %}
+
+    {% set pivotForm = pivotForm[child] %}
+
+    {% if child == "translations" %}
+        {% if pivotForm.vars.default_locale is defined and pivotForm.vars.default_locale in pivotForm|keys %}
+            {% set pivotForm = pivotForm[pivotForm.vars.default_locale] %}
+        {% else %} 
+            {% set pivotForm = pivotForm|first %}
+        {% endif %}
+    {% endif %}
+{% endfor %}
+
+{% set attr = attr|merge({
+    'data-cropper': form0.vars.cropper,
+    'data-cropper-field': form0.vars.id,
+    'data-cropper-pivot': pivotForm.vars.id,
+    'data-cropper-positions': pivotForm.parent.vars.positions
+}) %}
 
 <div class="form-group form-cropper">
     <div class="cropper">
-        <img id="{{ id }}_image" class="hidden" src="{{form.vars.value|imagine|image}}">
+        <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine|image}}">
         <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
 
-        <div class="hidden aspect-ratios" id="{{ id }}_aspectRatios">
-        {% for label,aspectRatio in form0.vars.aspectRatios %}
+        <div class="hidden cropper-actions" id="{{ id }}_actions">
+            <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fas fa-undo"|iconify}}</button>
+            {% for label,aspectRatio in form0.vars.aspectRatios %}
             <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}">{{label|trans}}</button>
-        {% endfor %}
+            {% endfor %}
         </div>
     </div>
 
@@ -943,11 +962,10 @@
 
 {% set attr = attr|merge({
     'data-quadrant-field': form.vars.id,
-    'data-quadrant-winds': nquadrants,
-    'data-quadrant-value': form.vars.value
+    'data-quadrant-winds': nquadrants
 }) %}
 
-{{ form_widget(form.wind, {attr:attr}) }}
+{{ form_widget(form.wind, {attr:attr, value:form.vars.value ?? form.vars.default}) }}
 
 {%- endblock -%}
 

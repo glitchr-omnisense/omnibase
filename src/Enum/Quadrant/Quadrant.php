@@ -26,6 +26,7 @@ class Quadrant extends EnumType implements IconizeInterface
         ];
     }
 
+    public static function getDefault() { return self::O; }
     public static function getTheta() { return 2*pi()/4; }
 
     public static function getRotation(string $quadrant): ?float { return self::getRotations()[$quadrant] ?? self::getRotations()[self::O]; }
@@ -44,10 +45,11 @@ class Quadrant extends EnumType implements IconizeInterface
     public static function getPositions(): array
     {
         return [
-            self::N   => "top",
-            self::E   => "right",
-            self::S   => "bottom",
-            self::W   => "left",
+            self::O   => "center center",
+            self::N   => "top center",
+            self::E   => "center right",
+            self::S   => "bottom center",
+            self::W   => "center left",
         ];
     }
 }

@@ -26,7 +26,9 @@ class QuadrantType extends AbstractType implements DataMapperInterface
 
     public function configureOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefaults(["class" => Quadrant8::class]);
+        $resolver->setDefaults([
+            "class" => Quadrant8::class
+        ]);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -39,8 +41,10 @@ class QuadrantType extends AbstractType implements DataMapperInterface
     {
         parent::buildView($view, $form, $options);
 
-        $view->vars['quadrants'] = $options["class"]::getPermittedValues();
-        $view->vars['icons'] = $options["class"]::getIcons();
+        $view->vars['positions']  = json_encode($options["class"]::getPositions());
+        $view->vars['quadrants']  = $options["class"]::getPermittedValues();
+        $view->vars['icons']      = $options["class"]::getIcons();
+        $view->vars['default']    = $options["class"]::getDefault();
         
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
     }
@@ -50,5 +54,6 @@ class QuadrantType extends AbstractType implements DataMapperInterface
     {
         $windType = current(iterator_to_array($forms));
         $viewData = $windType->getData() ?? Quadrant::O;
+
     }
 }

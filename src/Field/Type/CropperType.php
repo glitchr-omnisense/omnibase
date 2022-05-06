@@ -4,6 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\ImageCrop;
+use Base\Enum\Quadrant\Quadrant8;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Symfony\Component\Form\AbstractType;
@@ -48,7 +49,8 @@ class CropperType extends AbstractType implements DataMapperInterface
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
             'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
 
-            "target"        => null,
+            "target"       => null,
+            "pivot"        => null,
 
             "fields" => [
                 "label"    => [],
@@ -147,23 +149,52 @@ class CropperType extends AbstractType implements DataMapperInterface
 
         $view->ancestor = $ancestor;
 
-        // Check if path is reacheable..
-        $target = $ancestor;
-        $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
-        foreach($targetPath ?? [] as $path) {
+        //
+        // Check if target path is reacheable..
+        if(str_contains($options["target"], "/")) $targetPath = $options["target"];
+        else {
 
-            if(!array_key_exists($path, $target->children))
-                throw new \Exception("Child form \"$path\" related to view data \"".$target->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
+            $target = $ancestor;
+            $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
+            foreach($targetPath ?? [] as $path) {
 
-            $target = $target->children[$path];
-            if($target->vars["name"] == "translations") {
+                if(!array_key_exists($path, $target->children))
+                    throw new \Exception("Child form \"$path\" related to view data \"".$target->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
 
-                $availableLocales = array_keys($target->children);
-                $locale = count($availableLocales) > 1 ? $target->vars["default_locale"]: first($availableLocales) ?? null;
-                if($locale) $target = $target->children[$locale];
+                $target = $target->children[$path];
+                if($target->vars["name"] == "translations") {
+
+                    $availableLocales = array_keys($target->children);
+                    $locale = count($availableLocales) > 1 ? $target->vars["default_locale"]: first($availableLocales) ?? null;
+                    if($locale) $target = $target->children[$locale];
+                }
             }
         }
-        
+
         $view->vars['target'] = $targetPath;
+
+        //
+        // Check if pivot path is reacheable..
+        if(in_array($options["pivot"], Quadrant8::getPermittedValues())) $pivotPath = $options["pivot"];
+        else {
+
+            $pivot = $ancestor;
+            $pivotPath = $options["pivot"] ? explode(".", $options["pivot"]) : null;
+            foreach($pivotPath ?? [] as $path) {
+
+                if(!array_key_exists($path, $pivot->children))
+                    throw new \Exception("Child form \"$path\" related to view data \"".$pivot->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["pivot"]."\")");
+
+                $pivot = $pivot->children[$path];
+                if($pivot->vars["name"] == "translations") {
+
+                    $availableLocales = array_keys($pivot->children);
+                    $locale = count($availableLocales) > 1 ? $pivot->vars["default_locale"]: first($availableLocales) ?? null;
+                    if($locale) $pivot = $pivot->children[$locale];
+                }
+            }
+        }
+
+        $view->vars['pivot'] = $pivotPath;
     }
 }

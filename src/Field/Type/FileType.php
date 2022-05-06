@@ -105,7 +105,8 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options["allow_url"])
                 $form->add("url", UrlType::class);
 
-            $maxFilesize   = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
+            $mimeTypes   = $options["mime_types"] ?? Uploader::getMimeTypes($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName()) ;
+            $maxFilesize = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
             if(array_key_exists('max_size', $options) && $options["max_size"])
                 $maxFilesize = min($maxFilesize, $options["max_size"]);
 
@@ -113,7 +114,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                     "required"    => $options["required"] && ($data === null),
                     "multiple"    => $options["multiple"],
-                    "constraints" => [new File(["max_size" => $maxFilesize,"mime_types" => $options["mime_types"]])]
+                    "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])]
             ]);
 
             if($options["allow_delete"])
