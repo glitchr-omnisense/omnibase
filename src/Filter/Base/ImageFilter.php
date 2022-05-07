@@ -2,6 +2,7 @@
 
 namespace Base\Filter\Base;
 
+use Base\Filter\FilterInterface;
 use Base\Filter\LastFilterInterface;
 use Base\Service\ImageService;
 use Imagine\Image\ImageInterface;
@@ -22,6 +23,13 @@ class ImageFilter implements LastFilterInterface
         $this->path    = $path;
         $this->filters = $filters;
         $this->options  = $options;
+    }
+
+    public function getFilters() { return $this->filters; }
+    public function addFilter(FilterInterface $filter) 
+    {
+        $this->filters[] = $filter;
+        return $this;
     }
 
     protected ?string $path;

@@ -2,6 +2,7 @@
 
 namespace Base\Filter\Base;
 
+use Base\Filter\FilterInterface;
 use Base\Filter\LastFilterInterface;
 use Base\Service\ImageService;
 use Imagine\Image\ImageInterface;
@@ -11,6 +12,9 @@ class SvgFilter implements LastFilterInterface
     protected array $filters;
     protected array $options;
     
+    public function getFilters() { return $this->filters; }
+    public function addFilter(FilterInterface $filter) { /* Filters cannot apply to SVG */; return $this; }
+
     public function __toString() { return $this->path; }
     public function __construct(?string $path = null, array $options = [])
     {

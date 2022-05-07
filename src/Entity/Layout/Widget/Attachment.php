@@ -28,10 +28,10 @@ class Attachment extends Widget implements IconizeInterface
 
     public function __toUrl(): ?string
     {
-        return [$this->getTwigExtension()->getRoutingExtension()->getPath(
+        return $this->getTwigExtension()->getRoutingExtension()->getPath(
             "widget_attachment", 
             ["slug" => $this->getSlug()]
-        )];
+        );
     }
 
     public function __toString() { return $this->getTitle(); }

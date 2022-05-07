@@ -13,7 +13,7 @@ class CropFilter implements FilterInterface
 {
     public function __toString() { return "crop:".$this->getPosition().":".implode("x",$this->getXY()).":".implode("x",$this->getSize()); }
 
-    public function __construct(int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftotp")
+    public function __construct(int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "lefttop")
     {
         $this->x = $x ?? 0;
         $this->y = $y ?? 0;
@@ -85,8 +85,10 @@ class CropFilter implements FilterInterface
     
     public function apply(ImageInterface $image): ImageInterface
     {
-        list($x,$y) = $this->getXY($image);
         list($x0,$y0) = $this->getXYOffset($image);
+
+        list($x,$y)   = $this->getXY();
+        list($w,$h)   = $this->getSize();
 
         $filter = new Crop(
             new Point(          $x - $x0,            $y - $y0),
