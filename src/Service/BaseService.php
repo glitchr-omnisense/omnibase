@@ -43,7 +43,7 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\EventDispatcher\Event;
-
+    
 // TODO: Clean up advanced router proxy methods;
 class BaseService implements RuntimeExtensionInterface
 {   
@@ -604,9 +604,7 @@ class BaseService implements RuntimeExtensionInterface
         if(!$eventOrEntity instanceof LifecycleEventArgs) $entity = $eventOrEntity;
         else $entity = $eventOrEntity->getObject();
 
-        $oldEntity = $this->entityHydrator->hydrate($entity, []);
-        foreach ($data as $property => $value)
-            try { $this->propertyAccessor->setValue($oldEntity, $property, $value); } catch(Exception $e) {}
+        $oldEntity = $this->entityHydrator->hydrate($entity, $data);
 
         return $oldEntity;
     }

@@ -206,8 +206,11 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
-        if(str_starts_with($routeName, "_")) 
-            return $this->getUrl($routeName, $routeParameters, $referenceType);
+        if(str_starts_with($routeName, "_")) {
+        
+            try {return $this->getUrl($routeName, $routeParameters, $referenceType);}
+            catch (Exception $e ) { throw $e; }
+        }
 
         // Handle CLI case using either $_SERVER variables,
         // or base settting database information, if available.

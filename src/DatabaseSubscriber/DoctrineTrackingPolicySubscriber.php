@@ -16,9 +16,7 @@ class DoctrineTrackingPolicySubscriber implements EventSubscriberInterface
 
     public function getSubscribedEvents():array
     {
-        return [
-            Events::loadClassMetadata
-        ];
+        return [ Events::loadClassMetadata ];
     }
 
     public function loadClassMetadata(LoadClassMetadataEventArgs $args)
