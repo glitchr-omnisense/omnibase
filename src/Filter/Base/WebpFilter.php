@@ -2,6 +2,7 @@
 
 namespace Base\Filter\Base;
 
+use Base\Filter\FilterInterface;
 use Base\Filter\LastFilterInterface;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
@@ -12,6 +13,13 @@ class WebpFilter extends WebOptimization implements LastFilterInterface
     {
         $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
         return path_suffix("", $pathSuffixes);
+    }
+
+    public function getFilters() { return $this->filters; }
+    public function addFilter(FilterInterface $filter) 
+    {
+        $this->filters[] = $filter;
+        return $this;
     }
 
     public function __construct(?string $path = null, array $filters = [], array $options = [])

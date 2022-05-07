@@ -9,6 +9,7 @@ use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
+use Exception;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -84,9 +85,8 @@ class BaseBundle extends Bundle
             if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
             else Type::addType($className::getStaticName(), $className);
 
-            try {
-                $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
-            } catch(\Exception $e) { dump($e); }
+            try { $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName()); } 
+            catch(Exception $e) { }
         }
     }
 

@@ -244,11 +244,25 @@ class FileType extends AbstractType implements DataMapperInterface
         }
 
         $fileForm = current(iterator_to_array($forms));
+        $isMultiple = $fileForm->getConfig()->getOption("multiple");
+
+        if($isMultiple) {
+
+            if(!is_array($viewData) && !$viewData instanceof Collection)
+                $viewData = [$viewData];
+
+        } else {
+
+            if(is_array($viewData) || $viewData instanceof Collection)
+                $viewData = first($viewData);
+        }
+
         if(is_array($viewData)) $viewData = array_map("basename", $viewData);
         else if($viewData instanceof Collection) $viewData = $viewData->map(function($f) { return basename($f); });
         else $viewData = basename($viewData);
 
         $fileForm->setData($viewData);
+
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void

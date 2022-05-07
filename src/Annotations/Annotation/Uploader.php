@@ -56,9 +56,12 @@ class Uploader extends AbstractAnnotation
         $this->maxSize   = str2dec($data["max_size"] ?? UploadedFile::getMaxFilesize());
     }
 
-    protected $ancestorEntity;
+    protected $ancestorEntity = null;
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
+        if(!$this->getEntityManager()->contains($entity)) return;
+        if(array_key_exists(spl_object_id($entity), $this->getUnitOfWork()->getScheduledEntityInsertions())) return;
+
         $this->ancestorEntity = $this->getOldEntity($entity);
     }
 
@@ -270,6 +273,7 @@ class Uploader extends AbstractAnnotation
 
         // Field value can be an array or just a single path
         $fileList = array_values(array_intersect($newList, $oldList));
+
         foreach (array_diff($newList, $oldList) as $index => $entry) {
 
             //
@@ -278,6 +282,7 @@ class Uploader extends AbstractAnnotation
             if (!$file instanceof File) {
                 
                 if($this->missable) $fileList[] = $entry;
+                else if(is_uuidv4($entry)) $fileList[] = $entry;
                 continue;
             }
 

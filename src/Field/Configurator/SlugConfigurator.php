@@ -42,6 +42,6 @@ class SlugConfigurator implements FieldConfiguratorInterface
         $entity = $entityDto->getInstance();
         $slug = PropertyAccess::createPropertyAccessor()->getValue($entity, $field->getProperty());
         if(class_implements_interface($entityDto->getInstance(), UrlInterface::class))
-            $field->setFormattedValue(["url" => $entity->__toUrl()[0] ?? null, "slug" => $slug]);
+            $field->setFormattedValue(["url" => $entity->__toUrl() ?? null, "slug" => $slug]);
     }
 }

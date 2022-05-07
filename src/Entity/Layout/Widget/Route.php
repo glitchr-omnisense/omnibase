@@ -22,7 +22,7 @@ class Route extends Widget implements IconizeInterface, UrlInterface
     public        function __iconize()       : ?array { return $this->getRouteIcons(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-road"]; } 
 
-    public function __toUrl(): ?string { return [$this->generate()]; }
+    public function __toUrl(): ?string { return $this->generate(); }
     public function __toString() { return $this->getTitle(); }
     
     public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = []) 
