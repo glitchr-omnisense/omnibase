@@ -179,13 +179,12 @@ class ImageService implements ImageServiceInterface
         if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
             throw new Exception("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
 
-        array_unshift($filters, new $this->maxResolution());
-
         //
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $lastFilter = end($filters);
-        
+        $lastFilter->addFilter(new $this->maxResolution());
+
         $content = null;
         $pathPublic = null;
         if($lastFilter !== null) {

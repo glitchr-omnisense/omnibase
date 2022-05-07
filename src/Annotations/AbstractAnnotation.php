@@ -5,8 +5,10 @@ namespace Base\Annotations;
 use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\Filesystem;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
@@ -109,7 +111,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return false;
     }
 
-    public function getPropertyOwnerRepository($entity, string $property)
+    public function getPropertyOwnerRepository($entity, string $property): ServiceEntityRepositoryInterface
     {
         $className = get_class($entity);
         $repository = $this->getEntityManager()->getRepository($className);
@@ -123,8 +125,10 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $repository;
     }
 
-    public static function getEntityFromData($classname, $data)
+    public static function getEntityFromData($classname, $data): ?object
     {
+        if($data === null) return null;
+
         $fieldNames          = self::getClassMetadata($classname)->getFieldNames();
         $fields  = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
@@ -133,19 +137,20 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $entity;
     }
 
-    public static function getOriginalEntity($entity) { return self::getEntityFromData(get_class($entity), self::getOriginalEntityData($entity)); }
-    public static function getOriginalEntityData($entity)
+    public static function getOriginalEntity($entity): ?object { return self::getEntityFromData(get_class($entity), self::getOriginalEntityData($entity)); }
+    public static function getOriginalEntityData($entity): ?array
     {
         $primaryKey = self::getClassMetadataManipulator()->getPrimaryKey($entity); // primaryKey information missing
 
-        $entityData = self::getUnitOfWork()->getOriginalEntityData($entity);
-        $entityData[$primaryKey] = self::getFieldValue($entity, $primaryKey);
+        try { $entityData = self::getUnitOfWork()->getOriginalEntityData($entity); }
+        catch (EntityNotFoundException $e) { return null; }
 
+        $entityData[$primaryKey] = self::getFieldValue($entity, $primaryKey);
         return $entityData;
     }
 
-    public static function getOldEntity($entity) { return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity)); }
-    public static function getOldEntityData($entity)
+    public static function getOldEntity($entity): ?object { return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity)); }
+    public static function getOldEntityData($entity): ?array
     {
         $changeSet  = self::getEntityChangeSet($entity);
 
@@ -153,13 +158,14 @@ abstract class AbstractAnnotation implements AnnotationInterface
         //   It happens that "original" entity data doesn't mean,
         //   original value before form submission
         $entityData = self::getOriginalEntityData($entity);
+        
         foreach($entityData as $key => $_)
             if(array_key_exists($key, $changeSet)) $entityData[$key] = $changeSet[$key][0];
 
         return $entityData;
     }
 
-    public static function hasField($entity, string $property) { return self::getClassMetadata($entity)->hasField($property); }
+    public static function hasField($entity, string $property):bool { return self::getClassMetadata($entity)->hasField($property); }
     public static function getFieldValue($entity, string $property)
     {
         if(!$entity) return null;

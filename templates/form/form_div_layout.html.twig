@@ -648,7 +648,7 @@
                             {% if _href is not null %}
                                 <a href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
                             {% else %}
-                                {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}                                
+                                {% set url = form.vars.value.__toUrl() ?? null %}                                
                                 {{ url ? clipboard("copy", url, {style:"margin-left:0.25em;"})|raw : "" }}
                             {% endif %}
                         </button>

@@ -28,10 +28,10 @@ class Page extends Widget implements IconizeInterface, UrlInterface
 
     public function __toUrl(): ?string
     {
-        return [$this->getTwigExtension()->getRoutingExtension()->getPath(
+        return $this->getTwigExtension()->getRoutingExtension()->getPath(
             "widget_page",
             ["slug" => $this->getSlug()]
-        )];
+        );
     }
 
     public function __toString() { return $this->getTitle(); }

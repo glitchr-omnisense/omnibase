@@ -11,7 +11,7 @@ final class ClipboardTwigExtension extends AbstractExtension
 {
     public function getName() { return 'clipboard_extension'; }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
             new TwigFunction('clipboard', [$this, 'clipboard'], ["needs_environment" => true, 'is_safe' => ['all']]),
