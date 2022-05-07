@@ -86,7 +86,7 @@ class BaseBundle extends Bundle
 
             try {
                 $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
-            } catch(\Exception $e) { dump($e); }
+            } catch(\Exception $e) { }
         }
     }
 
