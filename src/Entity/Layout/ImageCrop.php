@@ -99,10 +99,10 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $x;
-    public function getX(): ?int { return $this->x; }
-    public function setX(int $x): self
+    public function getX(?int $naturalWidth = null): ?int { return $naturalWidth ? $naturalWidth*$this->x : $this->x; }
+    public function setX(int $x, ?int $naturalWidth = null): self
     {
-        $this->x = $x;
+        $this->x = $naturalWidth ? $x/$naturalWidth : $x;
         return $this;
     }
 
@@ -110,10 +110,10 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $y;
-    public function getY(): ?int { return $this->y; }
-    public function setY(int $y): self
+    public function getY(?int $naturalHeight = null): ?int { return $naturalHeight ? $naturalHeight*$this->y : $this->y; }
+    public function setY(int $y, ?int $naturalHeight = null): self
     {
-        $this->y = $y;
+        $this->y = $naturalHeight ? $y/$naturalHeight : $y;
         return $this;
     }
 
@@ -121,10 +121,10 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $width;
-    public function getWidth(): ?int { return $this->width; }
-    public function setWidth(int $width): self
+    public function getWidth(?int $naturalWidth = null): ?int  { return $naturalWidth ? $naturalWidth*$this->width : $this->width; }
+    public function setWidth(int $width, ?int $naturalWidth = null): self
     {
-        $this->width = $width;
+        $this->width = $naturalWidth ? $width/$naturalWidth : $width;
         return $this;
     }
 
@@ -132,15 +132,15 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="integer", nullable=true)
      */
     protected $height;
-    public function getHeight(): ?int { return $this->height; }
-    public function setHeight(int $height): self
+    public function getHeight(?int $naturalHeight = null): ?int { return $naturalHeight ? $naturalHeight*$this->height : $this->height; }
+    public function setHeight(int $height, ?int $naturalHeight = null): self
     {
-        $this->height = $height;
+        $this->height = $naturalHeight ? $height/$naturalHeight : $height;
         return $this;
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="integer", nullable=true)
      */
     protected $scaleX;
     public function getScaleX(): ?float { return $this->scaleX; }

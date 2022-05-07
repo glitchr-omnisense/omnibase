@@ -29,15 +29,10 @@
                 {% block header_logo %}
                     {% if page_title %}
                         <div class="logo-custom">
-                        {% if ea is defined %}
-                            <a class="logo {{ page_title|length > 14 ? 'logo-long' }}" title="{{ page_title|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
-                                {{ ea.dashboardTitle|raw }}
-                            </a>
-                        {% else %}
                             <div class="logo {{ page_title|length > 14 ? 'logo-long' }}">
-                                {{ page_title|raw }}
+                                <div class="logo-overlay">{{"security_loginRescue"|iconify({"class": "fa-3x"})|first|raw}}</div>
+                                <img src="{{ logo|imagine|raw }}">
                             </div>
-                        {% endif %}
                         </div>
                     {% endif %}
                 {% endblock header_logo %}
@@ -52,27 +47,33 @@
         <section class="content">
 
             <h1>{{ '@forms.login.title'|trans }}</h1>
-            <form method="post" action="{{ action|default('') }}">
-                {% if csrf_token_intention|default(false) %}
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token(csrf_token_intention) }}">
-                {% endif %}
+           
+                {{ form_start(form) }}
 
-                <input type="hidden" name="{{ target_path_parameter|default('_target_path') }}" value="{{ target_path|default(ea is defined ? path(ea.dashboardRouteName) : '/') }}" />
-
-                <div class="input-group mt-4 mb-3">
+                <input type="hidden" name="_target_path" value="{{ app.referrer }}"/>
+        
+                <div class="input-group mt-4 mb-2">
                     <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-user"></i></span>
-                    <input type="text" id="identifier" name="{{ identifier_parameter|default('identifier') }}" class="form-control" placeholder="{{ _identifier_label|trans }}" value="{{ last_identifier|default('') }}" required autofocus>
+                    {{ form_widget(form.identifier, {attr:{placeholder:'@forms.login.identifier'|trans}}) }}
                 </div>
 
-                <div class="input-group field-password mb-3">
+                <div class="input-group field-password mb">
                     <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-lock"></i></span>
-                    <input type="password" id="password" name="{{ password_parameter|default('password') }}" class="form-control" placeholder="{{ _password_label|trans }}" required>
+                    {{ form_widget(form.password, {attr:{ placeholder:'@forms.login.password'|trans}}) }}
                 </div>
 
-                <div class="text-center form-group field-button">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block" onclick="this.form.submit(); this.disabled=true;">{{ _sign_in_label }}</button>
+                <hr>
+
+                <div class="text-center form-group field-button input-group field-password">
+                        <button type="submit" class="btn btn-primary btn-block" onclick="this.form.submit(); this.disabled=true;">{{app.request.get('_route')|iconify|second|raw}} {{ _sign_in_label }}</button>
+                        <div class="remember-me form-group form-check form-switch form-switch-lg">
+                            {{ form_widget(form._remember_me) }}
+                            {{ form_label(form._remember_me, '@forms.login.rememberMe'|trans) }}
+                        </div>
                 </div>
-            </form>
+                {{ form_rest(form) }}
+        {{ form_end(form) }}
+
         </section>
     </div>
 {% endblock %}

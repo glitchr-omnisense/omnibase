@@ -6,6 +6,7 @@ use App\Entity\User;
 
 use Base\Entity\User\Notification;
 use Base\Service\BaseService;
+use Base\Security\LoginRescueFormAuthenticator;
 use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\Security\RegistrationType;
@@ -20,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 
 use Symfony\Component\Notifier\NotifierInterface;
 
@@ -31,18 +33,19 @@ use Base\Component\HttpFoundation\Referrer;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Doctrine\ORM\EntityManager;
+use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 
-class SecurityController extends AbstractController
+class SecurityController extends AbstractDashboardController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, Referrer $referrer, BaseService $baseService)
+    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService)
     {
         $this->baseService = $baseService;
         $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
         $this->entityManager = $entityManager;
-        $this->referrer = $referrer;
+        
     }
 
     /**
@@ -96,21 +99,50 @@ class SecurityController extends AbstractController
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/login/rescue", name="security_login_rescue")
+     * @Route("/login/rescue", name="security_loginRescue")
+     * @Iconize({"fas fa-lock","fas fa-unlock"})
      */
-    public function LoginRescue(AuthenticationUtils $authenticationUtils): Response
+    public function LoginRescue(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
     {
+        // Last username entered by the user
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        $targetPath = strval($referrer);
+        $targetRoute = $this->baseService->getRouteName($targetPath);
+
+        // Redirect to the right page when access denied
+        if ( ($user = $this->getUser()) && $user->isPersistent() ) {
+
+            if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
+
+                // Check if target path provided via $_POST..
+                $targetPath = strval($referrer);
+                $targetRoute = $this->baseService->getRouteName($targetPath);
+                if ($targetPath && !in_array($targetRoute, [LoginRescueFormAuthenticator::LOGOUT_ROUTE, LoginRescueFormAuthenticator::LOGIN_ROUTE]) )
+                    return $this->baseService->redirect($targetPath);
+
+                return $this->redirectToRoute($request->isMethod('POST') ? "user_settings" : $this->baseService->getRouteName("/"));
+            }
+        }
+
+        // Generate form
+        $user = new User();
+        $form = $this->createForm(LoginType::class, $user, ["identifier" => $lastUsername]);
+        $form->handleRequest($request);
+
         $lastUsername = $authenticationUtils->getLastUsername();
 
         $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
+        $logo = $logo ?? $this->baseService->getSettings()->get("base.settings.logo")["_self"] ?? null;
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',
-            'csrf_token_intention' => 'authenticate',
             'target_path' => $this->baseService->getUrl('dashboard'),
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
-            'page_title' => '<img src="'.$logo.'" alt="Dashboard">'
+            'logo' => $logo,
+            "identifier" => $lastUsername,
+            "form" => $form->createView()
         ]);
     }
 
@@ -118,7 +150,7 @@ class SecurityController extends AbstractController
      * @Route("/logout", name="security_logout")
      * @Iconize("fas fa-fw fa-sign-out-alt")
      */
-    public function Logout(Request $request) {
+    public function Logout(Referrer $referrer, Request $request) {
 
         // If user is found.. go to the logout request page
         if($this->getUser())
@@ -147,7 +179,7 @@ class SecurityController extends AbstractController
         }
 
         // Redirect to previous page
-        return $this->redirect($this->referrer->getUrl() ?? $this->baseService->getAsset("/"));
+        return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));
     }
 
     /**

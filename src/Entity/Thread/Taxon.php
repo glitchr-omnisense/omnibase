@@ -31,8 +31,6 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-sitemap"]; }
 
     public function __toString() { return $this->getLabel() ?? $this->getSlug() ?? get_class($this); }
-
-
     public function __construct(?string $label = null, ?string $slug = null)
     {
         $this->setLabel($label);
@@ -177,13 +175,11 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      * @ORM\Column(type="boolean")
      */
     protected $isVisible;
-    public function isVisible() : bool { return $this->visible; }
-    public function getVisible(): bool { return $this->isVisible(); }
-
-    public function markAsVisible(bool $visible) { return $this->setIsVisible($visible); }
-    public function setVisible(bool $visible)
+    public function isVisible() : bool { return $this->isVisible; }
+    public function markAsVisible(bool $isVisible) { return $this->setIsVisible($isVisible); }
+    public function setIsVisible(bool $isVisible)
     {
-        $this->visible = $visible;
+        $this->isVisible = $isVisible;
         return $this;
     }
 }

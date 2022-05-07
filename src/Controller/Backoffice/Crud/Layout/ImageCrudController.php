@@ -12,10 +12,19 @@ use Base\Field\Type\CropperType;
 use Base\Field\Type\NumberType;
 use Base\Field\Type\QuadrantType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 class ImageCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
+    
+    public function configureActions(Actions $actions): Actions
+    {
+        return parent::configureActions($actions)
+            ->remove(Crud::PAGE_INDEX, Action::NEW);
+    }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

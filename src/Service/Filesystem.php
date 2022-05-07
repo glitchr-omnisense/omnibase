@@ -41,13 +41,13 @@ class Filesystem
 
     public function getAdapter(?string $storage = null): FilesystemAdapter
     {
-        if($storage instanceof FilesystemOperator) $filesystemOperator = $storage;
-        else $filesystemOperator = $this->getOperator($storage); 
+        if($storage instanceof FilesystemOperator) $fsOperator = $storage;
+        else $fsOperator = $this->getOperator($storage); 
 
         $reflProperty = new \ReflectionProperty(Flysystem::class, 'adapter');
         $reflProperty->setAccessible(true);
 
-        return $reflProperty->getValue($filesystemOperator);
+        return $reflProperty->getValue($fsOperator);
     }
 
     public function getPathPrefixer(?string $storage = null): PathPrefixer
@@ -65,57 +65,113 @@ class Filesystem
         return null;
     }
 
-    public function read(string $location, ?FilesystemOperator $filesystemOperator = null): ?string
-    {
-        if(!$filesystemOperator) $filesystemOperator = $this->getOperator();
-        if(!$filesystemOperator->fileExists($location)) return null;
 
-        try { return $filesystemOperator->read($location); }
+    public function getHashId(string|null $source, array $filters = [], array $config = []): ?string
+    {
+        // if($source === null ) return null;
+        // $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
+
+        // $config["path"] = $path;
+        // $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
+        // if(!empty($filters)) $config["filters"] = $filters;
+
+        // while ( ($sourceConfig = $this->decode(basename($source))) ) {
+
+        //     $source = $sourceConfig["path"] ?? $source;
+        //     $config["path"] = $source;
+        //     $config["filters"] = ($sourceConfig["filters"] ?? []) + ($config["filters"] ?? []);
+        //     $config["options"] = ($sourceConfig["options"] ?? []) + ($config["options"] ?? []);
+        // }
+
+        // return $this->encode($config);
+    }
+
+    public function resolveArguments(string $hashid, array $filters = [], array $args = [])
+    {
+        // $path = null;
+        // $args = [];
+
+        // do {
+        
+        //     // Path fallback
+        //     $args0 = null;
+        //     $hashid0 = $hashid;
+        //     while(strlen($hashid0) > 1) {
+
+        //         $args0 = $this->decode(basename($hashid0));
+        //         if($args0) break;
+
+        //         $hashid0 = dirname($hashid0);
+        //     }
+
+        //     if(!is_array($args0)) $path = $hashid;
+        //     else {
+
+        //         $hashid = array_pop_key("path", $args0) ?? $hashid;
+        //         $filters = array_key_exists("filters", $args0) ? array_merge($args0["filters"], $filters) : $filters;
+        //         $args = array_merge($args, $args0);
+        //     }
+
+        // } while(is_array($args0));
+
+        // $args["path"]    = $path;
+        // $args["filters"] = $filters;
+        // $args["options"] = $args["options"] ?? [];
+        // return $args;
+    }
+    
+    public function isImage(string $location, ?FilesystemOperator $fsOperator = null) { return preg_match("/image\/\*/", $this->mimeType($location, $fsOperator)); }
+    public function read(string $location, ?FilesystemOperator $fsOperator = null): ?string
+    {
+        if(!$fsOperator) $fsOperator = $this->getOperator();
+        if(!$fsOperator->fileExists($location)) return null;
+
+        try { return $fsOperator->read($location); }
         catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$location\".. ".$e->getMessage()); }
     }
 
-    public function write(string $location, string $contents, ?FilesystemOperator $filesystemOperator = null, array $config = [])
+    public function write(string $location, string $contents, ?FilesystemOperator $fsOperator = null, array $config = [])
     {
-        if(!$filesystemOperator) $filesystemOperator = $this->getOperator();
-        if ($filesystemOperator->fileExists($location)) return false;
+        if(!$fsOperator) $fsOperator = $this->getOperator();
+        if ($fsOperator->fileExists($location)) return false;
 
-        try { $filesystemOperator->write($location, $contents, $config); }
+        try { $fsOperator->write($location, $contents, $config); }
         catch (UnableToWriteFile $e) { throw new NotWritableException("Unable to write file \"$location\".. ".$e->getMessage()); }
         return true;
     }
 
-    public function delete(string $location, ?FilesystemOperator $filesystemOperator = null)
+    public function delete(string $location, ?FilesystemOperator $fsOperator = null)
     {
-        if(!$filesystemOperator) $filesystemOperator = $this->getOperator();
-        if(!$filesystemOperator->fileExists($location)) return false;
+        if(!$fsOperator) $fsOperator = $this->getOperator();
+        if(!$fsOperator->fileExists($location)) return false;
 
-        try { $filesystemOperator->delete($location); }
+        try { $fsOperator->delete($location); }
         catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to delete file \"$location\".. ".$e->getMessage()); }
         return true;
     }
 
-    public function fileExists(string $location, ?FilesystemOperator $filesystemOperator = null): bool 
+    public function fileExists(string $location, ?FilesystemOperator $fsOperator = null): bool 
     {
-        if(!$filesystemOperator) $filesystemOperator = $this->getOperator();
-        return $filesystemOperator->fileExists($location);
+        if(!$fsOperator) $fsOperator = $this->getOperator();
+        return $fsOperator->fileExists($location);
     }
 
-    public function mkdir(string $location, ?FilesystemOperator $filesystemOperator = null, array $config = []) 
+    public function mkdir(string $location, ?FilesystemOperator $fsOperator = null, array $config = []) 
     {
-        if(!$filesystemOperator) $filesystemOperator = $this->getOperator();
-        if($filesystemOperator->fileExists($location)) return false;
+        if(!$fsOperator) $fsOperator = $this->getOperator();
+        if($fsOperator->fileExists($location)) return false;
 
-        try { $filesystemOperator->createDirectory($location, $config); }
+        try { $fsOperator->createDirectory($location, $config); }
         catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to create directory \"$location\".. ".$e->getMessage()); }
         return true;
     }
 
-    public function mimeType(string $location, ?FilesystemOperator $filesystemOperator = null) 
+    public function mimeType(string $location, ?FilesystemOperator $fsOperator = null) 
     {
-        if(!$filesystemOperator) $filesystemOperator = $this->getOperator();
-        if(!$filesystemOperator->fileExists($location)) return null;
+        if(!$fsOperator) $fsOperator = $this->getOperator();
+        if(!$fsOperator->fileExists($location)) return null;
 
-        try { $filesystemOperator->mimeType($location); }
+        try { $fsOperator->mimeType($location); }
         catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$location\".. ".$e->getMessage()); }
         return null;
     }

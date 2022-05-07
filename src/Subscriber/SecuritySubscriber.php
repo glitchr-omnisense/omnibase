@@ -90,7 +90,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onReferrerRequest', 2], ['onKernelRequest', 1]],
+            RequestEvent::class    => [['onAccessRestriction', 3], ['onReferrerRequest', 2], ['onKernelRequest', 1]],
             ResponseEvent::class   => ['onKernelResponse'],
             TerminateEvent::class  => ['onKernelTerminate'],
             ExceptionEvent::class  => ['onKernelException', -1024],
@@ -227,12 +227,58 @@ class SecuritySubscriber implements EventSubscriberInterface
         return $this->baseService->redirect($targetPath, [], 302);
     }
 
+    public function onAccessRestriction(RequestEvent $event)
+    {
+        if(!$event->isMainRequest()) return;
+
+        $token = $this->tokenStorage->getToken();
+        $user = $token ? $token->getUser() : null;
+
+        $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
+        $firewallDev  = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.dev";
+        $isEditor     = $user && $user->isGranted("ROLE_EDITOR");
+
+        if($isEditor) return;                       // Unless you are an editor !
+        if(!$firewallMain && !$firewallDev) return; // Access restricted to main and dev firewalls
+
+        //
+        // Check if public access right
+        $publicAccess = $this->baseService->getSettings()->getScalar("base.settings.public_access");
+        $userAccess   = $this->baseService->getSettings()->getScalar("base.settings.user_access");
+        $adminAccess  = $this->baseService->getSettings()->getScalar("base.settings.admin_access");
+
+        $rescueLoginRoute = "security_loginRescue";
+        $currentRouteName = $this->getCurrentRouteName($event);
+
+        if(!in_array($currentRouteName, [$rescueLoginRoute, "security_logout", "security_logoutRequest"])) {
+
+            if(!$publicAccess && (!$user || !$user->isGranted("ROLE_USER"))) {
+                $event->setResponse($this->baseService->redirectToRoute("security_loginRescue"));  
+                if($token) $this->tokenStorage->setToken(NULL);
+                return $event->stopPropagation();
+            }
+
+            if(!  $userAccess && (!$user || !$user->isGranted("ROLE_ADMIN"))) {
+                $event->setResponse($this->baseService->redirectToRoute("security_loginRescue"));                
+                if($token) $this->tokenStorage->setToken(NULL);
+                return $event->stopPropagation();
+            }
+
+            if(! $adminAccess && (!$user || !$user->isGranted("ROLE_EDITOR"))) {
+                $event->setResponse($this->baseService->redirectToRoute("security_loginRescue"));                
+                if($token) $this->tokenStorage->setToken(NULL);
+                return $event->stopPropagation();
+            }
+        }
+    }
+
     public function onKernelRequest(RequestEvent $event)
     {
-        //Notify user about the authentication method
-        if(!($token = $this->tokenStorage->getToken()) ) return;
-        if(!($user = $token->getUser())) return;
-
+        $token = $this->tokenStorage->getToken();
+        $user = $token ? $token->getUser() : null;
+        if(!$user) return;
+        
+        // Notify user about the authentication method
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
 

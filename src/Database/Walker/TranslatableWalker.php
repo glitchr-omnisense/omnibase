@@ -32,7 +32,7 @@ class TranslatableWalker extends SqlWalker
     }
 
 
-    public function walkFromClause($fromClause)
+    public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
 
@@ -58,7 +58,7 @@ class TranslatableWalker extends SqlWalker
         throw new RuntimeException('Locale provider not found.');
     }
 
-    public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null)
+    public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
     

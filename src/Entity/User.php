@@ -69,6 +69,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public const __ONLINE_TIME__ = 60*5;
     private const __DEFAULT_IDENTIFIER__ = "email";
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
+    
+    public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
 
     public function getUserIdentifier(): string 
     { 

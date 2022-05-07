@@ -86,6 +86,6 @@ class IconProvider
                     return $provider->iconify($icon, $attributes);
         }
 
-        return $this->imageService->imagify($icon, $attributes);
+        return $icon;
     }
 }

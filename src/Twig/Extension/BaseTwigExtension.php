@@ -129,6 +129,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('pad',            [$this, 'pad']),
             new TwigFilter('mb_ucfirst',     [$this, 'mb_ucfirst']),
             new TwigFilter('mb_ucwords',     [$this, 'mb_ucwords']),
+            new TwigFilter('second',         "second"),
             
             new TwigFilter('trans',          [Translator::class, 'trans']),
             new TwigFilter('time',           [Translator::class, 'time']),
@@ -158,6 +159,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('thumbnail_upscale ', [ImageService::class, 'thumbnail_upscale ']),
         ];
     }
+
 
     public function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_ucfirst($string, $encoding); }
     public function mb_ucwords(string $string, ?string $encoding = null, ?string $separator = null): string { return mb_ucwords($string, $encoding, $separator); }

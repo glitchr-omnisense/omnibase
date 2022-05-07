@@ -17,10 +17,11 @@ class ImageType extends FileType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'   => "bundles/base/images.svg",
-            'alt'         => null,
+            'thumbnail'    => "bundles/base/images.svg",
+            'alt'          => null,
+            'clipboard'    => true,
 
-            'modal'       => [
+            'modal'        => [
                 "keyboard" => false,
                 "backdrop" => "static"
             ],

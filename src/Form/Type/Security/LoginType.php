@@ -33,7 +33,7 @@ class LoginType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('email', TextType::class, [
+            ->add('identifier', TextType::class, [
                 'attr'  => [
                     'id' => "inputUsername",  // used in Symfony kernel
                     'value' => $options["identifier"] ?? ""

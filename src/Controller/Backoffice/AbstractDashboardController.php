@@ -217,6 +217,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true, "required" => false],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
+            "base.settings.public_access"        => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
+            "base.settings.user_access"          => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
+            "base.settings.admin_access"         => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
             "base.settings.maintenance.uptime"   => ["form_type" => DateTimePickerType::class, "required" => false],
@@ -226,6 +229,18 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
+
+        // $fields = array_filter($fields, function($o) use ($fields) {
+
+        //     $roles = array_pop_key("roles", $fields);
+        //     $this->getUser()->isGranted($o["roles"]);
+        // });
+
+        foreach($fields as $name => &$options) {
+
+            $roles = array_pop_key("roles", $options);
+            if($roles && !$this->getUser()->isGranted($roles)) unset($fields[$name]);
+        }
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);

@@ -86,12 +86,12 @@ class EntityHydrator
         }
 
         if (!is_object($entity))
-            throw new Exception('Entity passed to ".__CLASS__."::".__FUNCTION__."() must be a class name or entity object');
+            throw new Exception('Entity passed to '.__CLASS__.'::'.__FUNCTION__.'() must be a class name or entity object');
 
         $this->setDefaults($entity, $aggregateModel);
 
         $entityName = get_class($entity);
-        if (is_object($data) && !$data instanceof Collection && !$data instanceof $entityName)
+        if (is_object($data) && !$data instanceof Collection && !is_instanceof($entityName, get_class($data)))
             throw new Exception("\"".get_class($data)."\" data passed to ".__CLASS__."::".__FUNCTION__."() must inherit from \"".get_class($entity)."\"");
 
         $data = $this->dehydrate($data, $fieldExceptions);

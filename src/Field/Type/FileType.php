@@ -62,6 +62,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
             'allow_delete' => true,
             'multiple'     => false,
+            'clipboard'    => false, 
 
             'href'         => null,
             'title'        => null,
@@ -87,6 +88,12 @@ class FileType extends AbstractType implements DataMapperInterface
             return $value === null ? $options["data_class"] : $value;
         });
 
+        $resolver->setNormalizer('clipboard', function (Options $options, $value) {
+
+            if($value) return !$options["multiple"] || $options["dropzone"] !== null;
+            return false;
+        });
+
         $resolver->setAllowedTypes("dropzone", ['null', 'array']);
     }
 
@@ -110,12 +117,15 @@ class FileType extends AbstractType implements DataMapperInterface
             if(array_key_exists('max_size', $options) && $options["max_size"])
                 $maxFilesize = min($maxFilesize, $options["max_size"]);
 
-            if(!$options["dropzone"])
+            
+            if(!$options["dropzone"]) {
+         
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
-                    "required"    => $options["required"] && ($data === null),
-                    "multiple"    => $options["multiple"],
-                    "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])]
-            ]);
+                        "required"    => $options["required"] && ($data === null) && ($options["cropper"] ?? null) === null,
+                        "multiple"    => $options["multiple"],
+                        "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])]
+                ]);
+            }
 
             if($options["allow_delete"])
                 $form->add('delete', CheckboxType::class, ['required' => false]);
@@ -188,9 +198,14 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["mime_types"] = $mimeTypes;
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
-        if(is_array($view->vars['value']))
+        
+        $view->vars['pathLink'] = [];
+        if(is_array($view->vars['value'])) {
+            $view->vars['pathLink'] = json_encode(array_transforms(fn($k,$v):array => [basename($v), $v], $view->vars['value']));
             $view->vars["value"] = implode("|", $view->vars["value"]);
+        }
 
+        $view->vars["clipboard"]    = $options["clipboard"];
         $view->vars["sortable"]     = true;
         $view->vars['dropzone']     = null;
         $view->vars["ajax"]         = null;

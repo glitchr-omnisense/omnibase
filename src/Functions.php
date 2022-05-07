@@ -49,6 +49,64 @@ namespace {
         return $class->isAbstract();
     }
 
+    function shrinkhex(?string $_hex): ?string { 
+    
+        $hex = str_lstrip($_hex, "#");
+        if(!$hex) return null;
+
+        switch(strlen($hex)) {
+
+            case 3: break;
+
+            case 4:
+                if(str_ends_with($hex, "F")) $hex = substr($hex, 0,3);
+                break;
+
+            case 6:
+
+                if ($hex[0] == $hex[1] && $hex[2] == $hex[3] && $hex[4] == $hex[5])
+                    $hex = $hex[0].$hex[2].$hex[4];
+
+                break;
+
+            case 8:
+
+                if ($hex[0] == $hex[1] && $hex[2] == $hex[3] && $hex[4] == $hex[5] && $hex[6] == $hex[7])
+                    $hex = $hex[0].$hex[2].$hex[4].$hex[6];
+                
+                if(str_ends_with($hex, "F")) $hex = substr($hex, 0,3);
+                break;
+
+            default:
+                return $_hex;
+        }
+
+        return "#".$hex; 
+    }
+
+    function expandhex(?string $_hex, bool $extended = false): ?string 
+    {
+        $hex = str_lstrip($_hex, "#");
+        if(!$hex) return null;
+
+        switch(strlen($hex)) {
+
+            case 3: 
+                $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2];
+                if($extended) $hex .= "FF";
+                break;
+
+            case 4:
+                $hex = $hex[0].$hex[0].$hex[1].$hex[1].$hex[2].$hex[2].$hex[3].$hex[3];
+                break;
+
+            default:
+                return $_hex;
+        }
+
+        return "#".$hex; 
+    }
+    
     
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
@@ -371,6 +429,7 @@ namespace {
 
     function begin(object|array &$array) { return array_values(array_slice($array, 0, 1))[0] ?? null; }
     function first(object|array &$array) { return begin($array) ?? null; }
+    function second(object|array $array) { return $array[1] ?? null; }
     function head(object|array &$array):mixed { return begin($array); }
 
     function last(object|array &$array)  { return end($array)   ?? null; }

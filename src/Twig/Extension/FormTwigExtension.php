@@ -17,6 +17,9 @@ final class FormTwigExtension extends AbstractExtension
 
     public function getForm(string $name): ?FormView
     {
+        $form = $this->formProxy->getForm($name);
+        if(!$form) return null;
+        
         return $this->formProxy->getForm($name)->createView();
     }
 }
