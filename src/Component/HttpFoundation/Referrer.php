@@ -67,7 +67,7 @@ class Referrer
     public function getUrl() : ?string 
     {
         $request = $this->requestStack->getMainRequest();
-        if (null === $request) return "";
+        if (null === $request) return null;
 
         // Target path fallbacks
         $targetPath = $request->request->get('_target_path');

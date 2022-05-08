@@ -6,7 +6,6 @@ use App\Entity\User;
 
 use Base\Entity\User\Notification;
 use Base\Service\BaseService;
-use Base\Security\LoginRescueFormAuthenticator;
 use Base\Security\LoginFormAuthenticator;
 
 use App\Form\Type\Security\RegistrationType;
@@ -21,7 +20,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 
 use Symfony\Component\Notifier\NotifierInterface;
 
@@ -32,10 +30,10 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Component\HttpFoundation\Referrer;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
+use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 
-class SecurityController extends AbstractDashboardController
+class SecurityController extends AbstractController
 {
     protected $baseService;
 
@@ -45,7 +43,6 @@ class SecurityController extends AbstractDashboardController
         $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
         $this->entityManager = $entityManager;
-        
     }
 
     /**
@@ -91,56 +88,6 @@ class SecurityController extends AbstractDashboardController
         $user->removeExpiredTokens();
 
         return $this->render('@Base/security/login.html.twig', [
-            "identifier" => $lastUsername,
-            "form" => $form->createView()
-        ]);
-    }
-
-    /**
-     * Link to this controller to start the "connect" process
-     *
-     * @Route("/login/rescue", name="security_loginRescue")
-     * @Iconize({"fas fa-lock","fas fa-unlock"})
-     */
-    public function LoginRescue(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
-    {
-        // Last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        $targetPath = strval($referrer);
-        $targetRoute = $this->baseService->getRouteName($targetPath);
-
-        // Redirect to the right page when access denied
-        if ( ($user = $this->getUser()) && $user->isPersistent() ) {
-
-            if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-
-                // Check if target path provided via $_POST..
-                $targetPath = strval($referrer);
-                $targetRoute = $this->baseService->getRouteName($targetPath);
-                if ($targetPath && !in_array($targetRoute, [LoginRescueFormAuthenticator::LOGOUT_ROUTE, LoginRescueFormAuthenticator::LOGIN_ROUTE]) )
-                    return $this->baseService->redirect($targetPath);
-
-                return $this->redirectToRoute($request->isMethod('POST') ? "user_settings" : $this->baseService->getRouteName("/"));
-            }
-        }
-
-        // Generate form
-        $user = new User();
-        $form = $this->createForm(LoginType::class, $user, ["identifier" => $lastUsername]);
-        $form->handleRequest($request);
-
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        $logo = $this->baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
-        $logo = $logo ?? $this->baseService->getSettings()->get("base.settings.logo")["_self"] ?? null;
-        return $this->render('@EasyAdmin/page/login.html.twig', [
-            'last_username' => $lastUsername,
-            'translation_domain' => 'forms',
-            'target_path' => $this->baseService->getUrl('dashboard'),
-            'identifier_label' => '@forms.login.identifier',
-            'password_label' => '@forms.login.password',
-            'logo' => $logo,
             "identifier" => $lastUsername,
             "form" => $form->createView()
         ]);
@@ -193,7 +140,7 @@ class SecurityController extends AbstractDashboardController
     /**
      * @Route("/register", name="security_register")
      */
-    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator): Response {
+    public function Register(Request $request, LoginFormAuthenticator $authenticator, UserAuthenticatorInterface $userAuthenticator, ParameterBagInterface $parameterBag): Response {
 
         // If already connected..
         if (($user = $this->getUser()) && $user->isPersistent())
@@ -204,7 +151,7 @@ class SecurityController extends AbstractDashboardController
         $form = $this->createForm(RegistrationType::class, $newUser, ['validation_groups' => ['new']]);
 
         // An account might require to be verified by an admin
-        $adminApprovalRequired = $this->baseService->getParameterBag("security.user.adminApproval") ?? false;
+        $adminApprovalRequired = $parameterBag->get("security.user.adminApproval") ?? false;
         $newUser->approve(!$adminApprovalRequired);
 
         $form->handleRequest($request);

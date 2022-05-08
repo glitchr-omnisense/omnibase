@@ -22,15 +22,17 @@ class ErrorController extends AbstractController
 
     public function Main(\Throwable $exception) {
 
+        $response = null;
+        
         try {
 
-            if ($this->baseService->isDevelopment()) return $this->rescue($exception);
+            if ($this->baseService->isDevelopment()) return $this->Rescue($exception);
             return $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
 
         } catch(Exception $fatalException) {
 
             throw new Exception("Twig rendering engine failed (".trim($fatalException->getMessage(), ".").") following a first exception. (see below)", 500, $exception);
-            $response = $this->rescue($exception);
+            $response = $this->Rescue($exception);
         }
 
         $notification = new Notification($exception);
@@ -41,7 +43,7 @@ class ErrorController extends AbstractController
     }
 
 
-    public function rescue(\Throwable $exception): Response
+    public function Rescue(\Throwable $exception): Response
     {
         $flattenException = $this->htmlErrorRenderer->render($exception);
 

@@ -19,6 +19,7 @@ use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
+use Base\Security\RescueFormAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
@@ -26,6 +27,7 @@ use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
@@ -59,7 +61,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         ServiceLocator $dispatcherLocator,
         TranslatorInterface $translator,
         BaseService $baseService,
-        Referrer $referrer) {
+        Referrer $referrer, Profiler $profiler) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
@@ -67,6 +69,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->entityManager = $entityManager;
         $this->baseService = $baseService;
         $this->referrer = $referrer;
+        $this->profiler = $profiler;
         
         foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
@@ -90,7 +93,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onAccessRestriction', 3], ['onReferrerRequest', 2], ['onKernelRequest', 1]],
+            RequestEvent::class    => [['onAccessRestriction', 8], ['onReferrerRequest', 2], ['onKernelRequest', 1]],
             ResponseEvent::class   => ['onKernelResponse'],
             TerminateEvent::class  => ['onKernelTerminate'],
             ExceptionEvent::class  => ['onKernelException', -1024],
@@ -206,69 +209,63 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $currentRoute = $this->getCurrentRouteName($event);
         if($this->isException($currentRoute)) return;
-        
-        $event->getRequest()->getSession()->remove('_security.main.target_path');
-        $event->getRequest()->getSession()->remove('_security.account.target_path');
 
-        if ($currentRoute != $targetRoute &&
-            $currentRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
-            $currentRoute != LoginFormAuthenticator::LOGIN_ROUTE) {
+        $session = $event->getRequest()->getSession();
+        $session->remove('_security.main.target_path');
+        $session->remove('_security.account.target_path');
 
-            $event->getRequest()->getSession()->set('_target_path', null);
+        $currentRouteIsLoginForm = in_array($currentRoute, [
+            LoginFormAuthenticator::LOGOUT_ROUTE, 
+            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, 
+            LoginFormAuthenticator::LOGIN_ROUTE, 
+            RescueFormAuthenticator::RESCUE_ROUTE]
+        );
 
-        } else {
+        $session->set('_target_path', $currentRoute == $targetRoute || $currentRouteIsLoginForm ? $targetPath : null);
 
-            $event->getRequest()->getSession()->set('_target_path', $targetPath);
-        }
+        $targetRouteIsLoginForm = in_array($targetRoute, [
+            LoginFormAuthenticator::LOGOUT_ROUTE, 
+            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, 
+            LoginFormAuthenticator::LOGIN_ROUTE, 
+            RescueFormAuthenticator::RESCUE_ROUTE]
+        );
 
-        if ($targetPath && 
-            $targetRoute != LoginFormAuthenticator::LOGOUT_ROUTE &&
-            $targetRoute != LoginFormAuthenticator::LOGIN_ROUTE ) 
-        return $this->baseService->redirect($targetPath, [], 302);
+        if ($targetPath && !$targetRouteIsLoginForm) 
+            return $this->baseService->redirect($targetPath, [], 302);
     }
 
     public function onAccessRestriction(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
-
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
 
-        $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
-        $firewallDev  = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.dev";
-        $isEditor     = $user && $user->isGranted("ROLE_EDITOR");
-
-        if($isEditor) return;                       // Unless you are an editor !
-        if(!$firewallMain && !$firewallDev) return; // Access restricted to main and dev firewalls
-
         //
         // Check if public access right
-        $publicAccess = $this->baseService->getSettings()->getScalar("base.settings.public_access");
-        $userAccess   = $this->baseService->getSettings()->getScalar("base.settings.user_access");
-        $adminAccess  = $this->baseService->getSettings()->getScalar("base.settings.admin_access");
+        $publicAccess  = $this->baseService->getSettings()->getScalar("base.settings.public_access");
+        $publicAccess |= $user && $user->isGranted("ROLE_USER");
 
-        $rescueLoginRoute = "security_loginRescue";
-        $currentRouteName = $this->getCurrentRouteName($event);
+        $userAccess    = $this->baseService->getSettings()->getScalar("base.settings.user_access");
+        $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
 
-        if(!in_array($currentRouteName, [$rescueLoginRoute, "security_logout", "security_logoutRequest"])) {
+        $adminAccess   = $this->baseService->getSettings()->getScalar("base.settings.admin_access");
+        $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
 
-            if(!$publicAccess && (!$user || !$user->isGranted("ROLE_USER"))) {
-                $event->setResponse($this->baseService->redirectToRoute("security_loginRescue"));  
+        if(!$publicAccess || !$userAccess || !$adminAccess) {
+
+            $this->profiler->disable();
+
+            $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
+            if(!$firewallMain) return; // Access restricted to main firewalls
+
+            $currentRouteName = $this->getCurrentRouteName($event);
+            if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
+
+                $event->setResponse($this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE));  
+                $this->profiler->disable(); 
+
                 if($token) $this->tokenStorage->setToken(NULL);
                 return $event->stopPropagation();
-            }
-
-            if(!  $userAccess && (!$user || !$user->isGranted("ROLE_ADMIN"))) {
-                $event->setResponse($this->baseService->redirectToRoute("security_loginRescue"));                
-                if($token) $this->tokenStorage->setToken(NULL);
-                return $event->stopPropagation();
-            }
-
-            if(! $adminAccess && (!$user || !$user->isGranted("ROLE_EDITOR"))) {
-                $event->setResponse($this->baseService->redirectToRoute("security_loginRescue"));                
-                if($token) $this->tokenStorage->setToken(NULL);
-                return $event->stopPropagation();
-            }
+            } 
         }
     }
 
@@ -293,7 +290,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
 
             $this->referrer->setUrl($event->getRequest()->getUri());
-            $event->setResponse($this->baseService->redirectToRoute("security_logoutRequest"));
+            $event->setResponse($this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE));
 
             if(!$user->isDirty()) $this->entityManager->flush();
             return $event->stopPropagation();

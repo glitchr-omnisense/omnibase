@@ -267,6 +267,14 @@
             <argument type="service" id="router" />
         </service>
 
+        <service id="Base\Controller\RescueController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+
+            <argument type="service" id="base.service" />
+        </service>
+
         <service id="Base\Controller\SecurityController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
@@ -521,7 +529,7 @@
         </service>
 
         <service id="Base\Security\UserProvider"           />
-        <service id="Base\Security\LoginRescueFormAuthenticator" parent="Base\Security\LoginFormAuthenticator" />
+        <service id="Base\Security\RescueFormAuthenticator" parent="Base\Security\LoginFormAuthenticator"/>
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="referrer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -541,6 +549,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
             <argument type="service" id="referrer" />
+            <argument type="service" id="profiler" />
         </service>
 
         <service id="Base\EntitySubscriber\UserSubscriber">

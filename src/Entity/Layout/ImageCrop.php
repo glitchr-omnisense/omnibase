@@ -96,7 +96,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $x;
     public function getX(?int $naturalWidth = null): ?int { return $naturalWidth ? $naturalWidth*$this->x : $this->x; }
@@ -107,7 +107,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $y;
     public function getY(?int $naturalHeight = null): ?int { return $naturalHeight ? $naturalHeight*$this->y : $this->y; }
@@ -118,7 +118,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $width;
     public function getWidth(?int $naturalWidth = null): ?int  { return $naturalWidth ? $naturalWidth*$this->width : $this->width; }
@@ -129,7 +129,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $height;
     public function getHeight(?int $naturalHeight = null): ?int { return $naturalHeight ? $naturalHeight*$this->height : $this->height; }
@@ -140,7 +140,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="float", nullable=true)
      */
     protected $scaleX;
     public function getScaleX(): ?float { return $this->scaleX; }

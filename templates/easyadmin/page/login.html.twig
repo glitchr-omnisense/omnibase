@@ -2,7 +2,7 @@
 {# This template checks for 'ea' variable existence because it can
    be used in a EasyAdmin Dashboard controller, where 'ea' is defined
    or from any other Symfony controller, where 'ea' is not defined #}
-{% extends ea is defined ? ea.templatePath('layout') : '@EasyAdmin/page/login_minimal.html.twig' %}
+{% extends ea is defined ? ea.templatePath('layout') : '@EasyAdmin/page/login.html.twig' %}
 {% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
 
 {% block body_class 'page-login' %}
@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
     <link rel="stylesheet" href="{{ asset('bundles/base/easyadmin.css') }}">
 {% endblock %}
-{% block page_title %} {{ea is defined ? ea.dashboardTitle|raw : ''}} {% endblock %}
+
+{% block page_title %}{{ page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '') }}{% endblock %}
 
 {% block flash_messages %}
     {{ include(ea.templatePath('flash_messages')) }}
@@ -21,6 +22,8 @@
     {% set _identifier_label = identifier_label is defined ? identifier_label|trans : 'login_page.identifier'|trans({}, 'EasyAdminBundle') %}
     {% set _password_label = password_label is defined ? password_label|trans : 'login_page.password'|trans({}, 'EasyAdminBundle') %}
     {% set _sign_in_label = sign_in_label is defined ? sign_in_label|trans : 'login_page.sign_in'|trans({}, 'EasyAdminBundle') %}
+
+    {% include '@EasyAdmin/flash_messages.html.twig' %}
 
     <div class="login-wrapper">
     

@@ -48,13 +48,13 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         $request = $this->requestStack->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
-
+        $baseDir = $baseDir ."/";
         $path = trim($parseUrl["path"]);
-        if($path == "/") return $baseDir;
+        if($path == "/") return $baseDir ? $baseDir : "/";
         else if(!str_starts_with($path, "/"))
-            $path = $baseDir."/".$path;
+            $path = $baseDir.$path;
 
-        return $path;
+        return $path ? $path : null;
     }
 
     public function getRequest(): ?Request { return $this->getCurrentRequest(); }
@@ -127,7 +127,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         if ($baseDir && strpos($path, $baseDir) === 0)
             $path = mb_substr($path, strlen($baseDir));
 
-        try { return $this->router->match(rtrim($path, "/")); }
+        try { return $this->router->match("/".trim($path, "/")); }
         catch (ResourceNotFoundException $e) { return null; }
     }
 

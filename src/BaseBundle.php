@@ -73,7 +73,7 @@ class BaseBundle extends Bundle
         try {
             $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
             $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
-        } catch(\Exception $e) {}
+        } catch(Exception $e) { }
 
         $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
         $classList = BaseBundle::getAllClasses($projectDir . "./Enum");

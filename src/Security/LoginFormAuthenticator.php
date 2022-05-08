@@ -34,12 +34,14 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 {
     use TargetPathTrait;
 
-    public const LOGIN_ROUTE = 'security_login';
-    public const LOGOUT_ROUTE = 'security_logout';
+    public const LOGIN_ROUTE          = 'security_login';
+    public const LOGIN_RESCUE_ROUTE   = 'security_loginRescue';
+    public const LOGOUT_ROUTE         = 'security_logout';
+    public const LOGOUT_REQUEST_ROUTE = 'security_logoutRequest';
 
-    private $entityManager;
-    private $csrfTokenManager;
-    private $router;
+    protected $entityManager;
+    protected $csrfTokenManager;
+    protected $router;
 
     public function __construct(Referrer $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
     {
@@ -59,7 +61,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function supports(Request $request): ?bool
     {
-        return static::LOGIN_ROUTE === $request->attributes->get('_route') && $request->isMethod('POST');
+        $isLoginPage = in_array($request->attributes->get('_route'), [static::LOGIN_ROUTE, static::LOGIN_RESCUE_ROUTE]);
+        return $isLoginPage && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport

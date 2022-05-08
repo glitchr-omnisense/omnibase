@@ -29,6 +29,7 @@ use Base\Service\BaseService;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
+use Base\Component\HttpFoundation\Referrer;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Layout\SettingListType;
@@ -62,6 +63,7 @@ use Base\Entity\Extension\TrashBall;
 use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
 use Base\Field\Type\SelectType;
+use Base\Security\LoginFormRescueAuthenticator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
