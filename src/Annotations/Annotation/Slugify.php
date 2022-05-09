@@ -111,7 +111,7 @@ class Slugify extends AbstractAnnotation
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
         $keep = $this->keep[0];
-        if($keep) $this->slugger->slug($input, $this->separator);
+        if($keep) $slug = $this->slugger->slug($input, $this->separator);
         else {
 
             $slug = explode($keep, $input);
