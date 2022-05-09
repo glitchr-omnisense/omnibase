@@ -49,8 +49,10 @@ class CropperType extends AbstractType implements DataMapperInterface
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
             'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
 
-            "target"       => null,
-            "pivot"        => null,
+            "pivot"                 => null,
+            "target"                => null,
+            "natural_width"  => null,
+            "natural_height" => null,
 
             "fields" => [
                 "label"    => [],
@@ -69,19 +71,19 @@ class CropperType extends AbstractType implements DataMapperInterface
                 "@fields.cropper.aspect_ratio.square"    => 1,
                 "@fields.cropper.aspect_ratio.facebook"  => 1200/630,  # > 16:9
                 "@fields.cropper.aspect_ratio.pinterest" => 1000/1500, # 2:3
-                "@fields.cropper.aspect_ratio.free"      => NAN
             ],
 
             "default_fields" => [
 
-                "label"  => ["label" => "Label"  , "required" => false, "form_type" => TextType::class],
-                "x"      => ["label" => "Left"   , "form_type" => HiddenType::class],
-                "y"      => ["label" => "Top"    , "form_type" => HiddenType::class],
-                "width"  => ["label" => "Width"  , "form_type" => HiddenType::class],
-                "height" => ["label" => "Height" , "form_type" => HiddenType::class],
-                "scaleX" => ["label" => "Scale X", "form_type" => HiddenType::class],
-                "scaleY" => ["label" => "Scale Y", "form_type" => HiddenType::class],
-                "rotate" => ["label" => "Rotate" , "form_type" => HiddenType::class]
+                "label"  => ["label"  => "Label"  , "required" => false, "form_type" => TextType::class],
+                "slug"   => ["target" => "label"  , "required" => false, "form_type" => SlugType::class],
+                "x"      => ["label"  => "Left"   , "form_type" => HiddenType::class],
+                "y"      => ["label"  => "Top"    , "form_type" => HiddenType::class],
+                "width"  => ["label"  => "Width"  , "form_type" => HiddenType::class],
+                "height" => ["label"  => "Height" , "form_type" => HiddenType::class],
+                "scaleX" => ["label"  => "Scale X", "form_type" => HiddenType::class],
+                "scaleY" => ["label"  => "Scale Y", "form_type" => HiddenType::class],
+                "rotate" => ["label"  => "Rotate" , "form_type" => HiddenType::class]
             ]
         ]);
 
@@ -113,7 +115,7 @@ class CropperType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, Traversable $forms) {
 
         if($viewData === null) return;
-
+        
         $form = current(iterator_to_array($forms));
         $options = $form->getParent()->getConfig()->getOptions();
         $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
@@ -154,7 +156,9 @@ class CropperType extends AbstractType implements DataMapperInterface
         if(str_contains($options["target"], "/")) $targetPath = $options["target"];
         else {
 
-            $target = $ancestor;
+            if(str_starts_with($options["target"], ".")) $target = substr($options["target"], 1);
+            else $target = $ancestor;
+
             $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
             foreach($targetPath ?? [] as $path) {
 

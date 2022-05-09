@@ -210,6 +210,9 @@
 {# Define slug parameters #}
 {% set attr = attr|merge({
     'data-slug-field': target is not null,
+    'data-slug-keep': keep,
+    'data-slug-strict': strict,
+    'data-slug-lower': lower,
     'data-target': form.vars.id
 }) %}
 
@@ -435,15 +438,15 @@
     {% endif %}
     </div>
 
-    
-    <div class="form-filesize form-text text-muted">
-    {% if form.vars.max_size %}{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}
     {% set exts = form.vars.mime_types|extensions %}
-    {% if exts is not empty %}<i>({{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}})</i>{% endif %}
-
-    </div>
+    
+    {% if form.vars.max_size %}
+        <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}</div>
     {% endif %}
-
+    
+    {% if exts is not empty %}
+        <div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>
+    {% endif %}
 
     {%- set row_attr = row_attr|merge({'class': 'form-text text-muted' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {{ form_errors(form.raw, {row_attr:row_attr}) }}
@@ -880,10 +883,13 @@
     
 {% set attr = attr|merge({
     'data-number-field': form.vars.id,
+    "data-number-keyup": form.vars.keyUp,
+    "data-number-keydown": form.vars.keyDown,
     "data-number-up": form.vars.stepUp ?? 1,
     "data-number-down": form.vars.stepDown ?? 1,
     "data-number-up-throttle": form.vars.throttleUp ?? 0,
     "data-number-down-throttle": form.vars.throttleDown ?? 0,
+    "autocomplete" : form.vars.autocomplete ? "on" : "off"
 }) %}
 
 {% if form.vars.disabled %}
@@ -947,16 +953,23 @@
     'data-cropper-positions': pivotForm.parent.vars.positions
 }) %}
 
+{# todo: handle xhr errors #}
+{# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fas fa-fw fa-exclamation-circle'|iconify)~" "~('@fields.cropper.error')~"</div>", #}
+
 <div class="form-group form-cropper">
     <div class="cropper">
-        <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine|image}}">
-        <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
+        <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
+        <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.cropper.loading.wait'|trans }}</div>
 
         <div class="hidden cropper-actions" id="{{ id }}_actions">
             <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fas fa-undo"|iconify}}</button>
             {% for label,aspectRatio in form0.vars.aspectRatios %}
-            <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}">{{label|trans}}</button>
+                <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}" data-labelledby="{{form0.vars.id ~ "_label"}}" data-labelledby-value="{{ label|trans }}">{{ label|trans }}</button>
             {% endfor %}
+
+            {% if form0.vars.aspectRatios is defined and form0.vars.aspectRatios is not empty %}
+                <button class="btn btn-primary" type="button" data-aspect-ratio="NAN" data-labelledby="{{form0.vars.id ~ "_label"}}" data-labelledby-value="">{{ "@fields.cropper.aspect_ratio.free"|trans }}</button>
+            {% endif %}
         </div>
     </div>
 

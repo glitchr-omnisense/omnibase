@@ -44,7 +44,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\Column(type="string", length=255)
      * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(reference="translations.label", separator=".", exception="_")
+     * @Slugify(reference="translations.label", separator=".", keep={"_"})
      */
     protected $path;
 

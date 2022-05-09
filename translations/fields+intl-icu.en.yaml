@@ -42,6 +42,9 @@ clipboard:
 
 
 cropper:
+  loading:
+    wait: "Please wait a little bit.."
+    error: "Opps.. an error occurred, click or refresh !"
   aspect_ratio:
     standard: "4:3"
     large: "16:9"

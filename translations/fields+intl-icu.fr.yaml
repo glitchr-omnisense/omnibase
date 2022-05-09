@@ -20,6 +20,9 @@ clipboard:
     paste: Collé !
 
 cropper:
+  loading:
+    wait: "Merci de patienter.."
+    error: "Oups l'image n'a pas pu se charger cliquez pour réessayer !"
   aspect_ratio:
     standard: "4:3"
     large: "16:9"

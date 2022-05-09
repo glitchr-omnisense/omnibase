@@ -38,7 +38,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     /**
      * @ORM\Column(type="string", length=255, unique=true)
      * @AssertBase\NotBlank(groups={"new", "edit"})
-     * @Slugify(reference="translations.title", separator=".", exception="_")
+     * @Slugify(reference="translations.title", separator=".", keep={"_"})
      */
     protected $path;
     public function getPath(): string { return $this->path; }

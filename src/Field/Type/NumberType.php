@@ -18,13 +18,16 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
-        $view->vars["stepUp"]   = $options["stepUp"] ?? $options["step"];
-        $view->vars["stepDown"] = $options["stepDown"] ?? $options["step"];
+        $view->vars["stepUp"]       = $options["stepUp"] ?? $options["step"];
+        $view->vars["stepDown"]     = $options["stepDown"] ?? $options["step"];
+        $view->vars["keyUp"]        = $options["keyUp"];
+        $view->vars["keyDown"]      = $options["keyDown"];
         $view->vars["throttleUp"]   = $options["throttleUp"] ?? $options["throttle"];
         $view->vars["throttleDown"] = $options["throttleDown"] ?? $options["throttle"];
-        $view->vars["min"]      = $options["min"];
-        $view->vars["max"]      = $options["max"];
-        $view->vars["disabled"]      = $options["disabled"];
+        $view->vars["min"]          = $options["min"];
+        $view->vars["max"]          = $options["max"];
+        $view->vars["disabled"]     = $options["disabled"];
+        $view->vars["autocomplete"]     = $options["autocomplete"];
         
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-number.js");
     }
@@ -41,7 +44,10 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             'throttleDown' => null,
             'throttle' => 10,
             "min" => null,
-            "max" => null
+            "max" => null,
+            "autocomplete" => false,
+            "keyUp" => true,
+            "keyDown" => true
         ]);
     }
     

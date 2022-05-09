@@ -19,7 +19,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
 
     public function __toUrl(): ?string {
 
-        $identifier = $this->getLabel() ?? $this->getWidth().":".$this->getHeight();
+        $identifier = $this->getSlug() ?? $this->getWidth().":".$this->getHeight();
         $hashid = $this->getImageService()->getHashId($this->getImage()->getSource());
 
         return $this->getRouter()->generate("ux_crop", ["identifier" => $identifier, "hashid" => $hashid]);
@@ -67,7 +67,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Slugify
+     * @Slugify(unique=false, keep={":"})
      */
     protected $slug;
 
@@ -99,10 +99,10 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="float", nullable=true)
      */
     protected $x;
-    public function getX(?int $naturalWidth = null): ?int { return $naturalWidth ? $naturalWidth*$this->x : $this->x; }
-    public function setX(int $x, ?int $naturalWidth = null): self
+    public function getX(): ?int { return $this->x; }
+    public function setX(int $x): self
     {
-        $this->x = $naturalWidth ? $x/$naturalWidth : $x;
+        $this->x = $x;
         return $this;
     }
 
@@ -110,10 +110,10 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="float", nullable=true)
      */
     protected $y;
-    public function getY(?int $naturalHeight = null): ?int { return $naturalHeight ? $naturalHeight*$this->y : $this->y; }
-    public function setY(int $y, ?int $naturalHeight = null): self
+    public function getY(): ?int { return $this->y; }
+    public function setY(int $y): self
     {
-        $this->y = $naturalHeight ? $y/$naturalHeight : $y;
+        $this->y = $y;
         return $this;
     }
 
@@ -121,10 +121,11 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="float", nullable=true)
      */
     protected $width;
-    public function getWidth(?int $naturalWidth = null): ?int  { return $naturalWidth ? $naturalWidth*$this->width : $this->width; }
-    public function setWidth(int $width, ?int $naturalWidth = null): self
+    public function getNaturalWidth(): ?int { return $this->getImage()->getSourceMeta()[0] ?? null; }
+    public function getWidth(): ?int { return $this->width; }
+    public function setWidth(int $width): self
     {
-        $this->width = $naturalWidth ? $width/$naturalWidth : $width;
+        $this->width = $width;
         return $this;
     }
 
@@ -132,10 +133,11 @@ class ImageCrop implements ImageCropInterface, UrlInterface
      * @ORM\Column(type="float", nullable=true)
      */
     protected $height;
-    public function getHeight(?int $naturalHeight = null): ?int { return $naturalHeight ? $naturalHeight*$this->height : $this->height; }
-    public function setHeight(int $height, ?int $naturalHeight = null): self
+    public function getNaturalHeight(): ?int { return $this->getImage()->getSourceMeta()[1] ?? null; }
+    public function getHeight(): ?int { return $this->height; }
+    public function setHeight(int $height): self
     {
-        $this->height = $naturalHeight ? $height/$naturalHeight : $height;
+        $this->height = $height;
         return $this;
     }
 

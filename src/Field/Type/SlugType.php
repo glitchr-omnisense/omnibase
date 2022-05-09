@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
@@ -31,8 +32,16 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             ->setRequired(['target'])
             ->setAllowedTypes('target', ['string', 'null'])
             ->setDefaults([
-                "separator" => "-"
+                "separator" => "-",
+                "keep" => null,
+                "lower" => true,
+                "strict" => null
             ]);
+
+            $resolver->setNormalizer('strict', function (Options $options, $value) {
+                if($value === null) return empty($options["keep"] ?? "");
+                return $value;
+            });
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -42,19 +51,35 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        // Get oldest parent form available..
-        $ancestor = $view;
-        while($ancestor->parent !== null)
-            $ancestor = $ancestor->parent; 
-        
-        $view->ancestor = $ancestor;
+        $view->vars["keep"]   = preg_quote($options["keep"]);
+        $view->vars["lower"]  = json_encode($options["lower"]);
+        $view->vars["strict"] = json_encode($options["strict"]);
 
         // Check if path is reacheable..
-        $target = $form->getParent();
-        while($target && ($target->getViewData() instanceof Collection || $target->getViewData() === null))
-            $target = $target->getParent();
+        if(str_starts_with($options["target"], ".")) {
         
-        $targetPath = $options["target"] ? explode(".", $options["target"]) : null;
+            $view->ancestor = $view->parent;
+
+            $target = $form->getParent();
+            $targetPath = substr($options["target"], 1);
+    
+        } else {
+
+            // Get oldest parent form available..
+            $ancestor = $view;
+            while($ancestor->parent !== null)
+                $ancestor = $ancestor->parent; 
+            
+            $view->ancestor = $ancestor;
+
+            $target = $form->getParent();
+            while($target && ($target->getViewData() instanceof Collection || $target->getViewData() === null))
+                $target = $target->getParent();
+
+            $targetPath = $options["target"];
+        }
+ 
+        $targetPath = $targetPath ? explode(".", $targetPath) : null;
         foreach($targetPath ?? [] as $path) {
             
             if(!$target->has($path))

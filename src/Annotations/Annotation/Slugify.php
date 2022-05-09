@@ -28,7 +28,7 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
  *   @Attribute("locale",     type = "string"),
  *   @Attribute("map",        type = "array"),
  *   @Attribute("separator",  type = "string"),
- *   @Attribute("exception",  type = "string"),
+ *   @Attribute("keep",       type = "array"),
  *   @Attribute("lowercase",  type = "bool")
  * })
  */
@@ -52,7 +52,7 @@ class Slugify extends AbstractAnnotation
         $this->length = $data['length'] ?? null; // TODO: IMPLEMENT
 
         $this->separator = $data['separator'] ?? '-';
-        $this->exception = $data['exception'] ?? null;
+        $this->keep = $data['keep'] ?? null;
         $this->lowercase = $data['lowercase'] ?? true;
         $this->slugger   = new AsciiSlugger(
             $data["locale"] ?? null,
@@ -110,11 +110,16 @@ class Slugify extends AbstractAnnotation
 
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
-        $slug = $this->exception
-            ? implode($this->exception, array_map(fn($i) => $this->slugger->slug($i, $this->separator), explode($this->exception, $input)))
-            : $this->slugger->slug($input, $this->separator);
+        $keep = $this->keep[0];
+        if($keep) $this->slugger->slug($input, $this->separator);
+        else {
 
-            return ($this->lowercase ? strtolower($slug) : $slug);
+            $slug = explode($keep, $input);
+            $slug = array_map(fn($i) => $this->slugger->slug($i, $this->separator), $slug);
+            $slug = implode($keep, $slug);
+        }
+
+        return ($this->lowercase ? strtolower($slug) : $slug);
     }
     
     public function getSlug($entity, string $property, ?string $defaultInput = null, array &$invalidSlugs = []): string
@@ -125,9 +130,8 @@ class Slugify extends AbstractAnnotation
         $slug = $defaultSlug;
         if(!$this->unique) return $slug;
         
-        for($i = 1; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
+        for($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
-
         
         return $slug;
     }

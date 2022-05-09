@@ -1029,7 +1029,7 @@ namespace {
         return $tArray;
     }
 
-    function curlranger($url, int $start = 0, int $end = 32768){
+    function curlranger($url, int $start = 0, int $end = 32768): string|bool {
 
         $headers = ["Range: bytes=".$start."-".$end];    
 
@@ -1041,6 +1041,17 @@ namespace {
         curl_close($curl);
 
         return $data;
+    }
+
+    function curlimagesize(string $url): ?array {
+        
+        $raw = curlranger($url);
+        if($raw == false) return null;
+
+        try { $im = imagecreatefromstring($raw); }
+        catch (Exception $e) { return null; } 
+
+        return [imagesx($im), imagesy($im)];
     }
 
     function array_filter_recursive(array $array, ?callable $callback = null, int $mode = 0) 

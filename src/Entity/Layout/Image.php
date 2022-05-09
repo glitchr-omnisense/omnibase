@@ -29,6 +29,12 @@ class Image implements IconizeInterface
 {
     use BaseTrait;
 
+    public function __toUrl(): ?string {
+
+        $hashid = $this->getImageService()->getHashId($this->getSource());
+        return $this->getRouter()->generate("ux_image", ["hashid" => $hashid]);
+    }
+
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-images"]; }
 
@@ -49,17 +55,27 @@ class Image implements IconizeInterface
 
     /**
      * @ORM\Column(type="text")
-     * @AssertBase\File(max_size="2MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
+     * @AssertBase\File(max_size="5MB", groups={"new", "edit"})
+     * @Uploader(storage="local.storage", public="/storage", max_size="5MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
      */
     protected $source;
     public function getSource()     { return Uploader::getPublic($this, "source"); }
     public function getSourceFile() { return Uploader::get($this, "source"); }
-    public function getSourceMeta() { return getimagesize($this->getSource()); }
     public function setSource($source): self
     {
         $this->source = $source;
+        $this->sourceMeta = null;
         return $this;
+    }
+    
+    private $sourceMeta;
+    public function getSourceMeta(): array|null|false
+    { 
+        $sourceFile = $this->getSourceFile();
+        if($sourceFile === null) return null;
+
+        $this->sourceMeta = $this->sourceMeta ?? getimagesize($sourceFile->getPathname());
+        return $this->sourceMeta;
     }
 
     public function get()     { return $this->getSource(); }

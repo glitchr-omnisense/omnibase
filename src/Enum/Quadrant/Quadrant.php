@@ -46,10 +46,10 @@ class Quadrant extends EnumType implements IconizeInterface
     {
         return [
             self::O   => "center center",
-            self::N   => "top center",
-            self::E   => "center right",
-            self::S   => "bottom center",
-            self::W   => "center left",
+            self::N   => "center top",
+            self::S   => "center bottom",
+            self::E   => "right center",
+            self::W   => "left center",
         ];
     }
 }

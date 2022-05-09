@@ -117,7 +117,7 @@ class ImageController extends AbstractController
         //
         // Get the most image cropping 
         $ratio = null;
-        $imageCrop = $this->imageCropRepository->findOneByLabel($identifier);
+        $imageCrop = $this->imageCropRepository->findOneBySlug($identifier, [], ["image.source" => $uuid]);
 
         // Providing just a number
         if ($imageCrop === null && preg_match("/^-?(?:\d+|\d*\.\d+)$/", $identifier, $matches))

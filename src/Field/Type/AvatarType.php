@@ -6,6 +6,7 @@ use InvalidArgumentException;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class AvatarType extends ImageType
@@ -20,9 +21,13 @@ class AvatarType extends ImageType
             "lightbox"    => null,
             'clipboard'   => false,
             
-            'cropper'     => null,
-            "aspectRatio" => 1
+            'cropper'     => null
         ]);
+
+        $resolver->setNormalizer('cropper', function (Options $options, $value) {
+            if(!array_key_exists("aspectRatio", $value)) $value["aspectRatio"] = 1;
+            return $value;
+        });
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)

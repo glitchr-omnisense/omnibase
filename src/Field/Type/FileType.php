@@ -277,7 +277,6 @@ class FileType extends AbstractType implements DataMapperInterface
         else $viewData = basename($viewData);
 
         $fileForm->setData($viewData);
-
     }
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void

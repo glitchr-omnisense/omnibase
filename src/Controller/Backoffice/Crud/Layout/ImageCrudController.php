@@ -11,6 +11,7 @@ use Base\Field\QuadrantField;
 use Base\Field\Type\CropperType;
 use Base\Field\Type\NumberType;
 use Base\Field\Type\QuadrantType;
+use Base\Field\Type\SlugType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
@@ -51,6 +52,7 @@ class ImageCrudController extends AbstractCrudController
                         "pivot"  => "quadrant.wind",
                         "fields" => [
                             "label"  => ["form_type" => TextType::class ],
+                            "slug"   => ["label" => false, "keep" => ":", "form_type" => SlugType::class , "target" => ".label"],
                             "x"      => ["form_type" => NumberType::class, "min" => -1],
                             "y"      => ["form_type" => NumberType::class, "min" => -1],
                             "width"  => ["form_type" => NumberType::class, "min" => -1],
