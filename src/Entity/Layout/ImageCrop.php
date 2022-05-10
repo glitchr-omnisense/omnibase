@@ -67,7 +67,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Slugify(unique=false, keep={":"})
+     * @Slugify(reference="label", unique=false, keep={":"}, nullable=true, sync=true)
      */
     protected $slug;
 

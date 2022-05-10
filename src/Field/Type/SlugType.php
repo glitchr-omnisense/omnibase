@@ -33,8 +33,9 @@ final class SlugType extends AbstractType implements AutovalidateInterface
             ->setAllowedTypes('target', ['string', 'null'])
             ->setDefaults([
                 "separator" => "-",
-                "keep" => null,
-                "lower" => true,
+                "keep"   => null,
+                "lower"  => true,
+                "lock"   => null,
                 "strict" => null
             ]);
 
@@ -54,6 +55,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         $view->vars["keep"]   = preg_quote($options["keep"]);
         $view->vars["lower"]  = json_encode($options["lower"]);
         $view->vars["strict"] = json_encode($options["strict"]);
+        $view->vars["lock"]   = json_encode($options["lock"]);
 
         // Check if path is reacheable..
         if(str_starts_with($options["target"], ".")) {
