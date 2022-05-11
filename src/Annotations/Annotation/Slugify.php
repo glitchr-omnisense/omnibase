@@ -167,8 +167,12 @@ class Slugify extends AbstractAnnotation
         
         if($this->sync) {
             
+            $slug = $this->getFieldValue($entity, $property);
+
             $oldEntity = $this->getOldEntity($entity);
-            if ($this->getFieldValue($oldEntity, $property) == $this->getFieldValue($entity, $property)) {
+            $oldSlug   = $this->getFieldValue($oldEntity, $property);
+
+            if ($slug == $oldSlug) {
                 
                 $labelModified = !$this->referenceColumn ? null : 
                     $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
