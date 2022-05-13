@@ -97,7 +97,6 @@ class Slugify extends AbstractAnnotation
         if(!$input) $input = camel2snake(class_basename($entity), "-");
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
-        $this->keep = ["_", "."];
         if(!$this->keep) $slug = $this->slugger->slug($input, $this->separator);
         else {
 
