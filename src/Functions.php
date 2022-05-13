@@ -378,6 +378,18 @@ namespace {
         return [$string];
     }
 
+    function implodeByArray(array|string $separator, ?array $array)
+    {
+        if(!$array) return "";
+        if(is_string($separator)) return implode($separator, $array);
+
+        $str = $array[0];
+        for($i = 1, $iN = count($array), $jN = count($separator); $i < $iN; $i++)
+            $str .= $separator[($i-1)%$jN].$array[$i];
+
+        return $str;
+    }
+
     function str_strip(?string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true): ?string { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
     function str_rstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
@@ -425,6 +437,14 @@ namespace {
         }
 
         return $haystack;
+    }
+
+    function strmultipos(string $haystack, array $needles, int $offset = 0): int|false
+    {
+        for($i = $offset, $N = strlen($haystack); $i < $N; $i++)
+            if(in_array($haystack[$i], $needles)) return $i;
+
+        return false;
     }
 
     function begin(object|array &$array) { return array_values(array_slice($array, 0, 1))[0] ?? null; }
@@ -544,7 +564,7 @@ namespace {
         }
 
         try { return mime_content_type($filename); }
-        catch (Exception $e) { return null; }
+        catch (TypeError|Exception $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($filename))[0] ?? null; }
     }
 
     function str2bin($string)
@@ -789,7 +809,16 @@ namespace {
 
         return false;
     }
-    
+
+    function pathinfo_extension(string $path, ?string $extension = null)
+    {
+        $info = pathinfo($path);
+        $extension = $extension ?? $info["extension"];
+
+        $dirname = $info['dirname'] ? $info['dirname'] . "/" : '';
+        return $dirname . $info['filename'] . '.' . $extension;
+    }
+
     function pathinfo_relationship(string $path)
     {
         $extension = pathinfo(parse_url($path, PHP_URL_PATH), PATHINFO_EXTENSION);
@@ -872,6 +901,7 @@ namespace {
             return false;
 
         $imagesize = @getimagesize($path);
+        if($imagesize === false) return false;
         return array_key_exists('mime', $imagesize) && 'image/jpeg' == $imagesize['mime'] &&
                array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }

@@ -16,6 +16,7 @@ use App\Entity\User;
 
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use League\Flysystem\FilesystemOperator;
 use ReflectionClass;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -160,7 +161,7 @@ class AnnotationReader
      * @var Filesystem
      */
     protected $filesystem = null;
-    public function getFilesystem(string $storage):Filesystem { return $this->filesystem->set($storage); }
+    public function getFilesystem(): Filesystem { return $this->filesystem; }
 
     public function getParameterBag() { return $this->parameterBag; }
 

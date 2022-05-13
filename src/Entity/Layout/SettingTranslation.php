@@ -46,7 +46,7 @@ class SettingTranslation implements TranslationInterface
 
     /**
      * @ORM\Column(type="array")
-     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", missable=true)
+     * @Uploader(storage="local.storage", max_size="2MB", missable=true)
      */
     protected $value;
 

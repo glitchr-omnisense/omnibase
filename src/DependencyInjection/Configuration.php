@@ -2,7 +2,7 @@
 
 namespace Base\DependencyInjection;
 
-use Base\Filter\Advanced\Thumbnail\UltraHighDefinitionFilter;
+use Base\Filter\Basic\Definition\UltraHighDefinitionFilter;
 
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
@@ -173,7 +173,7 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(true)
                             ->end()
                         ->scalarNode('no_image')
-                            ->defaultValue("bundles/base/no-image.png")
+                            ->defaultValue("%kernel.project_dir%/public/bundles/base/image.svg")
                             ->end()
                     ->end()
                 ->end()

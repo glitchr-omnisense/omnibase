@@ -51,7 +51,7 @@ class Attachment extends Widget implements IconizeInterface
 
     /**
      * @ORM\Column(type="text")
-     * @Uploader(storage="local.storage", public="/storage", max_size="4096K")
+     * @Uploader(storage="local.storage", max_size="4096K")
      * @AssertBase\File(max_size="4096K", groups={"new", "edit"})
      */
     protected $download;

@@ -59,7 +59,7 @@ class UserCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function() {
 
-            yield AvatarField::new('avatar')->hideOnDetail()->setCropper([]);
+            yield AvatarField::new('avatar')->hideOnDetail()->setCropper(null);
 
             yield RoleField::new('roles')->setColumns(5);
             yield EmailField::new('email')->setColumns(5);

@@ -13,14 +13,14 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=ImageCropRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
-class ImageCrop implements ImageCropInterface, UrlInterface
+class ImageCrop implements UrlInterface
 {
     use BaseTrait;
 
     public function __toUrl(): ?string {
 
         $identifier = $this->getSlug() ?? $this->getWidth().":".$this->getHeight();
-        $hashid = $this->getImageService()->getHashId($this->getImage()->getSource());
+        $hashid = $this->getImageService()->obfuscate($this->getImage()->getSource());
 
         return $this->getRouter()->generate("ux_crop", ["identifier" => $identifier, "hashid" => $hashid]);
     }
@@ -67,7 +67,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Slugify(unique=false, keep={":"})
+     * @Slugify(unique=false, keep={":", ","}, nullable=true, sync=true)
      */
     protected $slug;
 
@@ -79,8 +79,22 @@ class ImageCrop implements ImageCropInterface, UrlInterface
         return $this;
     }
 
-    public function getPivotX() { return $this->width/2; }
-    public function getPivotY() { return $this->height/2; }
+    public function __construct(?Image $image = null) {
+
+        $this->setImage($image);
+
+        $this->x0      = 0;
+        $this->y0      = 0;
+        $this->width0  = 1;
+        $this->height0 = 1;
+
+        $this->xP      = 0.5;
+        $this->yP      = 0.5;
+
+        $this->scaleX  = 1;
+        $this->scaleY  = 1;
+        $this->rotate  = 0;
+    }
 
     public function getData(): array
     {
@@ -96,53 +110,106 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float")
      */
-    protected $x;
-    public function getX(): ?int { return $this->x; }
-    public function setX(int $x): self
+    protected $x0;
+    public function getX (): ?int { return $this->x0 * $this->getNaturalWidth(); }
+    public function setX (int $x, int $naturalWidth = null) 
     {
-        $this->x = $x;
+        $naturalWidth = $naturalWidth ?? $this->getNaturalWidth();
+        return $this->setX0($naturalWidth ? $x / $naturalWidth : 0);
+    }
+
+    public function getX0(): ?int { return $this->x0; }
+    public function setX0(int $x0): self
+    {
+        $this->x0 = min(1, max(0, $x0));
         return $this;
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float")
      */
-    protected $y;
-    public function getY(): ?int { return $this->y; }
-    public function setY(int $y): self
+    protected $y0;
+    public function getY (): ?int { return $this->y0 * $this->getNaturalHeight(); }
+    public function setY (int $y, int $naturalHeight = null) 
     {
-        $this->y = $y;
+        $naturalHeight = $naturalHeight ?? $this->getNaturalHeight();
+        return $this->setY0($naturalHeight ? $y / $naturalHeight : 0);
+    }
+
+    public function getY0(): ?int { return $this->y0; }
+    public function setY0(int $y0): self
+    {
+        $this->y0 = min(1, max(0, $y0));
         return $this;
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float")
      */
-    protected $width;
+    protected $width0;
     public function getNaturalWidth(): ?int { return $this->getImage()->getSourceMeta()[0] ?? null; }
-    public function getWidth(): ?int { return $this->width; }
-    public function setWidth(int $width): self
+    public function getWidth (): ?int { return $this->width0 * $this->getNaturalWidth(); }
+    public function setWidth (int $width, int $naturalWidth = null)
     {
-        $this->width = $width;
+        $naturalWidth = $naturalWidth ?? $this->getNaturalWidth();
+        return $this->setWidth0($naturalWidth ? $width / $naturalWidth : 0);
+    }
+
+    public function getWidth0(): ?int { return $this->width0; }
+    public function setWidth0(int $width0): self
+    {
+        $this->width0 = min(1, max(0, $width0));
         return $this;
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float")
      */
-    protected $height;
+    protected $height0;
     public function getNaturalHeight(): ?int { return $this->getImage()->getSourceMeta()[1] ?? null; }
-    public function getHeight(): ?int { return $this->height; }
-    public function setHeight(int $height): self
+    public function getHeight (): ?int { return $this->height0 * $this->getNaturalHeight(); }
+    public function setHeight (int $height, int $naturalHeight = null)
     {
-        $this->height = $height;
+        $naturalHeight = $naturalHeight ?? $this->getNaturalHeight();
+        return $this->setHeight0($naturalHeight ? $height / $naturalHeight : 0);
+    }
+    
+    public function getHeight0(): ?int { return $this->height0; }
+    public function setHeight0(int $height0): self
+    {
+        $this->height0 = min(1, max(0, $height0));
+        return $this;
+    }
+
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    protected $xP;
+    public function getPivotX () { return $this->xP * $this->getNaturalWidth();  }
+    public function getPivotX0() { return $this->xP; }
+    public function setPivotX0(int $xP): self
+    {
+        $this->xP = $xP;
         return $this;
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float")
+     */
+    protected $yP;
+    public function getPivotY () { return $this->yP * $this->getNaturalHeight(); }
+    public function getPivotY0() { return $this->yP; }
+    public function setPivotY0(int $yP): self
+    {
+        $this->yP = $yP;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="float")
      */
     protected $scaleX;
     public function getScaleX(): ?float { return $this->scaleX; }
@@ -153,7 +220,7 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="float", nullable=true)
+     * @ORM\Column(type="float")
      */
     protected $scaleY;
     public function getScaleY(): ?float { return $this->scaleY; }
@@ -164,13 +231,13 @@ class ImageCrop implements ImageCropInterface, UrlInterface
     }
 
     /**
-     * @ORM\Column(type="integer", nullable=true)
+     * @ORM\Column(type="integer")
      */
     protected $rotate;
     public function getRotate(): ?int { return $this->rotate; }
     public function setRotate(int $rotate): self
     {
-        $this->rotate = $rotate;
+        $this->rotate = mod($rotate,360);
         return $this;
     }
 }

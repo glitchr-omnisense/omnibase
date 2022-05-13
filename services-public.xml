@@ -15,7 +15,13 @@
         <service id="base.service.sharer" alias="Base\Service\SocialSharer" />
 
         <service id="base.service.image" alias="Base\Service\ImageService" />
-        <service id="Base\Service\ImageInterface" alias="base.service.image"/>
+        <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
+
+        <service id="base.service.file" alias="Base\Service\FileService" />
+        <service id="Base\Service\FileServiceInterface" alias="base.service.file"/>
+
+        <service id="base.service.obfuscator" alias="Base\Service\Obfuscator" />
+        <service id="Base\Service\ObfuscatorInterface" alias="base.service.obfuscator"/>
 
         <service id="base.filesystem" alias="Base\Service\Filesystem" />
         <service id="base.settings" alias="Base\Service\BaseSettings" />

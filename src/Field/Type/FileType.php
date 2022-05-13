@@ -6,6 +6,8 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
+use Base\Service\FileService;
+use Base\Service\ImageService;
 use Base\Validator\Constraints\File;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
@@ -22,14 +24,13 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class FileType extends AbstractType implements DataMapperInterface
 {
     protected $baseService;
     protected $translator;
 
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, FormFactory $formFactory)
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, FormFactory $formFactory, ImageService $imageService)
     {
         $this->baseService              = $baseService;
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -37,6 +38,9 @@ class FileType extends AbstractType implements DataMapperInterface
         $this->translator       = $baseService->getTranslator();
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
+        
+        $this->imageService     = $imageService;
+        $this->fileService      = cast($imageService, FileService::class);
     }
 
     /**
@@ -117,7 +121,6 @@ class FileType extends AbstractType implements DataMapperInterface
             if(array_key_exists('max_size', $options) && $options["max_size"])
                 $maxFilesize = min($maxFilesize, $options["max_size"]);
 
-            
             if(!$options["dropzone"]) {
          
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [

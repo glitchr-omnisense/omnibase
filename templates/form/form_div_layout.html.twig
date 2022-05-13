@@ -326,23 +326,20 @@
 }) %}
 
 <div class="imageupload" {{ block('attributes') }}>
-
     {% if not multiple %}
         <figure>
 
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(600,600) | default(thumbnail) }}" />
-            {% if form.vars.value is not empty %}
-                <figcaption id="{{id}}_figcaption">
-                    {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                    <i class="fas fa-image fa-3x"></i>
-                    {% else %}
-                    <i class="fas fa-plus-circle fa-3x"></i>
-                    {% endif %}
-                </figcaption>
-
-                {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(400,400) | default(thumbnail) }}" />
+            <figcaption id="{{id}}_figcaption">
+                {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
+                <i class="fas fa-image fa-3x"></i>
+                {% else %}
+                <i class="fas fa-plus-circle fa-3x"></i>
                 {% endif %}
+            </figcaption>
+
+            {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
+            <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
             {% endif %}
         </figure>
 
@@ -439,11 +436,11 @@
     </div>
 
     {% set exts = form.vars.mime_types|extensions %}
-    
+
     {% if form.vars.max_size %}
         <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}</div>
     {% endif %}
-    
+
     {% if exts is not empty %}
         <div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>
     {% endif %}

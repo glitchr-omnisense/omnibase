@@ -140,14 +140,14 @@ class DropzoneController extends AbstractController
         $cacheDir = $this->getCacheDir()."/dropzone";
         $path = $cacheDir."/".$uuid;
         if(file_exists($path)) {
-                
+
             $content = file_get_contents2($path);
             $mimetype = mime_content_type2($path);
 
             $response = new Response();
             $response->setContent($content);
-        
-            $response->setMaxAge(365*24*3600);
+
+            $response->setMaxAge(300);
             $response->setPublic();
             $response->setEtag(md5($response->getContent()));
             $response->headers->addCacheControlDirective('must-revalidate', true);

@@ -2,6 +2,7 @@
 
 namespace Base\DatabaseSubscriber;
 
+use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventSubscriber;

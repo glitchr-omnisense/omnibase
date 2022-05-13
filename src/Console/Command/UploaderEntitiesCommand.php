@@ -145,11 +145,11 @@ class UploaderEntitiesCommand extends Command
     protected function getFileList(string $class, string $field, Uploader $annotation)
     {
         $classPath  = $annotation->getPath($class, "");
-        $filesystem = Uploader::getFilesystem($annotation->getStorage());
-        
-        $property = $class."::".$field;
-        if(!array_key_exists($property, $this->fileList))
-            $this->fileList[$property] = array_values(array_filter(array_map(function($f) use ($annotation) {
+        $operator = Uploader::getOperator($annotation->getStorage());
+
+        $propertyFqcn = $class."::".$field;
+        if(!array_key_exists($propertyFqcn, $this->fileList))
+            $this->fileList[$propertyFqcn] = array_values(array_filter(array_map(function($f) use ($annotation) {
 
                 if(!$f instanceof FileAttributes) return null;
 
@@ -159,9 +159,9 @@ class UploaderEntitiesCommand extends Command
             }, $filesystem->getOperator()->listContents($classPath)->toArray())));
 
         if($this->uuid)
-            $this->fileList[$property] = array_filter($this->fileList[$property], fn($f) => basename($f) == $this->uuid);
+            $this->fileList[$propertyFqcn] = array_filter($this->fileList[$propertyFqcn], fn($f) => basename($f) == $this->uuid);
 
-        return $this->fileList[$property];
+        return $this->fileList[$propertyFqcn];
     }
 
     public function getOrphanFiles(string $class, string $field, Uploader $annotation)

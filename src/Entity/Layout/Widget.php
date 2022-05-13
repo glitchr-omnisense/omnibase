@@ -81,7 +81,7 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", max_size="1024K", mime_types={"image/*"})
+     * @Uploader(storage="local.storage", max_size="1024K", mime_types={"image/*"})
      * @AssertBase\File(max_size="1024K", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $thumbnail;

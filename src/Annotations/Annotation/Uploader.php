@@ -14,6 +14,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
 use League\Flysystem\Local\LocalFilesystemAdapter;
+use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
@@ -27,11 +28,10 @@ use Symfony\Component\Uid\Uuid;
  * @Attributes({
  *   @Attribute("storage",      type = "string"),
  *   @Attribute("pool",         type = "string"),
- *   @Attribute("public",       type = "string"),
- *   @Attribute("missable", type = "boolean"),
+ *   @Attribute("missable",     type = "boolean"),
  *
- *   @Attribute("max_size",         type = "string"),
- *   @Attribute("mime_types",         type = "array")
+ *   @Attribute("max_size",     type = "string"),
+ *   @Attribute("mime_types",   type = "array")
  * })
  */
 class Uploader extends AbstractAnnotation
@@ -45,7 +45,6 @@ class Uploader extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $this->public    = (!empty($data["public"] ?? null) ? ltrim($data["public"],"/") : null);
         $this->pool      = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
 
         $this->storage   = $data["storage"] ?? null;
@@ -69,7 +68,6 @@ class Uploader extends AbstractAnnotation
     protected function getConfig(): array { return $this->config; }
     
     public function getStorage() { return $this->storage; }
-    public function getStorageFilesystem() { return parent::getFilesystem($this->storage); }
 
     public function getPool() { return $this->pool; }
     public function getPath(mixed $entity, string $fieldName, ?string $uuid = null): ?string
@@ -90,60 +88,54 @@ class Uploader extends AbstractAnnotation
                             ));
         }
 
-        return rtrim("/" . $pool . $namespaceDir . "/_".camel2snake($fieldName)."/" . $uuid, ".");
+        return rtrim($pool . $namespaceDir . "/_".camel2snake($fieldName)."/" . $uuid, ".");
     }
     
-    public static function getPublic($entity, $fieldName)
+    public static function getPublic($entity, $fieldName): ?string
     {
         if(!self::hasAnnotation($entity, $fieldName, self::class)) 
             return null;
         
+        /**
+         * @var Uploader
+         */
         $that = self::getAnnotation($entity, $fieldName, self::class);
-
         if(!$that) return null;
         
-        if($that->public === null)
-            throw new MissingPublicPathException("No public path provided for \"$fieldName\" property annotation for \"".get_class($entity)."\".");
-
         $field = self::getFieldValue($entity, $fieldName);
         if(!$field) return null;
-        
+
         if(is_array($field)) {
 
             $pathList = [];
             foreach($field as $uuidOrFile) {
 
+                $uuidOrFile = file_exists($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
                 if($uuidOrFile instanceof File) {
 
-                    $pathList[] = null;
+                    $pathList[] = $that->getFilesystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
                     continue;
                 }
 
                 $path = $that->getPath($entity, $fieldName, $uuidOrFile);
-                if(!$path) $pathList[] = null;
-                else if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) $pathList[] = null;
-                else $pathList[] = rtrim($that->getAsset($that->public) . $path, ".");
+                $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
+                if($pathPublic) $pathList[] = $pathPublic;
             }
 
             $pathList = array_filter($pathList);
             return empty($pathList) ? null : $pathList;
 
         } else {
-        
-            $uuidOrFile = $field;
-            if($uuidOrFile instanceof File)
-                return null;
 
+            $uuidOrFile = file_exists($field) ? new File($field) : $field;
+            if($uuidOrFile instanceof File)
+                return $that->getFilesystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
+            
             if(!is_stringeable($uuidOrFile))
                 return null;
-                
-            $path = $that->getPath($entity, $fieldName, strval($uuidOrFile));
-            if(!$path) return null;
 
-            if(!$that->getStorageFilesystem()->getOperator()->fileExists($path)) 
-                return null;
-
-            return rtrim($that->getAsset($that->public) . $path, ".");
+            $path = $that->getPath($entity, $fieldName, $uuidOrFile);
+            return $that->getFilesystem()->getPublic($path, $that->getStorage());
         }
     }
 
@@ -176,13 +168,14 @@ class Uploader extends AbstractAnnotation
 
         if(!self::hasAnnotation($entity, $fieldName, self::class)) return null;
 
+        /**
+         * @var Uploader
+         */
         $that       = self::getAnnotation($entity, $fieldName, self::class);
         if(!$that) return null;
 
-        $config       = $that->config;
-        $filesystem   = $that->getStorageFilesystem();
-        $adapter      = $that->getStorageFilesystem()->getAdapter();
-        $pathPrefixer = $that->getStorageFilesystem()->getPathPrefixer();
+        $operator = $that->getFilesystem()->getOperator($that->storage);
+        $adapter  = $that->getFilesystem()->getAdapter($operator);
 
         $fieldValue = self::getFieldValue($entity, $fieldName);
         if (!$fieldValue) return null;
@@ -206,8 +199,8 @@ class Uploader extends AbstractAnnotation
 
             if($adapter instanceof LocalFilesystemAdapter) {
 
-                if ($filesystem->getOperator()->fileExists($path))
-                    $fileList[] = new File($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
+                if ($operator->fileExists($path))
+                    $fileList[] = new File($that->getFilesystem()->prefixPath($path));
 
                 continue;
             }
@@ -217,7 +210,7 @@ class Uploader extends AbstractAnnotation
             if (!array_key_exists($index, self::$tmpHashTable))
                 self::$tmpHashTable[$index] = tmpfile();
 
-            fwrite(self::$tmpHashTable[$index], $that->readFile($path, $filesystem, $config));
+            fwrite(self::$tmpHashTable[$index], $that->getFilesystem()->read($path, $that->getStorage()));
             $fileList[] = new File(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
         }
 
@@ -245,7 +238,7 @@ class Uploader extends AbstractAnnotation
         $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File); 
         if($potentialMemoryLeak)
             throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName.". Did you called unit of work change set ? Please process file manually");
-
+    
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
         if(count($oldList) != count($oldListStringable))
@@ -269,11 +262,8 @@ class Uploader extends AbstractAnnotation
             $newList[$index] = new File(tempurl($entry));
         }
 
-        self::setPropertyValue($entity, $fieldName, !is_array($new) ? $newList[0] ?? null : $newList);
-
         // Field value can be an array or just a single path
         $fileList = array_values(array_intersect($newList, $oldList));
-
         foreach (array_diff($newList, $oldList) as $index => $entry) {
 
             //
@@ -288,6 +278,9 @@ class Uploader extends AbstractAnnotation
 
             //
             // Check size restriction
+            if (!file_exists($file->getPathname()))
+                throw new FileNotFoundException("File got erased \"$fieldName\" in ".get_class($entity).".");
+
             if ($file->getSize() > $this->maxSize)
                 throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity).".");
 
@@ -302,15 +295,11 @@ class Uploader extends AbstractAnnotation
 
             //
             // Upload files
-            $path         = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
-            $pathPrefixer = $this->getStorageFilesystem()->getPathPrefixer($this->storage);
-
+            $path     = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
-            if ($this->getStorageFilesystem()->write($path, $contents)) {
 
-                $fileList[] = basename($pathPrefixer ? $pathPrefixer->prefixPath($path) : $path);
-                unlink_tmpfile($file->getPathname());
-            }
+            if ($this->getFilesystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
+                $fileList[] = basename($path);
         }
 
         self::setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
@@ -346,7 +335,7 @@ class Uploader extends AbstractAnnotation
             if($file instanceof File) $path = $file->getRealPath();
             else $path = $this->getPath($entity ?? $oldEntity ?? null, $fieldName, $file);
 
-            if($path) $this->getStorageFilesystem()->delete($path);
+            if($path) $this->getFilesystem()->delete($path, $this->getStorage());
         }
     }
 
@@ -384,6 +373,8 @@ class Uploader extends AbstractAnnotation
 
             throw $e;
         }
+
+        $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }
 
     public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
