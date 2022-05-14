@@ -388,8 +388,12 @@
 {%- block fileupload_widget -%}
 
 {% set path_link   = form.vars.pathLink %}
-{% set search_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
+{% set lightbox_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
 {% set clipboard_link = form.vars.value and form.vars.clipboard ? clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) : "" %}
+{% set download_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
+{% set goto_link = "<a href='{0}'>"~("fas fa-fw fa-external-link-square-alt"|iconify)~"</a>" %}
+{% set delete_link = "<a href='{0}'>"~("far fa-fw fa-trash-alt"|iconify)~"</a>" %}
+
 {% set attr = attr|merge({
     'data-file-sortable'              : form.vars.sortable,
     'data-file-lightbox'              : form.vars.lightbox,
@@ -398,8 +402,11 @@
     'data-file-href'                  : form.vars.href|default("")|urldecode,
     'data-file-max-files'             : form.vars.max_files,
 
-    'data-file-search'                : search_link,
+    'data-file-lightbox'              : lightbox_link,
     'data-file-clipboard'             : clipboard_link,
+    'data-file-download'              : download_link,
+    'data-file-goto'                  : goto_link,
+    'data-file-delete'                : delete_link,
     'data-file-path'                  : path_link,
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
@@ -626,7 +633,7 @@
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-                <i class="far fa-trash-alt"></i>
+                <i class="far fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
 
@@ -812,7 +819,7 @@
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-                <i class="far fa-trash-alt"></i>
+                <i class="far fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
 
@@ -820,7 +827,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
-                        <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
+                        <i class="fas fa-fw fa-chevron-right form-array-item-collapse-marker"></i>
                         {{ form_widget(form, {attr:attr}) }}
                     </button>
 

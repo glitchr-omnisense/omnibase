@@ -36,6 +36,7 @@ class FileService implements FileServiceInterface
         $this->mimeTypes = new MimeTypes();
     }
 
+    public function getFilesystem() { return $this->filesystem; }
     public function getExtensions(null|string|array $fileOrMimetypeOrArray): array
     {
         if(!$fileOrMimetypeOrArray) return [];
@@ -70,6 +71,9 @@ class FileService implements FileServiceInterface
         try { return $this->mimeTypes->guessMimeType($fileOrContentsOrArray); }
         catch (InvalidArgumentException $e) { return null; }
     }
+
+    public function downloadable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path, $config); }
+    public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->getFilesystem()->read($path, $storage); }
 
     public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
     public function isImage(?string $file) { return preg_match("/image\/.*/", $this->getMimeType($file)); }

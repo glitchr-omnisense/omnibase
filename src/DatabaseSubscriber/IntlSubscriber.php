@@ -9,6 +9,7 @@ use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use InvalidArgumentException;
@@ -25,7 +26,7 @@ class IntlSubscriber implements EventSubscriberInterface
      */
     public function getSubscribedEvents(): array
     {
-        return [Events::loadClassMetadata, Events::prePersist, Events::preUpdate];
+        return [Events::loadClassMetadata, Events::onFlush];
     }
     
     public function getLocaleProvider() { return $this->localeProvider; }
@@ -36,25 +37,35 @@ class IntlSubscriber implements EventSubscriberInterface
         $this->localeProvider = $localeProvider;
     }
 
-    public function prePersist(LifecycleEventArgs $args)
+    public function onFlush(OnFlushEventArgs $args)
     {
-        if (is_subclass_of($args->getEntity(), TranslatableInterface::class, true))
-            $this->normalize($args->getEntity());
-    }
+        $em = $args->getEntityManager();
+        $uow = $em->getUnitOfWork();
 
-    public function preUpdate(LifecycleEventArgs $args)
-    {
-        if (is_subclass_of($args->getEntity(), TranslatableInterface::class, true))
-            $this->normalize($args->getEntity());
+        $scheduledEntities = [];
+        foreach ($uow->getScheduledEntityInsertions() as $entity)
+            $scheduledEntities[] = $entity;
+        foreach ($uow->getScheduledEntityUpdates() as $entity)
+            $scheduledEntities[] = $entity;
+        foreach ($uow->getScheduledCollectionUpdates() as $entity)
+            $scheduledEntities[] = $entity->getOwner();
 
-        if (is_subclass_of($args->getEntity(), TranslationInterface::class, true)) 
-            $this->removeIfEmpty($args->getEntity());
+        $scheduledEntities = array_filter(array_unique_object($scheduledEntities));
+        foreach(array_unique_object($scheduledEntities) as $entity) {
+
+            if (is_subclass_of($entity, TranslatableInterface::class, true))
+                $this->normalize($entity);
+
+            if (is_subclass_of($entity, TranslationInterface::class, true)) 
+                $this->removeIfEmpty($entity);
+        }
     }
 
     protected function normalize(TranslatableInterface $translatable)
     {
         foreach($translatable->getTranslations() as $locale => $translation) {
 
+            $this->removeIfEmpty($translation);
             if($translation->getTranslatable() !== $translatable) {
 
                 if(!$translation->getTranslatable())

@@ -1,10 +1,12 @@
 <?php
 
-namespace Base\Entity\Layout\Widget;
+namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
+use Base\Model\UrlInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -17,7 +19,7 @@ use Base\Repository\Layout\Widget\MenuRepository;
  * @DiscriminatorEntry
  */
 
-class Menu extends Widget implements IconizeInterface
+class Menu extends Widget implements IconizeInterface, SetInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-compass"]; } 
@@ -25,27 +27,27 @@ class Menu extends Widget implements IconizeInterface
     public function __construct(string $title)
     {
         parent::__construct($title);
-        $this->widgets = new ArrayCollection();
+        $this->items = new ArrayCollection();
     }
 
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class, cascade={"persist"})
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
      */
-    protected $widgets;
-    public function getWidgets(): Collection { return $this->widgets; }
-    public function addWidget(Widget $widget): self
+    protected $items;
+    public function getItems(): Collection { return $this->items; }
+    public function addItem(Widget $item): self
     {
-        if (!$this->widgets->contains($widget)) {
-            $this->widgets[] = $widget;
+        if (!$this->items->contains($item) && class_implements_interface($item, UrlInterface::class)) {
+            $this->items[] = $item;
         }
 
         return $this;
     }
 
-    public function removeWidget(Widget $widget): self
+    public function removeItem(Widget $item): self
     {
-        $this->widgets->removeElement($widget);
+        $this->items->removeElement($item);
 
         return $this;
     }

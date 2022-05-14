@@ -7,7 +7,7 @@ use App\Entity\User\Group        as UserGroup;
 use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
-use App\Entity\User\Token      as UserToken;
+use App\Entity\User\Token        as UserToken;
 
 use App\Entity\Thread;
 use App\Entity\Thread\Like;
@@ -18,7 +18,7 @@ use App\Entity\Layout\Setting;
 use App\Entity\Layout\Widget;
 use App\Entity\User\Notification;
 use App\Entity\Layout\Widget\Attachment;
-use App\Entity\Layout\Widget\Menu;
+use App\Entity\Layout\Widget\Set\Menu;
 use App\Entity\Layout\Widget\Page;
 
 use App\Controller\Backoffice\Crud\UserCrudController;
@@ -29,7 +29,6 @@ use Base\Service\BaseService;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
-use Base\Component\HttpFoundation\Referrer;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Layout\SettingListType;
@@ -60,14 +59,15 @@ use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
+use Base\Entity\Layout\Short;
 use Base\Entity\Thread\Taxon;
-use Base\Field\Type\PasswordType;
 use Base\Field\Type\SelectType;
-use Base\Security\LoginFormRescueAuthenticator;
+
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -219,6 +219,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true, "required" => false],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
+            "base.settings.access_denied"        => ["roles" => "ROLE_EDITOR", "form_type" => UrlType::class, "required" => false],
             "base.settings.public_access"        => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.user_access"          => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.admin_access"         => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
@@ -231,12 +232,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
-
-        // $fields = array_filter($fields, function($o) use ($fields) {
-
-        //     $roles = array_pop_key("roles", $fields);
-        //     $this->getUser()->isGranted($o["roles"]);
-        // });
 
         foreach($fields as $name => &$options) {
 
@@ -255,6 +250,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
+
 
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
@@ -526,18 +522,19 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if($section) $section->setWidth(2);
 
             $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
-                WidgetItem::linkToCrud(Setting::class  ),
-                WidgetItem::linkToCrud(Slot::class     ),
+                WidgetItem::linkToCrud(Setting::class),
+                WidgetItem::linkToCrud(Slot::class),
                 WidgetItem::linkToCrud(Attachment::class),
-                WidgetItem::linkToCrud(Link::class ),
+                WidgetItem::linkToCrud(Link::class),
             ]);
         }
 
         $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
-            WidgetItem::linkToCrud(Menu::class      ),
-            WidgetItem::linkToCrud(Page::class      ),
-            WidgetItem::linkToCrud(Widget::class   ),
-            WidgetItem::linkToCrud(Image::class ),
+            WidgetItem::linkToCrud(Short::class),
+            WidgetItem::linkToCrud(Menu::class),
+            WidgetItem::linkToCrud(Page::class),
+            WidgetItem::linkToCrud(Widget::class),
+            WidgetItem::linkToCrud(Image::class),
             WidgetItem::linkToCrud(AbstractAttribute::class),
         ]);
 

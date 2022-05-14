@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Backoffice\Crud\Layout\Widget;
+namespace Base\Controller\Backoffice\Crud\Layout\Widget\Set;
 
 use Base\Controller\Backoffice\Crud\Layout\WidgetCrudController;
 use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;

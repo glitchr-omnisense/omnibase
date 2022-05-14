@@ -8,6 +8,8 @@ use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;
+use Base\Service\FileService;
+use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -44,11 +46,14 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     
     public function getBlockPrefix(): string { return 'associationfile'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, ImageService $imageService)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator = $entityHydrator;
+
+        $this->imageService     = $imageService;
+        $this->fileService      = cast($imageService, FileService::class);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
     }

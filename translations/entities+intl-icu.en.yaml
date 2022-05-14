@@ -56,6 +56,9 @@ layout:
   image_crop:
     singular: "image crop"
     plural: "image crops"
+  short:
+    singular: "short"
+    plural: "shorts"
   widget:
     singular: "widget"
     plural: "widgets"
@@ -66,21 +69,32 @@ layout:
     link:
       singular: "link"
       plural: "links"
-    linkset:
-      singular: "linkset"
-      plural: "linkset"
     attachment:
       singular: "attachment"
       plural: "attachments"
-    menu:
-      singular: "menu"
-      plural: "menu"
     route:
       singular: "route"
       plural: "routes"
     slot:
       singular: widget slot
       plural: "widget slots"
+
+    set:
+      linkset:
+        singular: "linkset"
+        plural: "linkset"
+      network:
+        singular: "network"
+        plural: "networks"
+      attachment_box:
+        singular: "attachment box"
+        plural: "attachment boxes"
+      menu:
+        singular: "menu"
+        plural: "menu"
+      book:
+        singular: "book"
+        plural: "books"
 
   attribute:
     singular: attribute
@@ -114,7 +128,7 @@ layout:
         plural: "textareas"
       datetime_attribute:
         singular: "datetime"
-        plural: "datetime"
+        plural: "datetimes"
       percent_attribute:
         singular: "percent"
         plural: "percents"

@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Repository\Layout\Widget;
+namespace Base\Repository\Layout\Widget\Set;
 
-use Base\Entity\Layout\Widget\Menu;
+use Base\Entity\Layout\Widget\Set\Menu;
 
 use Base\Repository\Layout\WidgetRepository;
 

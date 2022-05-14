@@ -29,6 +29,7 @@ use Symfony\Component\Uid\Uuid;
  *   @Attribute("storage",      type = "string"),
  *   @Attribute("pool",         type = "string"),
  *   @Attribute("missable",     type = "boolean"),
+ *   @Attribute("fetch",        type = "boolean"),
  *
  *   @Attribute("max_size",     type = "string"),
  *   @Attribute("mime_types",   type = "array")
@@ -39,6 +40,8 @@ class Uploader extends AbstractAnnotation
     private string $storage;
     private string $pool;
 
+    private bool $fetch;
+    private bool $missable;
     private array $config;
     private array $mimeTypes;
     private int   $maxSize;
@@ -47,9 +50,10 @@ class Uploader extends AbstractAnnotation
     {
         $this->pool      = (!empty($data["pool"]   ?? null) ? $data["pool"] : "default");
 
-        $this->storage   = $data["storage"] ?? null;
-        $this->missable  = $data["missable"] ?? false;
-        $this->config    = $data["config"] ?? [];
+        $this->storage   = $data["storage"]    ?? null;
+        $this->missable  = $data["missable"]   ?? false;
+        $this->fetch     = $data["fetch"]      ?? false;
+        $this->config    = $data["config"]     ?? [];
         $this->mimeTypes = $data["mime_types"] ?? [];
 
         $this->maxSize   = str2dec($data["max_size"] ?? UploadedFile::getMaxFilesize());
@@ -90,18 +94,18 @@ class Uploader extends AbstractAnnotation
 
         return rtrim($pool . $namespaceDir . "/_".camel2snake($fieldName)."/" . $uuid, ".");
     }
-    
-    public static function getPublic($entity, $fieldName): ?string
+
+    public static function getPublic($entity, $fieldName)
     {
-        if(!self::hasAnnotation($entity, $fieldName, self::class)) 
+        if(!self::hasAnnotation($entity, $fieldName, self::class))
             return null;
-        
+
         /**
          * @var Uploader
          */
         $that = self::getAnnotation($entity, $fieldName, self::class);
         if(!$that) return null;
-        
+
         $field = self::getFieldValue($entity, $fieldName);
         if(!$field) return null;
 
@@ -110,7 +114,7 @@ class Uploader extends AbstractAnnotation
             $pathList = [];
             foreach($field as $uuidOrFile) {
 
-                $uuidOrFile = file_exists($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
+                $uuidOrFile = is_string($uuidOrFile) && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
                 if($uuidOrFile instanceof File) {
 
                     $pathList[] = $that->getFilesystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
@@ -127,10 +131,10 @@ class Uploader extends AbstractAnnotation
 
         } else {
 
-            $uuidOrFile = file_exists($field) ? new File($field) : $field;
+            $uuidOrFile = is_string($field) && is_file($field) ? new File($field) : $field;
             if($uuidOrFile instanceof File)
                 return $that->getFilesystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
-            
+
             if(!is_stringeable($uuidOrFile))
                 return null;
 
@@ -141,9 +145,9 @@ class Uploader extends AbstractAnnotation
 
     public static function getMimeTypes($entity, $fieldName): array
     {
-        if(!self::hasAnnotation($entity, $fieldName, self::class)) 
+        if(!self::hasAnnotation($entity, $fieldName, self::class))
             return [];
-        
+
         $that = self::getAnnotation($entity, $fieldName, self::class);
         if(!$that) return [];
 
@@ -152,9 +156,9 @@ class Uploader extends AbstractAnnotation
 
     public static function getMaxFilesize($entity, $fieldName): int
     {
-        if(!self::hasAnnotation($entity, $fieldName, self::class)) 
+        if(!self::hasAnnotation($entity, $fieldName, self::class))
             return UploadedFile::getMaxFilesize();
-        
+
         $that = self::getAnnotation($entity, $fieldName, self::class);
         if(!$that) return UploadedFile::getMaxFilesize();
 
@@ -256,10 +260,13 @@ class Uploader extends AbstractAnnotation
 
         //
         // Replace http urls in the list of new elements
-        foreach ($newList as $index => $entry) {
+        if($this->fetch) {
 
-            if (filter_var($entry, FILTER_VALIDATE_URL))
-            $newList[$index] = new File(tempurl($entry));
+            foreach ($newList as $index => $entry) {
+
+                if (filter_var($entry, FILTER_VALIDATE_URL))
+                    $newList[$index] = new File(fetch_url($entry));
+            }
         }
 
         // Field value can be an array or just a single path
@@ -268,7 +275,7 @@ class Uploader extends AbstractAnnotation
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..
-            $file = is_string($entry) && file_exists($entry) ? new File($entry) : $entry;
+            $file = is_string($entry) && is_file($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
                 
                 if($this->missable) $fileList[] = $entry;

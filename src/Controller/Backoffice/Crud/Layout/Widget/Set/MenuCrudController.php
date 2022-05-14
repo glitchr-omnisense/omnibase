@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Controller\Backoffice\Crud\Layout\Widget;
+namespace Base\Controller\Backoffice\Crud\Layout\Widget\Set;
 
 use Base\Controller\Backoffice\Crud\Layout\WidgetCrudController;
-use Base\Entity\Layout\Widget\Menu;
+use Base\Entity\Layout\Widget\Set\Menu;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Field\DiscriminatorField;
 use Base\Field\SelectField;

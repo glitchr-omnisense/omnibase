@@ -13,7 +13,7 @@ use Base\Traits\BaseTrait;
 use Exception;
 
 use App\Entity\User;
-
+use Base\Entity\Layout\Short;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use League\Flysystem\FilesystemOperator;
@@ -45,6 +45,7 @@ class AnnotationReader
 
     protected $parameterBag;
 
+    public const CACHE   = true;
     public function __construct(
         EventDispatcherInterface $eventDispatcher, 
         EntityManager $entityManager, 
@@ -372,7 +373,7 @@ class AnnotationReader
             $this->getChildrenAnnotations($ancestor, $annotationNames, $targets)
         );
 
-        if(!is_cli()) $this->cache->save($this->cachePool['familyAnnotations']->set($annotations));
+        if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['familyAnnotations']->set($annotations));
         return $annotations[$ancestor] ?? [];
     }
 
@@ -424,11 +425,12 @@ class AnnotationReader
         // If annotation already computed
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         $annotations = $this->cachePool['classAnnotations']->get() ?? [];
-        if (!array_key_exists($reflClass->name, $annotations)) {
 
-            // Compute the class annotations
-            $annotations[$reflClass->name] = [];
-            foreach ($this->getDefaultReader()->getClassAnnotations($reflClass) as $annotation) {
+        // Compute the class annotations
+        $annotations[$reflClass->name] = [];
+        foreach ($this->getDefaultReader()->getClassAnnotations($reflClass) as $annotation) {
+
+            if(array_key_exists($reflClass->name, $annotations)) {
 
                 if (!is_serializable($annotation))
                     throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
@@ -442,7 +444,7 @@ class AnnotationReader
                 $annotations[$reflClass->name][] = $annotation;
             }
  
-            if(!is_cli()) $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
+            if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
@@ -516,12 +518,12 @@ class AnnotationReader
 
             // Compute the class annotations
             $annotations[$reflClass->name] = [];
-            foreach ($this->getAnnotationNames() as $annotationName) {
+            foreach ($reflClass->getMethods() as $reflMethod) {
 
-                foreach ($reflClass->getMethods() as $reflMethod) {
-
-                    if ( ($annotation = $this->getDefaultReader()->getMethodAnnotation($reflMethod, $annotationName)) ) {
-
+                foreach ($this->getDefaultReader()->getMethodAnnotations($reflMethod) as $annotation) {
+                
+                    if(in_array(get_class($annotation), $this->getAnnotationNames())) {
+    
                         if (!is_serializable($annotation))
                             throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
 
@@ -533,7 +535,7 @@ class AnnotationReader
                 }
             }
 
-            if(!is_cli()) $this->cache->save($this->cachePool['methodAnnotations']->set($annotations));
+            if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['methodAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
@@ -605,15 +607,16 @@ class AnnotationReader
         // If annotation already computed
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
         $annotations = $this->cachePool['propertyAnnotations']->get() ?? [];
+        
         if (!array_key_exists($reflClass->name, $annotations)) {
 
             // Force to get all known annotations when buffering
             $annotations[$reflClass->name] = [];
-            foreach ($this->getAnnotationNames() as $annotationName) {
+            foreach ($reflClass->getProperties() as $reflProperty) {
 
-                foreach ($reflClass->getProperties() as $reflProperty) {
-
-                    if( ($annotation = $this->getDefaultReader()->getPropertyAnnotation($reflProperty, $annotationName)) ) {
+                foreach ($this->getDefaultReader()->getPropertyAnnotations($reflProperty) as $annotation) {
+                
+                    if(in_array(get_class($annotation), $this->getAnnotationNames())) {
 
                         if (!is_serializable($annotation))
                             throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
@@ -626,14 +629,14 @@ class AnnotationReader
                 }
             }
 
-            if(!is_cli()) $this->cache->save($this->cachePool['propertyAnnotations']->set($annotations));
+            if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['propertyAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
         if($annotationNames == $this->getAnnotationNames())
             return $annotations[$reflClass->name];
 
-        // Filter them ask request by the $annontationNames
+        // Filter them by the $annontationNames
         $filteredAnnotations = [];
         foreach($annotations[$reflClass->name] as $property => $array) {
 

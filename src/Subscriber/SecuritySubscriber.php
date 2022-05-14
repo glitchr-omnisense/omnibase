@@ -241,15 +241,15 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         //
         // Check if public access right
-        $publicAccess  = $this->baseService->getSettings()->getScalar("base.settings.public_access");
+        $publicAccess  = filter_var($this->baseService->getSettings()->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
         $publicAccess |= $user && $user->isGranted("ROLE_USER");
-
-        $userAccess    = $this->baseService->getSettings()->getScalar("base.settings.user_access");
+        
+        $userAccess    = filter_var($this->baseService->getSettings()->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
         $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
-
-        $adminAccess   = $this->baseService->getSettings()->getScalar("base.settings.admin_access");
+        
+        $adminAccess   = filter_var($this->baseService->getSettings()->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
         $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
-
+        
         if(!$publicAccess || !$userAccess || !$adminAccess) {
 
             $this->profiler->disable();
@@ -260,9 +260,10 @@ class SecuritySubscriber implements EventSubscriberInterface
             $currentRouteName = $this->getCurrentRouteName($event);
             if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
 
-                $event->setResponse($this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE));  
-                $this->profiler->disable(); 
-
+                $accessDenied = $this->baseService->getSettings()->getScalar("base.settings.access_denied");
+                if($accessDenied) $this->baseService->redirect($accessDenied);
+                else $event->setResponse($this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE));  
+                
                 if($token) $this->tokenStorage->setToken(NULL);
                 return $event->stopPropagation();
             } 

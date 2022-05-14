@@ -147,6 +147,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
 
+            new TwigFilter('public',         [FileService::class, 'public']),
+            new TwigFilter('downloadable',   [FileService::class, 'downloadable']),
             new TwigFilter('mimetype',       [FileService::class, 'getMimeType']),
             new TwigFilter('extensions',     [FileService::class, 'getExtensions']),
 

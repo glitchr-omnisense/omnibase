@@ -9,7 +9,7 @@ use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-
+use Base\Model\UrlInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\AttachmentRepository;
 
@@ -21,7 +21,7 @@ use Base\Repository\Layout\Widget\AttachmentRepository;
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
-class Attachment extends Widget implements IconizeInterface
+class Attachment extends Widget implements IconizeInterface, UrlInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; } 

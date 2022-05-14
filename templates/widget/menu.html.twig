@@ -1,7 +1,7 @@
 <div class="widget-menu">
     {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
     <ul class="items">
-        {% for item in widget.widgets %}
+        {% for item in widget.items %}
             {% set url = item.__toUrl() %}
             {% if url is not empty %} 
                 <li>{{ urlify(url, item|raw, {"class": class|default(null)}) }}</li>

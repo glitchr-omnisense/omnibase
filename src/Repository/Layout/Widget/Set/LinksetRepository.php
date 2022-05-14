@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Repository\Layout\Widget;
+namespace Base\Repository\Layout\Widget\Set;
 
-use Base\Entity\Layout\Widget\Linkset;
+use Base\Entity\Layout\Widget\Set\Linkset;
 
 use Base\Repository\Layout\WidgetRepository;
 

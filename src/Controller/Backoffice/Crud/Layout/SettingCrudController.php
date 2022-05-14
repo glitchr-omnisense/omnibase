@@ -5,6 +5,7 @@ namespace Base\Controller\Backoffice\Crud\Layout;
 use Base\Field\TranslationField;
 
 use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Entity\Layout\Setting;
 use Base\Field\BooleanField;
 use Base\Field\SlugField;
 use Base\Field\Type\QuillType;
@@ -14,6 +15,7 @@ class SettingCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; } 
 
+    public function createEntity(string $entityFqcn) { return new Setting(""); }
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {

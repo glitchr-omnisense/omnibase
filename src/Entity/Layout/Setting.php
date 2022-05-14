@@ -25,10 +25,10 @@ class Setting implements TranslatableInterface, IconizeInterface
     public function __toString() { return $this->getPath() ?? ""; }
     public function __construct(string $path, $value = null, $locale = null)
     {
-        $this->setPath($path);
         $this->setLocked(false);
         $this->setBag(null);
-
+        
+        $this->setPath($path);
         if($value !== null)
             $this->translate($locale)->setValue($value);
     }

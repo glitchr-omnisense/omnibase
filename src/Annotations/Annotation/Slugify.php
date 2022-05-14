@@ -198,5 +198,6 @@ class Slugify extends AbstractAnnotation
 
         $this->setFieldValue($entity, $property, $slug);
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        
     }
 }

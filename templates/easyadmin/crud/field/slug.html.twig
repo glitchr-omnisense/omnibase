@@ -2,7 +2,10 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% if field.formattedValue is iterable %}
-    <span class="badge badge-secondary" title="{{ field.value }}"><a href="{{ field.formattedValue['url'] }}">#{{ field.formattedValue['slug']|raw|nl2br }}</a></span>
+    <span class="badge badge-secondary" title="{{ field.value }}">
+        <a href="{{ field.formattedValue['url'] }}">#{{ field.formattedValue['slug']|raw|nl2br }}</a>
+        {{ clipboard("copy", field.formattedValue['url'], {style:"font-size:13pt; margin-left:0.25em;"}) }}
+    </span>
 {% else %}
     <span class="badge badge-secondary" title="{{ field.value }}">{{ field.formattedValue|raw|nl2br }}</span>
 {% endif %}

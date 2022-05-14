@@ -71,6 +71,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'href'         => null,
             'title'        => null,
             'allow_url'    => false,
+            'obfusca'    => false,
 
             'sortable'     => null,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
@@ -204,7 +205,15 @@ class FileType extends AbstractType implements DataMapperInterface
         
         $view->vars['pathLink'] = [];
         if(is_array($view->vars['value'])) {
-            $view->vars['pathLink'] = json_encode(array_transforms(fn($k,$v):array => [basename($v), $v], $view->vars['value']));
+            $view->vars['pathLink'] = json_encode(array_transforms(function($k,$v):array {
+
+                // $v = $this->fileService->getPublic($v);
+                if($this->fileService->isImage($v)) $link = $this->imageService->imagine($v);
+                else $link = $this->fileService->downloadable($v);
+
+                return [basename($v), $link];
+
+            }, $view->vars['value']));
             $view->vars["value"] = implode("|", $view->vars["value"]);
         }
 

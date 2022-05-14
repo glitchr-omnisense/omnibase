@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity\Layout\Widget;
+namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Hyperlink;
@@ -18,7 +18,7 @@ use Base\Repository\Layout\Widget\LinksetRepository;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  * @DiscriminatorEntry
  */
-class Linkset extends Widget implements IconizeInterface
+class Linkset extends Widget implements IconizeInterface, SetInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-layer-group"]; } 

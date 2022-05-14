@@ -26,6 +26,16 @@ use Symfony\Component\Form\FormEvents;
 
 class SettingListType extends AbstractType implements DataMapperInterface
 {
+    /**
+     * @var BaseSettings
+     */
+    protected $baseSettings;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+
     public function __construct(BaseSettings $baseSettings, ClassMetadataManipulator $classMetadataManipulator) 
     { 
         $this->baseSettings = $baseSettings;
@@ -79,6 +89,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
+                
                 $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
             }
 

@@ -74,7 +74,9 @@ namespace {
                 if ($hex[0] == $hex[1] && $hex[2] == $hex[3] && $hex[4] == $hex[5] && $hex[6] == $hex[7])
                     $hex = $hex[0].$hex[2].$hex[4].$hex[6];
                 
-                if(str_ends_with($hex, "F")) $hex = substr($hex, 0,3);
+                if(strlen($hex) === 4 && str_ends_with($hex, "F")) $hex = substr($hex, 0,3);
+                else if(str_ends_with($hex, "FF")) $hex = substr($hex, 0,6); 
+
                 break;
 
             default:
@@ -118,7 +120,18 @@ namespace {
         return array_filter($array, fn($k) => in_array($k, $unique), ARRAY_FILTER_USE_KEY);
     }
 
-    function tempurl(string $url, string $prefix = "php", string $tmpdir = "/tmp")
+    function valid_response(string $url, int $status = 200, $follow_redirects = true, $redirect_limitation = 10): bool
+    {
+        $headers = array_filter(get_headers($url), fn($h) => str_starts_with($h, "HTTP/"));
+        $header = $follow_redirects ? end($headers) : first($headers);
+
+        $nRedirects = count(array_filter($headers, fn($h) => str_contains($h, "302")));
+        if($nRedirects > $redirect_limitation) return false;
+
+        return preg_match("/^HTTP\/[0-9]\.[0-9] ".$status."/", $header);
+    }
+    
+    function fetch_url(string $url, string $prefix = "php", string $tmpdir = "/tmp")
     {
         $tmpfname = tempnam($tmpdir, $prefix);
         file_put_contents($tmpfname, file_get_contents($url));
@@ -239,14 +252,20 @@ namespace {
         return $str;
     }
 
-    function random_str(int $length = 10)
+    function random_str(?int $length = null, ?string $chars = null): ?string
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
+        if ($length === null) 
+            $length = 8;
+        if ($chars === null) 
+            $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        if(!$chars)
+            return null;
+
         $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
+        for ($i = 0, $N = strlen($chars); $i < $length; $i++)
+            $randomString .= $chars[rand(0, $N - 1)];
+
         return $randomString;
     }
 
@@ -322,6 +341,45 @@ namespace {
         
         $reflMethod = new ReflectionMethod($class, $method);
         return $reflMethod->getDeclaringClass()->getName();
+    }
+
+    function builtin_default(string $builtin) {
+
+        switch($builtin) {
+            case "string": 
+                return "";
+            case "array": 
+                return [];
+            case "float": 
+                return NAN;
+            case "int" : 
+                return 0;
+            case "callable" : 
+                return function() {};
+
+            default:
+                return null;
+        }
+    }
+
+    function initialize_property(object $object, string $property): bool
+    {
+        $reflProperty = new ReflectionProperty(get_class($object), $property);
+        $reflProperty->setAccessible(true);
+        
+        if($reflProperty->isInitialized($object))
+            return true;
+        
+        $propertyType = $reflProperty->getType();
+        if(!$propertyType->isBuiltin()) 
+            return false;
+
+        $builtinDefault = builtin_default($propertyType->getName());
+        if(!$propertyType->allowsNull() && $builtinDefault === null)
+            return false;
+
+        $reflProperty->setValue($object, $builtinDefault);
+        return true;
     }
 
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string|array|null
@@ -1402,11 +1460,15 @@ namespace {
     function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
     function cast($object, $newClass, ...$args)
     {
-        $reflClass      = new \ReflectionClass($object);
+        $reflClass      = new ReflectionClass($object);
         $reflProperties = $reflClass->getProperties();
+        
+        $reflNewClass = new ReflectionClass($newClass);
+        $reflConstr   = new ReflectionMethod($newClass, '__construct');
 
-        $newObject    = new $newClass(...$args);
-        $reflNewClass = new \ReflectionClass($newObject);
+        if($reflConstr->getNumberOfParameters() && !count($args)) $newObject = $reflNewClass->newInstanceWithoutConstructor();
+        else $newObject = new $newClass(...$args);
+
         foreach ($reflNewClass->getProperties() as $reflNewProperty) {
 
             $reflNewProperty->setAccessible(true);

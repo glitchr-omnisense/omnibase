@@ -55,7 +55,7 @@ class EntityHydrator
     protected $hydratationMapping = [];
 
     /**
-     * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback
+     * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback, but initializing properties
      */
     const DEFAULT_AGGREGATE  = 0;
     const CLASS_METHODS      = 1;
@@ -63,8 +63,9 @@ class EntityHydrator
     const ARRAY_OBJECT       = 4;
     const DEEPCOPY           = 8;
     const CONSTRUCT          = 16;
-    const IGNORE_NULLS       = 32;
-    const AUTOTYPE           = 64;
+    const INITIALIZE         = 32;
+    const IGNORE_NULLS       = 64;
+    const AUTOTYPE           = 128;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -82,7 +83,14 @@ class EntityHydrator
             if(is_abstract($entity))
                 throw new InvalidArgumentException("Cannot instantiate abstract class \"$entity\"");
 
-            $entity = ($aggregateModel & self::CONSTRUCT) ? new $entity(...$constructArguments) : $reflClass->newInstanceWithoutConstructor();
+            if($aggregateModel & self::CONSTRUCT) $entity = new $entity(...$constructArguments);
+            else $entity = $reflClass->newInstanceWithoutConstructor();
+
+            if($aggregateModel & self::INITIALIZE) {
+
+                foreach($reflClass->getProperties() as $reflProperty)
+                    initialize_property($entity, $reflProperty->getName());
+            }
         }
 
         if (!is_object($entity))
@@ -98,6 +106,7 @@ class EntityHydrator
         if($data === null) return null;
 
         if(!$this->hydrateByArrayObject($entity, $data, $aggregateModel)) {
+
             $this->hydratationMapping = [];
             $this->hydrateProperties($entity, $data, $aggregateModel);
             $this->hydrateAssociations($entity, $data, $aggregateModel);

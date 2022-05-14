@@ -8,16 +8,24 @@ use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 
 class AnnotationSubscriber implements EventSubscriberInterface {
 
-    private $entityManager;
-    protected array $subscriberHistory = [];
+    /**
+     * @var AnnotationReader
+     */
+    protected $annotationReader;
 
-    public function __construct(EntityManager $entityManager, AnnotationReader $annotationReader)
+    /**
+     * @var EntityManagerInterface
+     */
+    protected $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager, AnnotationReader $annotationReader)
     {
         $this->entityManager    = $entityManager;
         $this->annotationReader = $annotationReader;
@@ -36,15 +44,17 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         ];
     }
 
+    protected array $subscriberHistory = [];
     public function loadClassMetadata( LoadClassMetadataEventArgs $event ) {
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
-       
+
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] =  $className."::".__FUNCTION__;
-        
+
         $annotations = $this->annotationReader->getAnnotations($className);
+
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {
 
