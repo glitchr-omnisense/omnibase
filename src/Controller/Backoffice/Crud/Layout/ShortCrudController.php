@@ -24,7 +24,10 @@ class ShortCrudController extends AbstractCrudController
             yield TranslationField::new("url")->renderAsHtml()
                 ->setFields([
                     "label" => [],
-                    "url" => ["form_type" => UrlType::class]
+                    "url" => [
+                        "form_type" => UrlType::class, 
+                        "attr" => ["placeholder" => $this->getTranslator()->trans("@dashboard.crud.short.url.placeholder", [$_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"]])]
+                    ]
                 ]);
 
         }, $args);

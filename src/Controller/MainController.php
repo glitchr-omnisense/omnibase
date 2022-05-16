@@ -25,7 +25,7 @@ class MainController extends AbstractController
     /**
      * Controller example
      *
-     * @Route("/", name="index")
+     * @Route("/", name="welcome")
      */
     public function Index(): Response
     {

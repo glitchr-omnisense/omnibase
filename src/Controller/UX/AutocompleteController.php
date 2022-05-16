@@ -81,7 +81,7 @@ class AutocompleteController extends AbstractController
                 $book = $this->paginator->paginate($entries, $page);
                 $pagination = $book->getTotalPages() > $book->getPage();
 
-                foreach($book as $i => $entry)
+                foreach($book as $entry)
                     $results[] = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html]);
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {

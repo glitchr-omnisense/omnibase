@@ -30,6 +30,7 @@ use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
@@ -44,7 +45,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var FormFactory */
     protected $formFactory;
 
-    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator, BaseService $baseService)
+    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator, BaseService $baseService, RouterInterface $router)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
@@ -56,7 +57,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->formFactory = $formFactory;
         $this->localeProvider = $localeProvider;
         $this->adminUrlGenerator = $adminUrlGenerator;
-
+        $this->router = $router;
         $this->autocomplete = new Autocomplete($this->translator);
     }
 
@@ -125,13 +126,14 @@ class SelectType extends AbstractType implements DataMapperInterface
             'href'               => null,
 
             // Autocomplete
-            'autocomplete'                => null,
-            'autocomplete_endpoint'       => "autocomplete",
-            'autocomplete_fields'         => [],
-            'autocomplete_data'           => null,
-            'autocomplete_processResults' => null,
-            'autocomplete_delay'          => 500,
-            'autocomplete_type'           => $this->baseService->isDebug() ? "GET" : "POST",
+            'autocomplete'                     => null,
+            'autocomplete_endpoint'            => "ux_autocomplete",
+            'autocomplete_endpoint_parameters' => [],
+            'autocomplete_fields'              => [],
+            'autocomplete_data'                => null,
+            'autocomplete_processResults'      => null,
+            'autocomplete_delay'               => 500,
+            'autocomplete_type'                => $this->baseService->isDebug() ? "GET" : "POST",
 
             // Sortable option
             'sortable'              => null
@@ -493,7 +495,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             if($options["autocomplete"]) {
 
                 $selectOpts["ajax"] = [
-                    "url" => $this->baseService->getAsset($options["autocomplete_endpoint"])."/".$hash,
+                    "url" => $this->router->generate($options["autocomplete_endpoint"], array_merge($options["autocomplete_endpoint_parameters"], ["hashid" => $hash])),
                     "type" => $options["autocomplete_type"],
                     "delay" => $options["autocomplete_delay"],
                     "dataType" => "json",
@@ -570,7 +572,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                     else $text = is_string($key) ? $key : $text;
 
                     $self = array_pop_key("_self", $choices);
-
                     if(! $self) yield null => ["text" => $text, "children" => array_transforms($callback, $choices, $d)];
                     else {
                 

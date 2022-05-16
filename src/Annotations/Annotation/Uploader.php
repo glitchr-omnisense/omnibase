@@ -124,6 +124,7 @@ class Uploader extends AbstractAnnotation
                 $path = $that->getPath($entity, $fieldName, $uuidOrFile);
                 $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
                 if($pathPublic) $pathList[] = $pathPublic;
+                elseif($that->missable) $pathList[] = $uuidOrFile;
             }
 
             $pathList = array_filter($pathList);
@@ -139,7 +140,10 @@ class Uploader extends AbstractAnnotation
                 return null;
 
             $path = $that->getPath($entity, $fieldName, $uuidOrFile);
-            return $that->getFilesystem()->getPublic($path, $that->getStorage());
+            $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
+            if($pathPublic) return $pathPublic;
+
+            return $that->missable ? $uuidOrFile : null;
         }
     }
 

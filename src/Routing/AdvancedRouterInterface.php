@@ -8,5 +8,5 @@ use Symfony\Component\Routing\RouterInterface;
 
 interface AdvancedRouterInterface extends RouterInterface, RequestMatcherInterface, WarmableInterface
 {
-    // TODO: Implement methods as defined in BaseService..
+    // TODO: Implement methods based on AdvancedRouter class
 }

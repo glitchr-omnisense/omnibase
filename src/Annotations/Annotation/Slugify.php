@@ -138,32 +138,6 @@ class Slugify extends AbstractAnnotation
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        $currentSlug = $this->getFieldValue($entity, $property);
-        $slug = $this->getSlug($entity, $property, $currentSlug);
-        $this->setFieldValue($entity, $property, $slug);
-    }
-
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        if($this->sync) {
-            
-            $oldEntity = $this->getOldEntity($entity);
-            if ($this->getFieldValue($oldEntity, $property) == $this->getFieldValue($entity, $property)) {
-                
-                $labelModified = !$this->referenceColumn ? null : 
-                    $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
-
-                if($labelModified) {
-
-                    $slug = $this->getSlug($entity, $property);
-                    $this->setFieldValue($entity, $property, $slug);
-                }
-            }
-        }
-    }
-
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
@@ -198,6 +172,5 @@ class Slugify extends AbstractAnnotation
 
         $this->setFieldValue($entity, $property, $slug);
         $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
-        
     }
 }

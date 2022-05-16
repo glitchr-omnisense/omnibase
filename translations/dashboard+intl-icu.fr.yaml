@@ -54,3 +54,7 @@ crud:
       # title: "User Edit TITLE"
       # text: "User Edit TEXT"
       # help: "User Edit HELP"
+
+  short:
+    url:
+      placeholder: "{0} ou /vers/page/local"

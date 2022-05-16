@@ -65,11 +65,17 @@ class FileService implements FileServiceInterface
 
         // Attempt to read based on custom mime_content_content method
         $mimeType = mime_content_type2($fileOrContentsOrArray);
-        if($mimeType) return $mimeType;
+        if($mimeType && $mimeType !== "application/x-empty") return $mimeType;
+
+        // Attempt to read mimetype
+        $extension = pathinfo($fileOrContentsOrArray, PATHINFO_EXTENSION);
+        $extension = $extension ? $extension : $fileOrContentsOrArray; // Assume extension is provided without filename
+        $mimeType = $this->mimeTypes->getMimeTypes($extension)[0] ?? null;
+        if($mimeType && $mimeType !== "application/x-empty") return $mimeType;
 
         // Attempt to guess mimetype using MimeTypes class
         try { return $this->mimeTypes->guessMimeType($fileOrContentsOrArray); }
-        catch (InvalidArgumentException $e) { return null; }
+        catch (InvalidArgumentException $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */ }
     }
 
     public function downloadable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path, $config); }

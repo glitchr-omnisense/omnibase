@@ -3,6 +3,8 @@
 namespace Base\Entity\Layout;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+use Base\Validator\Constraints as AssertBase;
 
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
@@ -29,16 +31,14 @@ class ShortTranslation implements TranslationInterface
     }
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="text")
+     * @Assert\Url
      */
     protected ?string $url = null;
-    public function isReacheable(): bool { return valid_response($this->url); }
-    public function getUrl(): ?string { return $this->getSettings()->url($this->url); }
-    public function setUrl(?string $url)
+    public function getUrl(): ?string { return $this->url; }
+    public function setUrl(string $url)
     {
-        if(is_url($url)) $this->url = $url;
-        else $this->url = null;
-
+        $this->url = $url;
         return $this;
     }
 }

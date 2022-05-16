@@ -10,6 +10,10 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Symfony\Component\Routing\Generator\Dumper\GeneratorDumper;
+use Symfony\Component\Routing\Generator\UrlGenerator;
+use Symfony\Component\Routing\Matcher\Dumper\MatcherDumper;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -21,8 +25,8 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function __construct(RouterInterface $router, RequestStack $requestStack, BaseSettings $baseSettings, string $debug)
     {
-        $this->router = $router;
         $this->debug  = $debug;
+        $this->router = $router;
 
         $this->requestStack = $requestStack;
         $this->baseSettings = $baseSettings;
@@ -102,6 +106,29 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function getCurrentUrl(): ?string { return $this->getUrl(); }
     public function getUrl(?string $routeName = null, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
     {
+        // Transforms requested route by adding parameters
+        if(($route = $this->getRouteCollection()->get($routeName))) {
+
+            if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
+
+            if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
+
+                $url = parse_url2(get_url());
+
+                $parameterNames = array_flip($matches[1]);
+                $routeParameters = array_merge(
+                    array_intersect_key($url, $parameterNames),
+                    $routeParameters,
+                    $route->getDefaults()
+                );
+
+                $search  = array_map(fn($k) => "{".$k."}", array_keys($url));
+                $replace = array_values($url);
+                foreach($routeParameters as &$routeParameter)
+                    $routeParameter = str_replace($search, $replace, $routeParameter);
+            }
+        }
+
         if (!empty($routeName)) {
 
             try { return $this->router->generate($routeName, $routeParameters, $referenceType); }
@@ -115,6 +142,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         if(!$request) return null;
 
         $routeName = $request->get('_route');
+
         return $routeName ? $this->router->generate($routeName, [], $referenceType) : null;
     }
 
@@ -255,7 +283,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         //
         // Strip unused variables from main group
-        $routeUrl = $this->getUrl($routeBase, $routeParameters);
+        $routeUrl      = $this->getUrl($routeBase, $routeParameters);
         $routeGroupUrl = $this->getUrl($routeBase.$routeGroup, $routeParameters);
 
         if($routeGroupUrl !== null && $routeUrl !== null) {

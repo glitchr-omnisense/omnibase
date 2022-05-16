@@ -22,6 +22,42 @@ namespace {
         }, $input);
     }
 
+    function get_url($subdomain = "") 
+    {
+        return  $_SERVER["REQUEST_SCHEME"]."://".
+                str_lstrip($_SERVER["HTTP_HOST"], $subdomain ? $subdomain."." : "").
+                $_SERVER["REQUEST_URI"];
+    }
+
+    function parse_url2(string $url, int $component = -1): array|string|int|false|null 
+    {
+        $parsedUrl = parse_url($url, $component);
+        $parsedUrl["root"] = str_rstrip($url, $parsedUrl['path'] ?? "") . '/';
+        
+        if(array_key_exists("host", $parsedUrl)) {
+
+            $parsedUrl["fqdn"] = $parsedUrl["host"].".";
+            
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parsedUrl["host"] ?? ""), $match)) {
+
+                $parsedUrl["domain"] = $match[0];
+
+                $subdomain = str_rstrip($parsedUrl["host"], ".".$parsedUrl["domain"]);
+                $parsedUrl["subdomain"] = $subdomain !== $parsedUrl["domain"] ? $subdomain : null;
+
+                $_ = explode(".", $parsedUrl["subdomain"] ?? "");
+                $parsedUrl["subdomain"] = array_pop($_);
+                $parsedUrl["machine"] = implode(".", $_);
+
+                $domain = explode(".", $match[0]);
+                $parsedUrl["sld"]   = first($domain);
+                $parsedUrl["tld"]   = implode(".", tail($domain));
+            }
+        }
+
+        return $parsedUrl;
+    }
+
     function is_instanceof(mixed $object_or_class, string|array $class): bool
     {
         // At least one class detection
@@ -122,9 +158,11 @@ namespace {
 
     function valid_response(string $url, int $status = 200, $follow_redirects = true, $redirect_limitation = 10): bool
     {
+        if(!filter_var($url, FILTER_VALIDATE_URL)) return false;
+        
         $headers = array_filter(get_headers($url), fn($h) => str_starts_with($h, "HTTP/"));
         $header = $follow_redirects ? end($headers) : first($headers);
-
+        
         $nRedirects = count(array_filter($headers, fn($h) => str_contains($h, "302")));
         if($nRedirects > $redirect_limitation) return false;
 
@@ -622,7 +660,7 @@ namespace {
         }
 
         try { return mime_content_type($filename); }
-        catch (TypeError|Exception $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($filename))[0] ?? null; }
+        catch (TypeError|Exception $e) { return null; }
     }
 
     function str2bin($string)
@@ -713,9 +751,9 @@ namespace {
         return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k])."\"", array_keys(array_filter($attributes)))));
     }
 
-    function browser_name()    : string { return get_browser2()["name"]; }
-    function browser_platform(): string { return get_browser2()["platform"]; }
-    function browser_version() : string { return get_browser2()["version"]; } 
+    function browser_name()    : ?string { return get_browser2()["name"] ?? null; }
+    function browser_platform(): ?string { return get_browser2()["platform"] ?? null; }
+    function browser_version() : ?string { return get_browser2()["version"] ?? null; } 
 
     function get_browser2(?string $userAgent = null)
     {
@@ -760,13 +798,13 @@ namespace {
         preg_match_all('#(?<browser>' . $known .')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#', $userAgent, $matches);
 
         $version = "";
-        if (count($matches['browser']) == 1) $version = $matches['version'][0];
+        if (count($matches['browser']) == 1) $version = $matches['version'][0] ?? null;
         else {
 
             //we will have two since we are not using 'other' argument yet
             //see if version is before or after the name
-            if (strripos($userAgent,"Version") < strripos($userAgent,$name)) $version = $matches['version'][0];
-            else $version = $matches['version'][1];
+            if (strripos($userAgent,"Version") < strripos($userAgent,$name)) $version = $matches['version'][0] ?? null;
+            else $version = $matches['version'][1] ?? null;
         }
 
         if (!$version) $version = "?";

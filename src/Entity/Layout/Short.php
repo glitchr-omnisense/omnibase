@@ -5,7 +5,7 @@ namespace Base\Entity\Layout;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
-use Base\Validator\Constraints as AssertBase;
+
 use Base\Annotations\Annotation\Slugify;
 use Base\Model\UrlInterface;
 
@@ -13,6 +13,7 @@ use Base\Annotations\Annotation\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortRepository;
+use Base\Traits\BaseTrait;
 
 /**
  * @ORM\Entity(repositoryClass=ShortRepository::class)
@@ -20,12 +21,19 @@ use Base\Repository\Layout\ShortRepository;
  */
 class Short implements TranslatableInterface, IconizeInterface, UrlInterface
 {
+    use BaseTrait;
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-compress-alt fa-rotate-45"]; }
 
-    public function __toUrl():?string { return $this->getUrl(); }
+    public function __toUrl():?string 
+    { 
+        $rel = $this->getRouter()->generate("short_redirect", ["slug" => $this->getSlug()]);
+        $url = $this->getSettings()->url($rel);
+        return $url;
+    }
+
     public function __toString() { return $this->getLabel() ?? $this->getUrl(); }
     public function __construct(string $url = "", ?string $label = null)
     {

@@ -19,16 +19,18 @@ final class ClipboardTwigExtension extends AbstractExtension
         ];
     }
 
-    public function clipboard(Environment $twig, string $template, string $value, array $attributes = []): ?string
+    public function clipboard(Environment $twig, string $template, ?string $value, array $attributes = []): ?string
     {
+        if(!$value) return null;
         if(!str_contains($template, "/") && !str_ends_with($template, "html.twig"))
             $template = "@Base/clipboard/".$template.".html.twig";
 
         return $twig->render($template, ["value" => $value, "attr" => $attributes]);
     }
 
-    public function clipboard_target(Environment $twig, string $template, string $target, array $attributes = []): ?string
+    public function clipboard_target(Environment $twig, string $template, ?string $target, array $attributes = []): ?string
     {
+        if(!$target) return null;
         if(!str_starts_with($target, "#"))
             throw new Exception("Clipboard target \"".$target."\" must start with an hashtag #");
 

@@ -5,7 +5,6 @@ namespace Base\Twig\Extension;
 use Base\Component\Intl\Colors;
 use Base\Service\BaseService;
 use Base\Service\FileService;
-use Base\Service\Filesystem;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProvider;

@@ -20,9 +20,10 @@ class Translator implements TranslatorInterface
     public const TRANSLATION_FEMININE     = "feminine";
     public const TRANSLATION_MASCULINE    = "masculine";
 
-    public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel)
+    public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel, ParameterBagInterface $parameterBag)
     {
         $this->translator = $translator;
+        $this->parameterBag = $parameterBag;
         $this->isDebug    = $kernel->isDebug();
     }
 
@@ -64,7 +65,7 @@ class Translator implements TranslatorInterface
         }
 
         // Replace parameter between brackets
-        $bracketList = ['{}', "%%", "[]", "()", "<>"];
+        $bracketList = ['{}', "[]", "%%"];
         foreach ($parameters as $key => $element) {
 
             $brackets = -1;
@@ -82,15 +83,25 @@ class Translator implements TranslatorInterface
             $leftBracket  = $brackets[0];
             $rightBracket = $brackets[1];
 
-            $parameters[$leftBracket.trim($key, $leftBracket.$rightBracket." ").$rightBracket] = $element; //htmlspecialchars($element);
+            $key = $leftBracket.trim($key, $leftBracket.$rightBracket." ").$rightBracket;
+            $parameters[$key] = $element;
+
             unset($parameters[$key]);
         }
 
-        // Call for translation with custom parameters
+        // Call for translation with parameter bag variables
         $trans  = $this->translator->trans($id, $parameters, $domain, $locale);
-        $trans2 = null;
+        if(preg_match_all("/%([^%]*)%/", $trans, $matches)) {
+
+            foreach($matches[1] ?? [] as $key) {
+
+                if(($parameter = $this->parameterBag->get($key)))
+                    $parameters["%".$key."%"] = $parameter;
+            }
+        }
 
         // Lookup for nested translations
+        $trans2 = null;
         while($trans != $trans2 && $recursive) {
 
             $trans2 = $this->trans($trans, $parameters, $domain, $locale, false);
