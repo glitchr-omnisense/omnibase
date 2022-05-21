@@ -22,40 +22,52 @@ namespace {
         }, $input);
     }
 
-    function get_url($subdomain = "") 
+    function get_url(bool $keep_subdomain = true, bool $keep_machine = true) 
     {
-        return  $_SERVER["REQUEST_SCHEME"]."://".
-                str_lstrip($_SERVER["HTTP_HOST"], $subdomain ? $subdomain."." : "").
-                $_SERVER["REQUEST_URI"];
+        $parse = parse_url2($_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]);
+        
+        $domain    = $parse["domain"] ? $parse["domain"] : "";
+        
+        $machine   = $parse["machine"] ? $parse["machine"] ."." : "";
+        $machine   = $keep_machine ? $machine : "";
+        
+        $subdomain = $parse["subdomain"] ? $parse["subdomain"]."." : "";
+        $subdomain = $keep_subdomain ? $subdomain : "";
+        
+        return $parse["scheme"]."://".$machine.$subdomain.$domain;
     }
 
-    function parse_url2(string $url, int $component = -1): array|string|int|false|null 
+    function parse_url2(string $url = null, int $component = -1): array|string|int|false|null 
     {
-        $parsedUrl = parse_url($url, $component);
-        $parsedUrl["root"] = str_rstrip($url, $parsedUrl['path'] ?? "") . '/';
+        if($url === null) $url = get_url();
         
-        if(array_key_exists("host", $parsedUrl)) {
+        $parse = parse_url($url, $component);
+        $parse['path'] = str_rstrip($parse['path'] ?? "", "/");
+        $parse["root"] = str_rstrip($url, $parse['path']);
+        
+        if(array_key_exists("host", $parse)) {
 
-            $parsedUrl["fqdn"] = $parsedUrl["host"].".";
+            $parse["fqdn"] = $parse["host"].".";
             
-            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parsedUrl["host"] ?? ""), $match)) {
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
-                $parsedUrl["domain"] = $match[0];
+                $parse["domain"] = $match[0];
 
-                $subdomain = str_rstrip($parsedUrl["host"], ".".$parsedUrl["domain"]);
-                $parsedUrl["subdomain"] = $subdomain !== $parsedUrl["domain"] ? $subdomain : null;
+                $subdomain = str_rstrip($parse["host"], ".".$parse["domain"]);
+                $parse["subdomain"] = $subdomain !== $parse["domain"] ? $subdomain : null;
 
-                $_ = explode(".", $parsedUrl["subdomain"] ?? "");
-                $parsedUrl["subdomain"] = array_pop($_);
-                $parsedUrl["machine"] = implode(".", $_);
+                $_ = explode(".", $parse["subdomain"] ?? "");
+                $parse["subdomain"] = array_pop($_);
+                $parse["machine"] = implode(".", $_);
 
                 $domain = explode(".", $match[0]);
-                $parsedUrl["sld"]   = first($domain);
-                $parsedUrl["tld"]   = implode(".", tail($domain));
+                $parse["sld"]   = first($domain);
+                $parse["tld"]   = implode(".", tail($domain));
             }
         }
 
-        return $parsedUrl;
+        $parse["url"] = $parse["root"].$parse['path'];
+        return $parse;
     }
 
     function is_instanceof(mixed $object_or_class, string|array $class): bool
@@ -149,6 +161,17 @@ namespace {
     function is_url(?string $url): bool { return filter_var($url, FILTER_VALIDATE_URL); }
     function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake2camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
+
+    function preg_match_array(string $pattern, array $subject) {
+
+        $search = [];
+        foreach($subject as $el) {
+            if(is_array($el)) $search[] = preg_match_array($pattern, $el);
+            else if(preg_match($pattern, $el)) $search[] = $el;
+        }
+
+        return $search;
+    }
 
     function array_unique_object(array $array): array
     {

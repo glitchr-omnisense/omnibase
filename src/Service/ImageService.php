@@ -79,9 +79,10 @@ class ImageService extends FileService implements ImageServiceInterface
     {
         if($path === null ) return null;
         $path = "/".str_strip($path, $this->assetExtension->getAssetUrl(""));
-
+        
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
+        $config["local_cache"] = $config["local_cache"] ?? null;
         if(!empty($filters)) $config["filters"] = $filters;
 
         while ( ($pathConfig = $this->obfuscator->decode(basename($path))) ) {
@@ -90,6 +91,7 @@ class ImageService extends FileService implements ImageServiceInterface
             $config["path"] = $path;
             $config["filters"] = ($pathConfig["filters"] ?? []) + ($config["filters"] ?? []);
             $config["options"] = ($pathConfig["options"] ?? []) + ($config["options"] ?? []);
+            $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
         return $this->obfuscator->encode($config);
@@ -165,7 +167,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $pathRelative = $this->filesystem->stripPrefix(realpath($path), $config["storage"] ?? null);
         $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
         $pathCache = path_suffix($pathRelative, $pathSuffixes);
-        
+
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? false) {
@@ -175,7 +177,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
             if(!$this->filesystem->fileExists($pathCache, "local.cache")) {
 
-                $filteredPath = $this->filter($path, $filters, $config);
+                $filteredPath = $this->filter($path, $filters, $config) ?? $path;
                 $this->filesystem->mkdir(dirname($filteredPath));
                 $this->filesystem->write($pathCache, file_get_contents($filteredPath), "local.cache");
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);

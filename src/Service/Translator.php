@@ -83,8 +83,7 @@ class Translator implements TranslatorInterface
             $leftBracket  = $brackets[0];
             $rightBracket = $brackets[1];
 
-            $key = $leftBracket.trim($key, $leftBracket.$rightBracket." ").$rightBracket;
-            $parameters[$key] = $element;
+            $parameters[$leftBracket.trim($key, $leftBracket.$rightBracket." ").$rightBracket] = $element;
 
             unset($parameters[$key]);
         }

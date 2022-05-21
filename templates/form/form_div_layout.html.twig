@@ -387,13 +387,33 @@
 
 {%- block fileupload_widget -%}
 
-{% set path_link   = form.vars.pathLink %}
+{% set paths   = form.vars.paths %}
+{# {% set search_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
+{% set clipboard_link = form.vars.value and form.vars.clipboard ? clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) : "" %}
+{% set attr = attr|merge({
+    'data-file-sortable'              : form.vars.sortable,
+    'data-file-lightbox'              : form.vars.lightbox,
+
+    'data-file-ajax'                  : form.vars.ajax,
+    'data-file-href'                  : form.vars.href|default("")|urldecode,
+    'data-file-max-files'             : form.vars.max_files,
+
+    'data-file-search'                : search_link,
+    'data-file-clipboard'             : clipboard_link,
+    'data-file-paths'                  : paths,
+    'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
+    'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
+    'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
+    'data-file-counter-max[none]'     : "@fields.fileupload.file_counter_max.none"    | trans(["{0}"]),
+    'data-file-counter-max[singular]' : "@fields.fileupload.file_counter_max.singular"| trans(["{0}"]),
+    'data-file-counter-max[plural]'   : "@fields.fileupload.file_counter_max.plural"  | trans(["{0}"])
+}) %} #}
+
 {% set lightbox_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
 {% set clipboard_link = form.vars.value and form.vars.clipboard ? clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) : "" %}
 {% set download_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
 {% set goto_link = "<a href='{0}'>"~("fas fa-fw fa-external-link-square-alt"|iconify)~"</a>" %}
 {% set delete_link = "<a href='{0}'>"~("far fa-fw fa-trash-alt"|iconify)~"</a>" %}
-
 {% set attr = attr|merge({
     'data-file-sortable'              : form.vars.sortable,
     'data-file-lightbox'              : form.vars.lightbox,
@@ -407,7 +427,8 @@
     'data-file-download'              : download_link,
     'data-file-goto'                  : goto_link,
     'data-file-delete'                : delete_link,
-    'data-file-path'                  : path_link,
+    'data-file-paths'                  : paths,
+
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
     'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
@@ -415,7 +436,6 @@
     'data-file-counter-max[singular]' : "@fields.fileupload.file_counter_max.singular"| trans(["{0}"]),
     'data-file-counter-max[plural]'   : "@fields.fileupload.file_counter_max.plural"  | trans(["{0}"])
 }) %}
-
 <div class="fileupload" data-file-field="{{ id }}" data-file-dropzone="{{form.vars.dropzone}}">
     <div class="field">
     {% if multiple and dropzone %}
@@ -427,7 +447,6 @@
 
         {% set placeholder = '' %}
         {% set title = '' %}
-        {% set filesLabel = 'files'|trans %}
 
         {{ form_widget(form.file, { attr: form.file.vars.attr}) }}
 
@@ -665,7 +684,7 @@
                             {% if _href is not null %}
                                 <a href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
                             {% else %}
-                                {% set url = form.vars.value.__toUrl() ?? null %}                                
+                                {% set url = form.vars.value.__toLink() ?? null %}                                
                                 {% if url is not empty %}
                                     {{ url ? clipboard("copy", url)|raw : "" }}
                                     <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
@@ -698,7 +717,7 @@
                 <label>
                     {{ label|default(value)|stringify }}
                     {% if form.vars.value is defined %}
-                        {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}
+                        {% set url = form.vars.value.__toLink() ?? form.vars.href ?? null %}
                         {% if url is not empty %}
                             {{ clipboard("copy", url)|raw }}
                             <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
@@ -1068,6 +1087,7 @@
 {% set attr = attr|merge({
         'data-color-field': form.vars.id,
         'data-options': pickr | json_encode,
+        'class' : 'form-color'
     })
 %}
 

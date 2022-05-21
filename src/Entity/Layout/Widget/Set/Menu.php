@@ -6,7 +6,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-use Base\Model\UrlInterface;
+use Base\Model\LinkableInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -38,9 +38,8 @@ class Menu extends Widget implements IconizeInterface, SetInterface
     public function getItems(): Collection { return $this->items; }
     public function addItem(Widget $item): self
     {
-        if (!$this->items->contains($item) && class_implements_interface($item, UrlInterface::class)) {
+        if(!$this->items->contains($item) && class_implements_interface($item, LinkableInterface::class))
             $this->items[] = $item;
-        }
 
         return $this;
     }

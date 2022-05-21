@@ -31,35 +31,35 @@ class RouterSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $url = parse_url2(get_url());
-
-        $route = $this->router->getCurrentRoute();
+        
+        $route = $this->router->getRoute();
         if(!$route) return;
-
-        $route->addDefaults($url);
-
+     
         if(empty($route->getHost())) {
 
-            if($url["machine"]) {
+            $reduce = !$this->router->keepMachine() || !$this->router->keepSubdomain();
+            if($url["machine"] && $reduce) {
 
-                $event->setResponse($this->redirectToSubdomain($url["machine"]));
+                $event->setResponse($this->redirectByReduction(false, true));
                 return $event->stopPropagation();
             }
             
             $permittedSubdomains = $this->parameterBag->get("base.access_restriction.permitted_subdomains") ?? [];
-            
+
             $vetoSubdomain = true;
             foreach($permittedSubdomains ?? [] as $permittedSubdomain)
                 $vetoSubdomain &= preg_match("/".$permittedSubdomain."/", $url["subdomain"]);
 
             if($vetoSubdomain) {
-                $event->setResponse($this->redirectToSubdomain(implode(".", array_filter([$url["machine"], $url["subdomain"]]))));
+
+                $event->setResponse($this->redirectByReduction(false, true));
                 return $event->stopPropagation();
             }
         }
     }
 
-    public function redirectToSubdomain(string $subdomain): RedirectResponse
+    public function redirectByReduction(bool $keep_subdomain = true, bool $keep_machine = true): RedirectResponse
     {
-        return new RedirectResponse(get_url($subdomain));
+        return new RedirectResponse(get_url($keep_subdomain, $keep_machine));
     }
 }

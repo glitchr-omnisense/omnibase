@@ -7,34 +7,32 @@ use Base\Database\Traits\TranslatableTrait;
 use Base\Model\IconizeInterface;
 
 use Base\Annotations\Annotation\Slugify;
-use Base\Model\UrlInterface;
+use Base\Model\LinkableInterface;
 
 use Base\Annotations\Annotation\Randomize;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortRepository;
 use Base\Traits\BaseTrait;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ShortRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
-class Short implements TranslatableInterface, IconizeInterface, UrlInterface
+class Short implements TranslatableInterface, IconizeInterface, LinkableInterface
 {
-    use BaseTrait;
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-compress-alt fa-rotate-45"]; }
 
-    public function __toUrl():?string 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
     { 
-        $rel = $this->getRouter()->generate("short_redirect", ["slug" => $this->getSlug()]);
-        $url = $this->getSettings()->url($rel);
-        return $url;
+        return $this->getRouter()->generate("short_redirect", ["slug" => $this->getSlug()], $referenceType);
     }
 
-    public function __toString() { return $this->getLabel() ?? $this->getUrl(); }
+    public function __toString() { return $this->getLabel() ?? $this->getUrl() ?? ""; }
     public function __construct(string $url = "", ?string $label = null)
     {
         $this->setUrl($url);

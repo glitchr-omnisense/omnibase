@@ -273,8 +273,12 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                     $accessDenied = $this->baseService->getSettings()->getScalar("base.settings.access_denied");
                     if($accessDenied) $this->baseService->redirect($accessDenied);
-                    else $event->setResponse($this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE));  
-                    
+                    else {
+
+                        $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
+                        if($response) $event->setResponse($response);
+                    }
+
                     if($token) $this->tokenStorage->setToken(NULL);
                     return $event->stopPropagation();
                 } 

@@ -4,25 +4,28 @@ namespace Base\Entity\Layout;
 
 use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Layout\Image;
-use Base\Model\UrlInterface;
+use Base\Model\LinkableInterface;
 use Base\Repository\Layout\ImageCropRepository;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ImageCropRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
-class ImageCrop implements UrlInterface
+class ImageCrop implements LinkableInterface
 {
     use BaseTrait;
 
-    public function __toUrl(): ?string {
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    {
+        $routeParameters = [
+            "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(),
+            "hashid"     => $this->getImageService()->obfuscate($this->getImage()->getSource())
+        ];
 
-        $identifier = $this->getSlug() ?? $this->getWidth().":".$this->getHeight();
-        $hashid = $this->getImageService()->obfuscate($this->getImage()->getSource());
-
-        return $this->getRouter()->generate("ux_crop", ["identifier" => $identifier, "hashid" => $hashid]);
+        return $this->getRouter()->generate("ux_crop", $routeParameters, $referenceType);
     }
 
     public function __toString() {

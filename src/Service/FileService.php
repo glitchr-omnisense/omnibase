@@ -26,6 +26,15 @@ class FileService implements FileServiceInterface
      */
     protected $filesystem;
 
+    /**
+     * @var AssetExtension
+     */
+    protected $assetExtension;
+    /**
+     * @var RouterInterface
+     */
+    protected $router;
+
     public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, Filesystem $filesystem)
     {
         $this->router = $router;
@@ -78,7 +87,7 @@ class FileService implements FileServiceInterface
         catch (InvalidArgumentException $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */ }
     }
 
-    public function downloadable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path, $config); }
+    public function downloadable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path, array_merge($config, ["attachment" => true])); }
     public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->getFilesystem()->read($path, $storage); }
 
     public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
@@ -89,16 +98,21 @@ class FileService implements FileServiceInterface
     {
         if($path === null ) return null;
 
-        $config["path"]    = str_strip($path, $this->assetExtension->getAssetUrl(""));
-        $config["options"] = $config["options"] ?? [];
+        $path = realpath($path);
+        $path = "/".str_strip($path, $this->assetExtension->getAssetUrl(""));
 
-        while ( ($pathConfig = $this->obfucator->decode(basename($path))) ) {
+        $config["path"] = $path;
+        $config["options"] = $config["options"] ?? [];
+        $config["local_cache"] = $config["local_cache"] ?? null;
+
+        while ( ($pathConfig = $this->obfuscator->decode(basename($path))) ) {
 
             $config["path"] = $path = $pathConfig["path"] ?? $path;
             $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
+            $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfucator->encode($config);
+        return $this->obfuscator->encode($config);
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string

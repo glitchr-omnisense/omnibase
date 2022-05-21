@@ -23,10 +23,10 @@ class ShortController extends AbstractController
     }
 
     /**
-     * @Route("/{slug}", name="short_redirect", host="{host}", requirements={"host": "^s.(.*)"}, defaults={"host": "s.{subdomain}.{domain}"}, priority=1)
-     * @Route("/{slug}/{_locale}", name="short_redirectByLocale", host="{host}", requirements={"host": "^s.(.*)"}, priority=1)
+     * @Route("/{slug}", name="short_redirect", host="{host}", requirements={"host": "^([^\.]*)\.{0,1}s\.(.*)"}, defaults={"host": "{subdomain}.s.{domain}"}, priority=1)
+     * @Route("/{slug}/{_locale}", name="short_redirectByLocale", host="{host}", requirements={"host": "^([^\.]*)\.{0,1}s\.(.*)"}, priority=1)
      */
-    public function Main($slug): Response
+    public function Main(string $slug): Response
     {
         /**
          * @var Short

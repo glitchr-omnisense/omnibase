@@ -188,7 +188,7 @@ class FileType extends AbstractType implements DataMapperInterface
         }
 
         if(!is_array($files)) $files = $files ? [$files] : [];
-        $view->vars['files'] = array_filter($files);
+        $view->vars["files"] = array_filter($files);
 
         $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
         $view->vars['max_size'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
@@ -202,19 +202,23 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["mime_types"] = $mimeTypes;
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
-        
-        $view->vars['pathLink'] = [];
+    
+        $view->vars['paths'] = [];
         if(is_array($view->vars['value'])) {
-            $view->vars['pathLink'] = json_encode(array_transforms(function($k,$v):array {
+            
+            if ($view->vars['value']) {
 
-                // $v = $this->fileService->getPublic($v);
-                if($this->fileService->isImage($v)) $link = $this->imageService->imagine($v);
-                else $link = $this->fileService->downloadable($v);
+                $view->vars['paths'] = json_encode(array_transforms(function($k,$v):array {
 
-                return [basename($v), $link];
+                    if($this->fileService->isImage($v)) $link = $this->imageService->imagine($v);
+                    else $link = $this->fileService->downloadable($v);
 
-            }, $view->vars['value']));
-            $view->vars["value"] = implode("|", $view->vars["value"]);
+                    return [basename($v), $link];
+
+                }, array_filter($view->vars['value'])));
+            }
+
+            $view->vars["value"] = implode("|", array_map(fn($v) => basename($v), $view->vars["value"]));
         }
 
         $view->vars["clipboard"]    = $options["clipboard"];

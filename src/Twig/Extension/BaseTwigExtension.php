@@ -112,7 +112,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('distance',    'distance'),
             new TwigFilter('color_name',  'color_name'),
             new TwigFilter('is_uuidv4',   'is_uuidv4'),
-            
+            new TwigFilter('basename',    'basename'),
+
             new TwigFilter('preg_split',     [$this,'preg_split']),
             new TwigFilter('nargs',          [$this, 'nargs']),
             new TwigFilter('instanceof',     [$this, 'instanceof']),
