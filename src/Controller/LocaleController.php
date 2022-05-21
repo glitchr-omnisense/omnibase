@@ -8,6 +8,7 @@ use Base\Service\LocaleProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\RouterInterface;
 
 class LocaleController extends AbstractController
@@ -36,8 +37,15 @@ class LocaleController extends AbstractController
 
         $lang = $locale ? ".".LocaleProvider::getLang($locale) : "";
         $referrerName = $this->router->getRouteName(strval($referrer));
-        $referrerUrl  = $this->router->resolve($referrerName.$lang) ?? $this->router->resolve($referrerName);
+        if($referrerName !== "locale_changeto") {
+        
+            try { return $this->router->generate($referrerName.$lang); }
+            catch (RouteNotFoundException $e) { return $this->router->generate($referrerName); }
+        }
 
-        return $this->redirect($referrerUrl ? $referrerUrl : $request->getBasePath());
+        $baseDir = $request->getBasePath();
+        if(!$baseDir) $baseDir = "/";
+
+        return $this->redirect($baseDir);
     }
 }
