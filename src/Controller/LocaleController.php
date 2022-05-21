@@ -29,14 +29,14 @@ class LocaleController extends AbstractController
     public function ChangeTo(Request $request, Referrer $referrer, ?string $locale = null)
     {
         $locale = $locale ? $this->localeProvider->getLocale($locale) : null;
-        if($locale === null) 
+        if($locale === null)
             $request->getSession()->remove('_locale');
         else if (in_array($locale, $this->localeProvider->getAvailableLocales()))
             $request->getSession()->set('_locale', $locale);
 
         $lang = $locale ? ".".LocaleProvider::getLang($locale) : "";
         $referrerName = $this->router->getRouteName(strval($referrer));
-        $referrerUrl  = $this->router->getUrl($referrerName.$lang) ?? $this->router->getUrl($referrerName);
+        $referrerUrl  = $this->router->resolve($referrerName.$lang) ?? $this->router->resolve($referrerName);
 
         return $this->redirect($referrerUrl ? $referrerUrl : $request->getBasePath());
     }

@@ -68,7 +68,7 @@ class CountryType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        //            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->baseService->getUrl("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }"
+        //            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->baseService->generateUrl("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }"
 
         $resolver->setDefaults([
             'choices' => $this->getChoices(),

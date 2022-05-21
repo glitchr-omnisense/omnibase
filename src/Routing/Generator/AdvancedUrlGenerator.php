@@ -60,8 +60,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
         if(str_starts_with($routeName, "_")) {
         
-            try {return $this->resolve($routeName, $routeParameters, $referenceType); }
-            catch (Exception $e ) { throw $e; }
+            try { 
+            
+                return $this->resolve($routeName, $routeParameters, $referenceType) 
+                    ?? throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeName));
+
+            } catch (Exception $e ) { throw $e; }
         }
 
         // Handle CLI case using either $_SERVER variables,
@@ -121,7 +125,15 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         
         // Try to compute subgroup (or base one)
         $routeUrl ??= $this->resolve($routeName, $routeParameters, $referenceType);
-        $routeUrl ??= $this->resolve($routeDefaultName, $routeParameters, $referenceType);
+        if($routeDefaultName == $routeName) {
+
+            if(!$routeUrl) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeName));
+
+        } else {
+
+            $routeUrl ??= $this->resolve($routeDefaultName, $routeParameters, $referenceType);
+            if(!$routeUrl) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" (or default route "%s") as such route does not exist.', $routeName, $routeDefaultName));
+        }
 
         // Clean up double slashes..
         $parts = filter_var($routeUrl, FILTER_VALIDATE_URL) ? parse_url($routeUrl) : ["path" => $routeUrl];

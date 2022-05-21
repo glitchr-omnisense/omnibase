@@ -337,7 +337,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                     } else {
 
-                        $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("security_verifyEmail")]);
+                        $notification = new Notification("verifyEmail.pending", [$this->baseService->generateUrl("security_verifyEmail")]);
                         $notification->send("warning");
                     }
                 };
