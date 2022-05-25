@@ -15,20 +15,29 @@ user:
    username:
       unique: "Ce pseudo existe déjà"
 
-stringCase: "Ce champ ne peut pas changer d'orthographe (seulement la casse)"
+string_case: "Ce champ ne peut pas changer d'orthographe (seulement la casse)"
 
 hexcode:
    "class": Color {{ value }} is not a valid hexadecimal value.
    "property": hexcode.class
 
 file:
-   maxSize: "Le fichier transmis est trop volumineux (~{1}). La limite est de {0}"
-   mimeType: "{0, plural,
+   max_size: "Le fichier transmis est trop volumineux (~{1}). La limite est de {0}"
+   mime_type: "{0, plural,
       =1 {Format de fichier supporté : {1}}
       other {Formats de fichier supportés : {1}}
    }"
 
-notBlank:
+password:
+   not_matching: "Les mots de passe ne correspondent pas"
+   min_strength: "Le mot de passe doit être au moins de force {0}."
+   min_length: "{0, plural,
+      =1 {Le mot de passe doit contenir au moins # caractère}
+      other {Le mot de passe doit contenir au moins # caractères}
+   }"
+
+
+not_blank:
    property: "Ce champ ne peut pas être vide."
    class: "Le champ \"{field}\" est vide."
 

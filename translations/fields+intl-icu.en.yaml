@@ -8,6 +8,38 @@ boolean:
 stock:
   unlimited: Unlimited
 
+password: 
+  invalid_message: "Password must be identicals."
+  first: "Password"
+  second: "Password confirmation"
+  unchanged: "This field is optional, leave it blank if no change."
+  strength:
+    label: "Password strength is <b>{label}</b> (Force {force})."
+    bad:
+      label: "<span>Bad"
+      message: "You shouldn't use this password."
+    poor:
+      label: "Poor"
+      message: "This is a poor password, you can do better."
+    weak:
+      label: "Weak"
+      message: "This is a weak password, you can do better."
+    good:
+      label: "Good"
+      message: "This password is rather good"
+    strong:
+      label: "Perfect"
+      message: "This is a strong password !"
+  requirements: 
+      label: "It increases with respect to the following criteria:"
+      uppercase: "upper case chars"
+      lowercase: "lower case chars"
+      numbers: "use of numbers"
+      length12: "length higher than 12 chars"
+      specials: "special chars (&, *, $, ..)"
+      min_length: "Password is expected to be {0} long"
+      min_strength: "Minimum required strength is {0}"
+
 attribute:
   empty: Save to update selected attribute fields
 
@@ -66,9 +98,22 @@ fileupload:
     php_extension: "A PHP extension stopped the file upload. "
     
   dropzone:
-    title: "Upload files here"
-    description: "Drop files here or click to upload"
+    title: "Action requested."
+    button: 
+      confirm: Confirm
+      cancel: Cancel
     spinner: "Please wait a little bit.."
+    default_message: "<h4>Upload files here</h4><p>Drop files here or click to upload</p>"
+    fallback_message: "<h4>Upload files here</h4><p>Your browser does not support drag'n'drop file uploads.</p>"
+    fallback_text: "Please use the fallback form below to upload your files like in the olden days."
+    file_too_big: "File is too big."
+    invalid_file_type: "You can't upload files of this type."
+    max_files_exceeded: "You can not upload any more files."
+    response_error: "Invalid server responded"
+    cancel_upload: "Cancel upload"
+    cancel_upload_confirmation: "Are you sure you want to cancel this upload?"
+    remove_file: "Remove file"
+    remove_file_confirmation: "Are you sure you want to remove this upload?"
 
   max_size: "The maximum file size allowed is {0}."
   max_size_feedback: "Image submitted is too big {0}."

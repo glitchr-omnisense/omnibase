@@ -10,9 +10,9 @@ use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
-use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\PersistentCollection;
@@ -86,45 +86,45 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        
         $orderingRepository = $this->getRepository(Ordering::class);
-        foreach($this->getOrderedColumns($entity) as $column) {
 
-            if(!str_ends_with($column, $property)) continue;
+        $className = array_transforms(function($k, $e) use ($property) : ?array {
+            
+            list($c, $p) = explode("::", $e);
+            return $p === $property ? [$k, $c] : null;
 
-            list($className, $property) = explode("::", $column);
-            $orderingRules = $orderingRepository->cacheByEntityIdAndEntityClass($entity->getId(), $className)->getResult();
+        }, $this->getOrderedColumns($entity));
 
-            foreach($orderingRules as $ordering) {
-                
-                $data = $ordering->getEntityData();
-                foreach($data as $column => $orderedIndexes) {
-                    
-                    try { $entityValue = $propertyAccessor->getValue($entity, $column); }
-                    catch (Exception $e) { continue; }
-                    
-                    if(is_array($entityValue)) {
+        $className = first($className);
+        if($className === null) return;
 
-                        $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
-                        if($this->order == "DESC") $entityValue = array_reverse($entityValue);
+        try { $entityValue = $propertyAccessor->getValue($entity, $property); }
+        catch (Exception $e) { return; }
 
-                        $propertyAccessor->setValue($entity, $column, $entityValue);
+        $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+        if($ordering === null) return;
+        
+        $data = $ordering->getEntityData();
+        $orderedIndexes = $data[$property] ?? [];
+        if(is_array($entityValue)) {
 
-                    } else if($entityValue instanceof PersistentCollection) {
+            $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
+            if($this->order == "DESC") $entityValue = array_reverse($entityValue);
 
-                        $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
-                        $reflProp->setAccessible(true);
-                        $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
-                    }
-                }
-            }
+            $propertyAccessor->setValue($entity, $property, $entityValue);
+
+        } else if($entityValue instanceof PersistentCollection) {
+
+            $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
+            $reflProp->setAccessible(true);
+            $reflProp->setValue($entityValue, new OrderedArrayCollection($entityValue->unwrap()->toArray() ?? [], $this->order == "DESC" ? array_reverse($orderedIndexes) : $orderedIndexes));
         }
     }
 
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
         $orderingRepository = $this->getEntityManager()->getRepository(Ordering::class);
-
+        
         $id = spl_object_id($entity);
         switch($action) {
 
@@ -137,29 +137,31 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 foreach($properties as $property) {
                     
                     $type = $this->getClassMetadataManipulator()->getTypeOfField($entity, $property);
-                    $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-
                     $value = $propertyAccessor->getValue($entity, $property);
-                    if($doctrineType instanceof SetType) {
 
-                        $data[$property] = array_keys($doctrineType::getOrderingKeys($value));
-                        if(!is_identity($data[$property]))
-                            unset($data[$property]);
-
-                    } else {
-
-                        if($value instanceof Collection) $data[$property] = $value->toArray();
+                    if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
+                    else if($value instanceof Collection) {
+                        
+                        $data[$property] = $value->toArray();
                         
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
+                        if($property === "images") dump($property, $dataIdentifier);
+
                         uasort($dataIdentifier, 
                             fn($a,$b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1))
                         );
 
-                        $data[$property] = array_keys($dataIdentifier);
-                        if(is_identity($data[$property]))
-                            unset($data[$property]);
+                        if($property === "images") dump($dataIdentifier);
+                        $data[$property] = array_flip(array_keys($dataIdentifier));
+                        ksort($data[$property]);
+
+                        if($property === "images") dump(array_keys($dataIdentifier), $data[$property], is_identity($data[$property]));
                     }
+
+                    if(is_identity($data[$property]))
+                        unset($data[$property]);
                 }
+
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);

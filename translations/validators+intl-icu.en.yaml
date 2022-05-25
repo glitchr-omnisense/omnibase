@@ -15,16 +15,21 @@ user:
    username:
       unique: "This username is already used"
 
-stringCase: "This string can only change its case"
+string_case: "This string can only change its case"
 
 file:
-   maxSize: "Provided file is too big (~{1}). Limit set at {0}"
-   mimeType: "{0, plural,
+   max_size: "Provided file is too big (~{1}). Limit set at {0}"
+   mime_type: "{0, plural,
                   =1 {Unsupported file type provided. A valid type is : {1}}
                   other {Unsupported file type provided. Valid types are : {1}}
                }"
 
-notBlank:
+password:
+   not_matching: "Passwords are not matching."
+   min_length: "Password is expected to be {0} long."
+   min_strength: "Minimum required strength is {0}."
+
+not_blank:
    property: "Field \"{label}\" is blank."
    class: "All fields are blank."
 

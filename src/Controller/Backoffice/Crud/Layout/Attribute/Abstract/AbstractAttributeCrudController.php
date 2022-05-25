@@ -39,7 +39,7 @@ class AbstractAttributeCrudController extends AbstractCrudController
 
             yield TranslationField::new("label");
             yield TranslationField::new()->showOnIndex("help");
-            yield AssociationField::new("attributes")->justDisplay();
+            yield AssociationField::new("attributes")->justDisplay()->onlyOnIndex();
 
         }, $args);
     }

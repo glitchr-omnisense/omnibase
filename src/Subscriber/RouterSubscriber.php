@@ -31,10 +31,10 @@ class RouterSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $url = parse_url2(get_url());
-        
+
         $route = $this->router->getRoute();
         if(!$route) return;
-     
+
         if(empty($route->getHost())) {
 
             $reduce = !$this->router->keepMachine() || !$this->router->keepSubdomain();
@@ -43,7 +43,7 @@ class RouterSubscriber implements EventSubscriberInterface
                 $event->setResponse($this->redirectByReduction(false, true));
                 return $event->stopPropagation();
             }
-            
+
             $permittedSubdomains = $this->parameterBag->get("base.access_restriction.permitted_subdomains") ?? [];
 
             $vetoSubdomain = true;

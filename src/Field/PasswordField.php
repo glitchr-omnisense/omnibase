@@ -2,9 +2,8 @@
 
 namespace Base\Field;
 
+use Base\Field\Type\PasswordType;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-use Symfony\Component\Form\Extension\Core\Type\RepeatedType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 final class PasswordField implements FieldInterface
@@ -26,9 +25,17 @@ final class PasswordField implements FieldInterface
         $this->setFormTypeOption("revealer", $revealer);
         return $this;
     }
+
     public function setRepeater(string $repeater): self
     {
         $this->setFormTypeOption("repeater", $repeater);
+        return $this;
+    }
+
+    public function showInline(bool $inline = true): self
+    {
+        $this->setFormTypeOption("inline", $inline);
+
         return $this;
     }
 }

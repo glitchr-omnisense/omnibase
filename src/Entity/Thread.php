@@ -138,17 +138,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnex(self $connexes): self 
+    public function addConnex($connex): self 
     {
-        if(!$this->connexes->contains($connexes))
-            $this->connexes[] = $connexes;
+        if(!$this->connexes->contains($connex))
+            $this->connexes[] = $connex;
 
         return $this;
     }
 
-    public function removeConnex(self $connexes): self
+    public function removeConnex($connex): self
     {
-        $this->connexes->removeElement($connexes);
+        $this->connexes->removeElement($connex);
         return $this;
     }
     

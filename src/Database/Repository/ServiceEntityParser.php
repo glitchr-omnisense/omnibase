@@ -449,7 +449,16 @@ class ServiceEntityParser
                     $option = self::OPTION_NOT_STARTING_WITH;
                 else if ( str_ends_with($by, self::OPTION_NOT_ENDING_WITH) )
                     $option = self::OPTION_NOT_ENDING_WITH;
-                
+
+                else if ( str_ends_with($by, self::OPTION_YOUNGER) )
+                    $option = self::OPTION_YOUNGER;
+                else if ( str_ends_with($by, self::OPTION_YOUNGER_EQUAL) )
+                    $option = self::OPTION_YOUNGER_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_OLDER) )
+                    $option = self::OPTION_OLDER;
+                else if ( str_ends_with($by, self::OPTION_OLDER_EQUAL) )
+                    $option = self::OPTION_OLDER_EQUAL;
+
                 else if ( str_ends_with($by, self::OPTION_LOWER_EQUAL) )
                     $option = self::OPTION_LOWER_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_LOWER) )
@@ -464,15 +473,6 @@ class ServiceEntityParser
                     $option = self::OPTION_NOT_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_EQUAL) )
                     $option = self::OPTION_EQUAL;
-
-                else if ( str_ends_with($by, self::OPTION_YOUNGER) )
-                    $option = self::OPTION_YOUNGER;
-                else if ( str_ends_with($by, self::OPTION_YOUNGER_EQUAL) )
-                    $option = self::OPTION_YOUNGER_EQUAL;
-                else if ( str_ends_with($by, self::OPTION_OLDER) )
-                    $option = self::OPTION_OLDER;
-                else if ( str_ends_with($by, self::OPTION_OLDER_EQUAL) )
-                    $option = self::OPTION_OLDER_EQUAL;
 
                 switch($option) {
 

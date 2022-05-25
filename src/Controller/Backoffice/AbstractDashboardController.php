@@ -61,6 +61,7 @@ use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
 use Base\Entity\Layout\Short;
 use Base\Entity\Thread\Taxon;
+use Base\Field\Type\PasswordType;
 use Base\Field\Type\SelectType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -92,8 +93,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
         RouterInterface $router,
-        BaseService $baseService,
-        ?GaService $gaService = null) {
+        BaseService $baseService) {
 
         $this->extension = $extension;
         $this->requestStack = $requestStack;
@@ -111,8 +111,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
         $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
         $this->slotRepository        = $baseService->getEntityManager()->getRepository(Slot::class);
-
-        $this->gaService = $gaService;
     }
 
     public function getExtension() { return $this->extension; }
@@ -129,16 +127,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      * @Iconize({"fas fa-fw fa-toolbox", "fas fa-fw fa-home"})
      */
     public function index(): Response
-    {
-        return $this->render('backoffice/index.html.twig');
-    }
-
-    /**
-     * Link to this controller to start the "connect" process
-     *
-     * @Route("/backoffice/ga", name="dashboard_ga")
-     */
-    public function GoogleAnalytics(): Response
     {
         return $this->render('backoffice/index.html.twig');
     }
@@ -162,10 +150,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         foreach($fields as $key => $field) {
 
-            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = TextType::class;
-            // if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
-            // if ($fields[$key]["form_type"] == PasswordType::class)
-            //     $fields[$key]["revealer"] = true;
+            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
+            if ($fields[$key]["form_type"] == PasswordType::class) {
+                $fields[$key]["inline"]       = true;
+                $fields[$key]["revealer"]     = true;
+                $fields[$key]["repeater"]     = false;
+                $fields[$key]["min_length"]   = 0;
+                $fields[$key]["min_strength"] = 0;
+                $fields[$key]["hint"] = false;
+            }
         }
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
@@ -419,33 +412,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->setAction('new');
         }
     
-        if (isset($this->gaService) && $this->gaService->isEnabled()) {
-
-            $ga = $this->gaService->getBasics();
-
-            $gaMenu = [];
-            $gaMenu["users"]        = ["label" => $this->translator->trans("users", [$ga["users"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-user'];
-            $gaMenu["users_1day"]   = ["label" => $this->translator->trans("users_1day", [$ga["users_1day"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-user-clock'];
-            $gaMenu["views"]        = ["label" => $this->translator->trans("views", [$ga["views"]], self::TRANSLATION_DASHBOARD), "icon"  => 'far fa-eye'];
-            $gaMenu["views_1day"]   = ["label" => $this->translator->trans("views_1day", [$ga["views_1day"]], self::TRANSLATION_DASHBOARD) , "icon"  => 'fas fa-eye'];
-            $gaMenu["sessions"]     = ["label" => $this->translator->trans("sessions", [$ga["sessions"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-stopwatch'];
-            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans("bounces_1day", [$ga["bounces_1day"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-meteor'];
-
-            $menu[] = MenuItem::section('STATISTICS');
-            foreach ($gaMenu as $key => $entry) {
-
-                $url = $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setRoute("dashboard_ga")
-                    ->set("menuIndex", count($menu))
-                    ->set("show", $key)
-                    ->generateUrl();
-
-                $menu[] = MenuItem::linkToUrl(
-                    $entry["label"], $entry["icon"], $url);
-            }
-        }
-
         return $menu;
     }
 

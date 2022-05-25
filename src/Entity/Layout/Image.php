@@ -101,7 +101,7 @@ class Image implements IconizeInterface
     protected $crops;
 
     public function getPreferredCrop(string|int $labelOrRatio): ?ImageCrop { return $this->getCrops($labelOrRatio)[0] ?? null; }
-    public function getCrops(string|int $labelOrRatio): Collection 
+    public function getCrops(string|int|null $labelOrRatio = null): Collection 
     { 
         return $this->crops->Map(function($c) use ($labelOrRatio) {
             if(is_string($labelOrRatio)) return $c->getLabel() && $c->getLabel() == $labelOrRatio;
@@ -109,7 +109,7 @@ class Image implements IconizeInterface
             return true;
         });
     }
-    
+
     public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {

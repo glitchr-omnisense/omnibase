@@ -65,6 +65,10 @@ class FileType extends AbstractType implements DataMapperInterface
             'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.stylesheet"),
 
             'allow_delete' => true,
+            "allow_delete[confirmation]" => true,
+
+            "allow_cancel[confirmation]" => true,
+
             'multiple'     => false,
             'clipboard'    => false, 
 
@@ -82,7 +86,7 @@ class FileType extends AbstractType implements DataMapperInterface
             'lightbox2b-js'  => $this->baseService->getParameterBag("base.vendor.lightbox2b.javascript"),
 
             'thumbnail_width'  => null,
-            'thumbnail_height' => 120,
+            'thumbnail_height' => 250,
             'max_size'        => null,
             'max_files'       => null,
             'mime_types'      => [],
@@ -203,18 +207,21 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
     
-        $view->vars['paths'] = [];
+        $view->vars['clippable'] = $view->vars['pathLinks'] = $view->vars['downloadLinks'] = json_encode([]);
         if(is_array($view->vars['value'])) {
             
             if ($view->vars['value']) {
 
-                $view->vars['paths'] = json_encode(array_transforms(function($k,$v):array {
+                $view->vars['pathLinks'] = json_encode(array_transforms(function($k,$v):array {
+                    return [basename($v), $this->fileService->isImage($v) ? $this->imageService->imagine($v) : null];
+                }, array_filter($view->vars['value'])));
 
-                    if($this->fileService->isImage($v)) $link = $this->imageService->imagine($v);
-                    else $link = $this->fileService->downloadable($v);
+                $view->vars['downloadLinks'] = json_encode(array_transforms(function($k,$v):array {
+                    return [basename($v), $this->fileService->downloadable($v)];
+                }, array_filter($view->vars['value'])));
 
-                    return [basename($v), $link];
-
+                $view->vars['clippable'] = json_encode(array_transforms(function($k,$v):array {
+                    return [basename($v),$this->fileService->isImage($v)];
                 }, array_filter($view->vars['value'])));
             }
 
@@ -228,7 +235,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['multiple']     = $options['multiple'];
         $view->vars['allow_delete'] = $options['allow_delete'];
         $view->vars['href']         = $options["href"];
-
+        $view->vars["confirm_action"] = $options["allow_cancel[confirmation]"] || $options["allow_delete[confirmation]"];
+            
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
             if($options["dropzone-js"] ) $this->baseService->addHtmlContent("javascripts:head", $options["dropzone-js"]);
@@ -242,13 +250,22 @@ class FileType extends AbstractType implements DataMapperInterface
             if($options['allow_delete'] !== null) $options["dropzone"]["addRemoveLinks"] = $options['allow_delete'];
             if($options['max_size'] !== null) $options["dropzone"]["maxFilesize"]    = $options["max_size"];
             if($options['max_files']    !== null) $options["dropzone"]["maxFiles"]       = $options["max_files"];
-            if($mimeTypes) $options["dropzone"]["mimeTypes"]  = implode(",", $mimeTypes);
+            if($mimeTypes) $options["dropzone"]["acceptedFiles"]  = implode(",", $mimeTypes);
 
-            $options["dropzone"]["thumbnail_width"]  = $options['thumbnail_width'] ?? null;
-            $options["dropzone"]["thumbnail_height"] = $options['thumbnail_height'] ?? null;
+            $options["dropzone"]["thumbnailWidth"]  = $options['thumbnail_width'] ?? null;
+            $options["dropzone"]["thumbnailHeight"] = $options['thumbnail_height'] ?? null;
 
-            $options["dropzone"]["dictDefaultMessage"] = $options["dropzone"]["dictDefaultMessage"]
-                ?? '<h4>'.$this->translator->trans("@fields.fileupload.dropzone.title").'</h4><p>'.$this->translator->trans("@fields.fileupload.dropzone.description").'</p>';
+            $options["dropzone"]["dictDefaultMessage"]           = $options["dropzone"]["dictDefaultMessage"]           ?? $this->translator->trans("@fields.fileupload.dropzone.default_message");
+            $options["dropzone"]["dictFallbackMessage"]          = $options["dropzone"]["dictFallbackMessage"]          ?? $this->translator->trans("@fields.fileupload.dropzone.fallback_message");
+            $options["dropzone"]["dictFileTooBig"]               = $options["dropzone"]["dictFileTooBig"]               ?? $this->translator->trans("@fields.fileupload.dropzone.file_too_big");
+            $options["dropzone"]["dictInvalidFileType"]          = $options["dropzone"]["dictInvalidFileType"]          ?? $this->translator->trans("@fields.fileupload.dropzone.invalid_file_type");
+            $options["dropzone"]["dictMaxFilesExceeded"]         = $options["dropzone"]["dictMaxFilesExceeded"]         ?? $this->translator->trans("@fields.fileupload.dropzone.max_files_exceeded");
+            $options["dropzone"]["dictResponseError"]            = $options["dropzone"]["dictResponseError"]            ?? $this->translator->trans("@fields.fileupload.dropzone.response_error");
+            $options["dropzone"]["dictCancelUpload"]             = $options["dropzone"]["dictCancelUpload"]             ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload");
+            $options["dropzone"]["dictRemoveFile"]               = $options["dropzone"]["dictRemoveFile"]               ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file");
+            
+            if($options["allow_cancel[confirmation]"]) $options["dropzone"]["dictCancelUploadConfirmation"] = $options["dropzone"]["dictCancelUploadConfirmation"] ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload_confirmation");
+            if($options["allow_delete[confirmation]"]) $options["dropzone"]["dictRemoveFileConfirmation"]   = $options["dropzone"]["dictRemoveFileConfirmation"]   ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file_confirmation");
 
             if(array_key_exists("maxFiles", $options["dropzone"]) && !empty($view->vars["value"]))
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));

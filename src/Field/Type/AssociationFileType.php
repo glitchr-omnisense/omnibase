@@ -70,6 +70,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             "multiple"     => null,
             'allow_delete' => true,
+            "allow_delete[confirmation]" => true,
+            
             'href'         => null,
 
             'max_size' => null,
@@ -111,7 +113,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $options["class"]    = $this->formFactory->guessClass($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
-
+ 
         $parentForm = $form->getParent();
         $dataClass = $parentForm ? $this->formFactory->guessClass($parentForm, $parentForm->getConfig()->getOptions()) : null;
         $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;

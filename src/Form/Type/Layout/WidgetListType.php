@@ -31,6 +31,9 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             'sortable' => true,
             'excluded_widgets' => [],
             'locale' => null,
+            'attr' => array(
+                'class' => 'needs-validation'
+            )
         ]);
     }
 

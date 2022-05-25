@@ -364,7 +364,7 @@ class BaseService implements RuntimeExtensionInterface
     public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
-    public function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
+    public static function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
 
     public function getAsset(string $url): string
     {
@@ -385,7 +385,7 @@ class BaseService implements RuntimeExtensionInterface
     }
 
 
-    public function getRequest(): ?Request { return $this->getRouter->getRequest(); }
+    public function getRequest(): ?Request { return $this->getRouter()->getRequest(); }
     public function getCurrentRequest(): ?Request { return $this->getRequest(); }
 
     public function hasRoute(string $routeName): bool { return $this->getRouter()->hasRoute($routeName); }

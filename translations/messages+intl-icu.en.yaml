@@ -70,3 +70,23 @@ base:
                 =1 {# second }
                 other {# seconds }
             }"
+
+user_analytics:
+
+    label: "{0, plural,
+                =0 {No other user connected}
+                =1 {User activity}
+                other {User activities}
+            }"
+
+    online_users: "{0, plural,
+                =0 {No other user connected}
+                =1 {# other user connected}
+                other {# other users connected}
+            }"
+
+    active_users: "{0, plural,
+                =0 {No other active user}
+                =1 {# other active user}
+                other {# other active users}
+            }"
