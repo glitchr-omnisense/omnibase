@@ -3,7 +3,7 @@
     "type": "symfony-bundle",
     "description": "Base helper integration for Symfony",
     "keywords": ["symfony", "base", "helper"],
-    "homepage": "https://gitlab.glitchr.io/repository-public/symfony",
+    "homepage": "https://gitlab.glitchr.dev/repository-public/symfony",
     "license": "MIT",
     "authors": [
         {
