@@ -16,6 +16,8 @@ class AvatarType extends ImageType
 
     public function configureOptions(OptionsResolver $resolver): void
     {
+        parent::configureOptions($resolver);
+        
         $resolver->setDefaults([
             'thumbnail'   => "bundles/base/user.svg",
             "lightbox"    => null,
@@ -25,7 +27,7 @@ class AvatarType extends ImageType
         ]);
 
         $resolver->setNormalizer('cropper', function (Options $options, $value) {
-            if(!array_key_exists("aspectRatio", $value)) $value["aspectRatio"] = 1;
+            if(is_array($value) && !array_key_exists("aspectRatio", $value)) $value["aspectRatio"] = 1;
             return $value;
         });
     }
