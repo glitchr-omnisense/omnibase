@@ -116,7 +116,7 @@ class DataCollector extends AbstractDataCollector
         if(!$host) return "";
 
         $driver = $params["driver"] ?? null;
-        $driver = $driver ? ":".$driver : "";
+        $driver = $driver ? $driver."://" : "";
 
         $user = $params["user"] ?? null;
         $user = $user ? $user."@" : "";

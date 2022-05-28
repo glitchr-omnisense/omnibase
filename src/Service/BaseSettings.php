@@ -31,7 +31,7 @@ class BaseSettings
         $this->environment    = $environment;
     }
 
-    public function __call($name, $arguments) { return $this->get("base.settings.".$name); }
+    public function __call($name, $_) { return $this->get("base.settings.".$name); }
     public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
     public function scheme     (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.scheme",    $locale)) ? "https" : "http"; }
     public function maintenance(?string $locale = null) : bool    { return filter_var($this->getScalar("base.settings.maintenance",     $locale)); }
@@ -63,7 +63,7 @@ class BaseSettings
     
     public function domain     (int $level = 0, ?string $locale = null) : ?string
     {
-        $domain = $this->getScalar("base.settings.domain", $locale);
+        $domain = $this->getScalar("base.settings.domain", $locale) ?? "localhost";
         while($level-- > 0) $domain = preg_replace("/^(\w+)./i", "", $domain);
 
         return $domain;

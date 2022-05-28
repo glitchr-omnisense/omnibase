@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Twig\Environment;
 
-class UserAnalyticsSubscriber implements EventSubscriberInterface
+class AnalyticsSubscriber implements EventSubscriberInterface
 {
     public function __construct(BaseService $baseService, TranslatorInterface $translator, Environment $twig, UserRepository $userRepository, ?GaService $googleAnalyticsService = null)
     {
@@ -40,6 +40,7 @@ class UserAnalyticsSubscriber implements EventSubscriberInterface
         if(!$this->baseService->isEasyAdmin()) return;
 
         $user = $this->baseService->getUser();
+        
         $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : [];
         $activeUsers = array_filter($onlineUsers, fn($u) => $u->isActive());
 

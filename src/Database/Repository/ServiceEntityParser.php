@@ -804,33 +804,31 @@ class ServiceEntityParser
                 else $tableColumn = $fieldName;
         }
 
-        $regexRequested    = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
         $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
+        if($datetimeRequested) {
 
-        if(is_string($fieldValue)) {
+            if(is_numeric($fieldValue)) $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second";
 
-            if($datetimeRequested) {
+                    if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
+            else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
+            else if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
 
-                     if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
-                else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
-                else if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
-
-                    $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
-                    $fieldValue = (new \DateTime("now"))->modify($subtract);
-                }
+                $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
+                $fieldValue = (new \DateTime("now"))->modify($subtract);
             }
+        }
 
-            if($regexRequested) {
+        $regexRequested    = in_array($tableOperator, [self::OPTION_STARTING_WITH, self::OPTION_ENDING_WITH, self::OPTION_NOT_STARTING_WITH, self::OPTION_NOT_ENDING_WITH]);
+        if($regexRequested) {
 
-                $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
+            $fieldValue = str_replace(["_", "\%"], ["\_", "\%"], $fieldValue);
 
-                     if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
-                else if($tableOperator == self::OPTION_ENDING_WITH      ) $fieldValue = "%".$fieldValue;
-                else if($tableOperator == self::OPTION_NOT_STARTING_WITH) $fieldValue = $fieldValue."%";
-                else if($tableOperator == self::OPTION_NOT_ENDING_WITH  ) $fieldValue = "%".$fieldValue;
+                    if($tableOperator == self::OPTION_STARTING_WITH    ) $fieldValue = $fieldValue."%";
+            else if($tableOperator == self::OPTION_ENDING_WITH      ) $fieldValue = "%".$fieldValue;
+            else if($tableOperator == self::OPTION_NOT_STARTING_WITH) $fieldValue = $fieldValue."%";
+            else if($tableOperator == self::OPTION_NOT_ENDING_WITH  ) $fieldValue = "%".$fieldValue;
 
-                $fieldValue = ($isInsensitive ? mb_strtolower($fieldValue) : $fieldValue);
-            }
+            $fieldValue = ($isInsensitive ? mb_strtolower($fieldValue) : $fieldValue);
         }
 
         if($isInstanceOf || $isNotInstanceOf) {

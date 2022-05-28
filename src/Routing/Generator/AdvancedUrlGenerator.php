@@ -68,27 +68,28 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             } catch (Exception $e ) { throw $e; }
         }
 
-        // Handle CLI case using either $_SERVER variables,
-        // or base settting database information, if available.
+        // Use either $_SERVER variables, or base setting from database if available.
+        $currentUrl = parse_url2();
+
         $baseDir = null;
         switch($referenceType) {
-
+            
             case self::ABSOLUTE_URL:
-                $baseDir    = $this->getSettings()->url("/", null, $referenceType);
+                $baseDir = $currentUrl["root"] ?? $this->getSettings()->url("/", null, $referenceType);
                 break;
 
             case self::NETWORK_PATH:
-                $baseDir    = $this->getSettings()->base_dir();
-                $baseDir    = "//".trim($baseDir, "/");
+                $baseDir = $currentUrl["path"] ?? $this->getSettings()->base_dir();
+                $baseDir = "//".trim($baseDir, "/");
                 break;
 
             case self::RELATIVE_PATH:
-                $baseDir    = ".";
+                $baseDir = ".";
                 break;
 
             case self::ABSOLUTE_PATH:
-                $baseDir    = $this->getSettings()->base_dir();
-                $baseDir    = str_rstrip($baseDir, "/");
+                $baseDir = $currentUrl["path"] ?? $this->getSettings()->base_dir();
+                $baseDir = str_rstrip($baseDir, "/");
         }
 
         // Implement route subgroup to improve connectivity

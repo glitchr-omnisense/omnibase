@@ -84,7 +84,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
-        <service id="Base\Subscriber\UserAnalyticsSubscriber">
+        <service id="Base\Subscriber\AnalyticsSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.service" />
             <argument type="service" id="translator" />

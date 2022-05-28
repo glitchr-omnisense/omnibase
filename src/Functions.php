@@ -22,8 +22,10 @@ namespace {
         }, $input);
     }
 
-    function get_url(bool $keep_subdomain = true, bool $keep_machine = true) 
+    function get_url(bool $keep_subdomain = true, bool $keep_machine = true) : ?string
     {
+        if(is_cli()) return null;
+        
         $parse = parse_url2($_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]);
         
         $domain    = $parse["domain"] ? $parse["domain"] : "";
@@ -40,7 +42,8 @@ namespace {
     function parse_url2(string $url = null, int $component = -1): array|string|int|false|null 
     {
         if($url === null) $url = get_url();
-        
+        if($url === null) return null;
+
         $parse = parse_url($url, $component);
         $parse['path'] = str_rstrip($parse['path'] ?? "", "/");
         $parse["root"] = str_rstrip($url, $parse['path']);
