@@ -4,6 +4,8 @@ namespace Base\Controller;
 use Base\Service\BaseService;
 
 use Base\Entity\User\Notification;
+use Error;
+use ErrorException;
 use Exception;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,7 +31,7 @@ class ErrorController extends AbstractController
             if ($this->baseService->isDevelopment()) return $this->Rescue($exception);
             return $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
 
-        } catch(Exception $fatalException) {
+        } catch(Error|Exception|ErrorException $fatalException) {
 
             throw new Exception("Twig rendering engine failed (".trim($fatalException->getMessage(), ".").") following a first exception. (see below)", 500, $exception);
             $response = $this->Rescue($exception);

@@ -60,7 +60,7 @@ class RescueController extends AbstractDashboardController
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',
-            'target_path' => $baseService->getUrl('dashboard'),
+            'target_path' => $baseService->generateUrl('dashboard'),
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
             'logo' => $logo,

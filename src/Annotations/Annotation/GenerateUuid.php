@@ -11,8 +11,8 @@ use Exception;
 use Symfony\Component\Uid\Uuid;
 
 /**
- * Class GeneratedUuid
- * package Base\Annotations\Annotation\GeneratedUuid
+ * Class GenerateUuid
+ * package Base\Annotations\Annotation\GenerateUuid
  *
  * @Annotation
  * @Target({"PROPERTY"})
@@ -81,12 +81,6 @@ class GenerateUuid extends AbstractAnnotation
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
-    }
-
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        if ($this->getFieldValue($entity, $property) === null)
-            $this->setFieldValue($entity, $property, $this->getUuid($entity));
     }
 
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)

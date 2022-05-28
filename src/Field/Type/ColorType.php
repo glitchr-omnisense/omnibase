@@ -61,7 +61,6 @@ final class ColorType extends AbstractType
                 $event->setData(null);
 
             $event->setData(shrinkhex($event->getData()));
-
         });
     }
 

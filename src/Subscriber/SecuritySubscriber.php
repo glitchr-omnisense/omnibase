@@ -20,6 +20,7 @@ use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
 use Base\Security\RescueFormAuthenticator;
+use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
@@ -61,7 +62,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         ServiceLocator $dispatcherLocator,
         TranslatorInterface $translator,
         BaseService $baseService,
-        Referrer $referrer, Profiler $profiler) {
+        Referrer $referrer, Profiler $profiler, ParameterBagInterface $parameterBag) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
@@ -70,6 +71,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->baseService = $baseService;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
+        $this->parameterBag = $parameterBag;
         
         foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
@@ -236,36 +238,51 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRestriction(RequestEvent $event)
     {
+        $vetoAccessRestriction = false;
+        $url = parse_url(get_url());
+
+        $urlExceptions  = $this->parameterBag->get("base.access_restriction.exceptions");
+        foreach($urlExceptions as $urlException)
+            $vetoAccessRestriction |= preg_match("/".$urlException."/", $url["host"] ?? "");
+
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
 
         //
         // Check if public access right
-        $publicAccess  = $this->baseService->getSettings()->getScalar("base.settings.public_access");
+        $publicAccess  = filter_var($this->baseService->getSettings()->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
         $publicAccess |= $user && $user->isGranted("ROLE_USER");
 
-        $userAccess    = $this->baseService->getSettings()->getScalar("base.settings.user_access");
+        $userAccess    = filter_var($this->baseService->getSettings()->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
         $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
-
-        $adminAccess   = $this->baseService->getSettings()->getScalar("base.settings.admin_access");
+        
+        $adminAccess   = filter_var($this->baseService->getSettings()->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
         $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
-
+        
         if(!$publicAccess || !$userAccess || !$adminAccess) {
 
             $this->profiler->disable();
 
-            $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
-            if(!$firewallMain) return; // Access restricted to main firewalls
+            if(!$vetoAccessRestriction) {
 
-            $currentRouteName = $this->getCurrentRouteName($event);
-            if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
+                $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
+                if(!$firewallMain) return; // Access restricted to main firewalls
 
-                $event->setResponse($this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE));  
-                $this->profiler->disable(); 
+                $currentRouteName = $this->getCurrentRouteName($event);
+                if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
 
-                if($token) $this->tokenStorage->setToken(NULL);
-                return $event->stopPropagation();
-            } 
+                    $accessDenied = $this->baseService->getSettings()->getScalar("base.settings.access_denied");
+                    if($accessDenied) $this->baseService->redirect($accessDenied);
+                    else {
+
+                        $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
+                        if($response) $event->setResponse($response);
+                    }
+
+                    if($token) $this->tokenStorage->setToken(NULL);
+                    return $event->stopPropagation();
+                } 
+            }
         }
     }
 
@@ -320,7 +337,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                     } else {
 
-                        $notification = new Notification("verifyEmail.pending", [$this->baseService->getUrl("security_verifyEmail")]);
+                        $notification = new Notification("verifyEmail.pending", [$this->baseService->generateUrl("security_verifyEmail")]);
                         $notification->send("warning");
                     }
                 };

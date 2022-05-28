@@ -17,12 +17,10 @@ class AvatarType extends ImageType
     public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
-        
         $resolver->setDefaults([
             'thumbnail'   => "bundles/base/user.svg",
             "lightbox"    => null,
             'clipboard'   => false,
-            
             'cropper'     => null
         ]);
 

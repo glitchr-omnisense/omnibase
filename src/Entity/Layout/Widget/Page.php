@@ -8,10 +8,11 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-use Base\Model\UrlInterface;
+use Base\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\PageRepository;
 use Base\Service\BaseService;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
@@ -21,17 +22,14 @@ use Base\Service\BaseService;
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
-class Page extends Widget implements IconizeInterface, UrlInterface
+class Page extends Widget implements IconizeInterface, LinkableInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; } 
 
-    public function __toUrl(): ?string
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
     {
-        return $this->getTwigExtension()->getRoutingExtension()->getPath(
-            "widget_page",
-            ["slug" => $this->getSlug()]
-        );
+        return $this->getTwigExtension()->getRoutingExtension()->getPath("widget_page", ["slug" => $this->getSlug()], $referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }

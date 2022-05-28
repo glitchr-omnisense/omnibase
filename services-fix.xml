@@ -7,22 +7,6 @@
 
         <defaults />
 
-        <!-- ImagineInterface instance use imagick by default (NB: GD do not support CMYK) -->
-        <service id="imagine" alias="imagine.imagick" />
-        <service id="imagine.meta_data.reader" class="Imagine\Image\Metadata\ExifMetadataReader" />
-
-        <service id="imagine.gd" class="Imagine\Gd\Imagine">
-            <call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call>
-        </service>
-
-        <service id="imagine.imagick" class="Imagine\Imagick\Imagine">
-            <call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call>
-        </service>
-
-        <service id="imagine.gmagick" class="Imagine\Gmagick\Imagine">
-            <call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call>
-        </service>
-
         <!-- TWIG FIX -->
         <service id="Symfony\Bridge\Twig\Extension\AssetExtension">
             <tag name="twig.runtime" />

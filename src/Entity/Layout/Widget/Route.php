@@ -6,9 +6,10 @@ use App\Enum\UserRole;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-use Base\Model\UrlInterface;
+use Base\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\RouteRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=RouteRepository::class)
@@ -17,12 +18,16 @@ use Base\Repository\Layout\Widget\RouteRepository;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
  */
 
-class Route extends Widget implements IconizeInterface, UrlInterface
+class Route extends Widget implements IconizeInterface, LinkableInterface
 {
     public        function __iconize()       : ?array { return $this->getRouteIcons(); } 
     public static function __iconizeStatic() : ?array { return ["fas fa-road"]; } 
 
-    public function __toUrl(): ?string { return $this->generate(); }
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    {
+        return $this->generate($referenceType);
+    }
+
     public function __toString() { return $this->getTitle(); }
     
     public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = []) 
@@ -65,9 +70,9 @@ class Route extends Widget implements IconizeInterface, UrlInterface
     public function getRouteIcons() { return $this->getIconProvider()->getRouteIcons($this->routeName); }
     public function getUrl(): ?string { return $this->generate(); }
 
-    public function generate(): ?string
+    public function generate(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        try { return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? []); }
+        try { return $this->getRouter()->generate($this->routeName, $this->routeParameters ?? [], $referenceType); }
         catch (\Exception $e) { }
 
         return null;

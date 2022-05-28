@@ -81,7 +81,7 @@ class Widget implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", max_size="1024K", mime_types={"image/*"})
+     * @Uploader(storage="local.storage", max_size="1024K", mime_types={"image/*"})
      * @AssertBase\File(max_size="1024K", mime_types={"image/*"}, groups={"new", "edit"})
      */
     protected $thumbnail;
@@ -99,17 +99,17 @@ class Widget implements TranslatableInterface, IconizeInterface
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnex(Widget $similar): self
+    public function addConnex(Widget $connex): self
     {
-        if(!$this->connexes->contains($similar))
-            $this->connexes[] = $similar;
+        if(!$this->connexes->contains($connex))
+            $this->connexes[] = $connex;
 
         return $this;
     }
 
-    public function removeConnex(Widget $similar): self
+    public function removeConnex(Widget $connex): self
     {
-        $this->connexes->removeElement($similar);
+        $this->connexes->removeElement($connex);
         return $this;
     }
 }

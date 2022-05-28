@@ -2,7 +2,8 @@
 
 namespace Base\Subscriber;
 
-use Base\Component\HttpFoundation\Referrer;
+use App\Entity\User;
+use App\Repository\UserRepository;
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
@@ -15,6 +16,8 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ResponseEvent;
+use Twig\Environment;
 
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
@@ -29,7 +32,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::REQUEST  => ['onKernelRequest'],
+            KernelEvents::REQUEST  => [['onKernelRequest']],
             KernelEvents::EXCEPTION => ['onKernelException']
         ];
     }
@@ -61,7 +64,6 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         // Calling child CRUD controller
         if($entityCrudController != $crud->getControllerFqcn() && !empty($crud->getCurrentPage())) {
 
-            
             $instance = $entity->getInstance();
             $url = $this->adminUrlGenerator->unsetAll()
                 ->setController($entityCrudController)
@@ -91,7 +93,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
                     if($request->query->get("crudAction") !== null) $request->query->set("crudAction", "index");
                     else $request->query->remove("crudAction");
 
-                    $eaCanonicException = false;
+                $eaCanonicException = false;
             }
 
             if(!$eaCanonicException)
@@ -100,4 +102,5 @@ class EasyAdminSubscriber implements EventSubscriberInterface
             $e->stopPropagation();
         }
     }
+
 }

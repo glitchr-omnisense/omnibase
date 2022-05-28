@@ -8,6 +8,8 @@ use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;
+use Base\Service\FileService;
+use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -44,11 +46,14 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     
     public function getBlockPrefix(): string { return 'associationfile'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, ImageService $imageService)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator = $entityHydrator;
+
+        $this->imageService     = $imageService;
+        $this->fileService      = cast($imageService, FileService::class);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
     }
@@ -65,6 +70,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
             "multiple"     => null,
             'allow_delete' => true,
+            "allow_delete[confirmation]" => true,
+            
             'href'         => null,
 
             'max_size' => null,
@@ -106,7 +113,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $options["class"]    = $this->formFactory->guessClass($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
-
+ 
         $parentForm = $form->getParent();
         $dataClass = $parentForm ? $this->formFactory->guessClass($parentForm, $parentForm->getConfig()->getOptions()) : null;
         $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;

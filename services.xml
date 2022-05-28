@@ -19,7 +19,7 @@
 
         <service id="Base\Component\HttpFoundation\Referrer" public="true">
             <argument type="service" id="request_stack" />
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Controller\MainController">
@@ -37,10 +37,11 @@
             <argument type="service" id="router" />
         </service>
 
-        <service id="Base\Controller\UX\ImageController">
+        <service id="Base\Controller\UX\FileController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="base.filesystem" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="App\Repository\Layout\ImageCropRepository" />
         </service>
@@ -53,18 +54,23 @@
             <argument type="service" id="App\Repository\Layout\Widget\PageRepository" />
             <argument type="service" id="App\Repository\Layout\Widget\AttachmentRepository" />
         </service>
+        <service id="Base\Controller\Client\Layout\ShortController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-        <service id="Base\Subscriber\BaseSubscriber">
-            <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="base.settings" />
+            <argument type="service" id="App\Repository\Layout\ShortRepository" />
         </service>
 
-        <service id="Base\Subscriber\TwigSubscriber">
+        <service id="Base\Subscriber\RouterSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
-
+        <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Subscriber\TwigSubscriber"    ><tag name="kernel.event_subscriber" /><argument type="service" id="base.service" /></service>
         <service id="Base\Subscriber\ParameterBagSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="parameter_bag" />
@@ -76,6 +82,15 @@
             <argument type="service" id="base.service" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
+        <service id="Base\Subscriber\UserAnalyticsSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
         <service id="Base\Service\BaseSettings" public="true">
@@ -132,12 +147,12 @@
         </service>
 
         <service id="Base\Service\Paginator" public="true">
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
             <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Service\Breadgrinder" public="true">
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
         </service>
@@ -343,19 +358,42 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Service\ImageService" public="true">
+        <service id="Base\Service\Obfuscator"   public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="twig" />
-            <argument type="service" id="twig.extension.assets" />
-            <argument type="service" id="router.default" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="imagine" />
+        </service>
+        
+        <service id="Base\Service\FileService"  public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="router" />
+            <argument type="service" id="base.service.obfuscator" />
+            <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="base.filesystem" />
+        </service>
+        
+        <service id="Base\Service\ImageService" public="true" parent="Base\Service\FileService">
+            <tag name="twig.runtime" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="imagine.bitmap" />
+            <argument type="service" id="imagine.svg" />
         </service>
 
         <service id="Base\Service\Filesystem" public="true">
             <argument type="service" id="flysystem.adapter.lazy.factory" />
+            <argument type="service" id="parameter_bag" />
         </service>
+
+
+        <!-- ImagineInterface instance use imagick by default (NB: GD do not support CMYK) -->
+        <service id="imagine.bitmap" alias="imagine.adapter.imagick" />
+        <service id="imagine.svg" alias="imagine.adapter.svg" />
+        <service id="imagine.meta_data.reader" class="Imagine\Image\Metadata\ExifMetadataReader" />
+
+        <service id="imagine.adapter.gd"      class="Imagine\Gd\Imagine"><call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call></service>
+        <service id="imagine.adapter.imagick" class="Imagine\Imagick\Imagine"><call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call></service>
+        <service id="imagine.adapter.gmagick" class="Imagine\Gmagick\Imagine"><call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call></service>
+        <service id="imagine.adapter.svg"     class="Base\Imagine\Svg\Imagine"><call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call></service>
+
 
         <service id="Base\Service\SocialSharer" public="true"><tag name="twig.runtime" /></service>
 
@@ -368,7 +406,7 @@
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="cache.adapter" />
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Model\IconProvider\Adapter\FontAwesomeAdapter">
@@ -533,7 +571,7 @@
         <service id="Base\Security\LoginFormAuthenticator">
             <argument type="service" id="referrer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />
         </service>
@@ -550,6 +588,7 @@
             <argument type="service" id="base.service" />
             <argument type="service" id="referrer" />
             <argument type="service" id="profiler" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\EntitySubscriber\UserSubscriber">
@@ -568,8 +607,9 @@
             <tag name="form.type" />
             <argument type="service" id="base.widget_provider" />
         </service>
-        <service id="Base\Form\Field\Type\QuadrantType">
+        <service id="Base\Field\Type\PasswordType">
             <tag name="form.type" />
+            <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
         </service>
 
@@ -587,7 +627,7 @@
 
         <service id="Base\Field\Type\RouteType">
             <tag name="form.type" />
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Field\Type\SelectType">
@@ -600,6 +640,7 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
@@ -617,6 +658,7 @@
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.database.entity_hydrator" />
+            <argument type="service" id="base.service.image" />
         </service>
 
         <service id="Base\Field\Type\AttributeType">
@@ -677,13 +719,14 @@
         </service>
 
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
-        <service id="Base\Field\Type\ImageType" parent="Base\Field\Type\FileType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\ImageType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.service.image" />
         </service>
 
         <service id="Base\Field\Type\CollectionType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
@@ -802,9 +845,8 @@
             <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="router.default" />
+            <argument type="service" id="router" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\Backoffice\AbstractCrudController">
@@ -845,16 +887,21 @@
         <service id="Base\Controller\Backoffice\Crud\Layout\SettingCrudController"   parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"    parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\ImageCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\ShortCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
         <service id="Base\Controller\Backoffice\Crud\Layout\Widget\SlotCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\MenuCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Widget\AttachmentCrudController" parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Widget\LinkCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\LinksetCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Widget\PageCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\RouteCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\RouteCrudController"      parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\HyperlinkCrudController" parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\Set\MenuCrudController"          parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\Set\LinksetCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\Set\AttachmentBoxCrudController" parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\Set\BookCrudController"          parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Widget\Set\NetworkCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\HyperlinkCrudController"  parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
         <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\TextAttributeCrudController"         parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

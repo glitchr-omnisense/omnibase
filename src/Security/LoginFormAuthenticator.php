@@ -35,7 +35,6 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     use TargetPathTrait;
 
     public const LOGIN_ROUTE          = 'security_login';
-    public const LOGIN_RESCUE_ROUTE   = 'security_loginRescue';
     public const LOGOUT_ROUTE         = 'security_logout';
     public const LOGOUT_REQUEST_ROUTE = 'security_logoutRequest';
 
@@ -61,8 +60,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function supports(Request $request): ?bool
     {
-        $isLoginPage = in_array($request->attributes->get('_route'), [static::LOGIN_ROUTE, static::LOGIN_RESCUE_ROUTE]);
-        return $isLoginPage && $request->isMethod('POST');
+        return $request->attributes->get('_route') == static::LOGIN_ROUTE && $request->isMethod('POST');
     }
 
     public function authenticate(Request $request): Passport

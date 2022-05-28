@@ -56,10 +56,12 @@ class CropperType extends AbstractType implements DataMapperInterface
 
             "fields" => [
                 "label"    => [],
-                "x"        => [],
-                "y"        => [],
-                "width"    => [],
-                "height"   => [],
+                "x0"        => [],
+                "y0"        => [],
+                "xP"        => [],
+                "yP"        => [],
+                "width0"    => [],
+                "height0"   => [],
                 "scaleX"   => [],
                 "scaleY"   => [],
                 "rotate"   => [],
@@ -77,10 +79,10 @@ class CropperType extends AbstractType implements DataMapperInterface
 
                 "label"  => ["label"  => "Label"  , "required" => false, "form_type" => TextType::class],
                 "slug"   => ["target" => "label"  , "required" => false, "form_type" => SlugType::class],
-                "x"      => ["label"  => "Left"   , "form_type" => HiddenType::class],
-                "y"      => ["label"  => "Top"    , "form_type" => HiddenType::class],
-                "width"  => ["label"  => "Width"  , "form_type" => HiddenType::class],
-                "height" => ["label"  => "Height" , "form_type" => HiddenType::class],
+                "x0"      => ["label"  => "Left"   , "form_type" => HiddenType::class],
+                "y0"      => ["label"  => "Top"    , "form_type" => HiddenType::class],
+                "width0"  => ["label"  => "Width"  , "form_type" => HiddenType::class],
+                "height0" => ["label"  => "Height" , "form_type" => HiddenType::class],
                 "scaleX" => ["label"  => "Scale X", "form_type" => HiddenType::class],
                 "scaleY" => ["label"  => "Scale Y", "form_type" => HiddenType::class],
                 "rotate" => ["label"  => "Rotate" , "form_type" => HiddenType::class]

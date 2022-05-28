@@ -71,3 +71,23 @@ base:
                 =1 {# seconde }
                 other {# secondes }
                 }"
+
+user_analytics:
+
+    label: "{0, plural,
+                =0 {Pas d'autre utilisateur connecté}
+                =1 {Activité sur le site}
+                other {Activités sur le site}
+            }"
+
+    online_users: "{0, plural,
+                =0 {Aucun autre utilisateur en ligne}
+                =1 {# utilisateur connecté}
+                other {# utilisateurs connectés}
+            }"
+
+    active_users: "{0, plural,
+                =0 {Aucun autre utilisateur actif}
+                =1 {# utilisateur actif}
+                other {# utilisateurs actifs}
+            }"

@@ -8,7 +8,7 @@
     {% if action.crudActionName == "index" and action.type == "entity" %}
         {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
     {% endif %}
-
+    
     <a class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
        href="{{ linkUrl }}"
        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>

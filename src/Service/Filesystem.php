@@ -5,10 +5,9 @@ namespace Base\Service;
 use Base\Exception\NotDeletableException;
 use Base\Exception\NotReadableException;
 use Base\Exception\NotWritableException;
-use League\Flysystem\Filesystem as Flysystem;
+use League\Flysystem\CorruptedPathDetected;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
-use League\Flysystem\Local\LocalFilesystemAdapter;
 use League\Flysystem\PathPrefixer;
 use League\Flysystem\UnableToDeleteDirectory;
 use League\Flysystem\UnableToDeleteFile;
@@ -16,163 +15,212 @@ use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToWriteFile;
 use League\FlysystemBundle\Lazy\LazyFactory;
+use ReflectionException;
+use Symfony\Component\Finder\Finder;
 
 class Filesystem
-{
-    protected string $storage;
+{   
+    /**
+     * @var FilesystemOperator
+     */
+    protected FilesystemOperator $operator;
+
+    /**
+     * @var LazyFactory
+     */
+    protected LazyFactory $lazyFactory;
+
+    protected static $projectDir;
+    public static function getProjectDir() { return self::$projectDir; }
+
+    protected static $publicDir;
+    public static function getPublicDir() { return self::$publicDir; }
+
     public function __construct(LazyFactory $lazyFactory)
     {
         $this->lazyFactory = $lazyFactory;
+        
+        self::$projectDir = dirname(__FILE__, 6);
+        self::$publicDir  = self::$projectDir."/public";
+
+        $this->setDefault("local.storage");
     }
 
-    public function setDefault(?string $storage): self { return $this->set($storage); } 
-    public function set(?string $storage): self
+    public function getDefault() { return $this->getOperator(); }
+    public function setDefault(FilesystemOperator|string $operator): self
     {
-        $this->storage = $storage;
+        $this->operator = $this->getOperator($operator);
         return $this;
     }
 
-    public function getOperator(?string $storage = null): FilesystemOperator
+    public function getOperator(FilesystemOperator|string|null $operator = null): FilesystemOperator
     { 
-        if(!$storage) $storage = $this->storage;
-        if(!$storage) throw new \Exception("Storage passed as argument is NULL, no default storage set.");
-        return $this->lazyFactory->createStorage($storage, $storage); 
+        if (class_implements_interface($operator, FilesystemOperator::class))
+            return $operator;
+
+        if (is_string($operator)) 
+            return $this->lazyFactory->createStorage($operator, $operator);
+
+        return $this->operator;
     }
 
-    public function getAdapter(?string $storage = null): FilesystemAdapter
+    public function getAdapter(FilesystemOperator|string|null $operator = null): FilesystemAdapter
     {
-        if($storage instanceof FilesystemOperator) $fsOperator = $storage;
-        else $fsOperator = $this->getOperator($storage); 
+        $operator = $this->getOperator($operator);
 
-        $reflProperty = new \ReflectionProperty(Flysystem::class, 'adapter');
+        try { $reflProperty = new \ReflectionProperty(get_class($operator), 'adapter'); }
+        catch (ReflectionException $e) { return null; }
+
         $reflProperty->setAccessible(true);
-
-        return $reflProperty->getValue($fsOperator);
+        return $reflProperty->getValue($operator);
     }
 
-    public function getPathPrefixer(?string $storage = null): PathPrefixer
+    protected function getPathPrefixer(FilesystemOperator|string|null $operator = null): PathPrefixer
     {
-        $adapter = $this->getAdapter($storage);
+        $adapter = $this->getAdapter($operator);
 
-        if($adapter instanceof LocalFilesystemAdapter) {
+        try { $reflProperty = new \ReflectionProperty(get_class($adapter), 'prefixer'); }
+        catch (ReflectionException $e) { return null; }
 
-            $reflProperty = new \ReflectionProperty(LocalFilesystemAdapter::class, 'prefixer');
-            $reflProperty->setAccessible(true);
-
-            return $reflProperty->getValue($adapter);
-        }
-        
-        return null;
+        $reflProperty->setAccessible(true);
+        return $reflProperty->getValue($adapter);
     }
 
-
-    public function getHashId(string|null $source, array $filters = [], array $config = []): ?string
+    public function prefixPath(string $path, FilesystemOperator|string|null $operator = null)
     {
-        // if($source === null ) return null;
-        // $path = "imagine/".str_strip($source, $this->assetExtension->getAssetUrl(""));
-
-        // $config["path"] = $path;
-        // $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
-        // if(!empty($filters)) $config["filters"] = $filters;
-
-        // while ( ($sourceConfig = $this->decode(basename($source))) ) {
-
-        //     $source = $sourceConfig["path"] ?? $source;
-        //     $config["path"] = $source;
-        //     $config["filters"] = ($sourceConfig["filters"] ?? []) + ($config["filters"] ?? []);
-        //     $config["options"] = ($sourceConfig["options"] ?? []) + ($config["options"] ?? []);
-        // }
-
-        // return $this->encode($config);
-    }
-
-    public function resolveArguments(string $hashid, array $filters = [], array $args = [])
-    {
-        // $path = null;
-        // $args = [];
-
-        // do {
-        
-        //     // Path fallback
-        //     $args0 = null;
-        //     $hashid0 = $hashid;
-        //     while(strlen($hashid0) > 1) {
-
-        //         $args0 = $this->decode(basename($hashid0));
-        //         if($args0) break;
-
-        //         $hashid0 = dirname($hashid0);
-        //     }
-
-        //     if(!is_array($args0)) $path = $hashid;
-        //     else {
-
-        //         $hashid = array_pop_key("path", $args0) ?? $hashid;
-        //         $filters = array_key_exists("filters", $args0) ? array_merge($args0["filters"], $filters) : $filters;
-        //         $args = array_merge($args, $args0);
-        //     }
-
-        // } while(is_array($args0));
-
-        // $args["path"]    = $path;
-        // $args["filters"] = $filters;
-        // $args["options"] = $args["options"] ?? [];
-        // return $args;
+        $prefixPath = $this->getPathPrefixer($operator)->prefixPath("");
+        return $prefixPath.str_lstrip($path, $prefixPath);
     }
     
-    public function isImage(string $location, ?FilesystemOperator $fsOperator = null) { return preg_match("/image\/\*/", $this->mimeType($location, $fsOperator)); }
-    public function read(string $location, ?FilesystemOperator $fsOperator = null): ?string
+    public function stripPrefix(string $path, FilesystemOperator|string|null $operator = null)
     {
-        if(!$fsOperator) $fsOperator = $this->getOperator();
-        if(!$fsOperator->fileExists($location)) return null;
-
-        try { return $fsOperator->read($location); }
-        catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$location\".. ".$e->getMessage()); }
+        $prefixPath = $this->getPathPrefixer($operator)->prefixPath("");
+        return str_lstrip($path, $prefixPath);
     }
 
-    public function write(string $location, string $contents, ?FilesystemOperator $fsOperator = null, array $config = [])
+    public function read(string $path, FilesystemOperator|string|null $operator = null): ?string
     {
-        if(!$fsOperator) $fsOperator = $this->getOperator();
-        if ($fsOperator->fileExists($location)) return false;
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
 
-        try { $fsOperator->write($location, $contents, $config); }
-        catch (UnableToWriteFile $e) { throw new NotWritableException("Unable to write file \"$location\".. ".$e->getMessage()); }
+        if(!$this->fileExists($path, $operator)) return null;
+
+        try { return $operator->read($path); }
+        catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$path\".. ".$e->getMessage()); }
+    }
+
+    public function write(string $path, string $contents, FilesystemOperator|string|null $operator = null, array $config = [])
+    {
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
+
+        if ($this->fileExists($path, $operator)) return false;
+
+        try { $operator->write($path, $contents, $config); }
+        catch (UnableToWriteFile $e) { throw new NotWritableException("Unable to write file \"$path\".. ".$e->getMessage()); }
         return true;
     }
 
-    public function delete(string $location, ?FilesystemOperator $fsOperator = null)
+    public function delete(string $path, FilesystemOperator|string|null $operator = null)
     {
-        if(!$fsOperator) $fsOperator = $this->getOperator();
-        if(!$fsOperator->fileExists($location)) return false;
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
 
-        try { $fsOperator->delete($location); }
-        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to delete file \"$location\".. ".$e->getMessage()); }
+        if(!$this->fileExists($path, $operator)) return false;
+
+        try { $operator->delete($path); }
+        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to delete file \"$path\".. ".$e->getMessage()); }
         return true;
     }
 
-    public function fileExists(string $location, ?FilesystemOperator $fsOperator = null): bool 
+    public function fileExists(string $path, FilesystemOperator|string|null $operator = null): bool 
     {
-        if(!$fsOperator) $fsOperator = $this->getOperator();
-        return $fsOperator->fileExists($location);
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
+
+        try { return $operator->fileExists($path); }
+        catch (CorruptedPathDetected $e ) { return false; }
     }
 
-    public function mkdir(string $location, ?FilesystemOperator $fsOperator = null, array $config = []) 
+    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []) 
     {
-        if(!$fsOperator) $fsOperator = $this->getOperator();
-        if($fsOperator->fileExists($location)) return false;
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
 
-        try { $fsOperator->createDirectory($location, $config); }
-        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to create directory \"$location\".. ".$e->getMessage()); }
+        if($this->fileExists($path, $operator)) return false;
+
+        try { $operator->createDirectory($path, $config); }
+        catch (UnableToDeleteFile|UnableToDeleteDirectory $e) { throw new NotDeletableException("Unable to create directory \"$path\".. ".$e->getMessage()); }
         return true;
     }
 
-    public function mimeType(string $location, ?FilesystemOperator $fsOperator = null) 
+    public function mimeType(string $path, FilesystemOperator|string|null $operator = null) : ?string
     {
-        if(!$fsOperator) $fsOperator = $this->getOperator();
-        if(!$fsOperator->fileExists($location)) return null;
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
 
-        try { $fsOperator->mimeType($location); }
-        catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$location\".. ".$e->getMessage()); }
+        if(!$this->fileExists($path, $operator)) return null;
+
+        try { return $operator->mimeType($path); }
+        catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$path\".. ".$e->getMessage()); }
         return null;
+    }
+    
+    public function get(mixed $path, FilesystemOperator|string|null $operator = null)
+    { 
+        $operator = $this->getOperator($operator);
+        $path = $this->stripPrefix($path, $operator);
+
+        if($this->fileExists($path, $operator))
+            return $this->getPathPrefixer($operator)->prefixPath($path);
+
+        return null;
+    }
+
+    public function getPublic(mixed $path, FilesystemOperator|string|null $operator = null)
+    {
+        if($path === null) return null;
+
+        $path = $this->stripPrefix($path, $operator);
+        $path = $this->getPathPrefixer($operator)->prefixPath($path);
+        if(in_array($path, ["", "/"])) return $this->getPublicDir();
+
+        //
+        // Check if file is reacheable in /public directory
+        $operator = $this->getOperator($operator);
+        if($operator) {
+        
+            $endpoints = $this->getPublicRealpath();
+            foreach($endpoints as $alias => $realpath) {
+
+                if(str_starts_with($path, $realpath) && file_exists($alias.str_lstrip($path, $realpath)))
+                    return $alias.str_lstrip($path, $realpath);
+            }
+        }
+
+        //
+        // Check if the corresponding public operator is found
+        if(is_string($operator)) {
+
+            $operator = $this->getOperator($operator.".public");
+            if($operator) {
+
+                $path = $this->stripPrefix($path, $operator);
+                return $this->fileExists($path, $operator) ? $this->getPathPrefixer($operator)->prefixPath($path) : null;
+            }
+        }
+
+        return null;
+    }
+
+    protected function getPublicRealpath(?string $path = null, int $depth = 1): array {
+
+        $publicPath = realpath($this->getPublicDir()."/".str_lstrip($path, [$this->getPublicDir(), "/"]));
+
+        $endpoints = [$publicPath => realpath($publicPath)];
+        foreach(Finder::create()->followLinks()->directories()->in($publicPath)->depth("< ".$depth) as $path)
+            $endpoints[$path->getPathname()] = realpath($path->getPathname());
+
+        return $endpoints;
     }
 }

@@ -140,5 +140,4 @@ class UserSubscriber implements EventSubscriber
         if($impersonator == $this->tokenStorage->getToken()->getUser() || $user == $this->tokenStorage->getToken()->getUser())
             throw new Exception("Unauthorized action: you can't delete your own account");
     }
-
 }

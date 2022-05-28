@@ -12,6 +12,7 @@ use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
 use Base\Twig\Extension\BaseTwigExtension;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -36,8 +37,9 @@ trait BaseTrait
 
     public static function getClassMetadataManipulator()  : ?ClassMetadataManipulator { return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator   : BaseService::getClassMetadataManipulator(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
-    public static function getIconProvider()  : ?IconProvider            { return (self::class === BaseService::class) ? BaseService::$iconProvider    : BaseService::getIconProvider(); }
+    public static function getIconProvider()  : ?IconProvider            { return (self::class === BaseService::class) ? BaseService::$iconProvider   : BaseService::getIconProvider(); }
     public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
+    public static function getParameterBag():   ?ParameterBagInterface   { return (self::class === BaseService::class) ? BaseService::$parameterBag   : BaseService::getParameterBag(); }
     public static function getRouter()        : ?AdvancedRouterInterface { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }
     public static function getTwigExtension() : ?BaseTwigExtension       { return (self::class === BaseService::class) ? BaseService::$twigExtension  : BaseService::getTwigExtension(); }
     public static function getTwig()          : ?Environment             { return (self::class === BaseService::class) ? BaseService::$twig           : BaseService::getTwig(); }

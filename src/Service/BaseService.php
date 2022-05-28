@@ -36,6 +36,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -362,24 +364,43 @@ class BaseService implements RuntimeExtensionInterface
     public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
-    public function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
+    public static function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
 
-    public function getRequest(): ?Request { return $this->getCurrentRequest(); }
-    public function getCurrentRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
+    public function getAsset(string $url): string
+    {
+        $url = trim($url);
+        $parse = parse_url($url);
+        if($parse["scheme"] ?? false)
+            return $url;
 
-    public function generateUrl(string $route = "", array $routeParameters = []): ?string { return $this->getUrl($route, $routeParameters); }
-    public function getCurrentUrl(): ?string { return $this->getUrl(); }
-    public function getUrl(?string $route = "", array $routeParameters = []): ?string { return $this->getRouter()->getUrl($route, $routeParameters); }
+        $request = $this->requestStack->getCurrentRequest();
+        $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
+        $baseDir = $baseDir ."/";
+        $path = trim($parse["path"]);
+        if($path == "/") return $baseDir ? $baseDir : "/";
+        else if(!str_starts_with($path, "/"))
+            $path = $baseDir.$path;
 
-    public function getAsset(string $url): string { return $this->getRouter()->getAsset($url); }
-    public function getCurrentRoute(): ?string { return $this->getRouter()->getCurrentRoute(); }
-    public function getCurrentRouteName(): ?string { return $this->getRouter()->getCurrentRouteName(); }
+        return $path ? $path : null;
+    }
 
-    public function hasRoute(string $route): bool { return $this->getRouter()->hasRoute($route); }
+
+    public function getRequest(): ?Request { return $this->getRouter()->getRequest(); }
+    public function getCurrentRequest(): ?Request { return $this->getRequest(); }
+
+    public function hasRoute(string $routeName): bool { return $this->getRouter()->hasRoute($routeName); }
     public function getRoute(?string $url): ?string { return $this->getRouter()->getRoute($url); }
+    public function getCurrentRoute(): ?string { return $this->getRouter()->getRoute(); }
     public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
+    public function getCurrentRouteName(): ?string { return $this->getRouter()->getRouteName(); }
 
-    public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->getUrl($urlOrRoute, $opts) ?? $urlOrRoute, $state, $headers); }
+    public function generateUrl(string $urlOrRoute = "", array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string 
+    { 
+        try { return $this->getRouter()->generate($urlOrRoute, $routeParameters, $referenceType); }
+        catch (RouteNotFoundException $e) { return $urlOrRoute; }
+    }
+
+    public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->generateUrl($urlOrRoute, $opts), $state, $headers); }
     public function redirectToRoute(string $route, array $opts = [], int $state = 302, array $headers = []): ?RedirectResponse
     { 
         $event = null;
@@ -406,8 +427,8 @@ class BaseService implements RuntimeExtensionInterface
             unset($headers["callback"]);
         }
 
-        $urlOrRoute   = $this->getUrl($route, $opts) ?? $route;
-        $route = $this->getRouteName($urlOrRoute);
+        $url   = $this->generateUrl($route, $opts) ?? $route;
+        $route = $this->getRouteName($url);
         if (!$route) return null;
         
         $currentRoute = $this->getCurrentRouteName();
@@ -417,7 +438,7 @@ class BaseService implements RuntimeExtensionInterface
         foreach($exceptions as $pattern) 
             if (preg_match($pattern, $currentRoute)) return null;
 
-        $response = new RedirectResponse($this->getUrl($urlOrRoute, $opts) ?? $urlOrRoute, $state, $headers);
+        $response = new RedirectResponse($url, $state, $headers);
         if($event && method_exists($event, "setResponse")) $event->setResponse($response);
 
         // Callable action if redirection happens

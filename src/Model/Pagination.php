@@ -49,10 +49,11 @@ class Pagination implements PaginationInterface, Iterator
     public function current(): mixed { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
 
     public function get() { return $this->instance; }
-    public function getQuery() { $this->isQuery() ? $this->instance->getQuery() : null; }
+    public function getQuery(): ?Query { return $this->isQuery() ? $this->instance->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults ($this->pageSize) : null; }
     public function isQuery()  { return $this->instance instanceof instance; }
 
     public function getTotalCount() { return $this->totalCount; }
+    public function getLastPage() { return $this->getTotalPages(); }
     public function getTotalPages()
     {
         $pageSize = $this->getPageSize();
@@ -126,7 +127,7 @@ class Pagination implements PaginationInterface, Iterator
             throw new InvalidPageException("Page not found.");
 
         if($this->isQuery())
-            return $this->lastResult = $this->instance->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults ($this->pageSize)->getResult();
+            return $this->lastResult = $this->getQuery()->getResult();
 
         return $this->lastResult =  array_slice_recursive($this->get(), $this->pageSize * ($this->page-1), $this->pageSize, true /*Always preserve keys*/);
     } 

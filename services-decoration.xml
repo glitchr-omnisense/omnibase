@@ -16,6 +16,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
             <argument type="service" id="kernel" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
@@ -30,6 +31,7 @@
         <service id="Base\Routing\AdvancedRouter" decorates="router">
             <argument type="service" id=".inner" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="base.settings" />
             <bind key="$debug">%kernel.debug%</bind>
         </service>

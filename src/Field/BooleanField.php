@@ -45,6 +45,13 @@ final class BooleanField implements FieldInterface
         return $this;
     }
 
+    public function showInline(bool $inline = true): self
+    {
+        $this->setFormTypeOption("inline", $inline);
+
+        return $this;
+    }
+
     public function withConfirmation(bool $onCheck = true, bool $onUncheck = true): self
     {
         $this->setCustomOption(self::OPTION_CONFIRMATION_MODAL_ON_CHECK, $onCheck);

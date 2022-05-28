@@ -6,6 +6,9 @@ use Base\Service\BaseService;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
@@ -18,6 +21,7 @@ class TwigSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
+            KernelEvents::REQUEST => ['onKernelRequest', 128],
             KernelEvents::RESPONSE => ['onKernelResponse'],
         ];
     }
@@ -38,6 +42,24 @@ class TwigSubscriber implements EventSubscriberInterface
             return false;
         
         return true;
+    }
+
+    public function onKernelRequest(RequestEvent $event)
+    {
+        $this->baseService->addHtmlContent("stylesheets:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.stylesheet")));
+        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.stylesheet")));
+        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.clipboardjs.stylesheet")));
+        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.dockjs.stylesheet")));
+        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));
+
+        $this->baseService->addHtmlContent("javascripts:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery.javascript")));
+        $this->baseService->addHtmlContent("javascripts:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox2b.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.cookie-consent.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.clipboardjs.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.dockjs.javascript")));
+        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
     }
 
     public function onKernelResponse(ResponseEvent $event)
@@ -64,8 +86,9 @@ class TwigSubscriber implements EventSubscriberInterface
 
             $javascriptsBody = $this->baseService->getHtmlContent("javascripts:body");
             $content = preg_replace('/<\/body\b[^>]*>/', "$0".$javascriptsBody, $content, 1);
-
-            $response->setContent($content);
+            
+            if(!is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class]))
+                $response->setContent($content);
 
             return true;
         }

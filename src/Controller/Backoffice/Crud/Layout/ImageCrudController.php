@@ -51,12 +51,12 @@ class ImageCrudController extends AbstractCrudController
                         "target" => "source",
                         "pivot"  => "quadrant.wind",
                         "fields" => [
-                            "label"  => ["form_type" => TextType::class ],
-                            "slug"   => ["label" => false, "lock" => true, "keep" => ":", "form_type" => SlugType::class, "target" => ".label"],
-                            "x"      => ["form_type" => NumberType::class, "min" => -1],
-                            "y"      => ["form_type" => NumberType::class, "min" => -1],
-                            "width"  => ["form_type" => NumberType::class, "min" => -1],
-                            "height" => ["form_type" => NumberType::class, "min" => -1],
+                            "label"   => ["form_type" => TextType::class ],
+                            "slug"    => ["label" => false, "lock" => true, "keep" => ":", "form_type" => SlugType::class , "target" => ".label"],
+                            "x0"      => ["form_type" => NumberType::class, "min" => -1],
+                            "y0"      => ["form_type" => NumberType::class, "min" => -1],
+                            "width0"  => ["form_type" => NumberType::class, "min" => -1],
+                            "height0" => ["form_type" => NumberType::class, "min" => -1],
                         ]
                     ]);
         }, $args);

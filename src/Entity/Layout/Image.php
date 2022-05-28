@@ -16,6 +16,7 @@ use Base\Enum\Quadrant\Quadrant;
 use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
@@ -29,10 +30,11 @@ class Image implements IconizeInterface
 {
     use BaseTrait;
 
-    public function __toUrl(): ?string {
-
-        $hashid = $this->getImageService()->getHashId($this->getSource());
-        return $this->getRouter()->generate("ux_image", ["hashid" => $hashid]);
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    {
+        $routeName = "ux_image";
+        $routeParameters = ["hashid" => $this->getImageService()->obfuscate($this->getSource())];
+        return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
     public        function __iconize()       : ?array { return null; } 
@@ -56,7 +58,7 @@ class Image implements IconizeInterface
     /**
      * @ORM\Column(type="text")
      * @AssertBase\File(max_size="5MB", groups={"new", "edit"})
-     * @Uploader(storage="local.storage", public="/storage", max_size="5MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
+     * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp"})
      */
     protected $source;
     public function getSource()     { return Uploader::getPublic($this, "source"); }
@@ -97,7 +99,17 @@ class Image implements IconizeInterface
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $crops;
-    public function getCrops(): Collection { return $this->crops; }
+
+    public function getPreferredCrop(string|int $labelOrRatio): ?ImageCrop { return $this->getCrops($labelOrRatio)[0] ?? null; }
+    public function getCrops(string|int|null $labelOrRatio = null): Collection 
+    { 
+        return $this->crops->Map(function($c) use ($labelOrRatio) {
+            if(is_string($labelOrRatio)) return $c->getLabel() && $c->getLabel() == $labelOrRatio;
+            if(is_numeric($labelOrRatio)) return $c->getRatio() == $labelOrRatio;
+            return true;
+        });
+    }
+
     public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {

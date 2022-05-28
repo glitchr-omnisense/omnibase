@@ -2,7 +2,7 @@
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {% set color = field.getCustomOption("iconColor") ?? "inherit" %}
-{% set attr = color ? {"style": "color"~color} : {} %}
+{% set attr = color ? {"style": "color:"~color} : {} %}
 {% if field.value %}
 <span class="badge badge-secondary field-icon">
     {{field.value|iconify(attr)}}

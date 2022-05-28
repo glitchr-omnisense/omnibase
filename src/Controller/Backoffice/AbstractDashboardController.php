@@ -7,7 +7,7 @@ use App\Entity\User\Group        as UserGroup;
 use App\Entity\User\Notification as UserNotification;
 use App\Entity\User\Permission   as UserPermission;
 use App\Entity\User\Penalty      as UserPenalty;
-use App\Entity\User\Token      as UserToken;
+use App\Entity\User\Token        as UserToken;
 
 use App\Entity\Thread;
 use App\Entity\Thread\Like;
@@ -18,7 +18,7 @@ use App\Entity\Layout\Setting;
 use App\Entity\Layout\Widget;
 use App\Entity\User\Notification;
 use App\Entity\Layout\Widget\Attachment;
-use App\Entity\Layout\Widget\Menu;
+use App\Entity\Layout\Widget\Set\Menu;
 use App\Entity\Layout\Widget\Page;
 
 use App\Controller\Backoffice\Crud\UserCrudController;
@@ -29,7 +29,6 @@ use Base\Service\BaseService;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
-use Base\Component\HttpFoundation\Referrer;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
 use Base\Form\Type\Layout\SettingListType;
@@ -60,14 +59,16 @@ use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
 use Base\Entity\Extension\TrashBall;
+use Base\Entity\Layout\Short;
 use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
 use Base\Field\Type\SelectType;
-use Base\Security\LoginFormRescueAuthenticator;
+
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -92,8 +93,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
         RouterInterface $router,
-        BaseService $baseService,
-        ?GaService $gaService = null) {
+        BaseService $baseService) {
 
         $this->extension = $extension;
         $this->requestStack = $requestStack;
@@ -111,8 +111,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
         $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
         $this->slotRepository        = $baseService->getEntityManager()->getRepository(Slot::class);
-
-        $this->gaService = $gaService;
     }
 
     public function getExtension() { return $this->extension; }
@@ -129,16 +127,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
      * @Iconize({"fas fa-fw fa-toolbox", "fas fa-fw fa-home"})
      */
     public function index(): Response
-    {
-        return $this->render('backoffice/index.html.twig');
-    }
-
-    /**
-     * Link to this controller to start the "connect" process
-     *
-     * @Route("/backoffice/ga", name="dashboard_ga")
-     */
-    public function GoogleAnalytics(): Response
     {
         return $this->render('backoffice/index.html.twig');
     }
@@ -162,10 +150,15 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         foreach($fields as $key => $field) {
 
-            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = TextType::class;
-            // if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
-            // if ($fields[$key]["form_type"] == PasswordType::class)
-            //     $fields[$key]["revealer"] = true;
+            if(!array_key_exists("form_type", $field)) $fields[$key]["form_type"] = PasswordType::class;
+            if ($fields[$key]["form_type"] == PasswordType::class) {
+                $fields[$key]["inline"]       = true;
+                $fields[$key]["revealer"]     = true;
+                $fields[$key]["repeater"]     = false;
+                $fields[$key]["min_length"]   = 0;
+                $fields[$key]["min_strength"] = 0;
+                $fields[$key]["hint"] = false;
+            }
         }
 
         $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
@@ -219,6 +212,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true, "required" => false],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
+            "base.settings.access_denied"        => ["roles" => "ROLE_EDITOR", "form_type" => UrlType::class, "required" => false],
             "base.settings.public_access"        => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.user_access"          => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.admin_access"         => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
@@ -231,12 +225,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
-
-        // $fields = array_filter($fields, function($o) use ($fields) {
-
-        //     $roles = array_pop_key("roles", $fields);
-        //     $this->getUser()->isGranted($o["roles"]);
-        // });
 
         foreach($fields as $name => &$options) {
 
@@ -255,6 +243,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
+
 
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
@@ -423,33 +412,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 ->setAction('new');
         }
     
-        if (isset($this->gaService) && $this->gaService->isEnabled()) {
-
-            $ga = $this->gaService->getBasics();
-
-            $gaMenu = [];
-            $gaMenu["users"]        = ["label" => $this->translator->trans("users", [$ga["users"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-user'];
-            $gaMenu["users_1day"]   = ["label" => $this->translator->trans("users_1day", [$ga["users_1day"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-user-clock'];
-            $gaMenu["views"]        = ["label" => $this->translator->trans("views", [$ga["views"]], self::TRANSLATION_DASHBOARD), "icon"  => 'far fa-eye'];
-            $gaMenu["views_1day"]   = ["label" => $this->translator->trans("views_1day", [$ga["views_1day"]], self::TRANSLATION_DASHBOARD) , "icon"  => 'fas fa-eye'];
-            $gaMenu["sessions"]     = ["label" => $this->translator->trans("sessions", [$ga["sessions"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-stopwatch'];
-            $gaMenu["bounces_1day"] = ["label" => $this->translator->trans("bounces_1day", [$ga["bounces_1day"]], self::TRANSLATION_DASHBOARD), "icon"  => 'fas fa-meteor'];
-
-            $menu[] = MenuItem::section('STATISTICS');
-            foreach ($gaMenu as $key => $entry) {
-
-                $url = $this->adminUrlGenerator
-                    ->unsetAll()
-                    ->setRoute("dashboard_ga")
-                    ->set("menuIndex", count($menu))
-                    ->set("show", $key)
-                    ->generateUrl();
-
-                $menu[] = MenuItem::linkToUrl(
-                    $entry["label"], $entry["icon"], $url);
-            }
-        }
-
         return $menu;
     }
 
@@ -526,18 +488,19 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if($section) $section->setWidth(2);
 
             $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
-                WidgetItem::linkToCrud(Setting::class  ),
-                WidgetItem::linkToCrud(Slot::class     ),
+                WidgetItem::linkToCrud(Setting::class),
+                WidgetItem::linkToCrud(Slot::class),
                 WidgetItem::linkToCrud(Attachment::class),
-                WidgetItem::linkToCrud(Link::class ),
+                WidgetItem::linkToCrud(Link::class),
             ]);
         }
 
         $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
-            WidgetItem::linkToCrud(Menu::class      ),
-            WidgetItem::linkToCrud(Page::class      ),
-            WidgetItem::linkToCrud(Widget::class   ),
-            WidgetItem::linkToCrud(Image::class ),
+            WidgetItem::linkToCrud(Short::class),
+            WidgetItem::linkToCrud(Menu::class),
+            WidgetItem::linkToCrud(Page::class),
+            WidgetItem::linkToCrud(Widget::class),
+            WidgetItem::linkToCrud(Image::class),
             WidgetItem::linkToCrud(AbstractAttribute::class),
         ]);
 

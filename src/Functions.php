@@ -22,6 +22,54 @@ namespace {
         }, $input);
     }
 
+    function get_url(bool $keep_subdomain = true, bool $keep_machine = true) 
+    {
+        $parse = parse_url2($_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]);
+        
+        $domain    = $parse["domain"] ? $parse["domain"] : "";
+        
+        $machine   = $parse["machine"] ? $parse["machine"] ."." : "";
+        $machine   = $keep_machine ? $machine : "";
+        
+        $subdomain = $parse["subdomain"] ? $parse["subdomain"]."." : "";
+        $subdomain = $keep_subdomain ? $subdomain : "";
+        
+        return $parse["scheme"]."://".$machine.$subdomain.$domain;
+    }
+
+    function parse_url2(string $url = null, int $component = -1): array|string|int|false|null 
+    {
+        if($url === null) $url = get_url();
+        
+        $parse = parse_url($url, $component);
+        $parse['path'] = str_rstrip($parse['path'] ?? "", "/");
+        $parse["root"] = str_rstrip($url, $parse['path']);
+        
+        if(array_key_exists("host", $parse)) {
+
+            $parse["fqdn"] = $parse["host"].".";
+            
+            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+
+                $parse["domain"] = $match[0];
+
+                $subdomain = str_rstrip($parse["host"], ".".$parse["domain"]);
+                $parse["subdomain"] = $subdomain !== $parse["domain"] ? $subdomain : null;
+
+                $_ = explode(".", $parse["subdomain"] ?? "");
+                $parse["subdomain"] = array_pop($_);
+                $parse["machine"] = implode(".", $_);
+
+                $domain = explode(".", $match[0]);
+                $parse["sld"]   = first($domain);
+                $parse["tld"]   = implode(".", tail($domain));
+            }
+        }
+
+        $parse["url"] = $parse["root"].$parse['path'];
+        return $parse;
+    }
+
     function is_instanceof(mixed $object_or_class, string|array $class): bool
     {
         // At least one class detection
@@ -80,7 +128,10 @@ namespace {
                     
                     $hex = substr($hex, 0,6); 
                 }
-                
+       
+                if(strlen($hex) === 4 && str_ends_with($hex, "F")) $hex = substr($hex, 0,3);
+                else if(str_ends_with($hex, "FF")) $hex = substr($hex, 0,6); 
+
                 break;
 
             default:
@@ -118,13 +169,37 @@ namespace {
     function camel2snake(string $input, string $separator = "_") { return mb_strtolower(str_replace('.'.$separator, '.', preg_replace('/(?<!^)[A-Z]/', $separator.'$0', $input))); }
     function snake2camel(string $input, string $separator = "_") { return lcfirst(str_replace(' ', '', mb_ucwords(str_replace($separator, ' ', $input)))); }
 
+    function preg_match_array(string $pattern, array $subject) {
+
+        $search = [];
+        foreach($subject as $el) {
+            if(is_array($el)) $search[] = preg_match_array($pattern, $el);
+            else if(preg_match($pattern, $el)) $search[] = $el;
+        }
+
+        return $search;
+    }
+
     function array_unique_object(array $array): array
     {
         $unique = array_keys(array_unique(array_map(fn($e) => spl_object_hash($e), $array)));
         return array_filter($array, fn($k) => in_array($k, $unique), ARRAY_FILTER_USE_KEY);
     }
 
-    function tempurl(string $url, string $prefix = "php", string $tmpdir = "/tmp")
+    function valid_response(string $url, int $status = 200, $follow_redirects = true, $redirect_limitation = 10): bool
+    {
+        if(!filter_var($url, FILTER_VALIDATE_URL)) return false;
+        
+        $headers = array_filter(get_headers($url), fn($h) => str_starts_with($h, "HTTP/"));
+        $header = $follow_redirects ? end($headers) : first($headers);
+        
+        $nRedirects = count(array_filter($headers, fn($h) => str_contains($h, "302")));
+        if($nRedirects > $redirect_limitation) return false;
+
+        return preg_match("/^HTTP\/[0-9]\.[0-9] ".$status."/", $header);
+    }
+    
+    function fetch_url(string $url, string $prefix = "php", string $tmpdir = "/tmp")
     {
         $tmpfname = tempnam($tmpdir, $prefix);
         file_put_contents($tmpfname, file_get_contents($url));
@@ -245,14 +320,20 @@ namespace {
         return $str;
     }
 
-    function random_str(int $length = 10)
+    function random_str(?int $length = null, ?string $chars = null): ?string
     {
-        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charactersLength = strlen($characters);
+        if ($length === null) 
+            $length = 8;
+        if ($chars === null) 
+            $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+        if(!$chars)
+            return null;
+
         $randomString = '';
-        for ($i = 0; $i < $length; $i++) {
-            $randomString .= $characters[rand(0, $charactersLength - 1)];
-        }
+        for ($i = 0, $N = strlen($chars); $i < $length; $i++)
+            $randomString .= $chars[rand(0, $N - 1)];
+
         return $randomString;
     }
 
@@ -330,6 +411,45 @@ namespace {
         return $reflMethod->getDeclaringClass()->getName();
     }
 
+    function builtin_default(string $builtin) {
+
+        switch($builtin) {
+            case "string": 
+                return "";
+            case "array": 
+                return [];
+            case "float": 
+                return NAN;
+            case "int" : 
+                return 0;
+            case "callable" : 
+                return function() {};
+
+            default:
+                return null;
+        }
+    }
+
+    function initialize_property(object $object, string $property): bool
+    {
+        $reflProperty = new ReflectionProperty(get_class($object), $property);
+        $reflProperty->setAccessible(true);
+        
+        if($reflProperty->isInitialized($object))
+            return true;
+        
+        $propertyType = $reflProperty->getType();
+        if(!$propertyType->isBuiltin()) 
+            return false;
+
+        $builtinDefault = builtin_default($propertyType->getName());
+        if(!$propertyType->allowsNull() && $builtinDefault === null)
+            return false;
+
+        $reflProperty->setValue($object, $builtinDefault);
+        return true;
+    }
+
     function path_suffix(string|array|null $path, $suffix, $separator = "_"): string|array|null
     {
         if($path === null) return $path;
@@ -384,6 +504,18 @@ namespace {
         return [$string];
     }
 
+    function implodeByArray(array|string $separator, ?array $array)
+    {
+        if(!$array) return "";
+        if(is_string($separator)) return implode($separator, $array);
+
+        $str = $array[0];
+        for($i = 1, $iN = count($array), $jN = count($separator); $i < $iN; $i++)
+            $str .= $separator[($i-1)%$jN].$array[$i];
+
+        return $str;
+    }
+
     function str_strip(?string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true): ?string { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
     function str_rstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
@@ -431,6 +563,14 @@ namespace {
         }
 
         return $haystack;
+    }
+
+    function strmultipos(string $haystack, array $needles, int $offset = 0): int|false
+    {
+        for($i = $offset, $N = strlen($haystack); $i < $N; $i++)
+            if(in_array($haystack[$i], $needles)) return $i;
+
+        return false;
     }
 
     function begin(object|array &$array) { return array_values(array_slice($array, 0, 1))[0] ?? null; }
@@ -550,7 +690,7 @@ namespace {
         }
 
         try { return mime_content_type($filename); }
-        catch (Exception $e) { return null; }
+        catch (TypeError|Exception $e) { return null; }
     }
 
     function str2bin($string)
@@ -641,9 +781,9 @@ namespace {
         return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k])."\"", array_keys(array_filter($attributes)))));
     }
 
-    function browser_name()    : string { return get_browser2()["name"]; }
-    function browser_platform(): string { return get_browser2()["platform"]; }
-    function browser_version() : string { return get_browser2()["version"]; } 
+    function browser_name()    : ?string { return get_browser2()["name"] ?? null; }
+    function browser_platform(): ?string { return get_browser2()["platform"] ?? null; }
+    function browser_version() : ?string { return get_browser2()["version"] ?? null; } 
 
     function get_browser2(?string $userAgent = null)
     {
@@ -688,13 +828,13 @@ namespace {
         preg_match_all('#(?<browser>' . $known .')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#', $userAgent, $matches);
 
         $version = "";
-        if (count($matches['browser']) == 1) $version = $matches['version'][0];
+        if (count($matches['browser']) == 1) $version = $matches['version'][0] ?? null;
         else {
 
             //we will have two since we are not using 'other' argument yet
             //see if version is before or after the name
-            if (strripos($userAgent,"Version") < strripos($userAgent,$name)) $version = $matches['version'][0];
-            else $version = $matches['version'][1];
+            if (strripos($userAgent,"Version") < strripos($userAgent,$name)) $version = $matches['version'][0] ?? null;
+            else $version = $matches['version'][1] ?? null;
         }
 
         if (!$version) $version = "?";
@@ -795,7 +935,16 @@ namespace {
 
         return false;
     }
-    
+
+    function pathinfo_extension(string $path, ?string $extension = null)
+    {
+        $info = pathinfo($path);
+        $extension = $extension ?? $info["extension"];
+
+        $dirname = $info['dirname'] ? $info['dirname'] . "/" : '';
+        return $dirname . $info['filename'] . '.' . $extension;
+    }
+
     function pathinfo_relationship(string $path)
     {
         $extension = pathinfo(parse_url($path, PHP_URL_PATH), PATHINFO_EXTENSION);
@@ -878,6 +1027,7 @@ namespace {
             return false;
 
         $imagesize = @getimagesize($path);
+        if($imagesize === false) return false;
         return array_key_exists('mime', $imagesize) && 'image/jpeg' == $imagesize['mime'] &&
                array_key_exists('channels', $imagesize) && 4 == $imagesize['channels'];
     }
@@ -1378,11 +1528,15 @@ namespace {
     function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
     function cast($object, $newClass, ...$args)
     {
-        $reflClass      = new \ReflectionClass($object);
+        $reflClass      = new ReflectionClass($object);
         $reflProperties = $reflClass->getProperties();
+        
+        $reflNewClass = new ReflectionClass($newClass);
+        $reflConstr   = new ReflectionMethod($newClass, '__construct');
 
-        $newObject    = new $newClass(...$args);
-        $reflNewClass = new \ReflectionClass($newObject);
+        if($reflConstr->getNumberOfParameters() && !count($args)) $newObject = $reflNewClass->newInstanceWithoutConstructor();
+        else $newObject = new $newClass(...$args);
+
         foreach ($reflNewClass->getProperties() as $reflNewProperty) {
 
             $reflNewProperty->setAccessible(true);
@@ -1408,6 +1562,41 @@ namespace {
         catch (Exception $e) { return false; }
 
         return true;
+    }
+
+    function dec2alphabet(string $s) { return base_convert2($s, "0123456789", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"); }
+    function alphabet2dec(string $s) { return base_convert2($s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "0123456789"); }
+    function base_convert2(string $numberInput, string $fromBaseInput, string $toBaseInput)
+    {
+        if ($fromBaseInput == $toBaseInput) return $numberInput;
+
+        $fromBase = str_split($fromBaseInput,1);
+        $toBase   = str_split($toBaseInput,1);
+        $number   = str_split($numberInput,1);
+        
+        $fromLen  = strlen($fromBaseInput);
+        $toLen    = strlen($toBaseInput);
+        $numberLen = strlen($numberInput);
+        
+        $retval='';
+        if ($toBaseInput == '0123456789') {
+
+            $retval=0;
+            for ($i = 1;$i <= $numberLen; $i++)
+                $retval = bcadd($retval, bcmul(array_search($number[$i-1], $fromBase),bcpow($fromLen,$numberLen-$i)));
+            return $retval;
+        }
+
+        if ($fromBaseInput != '0123456789') $base10=convBase($numberInput, $fromBaseInput, '0123456789');
+        else $base10 = $numberInput;
+
+        if ($base10<strlen($toBaseInput)) return $toBase[$base10];
+        while($base10 != '0') {
+            $retval = $toBase[bcmod($base10,$toLen)].$retval;
+            $base10 = bcdiv($base10,$toLen,0);
+        }
+
+        return $retval;
     }
 
     function hex2rgba(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x%02x"); }
@@ -1493,6 +1682,18 @@ namespace {
         }
 
         return $callback($value);
+    }
+
+    function array_order(array $array, array $reference) 
+    {
+        $order = [];
+        foreach($reference as $key => $value) {
+
+            $order[] = array_search($value, $array);
+            $array = array_key_removes($array, end($order));
+        }
+
+        return array_merge($order, array_values($array));
     }
 
     function is_identity(?array $array) 

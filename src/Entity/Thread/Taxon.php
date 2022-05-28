@@ -63,7 +63,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/*"})
+     * @Uploader(storage="local.storage", max_size="2MB", mime_types={"image/*"})
      */
     protected $icon;
     public function getIcon() { return Uploader::getPublic($this, "icon"); }
@@ -157,17 +157,17 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnex(self $connexes): self 
+    public function addConnex(self $connex): self 
     {
-        if(!$this->connexes->contains($connexes))
-            $this->connexes[] = $connexes;
+        if(!$this->connexes->contains($connex))
+            $this->connexes[] = $connex;
 
         return $this;
     }
 
-    public function removeConnex(self $connexes): self
+    public function removeConnex(self $connex): self
     {
-        $this->connexes->removeElement($connexes);
+        $this->connexes->removeElement($connex);
         return $this;
     }
     

@@ -4,6 +4,7 @@ namespace Base\Twig\Extension;
 
 use Base\Component\Intl\Colors;
 use Base\Service\BaseService;
+use Base\Service\FileService;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProvider;
@@ -111,7 +112,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('distance',    'distance'),
             new TwigFilter('color_name',  'color_name'),
             new TwigFilter('is_uuidv4',   'is_uuidv4'),
-            
+            new TwigFilter('basename',    'basename'),
+
             new TwigFilter('preg_split',     [$this,'preg_split']),
             new TwigFilter('nargs',          [$this, 'nargs']),
             new TwigFilter('instanceof',     [$this, 'instanceof']),
@@ -145,9 +147,12 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
 
-            new TwigFilter('mimetype',       [ImageService::class, 'mimetype']),
-            new TwigFilter('extension',      [ImageService::class, 'extension']),
-            new TwigFilter('extensions',     [ImageService::class, 'extensions']),
+            new TwigFilter('public',         [FileService::class, 'public']),
+            new TwigFilter('downloadable',   [FileService::class, 'downloadable']),
+            new TwigFilter('mimetype',       [FileService::class, 'getMimeType']),
+            new TwigFilter('extensions',     [FileService::class, 'getExtensions']),
+
+            new TwigFilter('obfuscate',      [FileService::class, 'obfuscate']),
             new TwigFilter('imagine',        [ImageService::class, 'imagine']),
             new TwigFilter('webp',           [ImageService::class, 'webp']),
             new TwigFilter('image',          [ImageService::class, 'image']),
@@ -210,7 +215,7 @@ final class BaseTwigExtension extends AbstractExtension
         if($array === null) return null;
         return implode($separator, array_filter($array));
     }
-
+    
     public function image(Environment $env, array $context, $src) 
     { 
         if(!$src) return $src;

@@ -140,11 +140,11 @@ trait BaseSettingsTrait
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRawScalar($path, $useCache);
 
-        if(!$setting instanceof Setting)
-            $setting = new Setting($path, null, $locale);
+        if(!$setting instanceof Setting) {
 
-        if(!$this->entityManager->contains($setting))
+            $setting = new Setting($path, null, $locale);
             $this->entityManager->persist($setting);
+        }
 
         return $setting;
     }

@@ -20,6 +20,7 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Exception;
+use League\Flysystem\FilesystemOperator;
 
 abstract class AbstractAnnotation implements AnnotationInterface
 {
@@ -36,10 +37,9 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getClassMetadata($objectOrClass): ?ClassMetadata { return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);     }
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator { return AnnotationReader::getInstance()->getClassMetadataManipulator();  }
 
-    public static function getFilesystem(string $storage): Filesystem { return AnnotationReader::getInstance()->getFilesystem($storage);      }
-    
-    public static function getImpersonator():?User { return AnnotationReader::getInstance()->getImpersonator(); }
-    public static function getUser():?User         { return AnnotationReader::getInstance()->getUser();         }
+    public static function getFilesystem(): Filesystem { return AnnotationReader::getInstance()->getFilesystem();   }
+    public static function getImpersonator():?User     { return AnnotationReader::getInstance()->getImpersonator(); }
+    public static function getUser():?User             { return AnnotationReader::getInstance()->getUser();         }
 
     public static function getRepository($className)                    { return AnnotationReader::getInstance()->getRepository($className); }
     public static function getAsset($url)                               { return AnnotationReader::getInstance()->getAsset($url);            }

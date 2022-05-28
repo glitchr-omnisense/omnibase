@@ -17,7 +17,7 @@ class ImageType extends FileType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'thumbnail'    => "bundles/base/images.svg",
+            'thumbnail'    => "bundles/base/image.svg",
             'alt'          => null,
             'clipboard'    => true,
 

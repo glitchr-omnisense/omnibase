@@ -9,9 +9,10 @@ use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
-
+use Base\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\AttachmentRepository;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
@@ -21,17 +22,14 @@ use Base\Repository\Layout\Widget\AttachmentRepository;
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
-class Attachment extends Widget implements IconizeInterface
+class Attachment extends Widget implements IconizeInterface, LinkableInterface
 {
     public        function __iconize()       : ?array { return null; } 
     public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; } 
 
-    public function __toUrl(): ?string
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
     {
-        return $this->getTwigExtension()->getRoutingExtension()->getPath(
-            "widget_attachment", 
-            ["slug" => $this->getSlug()]
-        );
+        return $this->getRouter()->generate("widget_attachment", ["slug" => $this->getSlug()], $referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }
@@ -51,7 +49,7 @@ class Attachment extends Widget implements IconizeInterface
 
     /**
      * @ORM\Column(type="text")
-     * @Uploader(storage="local.storage", public="/storage", max_size="4096K")
+     * @Uploader(storage="local.storage", max_size="4096K")
      * @AssertBase\File(max_size="4096K", groups={"new", "edit"})
      */
     protected $download;

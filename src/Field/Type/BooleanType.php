@@ -20,9 +20,11 @@ class BooleanType extends AbstractType
     public function configureOptions(OptionsResolver $resolver) {
 
         $resolver->setDefaults([
-            "confirmation[onCheck]" => true,
+            "confirmation[onCheck]"   => true,
             "confirmation[onUncheck]" => true,
-            "switch" => true
+            "toogle_url"              => null,
+            "switch"                  => true,
+            "inline"                  => false
         ]);
     }
 
@@ -31,6 +33,8 @@ class BooleanType extends AbstractType
         $view->vars["switch"] = $options["switch"];
         $view->vars["confirmation_check"] = $options["confirmation[onCheck]"];
         $view->vars["confirmation_uncheck"] = $options["confirmation[onUncheck]"];
+        $view->vars["toogle_url"] = $options["toogle_url"];
+        $view->vars["inline"] = $options["inline"];
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
     }

@@ -2,15 +2,15 @@
 
 {# Overriding the EA form overriding >( #}
 {% block form_start %}
-
-        {%- set attr = attr|merge({'class': 'needs-validation' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-        {%- set attr = attr|merge({'novalidate': 'novalidate'}) -%}
+    {%- set attr = attr|merge({'class': 'needs-validation' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {%- set attr = attr|merge({'novalidate': 'novalidate'}) -%}
     {{ parent(attr) }}
+
     <input type="hidden" name="referrer" value="{{ ea.request.query.get('referrer') }}">
     {% if form.vars.errors|length > 0 and 'ea_crud' in form.vars.block_prefixes|default([]) %}
         {{ form_errors(form, {attr: { class: 'global-invalid-feedback' }}) }}
     {% endif %}
-{% endblock form_start %}
+{% endblock %}
 
 {% block form_end %}
         {% if not render_rest is defined or render_rest %}
@@ -104,6 +104,7 @@
         'data-tabulation'      : form.vars["tabulation"]
     }) %}
 
+    {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 
     {% if form.vars.tokenSeparators is defined %}
@@ -244,6 +245,9 @@
     {% if form.vars.switch %}
         {%- set row_attr = row_attr|merge({'class': 'form-check form-switch' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
     {% endif %}
+    {% if form.vars.inline %}
+        {%- set row_attr = row_attr|merge({'class': 'inline' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    {% endif %}
 
     {{ form_row(form, { row_attr: row_attr }) }}
 
@@ -257,20 +261,23 @@
     {% endif %}
 
     {% set attr = attr|merge({
-        'data-boolean-field'   : form.vars.id,
+        'data-boolean-field'                : form.vars.id,
         'data-boolean-confirmation-check'   : form.vars.confirmation_check,
-        'data-boolean-confirmation-uncheck'   : form.vars.confirmation_uncheck
+        'data-boolean-confirmation-uncheck' : form.vars.confirmation_uncheck,
+        'data-toggle-url'                   : form.vars.toogle_url
     }) %}
 
+    <div class="form-checkbox">
     {{ form_widget(form, { attr: attr }) }}
-
+    </div>
+    
     {% if form.vars.confirmation_check or form.vars.confirmation_uncheck %}
     <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="myModalLabel">{{ "@fields.boolean.title" | trans([form.vars.label]) }}</h4>
+                <h4 class="modal-title" id="{{ form.vars.id }}-modal-label">{{ "@fields.boolean.title" | trans([form.vars.label]) }}</h4>
             </div>
             <div class="modal-body">
                 {{ "@fields.boolean.text"|trans }}
@@ -327,23 +334,20 @@
 }) %}
 
 <div class="imageupload" {{ block('attributes') }}>
-
     {% if not multiple %}
         <figure>
 
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(600,600) | default(thumbnail) }}" />
-            {% if form.vars.value is not empty %}
-                <figcaption id="{{id}}_figcaption">
-                    {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                    <i class="fas fa-image fa-3x"></i>
-                    {% else %}
-                    <i class="fas fa-plus-circle fa-3x"></i>
-                    {% endif %}
-                </figcaption>
-
-                {% if form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(400,400) | default(thumbnail) }}" />
+            <figcaption id="{{id}}_figcaption">
+                {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
+                <i class="fas fa-image fa-3x"></i>
+                {% else %}
+                <i class="fas fa-plus-circle fa-3x"></i>
                 {% endif %}
+            </figcaption>
+
+            {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
+            <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
             {% endif %}
         </figure>
 
@@ -390,20 +394,34 @@
 
 {%- block fileupload_widget -%}
 
-{% set path_link   = form.vars.pathLink %}
-{% set search_link = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
-{% set clipboard_link = form.vars.value and form.vars.clipboard ? clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) : "" %}
+{% set pathLinks     = form.vars.pathLinks %}
+{% set downloadLinks = form.vars.downloadLinks %}
+{% set clippable = form.vars.clippable %}
+
+{% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
+{% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify)~"</a>" %}
+{% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
+{% set gotoPattern = "<a target='_blank' href='{0}'>"~("fas fa-fw fa-2x fa-external-link-square-alt"|iconify)~"</a>" %}
+{% set deletePattern = allow_delete ? "<a class='warning' data-dz-remove='true'>"~("far fa-fw fa-2x fa-trash-alt"|iconify)~"</a>" : null %}
+
 {% set attr = attr|merge({
     'data-file-sortable'              : form.vars.sortable,
-    'data-file-lightbox'              : form.vars.lightbox,
+    'data-file-lightbox-options'      : form.vars.lightbox,
 
     'data-file-ajax'                  : form.vars.ajax,
     'data-file-href'                  : form.vars.href|default("")|urldecode,
     'data-file-max-files'             : form.vars.max_files,
 
-    'data-file-search'                : search_link,
-    'data-file-clipboard'             : clipboard_link,
-    'data-file-path'                  : path_link,
+    'data-file-path-links'            : pathLinks,
+    'data-file-download-links'        : downloadLinks,
+
+    'data-file-clipboard'             : clipboardPattern,
+    'data-file-download'              : downloadPattern,
+    'data-file-lightbox'              : lightboxPattern,
+    'data-file-goto'                  : gotoPattern,
+    'data-file-delete'                : deletePattern,
+    'data-file-clippable'             : clippable,
+
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
     'data-file-counter[plural]'       : "@fields.fileupload.file_counter.plural"     | trans(["{0}"]),
@@ -423,7 +441,6 @@
 
         {% set placeholder = '' %}
         {% set title = '' %}
-        {% set filesLabel = 'files'|trans %}
 
         {{ form_widget(form.file, { attr: form.file.vars.attr}) }}
 
@@ -440,11 +457,11 @@
     </div>
 
     {% set exts = form.vars.mime_types|extensions %}
-    
+
     {% if form.vars.max_size %}
         <div class="form-filesize form-text text-muted">{{"@fields.fileupload.max_size"|trans([form.vars.max_size|filesize])}}</div>
     {% endif %}
-    
+
     {% if exts is not empty %}
         <div class="form-filesize form-text text-muted">{{"@fields.fileupload.mime_type"|trans([exts|length, exts|join(', ')|upper])}}</div>
     {% endif %}
@@ -457,9 +474,25 @@
         <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.fileupload.dropzone.spinner'|trans }}</div>
     </div>
     {% endif %}
-
-
 </div>
+
+{% if form.vars.confirm_action %}
+<div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="{{ form.vars.id }}-modal-label">{{ "@fields.fileupload.dropzone.title" }}</h4>
+        </div>
+        <div class="modal-body" id="{{ form.vars.id}}-text"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" id="{{ form.vars.id }}-dismiss" data-dismiss="modal">{{ "@fields.fileupload.dropzone.button.cancel"|trans }}</button>
+            <button type="button" class="btn btn-primary" id="{{ form.vars.id }}-confirm">{{ "@fields.fileupload.dropzone.button.confirm"|trans }}</button>
+        </div>
+    </div>
+</div>
+</div>
+{% endif %}
 
 {%- endblock -%}
 
@@ -474,7 +507,7 @@
     {{ form_label(form, null, {'required': required})}}
 
     {% if form.vars.href is not null and not form.vars.multiple and form.vars.value %}
-    <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}">
+    <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
         <i class="fas fa-external-link-square-alt"></i>
     </a>{% endif %}
     
@@ -629,7 +662,7 @@
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-                <i class="far fa-trash-alt"></i>
+                <i class="far fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
 
@@ -659,12 +692,12 @@
                     <div class="form-collection-buttons">
                         {% if form.vars.value is not null %}
                             {% if _href is not null %}
-                                <a href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
+                                <a target='_blank' href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
                             {% else %}
-                                {% set url = form.vars.value.__toUrl() ?? null %}                                
+                                {% set url = form.vars.value.__toLink() ?? null %}                                
                                 {% if url is not empty %}
-                                    {{ url ? clipboard("copy", url)|raw : "" }}
-                                    <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
+                                {{ url ? clipboard("copy", url)|raw : "" }}
+                                <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
                                 {% endif %}
                             {% endif %}
                         {% endif %}
@@ -694,7 +727,7 @@
                 <label>
                     {{ label|default(value)|stringify }}
                     {% if form.vars.value is defined %}
-                        {% set url = form.vars.value.__toUrl() ?? form.vars.href ?? null %}
+                        {% set url = form.vars.value.__toLink() ?? form.vars.href ?? null %}
                         {% if url is not empty %}
                             {{ clipboard("copy", url)|raw }}
                             <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
@@ -815,7 +848,7 @@
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-array-delete-button"
                     title="{{ 'action.remove_item'|trans({}, 'EasyAdminBundle') }}">
-                <i class="far fa-trash-alt"></i>
+                <i class="far fa-fw fa-trash-alt"></i>
             </button>
         {% endset %}
 
@@ -823,7 +856,7 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
-                        <i class="fas fw fa-chevron-right form-array-item-collapse-marker"></i>
+                        <i class="fas fa-fw fa-chevron-right form-array-item-collapse-marker"></i>
                         {{ form_widget(form, {attr:attr}) }}
                     </button>
 
@@ -997,11 +1030,92 @@
 
 {%- endblock -%}
 
-{%- block password_row -%}
+{%- block password2_row -%}
 
-    {# TODO.. #}
-    {%- set row_attr = row_attr|merge({'class': 'col-md-6 form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
-    {{form_row(form, {row_attr:row_attr})}}
+    {% set attr = attr|merge({
+        'data-password-field': form.vars.id,
+        'data-password-strength': '@fields.password.strength.label'|trans|raw,
+        'data-password-autocomplete': form.vars.autocomplete,
+        'data-password-suggestions': form.vars.suggestions,
+        'data-password-match': "@validators.password.not_matching"|trans(),
+        'data-password-minstrength': form.vars.min_strength,
+        'data-password-minstrength-str': "@validators.password.min_strength"|trans([form.vars.min_strength])
+    }) %}
+
+    {%- set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') -%}
+    {%- set attr = attr|merge({'class': 'form-password' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {% if repeater %}
+        {%- set attr = attr|merge({'class': 'form-repeater' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {% endif %}
+    {% if not form.vars.inline %}
+        {%- set row_attr = row_attr|merge({'class': 'form-group form-password-block' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+    <div {{ html_attributes(row_attr) }}>
+        <div class="form-password-details" id="{{ form.vars.id}}_details">
+            <div class="main">
+                <p></p>
+                <div>{{ '@fields.password.requirements.label'|trans }}</div>
+                <ul>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'}) }} {{ '@fields.password.requirements.uppercase'|trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'}) }} {{ '@fields.password.requirements.lowercase'|trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'}) }} {{ '@fields.password.requirements.numbers'  |trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'}) }} {{ '@fields.password.requirements.specials' |trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'}) }} {{ '@fields.password.requirements.length12' |trans }}</li>
+                </ul>
+            </div>
+            <footer>
+                <hr>
+                <div class="form-text text-muted">
+                {% if form.vars.min_length %}{{"@fields.password.requirements.min_length"|trans([form.vars.min_length])}}{% endif %}
+                </div>
+                <div class="form-text text-muted">
+                {% if form.vars.min_strength %}{{"@fields.password.requirements.min_strength"|trans([form.vars.min_strength])}}{% endif %}
+                </div>
+            </footer>
+        </div>
+    {% endif %}
+        <div {{ html_attributes(attr) }}>
+            <div class="form-group">
+
+                {{ form_label(form.plain) }}{{ form_help(form.plain) }}
+                <div class="input-group">
+                    <span class="input-group-text">{{ (form.vars.repeater ? 'fas fa-unlock' : 'fas fa-lock')|iconify }}</span>
+                    {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"}) }}{% endif%}
+                    {{ form_widget(form.plain, {attr:{'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off", 'minlength':form.vars.min_length}}) }}
+                </div>
+                <div class="form-password-strength" id="{{form.vars.id}}_strength">
+                {% for i in range(1,form.vars.min_strength+1) %}
+                    {% if i < form.vars.min_strength+1 %}
+                    <span class="strength" id="{{form.vars.id}}_strength_{{i}}"></span>
+                    {% endif %}
+                {% endfor %}
+                </div>
+
+                {% if form.vars.inline %}
+                {% if form.vars.required is not defined or not form.vars.required and form.vars.value is empty and form.vars.hint %}
+                    <div class="form-text text-muted">{{"@fields.password.unchanged"|trans}}</div>
+                {% endif %}
+                {% if form.vars.min_length %}
+                    <div class="form-text text-muted">{{"@fields.password.requirements.min_length"|trans([form.vars.min_length])}}</div>
+                {% endif %}
+                {% if form.vars.min_strength > 0 %}
+                    <div class="form-text text-muted">{{"@fields.password.requirements.min_strength"|trans([form.vars.min_strength])}}</div>
+                {% endif %}
+                {% endif %}
+
+            </div>
+            {% if form.vars.repeater %}
+            <div class="form-group">
+                {{ form_label(form.plain_repeater) }}{{ form_help(form.plain_repeater) }}
+                <div class="input-group">
+                    <span class="input-group-text">{{ 'fas fa-lock'|iconify }}</span>
+                    {{ form_widget(form.plain_repeater, {attr:{'autocomplete': 'off'}}) }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    {% if not form.vars.inline %}
+    </div>
+    {% endif %}
 
 {%- endblock -%}
 
@@ -1064,6 +1178,7 @@
 {% set attr = attr|merge({
         'data-color-field': form.vars.id,
         'data-options': pickr | json_encode,
+        'class' : 'form-color'
     })
 %}
 

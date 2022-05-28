@@ -65,8 +65,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; } 
 
-    public const __ACTIVE_TIME__ = 60;
-    public const __ONLINE_TIME__ = 60*5;
     private const __DEFAULT_IDENTIFIER__ = "email";
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
     
@@ -221,7 +219,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", public="/storage", max_size="2MB", mime_types={"image/*"})
+     * @Uploader(storage="local.storage", max_size="2MB", mime_types={"image/*"}, fetch=true)
      * @AssertBase\File(max_size="2MB", mime_types={"image/*"})
      */
     protected $avatar;
@@ -268,6 +266,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @var string Plain password should be empty unless you want to change it
+     * @Assert\NotCompromisedPassword
+     * @AssertBase\Password(min_strength=4, min_length=8)
      */
     protected $plainPassword;
     public function getPlainPassword(): ?string { return $this->plainPassword; }
@@ -744,6 +744,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return $this;
     }
 
-    public function isActive(): bool { return ($this->getActiveAt() && $this->getActiveAt() > new \DateTime(self::__ACTIVE_TIME__.' seconds ago')); }
-    public function isOnline(): bool { return ($this->getActiveAt() && $this->getActiveAt() > new \DateTime(self::__ONLINE_TIME__.' seconds ago')); }
+    public static function getActiveDelay(): int { return self::getParameterBag()->get("base.user.active_delay"); }
+    public function isActive(): bool { return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getActiveDelay().' seconds ago'); }
+    public static function getOnlineDelay(): int { return self::getParameterBag()->get("base.user.online_delay"); }
+    public function isOnline(): bool { return $this->getActiveAt() && $this->getActiveAt() > new \DateTime($this->getOnlineDelay().' seconds ago'); }
 }

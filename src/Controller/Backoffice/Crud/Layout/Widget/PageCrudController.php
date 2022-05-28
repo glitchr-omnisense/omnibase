@@ -20,7 +20,7 @@ class PageCrudController extends WidgetCrudController
             yield ImageField::new('thumbnail')->setColumns(6);
             yield SlugField::new('slug')->setColumns(6)->setTargetFieldName("translations.title");
 
-            yield SelectField::new('similars')->showFirst()->setColumns(6)->setFilter(Page::class);
+            yield SelectField::new('connexes')->showFirst()->setColumns(6)->setFilter(Page::class);
 
         }], $args);
     }

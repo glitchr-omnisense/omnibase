@@ -8,6 +8,41 @@ boolean:
 stock:
   unlimited: Illimité
 
+password: 
+  invalid_message: "Les mots de passe ne sont pas identiques."
+  first: "Mot de passe"
+  second: "Confirmation du mot de passe"
+  unchanged: "Champ optionnel à laisser vide si inchangé."
+  strength:
+    label: "Le mot de passe est <b>{label}</b> (Force {force})."
+    bad:
+      label: "<span style='color:red'>Mauvais</span>"
+      message: "Il est déconseillé d'utiliser un mot de passe si facile à trouver."
+    poor:
+      label: "<span style='color:orange'>Très faible</span>"
+      message: "Ce mot de passe est très faible."
+    weak:
+      label: "<span style='color:orange'>Faible</span>"
+      message: "Ce mot de passe est faible."
+    good:
+      label: "<span style='color:lightgreen'>Bon</span>"
+      message: "Ce mot de passe est plutôt bon"
+    strong:
+      label: "<span style='color:green'>Sécurisé</span>"
+      message: "Ce mot de passe est très bien !"
+  requirements: 
+    label: "La force du mot de passe augmente s'il :"
+    uppercase: "contient au moins une lettre minuscule"
+    lowercase: "contient au moins une lettre majuscule"
+    numbers: "contient au moins un nombre"
+    length12: "est plus long que 12 caractères"
+    specials: "contient au moins un caractère spécial (&, *, $, ..)"
+    min_strength: "Le mot de passe doit être au moins de force {0}."
+    min_length: "{0, plural,
+        =1 {Le mot de passe doit contenir au moins # caractère.}
+        other {Le mot de passe doit contenir au moins # caractères.}
+    }"
+
 clipboard:
   info:
     copy: Copier dans le presse-papier
@@ -65,9 +100,22 @@ fileupload:
       php_extension: "Une extension PHP a stoppé le téléversement."
       
     dropzone:
-        title: "Téléchargez les fichiers ici"
-        description: "Déposez les fichiers ici ou cliquez pour télécharger"
-        spinner: "Merci de patienter.."
+      title: "Action demandée"
+      button: 
+        confirm: Confirmer
+        cancel: Annuler
+      spinner: "Merci de patienter.."
+      default_message: "<h4>Téléchargez les fichiers ici</h4><p>Déposez les fichiers ici ou cliquez pour télécharger</p>"
+      fallback_message: "<h4>Téléchargez les fichiers ici</h4><p>Ce navigateur ne supporte pas la fonctionnalité drag'n'drop.</p>"
+      fallback_text: "Merci d'utiliser le formulaire ci dessous."
+      file_too_big: "Ce fichier est trop volumineux."
+      invalid_file_type: "Ce type de fichier ne peut pas etre mis en ligne."
+      max_files_exceeded: "Impossible de mettre en ligne plus de fichiers."
+      response_error: "Réponse serveur invalide."
+      cancel_upload: "Annuler"
+      cancel_upload_confirmation: "Merci de confirmer l'annulation."
+      remove_file: "Supprimer"
+      remove_file_confirmation: "Merci de confirmer la suppression."
 
     max_size: "La taille de fichier maximale autorisée est de {0}."
     max_size_feedback: "L'image selectionnée est trop volumineuse ({0})."

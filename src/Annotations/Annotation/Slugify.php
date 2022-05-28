@@ -97,13 +97,19 @@ class Slugify extends AbstractAnnotation
         if(!$input) $input = camel2snake(class_basename($entity), "-");
         $input .= !empty($suffix) ? $this->separator.$suffix : "";
 
-        $keep = $this->keep[0] ?? false;
-        if(!$keep) $slug = $this->slugger->slug($input, $this->separator);
+        if(!$this->keep) $slug = $this->slugger->slug($input, $this->separator);
         else {
 
-            $slug = explode($keep, $input);
+            $pos = 0;
+            $posList = [];
+
+            $pos = -1;
+            while( ($pos = strmultipos($input, $this->keep, $pos+1)) )
+                $posList[] = $input[$pos];
+
+            $slug = explodeByArray($this->keep, $input);
             $slug = array_map(fn($i) => $this->slugger->slug($i, $this->separator), $slug);
-            $slug = implode($keep, $slug);
+            $slug = implodeByArray($posList, $slug);
         }
 
         return ($this->lowercase ? strtolower($slug) : $slug);
@@ -130,32 +136,6 @@ class Slugify extends AbstractAnnotation
     public function supports(string $target, ?string $targetValue = null, $object = null): bool
     {
         return ($target == AnnotationReader::TARGET_PROPERTY);
-    }
-
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        $currentSlug = $this->getFieldValue($entity, $property);
-        $slug = $this->getSlug($entity, $property, $currentSlug);
-        $this->setFieldValue($entity, $property, $slug);
-    }
-
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
-    {
-        if($this->sync) {
-            
-            $oldEntity = $this->getOldEntity($entity);
-            if ($this->getFieldValue($oldEntity, $property) == $this->getFieldValue($entity, $property)) {
-                
-                $labelModified = !$this->referenceColumn ? null : 
-                    $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
-
-                if($labelModified) {
-
-                    $slug = $this->getSlug($entity, $property);
-                    $this->setFieldValue($entity, $property, $slug);
-                }
-            }
-        }
     }
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)

@@ -27,12 +27,20 @@ class IconType extends SelectType implements SelectInterface
             "adapter"   => $this->baseService->getParameterBag("base.icon_provider.default_adapter"),
 
             "autocomplete" => true,
+            "autocomplete_pagesize" => 200,
             "autocomplete_endpoint" => null,
-            "autocomplete_pagesize" => 500
+            "autocomplete_endpoint_parameters" => null,
         ]);
 
         $resolver->setNormalizer('autocomplete_endpoint', function (Options $options, $value) {
-            return $value ?? "autocomplete/".$options["adapter"]::getName()."/".$options["autocomplete_pagesize"];
+            return $value ?? "ux_autocomplete_icons";
+        });
+
+        $resolver->setNormalizer('autocomplete_endpoint_parameters', function (Options $options, $value) {
+            return $value ?? [
+                    "provider" => $options["adapter"]::getName(),
+                    "pageSize" => $options["autocomplete_pagesize"]
+                ];
         });
     }
 
