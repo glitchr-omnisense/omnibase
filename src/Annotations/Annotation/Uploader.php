@@ -37,14 +37,14 @@ use Symfony\Component\Uid\Uuid;
  */
 class Uploader extends AbstractAnnotation
 {
-    private string $storage;
-    private string $pool;
+    protected string $storage;
+    protected string $pool;
 
-    private bool $fetch;
-    private bool $missable;
-    private array $config;
-    private array $mimeTypes;
-    private int   $maxSize;
+    protected bool $fetch;
+    protected bool $missable;
+    protected array $config;
+    protected array $mimeTypes;
+    protected int   $maxSize;
 
     public function __construct( array $data )
     {
@@ -74,6 +74,7 @@ class Uploader extends AbstractAnnotation
     public function getStorage() { return $this->storage; }
 
     public function getPool() { return $this->pool; }
+    public function getMissable() { return $this->missable; }
     public function getPath(mixed $entity, string $fieldName, ?string $uuid = null): ?string
     {
         $pool     = $this->pool;
@@ -124,7 +125,7 @@ class Uploader extends AbstractAnnotation
                 $path = $that->getPath($entity, $fieldName, $uuidOrFile);
                 $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
                 if($pathPublic) $pathList[] = $pathPublic;
-                elseif($that->missable) $pathList[] = $uuidOrFile;
+                elseif($that->getMissable()) $pathList[] = $uuidOrFile;
             }
 
             $pathList = array_filter($pathList);
@@ -143,7 +144,7 @@ class Uploader extends AbstractAnnotation
             $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
             if($pathPublic) return $pathPublic;
 
-            return $that->missable ? $uuidOrFile : null;
+            return $that->getMissable() ? $uuidOrFile : null;
         }
     }
 
@@ -282,7 +283,7 @@ class Uploader extends AbstractAnnotation
             $file = is_string($entry) && is_file($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
                 
-                if($this->missable) $fileList[] = $entry;
+                if($this->getMissable()) $fileList[] = $entry;
                 else if(is_uuidv4($entry)) $fileList[] = $entry;
                 continue;
             }
