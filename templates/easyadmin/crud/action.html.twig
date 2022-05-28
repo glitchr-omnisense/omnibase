@@ -87,7 +87,7 @@
                 {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
                 {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans|capitalize %}
                 {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
-                <li class="dropdown-item label-item"><a href="{{ linkUrl }}"
+                <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
                     {{label}}

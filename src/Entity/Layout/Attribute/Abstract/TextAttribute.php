@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\TextAttributeRepository;
  * @DiscriminatorEntry( value = "text" )
  */
 
-class TextAttribute extends AbstractAttribute implements IconizeInterface
+final class TextAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-paragraph"]; } 
 

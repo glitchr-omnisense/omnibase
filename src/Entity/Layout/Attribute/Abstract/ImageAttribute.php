@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\ImageAttributeRepository;
  * @DiscriminatorEntry( value = "image" )
  */
 
-class ImageAttribute extends AbstractAttribute implements IconizeInterface
+final class ImageAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-image"]; }
 

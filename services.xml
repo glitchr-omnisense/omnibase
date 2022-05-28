@@ -598,6 +598,10 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\EntitySubscriber\ImageCropSubscriber">
+            <tag name="doctrine.event_subscriber" />
+        </service>
+
         <service id="Base\Form\Type\Layout\SettingListType">
             <tag name="form.type" />
             <argument type="service" id="base.settings" />
@@ -713,7 +717,6 @@
 
         <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\CropperType"><tag name="form.type" />
-            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.service" />
         </service>
@@ -904,6 +907,7 @@
         <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\PercentAttributeCrudController"      parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\DateTimeAttributeCrudController"     parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\NumberAttributeCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\ScalarAttributeCrudController"       parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\HyperpatternAttributeCrudController" parent="Base\Controller\Backoffice\Crud\Layout\Attribute\Abstract\AbstractAttributeCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
     </services>
 </container>

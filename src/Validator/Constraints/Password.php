@@ -11,6 +11,7 @@ class Password extends Constraint
 {
     public const MIN_LENGTH_FALLBACK   = 8;
     public const MIN_STRENGTH_FALLBACK = 0;
+    public const MAX_STRENGTH_FALLBACK = 5;
 
     public $messageMinStrength = 'password.min_strength';
     public $messageMinLength   = 'password.min_length';

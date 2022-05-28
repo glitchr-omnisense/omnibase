@@ -8,6 +8,7 @@ use Base\Service\BaseService;
 use Base\Validator\Constraints\Password;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Extension\Core\DataTransformer\ValueToDuplicatesTransformer;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType as SymfonyPasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -31,10 +32,13 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
     {
         $view->vars["inline"]       = $options["inline"];
         $view->vars["hint"]         = $options["hint"];
+        $view->vars["secure"]       = $options["secure"];
         $view->vars["repeater"]     = $options["repeater"];
         $view->vars["revealer"]     = $options["revealer"];
         $view->vars["min_length"]   = $options["min_length"];
+        $view->vars["allow_empty"]  = $options["allow_empty"];
         $view->vars["min_strength"] = $options["min_strength"];
+        $view->vars["max_strength"] = $options["max_strength"];
         $view->vars["autocomplete"] = $options["autocomplete"];
         $view->vars["suggestions"]  = $options["suggestions"];
         $view->vars["required"]     = $options["required"] ?? true;
@@ -46,14 +50,17 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
     {
         $resolver->setDefaults([
             'inline'            => true,
+            'secure'            => true,
             'hint'              => true,
             'revealer'          => false,
             'repeater'          => true,
+            'allow_empty'       => false,
             'autocomplete'      => "on",
             'suggestions'       => true,
             'suggestions'       => false,
             "min_length"        => Password::MIN_LENGTH_FALLBACK,
             "min_strength"      => Password::MIN_STRENGTH_FALLBACK,
+            "max_strength"      => Password::MAX_STRENGTH_FALLBACK,
             'options'           => [],
             'options[repeater]' => [],
             'invalid_message'   => '@fields.password.invalid_message'
@@ -70,20 +77,22 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
 
         if (!isset($options['options']['error_bubbling']))
             $options['options']['error_bubbling'] = $options['error_bubbling'];
-        if (!isset($options['options']['label']))
-            $options["options"]["label"] = $options["label"];
         if (!isset($options['options']['help']))
             $options["options"]["help"] = $options["help"];
+        if (!isset($options['options']['required']) && array_key_exists("required", $options))
+            $options["options"]["required"] = $options["required"];
 
         $builder->add('plain', SymfonyPasswordType::class, array_merge([
-            "label" => $this->translator->trans("@fields.password.first"),
+            "label" => $options["label"] ?? $this->translator->trans("@fields.password.first"),
             "mapped" => true,
             "constraints" => [new Password(["min_strength" => $options["min_strength"], "min_length" => $options["min_length"]])]
         ], $options["options"]));
-
+        
         if($options["repeater"]) {
-            $builder->add('plain_repeater', SymfonyPasswordType::class, array_merge(["label" => $this->translator->trans("@fields.password.second"), "mapped" => true], $options['options[repeater]']));
-            $builder->addViewTransformer(new ValueToDuplicatesTransformer(["plain", "plain_repeater"]));
+            $builder->add('plain_repeater', SymfonyPasswordType::class, array_merge([
+                "label" => $this->translator->trans("@fields.password.second"), 
+                "mapped" => true
+            ], $options['options[repeater]']));
         }
     }
 
@@ -96,6 +105,17 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $plainPasswordType = iterator_to_array($forms)["plain"];
-        $viewData = $plainPasswordType->getViewData();
+        $plainPasswordRepeaterType = iterator_to_array($forms)["plain_repeater"];
+        $options = $plainPasswordType->getConfig()->getOptions();
+        
+        if($viewData == []) $viewData = "";
+        if($plainPasswordType->getViewData() !== "" || !($options["required"] ?? false))
+            $viewData = $plainPasswordType->getViewData();
+
+        if ($plainPasswordRepeaterType) {
+
+            if($plainPasswordType->getViewData() !== $plainPasswordRepeaterType->getViewData())
+                throw new TransformationFailedException('Password are differents');
+        }
     }
 }

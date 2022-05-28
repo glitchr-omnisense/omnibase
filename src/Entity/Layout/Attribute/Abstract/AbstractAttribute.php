@@ -27,6 +27,7 @@ use Base\Repository\Layout\Attribute\Abstract\AbstractAttributeRepository;
  * 
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
+
 abstract class AbstractAttribute implements AbstractAttributeInterface, AutocompleteInterface, TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;

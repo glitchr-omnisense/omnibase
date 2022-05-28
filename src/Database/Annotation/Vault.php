@@ -5,6 +5,8 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -87,10 +89,13 @@ class Vault extends AbstractAnnotation
         catch (\Exception $e) { return null; }
     }
 
-    public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function preUpdate  (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { $this->preLifecycleEvent($event, $classMetadata, $entity, $property); }
+    public function prePersist (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { $this->preLifecycleEvent($event, $classMetadata, $entity, $property); }
+    public function preLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
+
         
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach($this->fields as $field) {
@@ -106,26 +111,10 @@ class Vault extends AbstractAnnotation
         }
     }
 
-    public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
-    {
-        $vault = $entity->getVault();
-        $marshaller = $this->getMarshaller($vault);
-
-        $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        foreach($this->fields as $field) {
-
-            if(!$entity->isSecure()) continue;
-            if($propertyAccessor->isReadable($entity, $field)) {
-
-                $value = $propertyAccessor->getValue($entity, $field);
-                if($value === null) continue;
-
-                $propertyAccessor->setValue($entity, $field, base64_encode($this->seal($marshaller, $value)));
-            }
-        }
-    }
-
-    public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
+    public function postUpdate (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { $this->postLifecycleEvent($event, $classMetadata, $entity, $property); }
+    public function postPersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { $this->postLifecycleEvent($event, $classMetadata, $entity, $property); }
+    public function postLoad   (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { $this->postLifecycleEvent($event, $classMetadata, $entity, $property); }
+    public function postLifecycleEvent(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
@@ -139,7 +128,7 @@ class Vault extends AbstractAnnotation
                 $value = base64_decode($propertyAccessor->getValue($entity, $field));
                 if($value === false) $value = null;
 
-                if(is_string($value)) 
+                if(is_string($value))
                     $propertyAccessor->setValue($entity, $field, $this->reveal($marshaller, $value));
             }
         }

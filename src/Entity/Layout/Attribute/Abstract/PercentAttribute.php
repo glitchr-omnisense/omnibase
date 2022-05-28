@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\PercentAttributeRepository;
  * @DiscriminatorEntry( value = "percent" )
  */
 
-class PercentAttribute extends AbstractAttribute implements IconizeInterface
+final class PercentAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-percent"]; } 
 

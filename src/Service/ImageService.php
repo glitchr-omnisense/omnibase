@@ -178,8 +178,10 @@ class ImageService extends FileService implements ImageServiceInterface
             if(!$this->filesystem->fileExists($pathCache, "local.cache")) {
 
                 $filteredPath = $this->filter($path, $filters, $config) ?? $path;
-                $this->filesystem->mkdir(dirname($filteredPath));
+
+                $this->filesystem->mkdir(dirname($pathCache), "local.cache");
                 $this->filesystem->write($pathCache, file_get_contents($filteredPath), "local.cache");
+
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }
 

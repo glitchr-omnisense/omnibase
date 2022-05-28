@@ -18,16 +18,19 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Traversable;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+
 
 class CropperType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'cropper'; }
     
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, FormFactory $formFactory, BaseService $baseService) 
+    public function __construct(FormFactory $formFactory, BaseService $baseService) 
     {
-        $this->classMetadataManipulator = $classMetadataManipulator;
         $this->formFactory = $formFactory;
         $this->baseService = $baseService;
+
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -49,23 +52,12 @@ class CropperType extends AbstractType implements DataMapperInterface
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
             'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
 
-            "pivot"                 => null,
-            "target"                => null,
+            "quadrant"          => null,
+            "target"         => null,
             "natural_width"  => null,
             "natural_height" => null,
 
-            "fields" => [
-                "label"    => [],
-                "x0"        => [],
-                "y0"        => [],
-                "xP"        => [],
-                "yP"        => [],
-                "width0"    => [],
-                "height0"   => [],
-                "scaleX"   => [],
-                "scaleY"   => [],
-                "rotate"   => [],
-            ],
+            "fields" => null,
 
             "aspectRatios" => [
                 "@fields.cropper.aspect_ratio.standard"  => 4/3,
@@ -74,19 +66,6 @@ class CropperType extends AbstractType implements DataMapperInterface
                 "@fields.cropper.aspect_ratio.facebook"  => 1200/630,  # > 16:9
                 "@fields.cropper.aspect_ratio.pinterest" => 1000/1500, # 2:3
             ],
-
-            "default_fields" => [
-
-                "label"  => ["label"  => "Label"  , "required" => false, "form_type" => TextType::class],
-                "slug"   => ["target" => "label"  , "required" => false, "form_type" => SlugType::class],
-                "x0"      => ["label"  => "Left"   , "form_type" => HiddenType::class],
-                "y0"      => ["label"  => "Top"    , "form_type" => HiddenType::class],
-                "width0"  => ["label"  => "Width"  , "form_type" => HiddenType::class],
-                "height0" => ["label"  => "Height" , "form_type" => HiddenType::class],
-                "scaleX" => ["label"  => "Scale X", "form_type" => HiddenType::class],
-                "scaleY" => ["label"  => "Scale Y", "form_type" => HiddenType::class],
-                "rotate" => ["label"  => "Rotate" , "form_type" => HiddenType::class]
-            ]
         ]);
 
         $resolver->setAllowedTypes('target', ['string', 'null']);
@@ -100,40 +79,38 @@ class CropperType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
 
-            $fields = array_keys($options["fields"]);
-            foreach($fields as $parameter) {
+            $fields = array_reverse(array_merge(array_reverse([
 
-                $formOptions = array_merge(
-                    $options["default_fields"][$parameter],
-                    $options["fields"][$parameter]
-                );
-                
-                $formType = array_pop_key("form_type", $formOptions) ?? HiddenType::class;
-                $form->add($parameter, $formType, $formOptions);
+                // Displayed variables
+                "x"      => ["label"  => "Left"   , "form_type" => NumberType::class, "min" => -1],
+                "y"      => ["label"  => "Top"    , "form_type" => NumberType::class, "min" => -1],
+                "width"  => ["label"  => "Width"  , "form_type" => NumberType::class, "min" => -1],
+                "height" => ["label"  => "Height" , "form_type" => NumberType::class, "min" => -1],
+
+                // Not implemented for the moment
+                // "rotate"  => ["label"  => "Rotate" , "form_type" => HiddenType::class],
+                // "scaleX"  => ["label"  => "Scale X", "form_type" => HiddenType::class],
+                // "scaleY"  => ["label"  => "Scale Y", "form_type" => HiddenType::class],
+                // "pivotX"      => ["label"  => "Pivot X", "form_type" => HiddenType::class],
+                // "pivotY"      => ["label"  => "Pivot Y", "form_type" => HiddenType::class],
+
+                // Behind the scene
+                "x0"             => ["form_type" => HiddenType::class, "label" => "Left (normalized)"   ],
+                "y0"             => ["form_type" => HiddenType::class, "label" => "Top (normalized)"    ],
+                "width0"         => ["form_type" => HiddenType::class, "label" => "Width (normalized)"  ],
+                "height0"        => ["form_type" => HiddenType::class, "label" => "Height (normalized)" ],
+                "xP"             => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
+                "yP"             => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
+
+            ]), array_reverse($options["fields"]) ?? []));
+
+            foreach($fields as $fieldName => $fieldOptions) {
+
+                $fieldType = array_pop_key("form_type", $fieldOptions) ?? HiddenType::class;
+                $form->add($fieldName, $fieldType, $fieldOptions);
+                dump($fieldOptions);
             }
         });
-    }
-
-    public function mapDataToForms($viewData, Traversable $forms) {
-
-        if($viewData === null) return;
-        
-        $form = current(iterator_to_array($forms));
-        $options = $form->getParent()->getConfig()->getOptions();
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
-        foreach(iterator_to_array($forms) as $formName => $form) {
-            $form->setData($classMetadata->getFieldValue($viewData, $formName, $form->getData()));
-        }
-    }
-
-    public function mapFormsToData(Traversable $forms, &$viewData)
-    {
-        $form = current(iterator_to_array($forms));
-        $options = $form->getParent()->getConfig()->getOptions();
-        
-        $classMetadata = $this->classMetadataManipulator->getClassMetadata($options["data_class"]);
-        foreach(iterator_to_array($forms) as $formName => $form)
-            $classMetadata->setFieldValue($viewData, $formName, $form->getData());
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -180,27 +157,46 @@ class CropperType extends AbstractType implements DataMapperInterface
         $view->vars['target'] = $targetPath;
 
         //
-        // Check if pivot path is reacheable..
-        if(in_array($options["pivot"], Quadrant8::getPermittedValues())) $pivotPath = $options["pivot"];
+        // Check if quadrant path is reacheable..
+        if(in_array($options["quadrant"], Quadrant8::getPermittedValues())) $quadrantPath = $options["quadrant"];
         else {
 
-            $pivot = $ancestor;
-            $pivotPath = $options["pivot"] ? explode(".", $options["pivot"]) : null;
-            foreach($pivotPath ?? [] as $path) {
+            $quadrant = $ancestor;
+            $quadrantPath = $options["quadrant"] ? explode(".", $options["quadrant"]) : null;
+            foreach($quadrantPath ?? [] as $path) {
 
-                if(!array_key_exists($path, $pivot->children))
-                    throw new \Exception("Child form \"$path\" related to view data \"".$pivot->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["pivot"]."\")");
+                if(!array_key_exists($path, $quadrant->children))
+                    throw new \Exception("Child form \"$path\" related to view data \"".$quadrant->vars["name"]."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["quadrant"]."\")");
 
-                $pivot = $pivot->children[$path];
-                if($pivot->vars["name"] == "translations") {
+                $quadrant = $quadrant->children[$path];
+                if($quadrant->vars["name"] == "translations") {
 
-                    $availableLocales = array_keys($pivot->children);
-                    $locale = count($availableLocales) > 1 ? $pivot->vars["default_locale"]: first($availableLocales) ?? null;
-                    if($locale) $pivot = $pivot->children[$locale];
+                    $availableLocales = array_keys($quadrant->children);
+                    $locale = count($availableLocales) > 1 ? $quadrant->vars["default_locale"]: first($availableLocales) ?? null;
+                    if($locale) $quadrant = $quadrant->children[$locale];
                 }
             }
         }
 
-        $view->vars['pivot'] = $pivotPath;
+        $view->vars['quadrant'] = $quadrantPath;
+    }
+
+    public function mapDataToForms($viewData, Traversable $forms)
+    {
+        if($viewData === null) return;
+
+        foreach(iterator_to_array($forms) as $formName => $form)
+            $form->setData($this->propertyAccessor->getValue($viewData, $formName));
+    }
+
+    public function mapFormsToData(Traversable $forms, &$viewData)
+    {
+        foreach(iterator_to_array($forms) as $formName => $form) {
+            dump($form, $formName, $form->getData());
+            $this->propertyAccessor->setValue($viewData, $formName, $form->getData());
+        }
+
+        dump($viewData);
+        exit(1);
     }
 }

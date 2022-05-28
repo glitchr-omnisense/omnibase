@@ -4,18 +4,17 @@ namespace Base\Controller\Backoffice\Crud\Layout;
 
 
 use Base\Controller\Backoffice\AbstractCrudController;
-use Base\Field\AssociationField;
 use Base\Field\CollectionField;
 use Base\Field\ImageField;
 use Base\Field\QuadrantField;
 use Base\Field\Type\CropperType;
 use Base\Field\Type\NumberType;
-use Base\Field\Type\QuadrantType;
 use Base\Field\Type\SlugType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class ImageCrudController extends AbstractCrudController
 {
@@ -49,14 +48,10 @@ class ImageCrudController extends AbstractCrudController
                     ->setEntryType(CropperType::class)
                     ->setEntryOptions([
                         "target" => "source",
-                        "pivot"  => "quadrant.wind",
+                        "quadrant"  => "quadrant.wind",
                         "fields" => [
-                            "label"   => ["form_type" => TextType::class ],
-                            "slug"    => ["label" => false, "lock" => true, "keep" => ":", "form_type" => SlugType::class , "target" => ".label"],
-                            "x0"      => ["form_type" => NumberType::class, "min" => -1],
-                            "y0"      => ["form_type" => NumberType::class, "min" => -1],
-                            "width0"  => ["form_type" => NumberType::class, "min" => -1],
-                            "height0" => ["form_type" => NumberType::class, "min" => -1],
+                            "label"   => ["form_type" => TextType::class, "label" => "Label", "required"  => false],
+                            "slug"    => ["form_type" => SlugType::class, "label" => false, "lock" => true, "keep" => ":", "target" => ".label"]
                         ]
                     ]);
         }, $args);

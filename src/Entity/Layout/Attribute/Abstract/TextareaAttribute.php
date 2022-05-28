@@ -14,7 +14,7 @@ use Base\Repository\Layout\Attribute\Abstract\TextareaAttributeRepository;
  * @DiscriminatorEntry( value = "textarea" )
  */
 
-class TextareaAttribute extends AbstractAttribute implements IconizeInterface
+final class TextareaAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-align-left"]; }
 

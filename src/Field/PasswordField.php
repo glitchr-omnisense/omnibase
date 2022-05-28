@@ -20,13 +20,25 @@ final class PasswordField implements FieldInterface
             ->addCssClass('field-password');
     }
 
-    public function setRevealer(string $revealer): self
+    public function setRevealer(bool $revealer): self
     {
         $this->setFormTypeOption("revealer", $revealer);
         return $this;
     }
 
-    public function setRepeater(string $repeater): self
+    public function allowEmpty(bool $empty = true): self
+    {
+        $this->setFormTypeOption("allow_empty", $empty);
+        return $this;
+    }
+
+    public function secure(bool $secure = true): self
+    {
+        $this->setFormTypeOption("secure", $secure);
+        return $this;
+    }
+
+    public function setRepeater(bool $repeater): self
     {
         $this->setFormTypeOption("repeater", $repeater);
         return $this;

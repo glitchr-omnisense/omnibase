@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\HyperpatternAttributeRepository;
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
 
-class HyperpatternAttribute extends AbstractAttribute implements IconizeInterface
+final class HyperpatternAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 

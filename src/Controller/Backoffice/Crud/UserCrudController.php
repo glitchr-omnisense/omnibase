@@ -62,14 +62,14 @@ class UserCrudController extends AbstractCrudController
 
             yield BooleanField::new("isApproved")->withConfirmation()->showInline()->setColumns(2);
             yield FormField::addRow()->setColumns(10);
-            yield AvatarField::new('avatar')->hideOnDetail()->setCropper(null);
+            yield AvatarField::new('avatar')->hideOnDetail()->setCropper();
 
             yield FormField::addRow()->setColumns(2);
             yield RoleField::new('roles')->setColumns(5);
             yield EmailField::new('email')->setColumns(5);
 
             yield FormField::addRow()->setColumns(2);
-            yield PasswordField::new('plainPassword')->onlyOnForms()->setColumns(10)->showInline(false)->setRepeater(true)->setRevealer(true);
+            yield PasswordField::new('plainPassword')->onlyOnForms()->allowEmpty()->setColumns(10)->showInline(false)->setRepeater(true)->setRevealer(true);
 
             yield DateTimeField::new('updatedAt')->onlyOnDetail();
             yield DateTimeField::new('createdAt')->onlyOnDetail();
@@ -95,9 +95,8 @@ class UserCrudController extends AbstractCrudController
             $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
             $user->approve();
 
-	    $this->entityManager->flush();
+            $this->entityManager->flush($user);
         }
-
 
         return $this->redirect($batchActionDto->getReferrerUrl());
     }

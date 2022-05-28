@@ -155,9 +155,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $fields[$key]["inline"]       = true;
                 $fields[$key]["revealer"]     = true;
                 $fields[$key]["repeater"]     = false;
+                $fields[$key]["allow_empty"]  = true;
                 $fields[$key]["min_length"]   = 0;
-                $fields[$key]["min_strength"] = 0;
-                $fields[$key]["hint"] = false;
+                $fields[$key]["max_strength"] = 0;
+                $fields[$key]["secure"]       = false;
+                $fields[$key]["hint"]         = false;
+                $fields[$key]["autocomplete"] = false;
             }
         }
 
@@ -166,7 +169,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
         if($form->isSubmitted() && $form->isValid()){
 
-            $data     = array_filter($form->getData(), fn($value) => !is_null($value));
+            $data     = array_filter($form->getData(), function($v, $k) use ($fields) {
+
+                // If field is required but empty, update skip.. (to make sure the value is not empty)
+                if($fields[$k]["required"] ?? true)
+                    return !is_null($v) && $v->getValue() != null;
+
+                // If not required, then we update regardless of the value, but checking for secure flag
+                return !$fields[$k]["secure"];
+            
+            }, ARRAY_FILTER_USE_BOTH);
+
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
@@ -176,10 +189,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach($settings as $setting)
                 $setting->setSecure(true);
 
-            foreach(array_diff_key($data, $settings) as $name => $setting) {
+            foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
-	        $this->settingRepository->flush();
-	    }
+
+            $this->settingRepository->flush();
 
             $notification = new Notification("@controllers.dashboard_apikey.success");
             $notification->setUser($this->getUser());
@@ -285,7 +298,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 if(!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
-	            $this->slotRepository->flush();
+	                $this->slotRepository->flush();
                 }
 
                 $widgets = $data[$path] ?? [];
