@@ -48,7 +48,7 @@ class UserCrudController extends AbstractCrudController
             if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);
             else {
                 $extension->setTitle($entity.$impersonate);
-                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@dashboard.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
+                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@EasyAdminBundle.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
             }
         }
         

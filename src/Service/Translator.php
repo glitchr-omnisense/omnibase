@@ -109,7 +109,7 @@ class Translator implements TranslatorInterface
 
         if ($trans == $id && !$this->isDebug)
             $trans = $this->translator->trans($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
-
+            
         if ($trans == $id && $customId)
             return ($domain && $atBegin ? "@".$domain.".".$id : $id);
 

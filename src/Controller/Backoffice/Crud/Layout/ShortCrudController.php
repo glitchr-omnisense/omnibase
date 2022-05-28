@@ -26,7 +26,7 @@ class ShortCrudController extends AbstractCrudController
                     "label" => [],
                     "url" => [
                         "form_type" => UrlType::class, 
-                        "attr" => ["placeholder" => $this->getTranslator()->trans("@dashboard.crud.short.url.placeholder", [$_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"]])]
+                        "attr" => ["placeholder" => $this->getTranslator()->trans("@EasyAdminBundle.crud.short.url.placeholder", [$_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"]])]
                     ]
                 ]);
 

@@ -82,7 +82,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected $baseService;
     protected $adminUrlGenerator;
 
-    public const TRANSLATION_DASHBOARD = "dashboard";
+    public const TRANSLATION_DASHBOARD = "EasyAdminBundle";
     public const TRANSLATION_ENTITY    = "entities";
     public const TRANSLATION_ENUM      = "enums";
 
