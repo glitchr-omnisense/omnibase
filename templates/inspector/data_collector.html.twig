@@ -1,0 +1,40 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{% block toolbar %}
+        {% set icon %}
+            {{ include('@Base/inspector/icon.svg.twig', { fill_color: '#AAA', height: '20' }) }}
+        {% endset %}
+
+        {%- set text -%}
+            {% for bundle in collector.data._bundles %}
+            <div class="sf-toolbar-info-piece">
+                <b>{{bundle.name}}</b>
+                <span class="sf-toolbar-status">{{ bundle.version }}</span>
+            </div>
+            {% endfor %}
+        {%- endset -%}
+
+        {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { 'link': true }) }}
+{% endblock %}
+
+{% block menu %}
+    <span class="label {#{ not collector.isEasyAdminRequest ? 'disabled' }#}">
+        <span class="icon">{{ include('@Base/inspector/icon.svg.twig') }}</span>
+        <strong>Base</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    
+    {% for title, data in collector.data %}
+        {% if not (title starts with '_') %}
+            <h2>{{ title|raw }}</h2>
+            {% if data is empty %}
+            <div class="empty"><p>No specific information available.</p></div>
+            {% else %}
+                {{ include('@WebProfiler/Profiler/table.html.twig', {data:data}, with_context = false) }}
+            {% endif %}
+        {% endif %}    
+    {% endfor %}
+
+{% endblock %}

@@ -338,7 +338,6 @@ class Configuration implements ConfigurationInterface
                         ->end()
                         ->end()
                     ->end()
-
                 ->arrayNode('vendor')->addDefaultsIfNotSet()
                     ->children()
                         ->arrayNode('font_awesome')->addDefaultsIfNotSet()

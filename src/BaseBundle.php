@@ -2,8 +2,6 @@
 
 namespace Base;
 
-use Base\Database\Walker\TranslatableWalker;
-use Base\Database\Walker\TranslationWalker;
 use Base\DependencyInjection\Compiler\AnnotationPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;

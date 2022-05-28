@@ -3,13 +3,9 @@
 namespace Base\Subscriber;
 
 use Base\Service\BaseService;
-use InvalidArgumentException;
-use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
