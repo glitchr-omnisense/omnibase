@@ -3,14 +3,12 @@
 namespace Base\Subscriber;
 
 use Base\Service\BaseService;
-use InvalidArgumentException;
-use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
@@ -88,8 +86,8 @@ class TwigSubscriber implements EventSubscriberInterface
 
             $javascriptsBody = $this->baseService->getHtmlContent("javascripts:body");
             $content = preg_replace('/<\/body\b[^>]*>/', "$0".$javascriptsBody, $content, 1);
-
-            if(!$response instanceof StreamedResponse)
+            
+            if(!is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class]))
                 $response->setContent($content);
 
             return true;

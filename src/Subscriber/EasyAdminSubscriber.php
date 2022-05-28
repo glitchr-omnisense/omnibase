@@ -93,7 +93,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
                     if($request->query->get("crudAction") !== null) $request->query->set("crudAction", "index");
                     else $request->query->remove("crudAction");
 
-                    $eaCanonicException = false;
+                $eaCanonicException = false;
             }
 
             if(!$eaCanonicException)

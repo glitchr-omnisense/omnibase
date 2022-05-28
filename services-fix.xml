@@ -20,10 +20,12 @@
         </service>
 
         <!-- EASYADMIN FIXES (Using crud controller inside bundles -->
+        <service id="EasyCorp\Bundle\EasyAdminBundle\Inspector\DataCollector"></service>
+
         <service id="EasyCorp\Bundle\EasyAdminBundle\Factory\FilterFactory"    public="true">
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="tagged_iterator" tag="ea.filter_configurator"/>
-            </service>
+        </service>
 
         <service id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory"    public="true">
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\FieldFactory" />
