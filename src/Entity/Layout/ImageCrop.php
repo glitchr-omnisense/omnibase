@@ -141,6 +141,30 @@ class ImageCrop implements LinkableInterface
     /**
      * @ORM\Column(type="float")
      */
+    protected $xP;
+    public function getPivotX () { return $this->xP * $this->getNaturalWidth();  }
+    public function getPivotX0() { return $this->xP; }
+    public function setPivotX0(int $xP): self
+    {
+        $this->xP = $xP;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    protected $yP;
+    public function getPivotY () { return $this->yP * $this->getNaturalHeight(); }
+    public function getPivotY0() { return $this->yP; }
+    public function setPivotY0(int $yP): self
+    {
+        $this->yP = $yP;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="float")
+     */
     protected $width0;
     public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getSourceMeta()[0] ?? 0 : 0; }
     public function getWidth (): ?int { return $this->width0 * $this->getNaturalWidth(); }
@@ -164,30 +188,6 @@ class ImageCrop implements LinkableInterface
         return $this;
     }
 
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    protected $xP;
-    public function getPivotX () { return $this->xP * $this->getNaturalWidth();  }
-    public function getPivotX0() { return $this->xP; }
-    public function setPivotX0(int $xP): self
-    {
-        $this->xP = $xP;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    protected $yP;
-    public function getPivotY () { return $this->yP * $this->getNaturalHeight(); }
-    public function getPivotY0() { return $this->yP; }
-    public function setPivotY0(int $yP): self
-    {
-        $this->yP = $yP;
-        return $this;
-    }
 
     /**
      * @ORM\Column(type="float")

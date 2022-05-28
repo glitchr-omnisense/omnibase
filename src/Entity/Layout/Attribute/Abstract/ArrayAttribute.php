@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\ArrayAttributeRepository;
  * @DiscriminatorEntry( value = "array" )
  */
 
-final class ArrayAttribute extends AbstractAttribute implements IconizeInterface
+class ArrayAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-clipboard-list"]; }
 

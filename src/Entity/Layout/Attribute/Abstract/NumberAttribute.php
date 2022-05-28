@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\NumberAttributeRepository;
  * @DiscriminatorEntry( value = "number" )
  */
 
-final class NumberAttribute extends AbstractAttribute implements IconizeInterface
+class NumberAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-calculator"]; }
 

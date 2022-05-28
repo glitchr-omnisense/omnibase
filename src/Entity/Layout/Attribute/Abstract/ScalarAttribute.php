@@ -15,7 +15,7 @@ use Base\Repository\Layout\Attribute\Abstract\ScalarAttributeRepository;
  * @DiscriminatorEntry( value = "scalar" )
  */
 
-final class ScalarAttribute extends AbstractAttribute implements IconizeInterface
+class ScalarAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-ruler-combined"]; }
 

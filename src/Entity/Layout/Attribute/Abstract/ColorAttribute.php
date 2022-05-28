@@ -16,7 +16,7 @@ use Base\Repository\Layout\Attribute\Abstract\ColorAttributeRepository;
  * @DiscriminatorEntry( value = "color" )
  */
 
-final class ColorAttribute extends AbstractAttribute implements IconizeInterface
+class ColorAttribute extends AbstractAttribute implements IconizeInterface
 {
     public static function __iconizeStatic() : ?array { return ["fas fa-tint"]; }
 

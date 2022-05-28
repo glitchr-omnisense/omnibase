@@ -158,7 +158,7 @@ class DataCollector extends AbstractDataCollector
         return $bundleName.$bundleVersion;
     }
 
-    private function collectData(AdminContext $context): array
+    private function collectData(?AdminContext $context): array
     {
         $data = [];
         if(class_exists(BaseBundle::class))
@@ -172,12 +172,12 @@ class DataCollector extends AbstractDataCollector
             $data[$this->getBundleFormattedName(DoctrineBundle::class)] = $this->getDoctrineConnections();
 
         if(class_exists(EasyAdminBundle::class))
-            $data[$this->getBundleFormattedName(EasyAdminBundle::class)] = [
+            $data[$this->getBundleFormattedName(EasyAdminBundle::class)] = $context ? [
                 'CRUD Controller FQCN' => null === $context->getCrud() ? null : $context->getCrud()->getControllerFqcn(),
                 'CRUD Action' => $context->getRequest()->get(EA::CRUD_ACTION),
                 'Entity ID' => $context->getRequest()->get(EA::ENTITY_ID),
                 'Sort' => $context->getRequest()->get(EA::SORT),
-            ];
+            ] : null;
 
         if(class_exists(ApiPlatformBundle::class))
             $data[$this->getBundleFormattedName(ApiPlatformBundle::class)] = [];
