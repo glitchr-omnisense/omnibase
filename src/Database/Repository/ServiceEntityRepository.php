@@ -42,8 +42,9 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entityFqcn);
 
         if(count($entityList) || $entity === null)
-            $this->getEntityManager()->flush(); 
+            $this->getEntityManager()->flush($entity); 
     }
+
     public function persist($entity) {
 
         if(!is_object($entity) || (!$entity instanceof $this->_entityName && !is_subclass_of($entity, $this->_entityName))) {

@@ -13,30 +13,31 @@ password:
   first: "Password"
   second: "Password confirmation"
   unchanged: "This field is optional, leave it blank if no change."
+  unsecure: "This field is unsecure."
   strength:
     label: "Password strength is <b>{label}</b> (Force {force})."
     bad:
-      label: "<span>Bad"
+      label: "<span style='color:red'>bad</span>"
       message: "You shouldn't use this password."
     poor:
-      label: "Poor"
-      message: "This is a poor password, you can do better."
+      label: "<span style='color:orange'>poor</span>"
+      message: "You can do better."
     weak:
-      label: "Weak"
-      message: "This is a weak password, you can do better."
+      label: "<span style='color:orange'>weak</span>"
+      message: "You can do even better."
     good:
-      label: "Good"
-      message: "This password is rather good"
+      label: "<span style='color:lightgreen'>good</span>"
+      message: "This one is rather good"
     strong:
-      label: "Perfect"
-      message: "This is a strong password !"
+      label: "<span style='color:green'>secure</span>"
+      message: "You're good to go, this is a strong password !"
   requirements: 
       label: "It increases with respect to the following criteria:"
       uppercase: "upper case chars"
       lowercase: "lower case chars"
       numbers: "use of numbers"
       length12: "length higher than 12 chars"
-      specials: "special chars (&, *, $, ..)"
+      specials: "special chars (&, *, ..)"
       min_length: "Password is expected to be {0} long"
       min_strength: "Minimum required strength is {0}"
 

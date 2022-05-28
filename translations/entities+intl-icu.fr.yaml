@@ -139,6 +139,9 @@ layout:
       image_attribute:
         singular: "image"
         plural: "images"
+      scalar_attribute:  
+        singular: scalaire
+        plural: scalaires
 
   setting:
     singular: "paramètre"

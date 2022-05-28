@@ -230,7 +230,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->avatar = $avatar;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="string", length=16, nullable=true)
      * @Assert\Locale(canonicalize = true)

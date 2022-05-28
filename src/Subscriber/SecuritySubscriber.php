@@ -68,11 +68,13 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
         $this->entityManager = $entityManager;
+        $this->userRepository = $entityManager->getRepository(User::class);
+
         $this->baseService = $baseService;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
         $this->parameterBag = $parameterBag;
-        
+
         foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
             $dispatcher = $dispatcherLocator->get($dispatcherId);
@@ -153,6 +155,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification = new Notification("verifyEmail.success");
             $notification->send("success");
 
+            $this->userRepository->flush($user);
+
         } else {
 
             $verifyEmailToken = new Token('verify-email', 3600);
@@ -162,11 +166,10 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
-            $this->baseService->getEntityManager()->flush();
+            $this->userRepository->flush($user);
             $notification->send("email")->send("success");
         }
 
-        $this->baseService->getEntityManager()->flush();
         $this->baseService->redirectToRoute("user_profile", [], 302);
     }
 
@@ -185,7 +188,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("email");
         }
 
-        $this->baseService->getEntityManager()->flush();
+        $this->userRepository->flush($user);
     }
 
     public function onSwitchUser(SwitchUserEvent $event) { }
@@ -309,17 +312,17 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $event->setResponse($this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE));
 
-            if(!$user->isDirty()) $this->entityManager->flush();
+            if(!$user->isDirty()) $this->userRepository->flush($user);
             return $event->stopPropagation();
         }
 
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
             $user->approve();
-            $this->entityManager->flush();
+            $this->userRepository->flush($user);
 
         } else if($this->baseService->getParameterBag("base.user.autoapprove")) {
             $user->approve();
-            $this->entityManager->flush();
+            $this->userRepository->flush($user);
         }
 
         //
@@ -368,7 +371,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ( !($user->isActive()) ) {
     
             $user->poke(new \DateTime("now"));
-            $this->entityManager->flush();
+            $this->userRepository->flush($user);
         }
     }
     
@@ -530,7 +533,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $log->setUser($user);
 
                 $entityManager->persist($log);
-                $entityManager->flush();
+                $this->userRepository->flush($user);
             }
         }
     }

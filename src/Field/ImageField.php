@@ -32,7 +32,7 @@ class ImageField extends FileField implements FieldInterface
 
     public function setCropper(null|array|bool $cropper = true)
     {
-        if( is_bool($cropper) ) $cropper = [];
+        if( is_bool($cropper) ) $cropper = $cropper ? [] : null;
         $this->setFormTypeOption("cropper", $cropper);
         return $this;
     }

@@ -13,30 +13,31 @@ password:
   first: "Mot de passe"
   second: "Confirmation du mot de passe"
   unchanged: "Champ optionnel à laisser vide si inchangé."
+  unsecure: "Ce champ n'est pas sécurisé."
   strength:
     label: "Le mot de passe est <b>{label}</b> (Force {force})."
     bad:
-      label: "<span style='color:red'>Mauvais</span>"
-      message: "Il est déconseillé d'utiliser un mot de passe si facile à trouver."
+      label: "<span style='color:red'>mauvais</span>"
+      message: "N'utilisez pas ce mot de passe."
     poor:
-      label: "<span style='color:orange'>Très faible</span>"
-      message: "Ce mot de passe est très faible."
+      label: "<span style='color:orange'>très faible</span>"
+      message: "Très facile à trouver."
     weak:
-      label: "<span style='color:orange'>Faible</span>"
-      message: "Ce mot de passe est faible."
+      label: "<span style='color:orange'>faible</span>"
+      message: "Toujours trop facile à trouver."
     good:
-      label: "<span style='color:lightgreen'>Bon</span>"
+      label: "<span style='color:lightgreen'>bon</span>"
       message: "Ce mot de passe est plutôt bon"
     strong:
-      label: "<span style='color:green'>Sécurisé</span>"
-      message: "Ce mot de passe est très bien !"
+      label: "<span style='color:green'>sécurisé</span>"
+      message: "Bravo ! Ce mot de passe est très bien !"
   requirements: 
     label: "La force du mot de passe augmente s'il :"
     uppercase: "contient au moins une lettre minuscule"
     lowercase: "contient au moins une lettre majuscule"
     numbers: "contient au moins un nombre"
     length12: "est plus long que 12 caractères"
-    specials: "contient au moins un caractère spécial (&, *, $, ..)"
+    specials: "contient au moins un caractère spécial (&, *, ..)"
     min_strength: "Le mot de passe doit être au moins de force {0}."
     min_length: "{0, plural,
         =1 {Le mot de passe doit contenir au moins # caractère.}

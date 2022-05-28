@@ -369,7 +369,7 @@
                         {% endif %}
                         </div>
                         <div>
-                            <button type="button" class="btn btn-secondary {{id}}_modalClose">Cancel</button>
+                            <button type="button" class="btn btn-secondary" id="{{id}}_modalClose">Cancel</button>
                             <button type="button" class="btn btn-primary" id="{{id}}_modalSave">Save changes</button>
                         </div>
                     </div>
@@ -966,27 +966,31 @@
     {% endif %}
 {% endfor %}
 
-{% set pivotForm = form0.ancestor %}
-{% for child in pivot %}
+{% set quadrantForm = form0.ancestor %}
+{% for child in quadrant %}
 
-    {% set pivotForm = pivotForm[child] %}
+    {% set quadrantForm = quadrantForm[child] %}
 
     {% if child == "translations" %}
-        {% if pivotForm.vars.default_locale is defined and pivotForm.vars.default_locale in pivotForm|keys %}
-            {% set pivotForm = pivotForm[pivotForm.vars.default_locale] %}
+        {% if quadrantForm.vars.default_locale is defined and quadrantForm.vars.default_locale in quadrantForm|keys %}
+            {% set quadrantForm = quadrantForm[quadrantForm.vars.default_locale] %}
         {% else %} 
-            {% set pivotForm = pivotForm|first %}
+            {% set quadrantForm = quadrantForm|first %}
         {% endif %}
     {% endif %}
 {% endfor %}
 
 {% set attr = attr|merge({
     'data-cropper': form0.vars.cropper,
-    'data-cropper-field': form0.vars.id,
-    'data-cropper-pivot': pivotForm.vars.id,
-    'data-cropper-positions': pivotForm.parent.vars.positions
+    'data-cropper-field': form0.vars.id
 }) %}
 
+{% if form.vars.quadrant is not null %}
+    {% set attr = attr|merge({
+        'data-cropper-quadrant': quadrantForm.vars.id,
+        'data-cropper-positions': quadrantForm.parent ? quadrantForm.parent.vars.positions : null
+    }) %}
+{% endif %}
 {# todo: handle xhr errors #}
 {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fas fa-fw fa-exclamation-circle'|iconify)~" "~('@fields.cropper.error')~"</div>", #}
 
@@ -1008,7 +1012,9 @@
     </div>
 
     {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{ form_widget(form0, {attr:attr}) }}
+
+    {{dump(attr)}}
+    {{ form_widget(form0) }}
 </div>
 
 {%- endblock -%}
@@ -1035,11 +1041,23 @@
     {% set attr = attr|merge({
         'data-password-field': form.vars.id,
         'data-password-strength': '@fields.password.strength.label'|trans|raw,
+        'data-password-strength-name[0]': '@fields.password.strength.bad.label'|trans|raw,
+        'data-password-strength-name[1]': '@fields.password.strength.poor.label'|trans|raw,
+        'data-password-strength-name[2]': '@fields.password.strength.weak.label'|trans|raw,
+        'data-password-strength-name[3]': '@fields.password.strength.good.label'|trans|raw,
+        'data-password-strength-name[4]': '@fields.password.strength.strong.label'|trans|raw,
+        'data-password-strength-message[0]': '@fields.password.strength.bad.message'|trans|raw,
+        'data-password-strength-message[1]': '@fields.password.strength.poor.message'|trans|raw,
+        'data-password-strength-message[2]': '@fields.password.strength.weak.message'|trans|raw,
+        'data-password-strength-message[3]': '@fields.password.strength.good.message'|trans|raw,
+        'data-password-strength-message[4]': '@fields.password.strength.strong.message'|trans|raw,
         'data-password-autocomplete': form.vars.autocomplete,
-        'data-password-suggestions': form.vars.suggestions,
         'data-password-match': "@validators.password.not_matching"|trans(),
+        'data-password-allow-empty': form.vars.allow_empty ? "true" : "",
         'data-password-minstrength': form.vars.min_strength,
-        'data-password-minstrength-str': "@validators.password.min_strength"|trans([form.vars.min_strength])
+        'data-password-minstrength[feedback]': "@validators.password.min_strength"|trans([form.vars.min_strength]),
+        'data-password-minlength': form.vars.min_length,
+        'data-password-minlength[feedback]': "@validators.password.min_length"|trans([form.vars.min_length])
     }) %}
 
     {%- set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') -%}
@@ -1052,7 +1070,9 @@
     <div {{ html_attributes(row_attr) }}>
         <div class="form-password-details" id="{{ form.vars.id}}_details">
             <div class="main">
-                <p></p>
+                <p class="strength-label"><br/></p>
+                <p class="strength-message form-text text-muted"><br/></p>
+                <hr>
                 <div>{{ '@fields.password.requirements.label'|trans }}</div>
                 <ul>
                     <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'}) }} {{ '@fields.password.requirements.uppercase'|trans }}</li>
@@ -1065,6 +1085,9 @@
             <footer>
                 <hr>
                 <div class="form-text text-muted">
+                {% if form.vars.allow_empty and form.vars.hint %}{{"@fields.password.unchanged"|trans}}{% endif %}
+                </div>
+                <div class="form-text text-muted">
                 {% if form.vars.min_length %}{{"@fields.password.requirements.min_length"|trans([form.vars.min_length])}}{% endif %}
                 </div>
                 <div class="form-text text-muted">
@@ -1073,42 +1096,58 @@
             </footer>
         </div>
     {% endif %}
+
         <div {{ html_attributes(attr) }}>
             <div class="form-group">
 
                 {{ form_label(form.plain) }}{{ form_help(form.plain) }}
+
                 <div class="input-group">
                     <span class="input-group-text">{{ (form.vars.repeater ? 'fas fa-unlock' : 'fas fa-lock')|iconify }}</span>
                     {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"}) }}{% endif%}
-                    {{ form_widget(form.plain, {attr:{'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off", 'minlength':form.vars.min_length}}) }}
+                    {{ form_widget(form.plain, {
+                        required:form.vars.required and not allow_empty,
+                        value:form.vars.revealer and not form.vars.secure ? form.vars.value : "", 
+                        attr: {'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off"}
+                    }) }}
                 </div>
+
                 <div class="form-password-strength" id="{{form.vars.id}}_strength">
-                {% for i in range(1,form.vars.min_strength+1) %}
-                    {% if i < form.vars.min_strength+1 %}
+                {% for i in range(1,form.vars.max_strength+1) %}
+                    {% if i < form.vars.max_strength+1 %}
                     <span class="strength" id="{{form.vars.id}}_strength_{{i}}"></span>
                     {% endif %}
                 {% endfor %}
                 </div>
-
+                
+                {% if (not form.vars.secure and app.debug) %}
+                    <div class="form-text text-muted text-danger">{{"@fields.password.unsecure"|trans}}</div>
+                {% endif %}
+                
                 {% if form.vars.inline %}
-                {% if form.vars.required is not defined or not form.vars.required and form.vars.value is empty and form.vars.hint %}
+                    {% if (form.vars.allow_empty and form.vars.hint) %}
                     <div class="form-text text-muted">{{"@fields.password.unchanged"|trans}}</div>
-                {% endif %}
-                {% if form.vars.min_length %}
+                    {% endif %}
+                    {% if form.vars.min_length %}
                     <div class="form-text text-muted">{{"@fields.password.requirements.min_length"|trans([form.vars.min_length])}}</div>
-                {% endif %}
-                {% if form.vars.min_strength > 0 %}
+                    {% endif %}
+                    {% if form.vars.min_strength > 0 %}
                     <div class="form-text text-muted">{{"@fields.password.requirements.min_strength"|trans([form.vars.min_strength])}}</div>
-                {% endif %}
+                    {% endif %}
                 {% endif %}
 
             </div>
+            
             {% if form.vars.repeater %}
             <div class="form-group">
                 {{ form_label(form.plain_repeater) }}{{ form_help(form.plain_repeater) }}
                 <div class="input-group">
                     <span class="input-group-text">{{ 'fas fa-lock'|iconify }}</span>
-                    {{ form_widget(form.plain_repeater, {attr:{'autocomplete': 'off'}}) }}
+                    {{ form_widget(form.plain_repeater, {
+                        required:form.vars.required and not allow_empty,
+                        value:form.vars.revealer and not form.vars.secure ? form.vars.value : "", 
+                        attr:{'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off"}
+                    }) }}
                 </div>
             </div>
             {% endif %}

@@ -138,6 +138,9 @@ layout:
       image_attribute:
         singular: "image"
         plural: "images"
+      scalar_attribute:  
+        singular: scalar
+        plural: scalars
 
   setting:
     singular: "setting"
