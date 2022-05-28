@@ -1587,7 +1587,7 @@ namespace {
             return $retval;
         }
 
-        if ($fromBaseInput != '0123456789') $base10=convBase($numberInput, $fromBaseInput, '0123456789');
+        if ($fromBaseInput != '0123456789') $base10 = base_convert2($numberInput, $fromBaseInput, '0123456789');
         else $base10 = $numberInput;
 
         if ($base10<strlen($toBaseInput)) return $toBase[$base10];
