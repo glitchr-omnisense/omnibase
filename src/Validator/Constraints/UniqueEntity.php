@@ -23,7 +23,7 @@ class UniqueEntity extends ConstraintEntity
     public $errorPath = null;
     public $ignoreNull = true;
 
-    protected static $errorNames = [
+    protected const ERROR_NAMES = [
         self::NOT_UNIQUE_ERROR => 'NOT_UNIQUE_ERROR',
     ];
 

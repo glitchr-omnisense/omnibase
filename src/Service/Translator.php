@@ -41,7 +41,7 @@ class Translator implements TranslatorInterface
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
         $atBegin   = str_starts_with($id, "@");
 
-        $domain    = str_starts_with($domain, "@") ? mb_substr($domain, 1) : $domain ?? null;
+        $domain    = $domain && str_starts_with($domain, "@") ? mb_substr($domain, 1) : ($domain ?? null);
         if ($id && $customId) {
 
             $array  = explode(".", $id);
