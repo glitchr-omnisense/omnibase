@@ -31,7 +31,7 @@ class ExcelEncoder implements EncoderInterface, DecoderInterface
         Excel::COLUMNS_MAXSIZE_KEY => 50,
     ];
 
-    public function supportsEncoding($format): bool { return self::XLS === $format || self::XLSX === $format|| self::XLSM === $format; }
+    public function supportsEncoding   (string $format, array $context = []): bool { return self::XLS === $format || self::XLSX === $format|| self::XLSM === $format; }
     public function encode(mixed $data, string $format, array $context = []): string
     {
           $context = array_merge($this->defaultContext, $context);
@@ -39,10 +39,10 @@ class ExcelEncoder implements EncoderInterface, DecoderInterface
           return $excel->dump(); // PHP TO Excel binary
     }
 
-    public function supportsDecoding($format): bool { return self::XLS === $format || self::XLSX === $format || self::XLSM === $format; }
-    public function decode(string $data, string $format, array $context = []): mixed // Excel binary to PHP
+    public function supportsDecoding    (string $format, array $context = []): bool { return self::XLS === $format || self::XLSX === $format || self::XLSM === $format; }
+    public function decode(string $data, string $format, array $context = []): mixed
     {
           $context = array_merge($this->defaultContext, $context);
-          return Excel::parse($data, $format, $context);
+          return Excel::parse($data, $format, $context); // Excel binary to PHP
     }
 }
