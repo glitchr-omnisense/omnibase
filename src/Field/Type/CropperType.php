@@ -108,7 +108,6 @@ class CropperType extends AbstractType implements DataMapperInterface
 
                 $fieldType = array_pop_key("form_type", $fieldOptions) ?? HiddenType::class;
                 $form->add($fieldName, $fieldType, $fieldOptions);
-                dump($fieldOptions);
             }
         });
     }
@@ -191,12 +190,7 @@ class CropperType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
-        foreach(iterator_to_array($forms) as $formName => $form) {
-            dump($form, $formName, $form->getData());
+        foreach(iterator_to_array($forms) as $formName => $form)
             $this->propertyAccessor->setValue($viewData, $formName, $form->getData());
-        }
-
-        dump($viewData);
-        exit(1);
     }
 }

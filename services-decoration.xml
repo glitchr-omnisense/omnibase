@@ -23,6 +23,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
             <argument type="service" id="base.settings" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />

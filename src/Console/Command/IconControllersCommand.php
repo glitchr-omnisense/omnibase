@@ -13,10 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='icon:controllers', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'icon:controllers', aliases:[], description:'')]
 class IconControllersCommand extends Command
 {
     public function __construct(RouterInterface $router)

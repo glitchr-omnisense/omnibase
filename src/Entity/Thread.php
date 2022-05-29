@@ -43,7 +43,6 @@ use Base\Repository\ThreadRepository;
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
  */
-
 class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 {
     use BaseTrait;

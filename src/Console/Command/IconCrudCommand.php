@@ -13,10 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='icon:crud', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'icon:crud', aliases:[], description:'')]
 class IconCrudCommand extends Command
 {
     protected function configure(): void

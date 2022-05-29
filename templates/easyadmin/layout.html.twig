@@ -266,10 +266,10 @@
                                         {{ user_menu_dropdown }}
                                     </div>
                                 {% endblock header_custom_menu %}
-                                
+
                                 <div class="user-menu-wrapper responsive-header-menu">
                                     {% block responsive_header %}
-                                        
+
                                         <div class="responsive-menu">
                                             <button id="navigation-toggler" type="button" aria-label="Toggle navigation">
                                                 <i class="fa fa fa-bars"></i>
@@ -285,10 +285,10 @@
                                                 {{ appearance_menu_dropdown }}
                                             </div>
                                         {% endif %}
-                                        
+
                                     {% endblock responsive_header %}
                                 </div>
-                                
+
                                 {% if ea.dashboardHasDarkModeEnabled %}
                                     <div class="dropdown dropdown-appearance user-menu-wrapper">
                                         <a class="dropdown-appearance-button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
@@ -300,7 +300,7 @@
                                 {% endif %}
 
                                 <div class="user-menu-wrapper">
-                                    {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }} 
+                                    {{ render_locale("locale_changeto", {"class": "dropdown-menu-end"}, "@Base/locale/dropdown-min.html.twig") }}
                                 </div>
                             </div>
                         {% endblock content_top_header %}
@@ -308,13 +308,13 @@
 
                     <div class="content-wrapper">
                         {% block content_wrapper %}
-                        
+
                             <article class="content">
-                            
+
                                     {% block content_header_wrapper %}
-                                    
+
                                     <section class="content-header">
-                                    
+
                                         {% block content_header %}
 
                                         <div class="content-header-icon">
@@ -465,24 +465,24 @@
 
     {% block body_javascript %}{% endblock body_javascript %}
     <script>
-        $(function () { 
-            $('[data-toggle="popover"]').popover({html:true}) 
-            $('[data-toggle="tooltip"]').tooltip({trigger:"manual", html:true}) 
+        $(function () {
+            $('[data-toggle="popover"]').popover({html:true})
+            $('[data-toggle="tooltip"]').tooltip({trigger:"manual", html:true})
 
             $('[data-toggle="tooltip"]').on('click.persistent', function () { $(this).tooltip('toggle'); });
-            $('[data-toggle="tooltip"]').on('mouseleave.persistent', function () 
+            $('[data-toggle="tooltip"]').on('mouseleave.persistent', function ()
             {
                 $(this).data("hover", false);
                 setTimeout(function () {
                     if(!$(this).data("hover") && !$("#"+this.getAttribute("aria-describedby")).data("hover"))  {
                         $("#"+this.getAttribute("aria-describedby")).off('mouseenter.persistent');
                         $("#"+this.getAttribute("aria-describedby")).off('mouseleave.persistent');
-                        $(this).tooltip('hide'); 
+                        $(this).tooltip('hide');
                     }
                 }.bind(this), 500);
             });
 
-            $('[data-toggle="tooltip"]').on('mouseenter.persistent', function () 
+            $('[data-toggle="tooltip"]').on('mouseenter.persistent', function ()
             {
                 var that = this;
                 $(this).data("hover", true);

@@ -87,7 +87,14 @@ class FileService implements FileServiceInterface
         catch (InvalidArgumentException $e) { return explode(";", (new \finfo(FILEINFO_MIME))->buffer($fileOrContentsOrArray))[0] ?? null; /* Read file content content */ }
     }
 
-    public function downloadable(array|string|null $path, array $config = []): array|string|null { return $this->generate("ux_serve", [], $path, array_merge($config, ["attachment" => true])); }
+    public function downloadable(array|string|null $path, array $config = []): array|string|null
+    {
+        $attachment = array_pop_key("attachment", $config);
+        if(!$attachment) $attachment = true;
+
+        return $this->generate("ux_serve", [], $path, array_merge($config, ["attachment" => $attachment]));
+    }
+
     public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->getFilesystem()->read($path, $storage); }
 
     public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
@@ -183,6 +190,12 @@ class FileService implements FileServiceInterface
 
             $extension  = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
             $extensions = $this->getExtensions($mimeType);
+
+            if($attachment === true) {
+
+                if($mimeType && str_starts_with($mimeType, "image/")) $attachment = "image";
+                else $attachment = "unnamed";
+            }
 
             if($extension && !in_array($extension, $extensions))
                 $attachment = pathinfo_extension($attachment, $extensions[0]);

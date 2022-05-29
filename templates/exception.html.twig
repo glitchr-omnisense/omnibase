@@ -1,19 +1,17 @@
 {% extends 'layout1.html.twig' %}
 {% block content %}
     <div class="exception half text-center wrapper">
-
         {% set transCode = "@controllers.exception." ~ flattenException.statusCode %}
-        {% if (transCode|trans) != transCode %}
+        {% set knownException = (transCode|trans) != transCode %}
+        {% if  knownException %}
             <h1 class="exception-title">{{ flattenException.statusCode }} {{ transCode|trans }}</h1>
-            <h3>{{ '@controllers.exception.title'|trans }}</h3>
-            <p class="exception-message">{{ '@controllers.exception.description'|trans([
-                base.settings.mail()|default(base.getParameterBag("base.notifier.technical_support"))
-                ])|raw }}</p>
+            <h3>{{ flattenException.getTitle() ?? '@controllers.exception.title'|trans }}</h3>
         {% else %}
             {% set code = ((flattenException.statusCode != 0) ? flattenException.statusCode : null)|default(500) %}
+            {% set technicalSupport = base.settings.mail._self|default(app.bag("base.notifier.technical_support")) %}
             <h1 class="exception-title">{{ code }} {{"@controllers.exception.unknown"|trans}}</h1>
             <h3>{{ '@controllers.exception.title'|trans }}</h3>
-            <p class="exception-message">{{ flattenException.getMessage() }}</p>
+            <p class="exception-message">{{ '@controllers.exception.description'|trans([technicalSupport])|raw }}</p>
         {% endif %}
 
         {% set referer = app.request.server.get('http-referer')|default(asset('')) %}

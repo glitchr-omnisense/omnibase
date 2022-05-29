@@ -7,7 +7,7 @@
         <defaults public="true" />
 
         <service id="referrer" alias="Base\Component\HttpFoundation\Referrer" />
-        
+
         <service id="base.command" alias="Base\Console\Command" />
 
         <service id="base.service" alias="Base\Service\BaseService" />
@@ -61,6 +61,6 @@
         <service id="base.form.factory" alias="Base\Form\FormFactoryInterface" />
 
         <service id="ea_extension" alias="Base\Config\Extension" />
-        
+
     </services>
 </container>

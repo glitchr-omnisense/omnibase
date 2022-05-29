@@ -6,7 +6,8 @@ use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\ParameterBagInterface;
 use Base\Service\BaseSettings;
-
+use Error;
+use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
@@ -39,7 +40,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function isProfiler($request = null)
     {
-        if(!$request) $request = $this->getRequest();
+        if(!$request) $request = $this->requestStack->getCurrentRequest();
         if($request instanceof KernelEvent)
             $request = $request->getRequest();
         else if($request instanceof RequestStack)
@@ -54,7 +55,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function isEasyAdmin($request = null)
     {
-        if(!$request) $request = $this->getRequest();
+        if(!$request) $request = $this->requestStack->getCurrentRequest();
         if($request instanceof KernelEvent)
             $request = $request->getRequest();
         else if($request instanceof RequestStack)
@@ -97,7 +98,10 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function getRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
     public function getRoute(?string $routeUrl = null): ?Route
     {
-        if($routeUrl === null) $routeUrl = $this->getRequest()->getRequestUri();
+        if($routeUrl === null) {
+            try {$routeUrl = $this->getRequest()->getRequestUri();}
+            catch(Error $e) { return null; }
+        }
 
         $routeArray = $this->getRouteArray($routeUrl);
         if(!$routeArray) return null;

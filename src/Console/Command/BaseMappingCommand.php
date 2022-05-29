@@ -9,13 +9,11 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='base:mapping', aliases=[],
- *            description='This command gives access to the mapping applied from \\Base to \\App namespace'
- *
- *                         This is meant to avoid rewriting Base classes
- *                         and use customized \\App classes extending from Base classes')
- */
+#[AsCommand(name:'base:mapping', aliases:[], description:
+    'This command gives access to the mapping applied from \\Base to \\App namespace
+
+    This is meant to avoid rewriting Base classes
+    and use customized \\App classes extending from Base classes')]
 class BaseMappingCommand extends Command
 {
     protected function execute(InputInterface $input, OutputInterface $output): int

@@ -2,8 +2,9 @@
 
 namespace Base\Controller\Backoffice\Crud\Layout;
 
-
+use Base\Config\Extension;
 use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backoffice\AbstractDashboardController;
 use Base\Field\CollectionField;
 use Base\Field\ImageField;
 use Base\Field\QuadrantField;
@@ -14,11 +15,33 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class ImageCrudController extends AbstractCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }
+
+    public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
+    {
+        if($entity = $this->getEntity()) {
+
+            $extension->setImage($entity->getSource());
+
+            $class = "thread.".mb_strtolower(camel2snake(class_basename($entity)));
+            $entityLabel = $this->translator->trans($class.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+            if($entityLabel == $class.".singular") $entityLabel = null;
+            else $extension->setTitle(mb_ucwords($entityLabel));
+
+            $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
+            $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
+
+            if($this->getCrud()->getAsDto()->getCurrentAction() != "new")
+                $extension->setText($entityLabel." #".$entity->getId());
+        }
+
+        return $extension;
+    }
 
     public function configureActions(Actions $actions): Actions
     {

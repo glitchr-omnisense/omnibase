@@ -14,10 +14,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='icon:entities', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'icon:entities', aliases:[], description:'')]
 class IconEntitiesCommand extends Command
 {
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)

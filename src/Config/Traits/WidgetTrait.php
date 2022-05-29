@@ -37,8 +37,8 @@ trait WidgetTrait
         $sectionOffsetAndLength = [count($widgets), null];
         if(!$sectionOrPositionOrLabel) return $sectionOffsetAndLength;
 
-        $sectionFound   = false;
         $sectionCounter = 0;
+        $sectionFound   = false;
         foreach($widgets as $key => $widget) {
 
             if($widget instanceof SectionWidgetItem) {

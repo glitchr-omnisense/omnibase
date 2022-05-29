@@ -2,9 +2,11 @@
 
 namespace Base\Routing\Matcher;
 
-use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
+use Exception;
+use Symfony\Bundle\FrameworkBundle\Routing\RedirectableCompiledUrlMatcher;
+use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 
-class AdvancedUrlMatcher extends CompiledUrlMatcher
+class AdvancedUrlMatcher extends RedirectableCompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
     public function match(string $pathinfo): array
     {
@@ -13,6 +15,6 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher
 
         $this->getContext()->setHost($parse["host"]);
 
-        return parent::match($pathinfo);
+        return parent::match($parse["path"] ?? $pathinfo);
     }
 }

@@ -118,7 +118,7 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $x0;
-    public function getX (): ?int { return $this->x0 * $this->getNaturalWidth(); }
+    public function getX (): ?int { return $this->x0;}// * $this->getNaturalWidth(); }
     public function getX0(): ?int { return $this->x0; }
     public function setX0(int $x0): self
     {
@@ -130,7 +130,7 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $y0;
-    public function getY (): ?int { return $this->y0 * $this->getNaturalHeight(); }
+    public function getY (): ?int { return $this->y0;}// * $this->getNaturalHeight(); }
     public function getY0(): ?int { return $this->y0; }
     public function setY0(int $y0): self
     {
@@ -142,9 +142,9 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $xP;
-    public function getPivotX () { return $this->xP * $this->getNaturalWidth();  }
-    public function getPivotX0() { return $this->xP; }
-    public function setPivotX0(int $xP): self
+    public function getPivotX () { return $this->xP;}// * $this->getNaturalWidth();  }
+    public function getXp() { return $this->xP; }
+    public function setXp(int $xP): self
     {
         $this->xP = $xP;
         return $this;
@@ -154,9 +154,9 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $yP;
-    public function getPivotY () { return $this->yP * $this->getNaturalHeight(); }
-    public function getPivotY0() { return $this->yP; }
-    public function setPivotY0(int $yP): self
+    public function getPivotY () { return $this->yP;}// * $this->getNaturalHeight(); }
+    public function getYp() { return $this->yP; }
+    public function setYp(int $yP): self
     {
         $this->yP = $yP;
         return $this;
@@ -167,7 +167,7 @@ class ImageCrop implements LinkableInterface
      */
     protected $width0;
     public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getSourceMeta()[0] ?? 0 : 0; }
-    public function getWidth (): ?int { return $this->width0 * $this->getNaturalWidth(); }
+    public function getWidth (): ?int { return $this->width0;}// * $this->getNaturalWidth(); }
     public function getWidth0(): ?int { return $this->width0; }
     public function setWidth0(int $width0): self
     {
@@ -180,7 +180,7 @@ class ImageCrop implements LinkableInterface
      */
     protected $height0;
     public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getSourceMeta()[1] ?? 0 : 0; }
-    public function getHeight (): ?int { return $this->height0 * $this->getNaturalHeight(); }
+    public function getHeight (): ?int { return $this->height0;}// * $this->getNaturalHeight(); }
     public function getHeight0(): ?int { return $this->height0; }
     public function setHeight0(int $height0): self
     {

@@ -364,8 +364,6 @@ class BaseService implements RuntimeExtensionInterface
     public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
-    public static function getParameterBag(string $key = "", array $bag = null) { return !empty($key) ? self::$parameterBag->get($key, $bag) : self::$parameterBag; }
-
     public function getAsset(string $url): string
     {
         $url = trim($url);
@@ -454,8 +452,8 @@ class BaseService implements RuntimeExtensionInterface
     }
 
     public function isMaintenance() { return $this->getSettings()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
-    public function isDevelopment() { return $this->kernel->getEnvironment() == "dev"; }
-    public function isProduction()  { return $this->kernel->getEnvironment() != "dev"; }
+    public function isDevelopment() { return $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_"); }
+    public function isProduction()  { return !$this->isDevelopment(); }
 
     public function isCli() { return is_cli(); }
     public function isDebug() { return $this->kernel->isDebug(); }

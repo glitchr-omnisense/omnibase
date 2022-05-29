@@ -77,7 +77,7 @@ class WidgetItem
         return new LogoutMenuItem($label, $icon);
     }
 
-    public static function linkToRoute(string $label, ?string $icon = null, string $routeName, array $routeParameters = []): RouteMenuItem
+    public static function linkToRoute(string $label, ?string $icon, string $routeName, array $routeParameters = []): RouteMenuItem
     {
         return new RouteMenuItem($label, $icon, $routeName, $routeParameters);
     }

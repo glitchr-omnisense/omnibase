@@ -16,10 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='uploader:entities', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'uploader:entities', aliases:[], description:'')]
 class UploaderEntitiesCommand extends Command
 {
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)

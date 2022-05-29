@@ -115,7 +115,7 @@
 
 {%- block discriminator_row -%}
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{form_row(form)}}    
+    {{form_row(form)}}
 {%- endblock -%}
 
 {%- block discriminator_widget -%}
@@ -145,7 +145,7 @@
 {%- block translatable_widget -%}
     {% set row_attr = row_attr|merge({'class': 'form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
     <div id="{{ form.vars['id'] }}" {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
-        
+
     {% if form.children|length == 1 and single_locale %}
 
         {% for row in form.children %}
@@ -202,7 +202,7 @@
     {% if child == "translations" %}
         {% if form.vars.default_locale is defined and form.vars.default_locale in form|keys %}
             {% set form = form[form.vars.default_locale] %}
-        {% else %} 
+        {% else %}
             {% set form = form|first %}
         {% endif %}
     {% endif %}
@@ -270,7 +270,7 @@
     <div class="form-checkbox">
     {{ form_widget(form, { attr: attr }) }}
     </div>
-    
+
     {% if form.vars.confirmation_check or form.vars.confirmation_uncheck %}
     <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
     <div class="modal-dialog" role="document">
@@ -510,7 +510,7 @@
     <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
         <i class="fas fa-external-link-square-alt"></i>
     </a>{% endif %}
-    
+
 {% endblock associationfile_label %}
 
 {%- block association_label -%}
@@ -524,9 +524,9 @@
 {%- block association_row -%}
 
     {% if form.parent.parent is null and multiple %}
-    
+
         {% if form.children is iterable %}
-             {# e.g. OneToMany relations result in such one-size array structure.. 
+             {# e.g. OneToMany relations result in such one-size array structure..
                      it is not clear to me why sometimes it does and sometimes not.. #}
             {% set formChild = form.children|first %}
         {% else %}
@@ -544,7 +544,7 @@
             'data-allow-delete': formChild.vars.allow_delete ? 'true' : 'false',
             'data-num-items': formChild.children|length,
             'data-form-type-name-placeholder': formChild.vars.prototype is defined ? formChild.vars.prototype.vars.name : '',
-            'data-empty-collection': block('collection2_empty') 
+            'data-empty-collection': block('collection2_empty')
         }) %}
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
@@ -578,7 +578,7 @@
             </div>
         {% endif %}
     {% endif %}
-    
+
 {%- endblock -%}
 
 {%- block collection2_row -%}
@@ -596,7 +596,7 @@
         'data-form-type-name-placeholder': prototype is defined ? prototype.vars.name : '',
         'data-empty-collection': block('collection2_empty')
     }) %}
-    
+
     {%- set attr = attr | filter((v, k) => k != 'class' and v != 'form-control') -%}
     {%- set attr = attr|merge({'class': 'form-collection' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
@@ -637,7 +637,7 @@
         {% endif %}
         {{ form_widget(form, {attr: attr}) }}
     {% endif %}
-    
+
     {% if group and allow_add %}
         <button type="button" class="btn btn-link form-collection-add-button">
             <i class="fa fa-plus pr-1"></i>
@@ -676,7 +676,7 @@
                     {%- if linkable -%}
                         <a class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {%- else -%}
-                        <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ form.children is empty ? 'style="cursor:default;"' : '' }} 
+                        <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ form.children is empty ? 'style="cursor:default;"' : '' }}
                                 type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {%- endif -%}
 
@@ -694,7 +694,7 @@
                             {% if _href is not null %}
                                 <a target='_blank' href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
                             {% else %}
-                                {% set url = form.vars.value.__toLink() ?? null %}                                
+                                {% set url = form.vars.value.__toLink() ?? null %}
                                 {% if url is not empty %}
                                 {{ url ? clipboard("copy", url)|raw : "" }}
                                 <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
@@ -741,7 +741,7 @@
         {% else %}
             {{ form_widget(form, {attr:attr}) }}
         {% endif %}
-        
+
     {% endif %}
 
 {%- endblock collection2_entry_widget -%}
@@ -756,7 +756,7 @@
         {% set prototype_row = form_row(prototype, {attr:{"class": "form-control form-inline"}}) %}
         {% set attr = attr|merge({ 'data-prototype': prototype_row}) %}
     {% endif %}
-    
+
     {% set attr = attr|merge({
         'data-array-field': 'true',
         'data-allow-add': allow_add ? 'true' : 'false',
@@ -783,7 +783,7 @@
                     {% endif %}
                     {{ form_widget(formChild) }}
                 {% endfor %}
-                
+
                 {% if pattern|last is not empty %}
                     <div class="input-group-text">{{ pattern|last }}</div>
                 {% endif %}
@@ -814,7 +814,7 @@
         {% set attr = attr|merge({'class': 'form-array-items' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) %}
         {{ form_widget(form, {attr: attr}) }}
     {% endif %}
-    
+
     {% if allow_add %}
         <button type="button" class="btn btn-link form-array-add-button">
             <i class="fa fa-plus pr-1"></i>
@@ -829,7 +829,7 @@
 {%- endblock array_entry_row -%}
 
 {%- block array_entry_widget -%}
-    
+
     {% set pattern = form_parent(form).vars.pattern|default("") %}
     {% set placeholder = form_parent(form).vars.placeholder|default([])%}
     {% set key = form.vars.name|intval %}
@@ -882,7 +882,7 @@
 {%- endblock array_empty -%}
 
 {%- block stock_widget -%}
-    
+
 {% set attr = attr|merge({
     'data-stock-field': form.vars.id,
     'data-stock-unlimited': "@fields.stock.unlimited"|trans,
@@ -914,7 +914,7 @@
 {%- endblock -%}
 
 {%- block number2_widget -%}
-    
+
 {% set attr = attr|merge({
     'data-number-field': form.vars.id,
     "data-number-keyup": form.vars.keyUp,
@@ -960,7 +960,7 @@
     {% if child == "translations" %}
         {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
             {% set targetForm = targetForm[targetForm.vars.default_locale] %}
-        {% else %} 
+        {% else %}
             {% set targetForm = targetForm|first %}
         {% endif %}
     {% endif %}
@@ -974,7 +974,7 @@
     {% if child == "translations" %}
         {% if quadrantForm.vars.default_locale is defined and quadrantForm.vars.default_locale in quadrantForm|keys %}
             {% set quadrantForm = quadrantForm[quadrantForm.vars.default_locale] %}
-        {% else %} 
+        {% else %}
             {% set quadrantForm = quadrantForm|first %}
         {% endif %}
     {% endif %}
@@ -1012,9 +1012,7 @@
     </div>
 
     {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-
-    {{dump(attr)}}
-    {{ form_widget(form0) }}
+    {{ form_widget(form0, {attr:attr}) }}
 </div>
 
 {%- endblock -%}
@@ -1026,6 +1024,8 @@
 <div id="{{id}}_matrix">
 {% include '@Base/form/quadrant/quadrant'~quadrants~'.html.twig' %}
 </div>
+
+{%- set attr = attr|merge({'class': 'form-quadrant' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
 {% set attr = attr|merge({
     'data-quadrant-field': form.vars.id,
@@ -1107,7 +1107,7 @@
                     {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"}) }}{% endif%}
                     {{ form_widget(form.plain, {
                         required:form.vars.required and not allow_empty,
-                        value:form.vars.revealer and not form.vars.secure ? form.vars.value : "", 
+                        value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
                         attr: {'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off"}
                     }) }}
                 </div>
@@ -1119,11 +1119,11 @@
                     {% endif %}
                 {% endfor %}
                 </div>
-                
+
                 {% if (not form.vars.secure and app.debug) %}
                     <div class="form-text text-muted text-danger">{{"@fields.password.unsecure"|trans}}</div>
                 {% endif %}
-                
+
                 {% if form.vars.inline %}
                     {% if (form.vars.allow_empty and form.vars.hint) %}
                     <div class="form-text text-muted">{{"@fields.password.unchanged"|trans}}</div>
@@ -1137,7 +1137,7 @@
                 {% endif %}
 
             </div>
-            
+
             {% if form.vars.repeater %}
             <div class="form-group">
                 {{ form_label(form.plain_repeater) }}{{ form_help(form.plain_repeater) }}
@@ -1145,7 +1145,7 @@
                     <span class="input-group-text">{{ 'fas fa-lock'|iconify }}</span>
                     {{ form_widget(form.plain_repeater, {
                         required:form.vars.required and not allow_empty,
-                        value:form.vars.revealer and not form.vars.secure ? form.vars.value : "", 
+                        value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
                         attr:{'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off"}
                     }) }}
                 </div>
@@ -1169,7 +1169,7 @@
     {% if child == "translations" %}
         {% if currencyForm.vars.default_locale is defined and currencyForm.vars.default_locale in currencyForm|keys %}
             {% set currencyForm = currencyForm[currencyForm.vars.default_locale] %}
-        {% else %} 
+        {% else %}
             {% set currencyForm = currencyForm|first %}
         {% endif %}
     {% endif %}

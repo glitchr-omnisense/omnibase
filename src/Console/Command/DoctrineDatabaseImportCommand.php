@@ -30,10 +30,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='doctrine:database:import', aliases=[],
- *            description='This command allows to import data from an XLS file into the database')
- */
+#[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
 {
     /**

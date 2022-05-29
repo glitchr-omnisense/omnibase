@@ -4,6 +4,7 @@ namespace Base\Twig;
 
 use Base\Component\HttpFoundation\Referrer;
 use Base\Service\BaseSettings;
+use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Twig\Environment;
@@ -28,20 +29,25 @@ class AppVariable
      * @var BaseSettings
      */
     protected $settings;
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
 
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, BaseSettings $settings, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, BaseSettings $settings, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->settings  = $settings;
         $this->referrer  = $referrer;
         $this->twig      = $twig;
+        $this->bag       = $parameterBag;
 
         $this->meta      = [];
         $this->random    = new RandomVariable();
         $this->easyadmin = new EasyAdminVariable($adminUrlGenerator);
-
         $this->setProxy($appVariable);
     }
 
+    public function bag(?string $key = null, ?array $bag = null) { return $key ? $this->bag->get($key, $bag) ?? null : $this->bag; }
     public function settings() { return $this->settings->get("app.settings") ?? []; }
     public function referrer() { return $this->referrer; }
 

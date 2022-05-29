@@ -12,10 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='translation:controllers', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'translation:controllers', aliases:[], description:'')]
 class TranslationControllersCommand extends Command
 {
     public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router)

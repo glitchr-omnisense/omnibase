@@ -14,10 +14,7 @@ use Base\Console\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='user:notifications', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'user:notifications', aliases:[], description:'')]
 class UserNotificationCommand extends Command
 {
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)

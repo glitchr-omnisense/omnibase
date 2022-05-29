@@ -100,12 +100,23 @@ class Image implements IconizeInterface
      */
     protected $crops;
 
-    public function getPreferredCrop(string|int $labelOrRatio): ?ImageCrop { return $this->getCrops($labelOrRatio)[0] ?? null; }
-    public function getCrops(string|int|null $labelOrRatio = null): Collection
+    public function getPreferredCrop(
+        string|int $slugOrRatio, float $ratioTolerance = 1e-2,
+        ?int $width = null, ?int $height = null, int $dimTolerance = 10 /* pixels */): ?ImageCrop
     {
-        return $this->crops->Map(function($c) use ($labelOrRatio) {
-            if(is_string($labelOrRatio)) return $c->getLabel() && $c->getLabel() == $labelOrRatio;
-            if(is_numeric($labelOrRatio)) return $c->getRatio() == $labelOrRatio;
+        $preferredCrop = $this->getCrops($slugOrRatio, $ratioTolerance)
+            ->Filter(fn($c) => abs($c->getWidth () - $width ) < $dimTolerance)
+            ->Filter(fn($c) => abs($c->getHeight() - $height) < $dimTolerance)->First();
+
+        return $preferredCrop === false ? null : $preferredCrop;
+    }
+
+    public function getCrops(string|int|null $slugOrRatio = null, float $ratioTolerance = 1e-2): Collection
+    {
+        return $this->crops->Filter(function($c) use ($slugOrRatio, $ratioTolerance)
+        {
+            if(is_string($slugOrRatio)) return $c->getSlug() && $c->getSlug() == $slugOrRatio;
+            if(is_numeric($slugOrRatio)) return ($c->getRatio() - $slugOrRatio) < $ratioTolerance;
             return true;
         });
     }

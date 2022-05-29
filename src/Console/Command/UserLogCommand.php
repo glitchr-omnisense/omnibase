@@ -14,10 +14,7 @@ use Base\Console\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * @AsCommand(name='user:log', aliases=[],
- *            description='')
- */
+#[AsCommand(name:'user:log', aliases:[], description:'')]
 class UserLogCommand extends Command
 {
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
