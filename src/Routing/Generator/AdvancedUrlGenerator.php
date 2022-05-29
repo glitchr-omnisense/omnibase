@@ -59,10 +59,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     {
         // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
         if(str_starts_with($routeName, "_")) {
-        
-            try { 
-            
-                return $this->resolve($routeName, $routeParameters, $referenceType) 
+
+            try {
+
+                return $this->resolve($routeName, $routeParameters, $referenceType)
                     ?? throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeName));
 
             } catch (Exception $e ) { throw $e; }
@@ -73,7 +73,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $baseDir = null;
         switch($referenceType) {
-            
+
             case self::ABSOLUTE_URL:
                 $baseDir = $currentUrl["root"] ?? $this->getSettings()->url("/", null, $referenceType);
                 break;
@@ -123,7 +123,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $keys = array_keys(array_diff_key($this->getRouter()->getRouteParameters($routeUrl), $this->getRouter()->getRouteParameters($routeGroupUrl)));
             $routeParameters = array_key_removes($routeParameters, ...$keys);
         }
-        
+
         // Try to compute subgroup (or base one)
         $routeUrl ??= $this->resolve($routeName, $routeParameters, $referenceType);
         if($routeDefaultName == $routeName) {

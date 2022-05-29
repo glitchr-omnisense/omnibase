@@ -46,7 +46,7 @@ class UniqueEntityValidator extends ConstraintEntityValidator
             // Property path
             $fieldPath = explode(".", $fieldName);
             if(count($fieldPath) > 1) {
-    
+
                 $fieldName = head($fieldPath);
                 if(!$classMetadata->hasAssociation($fieldName)) {
                     throw new ConstraintDefinitionException(sprintf('The field "%s" is expected to be an association.', $fieldName));

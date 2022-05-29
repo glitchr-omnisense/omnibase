@@ -6,18 +6,20 @@ use App\Entity\User;
 use Base\Entity\Extension\Log;
 
 use Base\Service\BaseService;
-use Doctrine\ORM\EntityManager;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='user:log', aliases=[],
+ *            description='')
+ */
 class UserLogCommand extends Command
 {
-    protected static $defaultName = 'user:log';
-
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
     {
         $this->entityManager = $entityManager;
@@ -108,7 +110,7 @@ class UserLogCommand extends Command
         // Show log list
         $nLogs = count($filteredLogs);
         if($actionShow) {
-            
+
             foreach ($logs as $key => $log) {
 
                 $message = "Entry ID #" .($key+1) . " / <info>Log #" . $log->getId()." \"".$log."\"</info>";

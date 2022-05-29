@@ -40,7 +40,7 @@ class IconConfigurator extends SelectConfigurator
             $location = $relationship == "javascript" ? "javascripts" : "stylesheets";
             $this->baseService->addHtmlContent($location, $asset);
         }
-        
+
         $field->setCustomOption("iconColor", $icon);
     }
 }

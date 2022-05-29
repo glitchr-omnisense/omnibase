@@ -33,7 +33,7 @@ class OrderedArrayCollection extends ArrayCollection
             parent::clear();
 
             foreach($elements as $element)
-                parent::add($element); 
+                parent::add($element);
 
             $this->ordering = array_keys(parent::toArray());
         }

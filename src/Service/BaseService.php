@@ -45,10 +45,10 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\EventDispatcher\Event;
-    
+
 // TODO: Clean up advanced router proxy methods;
 class BaseService implements RuntimeExtensionInterface
-{   
+{
     use BaseTrait;
     use BaseCommonTrait;
 
@@ -66,12 +66,12 @@ class BaseService implements RuntimeExtensionInterface
      * @var AuthorizationCheckerInterface
      */
     protected $authorizationChecker;
-    
+
     /**
      * @var TokenStorageInterface
      */
     protected $tokenStorage;
-    
+
     /**
      * @var CsrfTokenManagerInterface
      */
@@ -81,7 +81,7 @@ class BaseService implements RuntimeExtensionInterface
      * @var EntityManagerInterface
      */
     protected $entityManager;
-    
+
     /**
      * @var Container
      */
@@ -94,7 +94,7 @@ class BaseService implements RuntimeExtensionInterface
 
         return $this->container->getServiceIds();
     }
-    
+
     /**
      * @var RequestStack
      */
@@ -128,7 +128,7 @@ class BaseService implements RuntimeExtensionInterface
         BaseSettings $settings,
         ImageService $imageService,
         IconProvider $iconProvider,
-        
+
         EntityHydrator $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -149,7 +149,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->formFactory              = $formFactory;
         $this->requestStack             = $requestStack;
         $this->entityHydrator           = $entityHydrator;
-        
+
         // Additional containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
         $this->setImageService($imageService);
@@ -242,7 +242,7 @@ class BaseService implements RuntimeExtensionInterface
     public function renderHtmlContent(string $location)
     {
         $htmlContent = $this->getHtmlContent($location);
-        if(!empty($htmlContent)) 
+        if(!empty($htmlContent))
             $this->removeHtmlContent($location);
 
         return $htmlContent;
@@ -277,7 +277,7 @@ class BaseService implements RuntimeExtensionInterface
         if(!$relationship) {
 
             $content = $contentOrArrayOrFile;
-        
+
         } else {
 
             // Compute options
@@ -321,11 +321,11 @@ class BaseService implements RuntimeExtensionInterface
 
 
     /**
-     * 
+     *
      * Symfony kernel container related methods
-     * 
+     *
      */
-    
+
     private static $startTime = 0;
     public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
     public function execution_time() { return $this->getExecutionTime(); }
@@ -359,7 +359,7 @@ class BaseService implements RuntimeExtensionInterface
         if (!$response) return null;
         return $this->getProfiler()->loadProfileFromResponse($response);
     }
-    
+
     public function getParameter(string $name): array|bool|string|int|float|null { return $this->kernel->getContainer()->getParameter($name); }
     public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
@@ -394,19 +394,19 @@ class BaseService implements RuntimeExtensionInterface
     public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
     public function getCurrentRouteName(): ?string { return $this->getRouter()->getRouteName(); }
 
-    public function generateUrl(string $urlOrRoute = "", array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string 
-    { 
+    public function generateUrl(string $urlOrRoute = "", array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
+    {
         try { return $this->getRouter()->generate($urlOrRoute, $routeParameters, $referenceType); }
         catch (RouteNotFoundException $e) { return $urlOrRoute; }
     }
 
     public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->generateUrl($urlOrRoute, $opts), $state, $headers); }
     public function redirectToRoute(string $route, array $opts = [], int $state = 302, array $headers = []): ?RedirectResponse
-    { 
+    {
         $event = null;
         if(array_key_exists("event", $headers)) {
             $event = $headers["event"];
-            if(! ($event instanceof Event) ) 
+            if(! ($event instanceof Event) )
                 throw new InvalidArgumentException("header variable \"event\" must be ".Event::class.", currently: ".(is_object($event) ? get_class($event) : gettype($event)));
             unset($headers["event"]);
         }
@@ -414,15 +414,15 @@ class BaseService implements RuntimeExtensionInterface
         $exceptions = [];
         if(array_key_exists("exceptions", $headers)) {
             $exceptions = $headers["exceptions"];
-            if(!is_string($exceptions) && !is_array($exceptions)) 
+            if(!is_string($exceptions) && !is_array($exceptions))
                 throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
             unset($headers["exceptions"]);
         }
-        
+
         $callback = null;
         if(array_key_exists("callback", $headers)) {
             $callback = $headers["callback"];
-            if(!is_callable($callback)) 
+            if(!is_callable($callback))
                 throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
             unset($headers["callback"]);
         }
@@ -430,12 +430,12 @@ class BaseService implements RuntimeExtensionInterface
         $url   = $this->generateUrl($route, $opts) ?? $route;
         $route = $this->getRouteName($url);
         if (!$route) return null;
-        
+
         $currentRoute = $this->getCurrentRouteName();
         if ($route == $currentRoute) return null;
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
-        foreach($exceptions as $pattern) 
+        foreach($exceptions as $pattern)
             if (preg_match($pattern, $currentRoute)) return null;
 
         $response = new RedirectResponse($url, $state, $headers);
@@ -465,11 +465,11 @@ class BaseService implements RuntimeExtensionInterface
 
 
     /**
-     * 
+     *
      * Security container related methods
      *
      */
-    
+
     public function setUserIdentifier(string $userIdentifier)
     {
         User::$identifier = $userIdentifier;
@@ -482,7 +482,7 @@ class BaseService implements RuntimeExtensionInterface
             throw new Exception("No token storage found in BaseService. Did you overloaded self::__construct ?");
 
         $this->tokenStorage->setToken(null);
-        if(array_key_exists("REMEMBERME", $_COOKIE)) 
+        if(array_key_exists("REMEMBERME", $_COOKIE))
             setcookie("REMEMBERME", '', time()-1);
     }
 
@@ -492,7 +492,7 @@ class BaseService implements RuntimeExtensionInterface
             throw new Exception("No CSRF token manager found in BaseService. Did you overloaded self::__construct ?");
 
         // Prepare token parameter
-       
+
         $token = null;
         if (!$tokenOrForm instanceof FormInterface) $token = $tokenOrForm;
         else {
@@ -513,7 +513,7 @@ class BaseService implements RuntimeExtensionInterface
         // Checking validity
         return $this->csrfTokenManager->isTokenValid(new CsrfToken($id, $token));
     }
-    
+
     public function getToken()
     {
         if (!isset($this->tokenStorage))
@@ -559,9 +559,9 @@ class BaseService implements RuntimeExtensionInterface
 
 
     /**
-     * 
+     *
      * Doctrine related methods
-     * 
+     *
      */
     public function setEntityManager(EntityManagerInterface $entityManager) { $this->entityManager = $entityManager; }
     public function getEntityManager(bool $reopen = false): ?EntityManagerInterface
@@ -571,7 +571,7 @@ class BaseService implements RuntimeExtensionInterface
 
             if(!$reopen) return null;
             $this->entityManager = $this->entityManager->create(
-                $this->entityManager->getConnection(), 
+                $this->entityManager->getConnection(),
                 $this->entityManager->getConfiguration()
             );
         }
@@ -595,7 +595,7 @@ class BaseService implements RuntimeExtensionInterface
     }
 
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
-    { 
+    {
         $entity = $eventOrEntity->getObject();
         $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
 
@@ -616,7 +616,7 @@ class BaseService implements RuntimeExtensionInterface
 
     protected static $entitySerializer = null;
     public function getOriginalEntity($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
-    { 
+    {
         if(!self::$entitySerializer)
             self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 

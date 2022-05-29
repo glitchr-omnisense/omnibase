@@ -6,5 +6,5 @@ use Base\Controller\Backoffice\AbstractCrudController;
 
 class NotificationCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 }

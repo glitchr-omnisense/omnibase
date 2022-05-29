@@ -16,13 +16,13 @@ use Base\Repository\Layout\Widget\AttachmentBoxRepository;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentBoxRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  */
 class AttachmentBox extends Widget implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-boxes"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-boxes"]; }
 
     public function __construct(string $title, array $attachments = [])
     {
@@ -32,7 +32,7 @@ class AttachmentBox extends Widget implements IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Attachment::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $attachments;
     public function getAttachments(): Collection { return $this->attachments; }

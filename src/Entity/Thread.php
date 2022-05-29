@@ -35,7 +35,7 @@ use Base\Repository\ThreadRepository;
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * 
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *
@@ -51,7 +51,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     use TranslatableTrait;
 
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-box"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-box"]; }
 
     public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
@@ -138,7 +138,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnex($connex): self 
+    public function addConnex($connex): self
     {
         if(!$this->connexes->contains($connex))
             $this->connexes[] = $connex;
@@ -151,7 +151,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->connexes->removeElement($connex);
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="string", length=255, unique=true, nullable=true)
      * @Slugify(reference="title")
@@ -180,7 +180,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     }
 
     public function setIsPublished (bool $newState): self
-    { 
+    {
         $this->state = $newState ? ThreadState::PUBLISH : ThreadState::DRAFT;
         return $this;
     }
@@ -359,7 +359,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $createdAt;
     public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
-    
+
     /**
      * @ORM\Column(type="datetime")
      * @Timestamp(on={"update", "create"})
@@ -391,14 +391,14 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     {
         if($depth > 0)
             return $this->translate($locale)->setTitle(empty($title) || $title === $this->getParent()->getTitle($locale, --$depth) ? null : $title);
-        
+
         return $this->translate($locale)->setTitle($title);
     }
 
     public function getExcerpt(?string $locale = null, int $depth = 0): ?string
     {
         $excerpt = $this->translate($locale)->getExcerpt();
-        if($depth > 0) 
+        if($depth > 0)
             $excerpt = $excerpt ?? ($this->getParent() ? $this->getParent()->getExcerpt($locale, --$depth) : null);
 
         return $excerpt;
@@ -406,7 +406,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     public function setExcerpt(?string $excerpt, ?string $locale = null, int $depth = 0)
     {
-        if($depth > 0) 
+        if($depth > 0)
             return $this->translate($locale)->setExcerpt(empty($excerpt) || $excerpt === $this->getParent()->getExcerpt($locale, --$depth) ? null : $excerpt);
 
         return $this->translate($locale)->setExcerpt($excerpt);
@@ -415,7 +415,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function getContent(?string $locale = null, int $depth = 0): ?string
     {
         $content = $this->translate($locale)->getContent();
-        if($depth > 0) 
+        if($depth > 0)
             $content = $content ?? ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
 
         return $content;
@@ -423,12 +423,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     public function setContent(?string $content, ?string $locale = null, int $depth = 0)
     {
-        if($depth > 0) 
+        if($depth > 0)
             return $this->translate($locale)->setContent(empty($content) || $content === $this->getParent()->getContent($locale, --$depth) ? null : $content);
 
         return $this->translate($locale)->setContent($content);
     }
-    
+
     /**
      * Add article content with reshaped titles
      */
@@ -444,7 +444,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
             $options["attr"]["class"] = $options["attr"]["class"] ?? "";
             $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
-            
+
             return "<".$tag." ".html_attributes($options["row_attr"] ?? [], ["id" => $slug])."><a ".html_attributes($options["attr"] ?? [])." href='#" . $slug . "'>".$content."</a><a href='#" . $slug . "'>".$suffix."</a></".$tag.">";
 
         }, $this->content);
@@ -470,5 +470,5 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
         return $headlines;
     }
-    
+
 }

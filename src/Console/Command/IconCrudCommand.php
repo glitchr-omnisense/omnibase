@@ -6,16 +6,19 @@ use Base\Annotations\Annotation\Iconize;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Controller\Backoffice\AbstractCrudController;
-use Base\Service\BaseService;
+
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='icon:crud', aliases=[],
+ *            description='')
+ */
 class IconCrudCommand extends Command
 {
-    protected static $defaultName = 'icon:crud';
-
     protected function configure(): void
     {
         $this->addOption('crud',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific CRUD controller ?');
@@ -28,13 +31,13 @@ class IconCrudCommand extends Command
         $cruds = array_filter(
             array_merge(
                 BaseBundle::getAllClasses($baseLocation."/Controller/Backoffice/Crud"),
-                BaseBundle::getAllClasses("./src/Controller/Backoffice/Crud"), 
+                BaseBundle::getAllClasses("./src/Controller/Backoffice/Crud"),
             ), fn($c) => !($c instanceof EaCrudController)
         );
 
         if($cruds) $output->section()->writeln("CRUD controller list: ".$crudRestriction);
         foreach($cruds as $crud) {
-        
+
             if(!str_starts_with($crud, $crudRestriction)) continue;
 
             $icon = $crud instanceof AbstractCrudController ? $crud::getPreferredIcon() : null;

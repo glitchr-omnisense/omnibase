@@ -33,7 +33,7 @@ class Quadrant extends EnumType implements IconizeInterface
     public static function getRotations(): array
     {
         return [
-            self::O   => null, 
+            self::O   => null,
             self::N   => 1 * self::getTheta(),
             self::W   => 2 * self::getTheta(),
             self::S   => 3 * self::getTheta(),

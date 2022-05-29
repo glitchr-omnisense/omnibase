@@ -25,7 +25,7 @@ class Sitemap extends AbstractAnnotation
     protected string $lastMod;
     protected string $changeFreq;
     protected float  $priority;
-    
+
     public function getPriority  () { return $this->priority;   }
     public function getChangeFreq() { return $this->changeFreq; }
     public function getLastMod   () { return $this->lastMod;    }

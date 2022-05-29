@@ -51,7 +51,7 @@ use Doctrine\ORM\Mapping\OrderBy;
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * 
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *
@@ -63,28 +63,28 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     use BaseTrait;
 
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
-    public static function __iconizeStatic() : ?array { return ["fas fa-user"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
     private const __DEFAULT_IDENTIFIER__ = "email";
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
-    
+
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
 
-    public function getUserIdentifier(): string 
-    { 
+    public function getUserIdentifier(): string
+    {
         $identifier = null;
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isReadable($this, self::$identifier)) 
+        if ($accessor->isReadable($this, self::$identifier))
             $identifier = $accessor->getValue($this, self::$identifier);
 
-        if ($accessor->isReadable($this, self::__DEFAULT_IDENTIFIER__) && !$identifier) 
+        if ($accessor->isReadable($this, self::__DEFAULT_IDENTIFIER__) && !$identifier)
             $identifier = $accessor->getValue($this, self::$identifier);
 
         if( $identifier === null)
             throw new Exception("User identifier is NULL, is this user already persistent in the database?");
-        
-        return $identifier; 
+
+        return $identifier;
     }
 
     public function equals($other): bool { return ($other->getId() == $this->getId()); }
@@ -95,7 +95,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
         $persistentCollection = ($this->getLogs() instanceof PersistentCollection ? (array) $this->getLogs() : null);
         if($persistentCollection === null) return true;
-        
+
         $dirtyCollection = [
             "\x00Doctrine\ORM\PersistentCollection\x00snapshot" => [],
             "\x00Doctrine\ORM\PersistentCollection\x00owner" => null,
@@ -196,7 +196,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         if($this->secret == null) return null;
         return new TotpConfiguration($this->secret, TotpConfiguration::ALGORITHM_SHA1, User::TOTP_TIMEOUT, User::TOTP_LENGTH);
     }
-    
+
     public function setSecret($secret): self
     {
         $this->secret = $secret;
@@ -242,10 +242,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         if(empty($locale)) $locale = null;
         $this->locale = $locale ?? User::getCookie("locale") ?? LocaleProvider::getDefaultLocale();
-        
+
         if(!$this->locale)
             throw new MissingLocaleException("Missing locale.");
-    
+
         return $this;
     }
 
@@ -282,7 +282,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $this->plainPassword = null;
         return $this;
     }
-    
+
     /**
      * @var string The hashed password
      * @ORM\Column(type="string", nullable=true)
@@ -308,7 +308,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isSocial(): bool { return in_array(UserRole::SOCIAL, $this->roles); }
     public function isPersistent(): bool { return (!$this->isSocial() || $this->id > 0); }
     public function getRoles(): array
-    { 
+    {
         if(empty($roles))
             $roles[] = UserRole::USER;
 
@@ -319,9 +319,9 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         if(empty($roles))
             $roles[] = UserRole::USER;
-            
+
         $this->roles = array_unique($roles);
-        
+
         return $this;
     }
 
@@ -483,7 +483,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
         return $this;
     }
-    
+
     public function getExpiredToken(string $name): ?Token { return $this->getToken($name, Token::EXPIRED); }
     public function getValidToken(string $name): ?Token { return $this->getToken($name, Token::VALID); }
     public function getToken(string $name, $type = Token::ALL): ?Token
@@ -513,7 +513,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $tokens = $this->getTokens();
         foreach ($tokens as $token) {
 
-            if ($token->getName() == $name) 
+            if ($token->getName() == $name)
                 $this->removeToken($token);
         }
 
@@ -650,7 +650,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function elder   (bool $newState = true): self { return $this->setIsNewcomer(!$newState); }
     public function isNewcomer(): bool { return in_array(UserState::NEWCOMER, $this->states); }
     public function isElder()   : bool { return !$this->isNewcomer(); }
-    public function setIsNewcomer(bool $newState): self 
+    public function setIsNewcomer(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::NEWCOMER) : array_values_remove($this->states, UserState::NEWCOMER);
         return $this;
@@ -660,7 +660,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function disregarded(bool $newState = true): self { return $this->setIsApproved(!$newState); }
     public function isApproved()   : bool { return in_array(UserState::APPROVED, $this->states); }
     public function isDisregarded(): bool { return !$this->isApproved(); }
-    public function setIsApproved(bool $newState): self 
+    public function setIsApproved(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::APPROVED) : array_values_remove($this->states, UserState::APPROVED);
         return $this;
@@ -668,7 +668,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function verify(bool $newState = true): self { return $this->setIsVerified($newState); }
     public function isVerified(): bool { return in_array(UserState::VERIFIED, $this->states); }
-    public function setIsVerified(bool $newState) 
+    public function setIsVerified(bool $newState)
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::VERIFIED) : array_values_remove($this->states, UserState::VERIFIED);
         return $this;
@@ -679,7 +679,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isEnabled() : bool { return in_array(UserState::ENABLED, $this->states); }
     public function isDisabled(): bool { return !$this->isEnabled(); }
     public function setIsEnabled (bool $newState): self
-    { 
+    {
         $this->states = $newState ? array_values_insert($this->states, UserState::ENABLED) : array_values_remove($this->states, UserState::ENABLED);
         return $this;
     }
@@ -687,7 +687,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function lock  (bool $newState = true): self { return $this->setIsLocked( $newState); }
     public function unlock(bool $newState = true): self { return $this->setIsLocked(!$newState); }
     public function isLocked(): bool { return in_array(UserState::LOCKED, $this->states); }
-    public function setIsLocked(bool $newState): self 
+    public function setIsLocked(bool $newState): self
     {
         $this->states = $newState ? array_values_insert($this->states, UserState::LOCKED) : array_values_remove($this->states, UserState::LOCKED);
         return $this;
@@ -697,7 +697,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function unban(bool $newState = true): self { return $this->setIsBanned(!$newState); }
     public function isBanned(): bool { return in_array(UserState::BANNED, $this->states); } // TO IMPLEMENT..
     public function setIsBanned(bool $newState = true): self
-    { 
+    {
         $this->states = $newState ? array_values_insert($this->states, UserState::BANNED) : array_values_remove($this->states, UserState::BANNED);
         return $this;
     }
@@ -714,7 +714,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function ghost(bool $newState = true): self { return $this->setIsGhost($newState); }
     public function isGhost(): bool { return in_array(UserState::GHOST, $this->states); }
     public function setIsGhost(bool $newState): self
-    { 
+    {
         $this->states = $newState ? array_values_insert($this->states, UserState::GHOST) : array_values_remove($this->states, UserState::GHOST);
         return $this;
     }

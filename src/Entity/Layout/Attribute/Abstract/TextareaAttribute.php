@@ -10,7 +10,7 @@ use Base\Repository\Layout\Attribute\Abstract\TextareaAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TextareaAttributeRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry( value = "textarea" )
  */
 

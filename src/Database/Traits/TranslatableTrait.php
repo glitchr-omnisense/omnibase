@@ -21,9 +21,9 @@ trait TranslatableTrait
     ): ?string
     {
         $class = ($selfClass ? self::class : static::class);
-        
+
         $prefix = "Proxies\__CG__\\";
-        if (strpos($class, $prefix) === 0) 
+        if (strpos($class, $prefix) === 0)
             $class = mb_substr($class, strlen($prefix));
 
         if($withInheritance) {
@@ -60,9 +60,9 @@ trait TranslatableTrait
         return $this->translations;
     }
 
-    public function removeTranslation(TranslationInterface $translation): void { 
+    public function removeTranslation(TranslationInterface $translation): void {
         $this->getTranslations()->removeElement($translation);
-       
+
     }
     public function addTranslation(TranslationInterface $translation)
     {
@@ -80,7 +80,7 @@ trait TranslatableTrait
         $localeProvider = BaseService::getLocaleProvider();
         $defaultLocale = $localeProvider->getDefaultLocale();
         $availableLocales = $localeProvider->getAvailableLocales();
-        
+
         $locale = intval($locale) < 0 ? $defaultLocale : $locale;
         $normLocale = $localeProvider->getLocale($locale); // Locale normalizer
 
@@ -125,21 +125,21 @@ trait TranslatableTrait
         if (str_starts_with($method, "set")) {
 
             $property = lcfirst(mb_substr($method, 3));
-        
+
             if (empty($arguments))
                 throw new \BadMethodCallException("Missing argument for setter property \"$property\" in ". $className);
-            
-            try { return $this->__set($property, ...$arguments); } 
+
+            try { return $this->__set($property, ...$arguments); }
             catch (\BadMethodCallException $e) {
 
                 // Parent fallback setter
-                if($parentClass && method_exists($parentClass, "__set")) 
+                if($parentClass && method_exists($parentClass, "__set"))
                     return parent::__set($property, ...$arguments);
             }
         }
 
         //
-        // Figure out is property exist 
+        // Figure out is property exist
         $property = null;
         if(property_exists($className, $method))
             $property = $method;
@@ -159,13 +159,13 @@ trait TranslatableTrait
         if($property) {
 
             try { return $this->__get($property); }
-            catch (\BadMethodCallException $e) 
+            catch (\BadMethodCallException $e)
             {
                 // Parent fallback getter
                 if($parentClass && method_exists($className, "__get")) {
 
                     try { return parent::__get($property); }
-                    catch (\BadMethodCallException $e) 
+                    catch (\BadMethodCallException $e)
                     {
                         throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
                     }
@@ -175,7 +175,7 @@ trait TranslatableTrait
         } else if($translationClassName && method_exists($translationClassName, $method)) {
 
             try { return $this->translate()->$method(...$arguments); }
-            catch (\BadMethodCallException $e) 
+            catch (\BadMethodCallException $e)
             {
                 throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
             }
@@ -183,7 +183,7 @@ trait TranslatableTrait
 
         //
         // Parent fallback for magic __call
-        if($parentClass && method_exists($parentClass,"__call")) 
+        if($parentClass && method_exists($parentClass,"__call"))
             return parent::__call($method, $arguments);
 
         if(!method_exists($className,$method))
@@ -198,7 +198,7 @@ trait TranslatableTrait
         $translationClassName = $this->getTranslationEntityClass();
         $property = snake2camel($property);
         $entity = $this;
-        
+
         //
         // Setter method in called class
         if (method_exists($entity, "set".mb_ucfirst($property))) {
@@ -232,7 +232,7 @@ trait TranslatableTrait
 
         return $this;
     }
-    
+
     public function __get($property)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
@@ -245,7 +245,7 @@ trait TranslatableTrait
             return $entity->{$property}();
         else if (method_exists($entity, "get".mb_ucfirst($property)))
             return $entity->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entity, $property) && $accessor->isReadable($entity, $property)) 
+        else if (property_exists($entity, $property) && $accessor->isReadable($entity, $property))
             return $accessor->getValue($entity, $property);
 
         //
@@ -267,7 +267,7 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for default locale
-        if ($entityTranslation->getLocale() == $defaultLocale) 
+        if ($entityTranslation->getLocale() == $defaultLocale)
             return $value;
 
         $entityTranslation = $this->translate($defaultLocale);
@@ -275,13 +275,13 @@ trait TranslatableTrait
             return $entityTranslation->{$property}();
         else if(method_exists($entityTranslation, "get".mb_ucfirst($property)))
             return $entityTranslation->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property)) 
+        else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property))
             return $accessor->getValue($entityTranslation, $property);
 
         // Exception for EA variables (cf. EA's FormField)
         if(!str_starts_with($property, "ea_"))
             throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
-        
+
         return null;
     }
 }

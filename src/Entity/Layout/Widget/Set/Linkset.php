@@ -15,13 +15,13 @@ use Base\Repository\Layout\Widget\LinksetRepository;
 
 /**
  * @ORM\Entity(repositoryClass=LinksetRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  */
 class Linkset extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-layer-group"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-layer-group"]; }
 
     public function __construct(string $title, array $hyperlinks = [])
     {
@@ -31,7 +31,7 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Hyperlink::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $hyperlinks;
     public function getHyperlinks(): Collection { return $this->hyperlinks; }

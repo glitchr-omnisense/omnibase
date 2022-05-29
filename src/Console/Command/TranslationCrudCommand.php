@@ -4,7 +4,6 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
@@ -12,11 +11,14 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController as EaCrudController;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='translation:crud', aliases=[],
+ *            description='')
+ */
 class TranslationCrudCommand extends Command
 {
-    protected static $defaultName = 'translation:crud';
-
     public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider)
     {
         $this->translator = $translator;
@@ -39,7 +41,7 @@ class TranslationCrudCommand extends Command
         $cruds = array_filter(
             array_merge(
                 BaseBundle::getAllClasses($baseLocation."/Controller/Backoffice/Crud"),
-                BaseBundle::getAllClasses("./src/Controller/Backoffice/Crud"), 
+                BaseBundle::getAllClasses("./src/Controller/Backoffice/Crud"),
             ), fn($c) => !($c instanceof EaCrudController)
         );
 
@@ -62,7 +64,7 @@ class TranslationCrudCommand extends Command
         foreach($cruds as $crud) {
 
             if(!str_starts_with($crud, $crudRestriction)) continue;
-            
+
             $trans = "";
             foreach($availableLocales as $currentLocale) {
 

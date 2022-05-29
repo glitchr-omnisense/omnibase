@@ -109,7 +109,7 @@ class SecurityController extends AbstractController
             $message = "Bye bye $user !";
 
             if( $user->isKicked()   ) {
-    
+
                 $notification = new Notification("kickout", [$user]);
                 $notification->setUser(!$user->isDirty() ? $user : null);
                 $notification->send("warning");
@@ -192,7 +192,7 @@ class SecurityController extends AbstractController
             $notification->send("info");
 
         } else {
-            
+
             $verifyEmailToken = $user->getToken("verify-email");
             if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
@@ -267,21 +267,21 @@ class SecurityController extends AbstractController
 
         if(!$user->isVerified()) {
 
-            $notification = new Notification("adminApproval.verifyFirst");  
+            $notification = new Notification("adminApproval.verifyFirst");
             $notification->send("warning");
 
         } else if (!$user->isApproved()) {
 
-            if ( ($adminApprovalToken = $user->getValidToken("admin-approval")) ) { 
+            if ( ($adminApprovalToken = $user->getValidToken("admin-approval")) ) {
 
-                $notification = new Notification("adminApproval.alreadySent");  
+                $notification = new Notification("adminApproval.alreadySent");
                 $notification->send("warning");
 
             } else {
 
                 $adminApprovalToken = new Token("admin-approval");
                 $adminApprovalToken->setUser($user);
-            
+
                 $notification = new Notification("adminApproval.required");
                 $notification->setUser($user);
                 $notification->setHtmlTemplate("@Base/security/email/admin_approval.html.twig",["token" => $adminApprovalToken]);
@@ -302,7 +302,7 @@ class SecurityController extends AbstractController
 
         if($user->isDisabled()) {
 
-            $notification = new Notification("accountGoodbye.already");  
+            $notification = new Notification("accountGoodbye.already");
             $notification->send("warning");
 
             return $this->redirectToRoute($this->baseService->getRouteName("/"));
@@ -406,7 +406,7 @@ class SecurityController extends AbstractController
     {
         if (($user = $this->getUser()) && $user->isPersistent())
             return $this->redirectToRoute('user_profile');
-            
+
         $resetPasswordToken = $this->tokenRepository->findOneByValue($token);
         if (!$resetPasswordToken) {
 
@@ -422,14 +422,14 @@ class SecurityController extends AbstractController
             // The token is valid; allow the user to change their password.
             $form = $this->createForm(ResetPasswordConfirmType::class);
             $form->handleRequest($request);
-        
+
             if ($form->isSubmitted() && $form->isValid()) {
 
                 $resetPasswordToken->revoke();
                 $user->setPlainPassword($form->get('plainPassword')->getData());
 
                 $notification = new Notification("resetPassword.success");
-               
+
                 $this->entityManager->flush();
                 $authenticateUser = $userAuthenticator->authenticateUser($user, $authenticator, $request);
                 $notification->send("success");

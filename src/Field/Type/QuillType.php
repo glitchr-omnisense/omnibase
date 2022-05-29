@@ -93,7 +93,7 @@ class QuillType extends AbstractType implements DataMapperInterface
             $theme = $themeArray[1];
             $themeCssFile = $themeArray[0];
         }
-        
+
         $this->baseService->addHtmlContent("stylesheets:head", $themeCssFile);
         $modules = $options["modules"] ?? [];
 
@@ -102,7 +102,7 @@ class QuillType extends AbstractType implements DataMapperInterface
         $quillOpts["modules"] = $modules;
         $quillOpts["placeholder"] = $options["placeholder"];
         $quillOpts["height"] = $options["height"];
-        
+
         $view->vars["quill"] = json_encode($quillOpts);
 
         //

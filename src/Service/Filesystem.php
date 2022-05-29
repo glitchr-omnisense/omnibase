@@ -19,7 +19,7 @@ use ReflectionException;
 use Symfony\Component\Finder\Finder;
 
 class Filesystem
-{   
+{
     /**
      * @var FilesystemOperator
      */
@@ -39,7 +39,7 @@ class Filesystem
     public function __construct(LazyFactory $lazyFactory)
     {
         $this->lazyFactory = $lazyFactory;
-        
+
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir  = self::$projectDir."/public";
 
@@ -54,11 +54,11 @@ class Filesystem
     }
 
     public function getOperator(FilesystemOperator|string|null $operator = null): FilesystemOperator
-    { 
+    {
         if (class_implements_interface($operator, FilesystemOperator::class))
             return $operator;
 
-        if (is_string($operator)) 
+        if (is_string($operator))
             return $this->lazyFactory->createStorage($operator, $operator);
 
         return $this->operator;
@@ -91,7 +91,7 @@ class Filesystem
         $prefixPath = $this->getPathPrefixer($operator)->prefixPath("");
         return $prefixPath.str_lstrip($path, $prefixPath);
     }
-    
+
     public function stripPrefix(string $path, FilesystemOperator|string|null $operator = null)
     {
         $prefixPath = $this->getPathPrefixer($operator)->prefixPath("");
@@ -133,7 +133,7 @@ class Filesystem
         return true;
     }
 
-    public function fileExists(string $path, FilesystemOperator|string|null $operator = null): bool 
+    public function fileExists(string $path, FilesystemOperator|string|null $operator = null): bool
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
@@ -142,7 +142,7 @@ class Filesystem
         catch (CorruptedPathDetected $e ) { return false; }
     }
 
-    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []) 
+    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = [])
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
@@ -165,9 +165,9 @@ class Filesystem
         catch (UnableToRetrieveMetadata $e) { throw new NotDeletableException("Unable to read mimetype \"$path\".. ".$e->getMessage()); }
         return null;
     }
-    
+
     public function get(mixed $path, FilesystemOperator|string|null $operator = null)
-    { 
+    {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
 
@@ -189,7 +189,7 @@ class Filesystem
         // Check if file is reacheable in /public directory
         $operator = $this->getOperator($operator);
         if($operator) {
-        
+
             $endpoints = $this->getPublicRealpath();
             foreach($endpoints as $alias => $realpath) {
 

@@ -11,7 +11,7 @@ use Base\Repository\Layout\Attribute\Abstract\HyperpatternAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=HyperpatternAttributeRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry( value = "hyperpattern" )
  */
 
@@ -22,7 +22,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
     public static function getType(): string { return ArrayType::class; }
     public function resolve(mixed $value): mixed { return unserialize($value); }
     public function getOptions(): array { return [
-        "pattern" => $this->getPattern(), 
+        "pattern" => $this->getPattern(),
         "placeholder" => $this->getPlaceholder() ?? []
     ]; }
 

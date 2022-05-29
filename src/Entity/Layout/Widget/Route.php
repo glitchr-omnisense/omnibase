@@ -14,30 +14,30 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 /**
  * @ORM\Entity(repositoryClass=RouteRepository::class)
  * @DiscriminatorEntry
- * 
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ *
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
 class Route extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return $this->getRouteIcons(); } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-road"]; } 
+    public        function __iconize()       : ?array { return $this->getRouteIcons(); }
+    public static function __iconizeStatic() : ?array { return ["fas fa-road"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         return $this->generate($referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }
-    
-    public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = []) 
+
+    public function __construct(?string $title = null, ?string $routeName = null, array $routeParameters = [])
     {
         parent::__construct($title);
-        
+
         $this->routeName = $routeName;
         $this->routeParameters = $routeParameters;
     }
-    
+
     /**
      * @ORM\Column(type="text")
      */
@@ -60,7 +60,7 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
         return $this;
     }
 
-    public function getPath() 
+    public function getPath()
     {
         $route = $this->getRouter()->getRouteCollection()->get($this->routeName);
         return $route ? $route->getPath() : null;

@@ -21,10 +21,10 @@ use Base\Repository\Layout\Attribute\Abstract\AbstractAttributeRepository;
  * @ORM\InheritanceType( "JOINED" )
  *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- * 
+ *
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry
- * 
+ *
  * @AssertBase\UniqueEntity(fields={"code"}, groups={"new", "edit"})
  */
 
@@ -32,7 +32,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return $this->icon ? [$this->icon] : null; } 
+    public        function __iconize()       : ?array { return $this->icon ? [$this->icon] : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
     public function __toString() { return $this->getLabel() ?? get_class($this); }

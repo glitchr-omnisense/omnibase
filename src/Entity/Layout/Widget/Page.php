@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
@@ -24,16 +24,16 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class Page extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         return $this->getTwigExtension()->getRoutingExtension()->getPath("widget_page", ["slug" => $this->getSlug()], $referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }
-    
+
     public function __construct(string $title, ?string $slug = null)
     {
         parent::__construct($title);
@@ -52,7 +52,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
         $this->slug = $slug;
         return $this;
     }
-    
+
     /**
      * Add article content with reshaped titles
      */
@@ -68,7 +68,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
 
             $options["attr"]["class"] = $options["attr"]["class"] ?? "";
             $options["attr"]["class"] = trim($options["attr"]["class"] . " anchor");
-            
+
             return "<".$tag." ".html_attributes($options["row_attr"] ?? [], ["id" => $slug])."><a ".html_attributes($options["attr"] ?? [])." href='#" . $slug . "'>".$content."</a><a href='#" . $slug . "'>".$suffix."</a></".$tag.">";
 
         }, $this->content);

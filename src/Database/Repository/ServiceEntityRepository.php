@@ -12,7 +12,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     {
         return preg_replace(
             ['/\\\\Repository\\\\/', '/Repository$/'],
-            ["\\\\Entity\\\\", ""], 
+            ["\\\\Entity\\\\", ""],
             static::class
         );
     }
@@ -35,14 +35,14 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     public function findBy   (array $criteria, ?array $orderBy = null, $limit = null, $offset = null):array { return $this->__call(__METHOD__, [[], $criteria, $orderBy, $limit, $offset])->getResult(); }
     public function findOneBy(array $criteria, ?array $orderBy = null):?object { return $this->__call(__METHOD__, [[], $criteria, $orderBy]); }
     public function count    (array $criteria):int { return $this->__call(__METHOD__, [[], $criteria]); }
-    
-    public function flush($entity = null) 
-    { 
+
+    public function flush($entity = null)
+    {
         $entityFqcn = self::getFqcnEntityName();
         $entityList = array_filter(!is_array($entity) ? [$entity] : $entity, fn($e) => $e instanceof $entityFqcn);
 
         if(count($entityList) || $entity === null)
-            $this->getEntityManager()->flush($entity); 
+            $this->getEntityManager()->flush($entity);
     }
 
     public function persist($entity) {

@@ -24,12 +24,12 @@ class DiscriminatorType extends AbstractType
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator = null;
-    
+
     /**
      * @var FormFactory
      */
     protected $formFactory = null;
-    
+
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->formFactory = $formFactory;
@@ -64,7 +64,7 @@ class DiscriminatorType extends AbstractType
 
                     // if(!class_implements_interface($entity, AttributeInterface::class))
                     //     continue;
-                    
+
                     // $fieldType    = $entity::getType();
                     // $fieldOptions = $entity::getOptions();
                     // $form->add($fieldName, $fieldType, $fieldOptions);
@@ -76,7 +76,7 @@ class DiscriminatorType extends AbstractType
         });
     }
 
-    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_TITLECASE) 
+    public static function getFormattedValues($entry, $class = null, TranslatorInterface $translator = null, $format = FORMAT_TITLECASE)
     {
         $entry = implode(".", array_unique(explode(".", $entry)));
 

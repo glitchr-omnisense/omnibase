@@ -15,7 +15,7 @@ class Password extends Constraint
 
     public $messageMinStrength = 'password.min_strength';
     public $messageMinLength   = 'password.min_length';
-    
+
     public $messageUpperCase = 'password.requirements.uppercase';
     public $messageLowerCase = 'password.requirements.lowercase';
     public $messageLength12  = 'password.requirements.length12';
@@ -56,10 +56,10 @@ class Password extends Constraint
         $this->maxStrength = (int) $this->lowercase + (int) $this->uppercase + (int) $this->numbers + (int) $this->specials;
         $this->minStrength = min($this->maxStrength, $options["min_strength"] ?? self::MIN_STRENGTH_FALLBACK);
         unset($options["min_strength"]);
-        
+
         $this->minLength = $options["min_length"] ?? self::MIN_LENGTH_FALLBACK;
         unset($options["min_length"]);
-        
+
         parent::__construct($options ?? [], $groups, $payload);
    }
 }

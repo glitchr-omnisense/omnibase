@@ -16,7 +16,7 @@ class WebpFilter extends WebOptimization implements FormatFilterInterface
     }
 
     public function getFilters() { return $this->filters; }
-    public function addFilter(FilterInterface $filter) 
+    public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
         return $this;
@@ -37,7 +37,7 @@ class WebpFilter extends WebOptimization implements FormatFilterInterface
 
     protected string $path;
     public function getPath():?string { return $this->path; }
-    public function setPath(?string $path) 
+    public function setPath(?string $path)
     {
         $this->path = $path;
         return $this;

@@ -56,7 +56,7 @@ class Slugify extends AbstractAnnotation
     }
 
     public function getReferenceColumn() { return $this->referenceColumn; }
-    public function getInvalidSlugs($event, $entity, $property) 
+    public function getInvalidSlugs($event, $entity, $property)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
 
@@ -87,7 +87,7 @@ class Slugify extends AbstractAnnotation
 
         return $invalidSlugs;
     }
-    
+
     public function slug($entity, ?string $input = null, string $suffix = ""): ?string
     {
         // Check if field already set.. get field value or by default class name
@@ -114,7 +114,7 @@ class Slugify extends AbstractAnnotation
 
         return ($this->lowercase ? strtolower($slug) : $slug);
     }
-    
+
     public function getSlug($entity, string $property, ?string $defaultInput = null, array &$invalidSlugs = []): ?string
     {
         /**
@@ -122,14 +122,14 @@ class Slugify extends AbstractAnnotation
          */
         $repository  = $this->getPropertyOwnerRepository($entity, $property);
         $defaultSlug = $this->slug($entity, $defaultInput);
-        
+
         $slug = $defaultSlug;
         if(!$slug) return null;
 
         if(!$this->unique) return $slug;
         for($i = 2; $repository->findOneBy([$property => $slug]) || in_array($slug, $invalidSlugs); $i++)
             $slug = $defaultSlug.$this->separator.$i;
-        
+
         return $slug;
     }
 
@@ -144,17 +144,17 @@ class Slugify extends AbstractAnnotation
         $propertyDeclarer  = property_declarer($entity , $property);
         $classMetadata = $this->getClassMetadata($propertyDeclarer);
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
-        
+
         if($this->sync) {
-            
+
             $slug = $this->getFieldValue($entity, $property);
 
             $oldEntity = $this->getOldEntity($entity);
             $oldSlug   = $this->getFieldValue($oldEntity, $property);
 
             if ($slug == $oldSlug) {
-                
-                $labelModified = !$this->referenceColumn ? null : 
+
+                $labelModified = !$this->referenceColumn ? null :
                     $this->getPropertyValue($oldEntity, $this->referenceColumn) !== $this->getPropertyValue($entity, $this->referenceColumn);
 
                 if($labelModified) {
@@ -165,7 +165,7 @@ class Slugify extends AbstractAnnotation
             }
 
         } else {
-        
+
             $currentSlug = $this->getFieldValue($entity, $property);
             $slug = $this->getSlug($entity, $property, $currentSlug, $invalidSlugs);
         }

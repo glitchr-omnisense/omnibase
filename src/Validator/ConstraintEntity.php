@@ -35,7 +35,7 @@ abstract class ConstraintEntity extends Constraint
             $constraintName = preg_replace('/Entity$/', '', array_pop($constraintName));
             $firstField = $fields['fields'][0] ?? "unknown";
 
-            $this->message = 
+            $this->message =
                 camel2snake($firstField) .".".
                 camel2snake($constraintName);
         }

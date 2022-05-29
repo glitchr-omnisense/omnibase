@@ -12,7 +12,7 @@ class MysqlWalker extends SqlWalker
      * @param $selectClause
      * @return string The SQL.
      */
-    
+
     public function walkSelectClause($selectClause)
     {
         $sql = parent::walkSelectClause($selectClause);

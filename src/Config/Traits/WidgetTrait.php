@@ -8,14 +8,14 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 trait WidgetTrait
 {
     public function getSectionWidgetItem(array $widgets = [], $positionOrLabel = null): ?SectionWidgetItem
-    {  
+    {
         $sectionOffsetAndLength = [0, null];
         if(!$positionOrLabel) return $sectionOffsetAndLength;
 
         $sectionFound   = false;
         $sectionCounter = 0;
         foreach($widgets as $key => $widget) {
-            
+
             if($widget instanceof SectionWidgetItem) {
 
                 if ($sectionFound) break;
@@ -33,14 +33,14 @@ trait WidgetTrait
     }
 
     public function getSectionWidgetItemOffsetAndLength(array $widgets = [], $sectionOrPositionOrLabel = null): array
-    {  
+    {
         $sectionOffsetAndLength = [count($widgets), null];
         if(!$sectionOrPositionOrLabel) return $sectionOffsetAndLength;
 
         $sectionFound   = false;
         $sectionCounter = 0;
         foreach($widgets as $key => $widget) {
-            
+
             if($widget instanceof SectionWidgetItem) {
 
                 if ($sectionFound) break;
@@ -51,7 +51,7 @@ trait WidgetTrait
 
                 if ($sectionFound)
                     $sectionOffsetAndLength = [$key, 0];
-                    
+
                 $sectionCounter++;
             }
 
@@ -82,9 +82,9 @@ trait WidgetTrait
     }
 
     public function addSectionWidgetItem(array $widgets = [], $sectionOrArray = null, int $position = -1): array
-    {  
+    {
         if(!$sectionOrArray) return $widgets;
-        
+
         if(!is_array($sectionOrArray))
             $sectionOrArray = [$sectionOrArray];
 
@@ -100,7 +100,7 @@ trait WidgetTrait
     }
 
     public function removeSectionWidgetItem(array $widgets = [], $sectionOrPositionOrLabel = null): array
-    {  
+    {
         if(!$sectionOrPositionOrLabel) return $widgets;
 
         [$offset, $length] = $this->getSectionWidgetItemOffsetAndLength($widgets, $sectionOrPositionOrLabel);
@@ -132,10 +132,10 @@ trait WidgetTrait
         [$offset, $length] = $this->getSectionWidgetItemOffsetAndLength($widgets, $sectionOrPositionOrLabel);
         [$_, $sectionWidgetItem, $widgetItems, $_] = $this->extractSectionWidgetItem($widgets, $offset, $length);
 
-        if(!$sectionWidgetItem) 
+        if(!$sectionWidgetItem)
             throw new \Exception("Section widget \"". $item."\" not found.");
 
-        if ($position < 0) $position = $length-1; 
+        if ($position < 0) $position = $length-1;
 
         array_splice($widgetItems, $position, 0, $itemOrArray);
         array_splice($widgets, $offset+1, $length-1);
@@ -150,9 +150,9 @@ trait WidgetTrait
 
         [$offset, $length] = $this->getSectionWidgetItemOffsetAndLength($widgets, $sectionOrPositionOrLabel);
         [$previousWidgets, $sectionWidgetItem, $widgetItems, $nextWidgets] = $this->extractSectionWidgetItem($widgets, $offset, $length);
-        
+
         $widgetItems = array_filter(array_values($widgetItems), function($widget, $widgetItemCounter) use ($widgetItemOrPositionOrLabel) {
-            
+
             $widgetItemFound  = (is_object($widgetItemOrPositionOrLabel) && $widgetItemOrPositionOrLabel === $widget);
             $widgetItemFound |= (is_int   ($widgetItemOrPositionOrLabel) && $widgetItemOrPositionOrLabel == $widgetItemCounter);
             $widgetItemFound |= (is_string($widgetItemOrPositionOrLabel) && $widget->getAsDto()->getLabel() == $widgetItemOrPositionOrLabel);

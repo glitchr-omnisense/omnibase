@@ -18,8 +18,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class ImageCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
-    
+    public static function getPreferredIcon(): ?string { return null; }
+
     public function configureActions(Actions $actions): Actions
     {
         return parent::configureActions($actions)
@@ -29,13 +29,13 @@ class ImageCrudController extends AbstractCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function () {
-                
+
             yield QuadrantField::new('quadrant')->setColumns(2);
             yield ImageField::new('source')->setColumns(10)->setCropper();
 
             yield CollectionField::new('crops')
                     ->showCollapsed(false)
-                    ->setEntryLabel(function($i, $e) { 
+                    ->setEntryLabel(function($i, $e) {
 
                         if($e === null) return false;
                         if($i === "__prototype__") return false;

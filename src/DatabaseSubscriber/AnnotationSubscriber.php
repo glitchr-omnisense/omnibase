@@ -38,7 +38,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
             Events::loadClassMetadata,
             Events::postLoad,
 
-            Events::onFlush, 
+            Events::onFlush,
             Events::prePersist,  Events::preUpdate,  Events::preRemove,
             Events::postPersist, Events::postUpdate, Events::postRemove,
         ];
@@ -161,7 +161,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $classMetadata  = $this->entityManager->getClassMetadata($className);
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
-        
+
         $annotations    = $this->annotationReader->getAnnotations($className);
 
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
@@ -183,10 +183,10 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
                 if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
                     continue;
-                
+
                 if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
                     continue;
-                
+
                 $entry->{$eventName}($event, $classMetadata, $entity, $property);
             }
         }

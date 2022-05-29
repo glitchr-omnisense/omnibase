@@ -11,7 +11,7 @@ use Base\Repository\Layout\Attribute\Abstract\NumberAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=NumberAttributeRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry( value = "number" )
  */
 

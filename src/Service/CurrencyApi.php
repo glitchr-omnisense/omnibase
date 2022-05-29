@@ -12,7 +12,7 @@ class CurrencyApi
     }
 
     protected $swap = null;
-    
+
     protected $providers = [];
     public function getProviders() { return $this->providers; }
     public function getProvider(string $idOrClass): ?CurrencyApiInterface

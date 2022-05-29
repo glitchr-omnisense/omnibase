@@ -15,11 +15,11 @@ use Base\Repository\Extension\OrderingRepository;
  */
 class Ordering extends AbstractExtension
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-sort-alpha-down"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-sort-alpha-down"]; }
 
-    public function supports(): bool 
-    { 
+    public function supports(): bool
+    {
         $needsOrdering = array_filter($this->getEntityData(), fn($v) => !is_identity($v));
-        return $needsOrdering !== []; 
+        return $needsOrdering !== [];
     }
 }

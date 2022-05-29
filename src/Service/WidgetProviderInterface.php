@@ -10,7 +10,7 @@ interface WidgetProviderInterface
 {
     public function all(): array;
     public function allSlots(): array;
-    
+
     public function get(string $widgetName): ?Widget;
     public function getSlot(string $widgetSlotName): ?Slot;
 }

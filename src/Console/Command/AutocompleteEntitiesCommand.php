@@ -2,7 +2,6 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,14 +10,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\AutocompleteInterface;
-use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='autocomplete:entities', aliases=[],
+ *            description='')
+ */
 class AutocompleteEntitiesCommand extends Command
 {
-    protected static $defaultName = 'autocomplete:entities';
-
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->entityManager = $entityManager;
@@ -35,12 +36,12 @@ class AutocompleteEntitiesCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
-        
+
         $entityId = $input->getOption('id') ?? null;
         $entityClass = $input->getOption('entity') ?? "";
-        
+
         if($entityClass) {
-        
+
             if(!$this->classMetadataManipulator->isEntity($entityClass))
                 throw new \Exception("Entity \"$entityClass\" doesn't exists");
             if(!class_implements_interface($entityClass, AutocompleteInterface::class))
@@ -56,18 +57,18 @@ class AutocompleteEntitiesCommand extends Command
 
             $maxLength = 0;
             foreach($entities as $entity) {
-            
+
                 $autocomplete = $entity->__autocomplete();
                 $maxLength = max(strlen($autocomplete), $maxLength);
             }
 
             foreach($entities as $entity) {
-                            
+
                 $autocomplete = $entity->__autocomplete();
                 $autocompleteData = $entity->__autocompleteData();
                 if ($autocomplete)
                     $autocompleteData = trim(str_replace(["\t", "\n"], ["", " "], print_r($autocompleteData, true)));
-    
+
                 $space = str_repeat(" ", max($maxLength-strlen($autocomplete), 0));
 
                 $output->section()->writeln("<info>".$entityClass." #".$entity->getId()."</info>; <warning>Autocomplete = </warning>\"". $autocomplete."\"".$space."<warning> / Data = </warning>\"$autocompleteData\"");
@@ -77,9 +78,9 @@ class AutocompleteEntitiesCommand extends Command
 
             $entity = array_filter(array_merge(
                 BaseBundle::getAllClasses($baseLocation."/Entity"),
-                BaseBundle::getAllClasses("./src/Entity"), 
+                BaseBundle::getAllClasses("./src/Entity"),
             ), fn($c) => class_implements_interface($c, AutocompleteInterface::class));
-    
+
             if($entity) $output->section()->writeln("Entity candidate list: ".$entityClass);
             foreach($entity as $entity)
                 $output->section()->writeln(" * <info>".$entity."</info>");

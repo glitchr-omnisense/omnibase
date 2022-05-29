@@ -12,7 +12,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     public const CODE_ONLY = 0;
     public const LABEL_ONLY = 1;
     public const LABELCODE_ONLY = 2;
-    
+
     public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
@@ -51,14 +51,14 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
                 ];
             break;
 
-            default: 
+            default:
             case self::LABEL_ONLY:
                 $view->vars["currency_label"] = [
                     "USD" => "\$US",
                     "EUR" => "€"
                 ];
             break;
-            
+
             case self::LABELCODE_ONLY:
                 $view->vars["currency_label"] = [
                     "USD" => "\$US (USD)",

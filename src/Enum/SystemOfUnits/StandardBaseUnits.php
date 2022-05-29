@@ -31,7 +31,7 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
     }
 
     public function __colorize(): ?array { return null; }
-    public static function __colorizeStatic(): ?array { 
+    public static function __colorizeStatic(): ?array {
 
         return [
             self::SECOND   => "#f5a801",
@@ -74,7 +74,7 @@ class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeIn
             self::CANDELA  => 683
         ];
     }
-    
+
     public static function getConstantSymbol(string $name): ?string { return self::getConstantSymbols()[$name] ?? null; }
     public static function getConstantSymbols(): ?array
     {

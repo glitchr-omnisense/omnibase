@@ -53,11 +53,11 @@ class Command extends SymfonyCommand
 
         $defaultDescription = get_called_class()::$defaultDescription;
         if($defaultDescription && $input->hasArgument("purpose")) {
-            
+
             $output->section()->writeln("\n // Command purpose :");
             foreach(explode("\n", $defaultDescription) as $line)
                 $output->section()->writeln(" // \t".trim($line));
-    
+
             $output->section()->writeln(" // \n");
         }
 

@@ -20,8 +20,8 @@ class BaseBundle extends Bundle
     public const CACHE   = true;
     public const VERSION = '1.0.0';
 
-    public function boot() 
-    { 
+    public function boot()
+    {
         $this->defineDoctrineTypes();
         $this->defineDoctrineFilters();
         $this->defineDoctrineWalkers();
@@ -83,7 +83,7 @@ class BaseBundle extends Bundle
             if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
             else Type::addType($className::getStaticName(), $className);
 
-            try { $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName()); } 
+            try { $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName()); }
             catch(Exception $e) { }
         }
     }

@@ -2,23 +2,23 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
-use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Model\IconizeInterface;
-use Base\Service\BaseService;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='icon:controllers', aliases=[],
+ *            description='')
+ */
 class IconControllersCommand extends Command
 {
-    protected static $defaultName = 'icon:controllers';
-
     public function __construct(RouterInterface $router)
     {
         $this->router = $router;

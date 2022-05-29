@@ -23,9 +23,9 @@ class EntityExtension
      */
     public static $entities   = [];
     public static function get() { return self::$entities; }
-    public static function has($entity):bool 
+    public static function has($entity):bool
     {
         $className = is_object($entity) ? get_class($entity) : $entity;
-        return in_array($className, self::$entities); 
+        return in_array($className, self::$entities);
     }
 }

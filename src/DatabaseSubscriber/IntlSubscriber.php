@@ -28,9 +28,9 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         return [Events::loadClassMetadata, Events::onFlush];
     }
-    
+
     public function getLocaleProvider() { return $this->localeProvider; }
-    
+
     public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider)
     {
         $this->entityManager  = $entityManager;
@@ -56,7 +56,7 @@ class IntlSubscriber implements EventSubscriberInterface
             if (is_subclass_of($entity, TranslatableInterface::class, true))
                 $this->normalize($entity);
 
-            if (is_subclass_of($entity, TranslationInterface::class, true)) 
+            if (is_subclass_of($entity, TranslationInterface::class, true))
                 $this->removeIfEmpty($entity);
         }
     }
@@ -74,7 +74,7 @@ class IntlSubscriber implements EventSubscriberInterface
                 continue;
             }
 
-            if($translation->getLocale() !== null && $translation->getLocale() !== $locale) 
+            if($translation->getLocale() !== null && $translation->getLocale() !== $locale)
                 throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
 
             if($translation->getLocale() === null) $translation->setLocale($locale);
@@ -104,10 +104,10 @@ class IntlSubscriber implements EventSubscriberInterface
             return; // Class has not yet been fully built, ignore this event
 
         if ($classMetadata->isMappedSuperclass) return;
-        
+
         if (is_subclass_of($classMetadata->reflClass->getName(), TranslatableInterface::class, true))
             $this->mapTranslatable($classMetadata);
-        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))  
+        if (is_subclass_of($classMetadata->reflClass->getName(), TranslationInterface::class, true))
             $this->mapTranslation($classMetadata);
     }
 
@@ -122,11 +122,11 @@ class IntlSubscriber implements EventSubscriberInterface
         switch($fetchMode) {
             case 'EAGER':
                 return ClassMetadata::FETCH_EAGER;
-            
+
             case 'EXTRA_LAZY':
                 return ClassMetadata::FETCH_EXTRA_LAZY;
 
-            default: 
+            default:
             case 'LAZY':
                 return ClassMetadata::FETCH_LAZY;
         }
@@ -136,7 +136,7 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         $targetEntity = $classMetadata->getReflectionClass()->getMethod('getTranslationEntityClass')->invoke(null);
         if($classMetadata->hasAssociation('translations')) {
-        
+
             $mapping = $classMetadata->getAssociationMapping("translations");
             if(is_subclass_of($targetEntity, $mapping["targetEntity"] ?? null)) {
 
@@ -196,7 +196,7 @@ class IntlSubscriber implements EventSubscriberInterface
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
-	if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
+    if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
             $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
 
         if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))

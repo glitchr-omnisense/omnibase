@@ -62,7 +62,7 @@ class FileService implements FileServiceInterface
         $mimeType = mime_content_type2($fileOrMimetypeOrArray) ?? $fileOrMimetypeOrArray;
         return $this->mimeTypes->getExtensions($mimeType);
     }
-    
+
     public function getMimeType(null|string|array $fileOrContentsOrArray):null|string|array  {
 
         if($fileOrContentsOrArray === null) return null;
@@ -157,7 +157,7 @@ class FileService implements FileServiceInterface
 
         return $args;
     }
-    
+
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response { return $this->serveContents(file_get_contents($file), $status, $headers); }
     public function serveContents(?string $contents, int $status = 200, array $headers = []): ?Response
     {
@@ -166,9 +166,9 @@ class FileService implements FileServiceInterface
 
         $response = new Response($contents, $status, $headers);
         if($this->isEmpty($contents)) return $response;
-        
+
         if($httpCache) {
-            
+
             $response->setMaxAge(300);
             $response->setPublic();
             $response->setEtag(md5($response->getContent()));

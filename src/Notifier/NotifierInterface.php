@@ -24,5 +24,5 @@ interface NotifierInterface extends \Symfony\Component\Notifier\NotifierInterfac
 
     public function enable();
     public function disable();
-    
+
 }

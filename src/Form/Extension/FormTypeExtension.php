@@ -47,7 +47,7 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-            
+
         $this->browseView( $view, $form, $options);
     }
 
@@ -55,12 +55,12 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         if($options["form2"]) $this->applyForm2($view);
         if($options["easyadmin"]) $this->applyEA($form, $view);
-        
+
         foreach($view->children as $field => $childView) {
 
             if (!$form->has($field))
                 continue;
-                
+
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
             $childOptions["form2"] = $options["form2"];
@@ -72,17 +72,17 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function applyForm2($view) {
 
-        // Add to all form custom base style.. 
+        // Add to all form custom base style..
         // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
-        if (array_search("form" , $view->vars['block_prefixes']) !== false && 
+        if (array_search("form" , $view->vars['block_prefixes']) !== false &&
             array_search("form2", $view->vars['block_prefixes']) === false)
         {
             array_splice($view->vars['block_prefixes'], 1, 0, ["form2"]);
         }
     }
-    
+
     public function applyEA($form, $view) {
-        
+
         if(!empty($view->vars["ea_crud_form"])) {
 
             if(!$form->getParent()) {
@@ -92,7 +92,7 @@ class FormTypeExtension extends AbstractTypeExtension
                 $view->vars["attr"]["class"] .= " row ";
             }
         }
-        
+
         $fieldDto = $view->vars["ea_crud_form"]["ea_field"] ?? null;
         if($fieldDto) {
 

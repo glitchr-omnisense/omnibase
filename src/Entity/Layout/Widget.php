@@ -21,8 +21,8 @@ use Doctrine\Common\Collections\Collection;
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
- * 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ *
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry
  */
@@ -32,7 +32,7 @@ class Widget implements TranslatableInterface, IconizeInterface
     use BaseTrait;
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
     public function __toString() { return $this->getTitle(); }

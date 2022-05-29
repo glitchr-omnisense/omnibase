@@ -62,7 +62,7 @@ class SearchController extends AbstractController
         $threads = [];
 
         if($formattedData) {
-            
+
             $data = new SearchData();
             $data->content = "%" . ($formattedData->content ?? $formattedData->generic) . "%";
             $data->title   = "%" . ($formattedData->title   ?? $formattedData->generic ?? $formattedData->content) . "%";

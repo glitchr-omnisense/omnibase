@@ -45,7 +45,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         return explode("?", $request->getRequestUri())[0] . $queryString;
     }
 
-    public function onKernelRequest(RequestEvent $e) 
+    public function onKernelRequest(RequestEvent $e)
     {
         if($this->baseService->getRequestStack()->getMainRequest() != $e->getRequest()) return;
         if($this->baseService->isProfiler()) return;
@@ -74,8 +74,8 @@ class EasyAdminSubscriber implements EventSubscriberInterface
             $e->setResponse($this->baseService->redirect($url));
         }
     }
-    
-    public function onKernelException(ExceptionEvent $e) 
+
+    public function onKernelException(ExceptionEvent $e)
     {
         if(!$this->baseService->isDebug()) {
 

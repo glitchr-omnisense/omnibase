@@ -65,7 +65,7 @@ final class BaseTwigExtension extends AbstractExtension
         $this->imageService     = $imageService;
     }
 
-    public function setBase(BaseService $baseService) 
+    public function setBase(BaseService $baseService)
     {
         $this->baseService = $baseService;
         $this->projectDir = $this->baseService->getProjectDir();
@@ -132,7 +132,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucfirst',     [$this, 'mb_ucfirst']),
             new TwigFilter('mb_ucwords',     [$this, 'mb_ucwords']),
             new TwigFilter('second',         "second"),
-            
+
             new TwigFilter('trans',          [Translator::class, 'trans']),
             new TwigFilter('time',           [Translator::class, 'time']),
             new TwigFilter('enum',           [Translator::class, 'enum']),
@@ -168,18 +168,18 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_ucfirst($string, $encoding); }
     public function mb_ucwords(string $string, ?string $encoding = null, ?string $separator = null): string { return mb_ucwords($string, $encoding, $separator); }
-    
+
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
     public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
     public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
-    public function filter(Environment $env,  $array = [], $arrow = null) 
+    public function filter(Environment $env,  $array = [], $arrow = null)
     {
         if($arrow === null) $arrow = function($el) {
             return $el !== null && $el !== false && $el !== "";
         };
-        
+
         return twig_array_filter($env, $array, $arrow);
     }
 
@@ -210,14 +210,14 @@ final class BaseTwigExtension extends AbstractExtension
 
     public function instanceof(mixed $object, string $class): bool { return is_instanceof($object, $class, true); }
 
-    public function joinIfExists(?array $array, string $separator) 
+    public function joinIfExists(?array $array, string $separator)
     {
         if($array === null) return null;
         return implode($separator, array_filter($array));
     }
-    
-    public function image(Environment $env, array $context, $src) 
-    { 
+
+    public function image(Environment $env, array $context, $src)
+    {
         if(!$src) return $src;
         if(is_array($src)) return array_map(fn($s) => $this->image($s, $context, $env), $src);
 
@@ -229,21 +229,21 @@ final class BaseTwigExtension extends AbstractExtension
         if(str_starts_with($src, "/")) $src = "@Public".$src;
         try { $src = $env->getLoader()->getSourceContext($src)->getPath(); }
         catch(LoaderError $e) { throw new NotFoundResourceException("Image \"$src\" not found."); }
-        
+
         if (mb_substr($src, 0, strlen($this->projectDir)) == $this->projectDir)
             $src = mb_substr($src, strlen($this->projectDir));
 
         return $src;
     }
 
-    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }    
+    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }
 
     function static_call($class, $method, ...$args) {
         if (!class_exists($class))
             throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
         if (!method_exists($class, $method))
             throw new \Exception("Cannot call static method $method on \"$class\": invalid method");
-   
+
         return forward_static_call_array([$class, $method], $args);
     }
 
@@ -298,7 +298,7 @@ final class BaseTwigExtension extends AbstractExtension
         if($date instanceof \DateTime) $date = $date->getTimestamp();
         if(is_string($diff)) $diff = new \DateTime($diff);
         if($diff instanceof \DateTime) $diff = $diff->getTimestamp() - time();
-      
+
         $deltaTime = time() - $date;
         return $deltaTime < $diff;
     }

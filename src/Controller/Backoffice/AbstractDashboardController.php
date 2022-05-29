@@ -177,12 +177,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
                 // If not required, then we update regardless of the value, but checking for secure flag
                 return !$fields[$k]["secure"];
-            
+
             }, ARRAY_FILTER_USE_BOTH);
 
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
 
@@ -253,7 +253,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data     = array_filter($form->getData(), fn($value) => !is_null($value));
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] , 
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
                 $this->baseService->getSettings()->getRawScalar($fields)
             );
 
@@ -298,7 +298,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 if(!$widgetSlot) {
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
-	                $this->slotRepository->flush();
+                    $this->slotRepository->flush();
                 }
 
                 $widgets = $data[$path] ?? [];
@@ -370,9 +370,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             if(empty($values)) $item = MenuItem::linkToUrl($label, $icon, $url);
             else {
-                
+
                 $item = MenuItem::subMenu($label, $icon, $url);
-                
+
                 $subItems = [];
                 foreach($values as $role)  {
 
@@ -425,7 +425,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $menu[] = MenuItem::linkToCrud(User::class, 'Add user', 'fas fa-fw fa-plus-circle')->setPermission('ROLE_EDITOR')
                 ->setAction('new');
         }
-    
+
         return $menu;
     }
 
@@ -474,7 +474,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'));
     }
-    
+
     public function configureUserMenu(UserInterface $user): UserMenu
     {
         // Usually it's better to call the parent method because that gives you a
@@ -547,7 +547,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 WidgetItem::linkToCrud(UserPenalty::class),
                 WidgetItem::linkToCrud(UserToken::class),
             ]);
-        
+
         }
 
         return $widgets;

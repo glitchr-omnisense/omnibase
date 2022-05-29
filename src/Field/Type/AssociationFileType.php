@@ -38,12 +38,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator = null;
-    
+
     /**
      * @var FormFactory
      */
     protected $formFactory = null;
-    
+
     public function getBlockPrefix(): string { return 'associationfile'; }
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, ImageService $imageService)
@@ -55,7 +55,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $this->imageService     = $imageService;
         $this->fileService      = cast($imageService, FileService::class);
 
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -71,7 +71,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             "multiple"     => null,
             'allow_delete' => true,
             "allow_delete[confirmation]" => true,
-            
+
             'href'         => null,
 
             'max_size' => null,
@@ -108,12 +108,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        // 
+        //
         // Set controller url
         $options["class"]    = $this->formFactory->guessClass($form, $options);
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
         $options["sortable"] = $this->formFactory->guessSortable($form, $options);
- 
+
         $parentForm = $form->getParent();
         $dataClass = $parentForm ? $this->formFactory->guessClass($parentForm, $parentForm->getConfig()->getOptions()) : null;
         $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
@@ -158,12 +158,12 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             $options["class"]    = $this->formFactory->guessClass($event, $options);
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
-            
+
             $fieldName = $options["entity_file"];
             $parentForm = $form->getParent();
             $dataClass = $parentForm ? $this->formFactory->guessClass($parentForm, $parentForm->getConfig()->getOptions()) : null;
             $isNullable = $dataClass ? $this->classMetadataManipulator->getMapping($dataClass, $form->getName())["nullable"] ?? false : false;
-            
+
             $form->add($fieldName, $options["form_type"], [
                 'class'         => $options["class"],
                 'allow_delete'  => $isNullable,
@@ -204,7 +204,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             throw new \Exception("Entity \"".$options['data_class']."\" not found.");
 
         $newData = new ArrayCollection();
-        
+
         $fieldName = $options["entity_file"];
         $form = iterator_to_array($forms)[$fieldName] ?? null;
         if($form) {
@@ -239,7 +239,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                         } else {
 
                             try { $this->propertyAccessor->setValue($entity, $fieldName, $file); }
-                            catch (Error $e) { throw new Exception("Failed to modify field \"$fieldName\" (is it an association ?), consider using \"entity_data\" option"); } 
+                            catch (Error $e) { throw new Exception("Failed to modify field \"$fieldName\" (is it an association ?), consider using \"entity_data\" option"); }
                         }
 
                         $newData[] = $entity;
@@ -268,7 +268,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     $mappedBy =  $viewData->getMapping()["mappedBy"];
                     $fieldName = $viewData->getMapping()["fieldName"];
                     $isOwningSide = $viewData->getMapping()["isOwningSide"];
-                    
+
                     if(!$isOwningSide) {
 
                         foreach($viewData as $entry)
@@ -279,7 +279,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     foreach($newData as $entry) {
 
                         $viewData->add($entry);
-                        if(!$isOwningSide) 
+                        if(!$isOwningSide)
                             $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
                     }
 

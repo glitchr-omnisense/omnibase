@@ -9,11 +9,11 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class Autocomplete
 {
     public function __construct(TranslatorInterface $translator)
-    {   
+    {
         $this->translator = $translator;
     }
 
-    public function resolve($entry, $class = null, array $entryOptions = []) 
+    public function resolve($entry, $class = null, array $entryOptions = [])
     {
         $entryOptions["format"] ??= FORMAT_TITLECASE;
         $entryOptions["html"] ??= true;
@@ -31,7 +31,7 @@ class Autocomplete
 
                 if(class_implements_interface($entry, AutocompleteInterface::class)) {
                     $autocomplete = $entry->__autocomplete() ?? null;
-                    $autocompleteData = $entry->__autocompleteData() ?? []; 
+                    $autocompleteData = $entry->__autocompleteData() ?? [];
                 }
             }
 
@@ -47,7 +47,7 @@ class Autocomplete
 
             $icons = $entry->__iconize() ?? [];
 
-            if(empty($icons) && class_implements_interface($entry, IconizeInterface::class)) 
+            if(empty($icons) && class_implements_interface($entry, IconizeInterface::class))
                 $icons = $entry::__iconizeStatic();
 
             $icon = begin($icons);
@@ -59,7 +59,7 @@ class Autocomplete
             $text = $class::getText($entry, $this->translator);
             $html = $class::getHtml($entry);
             $data = $class::getData($entry);
-            
+
         } else {
 
             $icon  = is_array($entry) ? ($entry[2] ?? $entry[1] ?? $entry[0]) : null  ;

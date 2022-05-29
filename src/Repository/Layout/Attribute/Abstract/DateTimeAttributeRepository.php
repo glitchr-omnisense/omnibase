@@ -15,5 +15,5 @@ use Base\Repository\Layout\AttributeRepository;
 
 class DateTimeAttributeRepository extends AttributeRepository
 {
-    
+
 }

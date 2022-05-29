@@ -130,15 +130,15 @@ class AutocompleteController extends AbstractController
             $array["results"] = array_transforms(function($k,$v,$callback,$i,$d) use ($format): ?array {
 
                 if(is_array($v)) {
-               
+
                     $children = array_transforms($callback, $v, ++$d);
-    
+
                     $group = array_pop_key("_self", $children);
                     $group["text"] = $k;
                     $group["children"] = $children;
                     return [null, $group];
                 }
-                
+
                 return [null, ["id" => $v, "icon" => $v, "text" => castcase($k, $format)]];
 
             }, !empty($results) ? $results : []);

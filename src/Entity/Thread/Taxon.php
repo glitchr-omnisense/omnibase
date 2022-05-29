@@ -27,7 +27,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; } 
+    public        function __iconize()       : ?array { return $this->getIcon() ? [$this->getIcon()] : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-sitemap"]; }
 
     public function __toString() { return $this->getLabel() ?? $this->getSlug() ?? get_class($this); }
@@ -35,7 +35,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
     {
         $this->setLabel($label);
         $this->slug = $slug;
-        
+
         $this->threads  = new ArrayCollection();
         $this->children = new ArrayCollection();
         $this->isVisible  = true;
@@ -157,7 +157,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $connexes;
     public function getConnexes(): Collection { return $this->connexes; }
-    public function addConnex(self $connex): self 
+    public function addConnex(self $connex): self
     {
         if(!$this->connexes->contains($connex))
             $this->connexes[] = $connex;
@@ -170,7 +170,7 @@ class Taxon implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->connexes->removeElement($connex);
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="boolean")
      */

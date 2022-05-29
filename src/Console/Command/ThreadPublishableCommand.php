@@ -10,11 +10,14 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='thread:publishable', aliases=[],
+ *            description='')
+ */
 class ThreadPublishableCommand extends Command
 {
-    protected static $defaultName = 'thread:publishable';
-
     public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
@@ -44,7 +47,7 @@ class ThreadPublishableCommand extends Command
                 $thread->setState(ThreadState::PUBLISH);
 
             // Refresh database with publishable articles
-	    $this->entityManager->flush();
+        $this->entityManager->flush();
 
             return true;
         });

@@ -16,7 +16,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     private $uniqueTableName = [];
     public function classToTableName($classNameWithNamespace) : string
     {
-        $classNameWithNamespace = class_exists($classNameWithNamespace) 
+        $classNameWithNamespace = class_exists($classNameWithNamespace)
             ? (new \ReflectionClass($classNameWithNamespace))->getName()
             : $classNameWithNamespace;
 
@@ -31,16 +31,16 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
                 $annotationReader = new AnnotationReader();
                 $annotations = $annotationReader->getClassAnnotations(new \ReflectionClass($classNameWithNamespace));
                 while  ($annotation = array_pop($annotations)) {
-                    
+
                     if ($annotation instanceof Table && !empty($annotation->name)) {
-                        
+
                         $tableName = $annotation->name;
                         break;
                     }
                 }
             }
         }
-        
+
         //
         // Determination of table name based on class information
         if(!$tableName) {

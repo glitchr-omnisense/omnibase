@@ -6,7 +6,7 @@ interface ImageCropInterface
 {
     public function getPivotX();
     public function getPivotY();
-    
+
     public function getX(): ?int;
     public function setX(int $x): self;
 

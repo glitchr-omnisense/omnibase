@@ -19,7 +19,7 @@ use Base\Repository\Extension\LogRepository;
  */
 class Log extends AbstractExtension
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-info-circle"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-info-circle"]; }
 
     public function __construct(array $listener, Request $request = null)
     {
@@ -42,7 +42,7 @@ class Log extends AbstractExtension
     }
 
     public function __toString() { return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt; }
-   
+
     public function supports():bool { return true; }
 
     /**

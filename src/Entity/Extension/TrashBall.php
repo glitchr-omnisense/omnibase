@@ -14,7 +14,7 @@ use Base\Repository\Extension\OrderingRepository;
  */
 class TrashBall extends AbstractExtension
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-trash-alt"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-trash-alt"]; }
 
     /**
      * @ORM\Column(type="datetime", nullable=true)

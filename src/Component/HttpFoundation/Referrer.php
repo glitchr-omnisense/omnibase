@@ -64,7 +64,7 @@ class Referrer
         return $this;
     }
 
-    public function getUrl() : ?string 
+    public function getUrl() : ?string
     {
         $request = $this->requestStack->getMainRequest();
         if (null === $request) return null;

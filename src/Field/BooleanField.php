@@ -15,7 +15,7 @@ final class BooleanField implements FieldInterface
     public const OPTION_RENDER_AS_SWITCH = 'switch';
     public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmation[onCheck]';
     public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmation[onUncheck]';
-    
+
     /** @internal */
     public const CSRF_TOKEN_NAME = 'ea-toggle';
     public const OPTION_TOGGLE_URL = 'toggleUrl';

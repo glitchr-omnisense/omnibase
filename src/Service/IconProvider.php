@@ -81,7 +81,7 @@ class IconProvider
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 
             foreach($this->adapters as $provider) {
-            
+
                 if ($provider->supports($icon))
                     return $provider->iconify($icon, $attributes);
         }

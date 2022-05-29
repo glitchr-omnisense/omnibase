@@ -5,7 +5,7 @@ namespace Base\Model\SocialSharer;
 use Symfony\Component\Yaml\Yaml;
 
 abstract class AbstractSharerAdapter implements SharerAdapterInterface
-{   
+{
     // protected string $metadata;
 
     // public function getMetadata() { return $this->metadata; }
@@ -29,15 +29,15 @@ abstract class AbstractSharerAdapter implements SharerAdapterInterface
     //     return self::$contents[$metadata];
     // }
 
-    // public function getEntries() 
-    // { 
-    //     if(empty(self::$contents[$this->metadata])) self::parse($this->metadata); 
-    //     return self::$contents[$this->metadata] ?? []; 
+    // public function getEntries()
+    // {
+    //     if(empty(self::$contents[$this->metadata])) self::parse($this->metadata);
+    //     return self::$contents[$this->metadata] ?? [];
     // }
 
-    // public function getEntry(string $value = null): string 
+    // public function getEntry(string $value = null): string
     // {
-    //     if(empty(self::$contents[$this->metadata])) self::parse($this->metadata); 
+    //     if(empty(self::$contents[$this->metadata])) self::parse($this->metadata);
     //     return self::$contents[$this->metadata][$value] ?? "";
     // }
 
@@ -60,7 +60,7 @@ abstract class AbstractSharerAdapter implements SharerAdapterInterface
 
     //     $class = trim(implode(" ", [$attributes["class"] ?? null, $options["class"] ?? null, $icon]));
     //     $attributes = array_key_removes($attributes, "class");
-        
+
     //     return "<i ".html_attributes($attributes)." class='".$class."'></i>";
     // }
 }

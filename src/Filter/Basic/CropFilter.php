@@ -82,7 +82,7 @@ class CropFilter implements FilterInterface
 
         return [$x0, $y0];
     }
-    
+
     public function apply(ImageInterface $image): ImageInterface
     {
         list($x0,$y0) = $this->getXYOffset($image);

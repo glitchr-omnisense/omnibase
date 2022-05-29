@@ -34,7 +34,7 @@ trait BaseCommonTrait {
      */
     protected static $projectDir = null;
     public static function setProjectDir($projectDir) { self::$projectDir = $projectDir; }
-    
+
     /**
      * @var string
      */
@@ -85,7 +85,7 @@ trait BaseCommonTrait {
      */
     protected static $router = null;
     public static function setRouter(AdvancedRouterInterface $router) { self::$router = $router; }
-    
+
     /**
      * @var Environment
      */

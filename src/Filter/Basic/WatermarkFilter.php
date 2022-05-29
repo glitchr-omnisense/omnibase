@@ -15,7 +15,7 @@ class WatermarkFilter implements FilterInterface
      */
     protected $imagine;
 
-    public function __toString() { 
+    public function __toString() {
         $md5sum = md5(serialize($this->watermark).serialize($this->options));
         return mod($this->angle, 360) ? "wmk:".$md5sum : "";
     }
@@ -35,7 +35,7 @@ class WatermarkFilter implements FilterInterface
             'position' => 'center',
         ];
 
-        if ('%' === mb_substr($this->options['size'], -1)) {
+        if ($this->options['size'] === null || '%' === mb_substr($this->options['size'], -1)) {
             $this->options['size'] = mb_substr($this->options['size'], 0, -1) / 100;
         }
 
@@ -43,7 +43,7 @@ class WatermarkFilter implements FilterInterface
         $this->watermarkSize = $this->watermark->getSize();
 
         // If 'null': Downscale if needed
-        if (!$this->options['size'] && ($size->getWidth() < $this->watermarkSize->getWidth() || $size->getHeight() < $this->watermarkSize->getHeight())) {
+        if(!$this->options['size'] && ($size->getWidth() < $this->watermarkSize->getWidth() || $size->getHeight() < $this->watermarkSize->getHeight())) {
             $this->options['size'] = 1.0;
         }
 

@@ -11,7 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class DiscriminatorField extends SelectField implements FieldInterface
 {
-    use FieldTrait; 
+    use FieldTrait;
 
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';
     public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';

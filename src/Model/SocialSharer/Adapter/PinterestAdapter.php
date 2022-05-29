@@ -12,7 +12,7 @@ class PinterestAdapter extends AbstractSharerAdapter
     // public function getAssets(): array
     // {
     //     return [
-    //         "<script type='text/javascript'>window.FacebookConfig = { autoReplaceSvg: false }</script>", 
+    //         "<script type='text/javascript'>window.FacebookConfig = { autoReplaceSvg: false }</script>",
     //         $this->javascript,
     //         $this->stylesheet
     //     ];
@@ -33,7 +33,7 @@ class PinterestAdapter extends AbstractSharerAdapter
     // {
     //     if(version_compare($this->getVersion(), 6, ">="))
     //         return $this->getName()."-".$style;
-    //     if(version_compare($this->getVersion(), 5, ">=")) 
+    //     if(version_compare($this->getVersion(), 5, ">="))
     //         return $this->getName().$style[0];
 
     //     throw new \Exception("Version ". $this->getVersion()." is not supported.");
@@ -74,7 +74,7 @@ class PinterestAdapter extends AbstractSharerAdapter
     // public function getIdentifier(string $name)
     // {
     //     return array_transforms(
-    //         fn($k, $v, $callback, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null, 
+    //         fn($k, $v, $callback, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null,
     //         explode(" ", $name)
     //     )[0];
     // }

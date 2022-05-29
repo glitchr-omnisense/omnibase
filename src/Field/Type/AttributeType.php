@@ -36,12 +36,12 @@ class AttributeType extends AbstractType implements DataMapperInterface
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator = null;
-    
+
     /**
      * @var FormFactory
      */
     protected $formFactory = null;
-    
+
     public function getBlockPrefix(): string { return 'attribute'; }
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
@@ -50,13 +50,13 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $this->formFactory   = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();  
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         parent::configureOptions($resolver);
-        
+
         $resolver->setDefaults([
             'abstract_class' => null,
             'class'          => null,
@@ -65,9 +65,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
             "multiple"     => null,
             'multivalue'   => false,
 
-            'filter'       => null, 
+            'filter'       => null,
             'filter_code'  => null,
-            'sortable'     => null, 
+            'sortable'     => null,
 
             'allow_add'    => true,
             'allow_delete' => true,
@@ -79,7 +79,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't exists");
             if($value !== null && !class_exists($value, BaseAttribute::class))
                 throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't inherit from \"".BaseAttribute::class."\"");
-            
+
             return $value;
         });
 
@@ -89,7 +89,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but the class itself doesn't exists");
             if($value !== null && !is_instanceof($value, AbstractAttribute::class))
                 throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but doesn't inherit from \"".AbstractAttribute::class."\"");
-            
+
             return $value;
         });
 
@@ -107,7 +107,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
     }
-    
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
@@ -122,7 +122,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             $form = $event->getForm();
             $form->add("choice", SelectType::class, [
                 "class"               => $options["abstract_class"],
-                "autocomplete_fields" => ["code" => $options["filter_code"]], 
+                "autocomplete_fields" => ["code" => $options["filter_code"]],
                 "choice_filter"       => $options["filter"],
                 "multiple"            => $options["multiple"],
                 "multivalue"          => $options["multivalue"],
@@ -149,12 +149,12 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 //
                 // First process universal data..
                 $unvFields  = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), array_merge($v->getAdapter()->getOptions(), [
-                    "label" => $v->getAdapter()->getLabel(), 
-                    "help" => $v->getAdapter()->getHelp(), 
+                    "label" => $v->getAdapter()->getLabel(),
+                    "help" => $v->getAdapter()->getHelp(),
                     "required" => false,
                     "form_type" => $v->getAdapter()::getType()])
                 ] : null, $data);
-                
+
                 if(!empty($unvFields)) {
 
                     $unvData = array_transforms(fn($k, $v): ?array => !class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getValue() ?? ""] : null, $data);
@@ -176,8 +176,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 //
                 // Then process translatable data
                 $intlFields  = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), array_merge($v->getAdapter()->getOptions(), [
-                    "label" => $v->getAdapter()->getLabel(), 
-                    "help" => $v->getAdapter()->getHelp(), 
+                    "label" => $v->getAdapter()->getLabel(),
+                    "help" => $v->getAdapter()->getHelp(),
                     "required" => false,
                     "form_type" => $v->getAdapter()::getType()])
                 ] : null, $data);
@@ -185,7 +185,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 if(!empty($intlFields)) {
 
                     $intlData = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getTranslations()] : null, $data);
-                    
+
                     $form->add("intl", TranslationType::class, [
                         "multiple" => true,
                         "autoload" => false,
@@ -195,7 +195,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                     $form->get("intl")->setData($intlData);
                 }
-            } 
+            }
         });
     }
 
@@ -222,7 +222,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
             }
 
         } else if($viewData instanceof Attribute) {
-            
+
             $choiceForm->setData($viewData->getAdapter());
             $key = array_search_user($forms, fn(string $k, $_) => str_starts_with($k, $viewData->getAdapter()->getCode()));
             if ( $key !== false ) {

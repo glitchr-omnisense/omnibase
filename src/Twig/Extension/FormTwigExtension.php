@@ -19,7 +19,7 @@ final class FormTwigExtension extends AbstractExtension
     {
         $form = $this->formProxy->getForm($name);
         if(!$form) return null;
-        
+
         return $this->formProxy->getForm($name)->createView();
     }
 }

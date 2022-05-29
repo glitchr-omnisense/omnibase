@@ -62,7 +62,7 @@ class TranslationField implements FieldInterface
 
         return $this;
     }
-    
+
     public function setFields(array $fields): self
     {
         $this->setFormTypeOption("fields", $fields);
@@ -74,7 +74,7 @@ class TranslationField implements FieldInterface
         if($field) {
 
             $this->setCustomOption("show_field", $field);
-            
+
             $displayedOn = $this->dto->getDisplayedOn();
             $displayedOn->set(Crud::PAGE_INDEX, Crud::PAGE_INDEX);
             $this->dto->setDisplayedOn($displayedOn);

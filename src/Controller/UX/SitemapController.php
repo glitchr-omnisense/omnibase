@@ -49,7 +49,7 @@ class SitemapController extends AbstractController
 
         // return response in XML format
         return new XmlResponse($this->renderView('sitemap.xml.twig', [
-            'urls' => $urls, 
+            'urls' => $urls,
             'hostname' => $hostname
         ]));
     }

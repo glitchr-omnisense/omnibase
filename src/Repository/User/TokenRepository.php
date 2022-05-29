@@ -13,5 +13,5 @@ use Base\Database\Repository\ServiceEntityRepository;
  */
 class TokenRepository extends ServiceEntityRepository
 {
-    
+
 }

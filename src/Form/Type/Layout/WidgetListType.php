@@ -79,7 +79,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
 
                 // Exclude requested widgets
                 $widget = str_replace("-", ".", $formattedWidget);
-                if(in_array($widget, $options["excluded_widgets"])) 
+                if(in_array($widget, $options["excluded_widgets"]))
                     continue;
 
                 // Set widget options
@@ -129,7 +129,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             $formattedWidget = str_replace(".", "-", $widget);
 
             $newViewData[$widget] = $children[$formattedWidget]->getData() ?? [];
-            if(!is_array($newViewData[$widget])) 
+            if(!is_array($newViewData[$widget]))
                 $newViewData[$widget] = [$newViewData[$widget]];
         }
 

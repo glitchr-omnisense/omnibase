@@ -22,7 +22,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
     public function setParameter(string $parameterName, ?string $parameterValue = null)
     {
-        if($this->buildViolation == null) 
+        if($this->buildViolation == null)
             throw new UnexpectedValueException("Please build violation before calling ".self::class."::setParameter.");
 
         $this->buildViolation

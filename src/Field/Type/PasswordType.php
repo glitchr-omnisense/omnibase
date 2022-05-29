@@ -87,10 +87,10 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
             "mapped" => true,
             "constraints" => [new Password(["min_strength" => $options["min_strength"], "min_length" => $options["min_length"]])]
         ], $options["options"]));
-        
+
         if($options["repeater"]) {
             $builder->add('plain_repeater', SymfonyPasswordType::class, array_merge([
-                "label" => $this->translator->trans("@fields.password.second"), 
+                "label" => $this->translator->trans("@fields.password.second"),
                 "mapped" => true
             ], $options['options[repeater]']));
         }
@@ -107,7 +107,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $plainPasswordType = iterator_to_array($forms)["plain"];
         $plainPasswordRepeaterType = iterator_to_array($forms)["plain_repeater"];
         $options = $plainPasswordType->getConfig()->getOptions();
-        
+
         if($viewData == []) $viewData = "";
         if($plainPasswordType->getViewData() !== "" || !($options["required"] ?? false))
             $viewData = $plainPasswordType->getViewData();

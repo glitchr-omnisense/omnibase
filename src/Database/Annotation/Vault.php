@@ -71,7 +71,7 @@ class Vault extends AbstractAnnotation
     public function seal(MarshallerInterface $marshaller, ?string $value)
     {
         try {
-          
+
             $failed = [];
             $encryptedValues = $marshaller->marshall([$value], $failed)[0] ?? [];
             if(count($failed)) return null;
@@ -96,7 +96,7 @@ class Vault extends AbstractAnnotation
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
-        
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach($this->fields as $field) {
 
@@ -118,7 +118,7 @@ class Vault extends AbstractAnnotation
     {
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
-        
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach($this->fields as $field) {
 

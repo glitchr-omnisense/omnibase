@@ -14,27 +14,27 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=LinkRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  */
 
 class Link extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; } 
+    public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); }
+    public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string 
-    { 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string
+    {
         return $this->getHyperlink()->generate();
     }
 
-    public function __toString() 
+    public function __toString()
     {
         return $this->getTitle() ?? $this->getHyperlink()->getLabel() ?? $this->__iconize();
     }
 
-    public function __construct(?Hyperlink $hyperlink = null) 
-    { 
+    public function __construct(?Hyperlink $hyperlink = null)
+    {
         parent::__construct();
 
         if($hyperlink)
@@ -43,7 +43,7 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Hyperlink::class, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $hyperlink;

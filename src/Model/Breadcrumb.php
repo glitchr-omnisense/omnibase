@@ -44,7 +44,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $this->router = $router;
         $this->translator = $translator;
         $this->options = $options;
-        
+
         $this->annotationReader = AnnotationReader::getInstance();
         if($template) $this->template = $template;
     }
@@ -70,7 +70,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         while($path !== "") {
 
             $path = rtrim($path === null ? $request->getPathInfo() : dirname($path), "/");
-            
+
             $controller = $this->getController($path);
             if(!$controller) continue;
 
@@ -91,7 +91,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             $routeParameterKeys = array_keys($routeParameters);
 
             $transPath = implode(".", array_merge([$routeName], $routeParameterKeys));
-            $transParameters = array_transforms(fn($k, $v):array => [$k, 
+            $transParameters = array_transforms(fn($k, $v):array => [$k,
                 $k == "id"   ? "#".$v : (
                 $k == "slug" ? ucwords(str_replace(["-","_"], " ", $v)) : $v
             )], $routeParameters);
@@ -104,7 +104,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
                 $pageTitle = $this->getOption("page_title");
                 if($pageTitle) {
-                    
+
                     $this->appendItem($pageTitle);
                     $icons[] = null;
                 }
@@ -128,9 +128,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
         $urlParts        = explode("/", rtrim($url, "/"));
         $urlPatternParts = explode("/", rtrim($urlPattern, "/"));
-        if(count($urlParts) > count($urlPatternParts)) 
+        if(count($urlParts) > count($urlPatternParts))
             return null; // Url not matching pattern
-        
+
         $routeParameters = [];
         foreach($urlPatternParts as $key => $pattern) {
 
@@ -141,7 +141,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
                 continue;
             }
 
-            if($pattern !== $urlParts[$key]) 
+            if($pattern !== $urlParts[$key])
                 return null; // Url not matching pattern
         }
 
@@ -151,7 +151,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     public function getRouteName(?string $url = null): string
     {
         if($url === null) return "";
-        
+
         $baseDir = $this->getRouter()->getContext()->getBaseUrl();
         $path = parse_url($url, PHP_URL_PATH);
         if ($baseDir && strpos($path, $baseDir) === 0)
@@ -167,7 +167,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     public function getController(?string $url = null): string
     {
         if($url === null) return "";
-        
+
         $baseDir = $this->getRouter()->getContext()->getBaseUrl();
         $path = parse_url($url, PHP_URL_PATH);
         if ($baseDir && strpos($path, $baseDir) === 0)
@@ -220,7 +220,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $this->options[$name] = $value;
         return $this;
     }
-    
+
     public function removeOption(string $name)
     {
         if(array_key_exists($name, $this->options)) unset($this->options[$name]);
@@ -241,7 +241,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
     }
 
     public function removeItem(string $offset) { unset($this->items[$offset]); }
-    public function prependItem(string $label, ?string $route = null, array $routeParameters = []) 
+    public function prependItem(string $label, ?string $route = null, array $routeParameters = [])
     {
         array_unshift($this->items, $this->getFormattedItem($label, $route, $routeParameters));
         return $this;

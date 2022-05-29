@@ -61,7 +61,7 @@ class UserSubscriber implements EventSubscriber
         $id = spl_object_id($user);
         if (!array_key_exists($id, $this->events)) return;
 
-	    foreach ($this->events[$id] as $event => $triggered) {
+        foreach ($this->events[$id] as $event => $triggered) {
 
             $this->events[$id][$event] = true;
             if(!$triggered) // Dispatch only once
@@ -82,7 +82,7 @@ class UserSubscriber implements EventSubscriber
     {
         $user = $event->getObject();
         if (!$user instanceof User) return;
-        
+
         // Update only if required
         $oldUser = $this->baseService->getOriginalEntity($event);
         if (!$oldUser instanceof User) return;
@@ -92,7 +92,7 @@ class UserSubscriber implements EventSubscriber
 
         if($user->isVerified() && !$oldUser->isVerified())
             $this->addEvent($user, UserEvent::VERIFIED);
-        
+
         if($user->isEnabled() && !$oldUser->isEnabled())
             $this->addEvent($user, UserEvent::ENABLED);
 
@@ -104,7 +104,7 @@ class UserSubscriber implements EventSubscriber
 
         if($user->isLocked() && !$oldUser->isLocked())
             $this->addEvent($user, UserEvent::LOCKED);
-        
+
         if($user->isBanned() && !$oldUser->isBanned())
             $this->addEvent($user, UserEvent::BANNED);
 

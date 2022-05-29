@@ -19,7 +19,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'quadrant'; }
 
-    public function __construct(BaseService $baseService) 
+    public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
     }
@@ -45,7 +45,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
         $view->vars['quadrants']  = $options["class"]::getPermittedValues();
         $view->vars['icons']      = $options["class"]::getIcons();
         $view->vars['default']    = $options["class"]::getDefault();
-        
+
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
     }
 

@@ -50,7 +50,7 @@ class Timestamp extends AbstractAnnotation
 
         if(!$this->value)
             $this->value = new DateTime("now");
-            
+
         return $this->value;
     }
 

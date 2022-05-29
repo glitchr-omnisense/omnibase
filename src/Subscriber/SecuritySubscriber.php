@@ -84,9 +84,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         $this->exceptions = [
-            "/^locale_/", 
-            "/^ux_/", 
-            "/^user(?:.*)$/", 
+            "/^locale_/",
+            "/^ux_/",
+            "/^user(?:.*)$/",
             "/^security(?:.*)$/",
         ];
     }
@@ -147,7 +147,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         $token = $this->tokenStorage->getToken();
         $user = $event->getUser();
-        
+
         if($token && $token->getUser() != $user) return; // Only notify when user requests itself
 
         if ($user->isVerified()) { // Social account connection
@@ -176,7 +176,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onApproval(UserEvent $event)
     {
         $user = $event->getUser();
-        
+
         $adminApprovalToken = $user->getValidToken("admin-approval");
         if ($adminApprovalToken) {
 
@@ -198,13 +198,13 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function isException($route)
     {
         $exceptions = is_string($this->exceptions) ? [$this->exceptions] : $this->exceptions;
-        foreach($exceptions as $pattern) 
+        foreach($exceptions as $pattern)
             if (preg_match($pattern, $route)) return true;
 
         return false;
     }
 
-    public function onReferrerRequest(RequestEvent $event) 
+    public function onReferrerRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
         if($this->baseService->isProfiler()) return;
@@ -220,22 +220,22 @@ class SecuritySubscriber implements EventSubscriberInterface
         $session->remove('_security.account.target_path');
 
         $currentRouteIsLoginForm = in_array($currentRoute, [
-            LoginFormAuthenticator::LOGOUT_ROUTE, 
-            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, 
-            LoginFormAuthenticator::LOGIN_ROUTE, 
+            LoginFormAuthenticator::LOGOUT_ROUTE,
+            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE,
+            LoginFormAuthenticator::LOGIN_ROUTE,
             RescueFormAuthenticator::RESCUE_ROUTE]
         );
 
         $session->set('_target_path', $currentRoute == $targetRoute || $currentRouteIsLoginForm ? $targetPath : null);
 
         $targetRouteIsLoginForm = in_array($targetRoute, [
-            LoginFormAuthenticator::LOGOUT_ROUTE, 
-            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, 
-            LoginFormAuthenticator::LOGIN_ROUTE, 
+            LoginFormAuthenticator::LOGOUT_ROUTE,
+            LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE,
+            LoginFormAuthenticator::LOGIN_ROUTE,
             RescueFormAuthenticator::RESCUE_ROUTE]
         );
 
-        if ($targetPath && !$targetRouteIsLoginForm) 
+        if ($targetPath && !$targetRouteIsLoginForm)
             return $this->baseService->redirect($targetPath, [], 302);
     }
 
@@ -258,10 +258,10 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $userAccess    = filter_var($this->baseService->getSettings()->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
         $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
-        
+
         $adminAccess   = filter_var($this->baseService->getSettings()->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
         $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
-        
+
         if(!$publicAccess || !$userAccess || !$adminAccess) {
 
             $this->profiler->disable();
@@ -284,7 +284,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                     if($token) $this->tokenStorage->setToken(NULL);
                     return $event->stopPropagation();
-                } 
+                }
             }
         }
     }
@@ -294,7 +294,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
         if(!$user) return;
-        
+
         // Notify user about the authentication method
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
@@ -369,12 +369,12 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(!($user = $token->getUser())) return;
 
         if ( !($user->isActive()) ) {
-    
+
             $user->poke(new \DateTime("now"));
             $this->userRepository->flush($user);
         }
     }
-    
+
     public function onLoginFailure(LoginFailureEvent $event)
     {
         $message = "@notifications.login.failed";
@@ -414,11 +414,11 @@ class SecuritySubscriber implements EventSubscriberInterface
                     else if(time_is_between($user->getActiveAt(), "12:00:00", "15:00:00")) $period = "afternoon";
                     else if(time_is_between($user->getActiveAt(), "19:00:00", "05:00:00")) $period = "evening";
                     else $period = "day";
-                    
+
                     $title = "@notifications.login.success.$period.$active";
 
                 } else {
-                
+
                     $title = "@notifications.login.success.alien";
                 }
 
@@ -500,7 +500,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             $event  = $listener["event"];
             $pretty = $listener["pretty"];
-            
+
             foreach ($monitoredEntries as $monitoredEntry) {
 
                 $monitoredStatusCode = $monitoredEntry["statusCode"];

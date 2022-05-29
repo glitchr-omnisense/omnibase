@@ -10,7 +10,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 class RoleField extends SelectField implements FieldInterface
 {
-    use FieldTrait; 
+    use FieldTrait;
 
     public static function new(string $propertyName, ?string $label = null): self
     {

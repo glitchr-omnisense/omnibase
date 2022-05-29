@@ -12,7 +12,7 @@ use Base\Validator\Constraints as AssertBase;
 
 /**
  * @ORM\Entity()
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class AttributeTranslation implements TranslationInterface
 {
@@ -25,12 +25,12 @@ class AttributeTranslation implements TranslationInterface
             if (in_array($var, ['id', 'translatable', 'locale'], true))
                 continue;
 
-            if(is_array($value)) 
+            if(is_array($value))
                 $value = array_filter($value);
 
             if (!empty($value)) return false;
         }
-        
+
         return true;
     }
 

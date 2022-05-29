@@ -19,7 +19,7 @@ class PasswordValidator extends ConstraintValidator
 
         $minLength   = $constraint->getMinLength();
         $minStrength = $constraint->getMinStrength();
-        
+
         // Check length of password
         if(strlen($entry) < $minLength) {
 
@@ -28,7 +28,7 @@ class PasswordValidator extends ConstraintValidator
                 ->setParameter('{0}', strlen($entry))
                 ->addViolation();
         }
-        
+
         // Check strength of password (if necessary)
         $strength = 0;
         if($minStrength > 0) {
@@ -38,7 +38,7 @@ class PasswordValidator extends ConstraintValidator
             if($strength < $minStrength) $strength += (int) preg_match('/[\W]+/' , $entry); // specials
             if($strength < $minStrength) $strength += (int) strlen($entry) > 12; // length12
         }
-        
+
         if ($strength < $minStrength) {
 
             $constraint->message = $constraint->messageMinStrength;

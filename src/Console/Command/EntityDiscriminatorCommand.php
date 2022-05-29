@@ -8,11 +8,14 @@ use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Exception;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='entity:discriminator', aliases=[],
+ *            description='')
+ */
 class EntityDiscriminatorCommand extends Command
 {
-    protected static $defaultName = 'entity:discriminator';
-
     public function __construct(ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;

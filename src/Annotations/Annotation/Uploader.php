@@ -70,7 +70,7 @@ class Uploader extends AbstractAnnotation
 
     protected function getContents(): string { return file_get_contents($this->file["tmp_name"]); }
     protected function getConfig(): array { return $this->config; }
-    
+
     public function getStorage() { return $this->storage; }
 
     public function getPool() { return $this->pool; }
@@ -88,8 +88,8 @@ class Uploader extends AbstractAnnotation
 
             $namespace = (is_string($entity) ? $entity : get_class($entity));
             $namespaceRoot = "Entity";
-            $namespaceDir = implode("/", array_map("lcfirst", explode("\\", 
-                                mb_substr($namespace, strpos($namespace, $namespaceRoot)-1)) 
+            $namespaceDir = implode("/", array_map("lcfirst", explode("\\",
+                                mb_substr($namespace, strpos($namespace, $namespaceRoot)-1))
                             ));
         }
 
@@ -237,17 +237,17 @@ class Uploader extends AbstractAnnotation
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // These elements are not meant to be uploaded
         if(count($newList) != count($newListStringable))
-            return false; 
+            return false;
 
         // File instances are filtered below, in case of UOW manipulation..
         $old = self::getFieldValue($this->ancestorEntity, $fieldName) ?? self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 
-        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File); 
+        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
         if($potentialMemoryLeak)
             throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName.". Did you called unit of work change set ? Please process file manually");
-    
+
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
         if(count($oldList) != count($oldListStringable))
@@ -282,7 +282,7 @@ class Uploader extends AbstractAnnotation
             // In case of string casting, and UploadedFile might be returned as a string..
             $file = is_string($entry) && is_file($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
-                
+
                 if($this->getMissable()) $fileList[] = $entry;
                 else if(is_uuidv4($entry)) $fileList[] = $entry;
                 continue;
@@ -327,7 +327,7 @@ class Uploader extends AbstractAnnotation
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
         if(count($newList) != count($newListStringable))
-            return false; 
+            return false;
 
         $old = self::getFieldValue($this->ancestorEntity, $fieldName) ?? self::getFieldValue($oldEntity, $fieldName);
         $oldList = is_array($old) ? $old : [$old];
@@ -358,7 +358,7 @@ class Uploader extends AbstractAnnotation
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
     {
-        try { $this->uploadFiles($entity, null, $fieldName); } 
+        try { $this->uploadFiles($entity, null, $fieldName); }
         catch(Exception $e) {
 
             $this->deleteFiles([], $entity, $fieldName);

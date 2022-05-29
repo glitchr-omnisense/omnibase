@@ -16,13 +16,13 @@ use Base\Repository\Layout\Widget\SlotRepository;
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
  * @DiscriminatorEntry
- * 
+ *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- * 
+ *
  */
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
 
     public function __toString() { return $this->getPath(); }
@@ -54,8 +54,8 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
      */
     protected $widget;
     public function getWidget(): ?Widget { return $this->widget; }
-    public function setWidget(?Widget $widget): self 
-    { 
+    public function setWidget(?Widget $widget): self
+    {
         $this->widget = $widget;
         return $this;
     }

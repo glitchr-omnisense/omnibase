@@ -42,24 +42,24 @@ final class NumberField implements FieldInterface
     }
 
     public function step(float $step) { return $this->stepUp($step)->stepDown($step); }
-    public function stepUp(float $stepUp) 
+    public function stepUp(float $stepUp)
     {
         $this->setFormTypeOption("stepUp", $stepUp);
         return $this;
     }
-    public function stepDown(float $stepDown) 
+    public function stepDown(float $stepDown)
     {
         $this->setFormTypeOption("stepDown", $stepDown);
         return $this;
     }
 
     public function throttle(float $throttle) { return $this->throttleUp($throttle)->throttleDown($throttle); }
-    public function throttleUp(float $throttleUp) 
+    public function throttleUp(float $throttleUp)
     {
         $this->setFormTypeOption("throttleUp", $throttleUp);
         return $this;
     }
-    public function throttleDown(float $throttleDown) 
+    public function throttleDown(float $throttleDown)
     {
         $this->setFormTypeOption("throttleDown", $throttleDown);
         return $this;

@@ -50,7 +50,7 @@ class Address implements IconizeInterface
         $this->streetAddress = $streetAddress;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
@@ -73,7 +73,7 @@ class Address implements IconizeInterface
         $this->zipCode = $zipCode;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="string", length=255)
      */

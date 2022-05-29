@@ -15,7 +15,7 @@ use Base\Repository\Layout\WidgetRepository;
 class SlotRepository extends WidgetRepository
 {
     // Attempt to cache
-    // public function findOneByPath(string $path) 
+    // public function findOneByPath(string $path)
     // {
     //     return $this->createQueryBuilder("s")
     //         ->where('s.path = :path')

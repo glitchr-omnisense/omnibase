@@ -20,8 +20,8 @@ class Token implements IconizeInterface
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return self::__iconizeStatic()[$this->isValid() ? 1 : 0]; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-drumstick-bite", "fas fa-drumstick"]; } 
+    public        function __iconize()       : ?array { return self::__iconizeStatic()[$this->isValid() ? 1 : 0]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-drumstick-bite", "fas fa-drumstick"]; }
 
     public const ALL     = "ALL_TOKENS";
     public const VALID   = "VALID_TOKENS";
@@ -232,7 +232,7 @@ class Token implements IconizeInterface
     public function getThrottleStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
     public function setThrottle(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
     public function hasThrottle():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
-    
+
     /**
      * @ORM\Column(type="boolean")
      */
@@ -243,7 +243,7 @@ class Token implements IconizeInterface
     public function markAsRevoked(): self
     {
         $this->isRevoked = true;
-        if(($user = $this->getUser())) 
+        if(($user = $this->getUser()))
             $user->removeToken($this);
 
         return $this;

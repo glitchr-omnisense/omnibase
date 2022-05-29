@@ -147,7 +147,7 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    public function setLength(int $length): self 
+    public function setLength(int $length): self
     {
         $this->setFormTypeOption(self::OPTION_LENGTH, max(0, $length));
         return $this;

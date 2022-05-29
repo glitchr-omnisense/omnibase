@@ -117,13 +117,13 @@ class EntityHydrator
     }
 
     public function dehydrate(mixed $entity, array $fieldExceptions = []) {
-    
+
         if($entity === null) return null;
 
         $data = $entity ?? [];
         $data = $data instanceof Collection ? $data->toArray() : $data;
         if(is_object($data)) $data = array_filter(array_transforms(
-            fn($k, $e):array => [str_lstrip($k, "\x00*\x00"), $e instanceof ArrayCollection && $e->isEmpty() ? null : $e], 
+            fn($k, $e):array => [str_lstrip($k, "\x00*\x00"), $e instanceof ArrayCollection && $e->isEmpty() ? null : $e],
             (array) $data
         ));
 
@@ -159,9 +159,9 @@ class EntityHydrator
             foreach ($reflectionClass->getProperties() as $reflProperty) {
 
                 $reflProperty->setAccessible(true);
-                
+
                 $value = $reflProperty->getValue($objectOrArray);
-                
+
                 if (is_object($value) && $deepcast)
                     $value = $this->toArray($value, $deepcast);
 
@@ -172,14 +172,14 @@ class EntityHydrator
         return $array;
     }
 
-    public function clone(object $entity, int $aggregateModel = self::DEEPCOPY) 
-    { 
+    public function clone(object $entity, int $aggregateModel = self::DEEPCOPY)
+    {
         return $this->hydrate(get_class($entity), $entity, [], $aggregateModel);
     }
 
-    public function setHydrateAssociationReferences(bool $hydrateAssociationReferences) 
-    { 
-        $this->hydrateAssociationReferences = $hydrateAssociationReferences; 
+    public function setHydrateAssociationReferences(bool $hydrateAssociationReferences)
+    {
+        $this->hydrateAssociationReferences = $hydrateAssociationReferences;
         return $this;
     }
 
@@ -221,30 +221,30 @@ class EntityHydrator
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($classMetadata->fieldNames as $alias => $column) {
-        
+
             $fn = function() use ($alias, $column) {
 
                 $aliasValue  = $this->$alias;
-    
+
                 $columnValue = $this->$column;
                 if ($aliasValue instanceof ArrayCollection && $columnValue instanceof ArrayCollection)
-                    $aliasValue = new ArrayCollection($columnValue->toArray() + $aliasValue->toArray()); 
+                    $aliasValue = new ArrayCollection($columnValue->toArray() + $aliasValue->toArray());
                 else if($columnValue !== null)
                     $aliasValue = $columnValue;
 
                 $this->$alias = &$this->$column; // Bind variable together..
                 $this->$alias = $aliasValue;
-    
+
                 return $this;
             };
-    
+
             $fnClosure = \Closure::bind($fn, $entity, get_class($entity));
             $fnClosure();
         }
 
         return $this;
     }
-    
+
     protected function setDefaults(object $entity, int $aggregateModel)
     {
         $reflEntity = new ReflectionObject($entity);
@@ -274,11 +274,11 @@ class EntityHydrator
 
                     $mapping = $this->classMetadataManipulator->getMapping($entity, $fieldName);
                     if($mapping["nullable"]) continue; // Skip nullable elements
-                    
+
                     $type = $this->classMetadataManipulator->getTypeOfField($entity, $fieldName);
 
                 } else if ($reflProperty !== null) {
-                    
+
                     $type = $reflProperty->getType();
                 }
 
@@ -287,11 +287,11 @@ class EntityHydrator
                     case "array":
                         $value = [];
                         break;
-                    
+
                     case "bool":
                         $value = false;
                         break;
-                    
+
                     case "string":
                         $value = "";
                         break;
@@ -307,7 +307,7 @@ class EntityHydrator
 
                 $this->setPropertyValue($entity, $fieldName, $value, $reflEntity);
             }
-            
+
         }
 
         //
@@ -342,7 +342,7 @@ class EntityHydrator
 
                 $this->propertyAccessor->setValue($entity, $propertyName, $value);
                 $this->markAsHydrated($entity, $propertyName);
-                
+
             } else if($aggregateModel & self::OBJECT_PROPERTIES || $aggregateFallback) {
 
                 if ($reflProperty !== null) {
@@ -359,17 +359,17 @@ class EntityHydrator
         return $this;
     }
 
-    protected function resetHydratationMapping() 
-    { 
+    protected function resetHydratationMapping()
+    {
         $this->hydratationMapping = [];
         return $this;
     }
 
     protected function isHydrated(mixed $entity, string $propertyName) { return in_array(spl_object_hash($entity)."::".$propertyName, $this->hydratationMapping); }
-    protected function markAsHydrated(mixed$entity, string $propertyName) 
-    { 
+    protected function markAsHydrated(mixed$entity, string $propertyName)
+    {
         $this->hydratationMapping[] = spl_object_hash($entity)."::".$propertyName;
-        return $this; 
+        return $this;
     }
 
     protected function hydrateAssociations(mixed $entity, array $data, int $aggregateModel): self
@@ -385,7 +385,7 @@ class EntityHydrator
 
             $mapping = $classMetadata->associationMappings[$classMetadata->getFieldName($propertyName)];
             try {
-    
+
                 if ($this->classMetadataManipulator->isToOneSide($entity, $propertyName))
                     $this->hydrateAssociationToOne($entity, $propertyName, $mapping, $value, $aggregateModel);
 
@@ -429,8 +429,8 @@ class EntityHydrator
     protected function hydrateAssociationToMany(mixed $entity, string $propertyName, array $mapping, mixed $values, int $aggregateModel): self
     {
         if($this->isHydrated($entity, $propertyName)) return $this;
-        
-        if($values !== null && !is_object($values) && !is_array($values)) 
+
+        if($values !== null && !is_object($values) && !is_array($values))
             throw new Exception("Failed to turn \"$values\" into an association in \"".get_class($entity)."\". Did you pass an object?");
 
         // Fetch or hydrate association
@@ -455,7 +455,7 @@ class EntityHydrator
             foreach($association as $entry)
                 $this->propertyAccessor->setValue($entry, $mappedBy, $entity);
         }
-        
+
         // Commit association
         $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
         if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
@@ -489,7 +489,7 @@ class EntityHydrator
 
             $this->reflProperties[$reflEntity->getName()] = [];
             foreach ($reflEntity->getProperties() as $reflProperty) {
-                
+
                 $reflProperty->setAccessible(true);
                 $this->reflProperties[$reflEntity->getName()][$reflProperty->getName()] = $reflProperty;
             }
@@ -507,7 +507,7 @@ class EntityHydrator
     protected function setPropertyValue(mixed $entity, string $propertyName, $value, ?ReflectionObject $reflEntity = null): mixed
     {
         $reflEntity = $reflEntity === null ? new ReflectionObject($entity) : $reflEntity;
-        
+
         $reflProperty = $this->getProperty($entity, $propertyName, $reflEntity);
 
         $reflProperty->setAccessible(true);
@@ -523,11 +523,11 @@ class EntityHydrator
         if(is_object($identifier)) return $identifier;
         if(!$identifier) return null;
 
-        $identifier = $this->propertyAccessor->isReadable($identifier, "id") 
+        $identifier = $this->propertyAccessor->isReadable($identifier, "id")
                     ? $this->propertyAccessor->getValue($identifier, "id") : null;
-        
+
         if(!$identifier) return null;
-        if ($this->hydrateAssociationReferences && $identifier !== null) 
+        if ($this->hydrateAssociationReferences && $identifier !== null)
             return $this->entityManager->getReference($entityName, $identifier);
 
         return $this->entityManager->find($entityName, $identifier);

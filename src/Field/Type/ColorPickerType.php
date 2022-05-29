@@ -49,9 +49,9 @@ final class ColorPickerType extends AbstractType
 
     /** @var TranslatorInterface */
     protected $translator;
-    
-    public function __construct(TranslatorInterface $translator, BaseService $baseService) 
-    { 
+
+    public function __construct(TranslatorInterface $translator, BaseService $baseService)
+    {
         $this->baseService = $baseService;
         $this->translator = $translator;
     }
@@ -63,7 +63,7 @@ final class ColorPickerType extends AbstractType
     {
         $resolver->setDefaults([
             'pickr' => [
-                
+
                 // Selector or element which will be replaced with the actual color-picker.
                 // Can be a HTMLElement.
                 'el' => null,

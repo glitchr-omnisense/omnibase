@@ -8,5 +8,5 @@ interface TranslatableInterface
 
     public function getTranslations();
     public function removeTranslation(TranslationInterface $translation);
-    public function addTranslation(TranslationInterface $translation);    
+    public function addTranslation(TranslationInterface $translation);
 }

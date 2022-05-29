@@ -2,26 +2,22 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\AbstractAnnotation;
-use Base\Annotations\Annotation\Iconize;
-use Base\Annotations\AnnotationReader;
-use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Model\IconizeInterface;
-use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='translation:controllers', aliases=[],
+ *            description='')
+ */
 class TranslationControllersCommand extends Command
 {
-    protected static $defaultName = 'translation:controllers';
-
     public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router)
     {
         $this->translator = $translator;

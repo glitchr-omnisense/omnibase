@@ -36,12 +36,12 @@ class FileController extends AbstractController
      * @var Filesystem
      */
     protected $filesystem;
-    
+
     /**
      * @var ImageCropRepository
      */
     protected $imageCropRepository;
-    
+
     public function __construct(Filesystem $filesystem, ImageService $imageService, ImageCropRepository $imageCropRepository)
     {
         $this->imageCropRepository = $imageCropRepository;
@@ -155,7 +155,7 @@ class FileController extends AbstractController
             return $this->redirectToRoute("ux_cropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         //
-        // Get the most image cropping 
+        // Get the most image cropping
         $ratio = null;
         $uuid = basename($path);
 
@@ -167,20 +167,20 @@ class FileController extends AbstractController
 
         // Providing a ratio X:Y
         if($imageCrop === null && preg_match("/([0-9]*):([0-9]*)/", $identifier, $matches)) {
-        
+
             $width  = (int) $matches[1];
             $height = (int) $matches[2];
             $ratio  = $width/$height;
 
             $imageCrop = $this->imageCropRepository->findOneByRatioClosestToAndWidthClosestToAndHeightClosestTo($ratio, $width, $height, ["ratio" => "e.width/e.height"], ["image.source" => $uuid])[0] ?? null;
         }
-        
+
         //
         // Apply filter
         if($imageCrop) {
 
             $filters[] = new CropFilter(
-                $imageCrop->getX(), $imageCrop->getY(), 
+                $imageCrop->getX(), $imageCrop->getY(),
                 $imageCrop->getWidth(), $imageCrop->getHeight()
             );
         }

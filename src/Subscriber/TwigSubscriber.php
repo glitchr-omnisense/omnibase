@@ -34,13 +34,13 @@ class TwigSubscriber implements EventSubscriberInterface
         $contentType = $event->getResponse()->headers->get('content-type');
         if ($contentType && !str_contains($contentType, "text/html"))
             return false;
-    
+
         if ($this->baseService->isProfiler())
             return false;
 
         if (!$event->isMainRequest())
             return false;
-        
+
         return true;
     }
 
@@ -86,7 +86,7 @@ class TwigSubscriber implements EventSubscriberInterface
 
             $javascriptsBody = $this->baseService->getHtmlContent("javascripts:body");
             $content = preg_replace('/<\/body\b[^>]*>/', "$0".$javascriptsBody, $content, 1);
-            
+
             if(!is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class]))
                 $response->setContent($content);
 

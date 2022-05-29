@@ -48,8 +48,8 @@ trait TranslationTrait
      */
     protected $locale;
 
-    public function getLocale(): ?string 
-    { 
+    public function getLocale(): ?string
+    {
         if($this->locale) return LocaleProvider::getLang($this->locale).LocaleProvider::SEPARATOR.LocaleProvider::getCountry($this->locale);
 
         if($this->getTranslatable() === null)
@@ -63,14 +63,14 @@ trait TranslationTrait
         $this->locale = LocaleProvider::getLang($locale).LocaleProvider::SEPARATOR.LocaleProvider::getCountry($locale);
         return $this;
     }
-    
+
     public function isEmpty(): bool
     {
         foreach (get_object_vars($this) as $var => $value) {
-            
+
             if (in_array($var, ['id', 'translatable', 'locale'], true))
                 continue;
-            
+
             if (!empty($value))
                 return false;
         }

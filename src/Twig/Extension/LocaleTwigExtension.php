@@ -10,7 +10,7 @@ use Twig\TwigFunction;
 final class LocaleTwigExtension extends AbstractExtension
 {
     public function __construct(LocaleProviderInterface $localeProvider) { $this->localeProvider = $localeProvider; }
-    
+
     public function getName() { return 'locale_extension'; }
     public function getFunctions() : array
     {
@@ -23,8 +23,8 @@ final class LocaleTwigExtension extends AbstractExtension
     {
         return $twig->render($template, array_merge($options, [
             "switch_route" => $switchRoute,
-            "available_locales" => $this->localeProvider->getAvailableLocales(), 
-            "current_locale"    => $this->localeProvider->getLocale() 
+            "available_locales" => $this->localeProvider->getAvailableLocales(),
+            "current_locale"    => $this->localeProvider->getLocale()
         ]));
     }
 }

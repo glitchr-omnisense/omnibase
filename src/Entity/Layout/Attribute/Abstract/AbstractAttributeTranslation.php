@@ -25,7 +25,7 @@ class AbstractAttributeTranslation implements TranslationInterface
         $this->label = $label;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="text", nullable=true)
      */

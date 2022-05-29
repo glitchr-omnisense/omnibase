@@ -25,6 +25,6 @@ class ResetPasswordConfirmType extends AbstractType
         ->add('plainPassword', RepeatedType::class, [
             'type' => PasswordType::class,
             'validation_groups' => ["edit"],
-            'mapped' => false]);    
+            'mapped' => false]);
     }
 }

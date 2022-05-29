@@ -13,5 +13,5 @@ interface SharerAdapterInterface
 
     // public function getVersion(): string;
     // public function getAssets(): array;
-    // public function getChoices(string $term = ""); // To be used in SharerType 
+    // public function getChoices(string $term = ""); // To be used in SharerType
 }

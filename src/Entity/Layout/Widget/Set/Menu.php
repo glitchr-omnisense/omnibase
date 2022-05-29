@@ -15,14 +15,14 @@ use Base\Repository\Layout\Widget\MenuRepository;
 
 /**
  * @ORM\Entity(repositoryClass=MenuRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  */
 
 class Menu extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-compass"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-compass"]; }
 
     public function __construct(string $title)
     {
@@ -32,7 +32,7 @@ class Menu extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $items;
     public function getItems(): Collection { return $this->items; }

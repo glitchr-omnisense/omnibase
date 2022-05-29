@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBag;
 class ParameterBag extends ContainerBag implements ParameterBagInterface, ContainerInterface
 {
     public const __SEPARATOR__ = ".";
-    
+
     public function get(string $key = "", array $bag = null): array|bool|string|int|float|null
     {
         if($bag == null) $bag = $this->all();

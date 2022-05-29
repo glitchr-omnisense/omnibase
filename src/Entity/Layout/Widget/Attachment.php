@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
@@ -24,10 +24,10 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class Attachment extends Widget implements IconizeInterface, LinkableInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         return $this->getRouter()->generate("widget_attachment", ["slug" => $this->getSlug()], $referenceType);
     }

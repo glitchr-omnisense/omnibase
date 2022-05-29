@@ -8,7 +8,7 @@ use Base\Entity\Layout\AttributeTranslation;
 
 /**
  * @ORM\Entity()
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class HyperlinkTranslation extends AttributeTranslation
 {
@@ -18,7 +18,7 @@ class HyperlinkTranslation extends AttributeTranslation
 
     public function setValue($value)
     {
-        if($value !== null && !is_array($value)) 
+        if($value !== null && !is_array($value))
            $value = [$value];
 
         $this->value = $value;

@@ -19,7 +19,7 @@ class Setting implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-tools"]; }
 
     public function __toString() { return $this->getPath() ?? ""; }
@@ -27,7 +27,7 @@ class Setting implements TranslatableInterface, IconizeInterface
     {
         $this->setLocked(false);
         $this->setBag(null);
-        
+
         $this->setPath($path);
         if($value !== null)
             $this->translate($locale)->setValue($value);

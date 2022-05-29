@@ -13,7 +13,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class OrderingCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureFields(string $pageName, ...$args): iterable
     {

@@ -20,13 +20,13 @@ class UserVoter extends Voter
         $this->security = $security;
     }
 
-    protected function supports(string $attribute, $subject)
+    protected function supports(string $attribute, mixed $subject): bool
     {
         // Voter only support "User" objects and one specific ballot type..
         return ($subject instanceof User) && in_array($attribute, self::BALLOT);
     }
 
-    protected function voteOnAttribute(string $attribute, $subject, TokenInterface $token)
+    protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
     {
         //
         // Check if current user is authenticated

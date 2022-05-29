@@ -2,9 +2,7 @@
 
 namespace Base\Console\Command;
 
-use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Service\BaseService;
 use Base\Service\BaseSettings;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
@@ -12,11 +10,14 @@ use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='translation:settings', aliases=[],
+ *            description='')
+ */
 class TranslationSettingsCommand extends Command
 {
-    protected static $defaultName = 'translation:settings';
-
     public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
     {
         $this->translator = $translator;
@@ -51,7 +52,7 @@ class TranslationSettingsCommand extends Command
 
         if(!$rawSettings) throw new \Exception("No settings found for \"$path\"");
         $settings = array_map_recursive(fn($s) => array_transforms(
-            fn($i,$k):array => [$k, null], 
+            fn($i,$k):array => [$k, null],
             $s->getTranslations()->getKeys()), $rawSettings
         );
 
@@ -89,14 +90,14 @@ class TranslationSettingsCommand extends Command
 
                     $value = $rawSetting->translate($currentLocale)->getLabel() ?? "<red>* no entry found *</red>";
                     $output->section()->writeln(" * <info>".trim($path).".label".$space."<magenta>[$currentLocale]</magenta></info> : $value");
-                } 
+                }
 
                 foreach($availableLocales as $currentLocale) {
 
                     $value = $rawSetting->translate($currentLocale)->getHelp() ?? "<red>* no entry found *</red>";
                     $output->section()->writeln(" * <info>".trim($path).".help".$space." <magenta>[$currentLocale]</magenta></info> : $value");
 
-                } 
+                }
                 $output->section()->writeln("");
 
             } else {
@@ -108,7 +109,7 @@ class TranslationSettingsCommand extends Command
                     $value = $setting[$currentLocale] ?? "<red>* no entry found *</red>";
                     if(is_array($value)) $value = "\n   {\n\t".implode(",\n\t", $value)."\n   }";
                     if(!is_stringeable($value)) $value = get_class($value)."([...])";
-                    
+
                     $output->section()->writeln(" * <info>".trim($path).$space."<magenta>[".($singleLocale ? "single," : "")."$currentLocale]</magenta></info> : <warning>$value</warning>");
                 }
             }

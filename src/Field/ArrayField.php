@@ -36,13 +36,13 @@ class ArrayField extends CollectionField implements FieldInterface
             ->setFormTypeOption(self::OPTION_PLACEHOLDER, null);
     }
 
-    public function useAssociativeKeys(bool $use_associative = true): self 
+    public function useAssociativeKeys(bool $use_associative = true): self
     {
         $this->setFormTypeOption(self::OPTION_ASSOCIATIVE, $use_associative);
         return $this;
     }
 
-    public function setPlaceholder(array $placeholder): self 
+    public function setPlaceholder(array $placeholder): self
     {
         $this->setFormTypeOption(self::OPTION_PLACEHOLDER, $placeholder);
         return $this;
@@ -107,7 +107,7 @@ class ArrayField extends CollectionField implements FieldInterface
         return $this;
     }
 
-    public function setLength(string|int $length): self 
+    public function setLength(string|int $length): self
     {
         $this->setFormTypeOption(self::OPTION_LENGTH, is_string($length) ? $length : max(0, $length));
         return $this;

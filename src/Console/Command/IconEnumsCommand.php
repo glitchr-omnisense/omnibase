@@ -2,21 +2,21 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Base\Console\Command;
-use Base\Service\BaseService;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='icon:enums', aliases=[],
+ *            description='')
+ */
 class IconEnumsCommand extends Command
 {
-    protected static $defaultName = 'icon:enums';
-
     protected function configure(): void
     {
         $this->addOption('enum',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific enum ?');
@@ -28,12 +28,12 @@ class IconEnumsCommand extends Command
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
             BaseBundle::getAllClasses($baseLocation."/Enum"),
-            BaseBundle::getAllClasses("./src/Enum"), 
+            BaseBundle::getAllClasses("./src/Enum"),
         );
 
         if($enums) $output->section()->writeln("Enum list: ".$enumRestriction);
         foreach($enums as $enum) {
-        
+
             if(!str_starts_with($enum, $enumRestriction)) continue;
 
             $output->section()->writeln(" * <info>".$enum."</info>");

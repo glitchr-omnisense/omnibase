@@ -19,7 +19,7 @@ interface PaginationInterface
     public function getTotalPages();
 
     public function getTemplate();
-    
+
     public function getPath(string $name, int $page = 0, array $parameters = []);
     public function getResult();
     public function getTotalCount();

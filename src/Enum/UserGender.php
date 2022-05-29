@@ -11,7 +11,7 @@ class UserGender extends EnumType implements IconizeInterface
     const FEMALE     = "FEMALE";
     const HYBRID     = "HYBRID";
     const GENDERLESS = "GENDERLESS";
-    
+
     public function __iconize(): ?array { return null; }
     public static function __iconizeStatic(): ?array
     {

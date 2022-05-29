@@ -20,8 +20,8 @@ use Symfony\Component\Yaml\Exception\ParseException;
 
 class Excel
 {
-    public function __construct(mixed $data, string $format, array $context = []) 
-    { 
+    public function __construct(mixed $data, string $format, array $context = [])
+    {
         $this->filesystem = new Filesystem();
         $this->data = $data;
         $this->format = $format;
@@ -82,7 +82,7 @@ class Excel
             case ExcelEncoder::XLSX:
                 $writer = new Writers\Xlsx($spreadsheet);
             break;
-    
+
             default:
                 throw new InvalidArgumentException(sprintf('The format "%s" is not supported', $this->format));
         }
@@ -165,7 +165,7 @@ class Excel
 
             $tmpFile = self::$filesystem->tempnam(sys_get_temp_dir(), $this->format);
             $writer->save($tmpFile);
-            
+
             $content = (string) file_get_contents($tmpFile);
             self::$filesystem->remove($tmpFile);
 
@@ -187,17 +187,17 @@ class Excel
     public static function parseFile(string $filename, array $context = []): mixed
     {
         if(filter_var($filename, FILTER_VALIDATE_URL) === false) {
-            
+
             if (!is_file($filename))
                 throw new ParseException(sprintf('File "%s" does not exist.', $filename));
-        
+
             if (!is_readable($filename))
                 throw new ParseException(sprintf('File "%s" cannot be read.', $filename));
         }
 
         return self::parse(file_get_contents($filename), self::extension($filename), $context);
     }
-    
+
     public static function parse(string $data, string $format, array $context = []): mixed
     {
         if (!is_scalar($data))
@@ -272,7 +272,7 @@ class Excel
 
                     if (array_key_exists($key, $headers))  $labelledRows[$rowIndex - 1][(string) $headers[$key]] = $value;
                     else $labelledRows[$rowIndex - 1][''][$key] = $value;
-                    
+
                     unset($sheetData[$rowIndex][$key]);
                 }
 

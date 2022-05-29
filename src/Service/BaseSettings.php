@@ -36,7 +36,7 @@ class BaseSettings
     public function scheme     (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.scheme",    $locale)) ? "https" : "http"; }
     public function maintenance(?string $locale = null) : bool    { return filter_var($this->getScalar("base.settings.maintenance",     $locale)); }
     public function base_dir   (?string $locale = null) : string  { return $this->getScalar("base.settings.domain.base_dir", $locale) ?? "/"; }
-    public function url(?string $path = null, ?string $packageName = null, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH) 
+    public function url(?string $path = null, ?string $packageName = null, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
         if(str_starts_with($path, "http")) return $path;
 
@@ -60,7 +60,7 @@ class BaseSettings
                 return $absolutePath;
         }
     }
-    
+
     public function domain     (int $level = 0, ?string $locale = null) : ?string
     {
         $domain = $this->getScalar("base.settings.domain", $locale) ?? "localhost";
@@ -69,8 +69,8 @@ class BaseSettings
         return $domain;
     }
 
-    public function birthdate(?string $locale = null) : DateTime 
-    { 
+    public function birthdate(?string $locale = null) : DateTime
+    {
         $birthdate = $this->getScalar("base.settings.birthdate", $locale);
         return $birthdate instanceof DateTime ? $birthdate : new DateTime($birthdate);
     }

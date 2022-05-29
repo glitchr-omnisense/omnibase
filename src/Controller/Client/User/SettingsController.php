@@ -49,7 +49,7 @@ class SettingsController extends AbstractController
     }
 
     private function displayQrCode(string $qrCodeContent): Response
-    { 
+    {
         $result = Builder::create()
             ->writer(new PngWriter())
             ->writerOptions([])

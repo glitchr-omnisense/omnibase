@@ -52,7 +52,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($entityOrClassNameOrMetadataOrRefl);
         foreach($annotations as $column => $annotation) {
-            
+
             if ($annotationClass !== null)
                 $annotations[$column] = array_filter($annotation, fn($a) => is_instanceof($a, $annotationClass));
         }
@@ -66,10 +66,10 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return !empty($annotations) ? end($annotations) : null;
     }
 
-    public static function hasAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass) 
-    { 
+    public static function hasAnnotation($entityOrClassNameOrMetadataOrRefl, string $mapping, string $annotationClass)
+    {
         $annotations = self::getAnnotations($entityOrClassNameOrMetadataOrRefl, $mapping, $annotationClass);
-        return !empty($annotations); 
+        return !empty($annotations);
     }
 
     /**
@@ -158,7 +158,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         //   It happens that "original" entity data doesn't mean,
         //   original value before form submission
         $entityData = self::getOriginalEntityData($entity);
-        
+
         foreach($entityData as $key => $_)
             if(array_key_exists($key, $changeSet)) $entityData[$key] = $changeSet[$key][0];
 
@@ -199,7 +199,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function setFieldValue($entity, string $property, $value)
     {
         $classMetadata = self::getClassMetadata($entity);
-        
+
         $fieldName = $classMetadata->getFieldName($property);
         if ($classMetadata->hasField($fieldName) || $classMetadata->hasAssociation($fieldName))
             return $classMetadata->setFieldValue($entity, $fieldName, $value);
@@ -212,7 +212,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getPropertyValue($entity, string $property)
     {
         if(!$entity) return null;
-        
+
         $classMetadata = self::getClassMetadata($entity);
         if( ($dot = strpos($property, ".")) > 0 ) {
 
@@ -231,7 +231,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
         $fieldName = $classMetadata->getFieldName($property);
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
-        
+
         return $propertyAccessor->getValue($entity, $fieldName);
     }
 
@@ -239,7 +239,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     {
         $classMetadata = self::getClassMetadata($entity);
         $fieldName = $classMetadata->getFieldName($property);
-       
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         return $propertyAccessor->setValue($entity, $fieldName, $value);
     }

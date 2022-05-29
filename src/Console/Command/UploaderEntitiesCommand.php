@@ -14,18 +14,21 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='uploader:entities', aliases=[],
+ *            description='')
+ */
 class UploaderEntitiesCommand extends Command
 {
-    protected static $defaultName = 'uploader:entities';
-
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
     {
         parent::__construct();
 
         $this->entityManager = $entityManager;
         $this->baseService = $baseService;
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();        
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     protected function configure(): void
@@ -80,7 +83,7 @@ class UploaderEntitiesCommand extends Command
                 $fileList = $this->getFileList($class, $field, $annotation);
                 if($this->uuid) $output->section()->writeln("- Looking for files in $class::$field <ln>UUID \"$this->uuid\" found.</ln>");
                 else $output->section()->writeln("- Looking for files in $class::$field <ln>".count($fileList)." file(s) found.</ln>");
-                
+
                 if($this->showEntries) {
 
                     foreach($fileList as $file)
@@ -92,7 +95,7 @@ class UploaderEntitiesCommand extends Command
                     $orphanFiles = $this->getOrphanFiles($class, $field, $annotation);
                     $nFiles = count($orphanFiles);
 
-                    $output->section()->writeln("- Looking for orphan files in $dirName <warning>$nFiles orphan file(s) found.</warning>");            
+                    $output->section()->writeln("- Looking for orphan files in $dirName <warning>$nFiles orphan file(s) found.</warning>");
                     if($this->showOrphans) {
                         foreach($orphanFiles as $file)
                             $output->section()->writeln("  <warning>* $file</warning>");
@@ -100,10 +103,10 @@ class UploaderEntitiesCommand extends Command
 
                     if ($this->deleteOrphans) {
 
-                        $this->deleteOrphanFiles($annotation, $orphanFiles);   
+                        $this->deleteOrphanFiles($annotation, $orphanFiles);
 
-                        if($orphanFiles) $output->section()->writeln("  <red>* Orphan files deleted..</red>"); 
-                        else  $output->section()->writeln("  <warning>* No orphan files to be deleted..</warning>"); 
+                        if($orphanFiles) $output->section()->writeln("  <red>* Orphan files deleted..</red>");
+                        else  $output->section()->writeln("  <warning>* No orphan files to be deleted..</warning>");
                     }
                 }
             }
@@ -118,7 +121,7 @@ class UploaderEntitiesCommand extends Command
         });
 
         $metadataClasses = [];
-        foreach($classes as $class) 
+        foreach($classes as $class)
             $metadataClasses[$class] = $this->entityManager->getClassMetadata($class);
 
         $annotations = [];
@@ -132,7 +135,7 @@ class UploaderEntitiesCommand extends Command
 
         return $annotations;
     }
-    
+
     private $allEntries = [];
     public function getEntries($class)
     {
@@ -168,7 +171,7 @@ class UploaderEntitiesCommand extends Command
     {
         $fileList = $this->getFileList($class, $field, $annotation);
         $fileListInDatabase = array_map(
-            fn($e) => $this->propertyAccessor->getValue($e, $field), 
+            fn($e) => $this->propertyAccessor->getValue($e, $field),
             $this->getEntries($class)
         );
 

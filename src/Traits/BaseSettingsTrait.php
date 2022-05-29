@@ -55,7 +55,7 @@ trait BaseSettingsTrait
             $el = explode(".", $path);
             $last = count($el)-1;
             foreach ($el as $index => $key) {
-            
+
                 if($key == "_self" && $index != $last)
                     throw new \Exception("Failed to normalize \"$path\": \"_self\" key can only be used as tail parameter");
 
@@ -86,7 +86,7 @@ trait BaseSettingsTrait
         }
 
         $settings = array_transforms(
-            fn($k, $v):?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v], 
+            fn($k, $v):?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
             array_flatten(".", $settings, -1, ARRAY_FLATTEN_PRESERVE_KEYS)
         );
 
@@ -152,7 +152,7 @@ trait BaseSettingsTrait
     public function getRawScalar(null|string|array $path = null, ?bool $useCache = true)
     {
         if(is_array($paths = $path)) {
-            
+
             $settings = [];
             foreach($paths as $path)
                 $settings[] = $this->getRawScalar($path);
@@ -196,7 +196,7 @@ trait BaseSettingsTrait
     public function set(string $path, $value, ?string $locale = null)
     {
         $setting = $this->generateRaw($path, $locale);
-        if($setting->isLocked()) 
+        if($setting->isLocked())
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
 
         $setting->translate($locale)->setValue($value);
@@ -236,7 +236,7 @@ trait BaseSettingsTrait
     {
         return $this->get($path, $locale) !== null;
     }
-    
+
     public function remove(string $path)
     {
         $setting = $this->settingRepository->findOneByInsensitivePath($path);

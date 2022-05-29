@@ -30,20 +30,20 @@ class Image implements IconizeInterface
 {
     use BaseTrait;
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         $routeName = "ux_image";
         $routeParameters = ["hashid" => $this->getImageService()->obfuscate($this->getSource())];
         return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-images"]; }
 
     public function __toString() { return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.image.no_image") ?? ""; }
-    public function __construct($src = null) 
+    public function __construct($src = null)
     {
-        $this->crops = new ArrayCollection(); 
+        $this->crops = new ArrayCollection();
         $this->setSource($src);
     }
 
@@ -69,10 +69,10 @@ class Image implements IconizeInterface
         $this->sourceMeta = null;
         return $this;
     }
-    
+
     private $sourceMeta;
     public function getSourceMeta(): array|null|false
-    { 
+    {
         $sourceFile = $this->getSourceFile();
         if($sourceFile === null) return null;
 
@@ -101,8 +101,8 @@ class Image implements IconizeInterface
     protected $crops;
 
     public function getPreferredCrop(string|int $labelOrRatio): ?ImageCrop { return $this->getCrops($labelOrRatio)[0] ?? null; }
-    public function getCrops(string|int|null $labelOrRatio = null): Collection 
-    { 
+    public function getCrops(string|int|null $labelOrRatio = null): Collection
+    {
         return $this->crops->Map(function($c) use ($labelOrRatio) {
             if(is_string($labelOrRatio)) return $c->getLabel() && $c->getLabel() == $labelOrRatio;
             if(is_numeric($labelOrRatio)) return $c->getRatio() == $labelOrRatio;

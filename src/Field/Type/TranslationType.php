@@ -54,11 +54,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
     {
         $resolver->setDefaults([
             'label' => false,
-            
+
             'locale'            => $this->localeProvider->getLocale(),
             'locale_options'    => [],
-            
-            
+
+
             'single_locale'     => false,
             'default_locale'    => $this->localeProvider->getDefaultLocale(),
             'required_locales'  =>  [],
@@ -66,11 +66,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
             'by_reference' => false,
             'empty_data' => fn(FormInterface $form) => new ArrayCollection,
-            
+
             'autoload' => true,
             'fields' => [],
             'excluded_fields' => [],
-            
+
             'translation_class' => null,
             'multiple' => false
         ]);
@@ -80,7 +80,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         });
 
     }
-    
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder->setDataMapper($this);
@@ -96,7 +96,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
             $translationClass = $this->getTranslationClass($form);
             $translationFields = $this->getTranslationFields($translationClass, $options);
-            
+
             foreach ($locales as $key => $locale) {
 
                 if (!isset($translationFields[$locale]))
@@ -142,7 +142,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             foreach($data as $key => $array) {
 
                 foreach ($array as $locale => $translation) {
- 
+
                     if($array instanceof PersistentCollection) {
 
                         if (!$translation instanceof TranslationInterface) $data[$key]->removeElement($translation);
@@ -165,7 +165,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     {
         $view->vars["locale"]            = $options["locale"];
         $view->vars["single_locale"]     = $options["single_locale"];
-    
+
         $view->vars["default_locale"]    = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];
         $view->vars["required_locales"]  = $options["required_locales"];
@@ -197,7 +197,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $fields = $this->classMetadataManipulator->getFields($translationClass, $options["fields"], $options["excluded_fields"]);
         if(!$options["autoload"])
             $fields = array_filter($fields, fn($k) => array_key_exists($k, $options["fields"]), ARRAY_FILTER_USE_KEY);
-        
+
         // Compute fields including locale information
         $translationFields = [];
         foreach ($fields as $fieldName => $fieldConfig) {
@@ -205,7 +205,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             // Simplest case: General options for all locales
             if (!isset($fieldConfig['locale_options'])) {
 
-                foreach ($options['available_locales'] as $locale) 
+                foreach ($options['available_locales'] as $locale)
                     $translationFields[$locale][$fieldName] = $fieldConfig;
 
                 continue;
@@ -241,7 +241,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
         while($translatableClass === null) {
 
             if($form->getParent() === null) break;
-            
+
             $translatableClass = $this->getTranslatableClass($form->getParent());
             $form = $form->getParent();
         };
@@ -251,7 +251,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
         if(!is_subclass_of($translatableClass, TranslatableInterface::class))
             throw new \Exception("Translatable interface not implemented in \"".$translatableClass."\"");
-    
+
         return $translatableClass::getTranslationEntityClass(true, false); //, false);
     }
 
@@ -259,7 +259,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     {
         // Looking at translatable interface using data_class
         $translatableClass = $form->getConfig()->getDataClass();
-        if(is_subclass_of($translatableClass, TranslatableInterface::class)) 
+        if(is_subclass_of($translatableClass, TranslatableInterface::class))
             return $translatableClass;
 
         // Looking at translatable interface using data
@@ -274,7 +274,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
     {
         $multiple = current(iterator_to_array($forms))->getParent()->getConfig()->getOption("multiple");
         foreach(iterator_to_array($forms) as $locale => $form) {
-        
+
             if(!$multiple) $form->setData($viewData[$locale] ?? null);
             else {
 
@@ -296,7 +296,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             $data = $form->getData();
             if(!$multiple) {
 
-                if ($data instanceof TranslationInterface) { 
+                if ($data instanceof TranslationInterface) {
 
                     if($data->isEmpty()) unset($viewData[$locale]);
                     else {
@@ -307,7 +307,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 }
 
             } else {
-    
+
                 foreach($data as $key => $translation) {
 
                     if ( $translation === null) continue;

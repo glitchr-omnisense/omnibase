@@ -20,20 +20,20 @@ class DiscriminatorEntry extends AbstractAnnotation
     /** @Required */
     private ?string $value;
 
-    public function __construct( array $data ) 
-    { 
+    public function __construct( array $data )
+    {
         $this->value = $data['value'] ?? null;
     }
 
-    public function getValue(object|string $object_or_class): string 
+    public function getValue(object|string $object_or_class): string
     {
-        if($this->value !== null) 
+        if($this->value !== null)
             return $this->value;
 
         // Formatting input object
         $className = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
         $namespace = explodeByArray("\\Entity\\", $className);
-        
+
         // Special case for App and Base entities
         switch (($namespaceRoot = array_shift($namespace))) {
 
@@ -42,18 +42,18 @@ class DiscriminatorEntry extends AbstractAnnotation
                 //NB: Either returning "common" or "abstract" value for root entity
                 $special = $namespaceRoot == "Base" ? (is_abstract($className) ? "abstract" : "common") : null;
                 if ($special && !get_parent_class($className)) return $special;
-                
+
                 // Otherwise.. Just put the class basename (as it is expected to be "general" terms.)
                 $namespace = array_unique(explode("\\", $namespace[0] ?? ""));
                 return mb_lcfirst(end($namespace));
 
-            default : 
-            case "App": 
+            default :
+            case "App":
 
                 $namespace = $namespace[0] ?? null;
                 if($namespace === null)
                     throw new Exception("Unexpected location for \"$className\"");
-        
+
                 // Looking for custom parent values
                 $parentValue = null;
                 $parentNamespace = null;
@@ -73,7 +73,7 @@ class DiscriminatorEntry extends AbstractAnnotation
 
                     $namespace = explode("\\", str_lstrip($namespace, $parentNamespace."\\"));
                     array_unshift($namespace, $parentValue);
-                    
+
                 } else {
 
                     $namespace = explode("\\", $namespace);

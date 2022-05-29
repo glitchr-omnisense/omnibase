@@ -38,7 +38,7 @@ class LocaleController extends AbstractController
         $lang = $locale ? ".".LocaleProvider::getLang($locale) : "";
         $referrerName = $this->router->getRouteName(strval($referrer));
         if($referrerName !== "locale_changeto") {
-        
+
             try { return $this->router->generate($referrerName.$lang); }
             catch (RouteNotFoundException $e) { return $this->router->generate($referrerName); }
         }

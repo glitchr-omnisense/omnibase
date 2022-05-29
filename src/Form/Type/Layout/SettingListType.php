@@ -36,8 +36,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
      */
     protected $classMetadataManipulator;
 
-    public function __construct(BaseSettings $baseSettings, ClassMetadataManipulator $classMetadataManipulator) 
-    { 
+    public function __construct(BaseSettings $baseSettings, ClassMetadataManipulator $classMetadataManipulator)
+    {
         $this->baseSettings = $baseSettings;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
@@ -206,7 +206,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     foreach($translations as $locale => $translation) {
 
                         $viewData[$field] = $viewData[$field] ?? new Setting($field);
-                        if($viewData[$field]->isLocked()) 
+                        if($viewData[$field]->isLocked())
                             throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
 
                         $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
@@ -222,7 +222,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                 if(!$viewData[$formName] instanceof Setting)
                     $viewData[$formName] = $viewData[$formName] ?? new Setting($formName);
 
-                if($viewData[$formName]->isLocked()) 
+                if($viewData[$formName]->isLocked())
                     throw new \Exception("Setting \"".$viewData[$formName]->getPath()."\" is currently locked.");
 
                 $translation = $form->getViewData();

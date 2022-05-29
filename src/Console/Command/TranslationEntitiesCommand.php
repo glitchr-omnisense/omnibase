@@ -4,18 +4,20 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='translation:entities', aliases=[],
+ *            description='')
+ */
 class TranslationEntitiesCommand extends Command
 {
-    protected static $defaultName = 'translation:entities';
-
     public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider)
     {
         $this->translator = $translator;
@@ -36,13 +38,13 @@ class TranslationEntitiesCommand extends Command
         $entityRestriction = $input->getOption('entity') ?? "";
         $entities = array_merge(
             BaseBundle::getAllNamespacesAndClasses("./src/Entity"),
-            BaseBundle::getAllNamespacesAndClasses($baseLocation."/Entity"), 
+            BaseBundle::getAllNamespacesAndClasses($baseLocation."/Entity"),
         );
         $namespaces = array_merge(
             BaseBundle::getAllNamespaces("./src/Entity"),
-            BaseBundle::getAllNamespaces($baseLocation."/Entity"), 
+            BaseBundle::getAllNamespaces($baseLocation."/Entity"),
         );
-        
+
         $maxLength = [];
         if(!$entityRestriction) {
             foreach($entities as $entity) {
@@ -78,7 +80,7 @@ class TranslationEntitiesCommand extends Command
                 if($locale !== null && $locale != $currentLocale) continue;
                 $prefix = "\n\t - ";
                 $space = "";
-            
+
                 $path = explode("\\", $entity);
                 $path = implode(".", tail($path, 2));
                 $translationPath = "@entities.".camel2snake($path, ".").".".$suffix;

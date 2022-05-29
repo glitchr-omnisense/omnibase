@@ -16,7 +16,7 @@ class BackgroundFilter implements FilterInterface
      */
     protected $imagine;
 
-    public function __toString() { 
+    public function __toString() {
         return "bkg:".$this->getRGBA(false).":".$this->getPosition().":".($this->getSize() ? implode("x", $this->getSize()) : "");
     }
 

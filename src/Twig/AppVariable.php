@@ -13,7 +13,7 @@ class AppVariable
     use ProxyTrait;
 
     protected array $meta;
-    
+
     /**
      * @var Referrer
      */
@@ -34,7 +34,7 @@ class AppVariable
         $this->settings  = $settings;
         $this->referrer  = $referrer;
         $this->twig      = $twig;
-        
+
         $this->meta      = [];
         $this->random    = new RandomVariable();
         $this->easyadmin = new EasyAdminVariable($adminUrlGenerator);
@@ -50,7 +50,7 @@ class AppVariable
     public function getGlobals() {
 
         return array_transforms(
-            fn($k,$v):?array => $k != "app" && str_starts_with($k, "app") ? [str_strip($k, "app."), $v] : null, 
-            $this->twig->getGlobals()); 
+            fn($k,$v):?array => $k != "app" && str_starts_with($k, "app") ? [str_strip($k, "app."), $v] : null,
+            $this->twig->getGlobals());
     }
 }

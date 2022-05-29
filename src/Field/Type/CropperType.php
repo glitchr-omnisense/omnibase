@@ -24,13 +24,13 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class CropperType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'cropper'; }
-    
-    public function __construct(FormFactory $formFactory, BaseService $baseService) 
+
+    public function __construct(FormFactory $formFactory, BaseService $baseService)
     {
         $this->formFactory = $formFactory;
         $this->baseService = $baseService;
 
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor(); 
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -126,7 +126,7 @@ class CropperType extends AbstractType implements DataMapperInterface
         // Get oldest parent form available..
         $ancestor = $view;
         while($ancestor->parent !== null)
-            $ancestor = $ancestor->parent; 
+            $ancestor = $ancestor->parent;
 
         $view->ancestor = $ancestor;
 

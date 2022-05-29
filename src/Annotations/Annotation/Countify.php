@@ -36,8 +36,8 @@ class Countify extends AbstractAnnotation
     public function __construct( array $data )
     {
         $this->referenceColumn = $data['reference'] ?? null;
-        
-        switch($data["type"]) 
+
+        switch($data["type"])
         {
             default:
             case self::COUNT_CHARS:
@@ -79,8 +79,8 @@ class Countify extends AbstractAnnotation
 
         // Check if field already set.. (it needs to be checked)
         $value = $this->getFieldValue($entity, $this->referenceColumn) ?? "";
-        
-        switch($this->type) 
+
+        switch($this->type)
         {
             default:
             case self::COUNT_CHARS:

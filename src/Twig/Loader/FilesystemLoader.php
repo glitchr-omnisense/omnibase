@@ -72,7 +72,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         $this->prependPath($bundlePath, "Base");
         $this->prependPath($bundlePath);
-        
+
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag("base.twig.paths");
         foreach($paths as $entry) {

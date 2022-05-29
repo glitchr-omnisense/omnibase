@@ -26,7 +26,7 @@ class FormTypeTranslateExtension extends AbstractTypeExtension
             "translation_domain" => false
         ]);
     }
-    
+
     /**
      * {@inheritdoc}
      */

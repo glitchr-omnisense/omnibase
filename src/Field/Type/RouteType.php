@@ -27,7 +27,7 @@ class RouteType extends AbstractType
                 return ChoiceList::loader($this, new CallbackChoiceLoader(function () {
 
                     return array_flip(array_transforms(
-                        fn($k, $r):array => [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()], 
+                        fn($k, $r):array => [$k, "<b>Name:</b> ".strtolower($k)."<br/><b>Path:</b> ".$r->getPath()],
                         $this->router->getRouteCollection()->all(),
                     ));
 

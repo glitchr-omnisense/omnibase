@@ -21,7 +21,7 @@ class TimezoneSubscriber implements EventSubscriberInterface
     {
         $timezone = User::getCookie("timezone") ?? "UTC";
         $defaultTimezone = date_default_timezone_get();
-        
+
         if($timezone != $defaultTimezone) {
             $notification = new Notification("invalidTimezone", [$timezone]);
             $notification->send("info");

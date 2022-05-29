@@ -20,7 +20,7 @@ use function Symfony\Component\String\u;
 class ArrayConfigurator implements FieldConfiguratorInterface
 {
     use BaseTrait;
-    
+
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return ArrayField::class === $field->getFieldFqcn();
@@ -56,9 +56,9 @@ class ArrayConfigurator implements FieldConfiguratorInterface
 
             $field->setCustomOption(ArrayField::OPTION_ENTRY_IS_COMPLEX, $isComplexEntry);
         }
-        
+
         if (null !== $patternFieldName = $field->getCustomOptions()->get(ArrayField::OPTION_PATTERN_FIELD_NAME)) {
-        
+
             $entity = $entityDto->getInstance();
             foreach(explode(".", $patternFieldName) as $propertyPath){
 
@@ -70,7 +70,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
             $field->setFormattedValue(is_url($this->sanitize($formattedValue)) ? "<a href='".$this->sanitize($formattedValue)."'>".$formattedValue."</a>" : $formattedValue);
 
         } else {
-            
+
             $field->setFormattedValue($this->formatCollection($field, $context));
         }
     }
@@ -78,7 +78,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
     public function resolve(?string $pattern, ...$patternOpts): ?string
     {
         if(!$pattern) return null;
-        
+
         $search = [];
         foreach($patternOpts as $index => $_)
             $search[] = "{".$index."}";

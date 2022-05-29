@@ -15,7 +15,7 @@ use Base\Repository\Extension\RevisionRepository;
  */
 class Revision extends AbstractExtension
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-sort-numeric-down"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-sort-numeric-down"]; }
 
     /**
      * @ORM\Column(type="integer")

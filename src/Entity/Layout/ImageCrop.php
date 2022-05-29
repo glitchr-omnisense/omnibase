@@ -18,7 +18,7 @@ class ImageCrop implements LinkableInterface
 {
     use BaseTrait;
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         $routeParameters = [
             "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(),
@@ -54,7 +54,7 @@ class ImageCrop implements LinkableInterface
         $this->image = $image;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */

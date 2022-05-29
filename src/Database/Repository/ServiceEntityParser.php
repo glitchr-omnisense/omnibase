@@ -34,12 +34,12 @@ class ServiceEntityParser
     public const SPECIAL_ATMOST = "AtMost";
     public const SPECIAL_LAST   = "Last";
     public const SPECIAL_RAND   = "Randomly";
-    protected static function getSpecials(): array 
-    { 
-        return [self::SPECIAL_ALL, self::SPECIAL_ONE, self::SPECIAL_ATMOST, self::SPECIAL_LAST, self::SPECIAL_RAND]; 
+    protected static function getSpecials(): array
+    {
+        return [self::SPECIAL_ALL, self::SPECIAL_ONE, self::SPECIAL_ATMOST, self::SPECIAL_LAST, self::SPECIAL_RAND];
     }
 
-    
+
     // Default options
     public const OPTION_EQUAL         = "EqualTo";
     public const OPTION_NOT_EQUAL     = "NotEqualTo";
@@ -75,7 +75,7 @@ class ServiceEntityParser
 
     public const OPTION_CLOSESTTO        = "ClosestTo";
     public const OPTION_FARESTTO         = "FarestTo";
-    
+
     // Separators
     public const SEPARATOR     = ":"; // Field separator
     public const SEPARATOR_OR  = "Or";
@@ -95,7 +95,7 @@ class ServiceEntityParser
 
     protected $classMetadata = null;
 
-    public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager,  EntityHydrator $entityHydrator) 
+    public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager,  EntityHydrator $entityHydrator)
     {
         $this->serviceEntity  = $serviceEntity;
         $this->entityHydrator = $entityHydrator;
@@ -124,21 +124,21 @@ class ServiceEntityParser
     protected function __findAtMostBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               ): ?Query
     {
         $limit = array_unshift($criteria);
-        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit, null); 
+        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit, null);
     }
 
     protected function __lengthOf     (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null) { return $this->getQueryWithLength($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset)->getResult(); }
     protected function __distinctCount(array $selectAs = [], array $criteria = [],                  $groupBy = null): int { return $this->__count($selectAs, $criteria, self::COUNT_DISTINCT, $groupBy); }
-    protected function __count        (array $selectAs = [], array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, $groupBy = null) 
+    protected function __count        (array $selectAs = [], array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, $groupBy = null)
     {
-        $query = $this->getQueryWithCount($selectAs, $criteria, $mode, $orderBy, $groupBy); 
+        $query = $this->getQueryWithCount($selectAs, $criteria, $mode, $orderBy, $groupBy);
         if(!$query) return null;
 
         $fnResult = ($groupBy ? "getResult" : "getSingleScalarResult");
         return $query->$fnResult();
     }
-    
-    
+
+
     public function parse($method, $arguments) : mixed
     {
         // Parse method and call it
@@ -154,7 +154,7 @@ class ServiceEntityParser
         return $ret;
     }
 
-    protected function getAlias($alias) 
+    protected function getAlias($alias)
     {
         $this->classMetadata->fieldNames[$alias] ?? $alias;
         return $this->classMetadata->fieldNames[$alias] ?? $alias;
@@ -162,7 +162,7 @@ class ServiceEntityParser
 
     protected function addCriteria(?string $by, $value)
     {
-        if($by != null && empty($by)) 
+        if($by != null && empty($by))
             throw new Exception("Tried to add unnamed criteria");
 
         $index = 0;
@@ -199,7 +199,7 @@ class ServiceEntityParser
     {
         $method = str_ends_with($method, $option) ? mb_substr($method, 0, strpos($method, $option)) : $method;
         $by     = str_ends_with($by, $option) ? mb_substr($by, 0, strlen($by) - strlen($option)) : $by;
-        
+
         return [$method, $by];
     }
 
@@ -345,28 +345,28 @@ class ServiceEntityParser
             $byNames = $matches[2];
 
         } else if (preg_match('/^('.$countRequest.')(?:'.$for.'([^'.$by.']*))?'.$by.'(.*)/', $method, $matches)) {
-            
+
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
 
         } else if (preg_match('/^('.$countRequest.')(?:'.$for.'([^'.$by.']*))?(.*)/', $method, $matches)) {
-            
+
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
 
         } else if (preg_match('/^('.$lengthRequest.')([^'.$by.']+)'.$by.'(.*)/', $method, $matches)) {
-            
+
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[3] ?? "";
 
             $this->setColumn(lcfirst($matches[2]) ?? null);
 
         } else if (preg_match('/^('.$lengthRequest.')([^'.$by.']+)(.*)/', $method, $matches)) {
-            
+
             $magicFn = $matches[1] ?? "";
             $byNames = $matches[3] ?? "";
 
@@ -409,7 +409,7 @@ class ServiceEntityParser
             $isModel    = $isInsensitive = $isPartial = false;
             $withRoute  = false;
             $but        = false;
-            
+
             $closestTo = $farestTo = false;
             $instanceOf = $notInstanceOf = false;
             $memberOf   = $notMemberOf   = false;
@@ -463,12 +463,12 @@ class ServiceEntityParser
                     $option = self::OPTION_LOWER_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_LOWER) )
                     $option = self::OPTION_LOWER;
-                
+
                 else if ( str_ends_with($by, self::OPTION_GREATER_EQUAL) )
                     $option = self::OPTION_GREATER_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_GREATER) )
                     $option = self::OPTION_GREATER;
-                
+
                 else if ( str_ends_with($by, self::OPTION_NOT_EQUAL) )
                     $option = self::OPTION_NOT_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_EQUAL) )
@@ -485,7 +485,7 @@ class ServiceEntityParser
                         $isInsensitive = true;
                         list($method, $by) = $this->stripByFront($method, $by, $option);
                         break;
-    
+
                     case self::OPTION_WITH_ROUTE:
                         $withRoute = true;
                         list($method, $by) = $this->stripByEnd($method, $by, $option);
@@ -530,7 +530,7 @@ class ServiceEntityParser
                     case self::OPTION_ENDING_WITH:
                     case self::OPTION_NOT_STARTING_WITH:
                     case self::OPTION_NOT_ENDING_WITH:
-                    
+
                     // Datetime related
                     case self::OPTION_YOUNGER:
                     case self::OPTION_YOUNGER_EQUAL:
@@ -538,7 +538,7 @@ class ServiceEntityParser
                     case self::OPTION_OLDER_EQUAL:
                     case self::OPTION_OVER:
                     case self::OPTION_NOT_OVER:
-                    
+
                     // Number related
                     case self::OPTION_LOWER:
                     case self::OPTION_LOWER_EQUAL:
@@ -567,7 +567,7 @@ class ServiceEntityParser
                 // Process self::OPTION_WITH_ROUTE method
                 if ($method == self::OPTION_WITH_ROUTE)
                     throw new Exception("Missing parameter to associate with operator 'withRouteParameter'");
-                    
+
                 $fieldValue = $routeParameters[$key] ?? null;
                 if(!empty($fieldValue)) {
 
@@ -576,7 +576,7 @@ class ServiceEntityParser
 
                     $id = $this->addCriteria($by, $fieldValue);
                     if ($operator == self::OPTION_EQUAL) $this->addCustomOption($id, $operator);
-                    else throw new Exception("Unexpected operator \"".$operator."\" found in model definition");    
+                    else throw new Exception("Unexpected operator \"".$operator."\" found in model definition");
                 }
 
             } else if ($but) {
@@ -643,7 +643,7 @@ class ServiceEntityParser
 
                 $modelCriteria = [];
                 $model = array_shift($arguments);
-                
+
                 if(is_object($model)) {
 
                     $reflClass = new ReflectionClass(get_class($model));
@@ -671,7 +671,7 @@ class ServiceEntityParser
                 } else if(is_array($model)) {
 
                     $modelCriteria = $this->entityHydrator->hydrate($this->classMetadata->getName(), $model);
-                
+
                 } else {
 
                     throw new Exception("Model expected to be an object or an array, currently \"". gettype($model)."\"");
@@ -682,7 +682,7 @@ class ServiceEntityParser
                     $id = $this->addCriteria($by, $modelCriteria);
                     if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
                     if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
-                    
+
                     if ($operator == self::OPTION_EQUAL || $operator == self::OPTION_NOT_EQUAL) $this->addCustomOption($id, $operator);
                     else throw new Exception("Unexpected operator \"".$operator."\" found in model definition");
                 }
@@ -690,14 +690,14 @@ class ServiceEntityParser
             } else if($by) {
 
                 $by = lcfirst($by);
-                
+
                 $fieldExpected = ($operator == self::OPTION_OVER || $operator == self::OPTION_NOT_OVER);
                 $fieldValue = ($fieldExpected ? "CURDATE()" : array_shift($arguments));
-                
+
                 $id = $this->addCriteria($by, $fieldValue);
                 if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
                 if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
-                
+
                 if ($closestTo) $this->addCustomOption($id, self::OPTION_CLOSESTTO);
                 if ($farestTo) $this->addCustomOption($id, self::OPTION_FARESTTO);
 
@@ -707,7 +707,7 @@ class ServiceEntityParser
 
         // Index definition:
         // "criteria"  = argument #0, after removal of head parameters
-        foreach($arguments as $i => $arg) 
+        foreach($arguments as $i => $arg)
             $magicArgs[$i] = $arg; // +1 because of array shift
 
         // Mark as cacheable (to be used in self::getQueryBuilder)
@@ -718,7 +718,7 @@ class ServiceEntityParser
         }
 
         if(str_starts_with($magicFn, self::REQUEST_FIND.self::SPECIAL_ALL)) {
-            
+
             if(str_ends_with($magicFn, self::SEPARATOR_BY))
                 $magicFn = mb_substr($magicFn, 0, -strlen(self::SEPARATOR_BY));
 
@@ -730,21 +730,21 @@ class ServiceEntityParser
 
         $magicFn = "__".$magicFn;
 
-        $magicArgs[0] = $magicArgs[0] ?? []; 
+        $magicArgs[0] = $magicArgs[0] ?? [];
         $magicArgs[1] = array_merge($magicArgs[1] ?? [], $this->criteria ?? []);
 
         return [$magicFn, $magicArgs];
     }
 
-    
+
     protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
     {
-        
+
         $fieldID   = str_replace(".", "_", implode("_", $field));
         $fieldName = $this->getAlias($field[0]);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
         $fieldHead = explode(".", $fieldName)[0];
-        
+
         $isPartial       = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
         $isInsensitive   = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
         $closestTo       = $this->findCustomOption($fieldRoot, self::OPTION_CLOSESTTO);
@@ -780,7 +780,7 @@ class ServiceEntityParser
             ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER)       ? self::OPTION_GREATER       :
             ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER_EQUAL) ? self::OPTION_GREATER_EQUAL :
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER         :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   : 
+            ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   :
             ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL     : self::OPTION_EQUAL
         )))))))))))))))))));
 
@@ -789,10 +789,10 @@ class ServiceEntityParser
 
         switch($tableOperator) {
 
-            case self::OPTION_MEMBEROF: 
-            case self::OPTION_NOT_MEMBEROF: 
-            case self::OPTION_INSTANCEOF: 
-            case self::OPTION_NOT_INSTANCEOF: 
+            case self::OPTION_MEMBEROF:
+            case self::OPTION_NOT_MEMBEROF:
+            case self::OPTION_INSTANCEOF:
+            case self::OPTION_NOT_INSTANCEOF:
                 $tableColumn = self::ALIAS_ENTITY;
                 break;
 
@@ -870,7 +870,7 @@ class ServiceEntityParser
 
             if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
             return $qb->expr()->orX(...$memberOf);
-        
+
         } else {
 
             if ($this->classMetadata->hasAssociation($fieldHead)) {
@@ -879,12 +879,12 @@ class ServiceEntityParser
                     throw new Exception("Association \"$fieldHead\" for \"".$this->classMetadata->getName()."\" is not owning side");
 
                 $fieldID = self::ALIAS_ENTITY."_".$fieldID;
-                
+
                 $qb = $this->innerJoin($qb, $fieldHead);
                 $qb->setParameter($fieldID, $fieldValue);
 
             } else {
-            
+
                 $qb->setParameter($fieldID, $fieldValue);
             }
 
@@ -914,9 +914,9 @@ class ServiceEntityParser
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
                 return "${tableColumn} ${tableOperator} (:${fieldID})";
-                
+
             } else if($regexRequested) {
-            
+
                      if($tableOperator == self::OPTION_STARTING_WITH) $tableOperator = "like";
                 else if($tableOperator == self::OPTION_ENDING_WITH)   $tableOperator = "like";
                 else if($tableOperator == self::OPTION_NOT_STARTING_WITH)  $tableOperator = "notLike";
@@ -929,7 +929,7 @@ class ServiceEntityParser
                 return "ABS(".$tableColumn." - :".$fieldID.")";
 
             } else {
-                
+
                     if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
                 else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
                 else if($tableOperator == self::OPTION_GREATER)       $tableOperator = ">";
@@ -969,18 +969,18 @@ class ServiceEntityParser
 
             $field     = explode(self::SEPARATOR, $field);
             $fieldName = $field[0];
-            
+
             if($fieldValue instanceof PersistentCollection)
                  throw new Exception("You passed a PersistentCollection for field \"".$fieldName."\"");
 
             // Handle partial entity/model input criteria
             if($fieldName == lcfirst(self::OPTION_MODEL)) {
-                
+
                 $expr = [];
                 foreach ($fieldValue ?? [] as $entryID => $entryValue) {
 
                     $newField = [];
-                    foreach ($field as $key => $value) 
+                    foreach ($field as $key => $value)
                         $newField[$key] = $value;
 
                     array_unshift($newField, $entryID);
@@ -999,7 +999,7 @@ class ServiceEntityParser
 
                 // Default query builder
                 $expr = $this->buildQueryExpr($qb, $field, $fieldValue);
-                
+
                 // Custom process in case of closest/farest
                 $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
                 $closestTo       = $this->findCustomOption($fieldRoot, self::OPTION_CLOSESTTO);
@@ -1022,7 +1022,7 @@ class ServiceEntityParser
                     case self::SEPARATOR_AND: $qb->andWhere($expr);
                         break;
 
-                    default: 
+                    default:
                         throw new Exception("Unknown separator \"".$separator."\" provided");
                 }
             }
@@ -1035,10 +1035,10 @@ class ServiceEntityParser
         $qb = $this->selectAs($qb, $selectAs);
         $qb = $this->orderBy ($qb, $orderBy);
         $qb = $this->groupBy ($qb, $groupBy);
-        
+
         return $qb;
     }
-    
+
     protected function getQuery(array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
     {
         $qb = $this->getQueryBuilder($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset);
@@ -1077,14 +1077,14 @@ class ServiceEntityParser
         $this->innerJoin($qb, $column);
 
         $qb->select('COUNT('.trim($mode.' '.$column).') AS count');
-        
+
         $this->selectAs($qb, $selectAs);
         $this->orderBy ($qb, $orderBy);
         $this->groupBy ($qb, $groupBy);
 
         return $qb->getQuery();
     }
-    
+
     protected function getQueryWithLength(array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
     {
         $column = $this->getAlias($this->getColumn());
@@ -1097,7 +1097,7 @@ class ServiceEntityParser
         $this->innerJoin($qb, $column);
 
         $qb->select("LENGTH(".self::ALIAS_ENTITY.".".$column.") as length");
-        
+
         $this->selectAs($qb, $selectAs);
         $this->orderBy ($qb, $orderBy);
         $this->groupBy ($qb, $groupBy);
@@ -1162,7 +1162,7 @@ class ServiceEntityParser
     protected function orderBy(QueryBuilder $qb, $orderBy)
     {
         if(!$orderBy) return $qb;
-    
+
         $column = explode("\\", $this->classMetadata->getName());
         $column = lcfirst(end($column));
 
@@ -1178,12 +1178,12 @@ class ServiceEntityParser
 
             $isRandom = ($name == "id" && strtolower($value) == "rand");
             if(!$isRandom) {
-            
-                if($this->classMetadata->hasField($entity)) 
+
+                if($this->classMetadata->hasField($entity))
                     $formattedName = self::ALIAS_ENTITY.".".$name;
-                else if($this->classMetadata->hasAssociation($entity)) 
+                else if($this->classMetadata->hasAssociation($entity))
                     $formattedName = self::ALIAS_ENTITY."_".$name;
-                else 
+                else
                     $formattedName = $name;
 
                 $qb = $this->innerJoin($qb, $entity);
@@ -1192,9 +1192,9 @@ class ServiceEntityParser
             $orderBy   = $first ? "orderBy" : "addOrderBy";
 
             if($isRandom) $qb->orderBy('RAND()');
-            else if(is_array($value)) 
+            else if(is_array($value))
                 $qb->add($orderBy, "FIELD(".$formattedName.",".implode(",",$value).")");
-            else 
+            else
                 $qb->$orderBy($formattedName, $value);
 
             $first = false;

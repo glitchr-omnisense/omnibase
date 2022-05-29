@@ -103,16 +103,16 @@ class Hashify extends AbstractAnnotation
 
         if($that->needsRehash($entity, $hashedMessage))
             throw new Exception("Password in @Hashify annotation in \"$property\" for $className needs to be rehashed");
-        
+
         return $that->getMessageHasher($entity)->verify(
-                    $that->getHashedMessage($entity, $property), 
+                    $that->getHashedMessage($entity, $property),
                     $that->getFieldValue($entity, $property)
                 );
     }
 
     private function getPlainMessage($entity): ?string
     {
-        if ($this->random) 
+        if ($this->random)
             return random_bytes(10);
 
         if (!$this->referenceColumn)

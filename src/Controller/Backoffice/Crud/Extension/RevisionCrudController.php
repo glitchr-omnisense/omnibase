@@ -6,5 +6,5 @@ use Base\Controller\Backoffice\AbstractCrudController;
 
 class RevisionCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 }

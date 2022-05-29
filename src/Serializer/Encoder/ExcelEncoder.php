@@ -19,7 +19,7 @@ class ExcelEncoder implements EncoderInterface, DecoderInterface
     public const XLS = 'xls';
     public const XLSX = 'xlsx';
     public const XLSM = 'xlsm';
-    
+
     /**
      * Default context constants.
      */

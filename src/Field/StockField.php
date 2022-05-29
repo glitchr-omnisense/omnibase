@@ -33,17 +33,17 @@ final class StockField implements FieldInterface
     }
 
     public function step(float $step) { return $this->stepUp($step)->stepDown($step); }
-    public function stepUp(float $stepUp) 
+    public function stepUp(float $stepUp)
     {
         $this->setFormTypeOption("stepUp", $stepUp);
         return $this;
     }
-    public function stepDown(float $stepDown) 
+    public function stepDown(float $stepDown)
     {
         $this->setFormTypeOption("stepDown", $stepDown);
         return $this;
     }
-    
+
     public function setNumDecimals(int $num): self
     {
         if ($num < 0) {

@@ -44,7 +44,7 @@ class DropzoneController extends AbstractController
      */
     public function Main(Request $request, $token = null): Response
     {
-        if(!$token || !$this->isCsrfTokenValid("dropzone", $token)) 
+        if(!$token || !$this->isCsrfTokenValid("dropzone", $token))
             return new Response($this->translator->trans("fileupload.error.invalid_token", [], "fields"), 500);
 
         // Move.. with flysystem
@@ -131,7 +131,7 @@ class DropzoneController extends AbstractController
     {
         if(!$token) throw new InvalidCsrfTokenException();
 
-        if(!$this->isCsrfTokenValid("dropzone", $token)) 
+        if(!$this->isCsrfTokenValid("dropzone", $token))
             return new Response("Invalid token.", 500);
 
         if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
@@ -168,7 +168,7 @@ class DropzoneController extends AbstractController
     {
         if(!$token) throw new InvalidCsrfTokenException();
 
-        if(!$this->isCsrfTokenValid("dropzone", $token)) 
+        if(!$this->isCsrfTokenValid("dropzone", $token))
             return new Response("Invalid token.", 500);
 
         if(!preg_match('/^[a-f0-9\-]{36}$/i', $uuid))

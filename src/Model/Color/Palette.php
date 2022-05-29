@@ -12,7 +12,7 @@ class Palette implements \Countable, \IteratorAggregate
     protected ?int $colorKey = null;
     public function getColorKey() { return $this->colorKey; }
     public function setColorKey(int|null $colorKey)
-    { 
+    {
         $this->colorKey = $colorKey;
         return $this;
     }
@@ -34,7 +34,7 @@ class Palette implements \Countable, \IteratorAggregate
         else $image = imagecreatefromstring(file_get_contents($filenameOrImage));
 
         $this->loadResource($image, $colorKey);
-        if(!$filenameOrImage instanceof GdImage) 
+        if(!$filenameOrImage instanceof GdImage)
             imagedestroy($image);
 
         return $this;
@@ -51,7 +51,7 @@ class Palette implements \Countable, \IteratorAggregate
         $areColorsIndexed = !imageistruecolor($resource);
         $width  = imagesx($resource);
         $height = imagesy($resource);
-        
+
         $this->colors = [];
         $this->colorKey = $colorKey;
 

@@ -12,7 +12,7 @@ use Exception;
 class RouteMenuItem implements MenuItemInterface
 {
     use MenuItemTrait;
-    
+
     public function __construct(string $routeName, array $routeParameters, ?string $label = null, ?string $icon = null)
     {
         if (MenuItem::$translator == null)

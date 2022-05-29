@@ -42,13 +42,13 @@ final class ColorType extends AbstractType
     {
         return TextType::class;
     }
-    
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
-        
+
             $event->setData(expandhex($event->getData(), true));
-            
+
             if ($event->getData() === null)
                 $event->setData("#00000000");
         });
@@ -74,7 +74,7 @@ final class ColorType extends AbstractType
 
         // Add alpha channel by default
         $options["value"] = expandhex($view->vars["value"], true);
-        
+
         // Import JSColor
         $this->baseService->addHtmlContent("javascripts:head", $options["jscolor-js"]);
     }

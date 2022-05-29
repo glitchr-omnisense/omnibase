@@ -28,12 +28,14 @@ use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='doctrine:database:import', aliases=[],
+ *            description='This command allows to import data from an XLS file into the database')
+ */
 class DoctrineDatabaseImportCommand extends Command
 {
-    protected static $defaultName = 'doctrine:database:import';
-    protected static $defaultDescription = "This command allows to import data from an XLS file into the database"; 
-
     /**
      * @var EntityManager
      */
@@ -67,8 +69,8 @@ class DoctrineDatabaseImportCommand extends Command
 
         $this->translator = $translator;
         $this->serializer = new Serializer([], [
-            new XmlEncoder(), 
-            new CsvEncoder(), 
+            new XmlEncoder(),
+            new CsvEncoder(),
             new ExcelEncoder()
         ]);
     }
@@ -79,7 +81,7 @@ class DoctrineDatabaseImportCommand extends Command
 
             $propertyPath = trim(explode('\n', $propertyPath)[0]); // Only keeps headline
             $fieldName = explodeByArray([":", "["], $propertyPath)[0];
-           
+
             if (preg_match('/(.*)\:explode\((.*)\)(.*)/', $propertyPath, $matches)) {
 
                 $propertyPath    = $matches[1].$matches[3] ?? "";
@@ -102,10 +104,10 @@ class DoctrineDatabaseImportCommand extends Command
                 $subFieldName = preg_replace("/\:[^\.]*/", "", $propertyPath);
                 $entityMapping = $this->classMetadataManipulator->fetchEntityMapping($entityName, $subFieldName);
                 $classMetadata = $this->entityManager->getClassMetadata($entityName);
-                
-                if(!$classMetadata->hasAssociation($classMetadata->getFieldName($subFieldName))) 
+
+                if(!$classMetadata->hasAssociation($classMetadata->getFieldName($subFieldName)))
                     throw new Exception("Field \"".$subFieldName."\" is expected to be an association.");
-                    
+
                 $isToManySide = in_array($entityMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
                 if(!is_array($entry)) $entry = [$propertyName => $entry];
                 else if($isToManySide) {
@@ -117,7 +119,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                             $propertyNames = explode(",", $propertyName);
                             $entries = explode($fieldSeparator, $e, count($propertyNames));
-                            
+
                             $e = [];
                             foreach($propertyNames as $i => $p)
                                 $e[trim($p)] = array_key_exists($i, $entries) && $entries[$i] ? trim($entries[$i]) : null;
@@ -133,7 +135,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                     $entry = array_transforms($fn, [$propertyPath => $entry]);
                     $propertyPath = array_key_first($entry);
-                
+
                     $entry = first($entry);
                 }
             }
@@ -147,7 +149,7 @@ class DoctrineDatabaseImportCommand extends Command
     protected function configure(): void
     {
         $this->addArgument('path',            InputArgument::OPTIONAL    , 'Path or URL');
-       
+
         $this->addOption('spreadsheet', null, InputOption::VALUE_OPTIONAL, 'Import selected spreadsheet (e.g. 1,3,4 [NB: starts from 1])');
         $this->addOption('extension',   null, InputOption::VALUE_OPTIONAL, 'Specify file extension to be used');
         $this->addOption('nrows',       null, InputOption::VALUE_OPTIONAL, 'Only read N-rows', null);
@@ -164,7 +166,7 @@ class DoctrineDatabaseImportCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if($input->hasArgument("path")) $path = $input->getArgument("path");
-        
+
         $notify            = $input->getOption("notify");
         if(!$notify) $this->baseService->getNotifier()->disable();
 
@@ -176,9 +178,9 @@ class DoctrineDatabaseImportCommand extends Command
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
         $nrows        = (int) $input->getOption("nrows");
         $iskip        = (int) $input->getOption("iskip");
-        
+
         if(!$nrows) $nrows = null;
-        
+
         $output->writeln("");
         if($path) $output->writeln(' <info>You have just selected:</info> '.$path);
         else {
@@ -191,7 +193,7 @@ class DoctrineDatabaseImportCommand extends Command
         }
         $output->writeln("");
 
-        $output->writeln(' Decoding spreadsheets..');        
+        $output->writeln(' Decoding spreadsheets..');
         $mimeTypes = new MimeTypes();
         $extension = $extension ?? $mimeTypes->getExtensions(mime_content_type2($path))[0] ?? null;
         switch($extension)
@@ -219,7 +221,7 @@ class DoctrineDatabaseImportCommand extends Command
 
         // Shrink and restrict according to options
         $spreadsheetKeys = [];
-        if($spreadsheets !== null) 
+        if($spreadsheets !== null)
             $spreadsheetKeys = array_filter(array_keys($rawData), fn($id) => !in_array($id, $spreadsheets), ARRAY_FILTER_USE_KEY);
 
         $rawData = array_key_removes($rawData, ...$spreadsheetKeys);
@@ -259,7 +261,7 @@ class DoctrineDatabaseImportCommand extends Command
             $entityStates        [$spreadsheet][$baseName] ??= [];
             $entityUniqueKeys    [$spreadsheet][$baseName] ??= [];
             $entityRequiredFields[$spreadsheet][$baseName] ??= [];
-            
+
             $discriminatorMap = $this->entityManager->getClassMetadata($baseName)->discriminatorMap ?? [];
 
             if(empty($entityRequiredFields[$spreadsheet][$baseName])) {
@@ -279,11 +281,11 @@ class DoctrineDatabaseImportCommand extends Command
             //
             // Clean up empty fields
             $rawData[$spreadsheet] = array_filter_recursive($rawData[$spreadsheet], fn($d) => $d !== null);
-            
+
             // Process them
             foreach($rawData[$spreadsheet] as &$data) {
 
-                if($counter < $iskip || ($nrows !== null && $counter > $nrows+$iskip-1)) { 
+                if($counter < $iskip || ($nrows !== null && $counter > $nrows+$iskip-1)) {
                     $counter++;
                     continue;
                 }
@@ -291,12 +293,12 @@ class DoctrineDatabaseImportCommand extends Command
                 if($discriminatorMap) {
 
                     $discriminatorEntry = $data[$baseName] ?? array_flip($discriminatorMap)[$baseName];
-                    $entityName = $discriminatorMap[$data[$baseName] ?? array_flip($discriminatorMap)[$baseName]] ?? null;                
-            
-                    if(is_a($baseName, first($discriminatorMap))) throw new Exception("Entity \"".$baseName."\" doesn't inherit from \"".first($discriminatorMap)."\""); 
+                    $entityName = $discriminatorMap[$data[$baseName] ?? array_flip($discriminatorMap)[$baseName]] ?? null;
+
+                    if(is_a($baseName, first($discriminatorMap))) throw new Exception("Entity \"".$baseName."\" doesn't inherit from \"".first($discriminatorMap)."\"");
                     else if(!array_key_exists($discriminatorEntry, $discriminatorMap)) throw new Exception("Discriminatory entry \"".$discriminatorEntry."\" not found in the discriminator list of \"".first($discriminatorMap)."\".. something wrong ?");
                 }
-            
+
                 unset($data[$baseName]);
 
                 $entityData[$spreadsheet][$baseName][] = [$entityName, $this->normalize($entityName, $data)];
@@ -319,7 +321,7 @@ class DoctrineDatabaseImportCommand extends Command
             foreach($entityData[$spreadsheet] ?? [] as $baseName => &$entries) {
 
                 $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName");
-                    
+
                 //
                 // Loop over entries
                 foreach($entries as &$_) {
@@ -337,7 +339,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                         list($fieldName, $special) = array_pad(explode(":", $k, 2),2,null);
                         $keyDepth[$d] = $fieldName;
-                        
+
                         $fieldPath = implode(".", $keyDepth);
                         $targetName = $this->classMetadataManipulator->fetchEntityName($entityName, $fieldPath);
                         $targetEntity[$d] = $targetName;
@@ -398,7 +400,7 @@ class DoctrineDatabaseImportCommand extends Command
                                                 if($isToOneSide) $v = $targetRepository->findOneBy($vBak);
                                                 else $v = array_filter(array_map(fn($e) => $targetRepository->findOneBy($e), $vBak));
 
-                                                if($v === null) 
+                                                if($v === null)
                                                     throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\"");
                                             }
                                         }
@@ -409,7 +411,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                                         $special = str_lstrip($special, "enum(");
                                         $enumType = substr($special, 0, strlen($special)-1);
-                                        
+
                                         $typeOfField = $this->classMetadataManipulator->getTargetClass($targetName, $fieldName);
                                         if(!is_instanceof($typeOfField, $enumType)) throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\"");
 
@@ -432,7 +434,7 @@ class DoctrineDatabaseImportCommand extends Command
                     }, $entry);
 
                     if ($entry) {
-    
+
                         $state = self::VALID_ENTITY;
                         foreach($entityRequiredFields[$spreadsheet][$baseName] as $field)
                             if(!array_key_exists($field, $entry)) $state = self::FIELD_REQUIRED;
@@ -442,13 +444,13 @@ class DoctrineDatabaseImportCommand extends Command
 
                             if($entity->getParent()) $parentThread = $entity;
                             else {
-                                
+
                                 $entity->setParent($parentThread);
-                                if (!in_array($parentThread, $entities[$spreadsheet][$baseName])) 
+                                if (!in_array($parentThread, $entities[$spreadsheet][$baseName]))
                                     $state = self::PARENT_NOT_FOUND;
                             }
                         }
-                        
+
                         //
                         // Check if duplicates found in the processed list
                         foreach($entityUniqueKeys[$spreadsheet][$entityName] ?? [] as $_) {
@@ -505,7 +507,7 @@ class DoctrineDatabaseImportCommand extends Command
                                 $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));
                                 $output->writeln($msg);
                                 $output->writeln(str_blankspace(strlen($msg)).'</red,bkg>');
-        
+
                                 throw $e;
                             }
                         }
@@ -532,7 +534,7 @@ class DoctrineDatabaseImportCommand extends Command
 
         $totalNewEntries = 0;
         $output->writeln(' <info>New data found: </info>'.implode(", ", array_map(function($spreadsheet) use (&$totalNewEntries, $baseClass, $entityData, $entityStates) {
-          
+
             $countData = 0;
             foreach(array_keys($entityData[$spreadsheet]) as $baseName)
                 $countData    += count($entityData[$spreadsheet][$baseName] ?? []);
@@ -556,7 +558,7 @@ class DoctrineDatabaseImportCommand extends Command
                 foreach($___ as $baseName => $__) {
 
                     $baseNameStr = $this->translator->entity($baseName);
-                    
+
                     $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName");
 
                     $totalEntries = count($entities[$spreadsheet][$baseName]);
@@ -567,7 +569,7 @@ class DoctrineDatabaseImportCommand extends Command
                         $entityStr = $this->translator->entity($entity);
 
                         switch($state) {
-                           
+
                             case self::VALID_ENTITY :
                                 $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onFly ? " just got imported on the fly" : "is ready for import")." !");
                                 break;
@@ -575,9 +577,9 @@ class DoctrineDatabaseImportCommand extends Command
                             case self::ALREADY_IN_DATABASE:
                                 $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <warning>".$entityStr.": </warning> \"". $entity."\" already exists in database");
                                 break;
-                            
+
                             default :
-                        
+
                                 if($state == self::FIELD_REQUIRED) $msg = "required field missing";
                                 else if($state == self::PARENT_NOT_FOUND) $msg = "parent not found";
                                 else $msg = "unknown reason";
@@ -601,12 +603,12 @@ class DoctrineDatabaseImportCommand extends Command
             $output->section()->writeln("");
             return Command::SUCCESS;
         }
-        
+
         if(!$onFly) {
 
             if($force) $apply = "y";
             else {
-            
+
                 $helper   = $this->getHelper('question');
                 $question = new Question(' > ');
 
@@ -630,7 +632,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                         $progressBar->advance();
                         try {
-                            
+
                             $this->entityManager->persist($entity);
                             if ($counter && ($counter % $batch) == 0)
                                 $this->entityManager->flush();
@@ -653,13 +655,13 @@ class DoctrineDatabaseImportCommand extends Command
 
                 $this->entityManager->flush();
             }
-        
+
             $progressBar->finish();
         }
 
         $output->section()->writeln("\n\n Updating database schema...");
         $output->section()->writeln("\n\t <info>".$totalNewEntries."</info> entries were added\n");
-        
+
         $msg = ' [OK] Database content imported successfully! ';
         $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
         $output->writeln($msg);

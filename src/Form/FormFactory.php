@@ -28,7 +28,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
-    
+
     public function __construct(EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->entityManager = $entityManager;
@@ -49,7 +49,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     public const GUESS_FROM_PHPDOC   = "GUESS_FROM_PHPDOC";
     public const GUESS_FROM_DATA     = "GUESS_FROM_DATA";
     public const GUESS_FROM_VIEW     = "GUESS_FROM_VIEW";
-    
+
     public function guessClass(FormInterface|FormEvent $form, ?array $options = null) :?string {
 
         if($form instanceof FormEvent) {
@@ -63,12 +63,12 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
         $class = null;
         $options["guess_priority"] = $options["guess_priority"] ?? [
-            self::GUESS_FROM_FORM, 
-            self::GUESS_FROM_PHPDOC, 
+            self::GUESS_FROM_FORM,
+            self::GUESS_FROM_PHPDOC,
             self::GUESS_FROM_DATA,
             self::GUESS_FROM_VIEW
         ];
-        
+
         foreach($options["guess_priority"] as $priority) {
 
             switch($priority) {
@@ -86,7 +86,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
                     while (null !== $formParent) {
 
-                        $parentDataClass = $formParent->getConfig()->getOption("data_class") 
+                        $parentDataClass = $formParent->getConfig()->getOption("data_class")
                             ?? get_class($formParent->getConfig()->getType()->getInnerType())
                             ?? null;
 
@@ -200,7 +200,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             if($this->classMetadataManipulator->isEntity($target)) {
 
                 $targetField = $form->getName();
-                
+
                 if($this->classMetadataManipulator->hasAssociation($target, $targetField) )
                     return $this->classMetadataManipulator->isToManySide($target, $targetField);
                 else if($this->classMetadataManipulator->hasField($target, $targetField)) {
@@ -216,7 +216,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                         return $typeOfField == "array";
                     }
                 }
-                
+
             } else if($this->classMetadataManipulator->isSetType($target)) {
                 return true;
             } else if($this->classMetadataManipulator->isEnumType($target)) {
@@ -314,7 +314,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
                         if(is_object($entry)) $options["choice_filter"][] = get_class($entry);
 
                 } else if(is_object($data)) {
-                    
+
                     $options["choice_filter"][] = get_class($data);
                 }
             }

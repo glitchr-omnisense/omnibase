@@ -14,7 +14,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
     {
         $this->baseService = $baseService;
     }
-    
+
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         parent::buildView($view, $form, $options);
@@ -28,7 +28,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["max"]          = $options["max"];
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"]     = $options["autocomplete"];
-        
+
         $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-number.js");
     }
 
@@ -50,5 +50,5 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
             "keyDown" => true
         ]);
     }
-    
+
 }

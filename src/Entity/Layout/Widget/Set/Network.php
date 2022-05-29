@@ -16,13 +16,13 @@ use Base\Repository\Layout\Widget\NetworkRepository;
 
 /**
  * @ORM\Entity(repositoryClass=NetworkRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  */
 class Network extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-chart-network"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-chart-network"]; }
 
     public function __construct(string $title, array $routes = [])
     {
@@ -32,7 +32,7 @@ class Network extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Route::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $routes;
     public function getRoutes(): Collection { return $this->routes; }

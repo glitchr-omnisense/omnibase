@@ -15,20 +15,20 @@ use Base\Repository\Layout\Attribute\Common\AttributeRepository;
 /**
  * @ORM\Entity(repositoryClass=BaseAttributeRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * 
+ *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- * 
+ *
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
  *     @DiscriminatorEntry(value="attribute_base")
  */
 abstract class BaseAttribute implements IconizeInterface, AttributeInterface
 {
-    public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconizeStatic() : null; } 
+    public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconizeStatic() : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
-    public function __toString() 
+    public function __toString()
     {
-        return $this->getId() ? "<b>".($this->getAdapter() ? $this->getAdapter() : "Attribute")." #".$this->getId()."</b>" : get_class($this); 
+        return $this->getId() ? "<b>".($this->getAdapter() ? $this->getAdapter() : "Attribute")." #".$this->getId()."</b>" : get_class($this);
     }
 
     public function __construct(AbstractAttribute $adapter)

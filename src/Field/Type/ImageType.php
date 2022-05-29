@@ -29,7 +29,7 @@ class ImageType extends FileType
             'cropper'     => null,
             'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
             'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
-            
+
             'mime_types'  => ["image/*"]
         ]);
 
@@ -39,7 +39,7 @@ class ImageType extends FileType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         parent::buildForm($builder, $options);
-        
+
         if($options["alt"]   !== null) $builder->add("alt",   TextType::class, $options["alt"]);
         if($options["multiple"] && is_array($options["cropper"]))
             throw new InvalidArgumentException("There can be only one picture if you want to crop, please disable 'multiple' option");
@@ -49,7 +49,7 @@ class ImageType extends FileType
     {
         parent::buildView($view, $form, $options);
 
-        if(!($view->vars["mime_types"] ?? false) ) 
+        if(!($view->vars["mime_types"] ?? false) )
              $view->vars["mime_types"] = "image/*";
 
         $view->vars["thumbnail"] = $this->baseService->getAsset($options["thumbnail"]);
@@ -60,7 +60,7 @@ class ImageType extends FileType
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
-            
+
             $this->baseService->addHtmlContent("javascripts:head", $options["cropper-js"]);
             $this->baseService->addHtmlContent("stylesheets:head", $options["cropper-css"]);
 

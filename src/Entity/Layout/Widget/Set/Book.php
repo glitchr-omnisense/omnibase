@@ -16,13 +16,13 @@ use Base\Repository\Layout\Widget\BookRepository;
 
 /**
  * @ORM\Entity(repositoryClass=BookRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  */
 class Book extends Widget implements IconizeInterface, SetInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-book"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-book"]; }
 
     public function __construct(string $title, array $pages = [])
     {
@@ -32,7 +32,7 @@ class Book extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Page::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $pages;
     public function getPages(): Collection { return $this->pages; }

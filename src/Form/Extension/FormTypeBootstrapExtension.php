@@ -35,7 +35,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
 
             if (!$form->has($field))
                 continue;
-                
+
             $childForm = $form->get($field);
             $childOptions = $childForm->getConfig()->getOptions();
 
@@ -48,12 +48,12 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
     public function applyBootstrap(FormView $view, FormInterface $form, array $options)
     {
         $type = explode("\\", get_class($form->getConfig()->getType()->getInnerType()));
-            
+
             $label = $view->vars["label"] ?? null;
             if($label === null) $label = mb_ucfirst((string) $view->vars["name"]);
 
             $attr = $view->vars["attr"];
-           
+
             switch(end($type)) {
 
                 case "CheckboxType":
@@ -66,7 +66,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
                     self::addAttribute($view, "class", "btn btn-primary");
                     self::addLabelAttribute($view, "class", "btn btn-primary");
                     break;
-    
+
                 case "HiddenType":
                     break;
 
@@ -120,7 +120,7 @@ class FormTypeBootstrapExtension extends AbstractTypeExtension
         foreach(explode(" ", $value) as $class)
             $classList[] = $class;
 
-    
+
         $view->vars["label_attr"][$name] = implode(" ", array_unique($classList));
         return $view->vars["label_attr"][$name];
     }

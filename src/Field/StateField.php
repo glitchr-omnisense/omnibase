@@ -13,7 +13,7 @@ class StateField extends SelectField implements FieldInterface
     use FieldTrait;
 
     public const OPTION_CLASS = 'class';
-    
+
     public static function new(string $propertyName, ?string $label = null): self
     {
         return (new self())

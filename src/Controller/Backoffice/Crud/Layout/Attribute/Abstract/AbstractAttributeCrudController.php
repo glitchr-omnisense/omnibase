@@ -15,7 +15,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 
 class AbstractAttributeCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureActionsWithEntityDto(ActionCollection $actions, EntityDto $entityDto): ActionCollection
     {

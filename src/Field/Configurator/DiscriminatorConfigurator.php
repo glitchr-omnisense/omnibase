@@ -75,11 +75,11 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
 
             $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);
         }
-        
+
         if($showLast) {
 
             $formattedValues = [end($formattedValues)];
-    
+
         } else if($showInline) {
 
             $lastEntry = end($formattedValues);

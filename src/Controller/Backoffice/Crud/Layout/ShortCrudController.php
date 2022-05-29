@@ -11,7 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\UrlType;
 
 class ShortCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function createEntity(string $entityFqcn) { return new Short(""); }
     public function configureFields(string $pageName, ...$args): iterable
@@ -25,7 +25,7 @@ class ShortCrudController extends AbstractCrudController
                 ->setFields([
                     "label" => [],
                     "url" => [
-                        "form_type" => UrlType::class, 
+                        "form_type" => UrlType::class,
                         "attr" => ["placeholder" => $this->getTranslator()->trans("@EasyAdminBundle.crud.short.url.placeholder", [$_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"]])]
                     ]
                 ]);

@@ -44,9 +44,9 @@ class IdConfigurator implements FieldConfiguratorInterface
 
         if($field->getValue() === null) return;
 
-        $value = $accessor->isReadable($field->getValue(), $field->getProperty()) 
+        $value = $accessor->isReadable($field->getValue(), $field->getProperty())
             ? $accessor->getValue  ($field->getValue(), $field->getProperty()) : null;
-    
+
         $hashtag = gettype($value) == "integer" ?  "#" : "";
         $value   = $hashtag . ($maxLength !== -1 ? u($value)->truncate($maxLength, '…')->toString() : $value);
 
@@ -59,7 +59,7 @@ class IdConfigurator implements FieldConfiguratorInterface
                 ->setEntityId($entityDto->getInstance()->getId())
                 ->generateUrl();
         }
-        
+
         $field->setFormattedValue( ($url ? "<a href='".$url."'>".$value."</a>" : $value));
     }
 }

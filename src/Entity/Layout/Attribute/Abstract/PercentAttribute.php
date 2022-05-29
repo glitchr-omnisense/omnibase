@@ -11,13 +11,13 @@ use Base\Repository\Layout\Attribute\Abstract\PercentAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=PercentAttributeRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry( value = "percent" )
  */
 
 class PercentAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-percent"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-percent"]; }
 
     public static function getType(): string { return PercentType::class; }
     public function getOptions(): array { return []; }

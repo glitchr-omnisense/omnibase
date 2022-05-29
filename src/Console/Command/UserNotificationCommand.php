@@ -12,11 +12,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Base\Console\Command;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='user:notifications', aliases=[],
+ *            description='')
+ */
 class UserNotificationCommand extends Command
 {
-    protected static $defaultName = 'user:notifications';
-
     public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
     {
         $this->entityManager = $entityManager;
@@ -32,7 +35,7 @@ class UserNotificationCommand extends Command
         $this->addOption('expiry',  null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific expiry value ?');
         $this->addOption('pretty',  null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific pretty value ?');
         $this->addOption('statutCode',  null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific status code ?');
-        
+
         $this->addOption('show', null, InputOption::VALUE_NONE, 'Should I show them ?');
         $this->addOption('clear', null, InputOption::VALUE_NONE, 'Should I clear them ?');
         $this->addOption('clear-all', null, InputOption::VALUE_NONE, 'Should I clear them all?');
@@ -56,7 +59,7 @@ class UserNotificationCommand extends Command
             $notifications  = $notificationRepository->findByUser($user)->getResult();
             $notifications_toErase  = $notificationRepository->findByUserAndIsReadAndSentAtOlderThan($user, true, $notificationExpiry, [], "user.id")->getResult();
             $notifications_isRead  = $notificationRepository->findByUserAndByIsRead($user, true, [], "user.id")->getResult();
-        
+
         } else {
 
             $notifications  = $notificationRepository->findAll();

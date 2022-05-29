@@ -13,5 +13,5 @@ interface IconAdapterInterface
 
     public function getVersion(): string;
     public function getAssets(): array;
-    public function getChoices(string $term = ""); // To be used in IconType 
+    public function getChoices(string $term = ""); // To be used in IconType
 }

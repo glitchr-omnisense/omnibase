@@ -74,7 +74,7 @@ class Extension
         $this->widgets[$pageName ?? self::PAGE_DEFAULT] = $widgets;
         return $this;
     }
-    
+
     public function configureDashboard(Dashboard $dashboard) { return $dashboard; }
     public function configureCrud(Crud $crud)
     {

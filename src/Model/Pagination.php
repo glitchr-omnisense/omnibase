@@ -19,7 +19,7 @@ class Pagination implements PaginationInterface, Iterator
 {
     protected $router;
     private $build;
-    
+
     protected $instance = null;
     protected $totalCount        = 0;
 
@@ -30,7 +30,7 @@ class Pagination implements PaginationInterface, Iterator
     protected $pageIter  = 0;
     protected $pageSize  = 0;
     protected $pageRange = 0;
-    
+
     protected $template = "@Base/paginator/sliding.html.twig";
 
     public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
@@ -57,7 +57,7 @@ class Pagination implements PaginationInterface, Iterator
     public function getTotalPages()
     {
         $pageSize = $this->getPageSize();
-        
+
         if($this->getTotalCount() <= $pageSize) return 1;
         return ceil(($pageSize < 1 ? 1 : $this->getTotalCount()/$pageSize));
     }
@@ -76,9 +76,9 @@ class Pagination implements PaginationInterface, Iterator
     }
 
     public function getParameterName() { return $this->parameterName; }
-    
+
     public function getPageRange() { return $this->pageRange; }
-    public function setPageRange(int $pageRange) 
+    public function setPageRange(int $pageRange)
     {
         $this->pageRange = $pageRange;
         return $this;
@@ -86,7 +86,7 @@ class Pagination implements PaginationInterface, Iterator
 
     public function getPageSize() { return $this->pageSize; }
     public function setPageSize($pageSize)
-    {      
+    {
         $pageSize = ($pageSize < 1 ? $this->getTotalCount() : $pageSize);
         if($this->pageSize != $pageSize) {
             $this->pageSize = $pageSize;
@@ -109,7 +109,7 @@ class Pagination implements PaginationInterface, Iterator
 
     public function getPath(string $name, int $page = 0, array $parameters = [])
     {
-        if ($page < 1) 
+        if ($page < 1)
             $page = $this->getPage();
 
         return $this->router->generate($name, array_merge($parameters, [$this->getParameterName() => $page]));
@@ -117,7 +117,7 @@ class Pagination implements PaginationInterface, Iterator
 
     protected array $lastResult = [];
     public function getResult() { return $this->build(); }
-    protected function build() 
+    protected function build()
     {
         if(!$this->build) return $this->lastResult;
         $this->build = false;
@@ -130,5 +130,5 @@ class Pagination implements PaginationInterface, Iterator
             return $this->lastResult = $this->getQuery()->getResult();
 
         return $this->lastResult =  array_slice_recursive($this->get(), $this->pageSize * ($this->page-1), $this->pageSize, true /*Always preserve keys*/);
-    } 
+    }
 }

@@ -14,5 +14,5 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class NotificationRepository extends ServiceEntityRepository
 {
-    
+
 }

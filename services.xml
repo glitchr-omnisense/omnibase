@@ -247,7 +247,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
-        
+
         <service id="Base\Console\Command\AutocompleteEntitiesCommand">
             <tag name="console.command" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -268,7 +268,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            
+
             <argument type="service" id="error_handler.error_renderer.html" />
             <argument type="service" id="base.service" />
         </service>
@@ -277,7 +277,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            
+
             <argument type="service" id="annotation_reader" />
             <argument type="service" id="router" />
         </service>
@@ -294,7 +294,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            
+
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="Base\Repository\User\TokenRepository" />
@@ -362,7 +362,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
         </service>
-        
+
         <service id="Base\Service\FileService"  public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="router" />
@@ -370,7 +370,7 @@
             <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="base.filesystem" />
         </service>
-        
+
         <service id="Base\Service\ImageService" public="true" parent="Base\Service\FileService">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
@@ -549,14 +549,14 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            
+
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
         <service id="Base\Controller\Client\User\SettingsController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            
+
             <argument type="service" id="base.service" />
             <argument type="service" id="App\Repository\UserRepository" />
         </service>
@@ -576,7 +576,7 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <!-- Listener declarations 
+        <!-- Listener declarations
         NB: SecuritySubscriber is now defined in BaseExtension.php due to security.event_dispatcher. -->
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
@@ -649,7 +649,7 @@
 
         <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
-        
+
         <service id="Base\Field\Type\AssociationType">
             <tag name="form.type" />
             <argument type="service" id="base.form.factory" />
@@ -790,8 +790,8 @@
         <service id="Base\Field\Configurator\BooleanConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="security.csrf.token_manager" on-invalid="null" />
         </service>
 
         <service id="Base\Field\Configurator\AssociationConfigurator">
@@ -836,7 +836,7 @@
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.service.icon" />
         </service>
-        
+
         <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Backoffice\AbstractDashboardController">
             <tag name="controller.service_arguments" />
@@ -867,26 +867,26 @@
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
         </service>
-      
+
         <service id="Base\Controller\Backoffice\Crud\ThreadCrudController"         parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Thread\LikeCrudController"    parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Thread\MentionCrudController" parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Thread\TagCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Thread\TaxonCrudController"   parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        
+
         <service id="Base\Controller\Backoffice\Crud\User\TokenCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
-        <service id="Base\Controller\Backoffice\Crud\Extension\LogCrudController"          parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>        
+        <service id="Base\Controller\Backoffice\Crud\Extension\LogCrudController"          parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Extension\OrderingCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Extension\TrashBallCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Extension\RevisionCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
-        
+
         <service id="Base\Controller\Backoffice\Crud\UserCrudController"              parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\User\GroupCrudController"        parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\User\NotificationCrudController" parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\User\PermissionCrudController"   parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\User\PenaltyCrudController"      parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /> </service>
-        
+
         <service id="Base\Controller\Backoffice\Crud\Layout\SettingCrudController"   parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\WidgetCrudController"    parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backoffice\Crud\Layout\ImageCrudController"     parent="Base\Controller\Backoffice\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

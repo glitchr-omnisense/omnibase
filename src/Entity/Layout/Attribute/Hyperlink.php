@@ -15,20 +15,20 @@ use Base\Repository\Layout\Attribute\HyperlinkRepository;
 /**
  * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
  * @DiscriminatorEntry
- * 
+ *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
 class Hyperlink extends Attribute implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return $this->getHyperpattern() ? [$this->getHyperpattern()->getIcon()] : null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-link"]; } 
+    public        function __iconize()       : ?array { return $this->getHyperpattern() ? [$this->getHyperpattern()->getIcon()] : null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-link"]; }
 
-    public function __toString() 
+    public function __toString()
     {
         $value = implode(", ", $this->getValue());
         $value = $value ? ": ".$value: "";
-        return "<b>".($this->getHyperpattern() ?? "Hyperlink")." #".$this->getId()."</b> ".$value; 
+        return "<b>".($this->getHyperpattern() ?? "Hyperlink")." #".$this->getId()."</b> ".$value;
     }
 
     /**

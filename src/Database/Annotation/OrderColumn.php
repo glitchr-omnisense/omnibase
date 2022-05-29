@@ -31,7 +31,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 {
     public const ASC  = "ASC";
     public const DESC = "DESC";
-    
+
     public function __construct( array $data = [] )
     {
         $this->order          = $data['order'] ?? self::ASC;
@@ -43,25 +43,25 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
-            
+
             $isEnum = is_instanceof($doctrineType, EnumType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
 
             if(!$isEnum && !$isToMany)
                 throw new \Exception("Unexpected column type found for @OrderColumn \"".$targetValue."\" found in \"".$object->getName()."\": expecting \"Collection\" or \"array\"");
-                
+
             $siblingAnnotations = $this->getAnnotationReader()->getDefaultPropertyAnnotations($object->getName(), OrderBy::class);
             if(array_key_exists($targetValue, $siblingAnnotations))
                 throw new \Exception("@OrderBy annotation is in conflict with @OrderColum for \"".$object->getName()."::$targetValue\"");
         }
-        
+
         return ($target == AnnotationReader::TARGET_PROPERTY);
     }
 
     public static $orderedColumns   = [];
     public static function get():array { return self::$orderedColumns; }
-    public static function has(string $className, ?string $property = null): bool { return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]); } 
-    
+    public static function has(string $className, ?string $property = null): bool { return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]); }
+
     protected $ordering = [];
     public function getOrderedColumns($entity)
     {
@@ -69,7 +69,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         foreach(self::$orderedColumns as $column) {
 
             list($className, $_) = explode("::", $column);
-            if(is_instanceof($entity, $className)) 
+            if(is_instanceof($entity, $className))
                 $orderedColumns[] = $column;
         }
 
@@ -89,7 +89,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $orderingRepository = $this->getRepository(Ordering::class);
 
         $className = array_transforms(function($k, $e) use ($property) : ?array {
-            
+
             list($c, $p) = explode("::", $e);
             return $p === $property ? [$k, $c] : null;
 
@@ -103,7 +103,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
         $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
         if($ordering === null) return;
-        
+
         $data = $ordering->getEntityData();
         $orderedIndexes = $data[$property] ?? [];
         if(is_array($entityValue)) {
@@ -124,7 +124,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
         $orderingRepository = $this->getEntityManager()->getRepository(Ordering::class);
-        
+
         $id = spl_object_id($entity);
         switch($action) {
 
@@ -135,19 +135,19 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                 $data = [];
                 foreach($properties as $property) {
-                    
+
                     $type = $this->getClassMetadataManipulator()->getTypeOfField($entity, $property);
                     $value = $propertyAccessor->getValue($entity, $property);
 
                     if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
                     else if($value instanceof Collection) {
-                        
+
                         $data[$property] = $value->toArray();
-                        
+
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
                         if($property === "images") dump($property, $dataIdentifier);
 
-                        uasort($dataIdentifier, 
+                        uasort($dataIdentifier,
                             fn($a,$b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1))
                         );
 

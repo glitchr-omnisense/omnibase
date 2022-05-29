@@ -42,7 +42,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->localCache = "local.cache";
     }
 
-    public function getMaximumQuality() { return $this->maxQuality; } 
+    public function getMaximumQuality() { return $this->maxQuality; }
     public function isWebpEnabled() { return $this->enableWebp; }
 
     public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate("ux_imageWebp", [], $path, array_merge($config, ["filters" => $filters])); }
@@ -63,23 +63,23 @@ class ImageService extends FileService implements ImageServiceInterface
     public function thumbnail_outbound(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_OUTBOUND])); }
     public function thumbnail_noclone (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_NOCLONE])); }
     public function thumbnail_upscale (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_FLAG_UPSCALE])); }
-    public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null 
+    public function thumbnail(array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null
     {
         $filters[] = new ThumbnailFilter(
-            $width, $height ?? null, 
-            $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET, 
+            $width, $height ?? null,
+            $config["mode"]  ?? ImageInterface::THUMBNAIL_INSET,
             $config["resampling"] ?? ImageInterface::FILTER_UNDEFINED
         );
 
         $config = array_key_removes($config, "width", "height", "mode", "resampling");
-        return $this->imagine($path, $filters, $config); 
+        return $this->imagine($path, $filters, $config);
     }
 
     public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
     {
         if($path === null ) return null;
         $path = "/".str_strip($path, $this->assetExtension->getAssetUrl(""));
-        
+
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);
         $config["local_cache"] = $config["local_cache"] ?? null;
@@ -104,7 +104,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $config["filters"] ??= [];
         return parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
     }
-    
+
     public function resolve(string $hashid, array $filters = [])
     {
         $args = parent::resolve($hashid);
@@ -142,7 +142,7 @@ class ImageService extends FileService implements ImageServiceInterface
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
-        if($formatter === null) 
+        if($formatter === null)
             throw new Exception("Last filter is missing.");
 
         //
@@ -159,7 +159,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         $filtersButLast = array_slice($filters, 0, count($filters)-1);
         foreach($filtersButLast as $filter) {
-            
+
             if(class_implements_interface($filter, FormatFilterInterface::class))
                 throw new \Exception("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
@@ -171,7 +171,7 @@ class ImageService extends FileService implements ImageServiceInterface
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? false) {
-            
+
             $localCache = array_pop_key("local_cache", $config);
             if(!is_string($localCache)) $localCache = $this->localCache;
 
@@ -191,16 +191,16 @@ class ImageService extends FileService implements ImageServiceInterface
         //
         // Use proper imagine service depending on the format
         $imagine = $formatter instanceof SvgFilter ? $this->imagineSvg : $this->imagineBitmap;
-        
-        // 
+
+        //
         // GD does not support other palette than RGB..
         //if($this->imagine instanceof \Imagine\Gd\Imagine && is_cmyk($pathPublic))
         //   cmyk2rgb($pathPublic); // Not working yet..
-        try { $image = $imagine->open($path); } 
+        try { $image = $imagine->open($path); }
         catch (Exception $e) { return null; }
 
         if($formatter instanceof BitmapFilter) // Take care to set proper palette
-            $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB()); 
+            $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB());
 
         foreach ($filters as $filter) // Apply filters
             $image = $filter->apply($image);

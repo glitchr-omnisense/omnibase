@@ -24,11 +24,11 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
 {
     use TranslatableTrait;
 
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-compress-alt fa-rotate-45"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string 
-    { 
+    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    {
         return $this->getRouter()->generate("short_redirect", ["slug" => $this->getSlug()], $referenceType);
     }
 
@@ -50,7 +50,7 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
     /**
      * @ORM\Column(type="string", length=255)
      * @Randomize
-     * 
+     *
      * @Slugify(separator="-")
      */
     protected $slug;

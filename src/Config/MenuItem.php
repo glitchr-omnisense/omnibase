@@ -19,7 +19,7 @@ class MenuItem
     public static $iconProvider;
     public static $translator;
     public static $router;
-    
+
     public static function setIconProvider(IconProvider $iconProvider)
     {
         self::$iconProvider = $iconProvider;

@@ -25,7 +25,7 @@ class NotBlankValidator extends ConstraintValidator
         if (\is_string($object) && null !== $constraint->normalizer) {
             $object = ($constraint->normalizer)($object);
         }
-        
+
         if (false === $object || (empty($object) && '0' != $object) || ($object instanceof \Doctrine\ORM\PersistentCollection && empty($object->toArray())))
             $this->buildViolation($constraint, $object)->addViolation();
     }

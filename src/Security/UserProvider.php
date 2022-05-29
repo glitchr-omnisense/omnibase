@@ -32,15 +32,15 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface, 
         $user->verify($data["verified_email"]);
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "username")) 
+        if ($accessor->isWritable($this, "username"))
             $accessor->setValue($this, "username", "Google");
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "username")) 
+        if ($accessor->isWritable($this, "username"))
             $accessor->setValue($this, "username", $data["family_name"]);
 
         $accessor = PropertyAccess::createPropertyAccessor();
-        if ($accessor->isWritable($this, "firstname")) 
+        if ($accessor->isWritable($this, "firstname"))
             $accessor->setValue($this, "firstname", $data["given_name"]);
 
         return $user;

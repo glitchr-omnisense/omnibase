@@ -36,11 +36,11 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
     public function configure(FieldDto $field, EntityDto $entityDto, AdminContext $context): void
     {
         $propertyName = $field->getProperty();
-        
+
         if (!$this->classMetadataManipulator->hasAssociation($entityDto->getFqcn(), $propertyName)) {
             throw new \RuntimeException(sprintf('The "%s" field is not a Doctrine association, so it cannot be used as an association field.', $propertyName));
         }
-        
+
         $targetEntity = $this->classMetadataManipulator->getAssociationMapping($entityDto->getFqcn(), $propertyName)["targetEntity"] ?? null;
         if ($field->getFormTypeOption("class") == null)
             $field->setFormTypeOption("class", $targetEntity);
@@ -141,7 +141,7 @@ class AssociationFileConfigurator implements FieldConfiguratorInterface
 
         // associations different from *-to-one cannot be sorted
         $field->setSortable(false);
-        
+
         $field->setFormTypeOptionIfNotSet('multiple', true);
         $field->setFormTypeOptionIfNotSet('empty_data', []);
 

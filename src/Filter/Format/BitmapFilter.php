@@ -12,7 +12,7 @@ class BitmapFilter implements FormatFilterInterface
 {
     protected array $filters;
     protected array $options;
-    
+
     public function __toString()
     {
         $pathSuffixes = array_map(fn($f) => is_stringeable($f) ? strval($f) : null, $this->filters);
@@ -34,7 +34,7 @@ class BitmapFilter implements FormatFilterInterface
     }
 
     public function getFilters() { return $this->filters; }
-    public function addFilter(FilterInterface $filter) 
+    public function addFilter(FilterInterface $filter)
     {
         $this->filters[] = $filter;
         return $this;
@@ -48,8 +48,8 @@ class BitmapFilter implements FormatFilterInterface
         return $this;
     }
 
-    public function getExtension() 
-    { 
+    public function getExtension()
+    {
         if($this->path === null) return null;
 
         $mimeType = mime_content_type2($this->path);

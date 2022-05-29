@@ -11,13 +11,13 @@ use Base\Repository\Layout\Attribute\Abstract\TextAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=TextAttributeRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE") 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry( value = "text" )
  */
 
 class TextAttribute extends AbstractAttribute implements IconizeInterface
 {
-    public static function __iconizeStatic() : ?array { return ["fas fa-paragraph"]; } 
+    public static function __iconizeStatic() : ?array { return ["fas fa-paragraph"]; }
 
     public static function getType(): string { return TextType::class; }
     public function getOptions(): array { return []; }

@@ -39,8 +39,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-bell"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-bell"]; }
 
     // Default notification
     public const IMPORTANCE_DEFAULT = "default";
@@ -67,7 +67,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     protected $user;
 
     public function getUser() { return $this->user; }
-    
+
     public function setUser(?User $user): self
     {
         if ($this->user) {
@@ -102,7 +102,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
     public function getImportance(): string { return $this->importance; }
     public function setImportance(?string $importance): self {
-        $this->importance = $importance; 
+        $this->importance = $importance;
         return $this;
     }
 
@@ -179,17 +179,17 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->sentAt = $sentAt;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="text")
      */
     protected string $backtrace = ""; // Internal use only (code line might be changing..)
     public function getBacktrace(): string { return $this->backtrace; }
-    
+
     /**
      * @ORM\Column(type="boolean")
      */
-    protected bool $markAsAdmin = false; 
+    protected bool $markAsAdmin = false;
 
     public function isMarkAsAdmin() { return $this->markAsAdmin; }
     public function markAsAdmin(bool $markAsAdmin = true)
@@ -209,7 +209,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     }
 
     public function addContextKey(string $key, $value = null): self { return $this->addContext([$key => $value]); }
-    public function addContext(array $context = []): self 
+    public function addContext(array $context = []): self
     {
         if(empty($context)) return $this;
         return $this->setContext(array_merge($this->context, $context));
@@ -218,7 +218,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     {
         if(array_key_exists("subject", $context)) $this->setSubject($context["subject"]);
         if(array_key_exists("content", $context)) $this->setContent($context["content"]);
-        
+
         $this->context = $context;
 
         return $this;
@@ -265,7 +265,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $backtrace = debug_backtrace()[0];
         $this->backtrace = $backtrace["file"].":".$backtrace["line"];
         $this->recipient = new ArrayCollection();
-        
+
         // Inject service from base class..
         if (User::getNotifier() == null)
             throw new Exception("Notifier not found in User class");
@@ -278,7 +278,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         // Formatting strings if exception passed as argument
         if ( $content instanceof ExceptionEvent ) {
-            
+
             $exception = $content->getThrowable();
             $location = str_replace($this->getProjectDir(),'.', $exception->getFile()) . ":" . $exception->getLine();
             $message = $exception->getMessage();
@@ -298,32 +298,32 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
     }
 
-    public function send(string $importance, ...$recipients) 
-    { 
+    public function send(string $importance, ...$recipients)
+    {
         $this->setImportance($importance);
 
         $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
-        User::getNotifier()->sendUsers($this, ...$recipients); 
+        User::getNotifier()->sendUsers($this, ...$recipients);
 
         return $this;
     }
-    
-    public function sendBy(array $channels,  ...$recipients) 
+
+    public function sendBy(array $channels,  ...$recipients)
     {
         if(!$this->getImportance())
             $this->setImportance(Notification::IMPORTANCE_DEFAULT);
 
         $recipients[] = ($this->user ? $this->user->getRecipient() : new NoRecipient());
         User::getNotifier()->sendUsersBy($channels, $this, ...$recipients);
-        
+
         return $this;
     }
 
-    public function sendAdmins(string $importance) 
-    { 
+    public function sendAdmins(string $importance)
+    {
         $this->setImportance($importance);
-        User::getNotifier()->sendAdmins($this); 
-        
+        User::getNotifier()->sendAdmins($this);
+
         return $this;
     }
 
@@ -336,7 +336,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
     {
         $notifier = User::getNotifier();
-        
+
         /**
          * @var EmailRecipientInterface
          */
@@ -351,7 +351,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         $this->setImportance(""); // Remove importance from email subject
 
         if($this->isMarkAsAdmin()) {
-            
+
             $user = $this->user ?? "User \"".User::getIp()."\"";
             $subject = "Fwd: " . $this->getSubject();
             $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
@@ -363,8 +363,8 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $subject = "Fwd: " . $this->getSubject();
             $from    = "[".$notifier->getTranslator()->trans("@emails.fake_test.author")."] ". $this->user->getRecipient()->getEmail();
             $footer  = [$footer, $notifier->getTranslator()->trans("@emails.fake_test.notice")];
-            $footer  = implode(" - ", array_filter($footer)); 
-        
+            $footer  = implode(" - ", array_filter($footer));
+
         } else {
 
             $subject = $this->getSubject();
@@ -372,7 +372,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         }
 
         $notification = EmailMessage::fromNotification($this, $recipient, $transport);
-        
+
         /**
          * @var TemplatedEmail
          */
@@ -387,7 +387,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         // Attach images using cid:/
         $projectDir = BaseService::getProjectDir();
         foreach($context as $key => $value) {
-        
+
             if(!$value) continue;
             if(!is_string($value)) continue;
             if(!str_starts_with($value, "cid:")) continue;
@@ -419,7 +419,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
 
         $user = ($this->user ? $this->user->getUsername() : "User \"".User::getIp()."\"");
         if($this->isMarkAsAdmin()) {
-            
+
             $user = $this->user ?? "User \"" . User::getIp() . "\"";
             $subject = "Fwd: " . $this->getSubject();
             $content = $user . " forwarded its notification: \"" . $this->getContent() . "\"";

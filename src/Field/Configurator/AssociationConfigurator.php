@@ -49,11 +49,11 @@ class AssociationConfigurator implements FieldConfiguratorInterface
         $field->setFormattedValue($field->getValue());
 
         $href = [$field->getFormTypeOption("class") => AbstractCrudController::getCrudControllerFqcn($field->getFormTypeOption("class"))];
-        
+
         $fieldValue = $field->getValue();
         $classList = $fieldValue instanceof Collection ? array_unique($fieldValue->map(fn($e) => get_class($e))->toArray()) : array_filter([is_object($fieldValue) ? get_class($fieldValue) : null]);
         foreach($classList as $classname) {
-        
+
             $crudController = AbstractCrudController::getCrudControllerFqcn($classname);
 
             $href[$classname] = $crudController ?
@@ -152,7 +152,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
 
         // associations different from *-to-one cannot be sorted
         $field->setSortable(false);
-        
+
         $field->setFormTypeOptionIfNotSet('multiple', true);
         $field->setFormTypeOptionIfNotSet('empty_data', []);
 
@@ -189,7 +189,7 @@ class AssociationConfigurator implements FieldConfiguratorInterface
             if($first && $showFirst) $count++;
 
             if($first != null || !empty($others))  {
-         
+
                 $field->setFormattedValue([
                     "count" => $count,
                     "first" => $first,

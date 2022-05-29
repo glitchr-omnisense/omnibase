@@ -34,7 +34,7 @@ final class PaginatorTwigExtension extends AbstractExtension
             new TwigFunction('paginator_lastSeparator',  [$this, 'getLastSeparator'],  ['is_safe' => ['all']]),
             new TwigFunction('paginator_lastOnes',       [$this, 'getLastOnes'],       ['is_safe' => ['all']]),
 
-            new TwigFunction('paginator_last',           [$this, 'getLast'],           ['is_safe' => ['all']]),            
+            new TwigFunction('paginator_last',           [$this, 'getLast'],           ['is_safe' => ['all']]),
             new TwigFunction('paginator_fastforward',    [$this, 'getFastForward'],    ['is_safe' => ['all']])
         ];
     }
@@ -67,7 +67,7 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         $label = $label ?? $this->translator->trans("messages.paginator.first");
         $str = "<a href='".$pagination->getPath($name, 1, $parameters)."'>".$label."</a>";
-    
+
         return $str;
     }
 
@@ -110,7 +110,7 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         return $str;
     }
-    
+
     public function getCurrent(PaginationInterface $pagination, ?string $label = null): ?string
     {
         return $label ?? $this->translator->trans("messages.paginator.current", [$pagination->getPage(), $pagination->getTotalPages()]);
@@ -122,40 +122,40 @@ final class PaginatorTwigExtension extends AbstractExtension
 
         $label = $label ?? $this->translator->trans("messages.paginator.next", [$pagination->getPage()+1]);
         $str = "<a href='".$pagination->getPath($name, $pagination->getPage()+1, $parameters)."'>".$label."</a>";
-    
+
         return $str;
     }
-    
+
     public function getNextOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
     {
         if($pagination->getPage() >= $pagination->getTotalPages()) return [];
-        
+
         $array = [];
         for($i = $pagination->getPage()+1, $N = min($pagination->getTotalPages(), $pagination->getPage()+$pagination->getPageRange())+1; $i < $N; $i++) {
             $array[] = "<a href='".$pagination->getPath($name, $i, $parameters)."'>".($this->translator->trans($label, [$i]) ?? $i)."</a>";
         }
-    
+
         return $array;
     }
 
     public function getLast(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
     {
         if($pagination->getPage() >= $pagination->getTotalPages()) return "";
-        
+
         $label = $label ?? $this->translator->trans("messages.paginator.last");
         $str = "<a href='".$pagination->getPath($name, $pagination->getTotalPages(), $parameters)."'>".$label."</a>";
-    
+
         return $str;
     }
 
     public function getLastOnes(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?array
     {
         if($pagination->getPage() >= $pagination->getTotalPages()) return [];
-        
+
         $array = [];
         for($i = max($pagination->getPage()+1, $pagination->getTotalPages()-$pagination->getPageRange()), $N = $pagination->getTotalPages(); $i <= $N; $i++)
             $array[] = "<a href='".$pagination->getPath($name, $i, $parameters)."'>".($this->translator->trans($label, [$i]) ?? $i)."</a>";
-    
+
         return $array;
     }
 
@@ -163,17 +163,17 @@ final class PaginatorTwigExtension extends AbstractExtension
     {
         if($pagination->getPage()+$pagination->getPageRange() <= $pagination->getTotalPages()-1)
             return $separator;
-        
+
         return null;
     }
 
     public function getFastForward(PaginationInterface $pagination, string $name, array $parameters = [], ?string $label = null): ?string
-    {   
+    {
         if($pagination->getPage() >= $pagination->getTotalPages()) return "";
 
         $label = $label ?? $this->translator->trans("messages.paginator.fastforward", [$pagination->getTotalPages()]);
         $str = "<a href='".$pagination->getPath($name, $pagination->getTotalPages(), $parameters)."'>".$label."</a>";
-    
+
         return $str;
     }
 }

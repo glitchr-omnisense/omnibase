@@ -35,13 +35,13 @@ final class WidgetTwigExtension extends AbstractExtension
 
         $widget = $widgetSlot->getWidget();
         if(!$widget) return "";
-        
+
         $options["widget"]   = $widget;
-        
+
         $widget->setTemplate($template);
         $entityClass = camel2snake(class_basename($widget), "-");
         $templateClass = camel2snake(str_strip(basename($widget->getTemplate()), "", ".html.twig"), "-");
-        
+
         $options["row_attr"] = $options["row_attr"] ?? [];
         $options["row_attr"]["class"]  = $options["row_attr"]["class"] ?? "";
         $options["row_attr"]["class"] .= " widget-".$entityClass;

@@ -37,7 +37,7 @@ class TranslationConfigurator implements FieldConfiguratorInterface
         // Show formatted value
         if( ($fieldName = $field->getCustomOption("show_field")) ) {
 
-            if($entityDto->getInstance() && !PropertyAccess::createPropertyAccessor()->isReadable($entityDto->getInstance(), $field->getProperty())) 
+            if($entityDto->getInstance() && !PropertyAccess::createPropertyAccessor()->isReadable($entityDto->getInstance(), $field->getProperty()))
                 throw new \Exception("Failed to access \"$fieldName\" in \"".$entityDto->getName()."\".");
 
             $field->setLabel($field->getLabel() == mb_ucfirst($fieldName) ? $field->getLabel() : mb_ucfirst($fieldName));

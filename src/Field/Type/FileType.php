@@ -38,7 +38,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $this->translator       = $baseService->getTranslator();
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
-        
+
         $this->imageService     = $imageService;
         $this->fileService      = cast($imageService, FileService::class);
     }
@@ -70,7 +70,7 @@ class FileType extends AbstractType implements DataMapperInterface
             "allow_cancel[confirmation]" => true,
 
             'multiple'     => false,
-            'clipboard'    => false, 
+            'clipboard'    => false,
 
             'href'         => null,
             'title'        => null,
@@ -127,7 +127,7 @@ class FileType extends AbstractType implements DataMapperInterface
                 $maxFilesize = min($maxFilesize, $options["max_size"]);
 
             if(!$options["dropzone"]) {
-         
+
                 $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
                         "required"    => $options["required"] && ($data === null) && ($options["cropper"] ?? null) === null,
                         "multiple"    => $options["multiple"],
@@ -174,7 +174,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);
         }
-        
+
         if($this->classMetadataManipulator->isEntity($entity)) {
 
             $files = Uploader::get($entity, $form->getName());
@@ -198,7 +198,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['max_size'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
         if($options["max_size"] !== null)
             $view->vars['max_size'] = min($view->vars['max_size'], $options["max_size"]);
-        
+
         $mimeTypes = $options["mime_types"];
         if(!$mimeTypes && $entity)
             $mimeTypes = Uploader::getMimeTypes($options["class"] ?? $entity, $options["data_mapping"] ?? $form->getName());
@@ -206,10 +206,10 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["mime_types"] = $mimeTypes;
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
-    
+
         $view->vars['clippable'] = $view->vars['pathLinks'] = $view->vars['downloadLinks'] = json_encode([]);
         if(is_array($view->vars['value'])) {
-            
+
             if ($view->vars['value']) {
 
                 $view->vars['pathLinks'] = json_encode(array_transforms(function($k,$v):array {
@@ -236,7 +236,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars['allow_delete'] = $options['allow_delete'];
         $view->vars['href']         = $options["href"];
         $view->vars["confirm_action"] = $options["allow_cancel[confirmation]"] || $options["allow_delete[confirmation]"];
-            
+
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
             if($options["dropzone-js"] ) $this->baseService->addHtmlContent("javascripts:head", $options["dropzone-js"]);
@@ -263,7 +263,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $options["dropzone"]["dictResponseError"]            = $options["dropzone"]["dictResponseError"]            ?? $this->translator->trans("@fields.fileupload.dropzone.response_error");
             $options["dropzone"]["dictCancelUpload"]             = $options["dropzone"]["dictCancelUpload"]             ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload");
             $options["dropzone"]["dictRemoveFile"]               = $options["dropzone"]["dictRemoveFile"]               ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file");
-            
+
             if($options["allow_cancel[confirmation]"]) $options["dropzone"]["dictCancelUploadConfirmation"] = $options["dropzone"]["dictCancelUploadConfirmation"] ?? $this->translator->trans("@fields.fileupload.dropzone.cancel_upload_confirmation");
             if($options["allow_delete[confirmation]"]) $options["dropzone"]["dictRemoveFileConfirmation"]   = $options["dropzone"]["dictRemoveFileConfirmation"]   ?? $this->translator->trans("@fields.fileupload.dropzone.remove_file_confirmation");
 
@@ -273,7 +273,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
             $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
             $options["dropzone"]["url"] = $view->vars["ajax"];
-            
+
             $view->vars["dropzone"]  = json_encode($options["dropzone"]);
 
             $view->vars["sortable"]  = json_encode($options["sortable"]);

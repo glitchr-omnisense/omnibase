@@ -32,17 +32,17 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 class AssociationType extends AbstractType implements DataMapperInterface
 {
     use BaseTrait;
-    
+
     /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator = null;
-    
+
     /**
      * @var FormFactory
      */
     protected $formFactory = null;
-    
+
     public function getBlockPrefix(): string { return 'association'; }
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
@@ -51,7 +51,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator   = $entityHydrator;
 
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();  
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -90,7 +90,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if($options["multiple"]) return null;
             return $value ?? null;
         });
-        
+
         $resolver->setNormalizer('allow_add', function (Options $options, $value) {
             if($options["group"]) return $value ?? null;
             return false;
@@ -112,7 +112,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $view->vars["keep_indexes"] = $options["keep_indexes"];
         $view->vars['length']       = $options["length"];
     }
-    
+
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->setDataMapper($this);
@@ -120,7 +120,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-            
+
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
@@ -137,7 +137,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     "group"            => $options["group"],
                     "row_group"        => $options["row_group"],
                     'entry_collapsed'  => $options["entry_collapsed"],
-                    'entry_type'       => AssociationType::class, 
+                    'entry_type'       => AssociationType::class,
                     'entry_label'      => $options["entry_label"],
                     'entry_options'    => array_merge($options, [
                         'href'         => $options["href"] ?? null,
@@ -148,9 +148,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
                     ]),
                 ];
 
-                if ($options["allow_add"] !== null) 
+                if ($options["allow_add"] !== null)
                     $collectionOptions['allow_add'] = $options["group"] ? $options["allow_add"] : false;
-                if ($options["allow_delete"] !== null) 
+                if ($options["allow_delete"] !== null)
                     $collectionOptions['allow_delete'] = $options["group"] ? $options["allow_delete"] : false;
 
                 $form->add("_collection", CollectionType::class, $collectionOptions);
@@ -198,7 +198,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         $data = $viewData;
-        
+
         if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));
@@ -252,9 +252,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if(!$classMetadata)
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
 
-            
+
             $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $data);
-            
+
         } else if($viewData instanceof PersistentCollection) {
 
             $mappedBy =  $viewData->getMapping()["mappedBy"];
@@ -263,7 +263,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             if ($data->containsKey("_collection"))
                 $data = $data->get("_collection");
-            
+
             if(!$isOwningSide) {
 
                 foreach($viewData as $entry)
@@ -274,7 +274,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             foreach($data as $n => $entry) {
 
                 $viewData->add($entry);
-                if(!$isOwningSide) 
+                if(!$isOwningSide)
                     $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
             }
 
@@ -282,7 +282,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $viewData = new ArrayCollection();
             foreach(iterator_to_array($forms) as $fieldName => $childForm) {
-                
+
                 foreach($childForm as $key => $value)
                     $viewData[$key] = $value->getViewData();
             }

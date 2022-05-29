@@ -18,7 +18,7 @@ use Base\Model\IconizeInterface;
  */
 class Mention implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
+    public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-quote-right"]; }
 
     /**

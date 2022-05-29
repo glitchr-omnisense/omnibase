@@ -59,19 +59,19 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
         // Check if path is reacheable..
         if(str_starts_with($options["target"], ".")) {
-        
+
             $view->ancestor = $view->parent;
 
             $target = $form->getParent();
             $targetPath = substr($options["target"], 1);
-    
+
         } else {
 
             // Get oldest parent form available..
             $ancestor = $view;
             while($ancestor->parent !== null)
-                $ancestor = $ancestor->parent; 
-            
+                $ancestor = $ancestor->parent;
+
             $view->ancestor = $ancestor;
 
             $target = $form->getParent();
@@ -80,24 +80,24 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
             $targetPath = $options["target"];
         }
- 
+
         $targetPath = $targetPath ? explode(".", $targetPath) : null;
         foreach($targetPath ?? [] as $path) {
-            
+
             if(!$target->has($path))
                 throw new \Exception("Child form \"$path\" related to view data \"".get_class($target->getViewData())."\" not found in ".get_class($form->getConfig()->getType()->getInnerType())." (complete path: \"".$options["target"]."\")");
-            
+
             $target = $target->get($path);
             $targetType = $target->getConfig()->getType()->getInnerType();
-            
+
             if($targetType instanceof TranslationType) {
-                
+
                 $availableLocales = array_keys($target->all());
                 $locale = (count($availableLocales) > 1 ? $targetType->getDefaultLocale() : $availableLocales[0] ?? null);
                 if($locale) $target = $target->get($locale);
             }
         }
-        
+
         $view->vars['target'] = $targetPath;
     }
 }

@@ -43,23 +43,23 @@ final class IdField implements FieldInterface
         return $this;
     }
 
-    public function enableImpersonation() 
+    public function enableImpersonation()
     {
         $this->setCustomOption(self::OPTION_IMPERSONATE, true);
         return $this;
     }
-    public function disableImpersonation() 
+    public function disableImpersonation()
     {
         $this->setCustomOption(self::OPTION_IMPERSONATE, false);
         return $this;
     }
 
-    public function enableLink() 
+    public function enableLink()
     {
         $this->setCustomOption(self::OPTION_ADD_LINK, true);
         return $this;
     }
-    public function disableLink() 
+    public function disableLink()
     {
         $this->setCustomOption(self::OPTION_ADD_LINK, false);
         return $this;

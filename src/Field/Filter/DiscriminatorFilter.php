@@ -49,7 +49,7 @@ class DiscriminatorFilter implements FilterInterface
 
       $em = $qb->getEntityManager();
       $meta = $em->getClassMetadata($entityDto->getFqcn());
-      
+
       $className = $meta->discriminatorMap[$parameter] ?? null;
       $qb
          ->andWhere("entity INSTANCE OF :".$parameterName)

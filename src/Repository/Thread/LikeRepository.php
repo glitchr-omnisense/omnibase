@@ -16,5 +16,5 @@ use Base\Database\Repository\ServiceEntityRepository;
  */
 class LikeRepository extends ServiceEntityRepository
 {
-    
+
 }

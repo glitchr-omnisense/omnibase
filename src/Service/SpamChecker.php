@@ -60,7 +60,7 @@ class SpamChecker
 
             case SpamApi::AKISMET:
                 return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $this->getKey($api));
-            
+
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");
         }

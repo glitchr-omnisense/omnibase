@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass=AbstractExtensionRepository::class)
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @ORM\InheritanceType( "JOINED" )
- * 
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */
@@ -23,8 +23,8 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
 {
     use BaseTrait;
 
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-external-link"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-external-link"]; }
 
     /**
      * @ORM\Id
@@ -53,7 +53,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $entityId;
     public function getEntityId() { return $this->entityId; }
-    public function setEntityId(mixed $entityOrId) 
+    public function setEntityId(mixed $entityOrId)
     {
         if($this->getService()->isEntity($entityOrId)) $this->entityId = $entityOrId->getId();
         else $this->entityId = $entityOrId;
@@ -66,7 +66,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $entityClass;
     public function getEntityClass() { return $this->entityClass; }
-    public function setEntityClass(object|string $entity) 
+    public function setEntityClass(object|string $entity)
     {
         $this->entityClass = is_object($entity) ? get_class($entity) : $entity;
         return $this;
@@ -77,7 +77,7 @@ abstract class AbstractExtension implements AbstractExtensionInterface, IconizeI
      */
     protected $action;
     public function getAction() { return $this->action; }
-    public function setAction(string $action) 
+    public function setAction(string $action)
     {
         $this->action = $action;
         return $this;

@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AttachmentCrudController extends WidgetCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function downloadAttachment(AdminContext $context)
     {
@@ -25,7 +25,7 @@ class AttachmentCrudController extends WidgetCrudController
 
         $fileContent = $attachment->getFile()->getContent();
         $response = new Response($fileContent);
-    
+
         $preferredDownloadName = $attachment->getSlug();
         if(($extension = $attachment->getFile()->guessExtension()))
             $preferredDownloadName .= ".".$extension;
@@ -35,7 +35,7 @@ class AttachmentCrudController extends WidgetCrudController
 
         return $response;
     }
-    
+
     public function configureActions(Actions $actions): Actions
     {
         $downloadAction = Action::new('download', "Download", 'fas fa-fw fa-download')
@@ -49,7 +49,7 @@ class AttachmentCrudController extends WidgetCrudController
         return parent::configureFields($pageName, [
             "id" => function () {
 
-                yield FileField::new('file')->setColumns(6)->setPreferredDownloadName("slug");                
+                yield FileField::new('file')->setColumns(6)->setPreferredDownloadName("slug");
                 yield SlugField::new('slug')->setColumns(6)->hideOnIndex()->setTargetFieldName("translations.title");
 
             }], $args);

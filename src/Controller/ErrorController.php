@@ -25,7 +25,7 @@ class ErrorController extends AbstractController
     public function Main(\Throwable $exception) {
 
         $response = null;
-        
+
         try {
 
             if ($this->baseService->isDevelopment()) return $this->Rescue($exception);

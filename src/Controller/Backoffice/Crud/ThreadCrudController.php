@@ -25,7 +25,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class ThreadCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureFilters(Filters $filters): Filters { return $filters->add(DiscriminatorFilter::new('class', null, self::getEntityFqcn())); }
     public function configureActions(Actions $actions): Actions
@@ -47,7 +47,7 @@ class ThreadCrudController extends AbstractCrudController
             yield TextField::new('title')->setTextAlign(TextAlign::RIGHT)->hideOnDetail()->hideOnForm();
             yield SelectField::new('owners')->showFirst()->setTextAlign(TextAlign::LEFT);
             yield StateField::new('state')->setColumns(6);
-            
+
             yield DateTimePickerField::new('publishedAt')->setFormat("dd MMM yyyy");
 
             yield SlugField::new('slug')->setTargetFieldName("translations.title");
@@ -67,7 +67,7 @@ class ThreadCrudController extends AbstractCrudController
         foreach ($batchActionDto->getEntityIds() as $id) {
             $thread = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
             $thread->setState(ThreadState::PUBLISH);
-	    $this->entityManager->flush();
+        $this->entityManager->flush();
         }
 
         return $this->redirect($batchActionDto->getReferrerUrl());

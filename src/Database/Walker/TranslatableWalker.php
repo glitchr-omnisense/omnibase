@@ -50,7 +50,7 @@ class TranslatableWalker extends SqlWalker
         foreach ($this->getEntityManager()->getEventManager()->getListeners() as $event => $listeners) {
             foreach ($listeners as $listener) {
 
-                if ($listener instanceof IntlSubscriber) 
+                if ($listener instanceof IntlSubscriber)
                     return $listener->getLocaleProvider();
             }
         }
@@ -61,13 +61,13 @@ class TranslatableWalker extends SqlWalker
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
-    
+
         $dqlAlias       = $joinAssociationDeclaration->joinAssociationPathExpression->identificationVariable;
         $joinedDqlAlias = $joinAssociationDeclaration->aliasIdentificationVariable;
-        
+
         $relation       = $this->getQueryComponent($joinedDqlAlias)['relation'] ?? null;
         if($relation === null) return $sql;
-        
+
         // Extract source class information
         $sourceClass      = $this->getEntityManager()->getClassMetadata($relation['sourceEntity']);
         if(!class_implements_interface($sourceClass->getName(), TranslatableInterface::class))
@@ -93,12 +93,12 @@ class TranslatableWalker extends SqlWalker
         $rootTargetTableAlias = $this->getSQLTableAlias($rootTargetClass->getTableName(), $joinedDqlAlias);
 
         $sql = str_replace(
-            $targetTableAlias.".id = ".$rootTargetTableAlias.".id", 
+            $targetTableAlias.".id = ".$rootTargetTableAlias.".id",
             $rootTargetTableAlias.".translatable_id = ".$sourceTableAlias.".id", $sql
         );
 
         $sql = str_replace(
-                $sourceTableAlias.".id = ".$targetTableAlias.".translatable_id", 
+                $sourceTableAlias.".id = ".$targetTableAlias.".translatable_id",
                 $targetTableAlias.".id = ".$rootTargetTableAlias.".id", $sql
             );
 

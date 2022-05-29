@@ -15,7 +15,7 @@ use UnexpectedValueException;
 abstract class EnumType extends Type implements SelectInterface
 {
     protected static $icons = [];
-    public static function getIcons(): array 
+    public static function getIcons(): array
     {
         $class = static::class;
         if(array_key_exists($class, self::$icons))
@@ -35,10 +35,10 @@ abstract class EnumType extends Type implements SelectInterface
                 $icons = array_union($icons, $class::__iconizeStatic());
                 self::$icons[$class] = $icons;
             }
-            
+
             $class = get_parent_class($class);
         }
-        
+
         self::$icons[static::class] = $icons;
         return $icons ?? [];
     }
@@ -49,13 +49,13 @@ abstract class EnumType extends Type implements SelectInterface
     public static function getData(string $id): ?array { return null; }
 
     public function getName() : string { return self::getStaticName(); }
-    public static function getStaticName() { 
+    public static function getStaticName() {
         $array = explode('\\', get_called_class());
         return camel2snake(end($array));
     }
 
     public static function hasKey  (string $key,   bool $inheritance = true) { return array_key_exists($key, self::getPermittedValues($inheritance, true)); }
-    
+
     public static function getValue(string $key,   bool $inheritance = true) { return self::getPermittedValues($inheritance, true)[$key] ?? null; }
     public static function hasValue(string $value, bool $inheritance = true) { return array_search($value, self::getPermittedValues($inheritance, true)) !== false; }
 
@@ -64,16 +64,16 @@ abstract class EnumType extends Type implements SelectInterface
         $permittedValues = self::getPermittedValues();
 
         $ordering = array_filter(
-                array_map(fn($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array), 
+                array_map(fn($a) => ($pos = array_search($a, $permittedValues)) !== false ? $pos : null, $array),
                 fn($c) => $c !== null
-            ); 
+            );
 
         asort($ordering);
         return $ordering;
     }
 
     public static function getPermittedValues(bool $inheritance = true, bool $preserve_keys = false): array
-    { 
+    {
         $refl = new \ReflectionClass(get_called_class());
         if($inheritance) $values = $refl->getConstants();
         else $values = array_diff($refl->getConstants(),$refl->getParentClass()->getConstants());
@@ -106,7 +106,7 @@ abstract class EnumType extends Type implements SelectInterface
 
                     if(array_key_exists($path, $group))
                         $group[$path] = is_array($group[$path]) ? $group[$path] : ["_self" => $group[$path]];
-        
+
                     $group[$path] = $group[$path] ?? [];
                     $group = &$group[$path];
                 }
@@ -120,7 +120,7 @@ abstract class EnumType extends Type implements SelectInterface
 
                 $bubbleUp = count($v) == 1;
                 foreach($v as $kk => $vv) {
-                
+
                     $vv = is_array($vv) ? array_transforms($callback, $vv) : $vv;
                     if(is_array($vv) && count($vv) == 1) {
 
@@ -166,7 +166,7 @@ abstract class EnumType extends Type implements SelectInterface
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform) : mixed { return $value; }
-    public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed 
+    public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed
     {
         if ($value !== null && !in_array($value, $this->getPermittedValues()))
             throw new \InvalidArgumentException("Invalid '".$this->name."' value.");

@@ -25,7 +25,7 @@ class HyperlinkCrudController extends AbstractCrudController
 
             yield ArrayField::new('value')->setPatternFieldName("hyperpattern.pattern")->onlyOnForms();
             yield UrlField::new('generate');
-            
+
         },$args);
     }
 }

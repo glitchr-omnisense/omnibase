@@ -30,7 +30,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
     public function __construct(BaseService $baseService)
     {
-    	$this->baseService = $baseService;
+        $this->baseService = $baseService;
         $this->exceptionRoute   = $baseService->getParameterBag("base.maintenance.exception");
         $this->exceptionRoute[] = "security_login";
 

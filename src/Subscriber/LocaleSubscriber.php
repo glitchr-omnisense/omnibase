@@ -20,8 +20,8 @@ class LocaleSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-         /* 
-          * Must be set prior SecuritySubscriber and 
+         /*
+          * Must be set prior SecuritySubscriber and
           * after Symfony\Component\HttpKernel\EventListener\LocaleListener::setDefaultLocale()
           *
           * CLI: php bin/console debug:event kernel.request
@@ -35,7 +35,7 @@ class LocaleSubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        $locale = $event->getRequest()->getSession()->get("_locale") 
+        $locale = $event->getRequest()->getSession()->get("_locale")
                ?? User::getCookie("locale")
                ?? $this->localeProvider->getLocale();
 

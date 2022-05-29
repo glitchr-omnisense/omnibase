@@ -32,7 +32,7 @@ class SettingTranslation implements TranslationInterface
         $this->label = $label;
         return $this;
     }
-    
+
     /**
      * @ORM\Column(type="text", nullable=true)
      */
@@ -55,7 +55,7 @@ class SettingTranslation implements TranslationInterface
     public function setValue($value)
     {
         $this->value  = $this->isEntity($value) ? $value->getId() : $value;
-        $this->setClass($this->isEntity($value) ? get_class($value) : null); 
+        $this->setClass($this->isEntity($value) ? get_class($value) : null);
 
         return $this;
     }

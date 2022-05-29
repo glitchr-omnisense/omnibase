@@ -17,8 +17,8 @@ use App\Repository\User\PenaltyRepository;
  */
 class Penalty implements IconizeInterface
 {
-    public        function __iconize()       : ?array { return null; } 
-    public static function __iconizeStatic() : ?array { return ["fas fa-exclamation-triangle"]; } 
+    public        function __iconize()       : ?array { return null; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-exclamation-triangle"]; }
 
     /**
      * @ORM\Id

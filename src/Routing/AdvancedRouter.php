@@ -87,15 +87,15 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function match(string $pathinfo)       : array { return $this->router->match($pathinfo); }
     public function matchRequest(Request $request): array { return $this->router->matchRequest($request); }
-    
-    public function warmUp(string $cacheDir): array 
-    { 
+
+    public function warmUp(string $cacheDir): array
+    {
         if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
         return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : $this->getRouteCollection();
     }
 
     public function getRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
-    public function getRoute(?string $routeUrl = null): ?Route 
+    public function getRoute(?string $routeUrl = null): ?Route
     {
         if($routeUrl === null) $routeUrl = $this->getRequest()->getRequestUri();
 
@@ -103,9 +103,9 @@ class AdvancedRouter implements AdvancedRouterInterface
         if(!$routeArray) return null;
 
         $routeName = $routeArray["_route"];
-        if(array_key_exists("_group", $routeArray)) 
+        if(array_key_exists("_group", $routeArray))
             $routeName .= ".".$routeArray["_group"];
-        
+
         $routeName = $routeArray["_route"];
         if(array_key_exists("_locale", $routeArray))
             $routeName .= ".".$routeArray["_locale"];

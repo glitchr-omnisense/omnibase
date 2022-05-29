@@ -17,8 +17,8 @@ abstract class AbstractCurrencyApi implements CurrencyApiInterface
     public function getOptions(): array { return $this->options; }
 
     protected string $key;
-    public function getKey(): ?string 
-    { 
+    public function getKey(): ?string
+    {
         if ($this->key === null)
             $this->key = $this->baseSettings->get("api.currency_api.".static::getName());
 

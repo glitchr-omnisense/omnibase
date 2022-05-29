@@ -37,13 +37,13 @@ class Cascade extends AbstractAnnotation
     {
         if($target == "property") $column = $targetValue;
         else $column = $this->column;
-        
+
         $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
         if($columnAlias) $column = $columnAlias->column;
 
-        if(!property_exists($classMetadata->getName(), $column)) 
+        if(!property_exists($classMetadata->getName(), $column))
             throw new Exception("Invalid column property \"$column\" provided in annotation of class ".$classMetadata->getName());
-        
+
         $associationMapping = $classMetadata->getAssociationMapping($column);
         $associationMapping["cascade"]          = $this->value;
         $associationMapping["isCascadeRemove"]  = in_array("remove" , $associationMapping["cascade"]);

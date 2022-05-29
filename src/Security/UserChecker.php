@@ -17,7 +17,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserChecker implements UserCheckerInterface
 {
-    public function __construct(EntityManagerInterface $entityManager, BaseTwigExtension $baseTwigExtension) 
+    public function __construct(EntityManagerInterface $entityManager, BaseTwigExtension $baseTwigExtension)
     {
         $this->entityManager = $entityManager;
         $this->baseTwigExtension = $baseTwigExtension;
@@ -42,7 +42,7 @@ class UserChecker implements UserCheckerInterface
         if (!$user instanceof User) return;
 
         if ($user->isDisabled()) {
-            
+
             $welcomeBackToken = $user->getValidToken("welcome-back");
             if( $welcomeBackToken ) {
 

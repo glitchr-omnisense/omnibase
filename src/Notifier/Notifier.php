@@ -31,15 +31,15 @@ class Notifier implements NotifierInterface
     /**
      * @var Notifier
      */
-    protected $notifier; 
+    protected $notifier;
 
     /**
      * @var ChannelPolicyInterface
      */
     protected $policy;
-    
+
     public function getPolicy(): ChannelPolicyInterface { return $this->policy; }
-    
+
     /**
      * @var array
      */
@@ -54,7 +54,7 @@ class Notifier implements NotifierInterface
     public function getTestRecipients(): array{ return $this->testRecipients; }
     public  function isTest(RecipientInterface $recipient): bool
     {
-        if(!$recipient instanceof EmailRecipientInterface) 
+        if(!$recipient instanceof EmailRecipientInterface)
             return false;
 
         $email = array_keys(mailparse($recipient->getEmail()));
@@ -111,7 +111,7 @@ class Notifier implements NotifierInterface
     {
         $this->markAsAdmin = $markAsAdmin;
 
-        if ($notification) 
+        if ($notification)
             $notification->markAsAdmin();
 
         return $this;
@@ -125,10 +125,10 @@ class Notifier implements NotifierInterface
     public function disable() { $this->enable = false; return $this; }
 
     public function getTranslator(): TranslatorInterface { return $this->translator; }
-    public function setTranslator(TranslatorInterface $translator) 
-    { 
+    public function setTranslator(TranslatorInterface $translator)
+    {
         $this->translator = $translator;
-        return $this; 
+        return $this;
     }
 
     public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
@@ -151,7 +151,7 @@ class Notifier implements NotifierInterface
         // Address support only once..
         $adminRecipients = [];
         $adminRecipients[] = $this->technicalRecipient;
-        foreach ($this->getAdminUsers() as $adminUser) 
+        foreach ($this->getAdminUsers() as $adminUser)
             $adminRecipients[] = $adminUser->getRecipient();
 
         foreach (array_unique_map(fn($r) => $r->getEmail(), $adminRecipients) as $adminRecipient)
@@ -238,10 +238,10 @@ class Notifier implements NotifierInterface
         return array_unique($channels);
     }
 
-    public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void 
-    { 
-        if ($this->enable) 
-            $this->notifier->send($notification, ...$recipients); 
+    public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void
+    {
+        if ($this->enable)
+            $this->notifier->send($notification, ...$recipients);
     }
 
     public function sendUsers(Notification $notification, RecipientInterface ...$recipients)
@@ -253,7 +253,7 @@ class Notifier implements NotifierInterface
         $notification->setChannels([]);
 
         // Admin recipient if test address
-        $adminRecipient = $this->getTechnicalRecipient() 
+        $adminRecipient = $this->getTechnicalRecipient()
                       ?? $this->getAdminRecipients()[0]
                       ?? new NoRecipient();
 
@@ -262,7 +262,7 @@ class Notifier implements NotifierInterface
 
             // Set selected channels, if any
             $channels    = $this->getUserChannels($notification->getImportance(), $recipient);
-            if (empty($channels)) 
+            if (empty($channels))
                 throw new Exception("No valid channel for the notification \"".$notification->getBacktrace()."\" sent with \"".$notification->getImportance()."\"");
 
             $prevChannels = array_merge($prevChannels, $channels);
@@ -290,9 +290,9 @@ class Notifier implements NotifierInterface
 
         $prevChannels = $notification->getChannels();
         $notification->setChannels([]);
-  
+
         // Admin recipient if test address
-        $adminRecipient = $this->getTechnicalRecipient() 
+        $adminRecipient = $this->getTechnicalRecipient()
                        ?? $this->getAdminRecipients()[0]
                        ?? new NoRecipient();
 

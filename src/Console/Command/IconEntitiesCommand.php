@@ -2,7 +2,6 @@
 
 namespace Base\Console\Command;
 
-use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,14 +10,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\IconizeInterface;
-use Base\Service\BaseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='icon:entities', aliases=[],
+ *            description='')
+ */
 class IconEntitiesCommand extends Command
 {
-    protected static $defaultName = 'icon:entities';
-
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->entityManager = $entityManager;
@@ -39,7 +40,7 @@ class IconEntitiesCommand extends Command
         $entityClass = $input->getOption('entity');
 
         if($entityClass) {
-    
+
             if(!$this->classMetadataManipulator->isEntity($entityClass))
                 throw new \Exception("Entity \"$entityClass\" doesn't exists");
             if(!class_implements_interface($entityClass, IconizeInterface::class))
@@ -65,15 +66,15 @@ class IconEntitiesCommand extends Command
             }
 
         } else {
-             
+
             $entities = array_filter(array_merge(
                 BaseBundle::getAllClasses($baseLocation."/Entity"),
-                BaseBundle::getAllClasses("./src/Entity"), 
+                BaseBundle::getAllClasses("./src/Entity"),
             ), fn($c) => class_implements_interface($c, IconizeInterface::class));
-    
+
             if($entities) $output->section()->writeln("Entity list: ".$entityClass);
             foreach($entities as $entity) {
-            
+
                 $icons = $entity::__iconizeStatic();
                 $output->section()->writeln(" * <info>".$entity."</info>: [".implode(",", $icons ?? [])."]");
             }

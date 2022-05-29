@@ -28,7 +28,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     public function getAssets(): array
     {
         return [
-            "<script type='text/javascript'>window.FontAwesomeConfig = { autoReplaceSvg: false }</script>", 
+            "<script type='text/javascript'>window.FontAwesomeConfig = { autoReplaceSvg: false }</script>",
             $this->javascript,
             $this->stylesheet
         ];
@@ -49,7 +49,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     {
         if(version_compare($this->getVersion(), 6, ">="))
             return $this->getName()."-".$style;
-        if(version_compare($this->getVersion(), 5, ">=")) 
+        if(version_compare($this->getVersion(), 5, ">="))
             return $this->getName().$style[0];
 
         throw new \Exception("Version ". $this->getVersion()." is not supported.");
@@ -90,7 +90,7 @@ class FontAwesomeAdapter extends AbstractIconAdapter
     public function getIdentifier(string $name)
     {
         return array_transforms(
-            fn($k, $v, $callback, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null, 
+            fn($k, $v, $callback, $i):?array => preg_match("/".$this->getName()."-(.*)/", $v, $matches) ? [$i, $matches[1]] : null,
             explode(" ", $name)
         )[0];
     }

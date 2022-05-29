@@ -10,7 +10,7 @@ use Symfony\Component\Intl\Languages;
 use Symfony\Component\Intl\Locales;
 
 class LocaleProvider implements LocaleProviderInterface
-{    
+{
     protected $requestStack = null;
     protected $parameterBag = null;
 
@@ -22,8 +22,8 @@ class LocaleProvider implements LocaleProviderInterface
     public const SEPARATOR = "-";
 
     private static ?array $locales = null;
-    public static function getLocales() 
-    { 
+    public static function getLocales()
+    {
         if(!self::$locales) {
 
             self::$locales = [];
@@ -31,7 +31,7 @@ class LocaleProvider implements LocaleProviderInterface
 
                 // NB: Only keep xx-YY locale format
                 if(!preg_match('/[a-z]{2}.[A-Z]{2}/', $locale)) continue;
-                
+
                 $lang    = mb_substr($locale,0,2);
                 $country = mb_substr($locale,3,2);
 
@@ -55,7 +55,7 @@ class LocaleProvider implements LocaleProviderInterface
 
     protected static $isLate = null; // Turns on when on kernel request
     public static function isLate(): bool { return is_string(self::$isLate) ? true : self::$isLate ?? false; }
-    public static function markAsLate(?string $location = null) 
+    public static function markAsLate(?string $location = null)
     {
         $backtrace = debug_backtrace()[1] ?? null;
         $location = ($backtrace ? $backtrace['class']."::".$backtrace['function'] : true);
@@ -65,15 +65,15 @@ class LocaleProvider implements LocaleProviderInterface
     public function getLocale(?string $locale = null): string { return self::normalize($locale ?? $this->translator->getLocale()); }
     public function setLocale(string $locale, ?Request $request = null)
     {
-        if($request !== null) { 
+        if($request !== null) {
 
             if(self::isLate()) {
-            
+
                 $method = __CLASS__."::".__FUNCTION__;
                 $location = is_string(self::$isLate) ? self::$isLate : "LocaleSubscriber::onKernelRequest";
                 throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
             }
-        
+
             $request->setLocale(substr_replace($locale, "_", 2, 1));
         }
 
@@ -88,19 +88,19 @@ class LocaleProvider implements LocaleProviderInterface
     public function setDefaultLocale(?string $defaultLocale) { self::$defaultLocale = $defaultLocale; }
     public static function getDefaultLocale(): ?string { return self::$defaultLocale; }
     public static function getFallbackLocales(): array { return self::$fallbackLocales; }
-    public static function getAvailableLocales(): array 
+    public static function getAvailableLocales(): array
     {
-        return array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales ?? []));
+        return array_filter(array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales ?? [])));
     }
     public static function getDefaultLang(): ?string { return self::getLang(self::$defaultLocale); }
     public static function getFallbackLangs(): array { return array_map(fn($l) => self::getLang($l), self::$fallbackLocales); }
-    public static function getAvailableLangs(): array 
+    public static function getAvailableLangs(): array
     {
         return array_unique(array_merge([self::getDefaultLang()], self::getFallbackLangs() ?? []));
     }
     public static function getDefaultCountry(): ?string { return self::getCountry(self::$defaultLocale); }
     public static function getFallbackCountries(): array { return array_map(fn($l) => self::getCountry($l), self::$fallbackLocales); }
-    public static function getAvailableCountries(): array 
+    public static function getAvailableCountries(): array
     {
         return array_unique(array_merge([self::getDefaultCountry()], self::getFallbackCountries() ?? []));
     }
@@ -108,8 +108,8 @@ class LocaleProvider implements LocaleProviderInterface
     public static function getLangName(?string $locale = null): string { return Languages::getName(self::getLang($locale)); }
     public static function getLang(?string $locale = null): string
     {
-        $lang = mb_substr($locale,0,2);
-        if(!array_key_exists($lang, self::getLocales()))
+        $lang = $locale ? mb_substr($locale,0,2) : null;
+        if ($lang === null || !array_key_exists($lang, self::getLocales()))
             $lang = mb_substr(self::getDefaultLocale(),0,2);
 
         return $lang;
@@ -119,13 +119,13 @@ class LocaleProvider implements LocaleProviderInterface
     public static function getCountry(?string $locale = null): string
     {
         $defaultCountry     = mb_substr(self::getDefaultLocale(),3,2);
-        $availableCountries = array_transforms(fn($k, $l):array => [mb_substr($l,0,2), [mb_substr($l,3,2)]], self::getAvailableLocales());
+        $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [mb_substr($l,0,2), [mb_substr($l,3,2)]] : null, self::getAvailableLocales());
 
         $lang           = self::getLang($locale);
         $langCountries  = $availableCountries[$lang] ?? self::getLocales()[$lang] ?? [];
 
-        $country = mb_substr($locale,3,2);
-        $country = in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);        
+        $country = $locale ? mb_substr($locale,3,2) : null;
+        $country = $locale !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
 
         return $country;
     }

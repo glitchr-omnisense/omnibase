@@ -4,18 +4,20 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+/**
+ * @AsCommand(name='translation:enums', aliases=[],
+ *            description='')
+ */
 class TranslationEnumsCommand extends Command
 {
-    protected static $defaultName = 'translation:enums';
-
     public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider)
     {
         $this->translator = $translator;
@@ -35,7 +37,7 @@ class TranslationEnumsCommand extends Command
         $baseLocation = dirname((new \ReflectionClass('Base\\BaseBundle'))->getFileName());
         $enumRestriction = $input->getOption('enum') ?? "";
         $enums = array_merge(
-            BaseBundle::getAllClasses("./src/Enum"), 
+            BaseBundle::getAllClasses("./src/Enum"),
             BaseBundle::getAllClasses($baseLocation."/Enum"),
         );
 
@@ -90,7 +92,7 @@ class TranslationEnumsCommand extends Command
                 $value = strval($value);
                 $trans2 = "";
                 foreach($availableLocales as $currentLocale) {
-    
+
                     if($locale !== null && $locale != $currentLocale) continue;
                     if($locale === null) {
                         $prefix = "\n\t\t - ";
@@ -99,11 +101,11 @@ class TranslationEnumsCommand extends Command
                         $prefix = "";
                         $space = str_repeat(" ", max($maxValueLength-strlen($enum."::".$value), 0));
                     }
-    
+
                     $translationPath = "@enums.".camel2snake($path, "_").".".strtolower($value).".".$suffix;
                     $translationPathStr = $prefix."@enums[$currentLocale].<ln>".camel2snake($path,"_").".".strtolower($value).".".$suffix."</ln>";
                     $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
-    
+
                     if($translation == $translationPath) $trans2 .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red>";
                     else $trans2 .= "<warning>".$translationPathStr." </warning>= \"". $translation."\"";
                 }

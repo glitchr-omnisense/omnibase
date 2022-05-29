@@ -23,7 +23,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
 
 class UserCrudController extends AbstractCrudController
 {
-    public static function getPreferredIcon(): ?string { return null; } 
+    public static function getPreferredIcon(): ?string { return null; }
 
     public function configureExtensionWithResponseParameters(Extension $extension, KeyValueStore $responseParameters): Extension
     {
@@ -38,7 +38,7 @@ class UserCrudController extends AbstractCrudController
 
             $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
             $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
-            
+
             $impersonate = null;
             if($this->isGranted("ROLE_EDITOR") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
                 $impersonate = $entity->getUserIdentifier();
@@ -48,10 +48,10 @@ class UserCrudController extends AbstractCrudController
             if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);
             else {
                 $extension->setTitle($entity.$impersonate);
-                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@EasyAdminBundle.crud.user.since", [$entity->getCreatedAt()->format("Y")])); 
+                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("@EasyAdminBundle.crud.user.since", [$entity->getCreatedAt()->format("Y")]));
             }
         }
-        
+
         return $extension;
     }
 

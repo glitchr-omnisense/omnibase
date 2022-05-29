@@ -34,8 +34,8 @@ class ArrayType extends CollectionType
             "placeholder" => []
         ]);
 
-        $resolver->setNormalizer('target',       function(Options $options, $value) { 
-            
+        $resolver->setNormalizer('target',       function(Options $options, $value) {
+
             if($options["pattern"] !== null && $value !== null)
             throw new \Exception("Option \"target\" cannot be set at the same time as \"pattern\"");
         });
@@ -52,7 +52,7 @@ class ArrayType extends CollectionType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         if($options['prototype_key'] && $options["prototype"]) {
-            
+
             $prototypeOptions = $options['entry_options'];
             if (null !== $options['prototype_data'])
                 $prototypeOptions['data'] = $options['prototype_data'];

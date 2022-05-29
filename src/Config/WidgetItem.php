@@ -23,7 +23,7 @@ class WidgetItem
     public static $adminUrlGenerator;
     public static $adminContextProvider;
     public static $translator;
-    
+
     public static function setAdminUrlGenerator(AdminUrlGenerator $adminUrlGenerator)
     {
         self::$adminUrlGenerator = $adminUrlGenerator;
@@ -43,7 +43,7 @@ class WidgetItem
             $crudController = $entityFqcnOrCrudController;
             $widgetItem     = CrudWidgetItem::class;
         }
-        
+
         if(!class_exists($crudController))
             throw new \Exception("CRUD controller for \"".$entityFqcnOrCrudController."\" not found");
 
@@ -85,11 +85,11 @@ class WidgetItem
     public static function linkToUrl(string $labelOrEntityFqcn, ?string $icon, string $url): UrlMenuItem
     {
         if(class_exists($labelOrEntityFqcn)) {
-            
+
             $crudController          = AbstractCrudController::getCrudControllerFqcn($labelOrEntityFqcn);
             if(!class_exists($crudController))
                 throw new \Exception("CRUD controller for \"".$labelOrEntityFqcn."\" not found");
-            
+
             $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
             $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 

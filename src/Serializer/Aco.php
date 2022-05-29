@@ -26,7 +26,7 @@ class Aco
           if (!is_file($filename)) {
                throw new ParseException(sprintf('File "%s" does not exist.', $filename));
           }
-          
+
           if (!is_readable($filename)) {
                throw new ParseException(sprintf('File "%s" cannot be read.', $filename));
           }
@@ -76,7 +76,7 @@ class Aco
                list($palette, $array, $hexcode, $name) = self::getBlock($handle, $version);
                switch($version) {
 
-                    case self::VERSION_V1: 
+                    case self::VERSION_V1:
                          $colors[] = [$palette, $array, $hexcode];
                          break;
                     case self::VERSION_V2:
@@ -86,7 +86,7 @@ class Aco
 
                if($flags == self::VERSION_V1 && $i == $ncolors-1)
                     break;
-               if($flags == self::VERSION_V2 && $i == 2*$ncolors-1) 
+               if($flags == self::VERSION_V2 && $i == 2*$ncolors-1)
                     break;
           }
 
@@ -154,22 +154,22 @@ class Aco
 
                switch($palette) {
 
-                    case "RGB": 
+                    case "RGB":
                          $palette = self::RGB;
                          break;
-                    case "HSB": 
+                    case "HSB":
                          $palette = self::HSB;
                          break;
                     case "CMYK":
-                         $palette = self::CMYK; 
+                         $palette = self::CMYK;
                          break;
-                    case "LAB": 
+                    case "LAB":
                          $palette = self::LAB;
                          break;
-                    case "WideCMYK": 
+                    case "WideCMYK":
                          $palette = self::WideCMYK;
                          break;
-                    case "GRAYSCALE": 
+                    case "GRAYSCALE":
                          $palette = self::GRAYSCALE;
                          break;
                }
@@ -196,22 +196,22 @@ class Aco
                $names = $color[3] ?? "";
                switch($palette) {
 
-                    case "RGB": 
+                    case "RGB":
                          $palette = self::RGB;
                          break;
-                    case "HSB": 
+                    case "HSB":
                          $palette = self::HSB;
                          break;
                     case "CMYK":
-                         $palette = self::CMYK; 
+                         $palette = self::CMYK;
                          break;
-                    case "LAB": 
+                    case "LAB":
                          $palette = self::LAB;
                          break;
-                    case "WideCMYK": 
+                    case "WideCMYK":
                          $palette = self::WideCMYK;
                          break;
-                    case "GRAYSCALE": 
+                    case "GRAYSCALE":
                          $palette = self::GRAYSCALE;
                          break;
                }
@@ -268,39 +268,39 @@ class Aco
 
                     switch($palette) {
 
-                         case self::RGB: 
+                         case self::RGB:
                               $palette = "RGB";
                               $hexcode = $w.$x.$y;
                               $array = [hexdec($w)/256, hexdec($x)/256, hexdec($y)/256];
                               break;
 
-                         case self::HSB: 
+                         case self::HSB:
                               $palette = "HSB";
                               $hexcode = $w.$x.$y;
                               $array = [hexdec($w)/182.04, hexdec($x)/655.35, hexdec($y)/655.35];
 
                               break;
 
-                         case self::CMYK: 
+                         case self::CMYK:
                               $palette = "CMYK";
                               $hexcode = $w.$x.$y.$z;
                               $array = [100 - hexdec($w)/655.35, 100 - hexdec($x)/655.35, 100 - hexdec($y)/655.35, 100 - hexdec($z)/655.35];
                               break;
 
-                         case self::LAB: 
+                         case self::LAB:
                               $palette = "LAB";
                               $hexcode = $w.$x.$y;
-                              $array = []; 
+                              $array = [];
                               throw new Exception("LAB COLOR SPACE NOT IMPLEMENTED");
                               break;
 
-                         case self::WideCMYK: 
+                         case self::WideCMYK:
                               $palette = "WideCMYK";
                               $hexcode = $w.$x.$y.$z;
                               $array = [hexdec($w)/100, hexdec($x)/100, hexdec($y)/100, hexdec($z)/100];
                               break;
 
-                         case self::GRAYSCALE: 
+                         case self::GRAYSCALE:
                               $palette = "GRAYSCALE";
                               $hexcode = $w;
                               $array = hexdec($w)/39.0625;
@@ -321,7 +321,7 @@ class Aco
 
                     break;
 
-               default: 
+               default:
                     throw new Exception("Unexpected block version.");
           }
 
@@ -334,7 +334,7 @@ class Aco
 
                $a = rgb2hsl($a);
                $b = rgb2hsl($b);
-               
+
                if(!huesAreinSameInterval($a[0],$b[0])) {
                   if ($a[0] < $b[0]) return -1;
                   if ($a[0] > $b[0]) return 1;
@@ -348,7 +348,7 @@ class Aco
                return 0;
           });
 
-          function huesAreinSameInterval(float $hue1, float $hue2, int $interval = 30): bool 
+          function huesAreinSameInterval(float $hue1, float $hue2, int $interval = 30): bool
           {
                return (round(($hue1 / $interval), 0, PHP_ROUND_HALF_DOWN) === round(($hue2 / $interval), 0, PHP_ROUND_HALF_DOWN));
           }

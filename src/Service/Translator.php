@@ -109,7 +109,7 @@ class Translator implements TranslatorInterface
 
         if ($trans == $id && !$this->isDebug)
             $trans = $this->translator->trans($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
-            
+
         if ($trans == $id && $customId)
             return ($domain && $atBegin ? "@".$domain.".".$id : $id);
 
@@ -170,7 +170,7 @@ class Translator implements TranslatorInterface
     public function time(int $time): string
     {
         if($time > 0) {
-        
+
             $seconds = fmod  ($time, 60);
             $time    = intdiv($time, 60);
             $minutes = fmod  ($time, 60);

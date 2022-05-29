@@ -38,10 +38,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function __construct(
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
-        ClassMetadataManipulator $classMetadataManipulator, 
-        EntityManagerInterface $entityManager, 
+        ClassMetadataManipulator $classMetadataManipulator,
+        EntityManagerInterface $entityManager,
         RequestStack $requestStack,
-        Extension $extension, 
+        Extension $extension,
         TranslatorInterface $translator, BaseService $baseService)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -53,7 +53,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->baseService = $baseService;
-        
+
         $this->crud = null;
     }
 
@@ -79,10 +79,10 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         if(array_key_exists($entityFqcn, self::$crudController))
             return self::$crudController[$entityFqcn];
-        
+
         $crudController = preg_replace('/\\\Entity\\\/', "\\Controller\\\Backoffice\\\Crud\\", $entityFqcn);
         $crudController = $crudController . "CrudController";
-        if( false !== ($pos = strrpos($crudController, '\\__CG__\\')) ) 
+        if( false !== ($pos = strrpos($crudController, '\\__CG__\\')) )
             $crudController = mb_substr($crudController, $pos + 8);
 
         $appCrudController  = preg_replace("/^Base/", 'App', $crudController);
@@ -111,13 +111,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     protected $allowRootEntity = true;
-    public function disallowRootEntity() 
-    { 
+    public function disallowRootEntity()
+    {
         $this->allowRootEntity = true;
         return $this->allowRootEntity;
     }
-    public function allowRootEntity() 
-    { 
+    public function allowRootEntity()
+    {
         $this->allowRootEntity = true;
         return $this;
     }
@@ -172,7 +172,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     }
 
     public function configureExtension(Extension $extension) : Extension
-    { 
+    {
         return $extension;
     }
 
@@ -205,7 +205,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $entityLabelInSingular = $this->translator->trans(self::getEntityLabelInSingular());
         if($entityLabelInSingular == self::getEntityLabelInSingular()) $entityLabelInSingular = null;
         $crud->getAsDto()->setEntityLabelInSingular($entityLabelInSingular ?? "");
-        
+
         $entityLabelInPlural = $this->translator->trans(self::getEntityLabelInPlural());
         if($entityLabelInPlural == self::getEntityLabelInPlural()) $entityLabelInPlural = null;
         $crud->getAsDto()->setEntityLabelInPlural($entityLabelInPlural ?? "");
@@ -218,7 +218,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         if($title == $crudTranslationPrefixWithAction.".title") $title = $this->translator->trans($crudTranslationPrefix.".title");
         if($title == $crudTranslationPrefix.".title") $title = $this->translator->trans($crudTranslationPrefix.".plural");
         if($title == $crudTranslationPrefix.".plural") $title = $entityLabelInPlural ?? camel2snake(class_basename($this->getEntityFqcn()), " ");
-        
+
         $help = $this->translator->trans($crudTranslationPrefixWithAction.".help");
         if($help == $crudTranslationPrefixWithAction.".help") $help = $this->translator->trans($crudTranslationPrefix.".help");
         if($help == $crudTranslationPrefix.".help") $help = "";
@@ -243,7 +243,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
                         ['validation_groups' => ['edit']]
                     );
     }
-    
+
     public function configureEntityCollectionWithResponseParameters(?EntityCollection $entityCollection, KeyValueStore $responseParameters): ?EntityCollection
     {
         foreach($entityCollection ?? [] as $entityDto) {
@@ -281,12 +281,12 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     {
         $entity = $this->getEntity();
         if(!$entity) return $extension;
-        
+
         $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
         $entityLabel = $this->translator->trans($userClass.".plural", [], AbstractDashboardController::TRANSLATION_ENTITY);
         if($entityLabel == $userClass.".plural") $entityLabel = null;
         else $extension->setTitle(mb_ucfirst($entityLabel));
-        
+
         $entityLabel = $entityLabel ?? $this->getEntityLabelInSingular() ?? "";
         $entityLabel = !empty($entityLabel) ? mb_ucfirst($entityLabel) : "";
 
@@ -301,7 +301,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
             $entityText = $entityLabel ." ID #".$entity->getId();
-            $extension->setText($entityText); 
+            $extension->setText($entityText);
         }
 
         return $extension;
@@ -323,7 +323,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         $this->entityCollection = $responseParameters->get("entities");
         $this->entityCollection = $this->configureEntityCollectionWithResponseParameters(
-            $this->entityCollection, 
+            $this->entityCollection,
             $responseParameters
         );
 
@@ -338,7 +338,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function configureFields(string $pageName, ...$args): iterable
     {
         array_prepend($args, fn() => yield IdField::new());
-        
+
         $yields = $this->yield($args);
         $simpleYields      = array_filter_recursive(array_filter($yields, fn($k) => preg_match("/^[0-9.]+$/", $k), ARRAY_FILTER_USE_KEY));
         $associativeYields = array_diff_key($yields, $simpleYields);
@@ -352,7 +352,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         foreach($associativeYields as $path => $_) foreach($_ as $i => $yield) {
 
             $property = preg_replace("/^[0-9.]+/", "", $path);
-            
+
             $yieldList = array_map(fn($y) => $y->getAsDto()->getProperty(), $yields);
             $yieldPos  = array_search($property, $yieldList);
 

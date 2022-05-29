@@ -8,7 +8,7 @@ use Base\Service\BaseSettings;
 
 // Endpoint : https://currencylayer.com/
 class CurrencyLayer extends AbstractCurrencyApi
-{ 
+{
     protected bool $enterprise;
     public function __construct(BaseSettings $baseSettings, bool $enterprise = false)
     {

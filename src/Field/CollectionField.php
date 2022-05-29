@@ -81,7 +81,7 @@ class CollectionField implements FieldInterface
         return $this;
     }
 
-    public function setLength(int $length): self 
+    public function setLength(int $length): self
     {
         $this->setFormTypeOption(self::OPTION_LENGTH, max(0, $length));
         return $this;
@@ -98,7 +98,7 @@ class CollectionField implements FieldInterface
         $this->setFormTypeOption("row_group", $embed);
         return $this;
     }
-    
+
     public function showCollapsed($collapsed = true): self
     {
         $this->setFormTypeOption("entry_collapsed", $collapsed);

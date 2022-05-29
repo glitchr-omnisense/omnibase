@@ -41,7 +41,7 @@ class ColumnAlias extends AbstractAnnotation
 
         if(!property_exists($classMetadata->getName(), $alias))
             throw new Exception("Invalid alias property \"$alias\" provided in annotation of class ".$classMetadata->getName());
-        else if(!property_exists($classMetadata->getName(), $this->column)) 
+        else if(!property_exists($classMetadata->getName(), $this->column))
             throw new Exception("Invalid column property \"$this->column\" provided in annotation of class ".$classMetadata->getName());
         else if($classMetadata->hasAssociation($alias))
             throw new Exception("Alias variable \"$alias\" cannot be used, association mapping already found.");
@@ -59,7 +59,7 @@ class ColumnAlias extends AbstractAnnotation
 
             $columnValue = $this->$column;
             if($aliasValue instanceof ArrayCollection && $columnValue instanceof ArrayCollection)
-                $aliasValue = new ArrayCollection($columnValue->toArray() + $aliasValue->toArray()); 
+                $aliasValue = new ArrayCollection($columnValue->toArray() + $aliasValue->toArray());
             else if($columnValue !== null)
                 $aliasValue = $columnValue;
 

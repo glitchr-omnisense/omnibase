@@ -19,7 +19,7 @@ class SelectField implements FieldInterface
     public const OPTION_AUTOCOMPLETE = 'autocomplete';
     public const OPTION_DEFAULT_CHOICE = "default_choice";
     public const OPTION_CLASS          = 'class';
-    
+
     public const OPTION_CHOICES = 'choices';
     public const OPTION_ICONS   = 'icons';
     public const OPTION_FILTER  = 'choice_filter';
@@ -102,7 +102,7 @@ class SelectField implements FieldInterface
     {
         return $this->setFormTypeOption("vertical", $vertical);
     }
-    
+
     public function allowTags(bool|array $tokenSeparators = [])
     {
         $this->setFormTypeOption("tags", !empty($tokenSeparators) || $tokenSeparators === false);

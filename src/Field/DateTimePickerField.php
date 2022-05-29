@@ -164,7 +164,7 @@ final class DateTimePickerField implements FieldInterface
         return $this;
     }
 
-    public function now() 
+    public function now()
     {
         return $this->setDefault(new DateTime());
     }

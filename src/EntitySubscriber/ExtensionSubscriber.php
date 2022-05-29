@@ -39,7 +39,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
     public function onFlush(OnFlushEventArgs $event)
     {
         $uow = $event->getEntityManager()->getUnitOfWork();
-        
+
         $this->scheduledEntityInsertions = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
             $this->scheduledEntityInsertions[] = $entity;
@@ -53,7 +53,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
         $this->scheduledEntityDeletions = [];
         foreach ($uow->getScheduledEntityDeletions() as $entity)
             $this->scheduledEntityDeletions[] = $entity;
-        
+
         $this->scheduledEntityInsertions = array_unique_object($this->scheduledEntityInsertions);
         $this->scheduledEntityUpdates    = array_unique_object($this->scheduledEntityUpdates);
         $this->scheduledEntityDeletions  = array_unique_object($this->scheduledEntityDeletions);
@@ -75,7 +75,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
     }
 
     public function payload(string $action, array $entities)
-    {  
+    {
         $uow = $this->entityManager->getUnitOfWork();
 
         $entries = [];
@@ -88,7 +88,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
                 $matches = [];
 
                 foreach($extension::get() as $column) {
-                
+
                     list($className, $_) = explode("::", $column);
                     if(!is_instanceof($entity, $className)) continue;
 
@@ -101,15 +101,15 @@ class ExtensionSubscriber implements EventSubscriberInterface
                     $properties = [];
                     foreach($match as $columns)
                         $properties[] = explode("::", $columns)[1];
-                    
+
                     $array = $extension->payload($action, $className, $properties, $entity);
 
                     foreach($array as $entry) {
 
                         if($entry === null) continue;
                         if(!$entry->supports()) {
-                        
-                            if ($this->entityManager->contains($entry)) 
+
+                            if ($this->entityManager->contains($entry))
                                 $this->entityManager->remove($entry);
 
                             continue;
@@ -131,7 +131,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
                                     $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 else {
                                     $this->entityManager->persist($entry);
-                                    $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);    
+                                    $uow->computeChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 }
                                 break;
 
@@ -142,7 +142,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
                         }
 
                         if($entry) {
-                            
+
                             if(!array_key_exists($id, $entries)) $entries[$id] = [];
                             $entries[$id][] = $entry;
                         }

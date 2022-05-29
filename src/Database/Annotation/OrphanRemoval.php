@@ -41,7 +41,7 @@ class OrphanRemoval extends AbstractAnnotation
         $columnAlias = $this->getAnnotation($classMetadata, $column, ColumnAlias::class);
         if($columnAlias) $column = $columnAlias->column;
 
-        if(!property_exists($classMetadata->getName(), $column)) 
+        if(!property_exists($classMetadata->getName(), $column))
             throw new Exception("Invalid column property \"$column\" provided in annotation of class ".$classMetadata->getName());
 
         $associationMapping = $classMetadata->getAssociationMapping($classMetadata->getFieldName($column));

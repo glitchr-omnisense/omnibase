@@ -31,7 +31,7 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
      */
     public static $trackedEntities   = [];
     public static function get():array { return self::$trackedEntities; }
-    public static function has(string $className, ?string $property = null): bool { return array_key_exists($className, self::$trackedEntities); } 
+    public static function has(string $className, ?string $property = null): bool { return array_key_exists($className, self::$trackedEntities); }
 
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
