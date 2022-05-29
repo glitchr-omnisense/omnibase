@@ -105,20 +105,20 @@ class LocaleProvider implements LocaleProviderInterface
         return array_unique(array_merge([self::getDefaultCountry()], self::getFallbackCountries() ?? []));
     }
 
-    public static function getLangName(?string $locale = null): string { return Languages::getName(self::getLang($locale)); }
-    public static function getLang(?string $locale = null): string
+    public static function getLangName(?string $locale = null): ?string { return Languages::getName(self::getLang($locale)); }
+    public static function getLang(?string $locale = null): ?string
     {
         $lang = $locale ? mb_substr($locale,0,2) : null;
         if ($lang === null || !array_key_exists($lang, self::getLocales()))
-            $lang = mb_substr(self::getDefaultLocale(),0,2);
+            $lang = self::getDefaultLocale() ? mb_substr(self::getDefaultLocale(),0,2) : null;
 
         return $lang;
     }
 
-    public static function getCountryName(?string $locale = null): string { return Countries::getName(self::getCountry($locale)); }
-    public static function getCountry(?string $locale = null): string
+    public static function getCountryName(?string $locale = null): ?string { return Countries::getName(self::getCountry($locale)); }
+    public static function getCountry(?string $locale = null): ?string
     {
-        $defaultCountry     = mb_substr(self::getDefaultLocale(),3,2);
+        $defaultCountry     = self::getDefaultLocale() ? mb_substr(self::getDefaultLocale(),3,2) : null;
         $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [mb_substr($l,0,2), [mb_substr($l,3,2)]] : null, self::getAvailableLocales());
 
         $lang           = self::getLang($locale);

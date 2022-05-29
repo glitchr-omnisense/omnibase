@@ -64,7 +64,7 @@
         "hashids/hashids": "^4.1",
 
         "doctrine/annotations": "^1.0",
-        "doctrine/doctrine-bundle": "^2.0",
+        "doctrine/doctrine-bundle": "^2.6",
         "doctrine/orm": "^2.0",
         "doctrine/dbal": "^3.2",
 
