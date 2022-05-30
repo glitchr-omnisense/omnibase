@@ -155,6 +155,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('obfuscate',      [FileService::class, 'obfuscate']),
             new TwigFilter('imagine',        [ImageService::class, 'imagine']),
             new TwigFilter('webp',           [ImageService::class, 'webp']),
+            new TwigFilter('crop',           [ImageService::class, 'crop']),
             new TwigFilter('image',          [ImageService::class, 'image']),
 
             new TwigFilter('thumbnail',          [ImageService::class, 'thumbnail']),
