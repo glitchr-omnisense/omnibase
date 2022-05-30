@@ -63,6 +63,7 @@
         data-ea-sidebar-width="{{ ea.crud.sidebarWidth ?? ea.dashboardSidebarWidth ?? 'normal' }}"
         data-ea-dark-scheme-is-enabled="{{ ea.dashboardHasDarkModeEnabled ? 'true' : 'false' }}"
     >
+
     {% block javascript_page_layout %}
         <script src="{{ asset('bundles/easyadmin/page-layout.js') }}"></script>
     {% endblock javascript_page_layout %}

@@ -45,7 +45,7 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
         if($discriminatorAutoload)
             $field->setFormType(DiscriminatorType::class);
 
-        $defaultClass = class_exists($field->getValue()) ? $field->getValue() : null;
+        $defaultClass = $field->getValue() && class_exists($field->getValue()) ? $field->getValue() : null;
         $defaultClass = $defaultClass ?? ($entityDto->getInstance() ? get_class($entityDto->getInstance()) : null);
         if($showColumn)
             $field->setLabel(ucfirst($this->classMetadataManipulator->getDiscriminatorColumn($defaultClass)));

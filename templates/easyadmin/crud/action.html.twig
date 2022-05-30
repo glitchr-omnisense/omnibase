@@ -13,7 +13,7 @@
        href="{{ linkUrl }}"
        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
         {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-        <span>{%- if action.label is not empty -%}{{ action.label }}{%- endif -%}</span>
+        <span>{{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))}}</span>
     </a>
 
 {% elseif 'button' == action.htmlElement %}
@@ -21,7 +21,7 @@
     <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
         <span class="btn-label">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-            {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
+            {{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))}}
         </span>
     </button>
 
@@ -56,7 +56,7 @@
 
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
+            {{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle')) }}
         </a>
 
         {% if discriminatorMap|length > 0 %}
@@ -69,7 +69,7 @@
 
         <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {%- if action.label is not empty -%}{{ action.label }}{%- endif -%}
+            {{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle')) }}
         </span>
 
     {% endif %}
@@ -79,18 +79,18 @@
         {% for group,entities in discriminatorMap %}
             {% if entities|length != 1 %}
                 {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
-                {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans|capitalize }}</li>{% endif %}
+                {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))|capitalize }}</li>{% endif %}
             {% endif %}
 
             {% for crudEntity in entities %}
 
                 {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
-                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans|capitalize %}
+                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))|capitalize %}
                 {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
                 <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                    {{label}}
+                    {{ label | trans }}
                 </a></li>
 
             {% endfor %}

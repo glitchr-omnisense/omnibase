@@ -143,6 +143,7 @@
 {%- endblock -%}
 
 {%- block translatable_widget -%}
+
     {% set row_attr = row_attr|merge({'class': 'form-translatable' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) %}
     <div id="{{ form.vars['id'] }}" {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
 

@@ -32,10 +32,11 @@ class BaseSettings
     }
 
     public function __call($name, $_) { return $this->get("base.settings.".$name); }
-    public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
-    public function scheme     (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.domain.scheme",    $locale)) ? "https" : "http"; }
     public function maintenance(?string $locale = null) : bool    { return filter_var($this->getScalar("base.settings.maintenance",     $locale)); }
-    public function base_dir   (?string $locale = null) : string  { return $this->getScalar("base.settings.domain.base_dir", $locale) ?? "/"; }
+
+    public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
+    public function scheme     (?string $locale = null) : string  { return filter_var($this->getScalar("base.settings.http.scheme",    $locale)) ? "https" : "http"; }
+    public function base_dir   (?string $locale = null) : string  { return $this->getScalar("base.settings.http.base_dir", $locale) ?? "/"; }
     public function url(?string $path = null, ?string $packageName = null, int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
         if(str_starts_with($path, "http")) return $path;
@@ -44,7 +45,7 @@ class BaseSettings
         switch($referenceType) {
 
             case UrlGeneratorInterface::ABSOLUTE_URL:
-                return str_rstrip($this->scheme()."://".$this->domain().(str_starts_with($absolutePath, "/") ? "" : "/").$absolutePath, "/");
+                return str_rstrip($this->scheme()."://".$this->host().(str_starts_with($absolutePath, "/") ? "" : "/").$absolutePath, "/");
                 break;
 
             case UrlGeneratorInterface::NETWORK_PATH:
@@ -61,12 +62,12 @@ class BaseSettings
         }
     }
 
-    public function domain     (int $level = 0, ?string $locale = null) : ?string
+    public function host     (int $level = 0, ?string $locale = null) : ?string
     {
-        $domain = $this->getScalar("base.settings.domain", $locale) ?? "localhost";
-        while($level-- > 0) $domain = preg_replace("/^(\w+)./i", "", $domain);
+        $host = $this->getScalar("base.settings.http.host", $locale) ?? "localhost";
+        while($level-- > 0) $host = preg_replace("/^(\w+)./i", "", $host);
 
-        return $domain;
+        return $host;
     }
 
     public function birthdate(?string $locale = null) : DateTime

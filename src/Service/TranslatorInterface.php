@@ -2,9 +2,11 @@
 
 namespace Base\Service;
 
+use Symfony\Component\Translation\TranslatableMessage;
+
 interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorInterface
 {
-    public function trans(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string;
+    public function trans(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string;
     public function setLocale(string $locale);
     public function parseClass($class, string $parseBy = Translator::PARSE_NAMESPACE): string;
 

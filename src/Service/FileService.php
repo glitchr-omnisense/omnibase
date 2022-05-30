@@ -124,7 +124,6 @@ class FileService implements FileServiceInterface
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
     {
-
         $hashid = $this->obfuscate($path, $config);
         if(!$hashid) return null;
 

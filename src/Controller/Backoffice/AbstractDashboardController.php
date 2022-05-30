@@ -48,7 +48,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Google\Analytics\Service\GaService;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -67,11 +66,10 @@ use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
+
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /* "abstract" (remove because of routes) */
@@ -82,7 +80,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     protected $baseService;
     protected $adminUrlGenerator;
 
-    public const TRANSLATION_DASHBOARD = "EasyAdminBundle";
+    public const TRANSLATION_DASHBOARD = "dashboard";
     public const TRANSLATION_ENTITY    = "entities";
     public const TRANSLATION_ENUM      = "enums";
 
@@ -232,9 +230,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
             "base.settings.maintenance.uptime"   => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.domain"               => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
-            "base.settings.domain.scheme"        => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
-            "base.settings.domain.base_dir"      => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
+            "base.settings.http.scheme"          => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
+            "base.settings.http.host"            => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
+            "base.settings.http.base_dir"        => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
             "base.settings.mail"                 => ["form_type" => EmailType::class],
             "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
@@ -343,7 +341,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setFaviconPath("/favicon.ico")
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
             ->setTitle('<img src="'.$logo.'">');
-
     }
 
     public function addRoles(array &$menu, string $class)

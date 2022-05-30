@@ -398,8 +398,8 @@ class BaseService implements RuntimeExtensionInterface
         catch (RouteNotFoundException $e) { return $urlOrRoute; }
     }
 
-    public function redirect(string $urlOrRoute, array $opts = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->generateUrl($urlOrRoute, $opts), $state, $headers); }
-    public function redirectToRoute(string $route, array $opts = [], int $state = 302, array $headers = []): ?RedirectResponse
+    public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->generateUrl($urlOrRoute, $routeParameters), $state, $headers); }
+    public function redirectToRoute(string $route, array $routeParameters = [], int $state = 302, array $headers = []): ?RedirectResponse
     {
         $event = null;
         if(array_key_exists("event", $headers)) {
@@ -419,14 +419,17 @@ class BaseService implements RuntimeExtensionInterface
 
         $callback = null;
         if(array_key_exists("callback", $headers)) {
+
             $callback = $headers["callback"];
             if(!is_callable($callback))
                 throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+
             unset($headers["callback"]);
         }
 
-        $url   = $this->generateUrl($route, $opts) ?? $route;
+        $url   = $this->generateUrl($route, $routeParameters) ?? $route;
         $route = $this->getRouteName($url);
+
         if (!$route) return null;
 
         $currentRoute = $this->getCurrentRouteName();

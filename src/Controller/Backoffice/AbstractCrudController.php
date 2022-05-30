@@ -35,6 +35,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      */
     protected $classMetadataManipulator;
 
+    /**
+     * @var BaseService
+     */
+    protected $baseService;
+
     public function __construct(
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
@@ -74,7 +79,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     protected static array $crudController = [];
     public static function getCrudControllerFqcn($entity, bool $inheritance = false): ?string
     {
-        $entityFqcn = is_object($entity) ? get_class($entity) : (class_exists($entity) ? $entity : null);
+        $entityFqcn = is_object($entity) ? get_class($entity) : ($entity !== null && class_exists($entity) ? $entity : null);
         if($entityFqcn === null) return null;
 
         if(array_key_exists($entityFqcn, self::$crudController))

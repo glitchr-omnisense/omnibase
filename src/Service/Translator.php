@@ -6,6 +6,7 @@ use Base\Database\Type\SetType;
 
 use Doctrine\DBAL\Types\Type;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Translation\TranslatableMessage;
 
 class Translator implements TranslatorInterface
 {
@@ -33,9 +34,14 @@ class Translator implements TranslatorInterface
 
     public const STRUCTURE_DOT = "^[@a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+$";
     public const STRUCTURE_DOTBRACKET = "\{[ ]*[@a-zA-Z0-9_.]+[.]{0,1}[a-zA-Z0-9_]+[ ]*\}";
-    public function trans(?string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string
+    public function trans(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string
     {
         if($id === null) return null;
+        if($id instanceof TranslatableMessage) {
+            $domain = $id->getDomain();
+            $parameters = array_merge($id->getParameters(), $parameters);
+            $id = $id->getMessage();
+        }
 
         $id = trim($id);
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
