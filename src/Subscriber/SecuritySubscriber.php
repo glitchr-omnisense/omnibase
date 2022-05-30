@@ -241,12 +241,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRestriction(RequestEvent $event)
     {
-        $vetoAccessRestriction = false;
+        if(!$event->isMainRequest()) return;
+
+        $vetoRestriction = false;
         $url = parse_url(get_url());
 
         $urlExceptions  = $this->parameterBag->get("base.access_restriction.exceptions");
         foreach($urlExceptions as $urlException)
-            $vetoAccessRestriction |= preg_match("/".$urlException."/", $url["host"] ?? "");
+            $vetoRestriction |= preg_match("/".$urlException."/", $url["host"] ?? "");
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
@@ -266,25 +268,24 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             $this->profiler->disable();
 
-            if(!$vetoAccessRestriction) {
+            if($vetoRestriction) return;
 
-                $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
-                if(!$firewallMain) return; // Access restricted to main firewalls
+            $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
+            if(!$firewallMain) return; // Access restricted to main firewalls
 
-                $currentRouteName = $this->getCurrentRouteName($event);
-                if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
+            $currentRouteName = $this->getCurrentRouteName($event);
+            if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
 
-                    $accessDenied = $this->baseService->getSettings()->getScalar("base.settings.access_denied");
-                    if($accessDenied) $this->baseService->redirect($accessDenied);
-                    else {
+                $accessDenied = $this->baseService->getSettings()->getScalar("base.settings.access_denied");
+                if($accessDenied) $this->baseService->redirect($accessDenied);
+                else {
 
-                        $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
-                        if($response) $event->setResponse($response);
-                    }
-
-                    if($token) $this->tokenStorage->setToken(NULL);
-                    return $event->stopPropagation();
+                    $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
+                    if($response) $event->setResponse($response);
                 }
+
+                if($token) $this->tokenStorage->setToken(NULL);
+                return $event->stopPropagation();
             }
         }
     }

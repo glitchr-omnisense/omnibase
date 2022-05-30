@@ -5,6 +5,10 @@
 {% extends ea is defined ? ea.templatePath('layout') : '@EasyAdmin/page/login.html.twig' %}
 {% trans_default_domain ea is defined ? ea.i18n.translationDomain : (translation_domain is defined ? translation_domain ?? '@messages') %}
 
+{% block head_favicon %}
+    <link rel="shortcut icon" href="{{ asset(ea.dashboardFaviconPath) }}">
+{% endblock %}
+
 {% block body_class 'page-login' %}
 {% block head_stylesheets %}
     <link rel="stylesheet" href="{{ asset('bundles/easyadmin/app.css') }}">
@@ -26,7 +30,7 @@
     {% include '@EasyAdmin/flash_messages.html.twig' %}
 
     <div class="login-wrapper">
-    
+
         <header class="main-header">
             <div id="header-logo" style="padding: 1em !important;">
                 {% block header_logo %}
@@ -50,11 +54,11 @@
         <section class="content">
 
             <h1>{{ '@forms.login.title'|trans }}</h1>
-           
+
                 {{ form_start(form) }}
 
                 <input type="hidden" name="_target_path" value="{{ app.referrer }}"/>
-        
+
                 <div class="input-group mt-4 mb-2">
                     <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-user"></i></span>
                     {{ form_widget(form.identifier, {attr:{placeholder:'@forms.login.identifier'|trans}}) }}

@@ -23,7 +23,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
                 $url = parse_url2(get_url());
-
                 $parameterNames = array_flip($matches[1]);
                 $routeParameters = array_merge(
                     array_intersect_key($url, $parameterNames),
@@ -33,8 +32,10 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
                 $search  = array_map(fn($k) => "{".$k."}", array_keys($url));
                 $replace = array_values($url);
-                foreach($routeParameters as &$routeParameter)
+                foreach($routeParameters as $key => &$routeParameter) {
                     $routeParameter = str_replace($search, $replace, $routeParameter);
+                    if($key == "host") $routeParameter = str_lstrip($routeParameter, "www.");
+                }
             }
         }
 
@@ -63,7 +64,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             try {
 
                 return $this->resolve($routeName, $routeParameters, $referenceType)
-                    ?? throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeName));
+                       ?? throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeName));
 
             } catch (Exception $e ) { throw $e; }
         }
@@ -92,8 +93,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             case self::ABSOLUTE_PATH:
                 $baseDir = $this->getSettings()->base_dir();
-                $baseDir = str_rstrip($baseDir, "/");
+                $baseDir = "/".str_rstrip($baseDir, "/");
         }
+
+        // Normalize base dir
+        if ($baseDir != "/" && !str_ends_with($baseDir, "/"))
+            $baseDir = $baseDir."/";
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations
@@ -120,6 +125,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // Strip unused variables from main group
         $routeUrl      = $this->resolve($routeBase, $routeParameters);
+
         $routeGroupUrl = $this->resolve($routeBase.$routeGroup, $routeParameters);
         if($routeGroupUrl !== null && $routeUrl !== null) {
 
@@ -145,6 +151,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeUrl = build_url($parts);
 
         if(preg_match("/^[a-zA-Z0-9]+:\/\//", $routeUrl)) return $routeUrl;
-        return str_rstrip($baseDir."/".str_lstrip($routeUrl, "/"), "/");
+        return $baseDir.str_rstrip(str_lstrip($routeUrl, "/"), "/");
     }
 }

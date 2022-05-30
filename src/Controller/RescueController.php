@@ -11,14 +11,20 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
-use Base\Security\LoginFormRescueAuthenticator;
+use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /* "abstract" (remove because of routes) */
 class RescueController extends AbstractDashboardController
 {
+    public function configureDashboard(): Dashboard
+    {
+        return Dashboard::new()->setFaviconPath("/favicon.ico");
+    }
+
     /**
      * Link to this controller to start the "connect" process
      *
@@ -41,7 +47,7 @@ class RescueController extends AbstractDashboardController
                 // Check if target path provided via $_POST..
                 $targetPath = strval($referrer);
                 $targetRoute = $baseService->getRouteName($targetPath);
-                if ($targetPath && !in_array($targetRoute, [LoginFormRescueAuthenticator::LOGOUT_ROUTE, LoginFormRescueAuthenticator::LOGIN_ROUTE]) )
+                if ($targetPath && !in_array($targetRoute, [RescueFormAuthenticator::LOGOUT_ROUTE, RescueFormAuthenticator::LOGIN_ROUTE]) )
                     return $baseService->redirect($targetPath);
 
                 return $this->redirectToRoute("dashboard");
@@ -57,6 +63,7 @@ class RescueController extends AbstractDashboardController
 
         $logo = $baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
         $logo = $logo ?? $baseService->getSettings()->get("base.settings.logo")["_self"] ?? null;
+
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',

@@ -7,7 +7,6 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 
 class RouterSubscriber implements EventSubscriberInterface
@@ -44,11 +43,10 @@ class RouterSubscriber implements EventSubscriberInterface
                 return $event->stopPropagation();
             }
 
-            $permittedSubdomains = $this->parameterBag->get("base.access_restriction.permitted_subdomains") ?? [];
-
             $vetoSubdomain = true;
+            $permittedSubdomains = $this->parameterBag->get("base.access_restriction.permitted_subdomains") ?? [];
             foreach($permittedSubdomains ?? [] as $permittedSubdomain)
-                $vetoSubdomain &= preg_match("/".$permittedSubdomain."/", $url["subdomain"]);
+                $vetoSubdomain &= !preg_match("/".$permittedSubdomain."/", $url["subdomain"]);
 
             if($vetoSubdomain) {
 
