@@ -14,7 +14,7 @@ class RescueFormAuthenticator extends LoginFormAuthenticator
 
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
-        throw new NotFoundHttpException();
+        // throw new NotFoundHttpException();
         return new RedirectResponse($this->router->generate(static::RESCUE_ROUTE));
     }
 
