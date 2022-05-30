@@ -124,12 +124,25 @@ class FileService implements FileServiceInterface
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
     {
+
         $hashid = $this->obfuscate($path, $config);
         if(!$hashid) return null;
 
-        return $this->router->generate($proxyRoute, array_merge($proxyRouteParameters, [
-            "hashid" => $hashid
-        ]));
+        // Append hashid
+        $proxyRouteParameters["hashid"] = $hashid;
+
+        // Add custom _host if found
+        $host = array_pop_key("host", $config);
+        if ($host !== null) $proxyRouteParameters["_host"] = $host;
+
+        $variadic = [];
+        $variadic[] = $proxyRoute;
+        $variadic[] = $proxyRouteParameters;
+
+        $referenceType = array_pop_key("reference_type", $config);
+        if($referenceType !== null) $variadic[] = $referenceType;
+
+        return $this->router->generate(...$variadic);
     }
 
     public function resolve(string $hashid)

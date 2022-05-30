@@ -95,13 +95,11 @@ class AdvancedRouter implements AdvancedRouterInterface
         return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : $this->getRouteCollection();
     }
 
+    public function getRequestUri(): ?string { return $this->getRequest() ? $this->getRequest()->getRequestUri() : $_SERVER["REQUEST_URI"] ?? null; }
     public function getRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
-    public function getRoute(?string $routeUrl = null): ?Route
+    public function getRoute(?string $routeUrl = null, ): ?Route
     {
-        if($routeUrl === null) {
-            try {$routeUrl = $this->getRequest()->getRequestUri();}
-            catch(Error $e) { return null; }
-        }
+        if ($routeUrl === null) $routeUrl = $this->getRequestUri();
 
         $routeArray = $this->getRouteArray($routeUrl);
         if(!$routeArray) return null;
@@ -120,8 +118,7 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function hasRoute(string $routeName): bool { return $this->getRouteName($routeName) !== null; }
     public function getRouteName(?string $routeUrl = null): ?string
     {
-        if(!$routeUrl) return $this->getRouteName($this->getRequest()->getRequestUri());
-
+        if(!$routeUrl) return $this->getRouteName($this->getRequestUri());
         $routeArray = $this->getRouteArray($routeUrl);
         return $routeArray ? $routeArray["_route"] : null;
     }

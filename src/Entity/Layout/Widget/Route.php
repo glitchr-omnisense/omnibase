@@ -23,8 +23,9 @@ class Route extends Widget implements IconizeInterface, LinkableInterface
     public        function __iconize()       : ?array { return $this->getRouteIcons(); }
     public static function __iconizeStatic() : ?array { return ["fas fa-road"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
+        $this->setRouteParameters(array_merge($this->getRouteParameters(), $routeParameters));
         return $this->generate($referenceType);
     }
 

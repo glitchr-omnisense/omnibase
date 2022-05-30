@@ -27,9 +27,11 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-compress-alt fa-rotate-45"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        return $this->getRouter()->generate("short_redirect", ["slug" => $this->getSlug()], $referenceType);
+        $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
+
+        return $this->getRouter()->generate("short_redirect", $routeParameters, $referenceType);
     }
 
     public function __toString() { return $this->getLabel() ?? $this->getUrl() ?? ""; }

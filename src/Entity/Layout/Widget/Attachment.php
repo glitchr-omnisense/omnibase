@@ -27,9 +27,11 @@ class Attachment extends Widget implements IconizeInterface, LinkableInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-paperclip"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        return $this->getRouter()->generate("widget_attachment", ["slug" => $this->getSlug()], $referenceType);
+        $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
+
+        return $this->getRouter()->generate("widget_attachment", $routeParameters, $referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }

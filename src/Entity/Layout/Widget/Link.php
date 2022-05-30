@@ -23,8 +23,9 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
     public        function __iconize()       : ?array { return $this->getHyperlink()->__iconize(); }
     public static function __iconizeStatic() : ?array { return ["fas fa-share-square"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH /* not used */): ?string
     {
+        // TODO $routeParameters Implement additional custom layer..
         return $this->getHyperlink()->generate();
     }
 

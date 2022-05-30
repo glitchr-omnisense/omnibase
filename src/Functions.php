@@ -22,21 +22,54 @@ namespace {
         }, $input);
     }
 
-    function get_url(bool $keep_subdomain = true, bool $keep_machine = true) : ?string
+    function get_url(bool $keep_subdomain = true, bool $keep_machine = true,
+                    ?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
+    {
+        $scheme      ??= $_SERVER["REQUEST_SCHEME"];
+        $http_host   ??= $_SERVER["HTTP_HOST"];
+        $request_uri ??= $_SERVER["REQUEST_URI"];
+        return format_url($scheme."://".$http_host.$request_uri, $keep_subdomain, $keep_machine);
+    }
+
+    function format_url(?string $url = null, bool $keep_subdomain = true, bool $keep_machine = true) : ?string
     {
         if(is_cli()) return null;
 
-        $parse = parse_url2($_SERVER["REQUEST_SCHEME"]."://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]);
+        $parse = parse_url2($url);
+        if($parse === false) return null;
 
-        $domain    = $parse["domain"] ? $parse["domain"] : "";
+        if(!$keep_machine  ) $parse = array_key_removes($parse, "machine");
+        if(!$keep_subdomain) $parse = array_key_removes($parse, "subdomain");
 
-        $machine   = $parse["machine"] ? $parse["machine"] ."." : "";
-        $machine   = $keep_machine ? $machine : "";
+        return compose_url(
+            $parse["scheme"] ?? null,
+            $parse["user"] ?? null,
+            $parse["password"] ?? null,
+            $parse["machine"] ?? null,
+            $parse["subdomain"] ?? null,
+            $parse["domain"] ?? null,
+            $parse["port"] ?? null,
+            $parse["path"] ?? null);
+    }
 
-        $subdomain = $parse["subdomain"] ? $parse["subdomain"]."." : "";
-        $subdomain = $keep_subdomain ? $subdomain : "";
+    function compose_url(
+        ?string $scheme = null,
+        ?string $user = null,
+        ?string $password = null,
+        ?string $machine = null,
+        ?string $subdomain = null,
+        ?string $domain = null,
+        string|int|null $port = null, ?string $path = null): array|string|int|false|null
+    {
+        $scheme    = ($domain && $scheme   ) ? $scheme."://" : null;
+        $user      = ($domain && $user     ) ? $user."@" : null;
+        $password  = ($domain && $user && $password) ? ":".$password : null;
 
-        return $parse["scheme"]."://".$machine.$subdomain.$domain;
+        $subdomain = ($domain && $subdomain) ? $subdomain . "." : null;
+        $machine   = ($domain && $machine  ) ? $machine . "." : null;
+        $port      = ($domain && $port     ) ? ":".$port : null;
+
+        return $scheme.$machine.$subdomain.$domain.$user.$password.$path;
     }
 
     function parse_url2(string $url = null, int $component = -1): array|string|int|false|null
@@ -45,8 +78,12 @@ namespace {
         if($url === null) return null;
 
         $parse = parse_url($url, $component);
-        $parse['path'] = str_rstrip($parse['path'] ?? "", "/");
-        $parse["root"] = str_rstrip($url, $parse['path']);
+
+        $path = str_rstrip($parse['path'] ?? "", "/");
+        $parse["path"] = $path;
+
+        $root = str_rstrip($url, $parse['path']);
+        if(!empty($root)) $parse["root"] = $root;
 
         if(array_key_exists("host", $parse)) {
 
@@ -69,9 +106,47 @@ namespace {
             }
         }
 
-        $parse["url"] = $parse["root"].$parse['path'];
+        if(array_key_exists("root", $parse))
+            $parse["url"] = $root.$path;
+
         return $parse;
     }
+
+    // function relpath(string $path, string $dir) {
+    // {
+    //     // some compatibility fixes for Windows paths
+    //     $from = is_dir($from) ? rtrim($from, '\/') . '/' : $from;
+    //     $to   = is_dir($to)   ? rtrim($to, '\/') . '/'   : $to;
+    //     $from = str_replace('\\', '/', $from);
+    //     $to   = str_replace('\\', '/', $to);
+
+    //     $from     = explode('/', $from);
+    //     $to       = explode('/', $to);
+    //     $relPath  = $to;
+
+    //     foreach($from as $depth => $dir) {
+    //         // find first non-matching dir
+    //         if($dir === $to[$depth]) {
+    //             // ignore this directory
+    //             array_shift($relPath);
+    //         } else {
+    //             // get number of remaining dirs to $from
+    //             $remaining = count($from) - $depth;
+    //             if($remaining > 1) {
+    //                 // add traversals up to first matching dir
+    //                 $padLength = (count($relPath) + $remaining - 1) * -1;
+    //                 $relPath = array_pad($relPath, $padLength, '..');
+    //                 break;
+    //             } else {
+    //                 $relPath[0] = './' . $relPath[0];
+    //             }
+    //         }
+    //     }
+    //     return implode('/', $relPath);
+    // }
+
+    // dump(relpath("dir1/dir2/file1.php", "dir1"));
+    // exit(1);
 
     function is_instanceof(mixed $object_or_class, string|array $class): bool
     {

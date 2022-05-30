@@ -27,9 +27,11 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-file-alt"]; }
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        return $this->getTwigExtension()->getRoutingExtension()->getPath("widget_page", ["slug" => $this->getSlug()], $referenceType);
+        $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
+
+        return $this->getTwigExtension()->getRoutingExtension()->getPath("widget_page", $routeParameters, $referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }

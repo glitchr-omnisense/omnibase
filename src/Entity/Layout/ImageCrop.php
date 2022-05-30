@@ -18,14 +18,14 @@ class ImageCrop implements LinkableInterface
 {
     use BaseTrait;
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $routeParameters = [
+        $routeParameters = array_merge($routeParameters, [
             "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(),
             "hashid"     => $this->getImageService()->obfuscate($this->getImage()->getSource())
-        ];
+        ]);
 
-        return $this->getRouter()->generate("ux_crop", $routeParameters, $referenceType);
+        return $this->getRouter()->generate("ux_imageCrop", $routeParameters, $referenceType);
     }
 
     public function __toString() {
@@ -33,7 +33,7 @@ class ImageCrop implements LinkableInterface
         return $this->getLabel() ?? $this->getTranslator()->entity($this).($this->getId() ? " #".$this->getId() : null);
     }
 
-    public function getRatio() { return $this->getWidth()/$this->getHeight(); }
+    public function getRatio() { return $this->getWidth0()/$this->getHeight0(); }
 
     /**
      * @ORM\Id

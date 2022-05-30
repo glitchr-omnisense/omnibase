@@ -30,10 +30,13 @@ class Image implements IconizeInterface
 {
     use BaseTrait;
 
-    public function __toLink(int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         $routeName = "ux_image";
-        $routeParameters = ["hashid" => $this->getImageService()->obfuscate($this->getSource())];
+        $routeParameters = array_merge($routeParameters, [
+            "hashid" => $this->getImageService()->obfuscate($this->getSource())
+        ]);
+
         return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
@@ -102,21 +105,23 @@ class Image implements IconizeInterface
 
     public function getPreferredCrop(
         string|int $slugOrRatio, float $ratioTolerance = 1e-2,
-        ?int $width = null, ?int $height = null, int $dimTolerance = 10 /* pixels */): ?ImageCrop
-    {
-        $preferredCrop = $this->getCrops($slugOrRatio, $ratioTolerance)
-            ->Filter(fn($c) => abs($c->getWidth () - $width ) < $dimTolerance)
-            ->Filter(fn($c) => abs($c->getHeight() - $height) < $dimTolerance)->First();
+        ?int $width = null, ?int $height = null, int $dimTolerance = 10 /* pixels */): ?ImageCrop {
 
-        return $preferredCrop === false ? null : $preferredCrop;
+        $preferredCrop = $this->getCrops($slugOrRatio, $ratioTolerance);
+        if($width !== null)
+            $preferredCrop = $preferredCrop->Filter(fn($c) => abs($c->getWidth () - $width ) < $dimTolerance);
+        if($height !== null)
+            $preferredCrop = $preferredCrop->Filter(fn($c) => abs($c->getHeight() - $height) < $dimTolerance);
+
+        return !$preferredCrop->isEmpty() ? $preferredCrop->First() : null;
     }
 
     public function getCrops(string|int|null $slugOrRatio = null, float $ratioTolerance = 1e-2): Collection
     {
-        return $this->crops->Filter(function($c) use ($slugOrRatio, $ratioTolerance)
-        {
+        return $this->crops->Filter(function($c) use ($slugOrRatio, $ratioTolerance) {
+
             if(is_string($slugOrRatio)) return $c->getSlug() && $c->getSlug() == $slugOrRatio;
-            if(is_numeric($slugOrRatio)) return ($c->getRatio() - $slugOrRatio) < $ratioTolerance;
+            if(is_numeric($slugOrRatio)) return abs($c->getRatio() - $slugOrRatio) < $ratioTolerance;
             return true;
         });
     }

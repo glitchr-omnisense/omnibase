@@ -135,10 +135,10 @@ class FileController extends AbstractController
     }
 
     /**
-     * @Route("/images/{identifier}/{hashid}", name="crop")
-     * @Route("/images/{identifier}/{hashid}/image.{extension}", name="cropExtension")
+     * @Route("/images/{identifier}/{hashid}", name="imageCrop")
+     * @Route("/images/{identifier}/{hashid}/image.{extension}", name="imageCropExtension")
      */
-    public function Crop($hashid, string $identifier, string $extension = null): Response
+    public function ImageCrop($hashid, string $identifier, string $extension = null): Response
     {
         //
         // Extract parameters
@@ -152,7 +152,7 @@ class FileController extends AbstractController
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
         if ($extension == null)
-            return $this->redirectToRoute("ux_cropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+            return $this->redirectToRoute("ux_imageCropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         //
         // Get the most image cropping

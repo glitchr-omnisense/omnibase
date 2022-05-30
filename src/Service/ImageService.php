@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Base\Filter\Basic\CropFilter;
 use Base\Filter\Basic\ThumbnailFilter;
 use Base\Filter\Format\BitmapFilter;
 use Base\Filter\Format\SvgFilter;
@@ -54,9 +55,21 @@ class ImageService extends FileService implements ImageServiceInterface
         if(is_array($path)) return array_map(fn($p) => $this->imagify($p), $path);
 
         if($attributes["src"] ?? false)
-            unset($attributes["src"]);
+        unset($attributes["src"]);
 
         return "<img ".html_attributes($attributes)." src='".$this->imagine($path)."' />";
+    }
+
+    public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
+    {
+        $filters[] = new CropFilter(
+            $x, $y,
+            $width, $height,
+            $position
+        );
+
+        $config = array_key_removes($config, "width", "height", "x", "y", "position");
+        return $this->imagine($path, $filters, $config);
     }
 
     public function thumbnail_inset   (array|string|null $path, ?int $width = null , ?int $height = null, array $filters = [], array $config = []): array|string|null { return $this->thumbnail($path, $width, $height, $filters, array_merge($config, ["mode" => ImageInterface::THUMBNAIL_INSET])); }
@@ -102,6 +115,7 @@ class ImageService extends FileService implements ImageServiceInterface
         if(!$path) return null;
 
         $config["filters"] ??= [];
+
         return parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
     }
 
@@ -178,6 +192,7 @@ class ImageService extends FileService implements ImageServiceInterface
             if(!$this->filesystem->fileExists($pathCache, "local.cache")) {
 
                 $filteredPath = $this->filter($path, $filters, $config) ?? $path;
+                if(!file_exists($filteredPath)) return $this->noImage;
 
                 $this->filesystem->mkdir(dirname($pathCache), "local.cache");
                 $this->filesystem->write($pathCache, file_get_contents($filteredPath), "local.cache");

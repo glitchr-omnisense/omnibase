@@ -68,18 +68,21 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             } catch (Exception $e ) { throw $e; }
         }
 
-        // Use either $_SERVER variables, or base setting from database if available.
-        $currentUrl = parse_url2();
+        // Use either parameters or $_SERVER variables to determine the host to provide
+        $parseHost = parse_url2(get_url(true, true,
+            array_pop_key("_scheme",  $routeParameters),
+            array_pop_key("_host",  $routeParameters)
+        ));
 
         $baseDir = null;
         switch($referenceType) {
 
             case self::ABSOLUTE_URL:
-                $baseDir = $currentUrl["root"] ?? $this->getSettings()->url("/", null, $referenceType);
+                $baseDir = $parseHost["root"] ?? $this->getSettings()->url("/", null, $referenceType);
                 break;
 
             case self::NETWORK_PATH:
-                $baseDir = $currentUrl["path"] ?? $this->getSettings()->base_dir();
+                $baseDir = $this->getSettings()->base_dir();
                 $baseDir = "//".trim($baseDir, "/");
                 break;
 
@@ -88,7 +91,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 break;
 
             case self::ABSOLUTE_PATH:
-                $baseDir = $currentUrl["path"] ?? $this->getSettings()->base_dir();
+                $baseDir = $this->getSettings()->base_dir();
                 $baseDir = str_rstrip($baseDir, "/");
         }
 
@@ -141,7 +144,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $parts["path"] = "/".str_strip(str_replace("//", "/", $parts["path"]), "/");
         $routeUrl = build_url($parts);
 
-        if(str_starts_with($routeUrl, "http")) return $routeUrl;
+        if(preg_match("/^[a-zA-Z0-9]+:\/\//", $routeUrl)) return $routeUrl;
         return str_rstrip($baseDir."/".str_lstrip($routeUrl, "/"), "/");
     }
 }
