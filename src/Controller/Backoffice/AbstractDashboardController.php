@@ -230,11 +230,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.maintenance"          => ["form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance.downtime" => ["form_type" => DateTimePickerType::class, "required" => false],
             "base.settings.maintenance.uptime"   => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.mail"                 => ["form_type" => EmailType::class],
+            "base.settings.mail.name"            => ["translatable" => true],
             "base.settings.http.scheme"          => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
             "base.settings.http.host"            => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
             "base.settings.http.base_dir"        => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
-            "base.settings.mail"                 => ["form_type" => EmailType::class],
-            "base.settings.mail.name"            => ["translatable" => true],
         ]), array_reverse($fields)));
 
         foreach($fields as $name => &$options) {
