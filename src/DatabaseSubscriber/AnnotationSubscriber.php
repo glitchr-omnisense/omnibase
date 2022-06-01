@@ -4,6 +4,7 @@ namespace Base\DatabaseSubscriber;
 
 use App\Entity\User;
 use Base\Annotations\AnnotationReader;
+use Base\BaseBundle;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
@@ -46,6 +47,8 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
     protected array $subscriberHistory = [];
     public function loadClassMetadata( LoadClassMetadataEventArgs $event ) {
+
+        if(!BaseBundle::isBooted()) return; // Base bundle needs to be booted to be aware of custom doctrine types.
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();

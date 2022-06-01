@@ -134,6 +134,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Try to compute subgroup (or base one)
         try { return $this->resolve($routeName, $routeParameters, $referenceType); }
         catch(Exception $e) { if ($routeDefaultName == $routeName) throw $e; }
+
         return $this->resolve($routeDefaultName, $routeParameters, $referenceType);
     }
 }

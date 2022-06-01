@@ -4,6 +4,9 @@ namespace {
 
     use Base\BaseBundle;
 
+    if( !extension_loaded('bcmath') )
+        throw new RuntimeException("bcmath is not installed");
+
     function interpret_link($input)
     {
         return preg_replace_callback(
@@ -28,6 +31,7 @@ namespace {
         $scheme      ??= $_SERVER["REQUEST_SCHEME"];
         $http_host   ??= $_SERVER["HTTP_HOST"];
         $request_uri ??= $_SERVER["REQUEST_URI"];
+
         return format_url($scheme."://".$http_host.$request_uri, $keep_subdomain, $keep_machine);
     }
 
@@ -47,7 +51,7 @@ namespace {
             $parse["password"] ?? null,
             $parse["machine"] ?? null,
             $parse["subdomain"] ?? null,
-            $parse["domain"] ?? null,
+            $parse["domain"] ?? $parse["host"] ?? null,
             $parse["port"] ?? null,
             $parse["path"] ?? null);
     }
@@ -78,7 +82,6 @@ namespace {
         if($url === null) return null;
 
         $parse = parse_url($url, $component);
-
         $path = str_rstrip($parse['path'] ?? "", "/");
         $parse["path"] = $path;
 
@@ -87,18 +90,31 @@ namespace {
 
         if(array_key_exists("host", $parse)) {
 
-            $parse["fqdn"] = $parse["host"].".";
+            //
+            // Check if IP address provided
+            if(filter_var($parse["host"], FILTER_VALIDATE_IP) ) $parse["ip"] = $parse["host"];
+            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) ) $parse["ipv4"] = $parse["host"];
+            if(filter_var($parse["host"], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) ) $parse["ipv6"] = $parse["host"];
 
-            if (preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
+            //
+            // Check if hostname
+            if(preg_match('/[a-z0-9][a-z0-9\-]{0,63}\.[a-z]{2,6}(\.[a-z]{1,2})?$/i', strtolower($parse["host"] ?? ""), $match)) {
 
+                $parse["fqdn"] = $parse["host"].".";
                 $parse["domain"] = $match[0];
 
                 $subdomain = str_rstrip($parse["host"], ".".$parse["domain"]);
-                $parse["subdomain"] = $subdomain !== $parse["domain"] ? $subdomain : null;
+                if ($parse["domain"] !== $subdomain)
+                    $parse["subdomain"] = $subdomain;
 
-                $_ = explode(".", $parse["subdomain"] ?? "");
-                $parse["subdomain"] = array_pop($_);
-                $parse["machine"] = implode(".", $_);
+                if(array_key_exists("subdomain", $parse)) {
+
+                    $_ = explode(".", $parse["subdomain"]);
+                    $parse["subdomain"] = array_pop($_);
+
+                    if(!empty($_))
+                        $parse["machine"] = implode(".", $_);
+                }
 
                 $domain = explode(".", $match[0]);
                 $parse["sld"]   = first($domain);

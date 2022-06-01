@@ -20,11 +20,16 @@ class BaseBundle extends Bundle
     public const CACHE   = true;
     public const VERSION = '1.0.0';
 
+    protected static bool $boot = false;
+    public static function isBooted() { return self::$boot; }
+
     public function boot()
     {
         $this->defineDoctrineTypes();
         $this->defineDoctrineFilters();
         $this->defineDoctrineWalkers();
+
+        self::$boot = true;
     }
 
     public function build(ContainerBuilder $container)
@@ -71,7 +76,7 @@ class BaseBundle extends Bundle
         try {
             $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
             $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
-        } catch(Exception $e) { }
+        } catch(Exception $e) { dump($e);}
 
         $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
         $classList = BaseBundle::getAllClasses($projectDir . "./Enum");
@@ -84,7 +89,7 @@ class BaseBundle extends Bundle
             else Type::addType($className::getStaticName(), $className);
 
             try { $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName()); }
-            catch(Exception $e) { }
+            catch(Exception $e) { dump($e);}
         }
     }
 
