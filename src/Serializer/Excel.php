@@ -135,6 +135,9 @@ class Excel
                     case 'right':
                         $alignment = Alignment::HORIZONTAL_RIGHT;
                     break;
+                    case 'fill':
+                        $alignment = Alignment::HORIZONTAL_FILL;
+                    break;
                     default:
                         throw new InvalidArgumentException(sprintf('The value of context key "%s" is not valid (possible values: "left", "center" or "right")', self::HEADERS_HORIZONTAL_ALIGNMENT_KEY));
                 }

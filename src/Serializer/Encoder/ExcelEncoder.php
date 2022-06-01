@@ -3,14 +3,9 @@
 namespace Base\Serializer\Encoder;
 
 use Base\Serializer\Excel;
-use Base\Serializer\Xls;
-use Exception;
-use PhpOffice\PhpSpreadsheet\Exception as PhpSpreadsheetException;
-use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
-// https://github.com/Ang3/php-excel-encoder
 class ExcelEncoder implements EncoderInterface, DecoderInterface
 {
     /**
