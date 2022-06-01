@@ -6,8 +6,6 @@ use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\ParameterBagInterface;
 use Base\Service\BaseSettings;
-use Error;
-use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;

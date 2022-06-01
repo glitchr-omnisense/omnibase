@@ -67,6 +67,7 @@
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.settings" />
         </service>
 
         <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="base.service" /></service>
