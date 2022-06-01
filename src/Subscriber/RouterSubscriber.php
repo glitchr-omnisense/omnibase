@@ -33,6 +33,8 @@ class RouterSubscriber implements EventSubscriberInterface
     {
         $url = parse_url2(get_url());
 
+        //
+        // Redirect IP if restriction enabled
         if(array_key_exists("ip", $url) && !$this->parameterBag->get("base.host_restriction.ip_access")) {
             $event->setResponse($this->redirectByReduction(true, true, null, $this->baseSettings->host()));
             return $event->stopPropagation();
@@ -41,6 +43,8 @@ class RouterSubscriber implements EventSubscriberInterface
         $route = $this->router->getRoute();
         if(!$route) return;
 
+        //
+        // If no host specified in Route, then check the list of permitted subdomain
         if(empty($route->getHost())) {
 
             $reduce = !$this->router->keepMachine() || !$this->router->keepSubdomain();
