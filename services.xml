@@ -453,6 +453,18 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
+         <service id="Base\Security\Voter\BackofficeVoter">
+            <tag name="security.voter" />
+            <argument type="service" id="router" />
+        </service>
+
+         <service id="Base\Security\Voter\AccessVoter">
+            <tag name="security.voter" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="router" />
+            <argument type="service" id="base.settings" />
+        </service>
+
 
         <service id="Base\Database\Factory\EntityExtension" public="true" />
         <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>

@@ -28,6 +28,7 @@ use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
@@ -243,47 +244,41 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        $vetoRestriction = false;
-        $url = parse_url(get_url());
-
-        $urlExceptions  = $this->parameterBag->get("base.access_restriction.exceptions");
-        foreach($urlExceptions as $urlException)
-            $vetoRestriction |= preg_match("/".$urlException."/", $url["host"] ?? "");
-
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
 
         //
-        // Check if public access right
-        $publicAccess  = filter_var($this->baseService->getSettings()->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
-        $publicAccess |= $user && $user->isGranted("ROLE_USER");
+        // Prevent the average guy to see the administration
+        if(!$this->security->isGranted("BACKOFFICE")) throw new NotFoundHttpException();
 
-        $userAccess    = filter_var($this->baseService->getSettings()->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
-        $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
+        //
+        // Redirect if basic access not granted
+        $accessRestricted  = !$this->security->isGranted("PUBLIC_ACCESS");
+        $accessRestricted |= !$this->security->isGranted("USER_ACCESS");
+        $accessRestricted |= !$this->security->isGranted("ADMIN_ACCESS");
+        $accessRestricted |= !$this->security->isGranted("EDITOR_ACCESS");
+        if($accessRestricted) {
 
-        $adminAccess   = filter_var($this->baseService->getSettings()->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
-        $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
-
-        if(!$publicAccess || !$userAccess || !$adminAccess) {
-
+            // In case of restriction: profiler is disabled
             $this->profiler->disable();
 
-            if($vetoRestriction) return;
+            // Nonetheless exception access is alway possible
+            if($this->security->isGranted("EXCEPTION_ACCESS"))
+                return;
 
-            $firewallMain = $event->getRequest()->attributes->get("_firewall_context") == "security.firewall.map.context.main";
-            if(!$firewallMain) return; // Access restricted to main firewalls
-
+            // If not, then user is redirected to a specific route
             $currentRouteName = $this->getCurrentRouteName($event);
-            if(!in_array($currentRouteName, [RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
+            $accessDeniedRedirection = $this->baseService->getSettings()->getScalar("base.settings.access_denied_redirection");
+            if(!in_array($currentRouteName, [$accessDeniedRedirection, RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
 
-                $accessDenied = $this->baseService->getSettings()->getScalar("base.settings.access_denied");
-                if($accessDenied) $this->baseService->redirect($accessDenied);
+                if($accessDeniedRedirection) $this->baseService->redirect($accessDeniedRedirection);
                 else {
 
                     $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
                     if($response) $event->setResponse($response);
                 }
 
+                // User gets disconnected if access not granted
                 if($token) $this->tokenStorage->setToken(NULL);
                 return $event->stopPropagation();
             }

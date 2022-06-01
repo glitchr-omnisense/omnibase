@@ -9,13 +9,18 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
 
 class AdvancedUrlGenerator extends CompiledUrlGenerator
 {
     use BaseTrait;
 
+    protected $compiledRoutes;
+
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
+        $this->compiledRoutes = $compiledRoutes;
+
         // NB: This generator needs separate context as it calls its corresponding Matcher..
         //     (.. and Matcher class is changing context.)
         $context = new RequestContext($context->getBaseUrl(), $context->getMethod(), $context->getHost(), $context->getScheme(), $context->getHttpPort(), $context->getHttpsPort(), $context->getPathInfo(), $context->getQueryString());
@@ -97,6 +102,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeGroup = $routeGroup ?? [];
         $routeGroup = $routeGroup ? ".".implode(".",$routeGroup) : null;
 
+        new Route(...$this->compiledRoutes);
+
         $routeBase = $routeName[0];
         $routeName = $routeBase.$routeGroup;
         if(!$routeName) $routeName = $this->getRouter()->getRouteName($this->resolve($routeBase, $routeParameters, $referenceType));
@@ -121,6 +128,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $keys = array_keys(array_diff_key($this->getRouter()->getRouteParameters($routeUrl), $this->getRouter()->getRouteParameters($routeGroupUrl)));
             $routeParameters = array_key_removes($routeParameters, ...$keys);
         }
+        dump(memory_get_usage());
 
         //
         // Try to compute subgroup (or base one)

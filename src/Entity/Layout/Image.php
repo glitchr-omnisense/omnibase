@@ -32,12 +32,31 @@ class Image implements IconizeInterface
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $routeName = "ux_image";
+        $cropIdentifier = array_pop_key("crop", $routeParameters);
+        $routeName = $cropIdentifier ? "ux_imageCrop" : "ux_image" ;
+
         $routeParameters = array_merge($routeParameters, [
-            "hashid" => $this->getImageService()->obfuscate($this->getSource())
+            "hashid" => $this->getImageService()->obfuscate($this->getSource()),
+            "identifier" => $cropIdentifier
         ]);
 
-        return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m1 = memory_get_usage();
+        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m2 = memory_get_usage();
+        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m3 = memory_get_usage();
+        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m4 = memory_get_usage();
+        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m5 = memory_get_usage();
+        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m6 = memory_get_usage();
+        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        $m7 = memory_get_usage();
+        dump("---> " .$m1." ".$m2." ".$m3." ".$m4." ".$m5." ".$m6." ".$m7);
+
+        exit(1);
+    return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
     public        function __iconize()       : ?array { return null; }
@@ -102,30 +121,7 @@ class Image implements IconizeInterface
      * @ORM\OneToMany(targetEntity=ImageCrop::class, mappedBy="image", orphanRemoval=true, cascade={"persist", "remove"})
      */
     protected $crops;
-
-    public function getPreferredCrop(
-        string|int $slugOrRatio, float $ratioTolerance = 1e-2,
-        ?int $width = null, ?int $height = null, int $dimTolerance = 10 /* pixels */): ?ImageCrop {
-
-        $preferredCrop = $this->getCrops($slugOrRatio, $ratioTolerance);
-        if($width !== null)
-            $preferredCrop = $preferredCrop->Filter(fn($c) => abs($c->getWidth () - $width ) < $dimTolerance);
-        if($height !== null)
-            $preferredCrop = $preferredCrop->Filter(fn($c) => abs($c->getHeight() - $height) < $dimTolerance);
-
-        return !$preferredCrop->isEmpty() ? $preferredCrop->First() : null;
-    }
-
-    public function getCrops(string|int|null $slugOrRatio = null, float $ratioTolerance = 1e-2): Collection
-    {
-        return $this->crops->Filter(function($c) use ($slugOrRatio, $ratioTolerance) {
-
-            if(is_string($slugOrRatio)) return $c->getSlug() && $c->getSlug() == $slugOrRatio;
-            if(is_numeric($slugOrRatio)) return abs($c->getRatio() - $slugOrRatio) < $ratioTolerance;
-            return true;
-        });
-    }
-
+    public function getCrops(): Collection { return $this->crops; }
     public function addCrop(ImageCrop $crop): self
     {
         if (!$this->crops->contains($crop)) {

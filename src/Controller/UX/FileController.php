@@ -88,7 +88,7 @@ class FileController extends AbstractController
         $filters = $args["filters"];
 
         $path = $this->imageService->filter($args["path"], new WebpFilter(null, $filters, $options), ["local_cache" => true]);
-        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 
     /**
@@ -107,7 +107,7 @@ class FileController extends AbstractController
             return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $path = $this->imageService->filter($args["path"], new SvgFilter(null, $filters, $options), ["local_cache" => true]);
-        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 
     /**
@@ -131,7 +131,7 @@ class FileController extends AbstractController
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         $path = $this->imageService->filter($args["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => true]);
-        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 
     /**
@@ -177,6 +177,8 @@ class FileController extends AbstractController
 
         //
         // Apply filter
+        // NB: Only applying cropping if ImageCrop is found ..
+        //     .. otherwise some naughty users might be generating infinite amount of image
         if($imageCrop) {
 
             $filters[] = new CropFilter(
@@ -186,6 +188,6 @@ class FileController extends AbstractController
         }
 
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options));
-        return $this->imageService->serve($path, 200, ["local_cache" => true, "http_cache" => $path !== null]);
+        return  $this->imageService->serve($path, 200, ["local_cache" => true, "http_cache" => $path !== null]);
     }
 }

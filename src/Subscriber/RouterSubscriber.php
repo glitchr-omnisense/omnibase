@@ -44,7 +44,7 @@ class RouterSubscriber implements EventSubscriberInterface
             }
 
             $vetoSubdomain = true;
-            $permittedSubdomains = $this->parameterBag->get("base.access_restriction.permitted_subdomains") ?? [];
+            $permittedSubdomains = $this->parameterBag->get("base.http_restriction.permitted_subdomains") ?? [];
             foreach($permittedSubdomains ?? [] as $permittedSubdomain)
                 $vetoSubdomain &= !preg_match("/".$permittedSubdomain."/", $url["subdomain"]);
 

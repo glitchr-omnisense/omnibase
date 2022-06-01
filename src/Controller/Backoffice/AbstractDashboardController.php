@@ -61,6 +61,7 @@ use Base\Entity\Extension\TrashBall;
 use Base\Entity\Layout\Short;
 use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
+use Base\Field\Type\RouteType;
 use Base\Field\Type\SelectType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -223,7 +224,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true, "required" => false],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
-            "base.settings.access_denied"        => ["roles" => "ROLE_EDITOR", "form_type" => UrlType::class, "required" => false],
+            "base.settings.access_denied"        => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
             "base.settings.public_access"        => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.user_access"          => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.admin_access"         => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
