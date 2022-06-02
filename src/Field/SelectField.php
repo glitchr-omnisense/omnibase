@@ -54,7 +54,6 @@ class SelectField implements FieldInterface
             ->addCssClass('field-select');
     }
 
-
     public function useHtml(bool $useHtml = true)
     {
         $this->setFormTypeOption("html", $useHtml);
