@@ -7,31 +7,31 @@ use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
+
 use Doctrine\Persistence\ManagerRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
+
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
-use Twig\Environment;
 
 class DataCollector extends AbstractDataCollector
 {
     private AdminContextProvider $adminContextProvider;
 
     public array $dataBundles = [];
-    public function __construct(AdminContextProvider $adminContextProvider, ManagerRegistry $doctrine, ParameterBagInterface $parameterBag, RouterInterface $router)
+    public function __construct(AdminContextProvider $adminContextProvider, ManagerRegistry $doctrine, ParameterBagInterface $parameterBag, RouterInterface $router, BaseService $baseService)
     {
         $this->adminContextProvider = $adminContextProvider;
         $this->doctrine = $doctrine;
         $this->router = $router;
         $this->parameterBag = $parameterBag;
+        $this->baseService = $baseService;
     }
 
     public function getName(): string { return 'base'; }
@@ -163,6 +163,8 @@ class DataCollector extends AbstractDataCollector
         $data = [];
         if(class_exists(BaseBundle::class))
             $data[$this->getBundleFormattedName(BaseBundle::class)] = [
+                'Environment name' => $this->baseService->getEnvironment(),
+                'Development mode' => $this->baseService->isDevelopment(),
                 'Technical support' => $this->parameterBag->get("base.notifier.technical_support"),
                 'Router Class' => get_class($this->router),
                 'Parameter Bag Class' => get_class($this->parameterBag),
@@ -177,7 +179,7 @@ class DataCollector extends AbstractDataCollector
                 'CRUD Action' => $context->getRequest()->get(EA::CRUD_ACTION),
                 'Entity ID' => $context->getRequest()->get(EA::ENTITY_ID),
                 'Sort' => $context->getRequest()->get(EA::SORT),
-            ] : null;
+            ] : [];
 
         if(class_exists(ApiPlatformBundle::class))
             $data[$this->getBundleFormattedName(ApiPlatformBundle::class)] = [];
