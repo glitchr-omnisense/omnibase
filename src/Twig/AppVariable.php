@@ -3,7 +3,7 @@
 namespace Base\Twig;
 
 use Base\Component\HttpFoundation\Referrer;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -26,7 +26,7 @@ class AppVariable
     protected $twig;
 
     /**
-     * @var BaseSettings
+     * @var Settings
      */
     protected $settings;
     /**
@@ -34,7 +34,7 @@ class AppVariable
      */
     protected $parameterBag;
 
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, BaseSettings $settings, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, Settings $settings, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->settings  = $settings;
         $this->referrer  = $referrer;

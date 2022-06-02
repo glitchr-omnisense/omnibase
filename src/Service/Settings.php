@@ -4,16 +4,15 @@ namespace Base\Service;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
-use Base\Traits\BaseSettingsTrait;
+use Base\Traits\SettingsTrait;
 use Symfony\Component\Asset\Packages;
 
 use DateTime;
-use Symfony\Component\Asset\Package;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class BaseSettings
+class Settings
 {
-    use BaseSettingsTrait;
+    use SettingsTrait;
 
     /**
      * @var Packages

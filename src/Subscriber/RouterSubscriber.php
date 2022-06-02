@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\RouterInterface;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 
 class RouterSubscriber implements EventSubscriberInterface
 {
@@ -17,11 +17,11 @@ class RouterSubscriber implements EventSubscriberInterface
      */
     protected $router;
 
-    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, BaseSettings $baseSettings)
+    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag, Settings $settings)
     {
         $this->router = $router;
         $this->parameterBag = $parameterBag;
-        $this->baseSettings = $baseSettings;
+        $this->settings = $settings;
     }
 
     public static function getSubscribedEvents(): array
@@ -36,7 +36,7 @@ class RouterSubscriber implements EventSubscriberInterface
         //
         // Redirect IP if restriction enabled
         if(!$this->authorizationChecker->isGranted("ROUTER_IP", $route)) {
-            $event->setResponse($this->redirectByReduction(true, true, null, $this->baseSettings->host()));
+            $event->setResponse($this->redirectByReduction(true, true, null, $this->settings->host()));
             return $event->stopPropagation();
         }
 

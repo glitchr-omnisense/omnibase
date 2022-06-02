@@ -2,19 +2,18 @@
 
 namespace Base\Subscriber;
 
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Base\Service\HotParameterBag;
-use Base\Service\ParameterBagInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ParameterBagSubscriber implements EventSubscriberInterface
 {
-    public function __construct($parameterBag, BaseSettings $baseSettings)
+    public function __construct($parameterBag, Settings $settings)
     {
         $this->parameterBag = $parameterBag;
-        $this->baseSettings = $baseSettings;
+        $this->settings = $settings;
     }
 
     public static function getSubscribedEvents(): array
@@ -26,7 +25,7 @@ class ParameterBagSubscriber implements EventSubscriberInterface
     {
         if(!$this->parameterBag instanceof HotParameterBag) return;
 
-        $settings = array_flatten(".", $this->baseSettings->getRaw(), -1, ARRAY_FLATTEN_PRESERVE_KEYS);
+        $settings = array_flatten(".", $this->settings->getRaw(), -1, ARRAY_FLATTEN_PRESERVE_KEYS);
         foreach($settings as $setting) {
 
             if($setting->getBag() === null) continue;

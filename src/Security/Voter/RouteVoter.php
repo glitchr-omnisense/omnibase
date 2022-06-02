@@ -1,15 +1,11 @@
 <?php
 
-namespace Base\Security;
+namespace Base\Security\Voter;
 
-use Base\Entity\User;
-use Base\Routing\AdvancedRouter;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -19,10 +15,10 @@ class RouteVoter extends Voter
     const    ROUTE_IP = "ROUTE_IP";
     const  ROUTE_HOST = "ROUTE_HOST";
 
-    public function __construct(AdvancedRouterInterface $router, BaseSettings $baseSettings)
+    public function __construct(AdvancedRouterInterface $router, ParameterBagInterface $parameterBag)
     {
-        $this->router               = $router;
-        $this->baseSettings         = $baseSettings;
+        $this->router       = $router;
+        $this->parameterBag = $parameterBag;
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -39,7 +35,6 @@ class RouteVoter extends Voter
         switch($attribute) {
 
             case self::ROUTE_IP:
-
                 return array_key_exists("ip", $url) && !$this->parameterBag->get("base.host_restriction.ip_access");
 
             case self::ROUTE_HOST:

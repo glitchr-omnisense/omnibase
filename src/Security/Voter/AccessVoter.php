@@ -3,7 +3,7 @@
 namespace Base\Security;
 
 use Base\Entity\User;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Security;
@@ -20,11 +20,11 @@ class AccessVoter extends Voter
     const     ADMIN_ACCESS = "ADMIN_ACCESS";
     const    EDITOR_ACCESS = "EDITOR_ACCESS";
 
-    public function __construct(RequestStack $requestStack, RouterInterface $router, BaseSettings $baseSettings)
+    public function __construct(RequestStack $requestStack, RouterInterface $router, Settings $settings)
     {
-        $this->requestStack         = $requestStack;
-        $this->router               = $router;
-        $this->baseSettings         = $baseSettings;
+        $this->requestStack = $requestStack;
+        $this->router       = $router;
+        $this->settings   = $settings;
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -43,21 +43,21 @@ class AccessVoter extends Voter
 
             case self::PUBLIC_ACCESS:
 
-                $publicAccess  = filter_var($this->baseService->getSettings()->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
+                $publicAccess  = filter_var($this->settings->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
                 $publicAccess |= $user && $user->isGranted("ROLE_USER");
 
                 return $publicAccess;
 
             case self::USER_ACCESS:
 
-                $userAccess    = filter_var($this->baseService->getSettings()->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
+                $userAccess    = filter_var($this->settings->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
                 $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
 
                 return $userAccess;
 
             case self::ADMIN_ACCESS:
 
-                $adminAccess   = filter_var($this->baseService->getSettings()->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $adminAccess   = filter_var($this->settings->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
 
                 return $adminAccess;

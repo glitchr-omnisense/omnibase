@@ -125,7 +125,7 @@ class BaseService implements RuntimeExtensionInterface
         FormFactoryInterface $formFactory,
         LocaleProviderInterface $localeProvider,
 
-        BaseSettings $settings,
+        Settings $settings,
         ImageService $imageService,
         IconProvider $iconProvider,
 

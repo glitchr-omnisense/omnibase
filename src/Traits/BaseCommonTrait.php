@@ -5,7 +5,7 @@ namespace Base\Traits;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Routing\AdvancedRouter;
 use Base\Routing\AdvancedRouterInterface;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
@@ -93,10 +93,10 @@ trait BaseCommonTrait {
     public static function setTwig(Environment $twig) { self::$twig = $twig; }
 
     /**
-     * @var BaseSettings
+     * @var Settings
      */
     protected static $settings;
-    public static function setSettings(BaseSettings $settings) { self::$settings = $settings; }
+    public static function setSettings(Settings $settings) { self::$settings = $settings; }
 
     /**
      * @var ParameterBag

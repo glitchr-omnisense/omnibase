@@ -1,11 +1,8 @@
 <?php
 
-namespace Base\Security;
+namespace Base\Security\Voter;
 
-use Base\Entity\User;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 

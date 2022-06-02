@@ -9,7 +9,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 
-trait BaseSettingsTrait
+trait SettingsTrait
 {
     protected $settingRepository = null;
 

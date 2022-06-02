@@ -8,7 +8,7 @@ use Base\Notifier\NotifierInterface;
 use Base\Notifier\Recipient\LocaleRecipientInterface;
 use Base\Notifier\Recipient\Recipient;
 use Base\Service\BaseService;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
@@ -94,11 +94,11 @@ class Notifier implements NotifierInterface
     public function getTechnicalRecipient(): Recipient { return $this->technicalRecipient; }
     protected function getTechnicalSupport(): ?string
     {
-        $mail = $this->baseSettings->mail();
+        $mail = $this->settings->mail();
         if(!$mail) $mail = $this->technicalRecipient->getEmail();
         if(!$mail) return null;
 
-        $mailName = $this->baseSettings->mail_name() ?? mb_ucfirst(explode("@", $mail)[0]);
+        $mailName = $this->settings->mail_name() ?? mb_ucfirst(explode("@", $mail)[0]);
         return $mailName." <".$mail.">";
     }
 
@@ -131,7 +131,7 @@ class Notifier implements NotifierInterface
         return $this;
     }
 
-    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
+    public function __construct(SymfonyNotifier $notifier, ChannelPolicyInterface $policy,  EntityManager $entityManager,  CacheInterface $cache, ParameterBagInterface $parameterBag, TranslatorInterface $translator,  LocaleProviderInterface $localeProvider, Settings $settings)
     {
         $this->notifier      = $notifier;
         $this->policy        = $policy;
@@ -144,7 +144,7 @@ class Notifier implements NotifierInterface
         $this->technicalRecipient = new Recipient($parameterBag->get("base.notifier.technical_support"));
 
         $this->entityManager  = $entityManager;
-        $this->baseSettings   = $baseSettings;
+        $this->settings   = $settings;
         $this->localeProvider = $localeProvider;
         $this->translator     = $translator;
 

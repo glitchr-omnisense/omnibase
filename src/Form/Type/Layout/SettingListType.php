@@ -11,7 +11,7 @@ use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Base\Service\LocaleProvider;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,18 +27,18 @@ use Symfony\Component\Form\FormEvents;
 class SettingListType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var BaseSettings
+     * @var Settings
      */
-    protected $baseSettings;
+    protected $settings;
 
     /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
 
-    public function __construct(BaseSettings $baseSettings, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(Settings $settings, ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->baseSettings = $baseSettings;
+        $this->settings = $settings;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -64,7 +64,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
 
-        } else if( is_subclass_of($data, BaseSettings::class)) {
+        } else if( is_subclass_of($data, Settings::class)) {
 
             foreach($data->all() as $setting)
                 $newData[str_replace($from, $to, $setting->getPath())] = $setting->getValue();
@@ -92,7 +92,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
+                $settings[$formattedField] = $this->settings->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
             }
 
             $fields = ["value" => []];

@@ -4,15 +4,15 @@ namespace Base\Model\CurrencyApi;
 
 use Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi;
 use Base\Service\BaseService;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 
 // Endpoint : https://currencylayer.com/
 class CurrencyLayer extends AbstractCurrencyApi
 {
     protected bool $enterprise;
-    public function __construct(BaseSettings $baseSettings, bool $enterprise = false)
+    public function __construct(Settings $settings, bool $enterprise = false)
     {
-        parent::__construct($baseSettings);
+        parent::__construct($settings);
         $this->enterprise = $enterprise;
     }
 

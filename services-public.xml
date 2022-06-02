@@ -24,7 +24,7 @@
         <service id="Base\Service\ObfuscatorInterface" alias="base.service.obfuscator"/>
 
         <service id="base.filesystem" alias="Base\Service\Filesystem" />
-        <service id="base.settings" alias="Base\Service\BaseSettings" />
+        <service id="base.settings" alias="Base\Service\Settings" />
 
         <service id="base.notifier" alias="Base\Notifier\Notifier" />
         <service id="Base\Notifier\NotifierInterface" alias="base.notifier"/>
