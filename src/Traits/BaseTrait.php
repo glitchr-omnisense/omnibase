@@ -7,13 +7,11 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Notifier\NotifierInterface;
 use Base\Routing\AdvancedRouterInterface;
 use Base\Service\BaseService;
-use Base\Service\BaseSettings;
+use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
 use Base\Twig\Extension\BaseTwigExtension;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
@@ -21,8 +19,8 @@ use Twig\Environment;
 trait BaseTrait
 {
     public static function getAnnotationReader() : ?AnnotationReader     { return AnnotationReader::getInstance(); }
-    public static function getService()          : ?BaseService          { return (self::class === BaseService::class) ? BaseService::$instance       : BaseService::getService(); }
-    public static function getSettings()         : ?BaseSettings         { return (self::class === BaseService::class) ? BaseService::$settings       : BaseService::getSettings(); }
+    public static function getService()          : ?BaseService          { return (self::class === BaseService::class) ? BaseService::$instance : BaseService::getService(); }
+    public static function getSettingBag()       : ?SettingBag           { return (self::class === BaseService::class) ? BaseService::$settings : BaseService::getSettingBag(); }
 
     public static function isEntity($entity)     : bool { return BaseService::getClassMetadataManipulator()->isEntity($entity); }
 

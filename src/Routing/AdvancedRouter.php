@@ -5,7 +5,7 @@ namespace Base\Routing;
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\ParameterBagInterface;
-use Base\Service\BaseSettings;
+use Base\Service\SettingBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
@@ -19,7 +19,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 {
     protected $router;
 
-    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, BaseSettings $baseSettings, string $debug)
+    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, SettingBag $settingBag, string $debug)
     {
         $this->debug  = $debug;
 
@@ -28,7 +28,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         $this->router->setOption("generator_class", AdvancedUrlGenerator::class);
 
         $this->requestStack = $requestStack;
-        $this->baseSettings = $baseSettings;
+        $this->settingBag = $settingBag;
         $this->parameterBag = $parameterBag;
 
         $this->useCustomRouter = $parameterBag->get("base.router.use_custom_engine");

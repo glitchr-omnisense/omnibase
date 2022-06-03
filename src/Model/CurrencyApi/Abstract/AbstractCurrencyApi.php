@@ -3,11 +3,11 @@
 namespace Base\Model\CurrencyApi\Abstract;
 
 use Base\Model\CurrencyApiInterface;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 
 abstract class AbstractCurrencyApi implements CurrencyApiInterface
 {
-    public function __construct(BaseSettings $baseSettings) { $this->baseSettings = $baseSettings; }
+    public function __construct(Settings $settings) { $this->settings = $settings; }
     public function supports(): bool { return $this->key !== null; }
 
     protected int $priority = 0;
@@ -20,7 +20,7 @@ abstract class AbstractCurrencyApi implements CurrencyApiInterface
     public function getKey(): ?string
     {
         if ($this->key === null)
-            $this->key = $this->baseSettings->get("api.currency_api.".static::getName());
+            $this->key = $this->settings->get("api.currency_api.".static::getName());
 
         return $this->key;
     }

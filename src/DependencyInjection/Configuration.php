@@ -138,6 +138,15 @@ class Configuration implements ConfigurationInterface
                     ->end()
 
                     ->children()
+                        ->arrayNode('firewalls')
+                            ->addDefaultChildrenIfNoneSet()
+                                ->prototype('scalar')
+                                ->defaultValue('main')
+                            ->end()
+                        ->end()
+                    ->end()
+
+                    ->children()
                         ->arrayNode('exceptions')
                             ->addDefaultChildrenIfNoneSet()
                                 ->prototype('scalar')

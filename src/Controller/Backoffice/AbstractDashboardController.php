@@ -61,6 +61,7 @@ use Base\Entity\Extension\TrashBall;
 use Base\Entity\Layout\Short;
 use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
+use Base\Field\Type\RouteType;
 use Base\Field\Type\SelectType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
@@ -144,7 +145,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]), array_reverse($fields)));
 
         if(empty($fields))
-            $fields = array_fill_keys($this->baseService->getSettings()->getPaths("api"), []);
+            $fields = array_fill_keys($this->baseService->getSettingBag()->getPaths("api"), []);
 
         foreach($fields as $key => $field) {
 
@@ -181,7 +182,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->baseService->getSettings()->getRawScalar($fields)
+                $this->baseService->getSettingBag()->getRawScalar($fields)
             );
 
             foreach($settings as $setting)
@@ -223,7 +224,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.keywords"             => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"               => ["translatable" => true, "required" => false],
             "base.settings.birthdate"            => ["form_type" => DateTimePickerType::class],
-            "base.settings.access_denied"        => ["roles" => "ROLE_EDITOR", "form_type" => UrlType::class, "required" => false],
+            "base.settings.access_denied"        => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
             "base.settings.public_access"        => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.user_access"          => ["roles" => "ROLE_ADMIN", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.admin_access"         => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
@@ -252,7 +253,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->baseService->getSettings()->getRawScalar($fields)
+                $this->baseService->getSettingBag()->getRawScalar($fields)
             );
 
 
@@ -321,12 +322,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings()->getScalar("base.settings.logo.backoffice");
-        if(!$logo) $logo = $this->baseService->getSettings()->getScalar("base.settings.logo");
+        $logo  = $this->baseService->getSettingBag()->getScalar("base.settings.logo.backoffice");
+        if(!$logo) $logo = $this->baseService->getSettingBag()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
 
-        $title = $this->baseService->getSettings()->getScalar("base.settings.title") ?? "";
-        $slogan = $this->baseService->getSettings()->getScalar("base.settings.slogan") ?? "";
+        $title = $this->baseService->getSettingBag()->getScalar("base.settings.title") ?? "";
+        $slogan = $this->baseService->getSettingBag()->getScalar("base.settings.slogan") ?? "";
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")

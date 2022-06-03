@@ -125,7 +125,7 @@ class BaseService implements RuntimeExtensionInterface
         FormFactoryInterface $formFactory,
         LocaleProviderInterface $localeProvider,
 
-        BaseSettings $settings,
+        SettingBag $settingBag,
         ImageService $imageService,
         IconProvider $iconProvider,
 
@@ -154,7 +154,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setClassMetadataManipulator($classMetadataManipulator);
         $this->setImageService($imageService);
         $this->setIconProvider($iconProvider);
-        $this->setSettings($settings);
+        $this->setSettingBag($settingBag);
         $this->setLocaleProvider($localeProvider);
         $this->setTwig($twig);
         $this->setRouter($this->container->get("router"));
@@ -178,7 +178,7 @@ class BaseService implements RuntimeExtensionInterface
     /*
      * Stylesheet and javascripts blocks
      */
-    public function settings() { return $this->getSettings(); }
+    public function settings() { return $this->getSettingBag(); }
 
     public function getParameterTwig(string $name = "")
     {
@@ -454,7 +454,7 @@ class BaseService implements RuntimeExtensionInterface
         return $this->redirect($request->get('_route'));
     }
 
-    public function isMaintenance() { return $this->getSettings()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
+    public function isMaintenance() { return $this->getSettingBag()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isDevelopment() { return $this->isDebug() || $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_"); }
     public function isProduction()  { return !$this->isDevelopment(); }
 

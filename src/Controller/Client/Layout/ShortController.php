@@ -3,7 +3,7 @@
 namespace Base\Controller\Client\Layout;
 
 use Base\Repository\Layout\ShortRepository;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,9 +16,9 @@ class ShortController extends AbstractController
      */
     protected $shortRepository;
 
-    public function __construct(BaseSettings $baseSettings, ShortRepository $shortRepository)
+    public function __construct(Settings $settings, ShortRepository $shortRepository)
     {
-        $this->baseSettings = $baseSettings;
+        $this->settings = $settings;
         $this->shortRepository = $shortRepository;
     }
 
@@ -34,6 +34,6 @@ class ShortController extends AbstractController
         $short = $this->shortRepository->findOneBySlug($slug);
         if($short === null) throw new NotFoundException("Page requested doesn't exist.");
 
-        return $this->redirect($this->baseSettings->url($short->getUrl()));
+        return $this->redirect($this->settings->url($short->getUrl()));
     }
 }

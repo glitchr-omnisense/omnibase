@@ -20,7 +20,7 @@ class SpamChecker
         $this->client       = $client;
 
         $this->baseService  = $baseService;
-        $this->baseSettings = $baseService->getSettings();
+        $this->settings = $baseService->getSettingBag();
     }
 
     public function getLang()
@@ -47,7 +47,7 @@ class SpamChecker
         switch($api) {
 
             case SpamApi::AKISMET:
-                return $this->baseSettings->getScalar("api.spam.akismet");
+                return $this->settings->getScalar("api.spam.akismet");
 
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");

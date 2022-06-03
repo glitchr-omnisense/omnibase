@@ -3,7 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
-use Base\Service\BaseSettings;
+use Base\Service\SettingBag;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
@@ -15,12 +15,12 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'translation:settings', aliases:[], description:'')]
 class TranslationSettingsCommand extends Command
 {
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, BaseSettings $baseSettings)
+    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, SettingBag $settings)
     {
         $this->translator = $translator;
         $this->localeProvider = $localeProvider;
 
-        $this->baseSettings = $baseSettings;
+        $this->settings = $settings;
         parent::__construct();
     }
 
@@ -44,7 +44,7 @@ class TranslationSettingsCommand extends Command
 
         $rawSettings    = array_transforms(
             fn($k, $v):array => $path ? [$k ? $path.".".$k : $path, $v] : [$k,$v],
-            $this->baseSettings->denormalize($this->baseSettings->getRaw($path))
+            $this->settings->denormalize($this->settings->getRaw($path))
         );
 
         if(!$rawSettings) throw new \Exception("No settings found for \"$path\"");

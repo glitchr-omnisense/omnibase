@@ -45,7 +45,7 @@ final class BooleanField implements FieldInterface
         return $this;
     }
 
-    public function showInline(bool $inline = true): self
+    public function showInline(bool $inline = false): self
     {
         $this->setFormTypeOption("inline", $inline);
 

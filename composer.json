@@ -57,11 +57,13 @@
         "picqer/php-barcode-generator": "^2.0",
         "florianv/swap": "^4.3",
 
+        "phpoffice/phpspreadsheet": "^1.23",
         "easycorp/easyadmin-bundle": "^4.0",
         "league/flysystem-bundle": "^2.2",
 
         "nelmio/security-bundle": "^3.0",
-        "hashids/hashids": "^4.1",
+        "nelmio/cors-bundle": "^2.2",
+	"hashids/hashids": "^4.1",
 
         "doctrine/doctrine-bundle": "^2.6"
     },

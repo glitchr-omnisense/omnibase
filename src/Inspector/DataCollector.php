@@ -3,7 +3,6 @@
 namespace Base\Inspector;
 
 use Base\BaseBundle;
-use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Connection;
@@ -13,6 +12,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
+
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 
 use Symfony\Bundle\TwigBundle\TwigBundle;
@@ -85,7 +85,7 @@ class DataCollector extends AbstractDataCollector
         $this->data["_bundles"] = $this->dataBundles;
     }
 
-    private function getBundleIdentifier(string $bundle) {
+    protected function getBundleIdentifier(string $bundle) {
 
         if(!class_exists($bundle))
             return null;
@@ -108,7 +108,7 @@ class DataCollector extends AbstractDataCollector
         return null;
     }
 
-    private function getFormattedConnection(Connection $connection)
+    protected function getFormattedConnection(Connection $connection)
     {
         $params = $connection->getParams();
 
@@ -132,7 +132,6 @@ class DataCollector extends AbstractDataCollector
 
         return $driver.$user.$host.$port.$dbname.$charset;
     }
-
 
     private function getDoctrineConnections()
     {

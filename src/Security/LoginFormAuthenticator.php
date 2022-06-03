@@ -10,7 +10,6 @@ use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Google\ReCaptcha\Badge\CaptchaBadge;
-use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -51,6 +50,11 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $this->router           = $router;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->baseService      = $baseService;
+    }
+
+    public static function security(Request $request)
+    {
+        return in_array($request->attributes->get('_route'), [self::LOGIN_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response

@@ -24,6 +24,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
     protected function resolve(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
     {
+        //
+        // Get host, path
+        // host,$path, default
+        // dump("");
+
         // Transforms requested route by adding parameters
         if($routeName === null) return null;
 
@@ -55,7 +60,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             try { return parent::generate($routeName, $routeParameters, $referenceType); }
             catch (RouteNotFoundException $e) { }
 
-            return parent::generate($routeName.".".LocaleProvider::getDefaultLang(), $routeParameters, $referenceType);
+            try { return parent::generate($routeName.".".LocaleProvider::getDefaultLang(), $routeParameters, $referenceType); }
+            catch (RouteNotFoundException $e) { throw $e; }
         }
 
         $request = $this->getRouter()->getRequest();
@@ -65,27 +71,47 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         return $routeName ? parent::generate($routeName, [], $referenceType) : null;
     }
 
+    public function resolveContext(?array $routeParameters = null)
+    {
+        if($routeParameters !== null) {
+
+            // Use either parameters or $_SERVER variables to determine the host to provide
+            $url = parse_url2(get_url(true, true,
+                array_pop_key("_scheme", $routeParameters) ?? $this->getSettingBag()->scheme(),
+                array_pop_key("_host", $routeParameters) ?? $this->getSettingBag()->host() ,
+                array_pop_key("_base_dir", $routeParameters) ?? $this->getSettingBag()->base_dir(),
+            ));
+
+            if(array_key_exists("host", $url))
+                $this->getContext()->setHost($url["host"]);
+            if(array_key_exists("base_dir", $url))
+                $this->getContext()->setBaseUrl($url["base_dir"]);
+
+        } else {
+
+            $url = parse_url2(); // Make sure also it gets the basic context
+            if(array_key_exists("host", $url))
+                $this->getContext()->setHost($url["host"]);
+            if(array_key_exists("base_dir", $url))
+                $this->getContext()->setBaseUrl($url["base_dir"]);
+        }
+    }
+
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
-        // Symfony internal root, I assume.. Infinite loop due to "_profiler*" route, if not set
+        //
+        // Prevent to generate custom route with Symfony internal route.
+        // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if(str_starts_with($routeName, "_")) {
 
-            try { return $this->resolve($routeName, $routeParameters, $referenceType); }
+            $this->resolveContext();
+            try { return parent::generate($routeName, $routeParameters, $referenceType); }
             catch (Exception $e ) { throw $e; }
         }
 
         //
-        // Use either parameters or $_SERVER variables to determine the host to provide
-        $url = parse_url2(get_url(true, true,
-            array_pop_key("_scheme", $routeParameters) ?? $this->getSettings()->scheme(),
-            array_pop_key("_host", $routeParameters) ?? $this->getSettings()->host() ,
-            array_pop_key("_base_dir", $routeParameters) ?? $this->getSettings()->base_dir(),
-        ));
-
-        if(array_key_exists("host", $url))
-            $this->getContext()->setHost($url["host"]);
-        if(array_key_exists("base_dir", $url))
-            $this->getContext()->setBaseUrl($url["base_dir"]);
+        // Update context
+        $this->resolveContext($routeParameters);
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations

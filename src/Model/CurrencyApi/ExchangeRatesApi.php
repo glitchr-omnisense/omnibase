@@ -3,7 +3,7 @@
 namespace Base\Model\CurrencyApi;
 
 use Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi;
-use Base\Service\BaseSettings;
+use Base\Service\Settings;
 
 // Endpoint http://api.exchangeratesapi.io/v1/
 class ExchangeRatesApi extends AbstractCurrencyApi

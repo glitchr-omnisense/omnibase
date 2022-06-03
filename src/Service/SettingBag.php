@@ -4,16 +4,15 @@ namespace Base\Service;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
-use Base\Traits\BaseSettingsTrait;
+use Base\Traits\SettingBagTrait;
 use Symfony\Component\Asset\Packages;
 
 use DateTime;
-use Symfony\Component\Asset\Package;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-class BaseSettings
+class SettingBag implements SettingBagInterface
 {
-    use BaseSettingsTrait;
+    use SettingBagTrait;
 
     /**
      * @var Packages
@@ -64,7 +63,7 @@ class BaseSettings
 
     public function host     (int $level = 0, ?string $locale = null) : ?string
     {
-        $host = $this->getScalar("base.settings.http.host", $locale) ?? "localhost";
+        $host = $this->getScalar("base.settings.http.host", $locale) ?? null;
         while($level-- > 0) $host = preg_replace("/^(\w+)./i", "", $host);
 
         return $host;

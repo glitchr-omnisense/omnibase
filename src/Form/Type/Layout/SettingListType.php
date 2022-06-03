@@ -11,7 +11,7 @@ use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
 use Base\Field\Type\TranslationType;
-use Base\Service\BaseSettings;
+use Base\Service\SettingBag;
 use Base\Service\LocaleProvider;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -27,18 +27,18 @@ use Symfony\Component\Form\FormEvents;
 class SettingListType extends AbstractType implements DataMapperInterface
 {
     /**
-     * @var BaseSettings
+     * @var SettingBag
      */
-    protected $baseSettings;
+    protected $settingBag;
 
     /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
 
-    public function __construct(BaseSettings $baseSettings, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(SettingBag $settingBag, ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->baseSettings = $baseSettings;
+        $this->settingBag = $settingBag;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -64,7 +64,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($data as $name => $value)
                 $newData[str_replace($from, $to, $name)] = $value;
 
-        } else if( is_subclass_of($data, BaseSettings::class)) {
+        } else if( is_subclass_of($data, SettingBag::class)) {
 
             foreach($data->all() as $setting)
                 $newData[str_replace($from, $to, $setting->getPath())] = $setting->getValue();
@@ -86,13 +86,13 @@ class SettingListType extends AbstractType implements DataMapperInterface
         $builder->setDataMapper($this);
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($options) {
 
-            $settings = [];
+            $settingBag = [];
 
             $formattedFields = $this->getFormattedData($options["fields"]);
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-                $settings[$formattedField] = $this->baseSettings->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
+                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
             }
 
             $fields = ["value" => []];
@@ -100,7 +100,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             $unvData = [];
             $intlData = [];
 
-            foreach($settings as $formattedField => $setting) {
+            foreach($settingBag as $formattedField => $setting) {
 
                 // Exclude requested fields
                 $field = str_replace("-", ".", $formattedField);
@@ -189,7 +189,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
             if(count($fields) > 0)
                 $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "dashboard_settings.valid"]);
-        });
+            });
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void { }
