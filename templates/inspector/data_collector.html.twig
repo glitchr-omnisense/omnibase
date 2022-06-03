@@ -29,8 +29,8 @@
     {% for title, data in collector.data %}
         {% if not (title starts with '_') %}
             <h2>{{ title|raw }}</h2>
-            {% if data is empty %}
-            <div class="empty"><p>No specific information available.</p></div>
+            {% if data is not iterable or data is empty %}
+                <div class="empty"><p>No specific information available.</p></div>
             {% else %}
                 {{ include('@WebProfiler/Profiler/table.html.twig', {data:data}, with_context = false) }}
             {% endif %}

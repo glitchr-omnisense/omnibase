@@ -151,7 +151,13 @@ class FileType extends AbstractType implements DataMapperInterface
                 foreach($data as $key => $uuid)
                     if(!empty($uuid)) $data[$key] = $cacheDir."/".$uuid;
 
-                $data = !empty($data) ? array_map(fn ($fname) => (file_exists($fname) ? new UploadedFile($fname, $fname) : basename($fname)), $data): [];
+                $data = empty($data) ? [] : array_map(function($fname) {
+
+                    if(file_exists($fname)) return new UploadedFile($fname, $fname);
+                    else return $fname !== null ? basename($fname) : null;
+
+                }, $data);
+
                 if(!$options["multiple"]) $data = $data[0] ?? null;
             }
 
@@ -213,19 +219,19 @@ class FileType extends AbstractType implements DataMapperInterface
             if ($view->vars['value']) {
 
                 $view->vars['pathLinks'] = json_encode(array_transforms(function($k,$v):array {
-                    return [basename($v), $this->fileService->isImage($v) ? $this->imageService->imagine($v) : null];
+                    return [$v !== null ? basename($v) : null, $this->fileService->isImage($v) ? $this->imageService->imagine($v) : null];
                 }, array_filter($view->vars['value'])));
 
                 $view->vars['downloadLinks'] = json_encode(array_transforms(function($k,$v):array {
-                    return [basename($v), $this->fileService->downloadable($v)];
+                    return [$v !== null ? basename($v) : null, $this->fileService->downloadable($v)];
                 }, array_filter($view->vars['value'])));
 
                 $view->vars['clippable'] = json_encode(array_transforms(function($k,$v):array {
-                    return [basename($v),$this->fileService->isImage($v)];
+                    return [$v !== null ? basename($v) : null,$this->fileService->isImage($v)];
                 }, array_filter($view->vars['value'])));
             }
 
-            $view->vars["value"] = implode("|", array_map(fn($v) => basename($v), $view->vars["value"]));
+            $view->vars["value"] = implode("|", array_map(fn($v) => $v !== null ? basename($v) : null, $view->vars["value"]));
         }
 
         $view->vars["clipboard"]    = $options["clipboard"];
@@ -306,8 +312,8 @@ class FileType extends AbstractType implements DataMapperInterface
         }
 
         if(is_array($viewData)) $viewData = array_map("basename", $viewData);
-        else if($viewData instanceof Collection) $viewData = $viewData->map(function($f) { return basename($f); });
-        else $viewData = basename($viewData);
+        else if($viewData instanceof Collection) $viewData = $viewData->map(fn($f) => $f !== null ? basename($f) : null);
+        else $viewData = $viewData !== null ? basename($viewData) : $viewData;
 
         $fileForm->setData($viewData);
     }

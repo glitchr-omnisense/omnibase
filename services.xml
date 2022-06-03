@@ -864,6 +864,7 @@
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
+            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Field\Configurator\RoleConfigurator"          parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>

@@ -200,10 +200,11 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             if($this->classMetadataManipulator->isEntity($target)) {
 
                 $targetField = $form->getName();
+                if($this->classMetadataManipulator->hasAssociation($target, $targetField) ) {
 
-                if($this->classMetadataManipulator->hasAssociation($target, $targetField) )
                     return $this->classMetadataManipulator->isToManySide($target, $targetField);
-                else if($this->classMetadataManipulator->hasField($target, $targetField)) {
+
+                } else if($this->classMetadataManipulator->hasField($target, $targetField)) {
 
                     $typeOfField  = $this->classMetadataManipulator->getTypeOfField($target, $targetField);
                     $doctrineType = $this->classMetadataManipulator->getDoctrineType($typeOfField);
