@@ -168,7 +168,6 @@ class LogSubscriber implements EventSubscriberInterface
                 // In the opposite case, we are storing the exception
                 $log = new Log($listener, $request);
                 $log->setException($exception ?? null);
-                $log->setImpersonator($impersonator);
                 $log->setUser($user);
 
                 $entityManager->persist($log);

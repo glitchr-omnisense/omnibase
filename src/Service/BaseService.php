@@ -429,7 +429,6 @@ class BaseService implements RuntimeExtensionInterface
 
         $url   = $this->generateUrl($route, $routeParameters) ?? $route;
         $route = $this->getRouteName($url);
-
         if (!$route) return null;
 
         $currentRoute = $this->getCurrentRouteName();

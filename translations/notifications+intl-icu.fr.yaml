@@ -4,16 +4,16 @@ login:
     success:
         normal: Bravo {0}, tu es à présent connecté.
         alien: "Bienvenue visiteur venu d'ailleurs ! Pense à t'inscrire :)"
-        day: 
+        day:
             first: "Bonjour {0} !"
             back: "Re-bonjour {0} !"
-        morning: 
+        morning:
             first: "@notifications.login.success.day.first"
             back: "@notifications.login.success.day.back"
-        afternoon: 
+        afternoon:
             first: "@notifications.login.success.day.first"
             back: "@notifications.login.success.day.back"
-        evening: 
+        evening:
             first: "Bonsoir {0} !"
             back: "Re-bonsoir {0} !"
 
@@ -28,7 +28,8 @@ login:
     locked: "Ce compte est verrouillé."
     failed: "Les identifiants sont incorrects"
 
-kickout: "Désolé {0}, mais tu as été volontairement déconnecté.."
+kickout: "{0}, tu as été jeté du site.."
+integrity: "Désolé {0}, mais tu as été volontairement déconnecté.. intégrité du site compromise"
 
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !
@@ -78,4 +79,4 @@ accountWelcomeBack:
     already: Ton compte est déjà actif !
     foundToken: "Un email de réactivation a déjà été envoyé ! Merci de patienter {0} avant la prochaine demande."
     invalidToken: "Jeton invalide. Nous ne pouvons pas confirmer ton adresse avec ce lien. Merci de renvoyer une demande"
-    
+

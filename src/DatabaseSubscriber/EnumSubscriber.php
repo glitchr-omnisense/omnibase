@@ -20,9 +20,9 @@ class EnumSubscriber implements EventSubscriberInterface
 
         foreach ($eventArgs->getSchema()->getTables() as $table) {
             foreach ($table->getColumns() as $column) {
-                if ($column->getType() instanceof EnumType) {
+
+                if ($column->getType() instanceof EnumType)
                     $columns[] = $column;
-                }
             }
         }
 

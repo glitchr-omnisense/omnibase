@@ -302,6 +302,7 @@
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <!-- Type declaration -->
@@ -617,6 +618,8 @@
             <argument type="service" id="translator" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="doctrine" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\EntitySubscriber\LogSubscriber">

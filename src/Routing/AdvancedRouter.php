@@ -39,7 +39,7 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function isProfiler($request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
-        if($request instanceof KernelEvent)
+        if ($request instanceof KernelEvent)
             $request = $request->getRequest();
         else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
@@ -62,8 +62,8 @@ class AdvancedRouter implements AdvancedRouterInterface
             throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
 
         $controllerAttribute = $request->attributes->get("_controller");
-        $array = is_array($controllerAttribute) ? $controllerAttribute : explode("::", $request->attributes->get("_controller"));
-        $controller = explode("::", $array[0])[0];
+        $array = is_array($controllerAttribute) ? $controllerAttribute : explode("::", $request->attributes->get("_controller") ?? "");
+        $controller = explode("::", $array[0] ?? "")[0];
 
         $parents = [];
 
@@ -75,7 +75,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         return !empty($eaParents);
     }
 
-    public function keepMachine(): bool { return $this->keepSubdomain; }
+    public function keepMachine(): bool { return $this->keepMachine; }
     public function keepSubdomain(): bool { return $this->keepSubdomain; }
 
     public function getRouteCollection(): RouteCollection { return $this->router->getRouteCollection(); }
@@ -99,16 +99,16 @@ class AdvancedRouter implements AdvancedRouterInterface
     {
         if ($routeUrl === null) $routeUrl = $this->getRequestUri();
 
-        $routeArray = $this->getRouteArray($routeUrl);
-        if(!$routeArray) return null;
+        $routeMatch = $this->getRouteMatch($routeUrl);
+        if(!$routeMatch) return null;
 
-        $routeName = $routeArray["_route"];
-        if(array_key_exists("_group", $routeArray))
-            $routeName .= ".".$routeArray["_group"];
+        $routeName = $routeMatch["_route"];
+        if(array_key_exists("_group", $routeMatch))
+            $routeName .= ".".$routeMatch["_group"];
 
-        $routeName = $routeArray["_route"];
-        if(array_key_exists("_locale", $routeArray))
-            $routeName .= ".".$routeArray["_locale"];
+        $routeName = $routeMatch["_route"];
+        if(array_key_exists("_locale", $routeMatch))
+            $routeName .= ".".$routeMatch["_locale"];
 
         return $this->router->getRouteCollection()->get($routeName);
     }
@@ -117,8 +117,8 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function getRouteName(?string $routeUrl = null): ?string
     {
         if(!$routeUrl) return $this->getRouteName($this->getRequestUri());
-        $routeArray = $this->getRouteArray($routeUrl);
-        return $routeArray ? $routeArray["_route"] : null;
+        $routeMatch = $this->getRouteMatch($routeUrl);
+        return $routeMatch ? $routeMatch["_route"] : null;
     }
 
     public function getRouteParameters(?string $routeUrl = null): array
@@ -127,7 +127,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $route ? $route->getDefaults() : [];
     }
 
-    public function getRouteArray(?string $routeUrl = null): ?array
+    public function getRouteMatch(?string $routeUrl = null): ?array
     {
         if(!$routeUrl) return null;
 

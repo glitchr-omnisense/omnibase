@@ -3,7 +3,6 @@
 namespace Base\Subscriber;
 
 use Base\Component\HttpFoundation\Referrer;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Base\Entity\User;
 
 use Base\Service\BaseService;
@@ -79,10 +78,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onAccessRestriction', 8], ['onReferrerRequest', 2], ['onKernelRequest', 8]],
+            RequestEvent::class    => [['onAccessRestriction', 8], ['onKernelRequest', 8], ['onReferrerRequest', 2]],
             ResponseEvent::class   => ['onKernelResponse'],
-            TerminateEvent::class  => ['onKernelTerminate'],
-            ExceptionEvent::class  => ['onKernelException', -1024],
 
             LoginSuccessEvent::class => ['onLoginSuccess'],
             LoginFailureEvent::class => ['onLoginFailure'],
@@ -103,7 +100,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         $notification = new Notification("accountWelcomeBack.success", [$user]);
-        $notificationd->setUser($user);
+        $notification->setUser($user);
 
         if($this->tokenStorage->getToken()->getUser() == $user)
             $notification->send("success");
@@ -141,6 +138,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         } else {
 
+            /**
+             * @var \App\Entity\User\Token
+             */
             $verifyEmailToken = new Token('verify-email', 3600);
             $user->addToken($verifyEmailToken);
 
@@ -223,12 +223,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRestriction(RequestEvent $event)
     {
+        $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
+        if($isSecurityRoute) return;
+
         //
         // Prevent the average guy to see the administration
         if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest())) {
 
-            if(!RescueFormAuthenticator::security($event->getRequest()))
-                throw new NotFoundHttpException();
+            if(!$isSecurityRoute) throw new NotFoundHttpException();
         }
 
         //
@@ -297,10 +299,12 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
 
         if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
+
             $user->approve();
             $this->userRepository->flush($user);
 
         } else if($this->baseService->getParameterBag("base.user.autoapprove")) {
+
             $user->approve();
             $this->userRepository->flush($user);
         }

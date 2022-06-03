@@ -34,12 +34,12 @@ class RouterSubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $route = $this->router->getRoute();
+        if(!$event->isMainRequest()) return ;
 
         //
         // Redirect IP if restriction enabled
-        $url = parse_url2();
         $host = $this->settingBag->host();
-        if(array_key_exists("ip", $url) && !$this->authorizationChecker->isGranted("ROUTE_IP", $route)) {
+        if($route && !$this->authorizationChecker->isGranted("VALIDATE_IP", $route)) {
 
             $event->setResponse($this->redirect(true, true, null, $host));
             return $event->stopPropagation();
@@ -47,8 +47,9 @@ class RouterSubscriber implements EventSubscriberInterface
 
         //
         // If no host specified in Route, then check the list of permitted subdomain
-        if(array_key_exists("host", $url) && !$this->authorizationChecker->isGranted("ROUTE_HOST", $route) && $url["host"] !== $host) {
-            $event->setResponse($this->redirect(false, true));
+        if($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
+
+            $event->setResponse($this->redirect($this->router->keepSubdomain(), $this->router->keepMachine()));
             return $event->stopPropagation();
         }
     }

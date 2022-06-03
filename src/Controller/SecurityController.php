@@ -12,6 +12,7 @@ use App\Form\Type\Security\RegistrationType;
 use App\Form\Type\Security\LoginType;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -32,17 +33,19 @@ use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Security\Core\Authentication\Token\RememberMeToken;
 
 class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService)
+    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService, TokenStorageInterface $tokenStorage)
     {
         $this->baseService = $baseService;
         $this->userRepository = $userRepository;
         $this->tokenRepository = $tokenRepository;
         $this->entityManager = $entityManager;
+        $this->tokenStorage = $tokenStorage;
     }
 
     /**
@@ -97,11 +100,15 @@ class SecurityController extends AbstractController
      * @Route("/logout", name="security_logout")
      * @Iconize("fas fa-fw fa-sign-out-alt")
      */
-    public function Logout(Referrer $referrer, Request $request) {
-
+    public function Logout(Referrer $referrer, Request $request)
+    {
         // If user is found.. go to the logout request page
-        if($this->getUser())
-            return $this->redirectToRoute('security_logoutRequest');
+        if($this->getUser()) {
+
+            $response = $this->redirectToRoute('security_logoutRequest');
+            $response->headers->clearCookie('REMEMBERME');
+            return $response;
+        }
 
         // Check if the session is found.. meaning, the user just logged out
         if($user = $this->baseService->removeSession("_user")) {

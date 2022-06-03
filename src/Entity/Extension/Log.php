@@ -43,7 +43,7 @@ class Log extends AbstractExtension
 
     public function __toString() { return __CLASS__." #".$this->getId().": ".$this->event."/". $this->level ."/".$this->createdAt; }
 
-    public function supports():bool { return true; }
+    public function supports(): bool { return true; }
 
     /**
      * @ORM\ManyToOne(targetEntity=User::class, inversedBy="logs")

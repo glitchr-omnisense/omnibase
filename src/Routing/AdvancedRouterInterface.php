@@ -16,15 +16,15 @@ interface AdvancedRouterInterface extends RouterInterface, RequestMatcherInterfa
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 
+    public function getRequest(): ?Request;
     public function getContext(): RequestContext;
     public function setContext(RequestContext $context);
 
-    public function getRequest(): ?Request;
-    public function getRoute(?string $routeUrl = null): ?Route;
-
     public function hasRoute(string $routeName): bool;
+
+    public function getRoute(?string $routeUrl = null): ?Route;
     public function getRouteName(?string $routeUrl = null): ?string;
     public function getRouteParameters(?string $routeUrl = null): array;
-    public function getRouteArray(?string $routeUrl = null): ?array;
+    public function getRouteMatch(?string $routeUrl = null): ?array;
     public function getRouteGroups(?string $routeName): array;
 }

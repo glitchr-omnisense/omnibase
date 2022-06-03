@@ -102,6 +102,6 @@ class Referrer
             $targetRoute = $this->getRouteName($targetPath, $request->getRequestUri());
         }
 
-        return $targetPath;
+        return $targetPath ? $targetPath : null;
     }
 }

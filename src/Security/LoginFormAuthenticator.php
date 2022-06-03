@@ -52,7 +52,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $this->baseService      = $baseService;
     }
 
-    public static function security(Request $request)
+    public static function isSecurityRoute(Request $request)
     {
         return in_array($request->attributes->get('_route'), [self::LOGIN_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
     }

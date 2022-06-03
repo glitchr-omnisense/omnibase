@@ -4,16 +4,16 @@ login:
     success:
         normal: "Hi {0}! You just logged in."
         alien :  "Welcome, visitor from the outside! Please consider signing up!"
-        day: 
+        day:
             first: "Good day, {0} !"
             back: "Good day again, {0} !"
-        morning: 
+        morning:
             first: "Good morning, {0} !"
             back: "Good morning again, {0} !"
-        afternoon: 
+        afternoon:
             first: "Good afternoon, {0} !"
             back: "Good afternoon again, {0} !"
-        evening: 
+        evening:
             first: "Good evening, {0} !"
             back: "Good evening again, {0} !"
 
@@ -30,6 +30,7 @@ login:
     failed : "Invalid login credentials"
 
 kickout: "Sorry {0}, but you have been kicked out !"
+integrity: "Sorry {0}, you have been disconnected, integrity is compromised !"
 
 impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !
@@ -43,7 +44,7 @@ resetPassword:
     csrfToken: "Invalid CSRF token detected. You can't reset your password"
     invalidToken: "Invalid token provided. You can't reset your password"
     confirmation: "A mail has been sent to the provided address (if this one exists)"
-    success: Your password has successfully been changed 
+    success: Your password has successfully been changed
 
 logout:
     success: "{0} You're now disconnected."
@@ -59,7 +60,7 @@ adminApproval:
     approved: "Your account just got approved. You can now log in and visit !"
     verifyFirst: "You need to verify first your email address"
     alreadySent: "You already asked administrators for approval, please be patient."
-    
+
 verifyEmail:
     title: Please confirm your email!
     invalidToken: "Invalid token. We cannot confirm your email address. Please resend a request"

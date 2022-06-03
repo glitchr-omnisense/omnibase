@@ -23,8 +23,8 @@ class ErrorController extends AbstractController
         $this->htmlErrorRenderer = $htmlErrorRenderer;
     }
 
-    public function Main(\Throwable $exception) {
-
+    public function Main(\Throwable $exception)
+    {
         $response = null;
         try {
 

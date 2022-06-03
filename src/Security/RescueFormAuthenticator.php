@@ -5,7 +5,6 @@ namespace Base\Security;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 class RescueFormAuthenticator extends LoginFormAuthenticator
@@ -17,9 +16,9 @@ class RescueFormAuthenticator extends LoginFormAuthenticator
         return new RedirectResponse($this->router->generate(static::RESCUE_ROUTE));
     }
 
-    public static function security(Request $request)
+    public static function isSecurityRoute(Request $request)
     {
-        return parent::security($request) || in_array($request->attributes->get('_route'), [self::RESCUE_ROUTE]);
+        return in_array($request->attributes->get('_route'), [self::RESCUE_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
     }
 
     public function supports(Request $request): ?bool

@@ -3,6 +3,8 @@
 namespace Base\Subscriber;
 
 use Base\Entity\User;
+use Base\Entity\User\Notification;
+use Base\Security\LoginFormAuthenticator;
 use Doctrine\DBAL\Connection;
 use Base\Service\BaseService;
 
@@ -15,6 +17,8 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\Mailer\Transport\Smtp\Auth\LoginAuthenticator;
+use Symfony\Component\Routing\RouterInterface;
 
 class IntegritySubscriber implements EventSubscriberInterface
 {
@@ -23,12 +27,14 @@ class IntegritySubscriber implements EventSubscriberInterface
      */
     private $tokenStorage;
 
-    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine)
+    public function __construct(TokenStorageInterface $tokenStorage, TranslatorInterface $translator, RequestStack $requestStack, ManagerRegistry $doctrine, BaseService $baseService, RouterInterface $router)
     {
         $this->tokenStorage = $tokenStorage;
         $this->requestStack = $requestStack;
         $this->translator   = $translator;
         $this->doctrine     = $doctrine;
+        $this->baseService  = $baseService;
+        $this->router  = $router;
     }
 
     public static function getSubscribedEvents(): array
@@ -75,18 +81,28 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($user === null) return true;
 
         $session = $this->requestStack->getSession();
-        if(!$session->get("INTEGRITY"))
-            $session->set("INTEGRITY", md5($this->getDefaultConnectionStr()));
+        if(!$session->get("_user_checksum"))
+            $session->set("_user_checksum", md5($this->getDefaultConnectionStr()));
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
         $integrity = $this->checkUserIntegrity() && $this->checkDoctrineChecksum();
-        if(!$integrity) {
+        if(!$integrity && $this->router->getRouteName() != LoginFormAuthenticator::LOGOUT_ROUTE) {
 
             $token = $this->tokenStorage->getToken();
-            if($token) $this->tokenStorage->setToken(NULL);
-            return $event->stopPropagation();
+            if(!$token) return;
+
+            $user = $token->getUser();
+            if(!$user) return;
+
+            $notification = new Notification("integrity", [$user]);
+            $notification->send("danger");
+
+            $this->tokenStorage->setToken(NULL);
+
+            $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
+            $event->stopPropagation();
         }
     }
 
@@ -115,15 +131,21 @@ class IntegritySubscriber implements EventSubscriberInterface
             "\x00*\x00initialized" => false
         ];
 
-        return !array_intersect_key($persistentCollection, $dirtyCollection) === $dirtyCollection;
+        return array_intersect_key($persistentCollection, $dirtyCollection) !== $dirtyCollection;
     }
 
     protected function checkDoctrineChecksum()
     {
+        $token = $this->tokenStorage->getToken();
+        if(!$token) return true;
+
+        $user = $token->getUser();
+        if($user === null) return true;
+
         $session = $this->requestStack->getSession();
-        if (!$session->get("INTEGRITY")) return false;
+        if (!$session->get("_user_checksum")) return false;
 
         $md5checksum = md5($this->getDefaultConnectionStr());
-        return $md5checksum == $session->get("INTEGRITY");
+        return $md5checksum == $session->get("_user_checksum");
     }
 }
