@@ -52,6 +52,11 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $this->baseService      = $baseService;
     }
 
+    public static function security(Request $request)
+    {
+        return in_array($request->attributes->get('_route'), [self::LOGIN_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
+    }
+
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
         return new RedirectResponse($this->router->generate(static::LOGIN_ROUTE));

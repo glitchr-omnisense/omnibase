@@ -20,7 +20,7 @@ class SpamChecker
         $this->client       = $client;
 
         $this->baseService  = $baseService;
-        $this->settings = $baseService->getSettings();
+        $this->settings = $baseService->getSettingBag();
     }
 
     public function getLang()

@@ -3,16 +3,12 @@
 namespace Base\Subscriber;
 
 use Base\Component\HttpFoundation\Referrer;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Base\Entity\User;
 
 use Base\Service\BaseService;
-use Base\Entity\Extension\Log;
 use Base\Security\LoginFormAuthenticator;
 
-use Symfony\Component\HttpKernel\Event\KernelEvent;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
@@ -23,14 +19,11 @@ use Base\Security\RescueFormAuthenticator;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
-use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
-use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -51,19 +44,15 @@ class SecuritySubscriber implements EventSubscriberInterface
      */
     private $tokenStorage;
 
-    /**
-     * @var array[TraceableEventDispatcher]
-     */
-    private $dispatchers = [];
-
     public function __construct(
         EntityManagerInterface $entityManager,
         AuthorizationChecker $authorizationChecker,
         TokenStorageInterface $tokenStorage,
-        ServiceLocator $dispatcherLocator,
         TranslatorInterface $translator,
         BaseService $baseService,
-        Referrer $referrer, Profiler $profiler, ParameterBagInterface $parameterBag) {
+        Referrer $referrer,
+        Profiler $profiler,
+        ParameterBagInterface $parameterBag) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
@@ -75,14 +64,6 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->referrer = $referrer;
         $this->profiler = $profiler;
         $this->parameterBag = $parameterBag;
-
-        foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
-
-            $dispatcher = $dispatcherLocator->get($dispatcherId);
-            if (!$dispatcher instanceof TraceableEventDispatcher) continue;
-
-            $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
-        }
 
         $this->exceptions = [
             "/^locale_/",
@@ -98,7 +79,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onAccessRestriction', 8], ['onReferrerRequest', 2], ['onKernelRequest', 1]],
+            RequestEvent::class    => [['onAccessRestriction', 8], ['onReferrerRequest', 2], ['onKernelRequest', 8]],
             ResponseEvent::class   => ['onKernelResponse'],
             TerminateEvent::class  => ['onKernelTerminate'],
             ExceptionEvent::class  => ['onKernelException', -1024],
@@ -122,7 +103,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
         $notification = new Notification("accountWelcomeBack.success", [$user]);
-        $notification->setUser($user);
+        $notificationd->setUser($user);
 
         if($this->tokenStorage->getToken()->getUser() == $user)
             $notification->send("success");
@@ -242,33 +223,32 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRestriction(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
-
-        $token = $this->tokenStorage->getToken();
-        $user = $token ? $token->getUser() : null;
-
         //
         // Prevent the average guy to see the administration
-        if(!$this->security->isGranted("BACKOFFICE")) throw new NotFoundHttpException();
+        if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest())) {
+
+            if(!RescueFormAuthenticator::security($event->getRequest()))
+                throw new NotFoundHttpException();
+        }
 
         //
         // Redirect if basic access not granted
-        $accessRestricted  = !$this->security->isGranted("PUBLIC_ACCESS");
-        $accessRestricted |= !$this->security->isGranted("USER_ACCESS");
-        $accessRestricted |= !$this->security->isGranted("ADMIN_ACCESS");
-        $accessRestricted |= !$this->security->isGranted("EDITOR_ACCESS");
+        $accessRestricted  = !$this->authorizationChecker->isGranted("PUBLIC_ACCESS");
+        $accessRestricted |= !$this->authorizationChecker->isGranted("USER_ACCESS");
+        $accessRestricted |= !$this->authorizationChecker->isGranted("ADMIN_ACCESS");
+        $accessRestricted |= !$this->authorizationChecker->isGranted("EDITOR_ACCESS");
         if($accessRestricted) {
 
             // In case of restriction: profiler is disabled
             $this->profiler->disable();
 
             // Nonetheless exception access is alway possible
-            if($this->security->isGranted("EXCEPTION_ACCESS"))
+            if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))
                 return;
 
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->getCurrentRouteName($event);
-            $accessDeniedRedirection = $this->baseService->getSettings()->getScalar("base.settings.access_denied_redirection");
+            $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirection");
             if(!in_array($currentRouteName, [$accessDeniedRedirection, RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
 
                 if($accessDeniedRedirection) $this->baseService->redirect($accessDeniedRedirection);
@@ -279,6 +259,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 }
 
                 // User gets disconnected if access not granted
+                $token = $this->tokenStorage->getToken();
                 if($token) $this->tokenStorage->setToken(NULL);
                 return $event->stopPropagation();
             }
@@ -288,6 +269,10 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $token = $this->tokenStorage->getToken();
+
+        /**
+         * @var User
+         */
         $user = $token ? $token->getUser() : null;
         if(!$user) return;
 
@@ -299,7 +284,6 @@ class SecuritySubscriber implements EventSubscriberInterface
             $notification->send("warning");
         }
 
-        if($user->isDirty()) $user->kick();
         if($user->isKicked()) {
 
             $notification = new Notification("kickout", [$user]);
@@ -308,7 +292,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->referrer->setUrl($event->getRequest()->getUri());
             $event->setResponse($this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE));
 
-            if(!$user->isDirty()) $this->userRepository->flush($user);
+            $this->userRepository->flush($user);
             return $event->stopPropagation();
         }
 
@@ -362,6 +346,10 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         //Notify user about the authentication method
         if(!($token = $this->tokenStorage->getToken()) ) return;
+
+        /**
+         * @var User
+         */
         if(!($user = $token->getUser())) return;
 
         if ( !($user->isActive()) ) {
@@ -391,7 +379,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onLoginSuccess(LoginSuccessEvent $event)
     {
-        // Notify user about the authentication method
+        /**
+         * @var User
+         */
         if ($user = $event->getUser()) {
 
             if (!$user->isPersistent()) {
@@ -424,136 +414,14 @@ class SecuritySubscriber implements EventSubscriberInterface
         }
     }
 
-    private $_onLogoutUser = null;
-    private $_onLogoutImpersonator = null;
     public function onLogout(LogoutEvent $event)
     {
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
-        $impersonator = ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
 
         if ($user instanceof User) // Just to remember username.. after logout & first redirection
             $this->baseService->addSession("_user", $user);
 
-        // Get back onLogout token information (to be used to store logs)
-        $this->_onLogoutUser = $user;
-        $this->_onLogoutImpersonator = $impersonator;
-
         return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
-    }
-
-    public function onStoreLog(KernelEvent $event, ?\Throwable $exception = null) {
-
-        if (self::$exceptionOnHold && self::$exceptionOnHold != $exception)
-            return;
-
-        if (!$event->isMainRequest()) return;
-        $request = $event->getRequest();
-
-        // Handle security (not mandatory, $user is null if not defined)
-        $token = $this->tokenStorage->getToken();
-        $impersonator = ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : $this->_onLogoutImpersonator);
-        $user = ($token ? $token->getUser() : $this->_onLogoutUser);
-        if(!$user) return;
-
-        // Monitored listeners
-        $monitoredEntries = $this->baseService->getParameterBag("base.logging") ?? [];
-        if(!$monitoredEntries) return;
-
-        // Format monitored entries
-        foreach ($monitoredEntries as $key => $entry) {
-
-            if (!array_key_exists("event", $monitoredEntries[$key]))
-                throw new Exception("Missing key \"event\" in monitored events #" . $key);
-            if (!array_key_exists("pretty", $monitoredEntries[$key]))
-                $monitoredEntries[$key]["pretty"] = "*";
-            if (!array_key_exists("statusCode", $monitoredEntries[$key]))
-                $monitoredEntries[$key]["statusCode"] = "*";
-
-            $monitoredEntries[$key]["pretty"] = str_replace("\\", "\\\\", $monitoredEntries[$key]["pretty"]);
-            $monitoredEntries[$key]["pretty"] = trim(ltrim($monitoredEntries[$key]["pretty"], '\\'));
-            $monitoredEntries[$key]["pretty"] = "/" . $monitoredEntries[$key]["pretty"] . "/";
-            if ($monitoredEntries[$key]["pretty"] == "/*/")
-                $monitoredEntries[$key]["pretty"] = "/.*/";
-
-            $monitoredEntries[$key]["statusCode"] = trim($monitoredEntries[$key]["statusCode"]);
-            $monitoredEntries[$key]["statusCode"] = "/" . $monitoredEntries[$key]["statusCode"] . "/";
-            if ($monitoredEntries[$key]["statusCode"] == "/*/")
-                $monitoredEntries[$key]["statusCode"] = "/.*/";
-        }
-
-        // Check called listeners
-        $calledListeners = [];
-        foreach($this->dispatchers as $dispatcher)
-            $calledListeners = array_merge($calledListeners, $dispatcher->getCalledListeners());
-
-        foreach ($calledListeners as $listener) {
-
-            if (!array_key_exists("event", $listener))
-                throw new Exception("Array key \"event\" missing in dispatcher listener");
-            if (!array_key_exists("pretty", $listener))
-                throw new Exception("Array key \"pretty\" missing in dispatcher listener");
-
-            $event  = $listener["event"];
-            $pretty = $listener["pretty"];
-
-            foreach ($monitoredEntries as $monitoredEntry) {
-
-                $monitoredStatusCode = $monitoredEntry["statusCode"];
-                $monitoredPretty   = $monitoredEntry["pretty"];
-                $monitoredEvent      = $monitoredEntry["event"];
-                if ($monitoredEvent != $event)                   continue;
-
-                if($event == "kernel.exception") {
-
-                    // If kernel exception, listener regex is inhibited
-                    if ($pretty != __CLASS__ . "::onKernelException") continue;
-
-                    // Handle exception
-                    if ($exception == null) continue;
-
-                    if ($exception instanceof HttpException && !preg_match($monitoredStatusCode, $exception->getStatusCode())) continue;
-                    else if (!preg_match($monitoredStatusCode, $exception->getCode())) continue;
-
-                } else if (!preg_match($monitoredPretty, $pretty)) continue; // Else just check the provided regex
-
-                // Entity Manager closed means most likely an exception
-                // due within doctrine execution happened
-                $entityManager = $this->baseService->getEntityManager(true);
-                if (!$entityManager || !$entityManager->isOpen()) return;
-
-                // In the opposite case, we are storing the exception
-                $log = new Log($listener, $request);
-                $log->setException($exception ?? null);
-                $log->setImpersonator($impersonator);
-                $log->setUser($user);
-
-                $entityManager->persist($log);
-                $this->userRepository->flush($user);
-            }
-        }
-    }
-
-    public function onKernelTerminate(TerminateEvent $event)
-    {
-        if(!$this->baseService->isDebug()) return;
-        return $this->onStoreLog($event);
-    }
-
-    private static $exceptionOnHold = null;
-    public function onKernelException(ExceptionEvent $event)
-    {
-        if(!$this->baseService->isDebug()) return;
-        $exception = $event->getThrowable();
-
-        // Initial exception held here, this is in case of nested exceptions..
-        // This guard must be set here, otherwise you are going to miss the first exception..
-        // In case the initial exception is related to doctrine, entity manager will be closed.
-        if(self::$exceptionOnHold)
-            throw self::$exceptionOnHold;
-
-        self::$exceptionOnHold = $exception;
-        $this->onStoreLog($event, $exception);
-        self::$exceptionOnHold = null;
     }
 }

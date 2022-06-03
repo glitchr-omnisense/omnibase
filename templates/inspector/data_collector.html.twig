@@ -25,7 +25,7 @@
 {% endblock %}
 
 {% block panel %}
-    
+
     {% for title, data in collector.data %}
         {% if not (title starts with '_') %}
             <h2>{{ title|raw }}</h2>
@@ -34,7 +34,7 @@
             {% else %}
                 {{ include('@WebProfiler/Profiler/table.html.twig', {data:data}, with_context = false) }}
             {% endif %}
-        {% endif %}    
+        {% endif %}
     {% endfor %}
 
 {% endblock %}

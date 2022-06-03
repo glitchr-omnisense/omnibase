@@ -1,15 +1,13 @@
 <?php
 
-namespace Base\Security;
+namespace Base\Security\Voter;
 
-use Base\Entity\User;
-use Base\Service\Settings;
+use Base\Service\ParameterBagInterface;
+use Base\Service\SettingBagInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Security\Core\Security;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class AccessVoter extends Voter
 {
@@ -20,11 +18,12 @@ class AccessVoter extends Voter
     const     ADMIN_ACCESS = "ADMIN_ACCESS";
     const    EDITOR_ACCESS = "EDITOR_ACCESS";
 
-    public function __construct(RequestStack $requestStack, RouterInterface $router, Settings $settings)
+    public function __construct(RequestStack $requestStack, RouterInterface $router, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag)
     {
         $this->requestStack = $requestStack;
         $this->router       = $router;
-        $this->settings   = $settings;
+        $this->settingBag   = $settingBag;
+        $this->parameterBag = $parameterBag;
     }
 
     protected function supports(string $attribute, mixed $subject): bool
@@ -43,21 +42,21 @@ class AccessVoter extends Voter
 
             case self::PUBLIC_ACCESS:
 
-                $publicAccess  = filter_var($this->settings->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
+                $publicAccess  = filter_var($this->settingBag->getScalar("base.settings.public_access"), FILTER_VALIDATE_BOOLEAN);
                 $publicAccess |= $user && $user->isGranted("ROLE_USER");
 
                 return $publicAccess;
 
             case self::USER_ACCESS:
 
-                $userAccess    = filter_var($this->settings->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
+                $userAccess    = filter_var($this->settingBag->getScalar("base.settings.user_access"), FILTER_VALIDATE_BOOLEAN);
                 $userAccess   |= $user && $user->isGranted("ROLE_ADMIN");
 
                 return $userAccess;
 
             case self::ADMIN_ACCESS:
 
-                $adminAccess   = filter_var($this->settings->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $adminAccess   = filter_var($this->settingBag->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $adminAccess  |= $user && $user->isGranted("ROLE_EDITOR");
 
                 return $adminAccess;
@@ -68,8 +67,11 @@ class AccessVoter extends Voter
             case self::EXCEPTION_ACCESS:
 
                 // Check if firewall is subjected to restriction
-                $firewallName = $this->parameterBag->get("base.access_restriction.firewall");
-                $isRestrictedFirewall = $request->attributes->get("_firewall_context") != "security.firewall.map.context.".$firewallName;
+                $firewallNames = $this->parameterBag->get("base.access_restriction.firewalls");
+
+                $isRestrictedFirewall = false;
+                foreach($firewallNames as $firewallName)
+                    $isRestrictedFirewall |= $request->attributes->get("_firewall_context") == "security.firewall.map.context.".$firewallName;
                 if(!$isRestrictedFirewall) return true;
 
                 $url = parse_url(get_url());

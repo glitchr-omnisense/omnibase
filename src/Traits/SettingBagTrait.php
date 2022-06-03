@@ -9,7 +9,7 @@ use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 
-trait SettingsTrait
+trait SettingBagTrait
 {
     protected $settingRepository = null;
 
@@ -24,9 +24,9 @@ trait SettingsTrait
         );
     }
 
-    protected function read(?string $path, array $normSettings)
+    protected function read(?string $path, array $bag)
     {
-        if($path === null) return $normSettings;
+        if($path === null) return $bag;
 
         $pathArray = explode(".", $path);
         foreach ($pathArray as $index => $key) {
@@ -34,13 +34,13 @@ trait SettingsTrait
             if($key == "_self" && $index != count($pathArray)-1)
                 throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
 
-            if(!array_key_exists($key, $normSettings))
+            if(!array_key_exists($key, $bag))
                 throw new \Exception("Failed to read \"$path\": key not found");
 
-            $normSettings = &$normSettings[$key];
+            $bag = &$bag[$key];
         }
 
-        return $normSettings;
+        return $bag;
     }
 
     public function normalize(?string $path, array $settings) {

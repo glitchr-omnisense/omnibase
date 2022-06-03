@@ -92,8 +92,8 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         if(!$url) return null;
 
         $parseUrl = parse_url($url);
-        $parseUrl["scheme"] = $parseUrl["scheme"] ?? $this->getSettings()->scheme();
-        $parseUrl["domain"] = $parseUrl["domain"] ?? $this->getSettings()->domain();
+        $parseUrl["scheme"] = $parseUrl["scheme"] ?? $this->getSettingBag()->scheme();
+        $parseUrl["domain"] = $parseUrl["domain"] ?? $this->getSettingBag()->domain();
         $parseUrl["path"]   = $this->getService()->getAsset($parseUrl["path"] ?? "");
 
         return $parseUrl["scheme"] . "://" . $parseUrl["domain"] . $parseUrl["path"];

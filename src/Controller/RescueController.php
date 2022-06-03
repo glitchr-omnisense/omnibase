@@ -61,8 +61,8 @@ class RescueController extends AbstractDashboardController
 
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $logo = $baseService->getSettings()->get("base.settings.logo.backoffice")["_self"] ?? null;
-        $logo = $logo ?? $baseService->getSettings()->get("base.settings.logo")["_self"] ?? null;
+        $logo = $baseService->getSettingBag()->get("base.settings.logo.backoffice")["_self"] ?? null;
+        $logo = $logo ?? $baseService->getSettingBag()->get("base.settings.logo")["_self"] ?? null;
 
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
@@ -71,7 +71,7 @@ class RescueController extends AbstractDashboardController
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
             'logo' => $logo,
-            "page_title" => $baseService->getSettings()->getScalar("base.settings.title"),
+            "page_title" => $baseService->getSettingBag()->getScalar("base.settings.title"),
             "identifier" => $lastUsername,
             "form" => $form->createView()
         ]);

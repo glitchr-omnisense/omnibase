@@ -3,7 +3,7 @@
 namespace Base\Twig;
 
 use Base\Component\HttpFoundation\Referrer;
-use Base\Service\Settings;
+use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -26,17 +26,17 @@ class AppVariable
     protected $twig;
 
     /**
-     * @var Settings
+     * @var SettingBag
      */
-    protected $settings;
+    protected $settingBag;
     /**
      * @var ParameterBagInterface
      */
     protected $parameterBag;
 
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, Settings $settings, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, SettingBag $settingBag, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
     {
-        $this->settings  = $settings;
+        $this->settingBag  = $settingBag;
         $this->referrer  = $referrer;
         $this->twig      = $twig;
         $this->bag       = $parameterBag;
@@ -48,7 +48,7 @@ class AppVariable
     }
 
     public function bag(?string $key = null, ?array $bag = null) { return $key ? $this->bag->get($key, $bag) ?? null : $this->bag; }
-    public function settings() { return $this->settings->get("app.settings") ?? []; }
+    public function settings() { return $this->settingBag->get("app.settings") ?? []; }
     public function referrer() { return $this->referrer; }
 
     public function meta(array $meta = []) { return $this->meta = array_merge($this->meta, $meta); }

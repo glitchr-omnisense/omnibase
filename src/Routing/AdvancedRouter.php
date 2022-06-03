@@ -5,7 +5,7 @@ namespace Base\Routing;
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\ParameterBagInterface;
-use Base\Service\Settings;
+use Base\Service\SettingBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
@@ -19,7 +19,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 {
     protected $router;
 
-    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, Settings $settings, string $debug)
+    public function __construct(Router $router, RequestStack $requestStack, ParameterBagInterface $parameterBag, SettingBag $settingBag, string $debug)
     {
         $this->debug  = $debug;
 
@@ -28,7 +28,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         $this->router->setOption("generator_class", AdvancedUrlGenerator::class);
 
         $this->requestStack = $requestStack;
-        $this->settings = $settings;
+        $this->settingBag = $settingBag;
         $this->parameterBag = $parameterBag;
 
         $this->useCustomRouter = $parameterBag->get("base.router.use_custom_engine");
@@ -99,11 +99,8 @@ class AdvancedRouter implements AdvancedRouterInterface
     {
         if ($routeUrl === null) $routeUrl = $this->getRequestUri();
 
-        dump($routeUrl);
         $routeArray = $this->getRouteArray($routeUrl);
         if(!$routeArray) return null;
-        dump($routeArray);
-        exit(1);
 
         $routeName = $routeArray["_route"];
         if(array_key_exists("_group", $routeArray))
@@ -116,7 +113,6 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $this->router->getRouteCollection()->get($routeName);
     }
 
-    public function getCompiledRoutes() { return $this->getGenerator()->getCompiledRoutes(); }
     public function hasRoute(string $routeName): bool { return $this->getRouteName($routeName) !== null; }
     public function getRouteName(?string $routeUrl = null): ?string
     {
@@ -139,12 +135,10 @@ class AdvancedRouter implements AdvancedRouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
-    protected $routeGroups = [];
     public function getRouteGroups(?string $routeName): array
     {
         $routeName = explode(".", $routeName ?? "")[0];
-        return $this->routeGroups[$routeName] = $this->routeGroups[$routeName] ??
-        array_unique(array_keys(array_transforms(
+        return array_unique(array_keys(array_transforms(
 
             function($k, $route) use ($routeName) :?array {
 
@@ -161,7 +155,7 @@ class AdvancedRouter implements AdvancedRouterInterface
 
                 return null;
 
-            }, $this->router->getCompiledRoutes()
+            }, $this->router->getRouteCollection()->all()
         )));
     }
 }

@@ -145,7 +145,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]), array_reverse($fields)));
 
         if(empty($fields))
-            $fields = array_fill_keys($this->baseService->getSettings()->getPaths("api"), []);
+            $fields = array_fill_keys($this->baseService->getSettingBag()->getPaths("api"), []);
 
         foreach($fields as $key => $field) {
 
@@ -182,7 +182,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->baseService->getSettings()->getRawScalar($fields)
+                $this->baseService->getSettingBag()->getRawScalar($fields)
             );
 
             foreach($settings as $setting)
@@ -253,7 +253,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->baseService->getSettings()->getRawScalar($fields)
+                $this->baseService->getSettingBag()->getRawScalar($fields)
             );
 
 
@@ -322,12 +322,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettings()->getScalar("base.settings.logo.backoffice");
-        if(!$logo) $logo = $this->baseService->getSettings()->getScalar("base.settings.logo");
+        $logo  = $this->baseService->getSettingBag()->getScalar("base.settings.logo.backoffice");
+        if(!$logo) $logo = $this->baseService->getSettingBag()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
 
-        $title = $this->baseService->getSettings()->getScalar("base.settings.title") ?? "";
-        $slogan = $this->baseService->getSettings()->getScalar("base.settings.slogan") ?? "";
+        $title = $this->baseService->getSettingBag()->getScalar("base.settings.title") ?? "";
+        $slogan = $this->baseService->getSettingBag()->getScalar("base.settings.slogan") ?? "";
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")

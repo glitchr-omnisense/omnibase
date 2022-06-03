@@ -41,12 +41,10 @@ use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Enum\UserState;
-use Doctrine\ORM\PersistentCollection;
 use Exception;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
-use Doctrine\ORM\Mapping\OrderBy;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -69,6 +67,10 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
+    public function killSession()
+    {
+        $this->getService()->Logout();
+    }
 
     public function getUserIdentifier(): string
     {
@@ -89,28 +91,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function equals($other): bool { return ($other->getId() == $this->getId()); }
 
-    // The purpose of this method is to detect if user is dirty
-    // It means: not in the database anymore, but user session still active..
-    public function isDirty() {
-
-        $persistentCollection = ($this->getLogs() instanceof PersistentCollection ? (array) $this->getLogs() : null);
-        if($persistentCollection === null) return true;
-
-        $dirtyCollection = [
-            "\x00Doctrine\ORM\PersistentCollection\x00snapshot" => [],
-            "\x00Doctrine\ORM\PersistentCollection\x00owner" => null,
-            "\x00Doctrine\ORM\PersistentCollection\x00association" => null,
-            "\x00Doctrine\ORM\PersistentCollection\x00em" => null,
-            "\x00Doctrine\ORM\PersistentCollection\x00backRefFieldName" => null,
-            "\x00Doctrine\ORM\PersistentCollection\x00typeClass" => null,
-            "\x00Doctrine\ORM\PersistentCollection\x00isDirty" => false,
-            "\x00*\x00initialized" => false
-        ];
-
-        if(array_intersect_key($persistentCollection, $dirtyCollection) === $dirtyCollection) return true;
-        return false;
-    }
-
     public function __toString() { return $this->getUserIdentifier(); }
     public function __construct()
     {
@@ -127,9 +107,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
         $this->threads = new ArrayCollection();
         $this->followedThreads = new ArrayCollection();
-
         $this->mentions = new ArrayCollection();
-
         $this->likes = new ArrayCollection();
 
         $this->setTimezone();

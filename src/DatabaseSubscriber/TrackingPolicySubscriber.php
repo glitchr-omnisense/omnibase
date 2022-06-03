@@ -7,7 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Events;
 
-class DoctrineTrackingPolicySubscriber implements EventSubscriberInterface
+class TrackingPolicySubscriber implements EventSubscriberInterface
 {
     public function __construct(ClassMetadataManipulator $classMetadataManipulator)
     {

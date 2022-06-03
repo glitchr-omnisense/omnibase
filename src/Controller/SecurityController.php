@@ -111,7 +111,7 @@ class SecurityController extends AbstractController
             if( $user->isKicked()   ) {
 
                 $notification = new Notification("kickout", [$user]);
-                $notification->setUser(!$user->isDirty() ? $user : null);
+                $notification->setUser($user);
                 $notification->send("warning");
                 $user->kick(0);
 
@@ -460,8 +460,8 @@ class SecurityController extends AbstractController
 
         } else {
 
-            $downtime = $this->baseService->getSettings()->get("base.settings.maintenance_downtime")["_self"] ?? null;
-            $uptime   = $this->baseService->getSettings()->get("base.settings.maintenance_uptime")["_self"] ?? null;
+            $downtime = $this->baseService->getSettingBag()->get("base.settings.maintenance_downtime")["_self"] ?? null;
+            $uptime   = $this->baseService->getSettingBag()->get("base.settings.maintenance_uptime")["_self"] ?? null;
         }
 
         $downtime = $downtime ? strtotime($downtime) : 0;

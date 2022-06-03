@@ -3,7 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
-use Base\Service\Settings;
+use Base\Service\SettingBag;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
@@ -15,7 +15,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'translation:settings', aliases:[], description:'')]
 class TranslationSettingsCommand extends Command
 {
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, Settings $settings)
+    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, SettingBag $settings)
     {
         $this->translator = $translator;
         $this->localeProvider = $localeProvider;

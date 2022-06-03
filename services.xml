@@ -59,15 +59,16 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
             <argument type="service" id="App\Repository\Layout\ShortRepository" />
         </service>
 
         <service id="Base\Subscriber\RouterSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="base.service" /></service>
@@ -75,7 +76,7 @@
         <service id="Base\Subscriber\ParameterBagSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\Subscriber\EasyAdminSubscriber">
@@ -94,7 +95,8 @@
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
-        <service id="Base\Service\Settings" public="true">
+        <service id="Base\Service\SettingBagInterface" alias="Base\Service\SettingBag"/>
+        <service id="Base\Service\SettingBag" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="locale_provider" />
@@ -111,7 +113,7 @@
             <argument type="service" id="base.parameter_bag" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\DependencyInjection\CacheWarmer" public="true" >
@@ -134,7 +136,7 @@
             <argument type="service" id="base.notifier" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="base.database.entity_hydrator" />
@@ -233,7 +235,7 @@
             <tag name="console.command" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
         </service>
 
 
@@ -337,7 +339,8 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
-        <service id="Base\DatabaseSubscriber\DoctrineTrackingPolicySubscriber">
+
+        <service id="Base\DatabaseSubscriber\TrackingPolicySubscriber">
             <tag name="doctrine.event_subscriber" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
@@ -422,7 +425,7 @@
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
         </service>
 
-        <service id="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="base.settings" /></service>
+        <service id="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
         <service id="Base\Model\CurrencyApi\Fixer"            parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
         <service id="Base\Model\CurrencyApi\AbstractApi"      parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
         <service id="Base\Model\CurrencyApi\ExchangeRatesApi" parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
@@ -463,10 +466,11 @@
             <tag name="security.voter" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
-         <service id="Base\Security\Voter\RouterVoter">
+         <service id="Base\Security\Voter\RouteVoter">
             <tag name="security.voter" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
@@ -595,18 +599,32 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <!-- Listener declarations
-        NB: SecuritySubscriber is now defined in BaseExtension.php due to security.event_dispatcher. -->
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.authorization_checker" />
-            <argument type="service" id="security.untracked_token_storage" />
-            <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
+            <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
             <argument type="service" id="referrer" />
             <argument type="service" id="profiler" />
+            <argument type="service" id="parameter_bag" />
+        </service>
+
+        <service id="Base\Subscriber\IntegritySubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="doctrine" />
+        </service>
+
+        <service id="Base\EntitySubscriber\LogSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
+            <argument type="service" id="security.untracked_token_storage" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.service" />
             <argument type="service" id="parameter_bag" />
         </service>
 
@@ -623,7 +641,7 @@
 
         <service id="Base\Form\Type\Layout\SettingListType">
             <tag name="form.type" />
-            <argument type="service" id="base.settings" />
+            <argument type="service" id="setting_bag" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         <service id="Base\Form\Type\Layout\WidgetListType">

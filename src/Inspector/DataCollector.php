@@ -3,23 +3,20 @@
 namespace Base\Inspector;
 
 use Base\BaseBundle;
-use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\EasyAdminBundle;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
-use Exception;
+
 use Symfony\Bundle\FrameworkBundle\DataCollector\AbstractDataCollector;
 use Symfony\Bundle\TwigBundle\TwigBundle;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
-use Twig\Environment;
 
 class DataCollector extends AbstractDataCollector
 {
@@ -85,7 +82,7 @@ class DataCollector extends AbstractDataCollector
         $this->data["_bundles"] = $this->dataBundles;
     }
 
-    private function getBundleIdentifier(string $bundle) {
+    protected function getBundleIdentifier(string $bundle) {
 
         if(!class_exists($bundle))
             return null;
@@ -108,7 +105,7 @@ class DataCollector extends AbstractDataCollector
         return null;
     }
 
-    private function getFormattedConnection(Connection $connection)
+    protected function getFormattedConnection(Connection $connection)
     {
         $params = $connection->getParams();
 
@@ -132,7 +129,6 @@ class DataCollector extends AbstractDataCollector
 
         return $driver.$user.$host.$port.$dbname.$charset;
     }
-
 
     private function getDoctrineConnections()
     {
@@ -177,7 +173,7 @@ class DataCollector extends AbstractDataCollector
                 'CRUD Action' => $context->getRequest()->get(EA::CRUD_ACTION),
                 'Entity ID' => $context->getRequest()->get(EA::ENTITY_ID),
                 'Sort' => $context->getRequest()->get(EA::SORT),
-            ] : null;
+            ] : [];
 
         if(class_exists(ApiPlatformBundle::class))
             $data[$this->getBundleFormattedName(ApiPlatformBundle::class)] = [];
