@@ -22,13 +22,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
     }
 
-    protected function resolve(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
+    protected function resolveUrl(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
     {
-        //
-        // Get host, path
-        // host,$path, default
-        // dump("");
-
         // Transforms requested route by adding parameters
         if($routeName === null) return null;
 
@@ -71,7 +66,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         return $routeName ? parent::generate($routeName, [], $referenceType) : null;
     }
 
-    public function resolveContext(?array $routeParameters = null)
+    public function resolveParameters(?array $routeParameters = null)
     {
         if($routeParameters !== null) {
 
@@ -95,6 +90,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             if(array_key_exists("base_dir", $url))
                 $this->getContext()->setBaseUrl($url["base_dir"]);
         }
+
+        return $routeParameters;
     }
 
     public function generate(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): string
@@ -104,14 +101,14 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         if(str_starts_with($routeName, "_")) {
 
-            $this->resolveContext();
+            $routeParameters = $this->resolveParameters() ?? $routeParameters;
             try { return parent::generate($routeName, $routeParameters, $referenceType); }
             catch (Exception $e ) { throw $e; }
         }
 
         //
         // Update context
-        $this->resolveContext($routeParameters);
+            $routeParameters = $this->resolveParameters() ?? $routeParameters;
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations
@@ -125,7 +122,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $routeBase = $routeName[0];
         $routeName = $routeBase.$routeGroup;
-        if(!$routeName) $routeName = $this->getRouter()->getRouteName($this->resolve($routeBase, $routeParameters, $referenceType));
+        if(!$routeName) $routeName = $this->getRouter()->getRouteName($this->resolveUrl($routeBase, $routeParameters, $referenceType));
 
         // Prepare the default route if not found.
         // In case a group doesn't exists, it will be replaced by the first group found in the route collection list.
@@ -133,13 +130,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $routeDefaultGroup = first($routeGroups);
         $routeDefaultName = $routeBase.($routeDefaultGroup ? ".".$routeDefaultGroup : "");
-        if(!$routeDefaultName) $routeDefaultName = $this->getRouter()->getRouteName($this->resolve($routeBase, $routeParameters, $referenceType));
+        if(!$routeDefaultName) $routeDefaultName = $this->getRouter()->getRouteName($this->resolveUrl($routeBase, $routeParameters, $referenceType));
 
         //
         // Strip unused variables from main group
-        try { $routeUrl      = $this->resolve($routeBase, $routeParameters, $referenceType); }
+        try { $routeUrl      = $this->resolveUrl($routeBase, $routeParameters, $referenceType); }
         catch(Exception $e) { $routeUrl = null; }
-        try { $routeGroupUrl = $this->resolve($routeBase.$routeGroup, $routeParameters, $referenceType); }
+        try { $routeGroupUrl = $this->resolveUrl($routeBase.$routeGroup, $routeParameters, $referenceType); }
         catch(Exception $e) { $routeGroupUrl = null; }
 
         if($routeGroupUrl !== null && $routeUrl !== null) {
@@ -150,9 +147,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         //
         // Try to compute subgroup (or base one)
-        try { return $this->resolve($routeName, $routeParameters, $referenceType); }
+        try { return $this->resolveUrl($routeName, $routeParameters, $referenceType); }
         catch(Exception $e) { if ($routeDefaultName == $routeName) throw $e; }
 
-        return $this->resolve($routeDefaultName, $routeParameters, $referenceType);
+        return $this->resolveUrl($routeDefaultName, $routeParameters, $referenceType);
     }
 }

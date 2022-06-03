@@ -5,7 +5,7 @@
         {% set knownException = (transCode|trans) != transCode %}
         {% if  knownException %}
             <h1 class="exception-title">{{ flattenException.statusCode }} {{ transCode|trans }}</h1>
-            <h3>{{ flattenException.getTitle() ?? '@controllers.exception.title'|trans }}</h3>
+            {# <h3>{{ flattenException.getTitle() ?? '@controllers.exception.title'|trans }}</h3> #}
         {% else %}
             {% set code = ((flattenException.statusCode != 0) ? flattenException.statusCode : null)|default(500) %}
             {% set technicalSupport = setting_bag.mail._self|default(app.bag("base.notifier.technical_support")) %}

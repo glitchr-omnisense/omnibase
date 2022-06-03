@@ -166,7 +166,7 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $width0;
-    public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getSourceMeta()[0] ?? 0 : 0; }
+    public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getWidth() : 0; }
     public function getWidth (): ?int { return $this->width0;}// * $this->getNaturalWidth(); }
     public function getWidth0(): ?int { return $this->width0; }
     public function setWidth0(int $width0): self
@@ -179,7 +179,7 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $height0;
-    public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getSourceMeta()[1] ?? 0 : 0; }
+    public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getHeight() : 0; }
     public function getHeight (): ?int { return $this->height0;}// * $this->getNaturalHeight(); }
     public function getHeight0(): ?int { return $this->height0; }
     public function setHeight0(int $height0): self

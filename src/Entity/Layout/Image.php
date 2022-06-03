@@ -13,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Enum\Quadrant\Quadrant;
+use Base\Filter\Basic\ThumbnailFilter;
 use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
@@ -32,31 +33,18 @@ class Image implements IconizeInterface
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $cropIdentifier = array_pop_key("crop", $routeParameters);
-        $routeName = $cropIdentifier ? "ux_imageCrop" : "ux_image" ;
+        $filters = array_pop_key("filters", $routeParameters) ?? [];
 
+        $cropIdentifier = array_pop_key("crop", $routeParameters);
+        if(is_array($cropIdentifier)) $cropIdentifier = implode(":", array_slice($cropIdentifier, 0, 2));
+
+        $routeName = $cropIdentifier ? "ux_imageCrop" : "ux_image" ;
         $routeParameters = array_merge($routeParameters, [
-            "hashid" => $this->getImageService()->obfuscate($this->getSource()),
+            "hashid" => $this->getImageService()->obfuscate($this->getSource(), [], $filters),
             "identifier" => $cropIdentifier
         ]);
 
-        $m1 = memory_get_usage();
-        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
-        $m2 = memory_get_usage();
-        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
-        $m3 = memory_get_usage();
-        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
-        $m4 = memory_get_usage();
-        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
-        $m5 = memory_get_usage();
-        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
-        $m6 = memory_get_usage();
-        $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
-        $m7 = memory_get_usage();
-        dump("---> " .$m1." ".$m2." ".$m3." ".$m4." ".$m5." ".$m6." ".$m7);
-
-        exit(1);
-    return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
+        return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
     public        function __iconize()       : ?array { return null; }
@@ -93,6 +81,8 @@ class Image implements IconizeInterface
     }
 
     private $sourceMeta;
+    public function getNaturalWidth(): ?int { return $this->getSourceMeta()[0] ?? 0; }
+    public function getNaturalHeight(): ?int { return $this->getSourceMeta()[1] ?? 0; }
     public function getSourceMeta(): array|null|false
     {
         $sourceFile = $this->getSourceFile();

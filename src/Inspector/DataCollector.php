@@ -3,6 +3,7 @@
 namespace Base\Inspector;
 
 use Base\BaseBundle;
+use Base\Service\BaseService;
 use Base\Service\ParameterBagInterface;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\DBAL\Connection;
