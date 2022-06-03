@@ -4,6 +4,7 @@ namespace Base\Controller;
 use Base\Service\BaseService;
 
 use Base\Entity\User\Notification;
+use Base\Routing\AdvancedRouterInterface;
 use Error;
 use ErrorException;
 use Exception;
@@ -17,19 +18,20 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ErrorController extends AbstractController
 {
     private $baseService;
-    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, BaseService $baseService)
+    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, BaseService $baseService)
     {
         $this->baseService = $baseService;
+        $this->router = $router;
         $this->htmlErrorRenderer = $htmlErrorRenderer;
     }
 
     public function Main(\Throwable $exception)
     {
-        $response = null;
         try {
 
-            if ($this->baseService->isDevelopment()) return $this->Rescue($exception);
-            return $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
+            $isPreview = $this->router->getRouteName() === "_preview_error";
+            if ($this->baseService->isDevelopment() && !$isPreview) $response = $this->Rescue($exception);
+            else $response = $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
 
         } catch(Error|Exception|ErrorException $fatalException) {
 

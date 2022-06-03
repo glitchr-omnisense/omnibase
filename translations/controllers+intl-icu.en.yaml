@@ -82,19 +82,40 @@ dashboard_apikey:
 exception:
   title: "Oops! An Error Occurred !"
   excerpt: "Something is broken.."
-  description: "Something is broken and this is an unexcepted error.<br/>
+  message: "Something is broken and this is an unexcepted error.<br/>
         Please <a href=\"mailto:{0}\">let us</a> know what you were doing when this error occurred.<br/>
         We will fix it as soon as possible. Sorry for any inconvenience caused."
+
   return: "Return to the <a href=\"{0}\">home page</a>."
 
-  unknown: "Unknown Error"
-  400: "Bad Request"
-  401: "Not Authorized"
-  402: "Payment Required"
-  403: "Forbidden Access"
-  404: "Page Not Found"
+  unknown:
+    title: "Unknown Error"
+    message: ""
+  400:
+    title: "Bad Request"
+    message: ""
+  401:
+    title: "Not Authorized"
+    message: ""
+  402:
+    title: "Payment Required"
+    message: ""
+  403:
+    title: "Forbidden Access"
+    message: ""
+  404:
+    title: "Page Not Found"
+    message: ""
 
-  500: "Internal Server"
-  501: "Not Implemented"
-  502: "Bad Gateway"
-  503: "Service Unavailable"
+  500:
+    title: "Internal Server"
+    message: ""
+  501:
+    title: "Not Implemented"
+    message: ""
+  502:
+    title: "Bad Gateway"
+    message: ""
+  503:
+    title: "Service Unavailable"
+    message: ""

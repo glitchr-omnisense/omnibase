@@ -81,7 +81,13 @@ namespace {
         if($url === null) $url = get_url();
         if($url === null) return null;
 
+        $noscheme = !str_contains($url, "://");
+        if($noscheme) $url = "file://".$url;
+
         $parse = parse_url($url, $component);
+        if($parse === false) return false;
+        if($noscheme) unset($parse["scheme"]);
+
         $path = str_rstrip($parse['path'] ?? "", "/");
         $parse["path"] = $path;
 

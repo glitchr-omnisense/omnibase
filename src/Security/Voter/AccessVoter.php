@@ -11,7 +11,8 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class AccessVoter extends Voter
 {
-    const EXCEPTION_ACCESS = "EXCEPTION_ACCESS";
+    const   EXCEPTION_ACCESS = "EXCEPTION_ACCESS";
+    const MAINTENANCE_ACCESS = "MAINTENANCE_ACCESS";
 
     const    PUBLIC_ACCESS = "PUBLIC_ACCESS";
     const      USER_ACCESS = "USER_ACCESS";
@@ -28,7 +29,7 @@ class AccessVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return in_array($attribute, [self::EXCEPTION_ACCESS, self::PUBLIC_ACCESS, self::USER_ACCESS, self::ADMIN_ACCESS, self::EDITOR_ACCESS]);
+        return in_array($attribute, [self::EXCEPTION_ACCESS, self::MAINTENANCE_ACCESS, self::PUBLIC_ACCESS, self::USER_ACCESS, self::ADMIN_ACCESS, self::EDITOR_ACCESS]);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool
@@ -62,6 +63,7 @@ class AccessVoter extends Voter
                 return $adminAccess;
 
             case self::EDITOR_ACCESS:
+            case self::MAINTENANCE_ACCESS:
                 return $user && $user->isGranted("ROLE_EDITOR");
 
             case self::EXCEPTION_ACCESS:
@@ -72,6 +74,7 @@ class AccessVoter extends Voter
                 $isRestrictedFirewall = false;
                 foreach($firewallNames as $firewallName)
                     $isRestrictedFirewall |= $request->attributes->get("_firewall_context") == "security.firewall.map.context.".$firewallName;
+
                 if(!$isRestrictedFirewall) return true;
 
                 $url = parse_url(get_url());

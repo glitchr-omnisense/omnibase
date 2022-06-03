@@ -33,10 +33,13 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
         //
         // Custom match implementation
-        $parse = parse_url2();
-        $parse = array_merge($parse, parse_url2($pathinfo));
-        $this->getContext()->setHost($parse["host"]);
+        $parsePathinfo = parse_url2($pathinfo);
+        if($parsePathinfo === false) return $match;
 
+        $parse = parse_url2();
+        $parse = array_merge($parse, $parsePathinfo);
+
+        $this->getContext()->setHost($parse["host"] ?? "");
         return parent::match($parse["path"] ?? $pathinfo);
     }
 }

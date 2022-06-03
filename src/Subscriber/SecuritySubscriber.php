@@ -228,10 +228,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         //
         // Prevent the average guy to see the administration
-        if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest())) {
-
+        if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest()))
             if(!$isSecurityRoute) throw new NotFoundHttpException();
-        }
 
         //
         // Redirect if basic access not granted
@@ -239,7 +237,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         $accessRestricted |= !$this->authorizationChecker->isGranted("USER_ACCESS");
         $accessRestricted |= !$this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $accessRestricted |= !$this->authorizationChecker->isGranted("EDITOR_ACCESS");
+        $accessRestricted |= !$this->authorizationChecker->isGranted("MAINTENANCE_ACCESS");
+
         if($accessRestricted) {
+
 
             // In case of restriction: profiler is disabled
             $this->profiler->disable();

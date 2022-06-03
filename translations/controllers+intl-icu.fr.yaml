@@ -74,19 +74,39 @@ user_settings:
   title: "Mes paramètres"
 
 exception:
-  title: "Oups! Une erreur s'est produite !"
-  description: "Cette erreur est inattendue, mais on travaille à la réparer !<br/>
+  title: "Oups! Une erreur a eu lieu !"
+  message: "Cette erreur est inattendue, mais on travaille à la réparer !<br/>
           Tu peux nous envoyer un email <a href=\"mailto:{0}\">ici</a> pour essayer de décrire ce qu'il s'est passé."
+
   return: "Retourner à la page d'<a href=\"{0}\">accueil</a>."
 
-  unknown: "Erreur Inconnue"
-  400: "Accès Interdit"
-  401: "Non Authentifié"
-  402: "Paiement Requis"
-  403: "Accès Interdit"
-  404: "Page Introuvable"
-
-  500: "Erreur Interne"
-  501: "Pas Implémenté"
-  502: "Passerelle Indisponible"
-  503: "Service Indisponible"
+  unknown:
+    title: "Erreur Inconnue"
+    message: ""
+  400:
+    title: "Accès Interdit"
+    message: ""
+  401:
+    title: "Non Authentifié"
+    message: ""
+  402:
+    title: "Paiement Requis"
+    message: ""
+  403:
+    title: "Accès Interdit"
+    message: ""
+  404:
+    title: "Page Introuvable"
+    message: ""
+  500:
+    title: "Erreur Interne"
+    message: ""
+  501:
+    title: "Pas Implémenté"
+    message: ""
+  502:
+    title: "Passerelle Indisponible"
+    message: ""
+  503:
+    title: "Service Indisponible"
+    message: ""

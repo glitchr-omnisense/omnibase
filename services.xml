@@ -273,6 +273,7 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="error_handler.error_renderer.html" />
+            <argument type="service" id="router" />
             <argument type="service" id="base.service" />
         </service>
 

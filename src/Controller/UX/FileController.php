@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Exception;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /** @Route("", name="ux_") */
 class FileController extends AbstractController
@@ -107,7 +108,7 @@ class FileController extends AbstractController
             return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $path = $this->imageService->filter($args["path"], new SvgFilter(null, $filters, $options), ["local_cache" => true]);
-        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+        return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 
     /**
@@ -155,24 +156,41 @@ class FileController extends AbstractController
             return $this->redirectToRoute("ux_imageCropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         //
-        // Get the most image cropping
+        // Get the most accurate cropping
         $ratio = null;
         $uuid = basename($path);
 
+        // Dimension information
+        $imagesize = getimagesize($path);
+        $naturalWidth = $imagesize[0] ?? 0;
+        if($naturalWidth == 0) throw $this->createNotFoundException();
+        $naturalHeight = $imagesize[1] ?? 0;
+        if($naturalHeight == 0) throw $this->createNotFoundException();
+
+        // Providing "label" information
         $imageCrop = $this->imageCropRepository->findOneBySlug($identifier, [], ["image.source" => $uuid]);
 
-        // Providing just a number
-        if ($imageCrop === null && preg_match("/^-?(?:\d+|\d*\.\d+)$/", $identifier, $matches))
-            $imageCrop = $this->imageCropRepository->findOneByRatioClosestTo($ratio, ["ratio" => "e.width/e.height"], ["image.source" => $uuid])[0] ?? null;
+        // Providing just a "ratio" number
+        if ($imageCrop === null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
 
-        // Providing a ratio X:Y
+            $ratio = floatval($matches[1]);
+            $ratio0 = $ratio/($naturalWidth/$naturalHeight);
+
+            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestTo($ratio0, ["ratio0" => "e.width0/e.height0"], ["image.source" => $uuid])[0] ?? null;
+        }
+
+        // Providing a "width:height" information
         if($imageCrop === null && preg_match("/([0-9]*):([0-9]*)/", $identifier, $matches)) {
 
-            $width  = (int) $matches[1];
-            $height = (int) $matches[2];
-            $ratio  = $width/$height;
+            $width   = $matches[1];
+            $width0  = $width/$naturalWidth;
+            $height  = $matches[2];
+            $height0 = $height/$naturalHeight;
 
-            $imageCrop = $this->imageCropRepository->findOneByRatioClosestToAndWidthClosestToAndHeightClosestTo($ratio, $width, $height, ["ratio" => "e.width/e.height"], ["image.source" => $uuid])[0] ?? null;
+            $ratio0  = $height0 ? $width0/$height0 : 0; // NB: != $width/height
+            if($ratio0 == 0) throw $this->createNotFoundException();
+
+            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["ratio0" => "e.width0/e.height0"], ["image.source" => $uuid])[0] ?? null;
         }
 
         //
