@@ -18,6 +18,7 @@ use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;
 use Imagine\Filter\Basic\Thumbnail;
+use Imagine\Image\Box;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -38,7 +39,7 @@ class Image implements IconizeInterface
 
         $cropIdentifier = array_pop_key("crop", $routeParameters);
         if(is_array($cropIdentifier)) {
-            $filters[] = new Thumbnail($cropIdentifier[0] ?? null, $cropIdentifier[0] ?? null);
+            $filters[] = new Thumbnail(new Box($cropIdentifier[0] ?? null, $cropIdentifier[0] ?? null));
             $cropIdentifier = implode(":", array_slice($cropIdentifier, 0, 2));
         }
 

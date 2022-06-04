@@ -39,9 +39,10 @@ class ErrorController extends AbstractController
             $response = $this->Rescue($exception);
         }
 
-        $notification = new Notification($exception);
-        if ($this->baseService->isDevelopment()) $notification->send("danger");
-        if ($this->baseService->isDevelopment()) dump($exception);
+        // NB: Remember this might be annoying sometimes..
+        // $notification = new Notification($exception);
+        // if ($this->baseService->isDevelopment()) $notification->send("danger");
+        // if ($this->baseService->isDevelopment()) dump($exception);
 
         return $response;
     }
