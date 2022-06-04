@@ -101,7 +101,10 @@ class IntegritySubscriber implements EventSubscriberInterface
 
             $this->tokenStorage->setToken(NULL);
 
-            $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
+            $response = $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
+            $response->headers->clearCookie('REMEMBERME');
+            $event->setResponse($response);
+
             $event->stopPropagation();
         }
     }

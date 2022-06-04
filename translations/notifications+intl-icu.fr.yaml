@@ -29,7 +29,7 @@ login:
     failed: "Les identifiants sont incorrects"
 
 kickout: "{0}, tu as été jeté du site.."
-integrity: "Désolé {0}, mais tu as été volontairement déconnecté.. intégrité du site compromise"
+integrity: "Tu as été volontairement déconnecté.. L'intégrité du site était compromise"
 
 impersonator:
     "<b>Rappel:</b> Tu es actuellement entrain d'usurper l'identité de <b>{0}</b> !
