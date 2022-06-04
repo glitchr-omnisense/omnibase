@@ -9,16 +9,16 @@ use Base\Annotations\Annotation\Uploader;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Repository\Layout\ImageRepository;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
-use Doctrine\ORM\Mapping\DiscriminatorColumn;
-use Imagine\Filter\Basic\Thumbnail;
+
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\Layout\ImageRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
@@ -38,7 +38,7 @@ class Image implements IconizeInterface
 
         $cropIdentifier = array_pop_key("crop", $routeParameters);
         if(is_array($cropIdentifier)) {
-            $filters[] = new Thumbnail($cropIdentifier[0] ?? null, $cropIdentifier[0] ?? null);
+            $filters[] = new ThumbnailFilter($cropIdentifier[0] ?? null, $cropIdentifier[0] ?? null);
             $cropIdentifier = implode(":", array_slice($cropIdentifier, 0, 2));
         }
 
