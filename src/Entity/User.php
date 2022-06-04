@@ -287,8 +287,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function isPersistent(): bool { return (!$this->isSocial() || $this->id > 0); }
     public function getRoles(): array
     {
-        if(empty($roles))
-            $roles[] = UserRole::USER;
+        if(empty($this->roles))
+            $this->roles[] = UserRole::USER;
 
         return $this->roles;
     }
@@ -298,7 +298,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         if(empty($roles))
             $roles[] = UserRole::USER;
 
-        $this->roles = array_unique($roles);
+        $this->roles = array_filter(array_unique($roles));
 
         return $this;
     }

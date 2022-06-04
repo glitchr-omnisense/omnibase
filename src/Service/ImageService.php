@@ -2,11 +2,12 @@
 
 namespace Base\Service;
 
-use Base\Filter\Basic\CropFilter;
-use Base\Filter\Basic\ThumbnailFilter;
-use Base\Filter\Format\BitmapFilter;
-use Base\Filter\Format\SvgFilter;
-use Base\Filter\FormatFilterInterface;
+use Base\Imagine\Filter\Basic\CropFilter;
+use Base\Imagine\Filter\Basic\ThumbnailFilter;
+use Base\Imagine\Filter\Format\BitmapFilterInterface;
+use Base\Imagine\Filter\Format\BitmapFilter;
+use Base\Imagine\Filter\Format\SvgFilter;
+use Base\Imagine\Filter\FormatFilterInterface;
 use Exception;
 
 use Imagine\Filter\FilterInterface;
@@ -102,8 +103,8 @@ class ImageService extends FileService implements ImageServiceInterface
 
             $path = $pathConfig["path"] ?? $path;
             $config["path"] = $path;
-            $config["filters"] = ($pathConfig["filters"] ?? []) + ($config["filters"] ?? []);
-            $config["options"] = ($pathConfig["options"] ?? []) + ($config["options"] ?? []);
+            $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
+            $config["options"] = array_merge_recursive($pathConfig["options"] ?? [], $config["options"] ?? []);
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
@@ -161,7 +162,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         //
         // Apply size limitation to bitmap only
-        if($formatter instanceof BitmapFilter) {
+        if(class_implements_interface($formatter, BitmapFilterInterface::class)) {
 
             $definitionFilters = array_filter($formatter->getFilters(), fn($f) => $f instanceof ThumbnailFilter);
             if(empty($definitionFilters))

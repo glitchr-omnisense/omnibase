@@ -52,7 +52,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["keep"]   = preg_quote($options["keep"]);
+        $view->vars["keep"]   = $options["keep"] ? preg_quote($options["keep"]) : null;
         $view->vars["lower"]  = json_encode($options["lower"]);
         $view->vars["strict"] = json_encode($options["strict"]);
         $view->vars["lock"]   = json_encode($options["lock"]);

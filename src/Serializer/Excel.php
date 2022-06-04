@@ -184,7 +184,7 @@ class Excel
 
         try { $extension = exif_imagetype($path); }
         catch (Exception $e) { $extension = false; }
-        return $extension !== false ? mb_substr(image_type_to_extension($extension), 1) : pathinfo($path, PATHINFO_EXTENSION) ?? null;
+        return $extension !== false ? substr(image_type_to_extension($extension), 1) : pathinfo($path, PATHINFO_EXTENSION) ?? null;
     }
 
     public static function parseFile(string $filename, array $context = []): mixed

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Filter;
+namespace Base\Imagine;
 
 interface FilterInterface extends \Imagine\Filter\FilterInterface
 {

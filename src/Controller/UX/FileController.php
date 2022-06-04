@@ -2,10 +2,10 @@
 
 namespace Base\Controller\UX;
 
-use Base\Filter\Basic\CropFilter;
-use Base\Filter\Format\BitmapFilter;
-use Base\Filter\Format\SvgFilter;
-use Base\Filter\Format\WebpFilter;
+use Base\Imagine\Filter\Basic\CropFilter;
+use Base\Imagine\Filter\Format\BitmapFilter;
+use Base\Imagine\Filter\Format\SvgFilter;
+use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\FileService;
 use Base\Service\Filesystem;

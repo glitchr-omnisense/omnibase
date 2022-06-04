@@ -28,11 +28,11 @@ namespace {
     function get_url(bool $keep_subdomain = true, bool $keep_machine = true,
                     ?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
     {
-        $scheme      ??= $_SERVER["REQUEST_SCHEME"];
-        $http_host   ??= $_SERVER["HTTP_HOST"];
-        $request_uri ??= $_SERVER["REQUEST_URI"];
+        $scheme      ??= $_SERVER["REQUEST_SCHEME"] ?? null;
+        $http_host   ??= $_SERVER["HTTP_HOST"]      ?? null;
+        $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        return format_url($scheme."://".$http_host.$request_uri, $keep_subdomain, $keep_machine);
+        return format_url(compose_url($scheme,null,null,null,null,$http_host,null,$request_uri));
     }
 
     function format_url(?string $url = null, bool $keep_subdomain = true, bool $keep_machine = true) : ?string
@@ -372,13 +372,13 @@ namespace {
             switch($position) {
 
                 case SHORTEN_FRONT:
-                    return ltrim($separator) . mb_substr($str, $nChr, $length+1);
+                    return ltrim($separator) . substr($str, $nChr, $length+1);
 
                 case SHORTEN_MIDDLE:
-                    return mb_substr($str, 0, $length/2). $separator . mb_substr($str, $nChr-$length/2, $length/2+1);
+                    return substr($str, 0, $length/2). $separator . substr($str, $nChr-$length/2, $length/2+1);
 
                 case SHORTEN_BACK:
-                    return mb_substr($str, 0, $length) . rtrim($separator);
+                    return substr($str, 0, $length) . rtrim($separator);
             }
         }
 
@@ -584,37 +584,42 @@ namespace {
     function str_strip(?string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true): ?string { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
     function str_rstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
+        if(empty($needle)) return $haystack;
+        $needleLength = strlen($needle);
+
         if($haystack === null) return null;
+
         if(is_array($needle)) {
 
-            $_haystack = null;
-            while($haystack != $_haystack) {
-
-                $_haystack = $haystack;
+            $lastHaystack = null;
+            while($haystack != $lastHaystack) {
+                $lastHaystack = $haystack;
                 foreach($needle as $n)
                     $haystack = str_rstrip($haystack, $n);
+
             }
 
             return $haystack;
         }
 
-        while(!empty($needle) && strlen($haystack) === strrpos($haystack, $needle)+strlen($needle)) {
-            $haystack = mb_substr($haystack, 0, strlen($haystack)-strlen($needle));
+        $needleLength = strlen($needle);
+        while(strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
+
+            $haystack = substr($haystack, 0, strlen($haystack)-$needleLength);
             if(!$recursive) break;
         }
 
         return $haystack;
     }
-
     function str_lstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
         if($haystack === null) return null;
         if(is_array($needle)) {
 
-            $_haystack = null;
-            while($haystack != $_haystack) {
+            $lastHaystack = null;
+            while($haystack != $lastHaystack) {
 
-                $_haystack = $haystack;
+                $lastHaystack = $haystack;
                 foreach($needle as $n)
                     $haystack = str_lstrip($haystack, $n);
             }
@@ -623,7 +628,7 @@ namespace {
         }
 
         while(!empty($needle) && 0 === strpos($haystack, $needle)) {
-            $haystack = mb_substr($haystack, strlen($needle));
+            $haystack = substr($haystack, strlen($needle));
             if(!$recursive) break;
         }
 
@@ -820,7 +825,7 @@ namespace {
     }
 
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
-    function mb_lcfirst (string $str, ?string $encoding = null): string { return mb_strtolower(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding); }
+    function mb_lcfirst (string $str, ?string $encoding = null): string { return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); }
     function mb_lcwords (string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string
     {
         $separators = str_split($separators);
@@ -830,7 +835,7 @@ namespace {
         return $str;
     }
 
-    function mb_ucfirst (string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding)).mb_substr($str, 1, null, $encoding); }
+    function mb_ucfirst (string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); }
     function mb_ucwords (string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string
     {
         $separators = str_split($separators);
@@ -1372,7 +1377,7 @@ namespace {
                 switch($mode) {
 
                     case ARRAY_INFLATE_INCREMENT_INTKEYS:
-                        $ret[$head] = array_merge_recursive($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
+                        $ret[$head] = array_merge_recursive ($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
                         break;
 
                     default:

@@ -15,6 +15,7 @@ use Exception;
 
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
+use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
@@ -89,7 +90,7 @@ class Uploader extends AbstractAnnotation
             $namespace = (is_string($entity) ? $entity : get_class($entity));
             $namespaceRoot = "Entity";
             $namespaceDir = implode("/", array_map("lcfirst", explode("\\",
-                                mb_substr($namespace, strpos($namespace, $namespaceRoot)-1))
+                                substr($namespace, strpos($namespace, $namespaceRoot)-1))
                             ));
         }
 
@@ -265,12 +266,12 @@ class Uploader extends AbstractAnnotation
 
         //
         // Replace http urls in the list of new elements
-        if($this->fetch) {
+        foreach ($newList as $index => $entry) {
 
-            foreach ($newList as $index => $entry) {
+            if (filter_var($entry, FILTER_VALIDATE_URL)) {
 
-                if (filter_var($entry, FILTER_VALIDATE_URL))
-                    $newList[$index] = new File(fetch_url($entry));
+                if(!$this->fetch) throw new UploadException("URL provided, but Uploader is not configured for that.");
+                $newList[$index] = new File(fetch_url($entry));
             }
         }
 

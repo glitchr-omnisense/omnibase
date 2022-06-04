@@ -189,16 +189,16 @@ class ServiceEntityParser
 
     protected function stripByFront($method, $by, $option)
     {
-        $method = str_starts_with($method, $option) ? mb_substr($method, strlen($option), strlen($method)) : $method;
-        $by     = str_starts_with($by, $option) ? mb_substr($by, strlen($option), strlen($by)) : $by;
+        $method = str_starts_with($method, $option) ? substr($method, strlen($option), strlen($method)) : $method;
+        $by     = str_starts_with($by, $option) ? substr($by, strlen($option), strlen($by)) : $by;
 
         return [$method, $by];
     }
 
     protected function stripByEnd($method, $by, $option)
     {
-        $method = str_ends_with($method, $option) ? mb_substr($method, 0, strpos($method, $option)) : $method;
-        $by     = str_ends_with($by, $option) ? mb_substr($by, 0, strlen($by) - strlen($option)) : $by;
+        $method = str_ends_with($method, $option) ? substr($method, 0, strpos($method, $option)) : $method;
+        $by     = str_ends_with($by, $option) ? substr($by, 0, strlen($by) - strlen($option)) : $by;
 
         return [$method, $by];
     }
@@ -382,7 +382,7 @@ class ServiceEntityParser
         }
 
         // Reveal obvious logical ambiguities..
-        $byNames = str_starts_with($byNames, self::SEPARATOR_BY) ? mb_substr($byNames, strlen(self::SEPARATOR_BY)) : $byNames;
+        $byNames = str_starts_with($byNames, self::SEPARATOR_BY) ? substr($byNames, strlen(self::SEPARATOR_BY)) : $byNames;
         if (str_contains($byNames, self::SEPARATOR_AND ) && str_contains($byNames, self::SEPARATOR_OR ))
             throw new Exception("\"".$byNames. "\" method gets an AND/OR ambiguity");
 
@@ -399,7 +399,7 @@ class ServiceEntityParser
         }
 
         $methodBak = $method;
-        $method = str_starts_with($method, $magicFn) ? mb_substr($method, strlen($magicFn)) : $method;
+        $method = str_starts_with($method, $magicFn) ? substr($method, strlen($magicFn)) : $method;
 
         $operator = self::OPTION_EQUAL; // Default case (e.g. "findBy" alone)
         foreach($byNames as $id => $by) {
@@ -638,7 +638,7 @@ class ServiceEntityParser
             } else if ($isModel) {
 
                 list($method, $_) = $this->stripByEnd($method, $by, $option);
-                $method = mb_substr($method, 0, strpos($method, self::OPTION_MODEL));
+                $method = substr($method, 0, strpos($method, self::OPTION_MODEL));
                 $by = lcfirst($by);
 
                 $modelCriteria = [];
@@ -713,14 +713,14 @@ class ServiceEntityParser
         // Mark as cacheable (to be used in self::getQueryBuilder)
         if(str_starts_with($magicFn, self::REQUEST_CACHE)) {
 
-            $magicFn = self::REQUEST_FIND.mb_substr($magicFn, strlen(self::REQUEST_CACHE));
+            $magicFn = self::REQUEST_FIND.substr($magicFn, strlen(self::REQUEST_CACHE));
             $this->cacheable = true;
         }
 
         if(str_starts_with($magicFn, self::REQUEST_FIND.self::SPECIAL_ALL)) {
 
             if(str_ends_with($magicFn, self::SEPARATOR_BY))
-                $magicFn = mb_substr($magicFn, 0, -strlen(self::SEPARATOR_BY));
+                $magicFn = substr($magicFn, 0, -strlen(self::SEPARATOR_BY));
 
         } else if(!str_ends_with($magicFn, self::SEPARATOR_BY)) { // "Find" method without "By" must include a criteria to call __findBy
 

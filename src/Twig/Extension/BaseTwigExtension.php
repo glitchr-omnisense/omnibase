@@ -231,8 +231,8 @@ final class BaseTwigExtension extends AbstractExtension
         try { $src = $env->getLoader()->getSourceContext($src)->getPath(); }
         catch(LoaderError $e) { throw new NotFoundResourceException("Image \"$src\" not found."); }
 
-        if (mb_substr($src, 0, strlen($this->projectDir)) == $this->projectDir)
-            $src = mb_substr($src, strlen($this->projectDir));
+        if (substr($src, 0, strlen($this->projectDir)) == $this->projectDir)
+            $src = substr($src, strlen($this->projectDir));
 
         return $src;
     }
@@ -417,7 +417,7 @@ final class BaseTwigExtension extends AbstractExtension
             else if (method_exists($value, 'getUuid'))
                 return sprintf('%s #%s', $this->translator->entity(get_class($value)), $value->getUuid());
 
-            return sprintf('%s #%s', $this->translator->entity(get_class($value)), mb_substr(md5(spl_object_hash($value)), 0, 7));
+            return sprintf('%s #%s', $this->translator->entity(get_class($value)), substr(md5(spl_object_hash($value)), 0, 7));
         }
 
         return '';

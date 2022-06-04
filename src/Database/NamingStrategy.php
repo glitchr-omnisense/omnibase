@@ -50,7 +50,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
                 $tableName = $classNameWithNamespace;
                 if(strrpos($tableName, '\\') !== false)
-                    $tableName = lcfirst(mb_substr($classNameWithNamespace, strrpos($classNameWithNamespace, '\\') + 1));
+                    $tableName = lcfirst(substr($classNameWithNamespace, strrpos($classNameWithNamespace, '\\') + 1));
             }
 
             $tableName = str_replace("\\", "", $tableName);

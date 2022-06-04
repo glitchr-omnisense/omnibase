@@ -36,7 +36,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $parsePathinfo = parse_url2($pathinfo);
         if($parsePathinfo === false) return $match;
 
-        $parse = parse_url2();
+        $parse = parse_url2() ?? [];
         $parse = array_merge($parse, $parsePathinfo);
 
         $this->getContext()->setHost($parse["host"] ?? "");

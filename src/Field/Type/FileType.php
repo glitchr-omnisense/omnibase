@@ -69,13 +69,14 @@ class FileType extends AbstractType implements DataMapperInterface
 
             "allow_cancel[confirmation]" => true,
 
-            'multiple'     => false,
+            'multiple'     => null,
             'clipboard'    => false,
 
-            'href'         => null,
-            'title'        => null,
-            'allow_url'    => false,
-            'obfusca'    => false,
+            'href'           => null,
+            'title'          => null,
+            'allow_url'      => false,
+            'allow_reupload' => true,
+            'obfusca'        => false,
 
             'sortable'     => null,
             'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
@@ -113,6 +114,8 @@ class FileType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
+
+            $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
 
             $form->add('file', HiddenType::class, ["required" => $options["required"]]);
 
@@ -171,6 +174,8 @@ class FileType extends AbstractType implements DataMapperInterface
         $parent = $form->getParent();
         $entity = $parent->getData();
 
+        $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
+
         $view->vars["lightbox"] = null;
         if(is_array($options["lightbox"])) {
 
@@ -213,25 +218,34 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["value"]  = (!is_callable($options["empty_data"]) ? $options["empty_data"] : null) ?? null;
         $view->vars['value']  = Uploader::getPublic($entity ?? null, $options["data_mapping"] ?? $form->getName()) ?? $files;
 
-        $view->vars['clippable'] = $view->vars['pathLinks'] = $view->vars['downloadLinks'] = json_encode([]);
+        $view->vars['clippable'] = $view->vars['path'] = $view->vars['download'] = json_encode([]);
+        if(!is_array($view->vars["value"]) && $options["multiple"])
+            $view->vars["value"] = [$view->vars["value"]];
+
         if(is_array($view->vars['value'])) {
 
             if ($view->vars['value']) {
 
-                $view->vars['pathLinks'] = json_encode(array_transforms(function($k,$v):array {
-                    return [$v !== null ? basename($v) : null, $this->fileService->isImage($v) ? $this->imageService->imagine($v) : null];
+                $view->vars['path'] = json_encode(array_transforms(function($k,$v):array {
+                    return $v !== null ? [basename($v), $this->fileService->isImage($v) ? $this->imageService->imagine($v) : null] : null;
                 }, array_filter($view->vars['value'])));
 
-                $view->vars['downloadLinks'] = json_encode(array_transforms(function($k,$v):array {
-                    return [$v !== null ? basename($v) : null, $this->fileService->downloadable($v)];
+                $view->vars['download'] = json_encode(array_transforms(function($k,$v):array {
+                    return $v !== null ? [basename($v), $this->fileService->downloadable($v)] : null;
                 }, array_filter($view->vars['value'])));
 
                 $view->vars['clippable'] = json_encode(array_transforms(function($k,$v):array {
-                    return [$v !== null ? basename($v) : null,$this->fileService->isImage($v)];
+                    return $v !== null ? [basename($v), $this->fileService->isImage($v)] : null;
                 }, array_filter($view->vars['value'])));
             }
 
             $view->vars["value"] = implode("|", array_map(fn($v) => $v !== null ? basename($v) : null, $view->vars["value"]));
+
+        } else {
+
+            $view->vars['path']      = $this->fileService->isImage($view->vars["value"]) ? $this->imageService->imagine($view->vars["value"]) : null;
+            $view->vars['download']  = $this->fileService->downloadable($view->vars["value"]);
+            $view->vars['clippable'] = $this->fileService->isImage($view->vars["value"]);
         }
 
         $view->vars["clipboard"]    = $options["clipboard"];
@@ -299,7 +313,6 @@ class FileType extends AbstractType implements DataMapperInterface
 
         $fileForm = current(iterator_to_array($forms));
         $isMultiple = $fileForm->getConfig()->getOption("multiple");
-
         if($isMultiple) {
 
             if(!is_array($viewData) && !$viewData instanceof Collection)

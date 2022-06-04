@@ -173,8 +173,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $classMetadata = self::getClassMetadata($entity);
         if( ($dot = strpos($property, ".")) > 0 ) {
 
-            $field    = trim(mb_substr($property, 0, $dot));
-            $property = trim(mb_substr($property,    $dot+1));
+            $field    = trim(substr($property, 0, $dot));
+            $property = trim(substr($property,    $dot+1));
 
             if(!$classMetadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");
@@ -216,8 +216,8 @@ abstract class AbstractAnnotation implements AnnotationInterface
         $classMetadata = self::getClassMetadata($entity);
         if( ($dot = strpos($property, ".")) > 0 ) {
 
-            $field    = trim(mb_substr($property, 0, $dot));
-            $property = trim(mb_substr($property,    $dot+1));
+            $field    = trim(substr($property, 0, $dot));
+            $property = trim(substr($property,    $dot+1));
 
             if(!$classMetadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entity)."\"");

@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Filter\Basic;
+namespace Base\Imagine\Filter\Basic;
 
-use Base\Filter\FilterInterface;
+use Base\Imagine\FilterInterface;
 use Imagine\Image\ImageInterface;
 
 class RotateFilter implements FilterInterface

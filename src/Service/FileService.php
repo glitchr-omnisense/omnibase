@@ -166,7 +166,10 @@ class FileService implements FileServiceInterface
             else {
 
                 $hashid = array_pop_key("path", $args0) ?? $hashid;
-                $args = array_merge_recursive2($args, $args0);
+                foreach($args0 as $key => $arg0) {
+                    if(is_array($arg0)) $args[$key] = array_merge($args[$key] ?? [], $arg0);
+                    else $args[$key] = $arg0;
+                }
             }
 
         } while(is_array($args0));

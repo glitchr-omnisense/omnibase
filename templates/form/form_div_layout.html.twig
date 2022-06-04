@@ -20,7 +20,10 @@
 {% endblock %}
 
 {# Overloaded form template.. #}
-{%- block form2_label  -%}{{- form_label(form, null, {'label_html': true})  -}}{%- endblock -%}
+{%- block form2_label  -%}
+    {# {{dump(form.vars.is_column)}} #}
+    {{- form_label(form, null, {'label_html': true})  -}}
+{%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
 {%- block form2_errors -%}
 {%- set row_attr = row_attr|merge({'class': 'form-errors' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
@@ -313,12 +316,9 @@
 </div>
 {%- endblock -%}
 
-{%- block imageupload_label -%}
+{# {%- block imageupload_label -%}
     {{ form_label(form, null, {'required': required})}}
-    {% if form.vars.dropzone is empty %}
-        {{ form.vars.value and form.vars.clipboard ? clipboard("copy", form.vars.value|imagine, {style:"font-size:13pt; margin-left:0.25em;"}) : "" }}
-    {% endif %}
-{% endblock imageupload_label %}
+{% endblock imageupload_label %} #}
 
 {%- block imageupload_widget -%}
 {% set attr = attr|merge({
@@ -335,21 +335,28 @@
 }) %}
 
 <div class="imageupload" {{ block('attributes') }}>
+
     {% if not multiple %}
         <figure>
 
             <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(400,400) | default(thumbnail) }}" />
             <figcaption id="{{id}}_figcaption">
+                <div class="figwrapper">
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                <i class="fas fa-image fa-3x"></i>
+                    <span><i class="fas fa-image" id="{{id}}_preview"></i></span>
+                    <span>{{ clipboard("copy", form.vars.value|imagine) }}</span>
+                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify }}</a></span>
+                    <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fas fa-fw fa-eye"|iconify({"style":"font-size: 0.9em;"}) }}</a></span>
                 {% else %}
-                <i class="fas fa-plus-circle fa-3x"></i>
+                    <span><i class="fas fa-plus-circle"></i></span>
                 {% endif %}
+                </div>
             </figcaption>
 
             {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
             <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
             {% endif %}
+
         </figure>
 
         {% if cropper %}
@@ -395,12 +402,13 @@
 
 {%- block fileupload_widget -%}
 
-{% set pathLinks     = form.vars.pathLinks %}
-{% set downloadLinks = form.vars.downloadLinks %}
-{% set clippable = form.vars.clippable %}
+{% set path     = form.vars.path ?? [] %}
+{% set download = form.vars.download ?? [] %}
+{% set clippable = form.vars.clippable ?? [] %}
 
-{% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~("fas fa-2x fa-fw fa-search-plus"|iconify)~"</a>" %}
-{% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify)~"</a>" %}
+{% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-images" : "fas fa-2x fa-fw fa-image" %}
+{% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify)~"</a>" %}
+{% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"}))~"</a>" %}
 {% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
 {% set gotoPattern = "<a target='_blank' href='{0}'>"~("fas fa-fw fa-2x fa-external-link-square-alt"|iconify)~"</a>" %}
 {% set deletePattern = allow_delete ? "<a class='warning' data-dz-remove='true'>"~("far fa-fw fa-2x fa-trash-alt"|iconify)~"</a>" : null %}
@@ -413,8 +421,8 @@
     'data-file-href'                  : form.vars.href|default("")|urldecode,
     'data-file-max-files'             : form.vars.max_files,
 
-    'data-file-path-links'            : pathLinks,
-    'data-file-download-links'        : downloadLinks,
+    'data-file-path-links'            : path,
+    'data-file-download-links'        : download,
 
     'data-file-clipboard'             : clipboardPattern,
     'data-file-download'              : downloadPattern,
@@ -422,6 +430,7 @@
     'data-file-goto'                  : gotoPattern,
     'data-file-delete'                : deletePattern,
     'data-file-clippable'             : clippable,
+    'data-file-loader'                : "<div id='"~id~"_loader' class='loader'><div class='loader-spinner'></div></div>",
 
     'data-file-counter[none]'         : "@fields.fileupload.file_counter.none"       | trans(["{0}"]),
     'data-file-counter[singular]'     : "@fields.fileupload.file_counter.singular"   | trans(["{0}"]),
@@ -483,7 +492,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close" onclick="$('#{{ form.vars.id }}-modal').modal('hide');"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="{{ form.vars.id }}-modal-label">{{ "@fields.fileupload.dropzone.title" }}</h4>
+            <h4 class="modal-title" id="{{ form.vars.id }}-modal-label">{{ "@fields.fileupload.dropzone.title"|trans }}</h4>
         </div>
         <div class="modal-body" id="{{ form.vars.id}}-text"></div>
         <div class="modal-footer">
@@ -992,9 +1001,11 @@
         'data-cropper-positions': quadrantForm.parent ? quadrantForm.parent.vars.positions : null
     }) %}
 {% endif %}
+
+{% set isNormalized = form0.is_normalized.vars.value ? true : false %}
+
 {# todo: handle xhr errors #}
 {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fas fa-fw fa-exclamation-circle'|iconify)~" "~('@fields.cropper.error')~"</div>", #}
-
 <div class="form-group form-cropper">
     <div class="cropper">
         <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
@@ -1013,8 +1024,16 @@
     </div>
 
     {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {%- set attr = attr|merge({'disabled': 'disabled' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {{ form_widget(form0, {attr:attr}) }}
 </div>
+
+{% if not isNormalized %}
+<hr>
+<div class="form-text text-muted text-danger">
+{{"@fields.cropper.not_normalized"|trans}}
+</div>
+{% endif %}
 
 {%- endblock -%}
 

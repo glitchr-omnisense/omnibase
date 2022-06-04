@@ -47,12 +47,12 @@ class Translator implements TranslatorInterface
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
         $atBegin   = str_starts_with($id, "@");
 
-        $domain    = $domain && str_starts_with($domain, "@") ? mb_substr($domain, 1) : ($domain ?? null);
+        $domain    = $domain && str_starts_with($domain, "@") ? substr($domain, 1) : ($domain ?? null);
         if ($id && $customId) {
 
             $array  = explode(".", $id);
             if($atBegin) {
-                $domain = mb_substr(array_shift($array), 1);
+                $domain = substr(array_shift($array), 1);
                 $id     = implode(".", $array);
             }
 

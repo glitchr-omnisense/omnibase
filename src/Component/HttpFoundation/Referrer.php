@@ -48,7 +48,7 @@ class Referrer
         if($path === $requestUri) return "";
 
         if ($baseDir && strpos($path, $baseDir) === 0)
-            $path = mb_substr($path, strlen($baseDir));
+            $path = substr($path, strlen($baseDir));
 
         try { $routeMatch = $this->router->match($path); }
         catch (ResourceNotFoundException $e) { return ''; }

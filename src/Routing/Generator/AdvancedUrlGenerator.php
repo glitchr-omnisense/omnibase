@@ -77,17 +77,17 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                 array_pop_key("_base_dir", $routeParameters) ?? $this->getSettingBag()->base_dir(),
             ));
 
-            if(array_key_exists("host", $url))
+            if($url && array_key_exists("host", $url))
                 $this->getContext()->setHost($url["host"]);
-            if(array_key_exists("base_dir", $url))
+            if($url && array_key_exists("base_dir", $url))
                 $this->getContext()->setBaseUrl($url["base_dir"]);
 
         } else {
 
             $url = parse_url2(); // Make sure also it gets the basic context
-            if(array_key_exists("host", $url))
+            if($url && array_key_exists("host", $url))
                 $this->getContext()->setHost($url["host"]);
-            if(array_key_exists("base_dir", $url))
+            if($url && array_key_exists("base_dir", $url))
                 $this->getContext()->setBaseUrl($url["base_dir"]);
         }
 
@@ -112,11 +112,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations
-        $currentRouteName = explode(".", $this->getRouter()->getRouteName());
+        $currentRouteName = $this->getRouter()->getRouteName();
+        $currentRouteName = $currentRouteName ? explode(".", $this->getRouter()->getRouteName()) : [];
         $routeName = explode(".", $routeName) ?? $currentRouteName;
 
         $routeGroup = count($routeName) > 1 ? tail($routeName) : null;
-        $routeGroup = $routeGroup ?? count($currentRouteName) > 1 ? tail($currentRouteName) : null;
+        $routeGroup = $routeGroup ?? (count($currentRouteName) > 1 ? tail($currentRouteName) : null);
         $routeGroup = $routeGroup ?? [];
         $routeGroup = $routeGroup ? ".".implode(".",$routeGroup) : null;
 

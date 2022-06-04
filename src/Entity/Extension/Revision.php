@@ -23,7 +23,7 @@ class Revision extends AbstractExtension
      */
     protected $hash;
     public function getHash() { return $this->hash; }
-    public function getHashShort() { return mb_substr($this->hash, 0, 7); }
+    public function getHashShort() { return substr($this->hash, 0, 7); }
 
     public function supports(): bool { return true; }
 }

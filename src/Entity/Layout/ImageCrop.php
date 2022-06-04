@@ -34,6 +34,15 @@ class ImageCrop implements LinkableInterface
     }
 
     public function getRatio() { return $this->getWidth0()/$this->getHeight0(); }
+    public function isNormalized() // New coordinate system is using normalized values
+    {
+        if($this->x0      > 1) return false;
+        if($this->y0      > 1) return false;
+        if($this->width0  > 1) return false;
+        if($this->height0 > 1) return false;
+
+        return true;
+    }
 
     /**
      * @ORM\Id
@@ -118,9 +127,9 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $x0;
-    public function getX (): ?int { return $this->x0;}// * $this->getNaturalWidth(); }
-    public function getX0(): ?int { return $this->x0; }
-    public function setX0(int $x0): self
+    public function getX (?int $width = null): ?int { return $this->isNormalized() ? $this->x0 * ($width ?? $this->getNaturalWidth()) : $this->x0; }
+    public function getX0(): ?float { return $this->x0; }
+    public function setX0(float $x0): self
     {
         $this->x0 = min(1, max(0, $x0));
         return $this;
@@ -130,9 +139,9 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $y0;
-    public function getY (): ?int { return $this->y0;}// * $this->getNaturalHeight(); }
-    public function getY0(): ?int { return $this->y0; }
-    public function setY0(int $y0): self
+    public function getY (?int $height = null): ?int { return $this->isNormalized() ? $this->y0 * ($height ?? $this->getNaturalHeight()) : $this->y0; }
+    public function getY0(): ?float { return $this->y0; }
+    public function setY0(float $y0): self
     {
         $this->y0 = min(1, max(0, $y0));
         return $this;
@@ -142,9 +151,9 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $xP;
-    public function getPivotX () { return $this->xP;}// * $this->getNaturalWidth();  }
-    public function getXp() { return $this->xP; }
-    public function setXp(int $xP): self
+    public function getPivotX (?int $width = null) { return $this->isNormalized() ? $this->xP * ($width ?? $this->getNaturalWidth()) : $this->xP; }
+    public function getXp():?float { return $this->xP; }
+    public function setXp(float $xP): self
     {
         $this->xP = $xP;
         return $this;
@@ -154,9 +163,9 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $yP;
-    public function getPivotY () { return $this->yP;}// * $this->getNaturalHeight(); }
-    public function getYp() { return $this->yP; }
-    public function setYp(int $yP): self
+    public function getPivotY (?int $height = null) { return $this->isNormalized() ? $this->yP * ($height ?? $this->getNaturalHeight()) : $this->xP; }
+    public function getYp():?float { return $this->yP; }
+    public function setYp(float $yP): self
     {
         $this->yP = $yP;
         return $this;
@@ -166,10 +175,10 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $width0;
-    public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getWidth() : 0; }
-    public function getWidth (): ?int { return $this->width0;}// * $this->getNaturalWidth(); }
-    public function getWidth0(): ?int { return $this->width0; }
-    public function setWidth0(int $width0): self
+    public function getNaturalWidth(): ?int { return $this->getImage() ? $this->getImage()->getNaturalWidth() : 0; }
+    public function getWidth (?int $width = null): ?int { return $this->isNormalized() ? $this->width0 * ($width ?? $this->getNaturalWidth()) : $this->width0; }
+    public function getWidth0(): ?float { return $this->width0; }
+    public function setWidth0(float $width0): self
     {
         $this->width0 = min(1, max(0, $width0));
         return $this;
@@ -179,10 +188,10 @@ class ImageCrop implements LinkableInterface
      * @ORM\Column(type="float")
      */
     protected $height0;
-    public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getHeight() : 0; }
-    public function getHeight (): ?int { return $this->height0;}// * $this->getNaturalHeight(); }
-    public function getHeight0(): ?int { return $this->height0; }
-    public function setHeight0(int $height0): self
+    public function getNaturalHeight(): ?int { return $this->getImage() ? $this->getImage()->getNaturalHeight() : 0; }
+    public function getHeight (?int $height = null): ?int{ return $this->isNormalized() ? $this->height0 * ($height ?? $this->getNaturalHeight()) : $this->height0; }
+    public function getHeight0(): ?float { return $this->height0; }
+    public function setHeight0(float $height0): self
     {
         $this->height0 = min(1, max(0, $height0));
         return $this;

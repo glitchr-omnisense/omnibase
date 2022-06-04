@@ -42,6 +42,18 @@ class ThreadTranslation implements TranslationInterface
     }
 
     /**
+     * @ORM\Column(type="array")
+     */
+    protected $keywords = [];
+    public function getKeywords(): array { return $this->keywords; }
+    public function setKeywords(array $keywords)
+    {
+        $this->keywords = $keywords;
+
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     protected $excerpt;
@@ -65,15 +77,4 @@ class ThreadTranslation implements TranslationInterface
         return $this;
     }
 
-    /**
-     * @ORM\Column(type="array")
-     */
-    protected $keywords = [];
-    public function getKeywords(): array { return $this->keywords; }
-    public function setKeywords(array $keywords)
-    {
-        $this->keywords = $keywords;
-
-        return $this;
-    }
 }

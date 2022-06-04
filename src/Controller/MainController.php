@@ -31,7 +31,7 @@ class MainController extends AbstractController
     {
         $version = Kernel::VERSION;
         $projectDir = \dirname(__DIR__, 5);
-        $docVersion = mb_substr(Kernel::VERSION, 0, 3);
+        $docVersion = substr(Kernel::VERSION, 0, 3);
         $baseVersion = BaseBundle::VERSION;
 
         ob_start();

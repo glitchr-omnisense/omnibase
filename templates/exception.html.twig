@@ -1,11 +1,13 @@
 {% extends 'layout1.html.twig' %}
 {% block content %}
     <div class="exception half text-center wrapper">
-        {% set knownExceptionTitle = "@controllers.exception." ~ flattenException.statusCode~".title" %}
-        {% set knownExceptionMessage = "@controllers.exception." ~ flattenException.statusCode~".message"|trans %}
-        {% set knownException = (knownExceptionTitle|trans) != knownExceptionTitle %}
+        {% set knownExceptionTitle = ("@controllers.exception." ~ flattenException.statusCode ~ ".title")|trans %}
+        {% set knownExceptionMessage = ("@controllers.exception." ~ flattenException.statusCode ~ ".message")|trans %}
+
+        {% set knownException = knownExceptionTitle != flattenException.statusCode %}
         {% if  knownException %}
-            <h1 class="exception-title">{{ flattenException.statusCode }} {{ knownExceptionTitle|trans }}</h1>
+
+            <h1 class="exception-title">{{ flattenException.statusCode }} {{ knownExceptionTitle }}</h1>
             <p>{{ knownExceptionMessage ?? ('@controllers.exception.message'|trans) }}</p>
         {% else %}
             {% set code = ((flattenException.statusCode != 0) ? flattenException.statusCode : null)|default(500) %}

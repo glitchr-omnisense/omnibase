@@ -54,7 +54,7 @@ class FormTypeExtension extends AbstractTypeExtension
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
         if($options["form2"]) $this->applyForm2($view);
-        if($options["easyadmin"]) $this->applyEA($form, $view);
+        if($options["easyadmin"]) $this->applyEA($view, $form);
 
         foreach($view->children as $field => $childView) {
 
@@ -70,7 +70,7 @@ class FormTypeExtension extends AbstractTypeExtension
         }
     }
 
-    public function applyForm2($view) {
+    public function applyForm2(FormView $view) {
 
         // Add to all form custom base style..
         // It is named form2 and blocks are available in ./templates/form/form_div_layout.html.twig
@@ -81,7 +81,7 @@ class FormTypeExtension extends AbstractTypeExtension
         }
     }
 
-    public function applyEA($form, $view) {
+    public function applyEA(FormView $view, FormInterface $form) {
 
         if(!empty($view->vars["ea_crud_form"])) {
 

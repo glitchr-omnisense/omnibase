@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Filter\Basic\Definition;
+namespace Base\Imagine\Filter\Basic\Definition;
 
-use Base\Filter\Basic\ThumbnailFilter;
+use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Imagine\Image\ImageInterface;
 
 class QuadHighDefinitionFilter extends ThumbnailFilter

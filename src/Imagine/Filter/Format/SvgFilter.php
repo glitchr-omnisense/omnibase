@@ -1,14 +1,13 @@
 <?php
 
-namespace Base\Filter\Format;
+namespace Base\Imagine\Filter\Format;
 
-use Base\Filter\FilterInterface;
-use Base\Filter\FormatFilterInterface;
-use Base\Service\ImageService;
+use Base\Imagine\FilterInterface;
+
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 
-class BitmapFilter implements FormatFilterInterface
+class SvgFilter implements FilterInterface
 {
     protected array $filters;
     protected array $options;

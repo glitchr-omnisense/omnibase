@@ -116,7 +116,7 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function hasRoute(string $routeName): bool { return $this->getRouteName($routeName) !== null; }
     public function getRouteName(?string $routeUrl = null): ?string
     {
-        if(!$routeUrl) return $this->getRouteName($this->getRequestUri());
+        if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());
         $routeMatch = $this->getRouteMatch($routeUrl);
         return $routeMatch ? $routeMatch["_route"] : null;
     }

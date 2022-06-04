@@ -400,10 +400,10 @@ class ClassMetadataManipulator
 
         if( ($dot = strpos($property, ".")) > 0 ) {
 
-            $field    = trim(mb_substr($property, 0, $dot));
+            $field    = trim(substr($property, 0, $dot));
             $field = $metadata->getFieldName($field) ?? $field;
 
-            $property = trim(mb_substr($property,    $dot+1));
+            $property = trim(substr($property,    $dot+1));
 
             if(!$metadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entityOrClassOrMetadata)."\"");
@@ -427,10 +427,10 @@ class ClassMetadataManipulator
 
         if( ($dot = strpos($property, ".")) > 0 ) {
 
-            $field    = trim(mb_substr($property, 0, $dot));
+            $field    = trim(substr($property, 0, $dot));
             $field = $metadata->getFieldName($field) ?? $field;
 
-            $property = trim(mb_substr($property,    $dot+1));
+            $property = trim(substr($property,    $dot+1));
 
             if(!$metadata->hasAssociation($field))
                 throw new \Exception("No association found for field \"$field\" in \"".get_class($entityOrClassOrMetadata)."\"");

@@ -13,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Enum\Quadrant\Quadrant;
-use Base\Filter\Basic\ThumbnailFilter;
+use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\DiscriminatorColumn;

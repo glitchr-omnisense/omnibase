@@ -2,7 +2,7 @@
 
 namespace Base\DependencyInjection;
 
-use Base\Filter\Basic\Definition\UltraHighDefinitionFilter;
+use Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter;
 
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;

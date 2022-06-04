@@ -1,9 +1,9 @@
 <?php
 
-namespace Base\Filter\Basic;
+namespace Base\Imagine\Filter\Basic;
 
 use Imagine\Filter\Basic\Resize;
-use Base\Filter\FilterInterface;
+use Base\Imagine\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 

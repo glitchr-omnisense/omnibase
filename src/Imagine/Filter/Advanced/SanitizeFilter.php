@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Filter\Advanced;
+namespace Base\Imagine\Filter\Advanced;
 
 use enshrined\svgSanitize\Sanitizer;
 
-use Base\Filter\FilterInterface;
+use Base\Imagine\FilterInterface;
 use Imagine\Image\ImageInterface;
 
 class SanitizeFilter implements FilterInterface

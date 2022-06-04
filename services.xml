@@ -759,6 +759,7 @@
         <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\CropperType"><tag name="form.type" />
             <argument type="service" id="base.form.factory" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.service" />
         </service>
 

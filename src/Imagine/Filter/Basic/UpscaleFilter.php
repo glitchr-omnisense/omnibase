@@ -1,22 +1,22 @@
 <?php
 
-namespace Base\Filter\Basic;
+namespace Base\Imagine\Filter\Basic;
 
-class DownscaleFilter extends ScaleFilter
+class UpscaleFilter extends ScaleFilter
 {
     public function __toString() { return "dwn".parent::__toString(); }
     public function __construct()
     {
-        parent::__construct([], 'max', 'by', false);
+        parent::__construct([], 'min', 'by', false);
     }
 
     protected function calcAbsoluteRatio($ratio)
     {
-        return 1 - ($ratio > 1 ? $ratio - floor($ratio) : $ratio);
+        return 1 + $ratio;
     }
 
     protected function isImageProcessable($ratio)
     {
-        return $ratio < 1;
+        return $ratio > 1;
     }
 }

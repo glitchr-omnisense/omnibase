@@ -13,7 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ErrorController extends AbstractController
 {
@@ -30,6 +29,7 @@ class ErrorController extends AbstractController
         try {
 
             $isPreview = $this->router->getRouteName() === "_preview_error";
+
             if ($this->baseService->isDevelopment() && !$isPreview) $response = $this->Rescue($exception);
             else $response = $this->render("@Base/exception.html.twig", ['flattenException' => FlattenException::createFromThrowable($exception)]);
 

@@ -110,9 +110,9 @@ class Aco
                $hexcode = strlen($hexcode) === 3 ? $hexcode[0].$hexcode[0].$hexcode[1].$hexcode[1].$hexcode[2].$hexcode[2] : $hexcode;
 
                $array = [
-                    hexdec(mb_substr($hexcode,0,2)),
-                    hexdec(mb_substr($hexcode,2,2)),
-                    hexdec(mb_substr($hexcode,4,2))
+                    hexdec(substr($hexcode,0,2)),
+                    hexdec(substr($hexcode,2,2)),
+                    hexdec(substr($hexcode,4,2))
                ];
 
                $name = trim(implode(" ", $words));
@@ -145,10 +145,10 @@ class Aco
                $palette = $color[0];
                $hexcode = $color[2];
 
-               $w = strlen($hexcode) >= 0 ? str_pad(mb_substr($hexcode,0,2), 2, "0") : "00";
-               $x = strlen($hexcode) >= 2 ? str_pad(mb_substr($hexcode,2,2), 2, "0") : "00";
-               $y = strlen($hexcode) >= 4 ? str_pad(mb_substr($hexcode,4,2), 2, "0") : "00";
-               $z = strlen($hexcode) >= 6 ? str_pad(mb_substr($hexcode,6,2), 2, "0") : "00";
+               $w = strlen($hexcode) >= 0 ? str_pad(substr($hexcode,0,2), 2, "0") : "00";
+               $x = strlen($hexcode) >= 2 ? str_pad(substr($hexcode,2,2), 2, "0") : "00";
+               $y = strlen($hexcode) >= 4 ? str_pad(substr($hexcode,4,2), 2, "0") : "00";
+               $z = strlen($hexcode) >= 6 ? str_pad(substr($hexcode,6,2), 2, "0") : "00";
 
                $names    = $color[3] ?? "";
 
@@ -187,10 +187,10 @@ class Aco
                $palette = $color[0];
                $hexcode = $color[2];
 
-               $w = strlen($hexcode) >= 0 ? str_pad(mb_substr($hexcode,0,2), 2, "0") : "00";
-               $x = strlen($hexcode) >= 2 ? str_pad(mb_substr($hexcode,2,2), 2, "0") : "00";
-               $y = strlen($hexcode) >= 4 ? str_pad(mb_substr($hexcode,4,2), 2, "0") : "00";
-               $z = strlen($hexcode) >= 6 ? str_pad(mb_substr($hexcode,6,2), 2, "0") : "00";
+               $w = strlen($hexcode) >= 0 ? str_pad(substr($hexcode,0,2), 2, "0") : "00";
+               $x = strlen($hexcode) >= 2 ? str_pad(substr($hexcode,2,2), 2, "0") : "00";
+               $y = strlen($hexcode) >= 4 ? str_pad(substr($hexcode,4,2), 2, "0") : "00";
+               $z = strlen($hexcode) >= 6 ? str_pad(substr($hexcode,6,2), 2, "0") : "00";
                $t = "00";
 
                $names = $color[3] ?? "";

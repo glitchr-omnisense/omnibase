@@ -2,15 +2,14 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\ImageCrop;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -25,9 +24,10 @@ class CropperType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'cropper'; }
 
-    public function __construct(FormFactory $formFactory, BaseService $baseService)
+    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, BaseService $baseService)
     {
         $this->formFactory = $formFactory;
+        $this->entityManager = $entityManager;
         $this->baseService = $baseService;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -95,12 +95,13 @@ class CropperType extends AbstractType implements DataMapperInterface
                 // "pivotY"      => ["label"  => "Pivot Y", "form_type" => HiddenType::class],
 
                 // Behind the scene
-                "x0"             => ["form_type" => HiddenType::class, "label" => "Left (normalized)"   ],
-                "y0"             => ["form_type" => HiddenType::class, "label" => "Top (normalized)"    ],
-                "width0"         => ["form_type" => HiddenType::class, "label" => "Width (normalized)"  ],
-                "height0"        => ["form_type" => HiddenType::class, "label" => "Height (normalized)" ],
-                "xP"             => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
-                "yP"             => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
+                "is_normalized" => ["form_type" => HiddenType::class, "label" => "Is Normalized ?"     ],
+                "x0"            => ["form_type" => HiddenType::class, "label" => "Left (normalized)"   ],
+                "y0"            => ["form_type" => HiddenType::class, "label" => "Top (normalized)"    ],
+                "width0"        => ["form_type" => HiddenType::class, "label" => "Width (normalized)"  ],
+                "height0"       => ["form_type" => HiddenType::class, "label" => "Height (normalized)" ],
+                "xP"            => ["form_type" => HiddenType::class, "label" => "Pivot X (normalized)"],
+                "yP"            => ["form_type" => HiddenType::class, "label" => "Pivot Y (normalized)"],
 
             ]), array_reverse($options["fields"]) ?? []));
 
@@ -184,13 +185,26 @@ class CropperType extends AbstractType implements DataMapperInterface
     {
         if($viewData === null) return;
 
-        foreach(iterator_to_array($forms) as $formName => $form)
+        $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
+        $fieldNames = $classMetadata->getFieldNames($viewData);
+        $fieldNames[] = "is_normalized"; // Include normalization information
+
+        foreach(iterator_to_array($forms) as $formName => $form) {
+
+            if(!in_array($formName, $fieldNames)) continue;
             $form->setData($this->propertyAccessor->getValue($viewData, $formName));
+        }
     }
 
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
-        foreach(iterator_to_array($forms) as $formName => $form)
+        $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
+        $fieldNames = $classMetadata->getFieldNames($viewData);
+
+        foreach(iterator_to_array($forms) as $formName => $form) {
+
+            if(!in_array($formName, $fieldNames)) continue;
             $this->propertyAccessor->setValue($viewData, $formName, $form->getData());
+        }
     }
 }

@@ -1,13 +1,13 @@
 <?php
 
-namespace Base\Filter\Format;
+namespace Base\Imagine\Filter\Format;
 
-use Base\Filter\FilterInterface;
-use Base\Filter\FormatFilterInterface;
+use Base\Imagine\FilterInterface;
+use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
 
-class WebpFilter extends WebOptimization implements FormatFilterInterface
+class WebpFilter extends WebOptimization implements BitmapFilterInterface
 {
     public function __toString()
     {

@@ -675,7 +675,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $maxIdentifierLength = $platform->getMaxIdentifierLength();
 
         if (strlen($schemaElementName) > $maxIdentifierLength) {
-            return mb_substr($schemaElementName, 0, $maxIdentifierLength);
+            return substr($schemaElementName, 0, $maxIdentifierLength);
         }
 
         return $schemaElementName;

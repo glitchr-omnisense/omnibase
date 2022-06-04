@@ -70,7 +70,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
     public static function getEntityFqcn(): string
     {
-        $entityFqcn = mb_substr(get_called_class(), 0, -strlen("CrudController"));
+        $entityFqcn = substr(get_called_class(), 0, -strlen("CrudController"));
         $entityFqcn = get_alias(preg_replace('/\\\Controller\\\Backoffice\\\Crud\\\/', "\\Entity\\", $entityFqcn));
         self::$crudController[$entityFqcn] = get_called_class();
         return $entityFqcn;
@@ -88,7 +88,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $crudController = preg_replace('/\\\Entity\\\/', "\\Controller\\\Backoffice\\\Crud\\", $entityFqcn);
         $crudController = $crudController . "CrudController";
         if( false !== ($pos = strrpos($crudController, '\\__CG__\\')) )
-            $crudController = mb_substr($crudController, $pos + 8);
+            $crudController = substr($crudController, $pos + 8);
 
         $appCrudController  = preg_replace("/^Base/", 'App', $crudController);
         $baseCrudController = preg_replace("/^App/", 'Base', $appCrudController);

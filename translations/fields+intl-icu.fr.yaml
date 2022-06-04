@@ -8,7 +8,7 @@ boolean:
 stock:
   unlimited: Illimité
 
-password: 
+password:
   invalid_message: "Les mots de passe ne sont pas identiques."
   first: "Mot de passe"
   second: "Confirmation du mot de passe"
@@ -31,7 +31,7 @@ password:
     strong:
       label: "<span style='color:green'>sécurisé</span>"
       message: "Bravo ! Ce mot de passe est très bien !"
-  requirements: 
+  requirements:
     label: "La force du mot de passe augmente s'il :"
     uppercase: "contient au moins une lettre minuscule"
     lowercase: "contient au moins une lettre majuscule"
@@ -56,6 +56,7 @@ clipboard:
     paste: Collé !
 
 cropper:
+  not_normalized: "Ce recadrage utilise l'ancien système de coordonnées (dépendt de la taille de l'image recadrée). Sauvegardez pour corriger le problème."
   loading:
     wait: "Merci de patienter.."
     error: "Oups l'image n'a pas pu se charger cliquez pour réessayer !"
@@ -99,10 +100,10 @@ fileupload:
       no_tmp_dir : "Dossier temporaire manquant."
       cant_write: "Échec d'écriture du fichier sur le disque."
       php_extension: "Une extension PHP a stoppé le téléversement."
-      
+
     dropzone:
       title: "Action demandée"
-      button: 
+      button:
         confirm: Confirmer
         cancel: Annuler
       spinner: "Merci de patienter.."
@@ -116,7 +117,7 @@ fileupload:
       cancel_upload: "Annuler"
       cancel_upload_confirmation: "Merci de confirmer l'annulation."
       remove_file: "Supprimer"
-      remove_file_confirmation: "Merci de confirmer la suppression."
+      remove_file_confirmation: "Merci de confirmer la demande suppression."
 
     max_size: "La taille de fichier maximale autorisée est de {0}."
     max_size_feedback: "L'image selectionnée est trop volumineuse ({0})."
@@ -126,7 +127,7 @@ fileupload:
             other {Extensions autorisées : {1}}
           }"
 
-    file_counter: 
+    file_counter:
         none: "Aucun fichier trouvé."
         singular: "{0} fichier trouvé."
         plural: "{0} fichiers trouvés."

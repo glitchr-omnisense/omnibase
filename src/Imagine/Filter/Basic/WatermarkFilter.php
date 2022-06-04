@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Filter\Basic;
+namespace Base\Imagine\Filter\Basic;
 
-use Base\Filter\FilterInterface;
+use Base\Imagine\FilterInterface;
 use Imagine\Image\Box;
 use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
@@ -35,8 +35,8 @@ class WatermarkFilter implements FilterInterface
             'position' => 'center',
         ];
 
-        if ($this->options['size'] === null || '%' === mb_substr($this->options['size'], -1)) {
-            $this->options['size'] = mb_substr($this->options['size'], 0, -1) / 100;
+        if ($this->options['size'] === null || '%' === substr($this->options['size'], -1)) {
+            $this->options['size'] = substr($this->options['size'], 0, -1) / 100;
         }
 
         $size = $image->getSize();

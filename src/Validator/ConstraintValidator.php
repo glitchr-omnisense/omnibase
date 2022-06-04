@@ -46,7 +46,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
         $value = is_stringeable($value) ? $value : "";
 
-        $this->buildViolation = $this->context->buildViolation($constraint->message.".".strtolower($this->getConstraintType()));
+    $this->buildViolation = $this->context->buildViolation($constraint->message .".".strtolower($this->getConstraintType()));
         $this->setParameter('field', $this->getPropertyName());
         $this->setParameter('value', $value);
 

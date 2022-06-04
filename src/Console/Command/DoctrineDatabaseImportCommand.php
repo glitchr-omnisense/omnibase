@@ -78,7 +78,6 @@ class DoctrineDatabaseImportCommand extends Command
 
             $propertyPath = trim(explode('\n', $propertyPath)[0]); // Only keeps headline
             $fieldName = explodeByArray([":", "["], $propertyPath)[0];
-
             if (preg_match('/(.*)\:explode\((.*)\)(.*)/', $propertyPath, $matches)) {
 
                 $propertyPath    = $matches[1].$matches[3] ?? "";
@@ -87,6 +86,8 @@ class DoctrineDatabaseImportCommand extends Command
                 if(!is_array($entry))
                     $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, str_rstrip(trim($entry), $entrySeparator)));
             }
+
+            if($propertyPath == "translations.fr-FR.keywords:explode(,)") exit(1);
 
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);
             if(substr_count($propertyName, "[") > 1)
@@ -115,14 +116,16 @@ class DoctrineDatabaseImportCommand extends Command
                         else {
 
                             $propertyNames = explode(",", $propertyName);
-                            $entries = explode($fieldSeparator, $e, count($propertyNames));
+                            $entries = $e ? explode($fieldSeparator, $e, count($propertyNames)) : [];
 
                             $e = [];
                             foreach($propertyNames as $i => $p)
                                 $e[trim($p)] = array_key_exists($i, $entries) && $entries[$i] ? trim($entries[$i]) : null;
+
                         }
                     }
                 }
+
             }
 
             if(is_array($entry)) {
@@ -191,8 +194,10 @@ class DoctrineDatabaseImportCommand extends Command
         $output->writeln("");
 
         $output->writeln(' Decoding spreadsheets..');
+        $mimeType = mime_content_type2($path) ?? "";
         $mimeTypes = new MimeTypes();
-        $extension = $extension ?? $mimeTypes->getExtensions(mime_content_type2($path))[0] ?? null;
+
+        $extension = $extension ?? $mimeTypes->getExtensions($mimeType)[0] ?? null;
         switch($extension)
         {
             case "xml":
@@ -237,6 +242,7 @@ class DoctrineDatabaseImportCommand extends Command
             $parentThread = null;
 
             $entities[$spreadsheet]   = [];
+            $entitySpls[$spreadsheet]  = [];
             $entityData[$spreadsheet] = [];
 
             $entityStates[$spreadsheet]         = [];
@@ -252,8 +258,9 @@ class DoctrineDatabaseImportCommand extends Command
                 continue;
             }
 
-            $entities[$spreadsheet][$baseName] ??= [];
-            $entityData[$spreadsheet][$baseName] ??= [];
+            $entities[$spreadsheet][$baseName]    ??= [];
+            $entitiesSpls[$spreadsheet][$baseName] ??= [];
+            $entityData[$spreadsheet][$baseName]  ??= [];
 
             $entityStates        [$spreadsheet][$baseName] ??= [];
             $entityUniqueKeys    [$spreadsheet][$baseName] ??= [];
@@ -299,7 +306,6 @@ class DoctrineDatabaseImportCommand extends Command
                 unset($data[$baseName]);
 
                 $entityData[$spreadsheet][$baseName][] = [$entityName, $this->normalize($entityName, $data)];
-
                 $totalData++;
                 $counter++;
             }
@@ -437,16 +443,6 @@ class DoctrineDatabaseImportCommand extends Command
                             if(!array_key_exists($field, $entry)) $state = self::FIELD_REQUIRED;
 
                         $entity = $this->entityHydrator->hydrate($entityName, $entry, [], EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES);
-                        if($entity instanceof Thread && $entityParentColumn !== null) {
-
-                            if($entity->getParent()) $parentThread = $entity;
-                            else {
-
-                                $entity->setParent($parentThread);
-                                if (!in_array($parentThread, $entities[$spreadsheet][$baseName]))
-                                    $state = self::PARENT_NOT_FOUND;
-                            }
-                        }
 
                         //
                         // Check if duplicates found in the processed list
@@ -480,8 +476,21 @@ class DoctrineDatabaseImportCommand extends Command
                                 $inDatabase |= ($targetRepository->findOneBy([$targetFieldName => $targetValue]) !== null);
                         }
 
-                        if($inDatabase) $state = self::ALREADY_IN_DATABASE;
 
+                        if($inDatabase) $state = self::ALREADY_IN_DATABASE;
+                        else {
+
+                            if($entity instanceof Thread && $entityParentColumn !== null) {
+
+                                if($entity->getParent()) $parentThread = $entity;
+                                else {
+
+                                    $entity->setParent($parentThread);
+                                    if (!in_array($parentThread, $entities[$spreadsheet][$baseName]))
+                                        $state = self::PARENT_NOT_FOUND;
+                                }
+                            }
+                        }
                         $entities[$spreadsheet][$baseName][] = $entity;
                         $entityStates[$spreadsheet][$baseName][] = $state;
 

@@ -8,7 +8,7 @@ boolean:
 stock:
   unlimited: Unlimited
 
-password: 
+password:
   invalid_message: "Password must be identicals."
   first: "Password"
   second: "Password confirmation"
@@ -31,7 +31,7 @@ password:
     strong:
       label: "<span style='color:green'>secure</span>"
       message: "You're good to go, this is a strong password !"
-  requirements: 
+  requirements:
       label: "It increases with respect to the following criteria:"
       uppercase: "upper case chars"
       lowercase: "lower case chars"
@@ -50,7 +50,7 @@ select:
 
 collection:
   empty: Empty
-  
+
 array:
   key: "Key"
   value: "Value"
@@ -75,6 +75,7 @@ clipboard:
 
 
 cropper:
+  not_normalized: "This image crop is storing previous coordinate system (image size-dependent). Please save to fix it."
   loading:
     wait: "Please wait a little bit.."
     error: "Opps.. an error occurred, click or refresh !"
@@ -85,7 +86,7 @@ cropper:
     square: "Square"
     pinterest: "Pinterest"
     free: "Free"
-    
+
 fileupload:
   error:
     cannot_upload: "Failed to upload the file"
@@ -97,10 +98,10 @@ fileupload:
     no_tmp_dir : "Missing a temporary folder."
     cant_write: "Failed to write file to disk."
     php_extension: "A PHP extension stopped the file upload. "
-    
+
   dropzone:
     title: "Action requested."
-    button: 
+    button:
       confirm: Confirm
       cancel: Cancel
     spinner: "Please wait a little bit.."
@@ -123,7 +124,7 @@ fileupload:
           =1 {Only {1} files are allowed }
           other {Allowed extensions are : {1}}
         }"
-  file_counter: 
+  file_counter:
       none: "No files found."
       singular: "{0} file found."
       plural: "{0} files found."
