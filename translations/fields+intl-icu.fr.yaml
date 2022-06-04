@@ -56,7 +56,7 @@ clipboard:
     paste: Collé !
 
 cropper:
-  not_normalized: "Ce recadrage utilise l'ancien système de coordonnées (dépendt de la taille de l'image recadrée). Sauvegardez pour corriger le problème."
+  not_normalized: "Ce recadrage utilise l'ancien système de coordonnées (dépend de la taille de l'image recadrée). Sauvegardez pour corriger le problème."
   loading:
     wait: "Merci de patienter.."
     error: "Oups l'image n'a pas pu se charger cliquez pour réessayer !"
