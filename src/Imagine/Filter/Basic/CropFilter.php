@@ -13,7 +13,7 @@ class CropFilter implements FilterInterface
 {
     public function __toString() { return "crop:".$this->getPosition().":".implode("x",$this->getXY()).":".implode("x",$this->getSize()); }
 
-    public function __construct(int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "lefttop")
+    public function __construct(float $x = 0, float $y = 0, ?float $width = null, ?float $height = null, string $position = "lefttop")
     {
         $this->x = $x ?? 0;
         $this->y = $y ?? 0;
@@ -22,12 +22,37 @@ class CropFilter implements FilterInterface
         $this->height = $height ?? 0;
     }
 
+    public function isNormalized(): bool
+    {
+        if($this->x      > 1) return false;
+        if($this->y      > 1) return false;
+        if($this->width  > 1) return false;
+        if($this->height > 1) return false;
+
+        return true;
+    }
+
     public function getPosition(): string { return $this->position ?? "topleft"; }
-    public function getSize(): array { return [$this->width, $this->height]; }
-    public function getXY()  : array { return [$this->x, $this->y]; }
+    public function getSize(?ImageInterface $image = null): array
+    {
+        if($this->isNormalized() && $image !== null)
+            return [$image->getSize()->getWidth()*$this->width, $image->getSize()->getHeight()*$this->height];
+
+        return [$this->width, $this->height];
+    }
+
+    public function getXY(?ImageInterface $image = null)  : array
+    {
+        if($this->isNormalized() && $image !== null)
+            return [$image->getSize()->getWidth()*$this->x, $image->getSize()->getHeight()*$this->y];
+
+        return [$this->x, $this->y];
+    }
+
     public function getXYOffset(ImageInterface $image)  :array {
 
-        list($width,$height) = $this->getSize();
+        list($width,$height) = $this->getSize($image);
+
         $position = $this->getPosition();
         switch ($position) {
 
@@ -86,13 +111,12 @@ class CropFilter implements FilterInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         list($x0,$y0) = $this->getXYOffset($image);
-
-        list($x,$y)   = $this->getXY();
-        list($w,$h)   = $this->getSize();
+        list($x,$y)   = $this->getXY($image);
+        list($w,$h)   = $this->getSize($image);
 
         $filter = new Crop(
-            new Point(          $x - $x0,            $y - $y0),
-            new Box  ($this->width - $x0, $this->height - $y0)
+            new Point($x - $x0, $y - $y0),
+            new Box  ($w - $x0, $h - $y0)
         );
 
         try { return $filter->apply($image); }

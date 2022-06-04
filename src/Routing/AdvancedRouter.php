@@ -44,7 +44,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
         else if(!$request instanceof Request)
-            throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
+            return false;
 
         $route = $request->get('_route');
 
@@ -59,7 +59,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
         else if(!$request instanceof Request)
-            throw new \InvalidArgumentException("Invalid argument provided, expected either RequestStack or Request");
+            return false;
 
         $controllerAttribute = $request->attributes->get("_controller");
         $array = is_array($controllerAttribute) ? $controllerAttribute : explode("::", $request->attributes->get("_controller") ?? "");

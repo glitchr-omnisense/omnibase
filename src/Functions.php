@@ -1638,8 +1638,15 @@ namespace {
         return true;
     }
 
-    function dec2alphabet(string $s) { return base_convert($s, 10, 26); }
-    function alphabet2dec(string $s) { return base_convert($s, 26, 10); }
+    function dec2alphabet(string $s)
+    {
+        return strtr(strtoupper(base_convert($s, 10, 26)), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    }
+
+    function alphabet2dec(string $s)
+    {
+        return base_convert(strtr(strtoupper($s), "0123456789ABCDEFGHIJKLMNOP", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"), 10, 26);
+    }
 
     function hex2rgba(string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x%02x"); }
     function hex2rgb (string $hex): array { return sscanf(strtoupper($hex), "#%02x%02x%02x"); }

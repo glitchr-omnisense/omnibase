@@ -157,7 +157,6 @@ class FileController extends AbstractController
 
         //
         // Get the most accurate cropping
-        $ratio = null;
         $uuid = basename($path);
 
         // Dimension information
@@ -187,7 +186,8 @@ class FileController extends AbstractController
             $height  = $matches[2];
             $height0 = $height/$naturalHeight;
 
-            $ratio0  = $height0 ? $width0/$height0 : 0; // NB: != $width/height
+            $ratio   = $height ? $width/$height : 0;
+            $ratio0  = $width0/$height0;
             if($ratio0 == 0) throw $this->createNotFoundException();
 
             $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["ratio0" => "e.width0/e.height0"], ["image.source" => $uuid])[0] ?? null;
@@ -200,8 +200,8 @@ class FileController extends AbstractController
         if($imageCrop) {
 
             $filters[] = new CropFilter(
-                $imageCrop->getX(), $imageCrop->getY(),
-                $imageCrop->getWidth(), $imageCrop->getHeight()
+                $imageCrop->getX0(), $imageCrop->getY0(),
+                $imageCrop->getWidth0(), $imageCrop->getHeight0()
             );
         }
 
