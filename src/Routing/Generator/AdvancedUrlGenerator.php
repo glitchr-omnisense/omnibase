@@ -108,7 +108,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         //
         // Update context
-            $routeParameters = $this->resolveParameters() ?? $routeParameters;
+        $routeParameters = $this->resolveParameters($routeParameters);
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations

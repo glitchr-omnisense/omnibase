@@ -2,9 +2,9 @@
 
 namespace Base\Routing\Matcher;
 
+use Exception;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
-use Symfony\Component\Routing\RequestContext;
 
 class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
@@ -26,10 +26,10 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         //
         // Prevent to match custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
-        $match = parent::match($pathinfo);
-        $routeName = $match["_route"] ?? null;
+        try { $match = parent::match($pathinfo); }
+        catch (Exception $e) { $match = []; }
         if(array_key_exists("_route", $match))
-            if(str_starts_with($routeName, "_")) return $match;
+            if(str_starts_with($match["_route"], "_")) return $match;
 
         //
         // Custom match implementation

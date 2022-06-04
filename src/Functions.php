@@ -32,7 +32,7 @@ namespace {
         $http_host   ??= $_SERVER["HTTP_HOST"]      ?? null;
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        return format_url(compose_url($scheme,null,null,null,null,$http_host,null,$request_uri));
+        return format_url(compose_url($scheme,null,null,null,null,$http_host,null,$request_uri), $keep_subdomain, $keep_machine);
     }
 
     function format_url(?string $url = null, bool $keep_subdomain = true, bool $keep_machine = true) : ?string
@@ -86,6 +86,10 @@ namespace {
 
         $parse = parse_url($url, $component);
         if($parse === false) return false;
+
+        foreach($parse as $_)
+            $_ = str_lstrip("file://", $_);
+
         if($noscheme) unset($parse["scheme"]);
 
         $path = str_rstrip($parse['path'] ?? "", "/");
