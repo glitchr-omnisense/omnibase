@@ -223,14 +223,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRequest(RequestEvent $event)
     {
-        $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
-        if($isSecurityRoute) return; // Rescue authenticator must always be public
-
-        //
-        // Prevent the average guy to see the administration
-        if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest()))
-            if(!$isSecurityRoute) throw new NotFoundHttpException();
-
         //
         // Redirect if basic access not granted
         $accessRestricted  = !$this->authorizationChecker->isGranted("PUBLIC_ACCESS");
@@ -243,6 +235,18 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // In case of restriction: profiler is disabled
             $this->profiler->disable();
+
+             // Rescue authenticator must always be public
+            $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
+            if($isSecurityRoute)
+                return;
+
+            //
+            // Prevent the average guy to see the administration
+            if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest()))
+                if(!$isSecurityRoute) throw new NotFoundHttpException();
+            if($this->baseService->isProfiler() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest()))
+                if(!$isSecurityRoute) throw new NotFoundHttpException();
 
             // Nonetheless exception access is alway possible
             if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))
