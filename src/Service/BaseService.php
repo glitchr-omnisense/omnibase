@@ -428,16 +428,13 @@ class BaseService implements RuntimeExtensionInterface
             unset($headers["callback"]);
         }
 
-        $url   = $this->generateUrl($routeName, $routeParameters) ?? $routeName;
+        $url   = $this->getRouter()->generate($routeName, $routeParameters) ?? $routeName;
         $routeName = $this->getRouteName($url);
         if (!$routeName) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
 
-        $currentRoute = $this->getCurrentRouteName();
-        if ($routeName == $currentRoute) return null;
-
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
         foreach($exceptions as $pattern)
-            if (preg_match($pattern, $currentRoute)) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+            if (preg_match($pattern, $this->getCurrentRouteName())) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
 
         $response = new RedirectResponse($url, $state, $headers);
         if($event && method_exists($event, "setResponse")) $event->setResponse($response);
