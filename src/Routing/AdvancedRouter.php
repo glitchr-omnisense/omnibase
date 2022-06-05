@@ -38,7 +38,8 @@ class AdvancedRouter implements AdvancedRouterInterface
         $this->keepSubdomain   = $parameterBag->get("base.router.shorten.keep_subdomain");
     }
 
-    public function isProfiler($request = null)
+    public function isBackOffice(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
+    public function isProfiler(mixed $request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if ($request instanceof KernelEvent)
@@ -48,12 +49,11 @@ class AdvancedRouter implements AdvancedRouterInterface
         else if(!$request instanceof Request)
             return false;
 
-        $route = $request->get('_route');
-
+        $route = $this->getRouteName();
         return $route == "_wdt" || $route == "_profiler";
     }
 
-    public function isEasyAdmin($request = null)
+    public function isEasyAdmin(mixed $request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
         if($request instanceof KernelEvent)

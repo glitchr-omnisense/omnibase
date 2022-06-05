@@ -2,6 +2,7 @@
 
 namespace Base\Security\Voter;
 
+use App\Entity\User;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -15,7 +16,7 @@ class BackofficeVoter extends Voter
     protected function supports(string $attribute, mixed $subject): bool
     {
         // Voter only support "User" objects and one specific ballot type..
-        return $this->router->isEasyAdmin() && $attribute == self::BACKOFFICE;
+        return $this->router->isBackOffice() && $attribute == self::BACKOFFICE;
     }
 
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token): bool

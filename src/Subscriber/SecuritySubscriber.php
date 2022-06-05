@@ -242,10 +242,10 @@ class SecuritySubscriber implements EventSubscriberInterface
                 return;
 
             //
-            // Prevent the average guy to see the administration
-            if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest()))
-                if(!$isSecurityRoute) throw new NotFoundHttpException();
-            if($this->baseService->isProfiler() && !$this->authorizationChecker->isGranted("BACKOFFICE", $event->getRequest()))
+            // Prevent the average guy to see the administration and debug tools
+            if($this->baseService->isProfiler() && !$this->authorizationChecker->isGranted("BACKOFFICE"))
+                throw new NotFoundHttpException();
+            if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE"))
                 if(!$isSecurityRoute) throw new NotFoundHttpException();
 
             // Nonetheless exception access is alway possible

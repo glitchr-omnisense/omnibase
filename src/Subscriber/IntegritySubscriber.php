@@ -5,7 +5,7 @@ namespace Base\Subscriber;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Security\LoginFormAuthenticator;
-use Doctrine\DBAL\Connection;
+use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -17,7 +17,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Component\Mailer\Transport\Smtp\Auth\LoginAuthenticator;
 use Symfony\Component\Routing\RouterInterface;
 
 class IntegritySubscriber implements EventSubscriberInterface
@@ -83,29 +82,32 @@ class IntegritySubscriber implements EventSubscriberInterface
         $session = $this->requestStack->getSession();
         if(!$session->get("_user_checksum"))
             $session->set("_user_checksum", md5($this->getDefaultConnectionStr()));
+
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
+        $token = $this->tokenStorage->getToken();
+        if(!$token) return true;
+
+        $user = $token->getUser();
+
         $integrity = $this->checkUserIntegrity() && $this->checkDoctrineChecksum();
-        if(!$integrity && $this->router->getRouteName() != LoginFormAuthenticator::LOGOUT_ROUTE) {
 
-            $token = $this->tokenStorage->getToken();
-            if(!$token) return;
+        $isSecurity  = LoginFormAuthenticator::isSecurityRoute($event->getRequest());
+        $isSecurity |= RescueFormAuthenticator::isSecurityRoute($event->getRequest());
 
-            $user = $token->getUser();
-            if(!$user) return;
+        if($user && !$integrity && !$isSecurity) {
 
             $notification = new Notification("integrity", [$user]);
             $notification->send("danger");
 
-            $this->tokenStorage->setToken(NULL);
+            $response = $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, [], 302);
+            $response->headers->clearCookie('REMEMBERME', "/");
+            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
 
-            $response = $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302);
-            $response->headers->clearCookie('REMEMBERME');
             $event->setResponse($response);
-
-            $event->stopPropagation();
+            return $event->stopPropagation();
         }
     }
 
@@ -149,6 +151,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         if (!$session->get("_user_checksum")) return false;
 
         $md5checksum = md5($this->getDefaultConnectionStr());
+
         return $md5checksum == $session->get("_user_checksum");
     }
 }
