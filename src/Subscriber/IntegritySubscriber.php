@@ -103,12 +103,11 @@ class IntegritySubscriber implements EventSubscriberInterface
             if(RescueFormAuthenticator::isSecurityRoute($event->getRequest())) $response = $event->getResponse();
             else $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
 
-            if ($response) {
-                $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
-                $response->headers->clearCookie('REMEMBERME', "/");
-                $response->sendHeaders();
-            }
+            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
+            $response->headers->clearCookie('REMEMBERME', "/");
+            $response->sendHeaders();
 
+            $event->setResponse($response);
             $event->stopPropagation();
         }
     }
