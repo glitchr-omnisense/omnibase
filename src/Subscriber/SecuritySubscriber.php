@@ -254,17 +254,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->getCurrentRouteName($event);
             $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirection");
-            if(!in_array($currentRouteName, [$accessDeniedRedirection, RescueFormAuthenticator::RESCUE_ROUTE, LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE])) {
+            if($currentRouteName != $accessDeniedRedirection)
+                $response = $this->baseService->redirect($accessDeniedRedirection);
+            else if($currentRouteName === LoginFormAuthenticator::LOGIN_ROUTE)
+                $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
 
-                if($accessDeniedRedirection) $this->baseService->redirect($accessDeniedRedirection);
-                else {
-
-                    $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE);
-                    if($response) $event->setResponse($response);
-                }
-
-                return $event->stopPropagation();
-            }
+            if($response) $event->setResponse($response);
+            return $event->stopPropagation();
         }
     }
 
