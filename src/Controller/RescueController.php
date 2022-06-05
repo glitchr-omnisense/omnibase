@@ -13,13 +13,22 @@ use Symfony\Component\HttpFoundation\Request;
 
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
+use Base\Service\SettingBag;
+use Base\Service\SettingBagInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /* "abstract" (remove because of routes) */
 class RescueController extends AbstractDashboardController
 {
+    public function __construct(RouterInterface $router, SettingBagInterface $settingBag)
+    {
+        $this->router = $router;
+        $this->settingBag = $settingBag;
+    }
+
     public function configureDashboard(): Dashboard
     {
         return Dashboard::new()->setFaviconPath("/favicon.ico");
@@ -31,27 +40,16 @@ class RescueController extends AbstractDashboardController
      * @Route("/rescue", name="security_rescue")
      * @Iconize({"fas fa-lock","fas fa-unlock"})
      */
-    public function LoginRescue(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils, BaseService $baseService): Response
+    public function LoginRescue(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $targetPath = strval($referrer);
-        $targetRoute = $baseService->getRouteName($targetPath);
-
         // Redirect to the right page when access denied
-        if ( ($user = $this->getUser()) && $user->isPersistent() ) {
+        if ( ($user = $this->getUser()) ) {
 
-            if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-
-                // Check if target path provided via $_POST..
-                $targetPath = strval($referrer);
-                $targetRoute = $baseService->getRouteName($targetPath);
-                if ($targetPath && !in_array($targetRoute, [RescueFormAuthenticator::LOGOUT_ROUTE, RescueFormAuthenticator::LOGIN_ROUTE]) )
-                    return $baseService->redirect($targetPath);
-
-                return $this->redirectToRoute("dashboard");
-            }
+            if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
+                return $this->redirect($referrer->getUrl() ?? $router->generate("dashboard"));
         }
 
         // Generate form
@@ -61,17 +59,17 @@ class RescueController extends AbstractDashboardController
 
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $logo = $baseService->getSettingBag()->get("base.settings.logo.backoffice")["_self"] ?? null;
-        $logo = $logo ?? $baseService->getSettingBag()->get("base.settings.logo")["_self"] ?? null;
+        $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
+        $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
 
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',
-            'target_path' => $baseService->generateUrl('dashboard'),
+            'target_path' => $this->router->generate('dashboard'),
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
             'logo' => $logo,
-            "page_title" => $baseService->getSettingBag()->getScalar("base.settings.title"),
+            "page_title" => $this->settingBag->getScalar("base.settings.title"),
             "identifier" => $lastUsername,
             "form" => $form->createView()
         ]);

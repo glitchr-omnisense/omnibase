@@ -63,7 +63,7 @@ class SecurityController extends AbstractController
         $lastUsername = $authenticationUtils->getLastUsername();
 
         // Redirect to the right page when access denied
-        if ( ($user = $this->getUser()) && $user->isPersistent() ) {
+        if ( ($user = $this->getUser()) ) {
 
             if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
                 return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));

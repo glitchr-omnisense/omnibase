@@ -291,7 +291,8 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\Controller\SecurityController">
