@@ -18,7 +18,7 @@ login:
             back: "Re-bonsoir {0} !"
 
     already: Oh, mais tu es déjà connecté !
-    partial: Tu es partiellement connecté, connecte toi à nouveau pour modifier les informations sensibles de ton compte
+    partial: Tu es partiellement connecté ! Une connexion complète est requise pour accéder à cette page
     full: "Authentication force requise pour cette action."
     social: Salut ! Tu t'es bien connecté à ton compte {0}
 

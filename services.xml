@@ -639,10 +639,6 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\EntitySubscriber\ImageCropSubscriber">
-            <tag name="doctrine.event_subscriber" />
-        </service>
-
         <service id="Base\Form\Type\Layout\SettingListType">
             <tag name="form.type" />
             <argument type="service" id="setting_bag" />

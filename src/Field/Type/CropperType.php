@@ -188,7 +188,6 @@ class CropperType extends AbstractType implements DataMapperInterface
         $classMetadata = $this->entityManager->getClassMetadata(get_class($viewData));
         $fieldNames = $classMetadata->getFieldNames($viewData);
         $fieldNames[] = "is_normalized"; // Include normalization information
-
         foreach(iterator_to_array($forms) as $formName => $form) {
 
             if(!in_array($formName, $fieldNames)) continue;

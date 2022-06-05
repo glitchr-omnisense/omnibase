@@ -4,6 +4,8 @@ namespace Base\Routing;
 
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
+use Base\Security\LoginFormAuthenticator;
+use Base\Security\RescueFormAuthenticator;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBag;
 use Symfony\Component\HttpFoundation\Request;
@@ -89,10 +91,8 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function warmUp(string $cacheDir): array
     {
-        $this->getRouteCollection();
-
         if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
-        return $this->router->warmUp($cacheDir);
+        return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : $this->getRouteCollection();
     }
 
     public function getRequestUri(): ?string { return $this->getRequest() ? $this->getRequest()->getRequestUri() : $_SERVER["REQUEST_URI"] ?? null; }
@@ -159,5 +159,45 @@ class AdvancedRouter implements AdvancedRouterInterface
 
             }, $this->router->getRouteCollection()->all()
         )));
+    }
+
+    public function sanitize(string $url = null) {
+
+        if($url === null) $url = parse_url2(get_url());
+
+        $allowedSubdomain = false;
+        $permittedSubdomains = $this->parameterBag->get("base.host_restriction.permitted_subdomains") ?? [];
+        if(!$this->keepMachine() && !$this->keepSubdomain())
+            $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
+
+        foreach($permittedSubdomains as $permittedSubdomain)
+            $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null);
+
+        // Special case for login form.. to be redirected to rescue authenticator if no access right
+        $routeName = $this->getRouteName();
+        if(!LoginFormAuthenticator::isSecurityRoute($routeName) && !RescueFormAuthenticator::isSecurityRoute($routeName))
+        {
+            // Special case for WWW subdomain
+            if(!array_key_exists("subdomain", $url) && !array_key_exists("machine", $url) && !$allowedSubdomain) {
+                $url["subdomain"] = "www";
+            } else if( array_key_exists("subdomain", $url) && !$allowedSubdomain) {
+
+                if($url["subdomain"] === "www") $url = array_key_removes($url, "subdomain");
+                else $url["subdomain"] = "www";
+            }
+
+            if(array_key_exists("machine",   $url) && !$this->keepMachine()  )
+                $url = array_key_removes($url, "machine");
+
+            if(array_key_exists("subdomain", $url) && !$this->keepSubdomain())
+                if(array_key_exists("machine",   $url) || !$this->keepMachine())
+                    $url = array_key_removes($url, "subdomain");
+        }
+
+        return compose_url(
+            $url["scheme"] ?? null, $url["user"] ?? null, $url["password"] ?? null,
+            $url["machine"] ?? null, $url["subdomain"] ?? null, $url["domain"] ?? null, $url["port"] ?? null,
+            $url["path"] ?? null,
+        );
     }
 }

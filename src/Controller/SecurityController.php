@@ -31,6 +31,7 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Component\HttpFoundation\Referrer;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
+use Base\Security\RescueFormAuthenticator;
 use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Security\Core\Authentication\Token\RememberMeToken;
@@ -56,27 +57,16 @@ class SecurityController extends AbstractController
     {
         // In case of maintenance, still allow users to login
         if($this->baseService->isMaintenance())
-            return $this->redirectToRoute("dashboard_login");
+            return $this->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE);
 
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $targetPath = strval($referrer);
-        $targetRoute = $this->baseService->getRouteName($targetPath);
-
         // Redirect to the right page when access denied
         if ( ($user = $this->getUser()) && $user->isPersistent() ) {
 
-            if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
-
-                // Check if target path provided via $_POST..
-                $targetPath = strval($referrer);
-                $targetRoute = $this->baseService->getRouteName($targetPath);
-                if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
-                    return $this->baseService->redirect($targetPath);
-
-                return $this->redirectToRoute($request->isMethod('POST') ? "user_settings" : $this->baseService->getRouteName("/"));
-            }
+            if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
+                return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));
 
             $notification = new Notification("login.partial");
             $notification->send("info");
@@ -105,8 +95,10 @@ class SecurityController extends AbstractController
         // If user is found.. go to the logout request page
         if($this->getUser()) {
 
-            $response = $this->redirectToRoute('security_logoutRequest');
-            $response->headers->clearCookie('REMEMBERME');
+            $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
+            $response->headers->clearCookie('REMEMBERME', "/");
+            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
+
             return $response;
         }
 

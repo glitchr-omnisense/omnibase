@@ -25,17 +25,20 @@ namespace {
         }, $input);
     }
 
-    function get_url(bool $keep_subdomain = true, bool $keep_machine = true,
+    function get_url(bool $keep_machine = true, bool $keep_subdomain = true,
                     ?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
     {
         $scheme      ??= $_SERVER["REQUEST_SCHEME"] ?? null;
         $http_host   ??= $_SERVER["HTTP_HOST"]      ?? null;
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        return format_url(compose_url($scheme,null,null,null,null,$http_host,null,$request_uri), $keep_subdomain, $keep_machine);
+        return format_url(
+              compose_url($scheme,null,null,null,null,$http_host,null,$request_uri),
+              $keep_machine, $keep_subdomain
+        );
     }
 
-    function format_url(?string $url = null, bool $keep_subdomain = true, bool $keep_machine = true) : ?string
+    function format_url(?string $url = null, bool $keep_machine = true, bool $keep_subdomain = true) : ?string
     {
         if(is_cli()) return null;
 

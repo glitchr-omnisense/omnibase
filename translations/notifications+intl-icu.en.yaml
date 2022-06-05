@@ -18,7 +18,7 @@ login:
             back: "Good evening again, {0} !"
 
     already: "You are already logged in !"
-    partial: "You're partially logged in ! You can sign in."
+    partial: "You're partially logged in ! Please sign in to get full access right."
     full: "Full authentication required for this action"
     social : "Hi ! You just got connected to thought your {0} account"
 

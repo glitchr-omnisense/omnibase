@@ -52,9 +52,9 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $this->baseService      = $baseService;
     }
 
-    public static function isSecurityRoute(Request $request)
+    public static function isSecurityRoute(Request|string $routeOrRequest)
     {
-        return in_array($request->attributes->get('_route'), [self::LOGIN_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
+        return in_array(is_string($routeOrRequest) ? $routeOrRequest : $routeOrRequest->attributes->get('_route'), [self::LOGIN_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
@@ -113,7 +113,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
         $request->getSession()->remove("_target_path");
 
-        if ($targetPath && !in_array($targetRoute, [LoginFormAuthenticator::LOGOUT_ROUTE, LoginFormAuthenticator::LOGIN_ROUTE]) )
+        if ($targetPath && !$this->isSecurityRoute($targetRoute))
             return $this->baseService->redirect($targetPath);
 
         return $this->baseService->redirectToRoute($this->baseService->getRouteName("/"));

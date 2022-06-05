@@ -78,7 +78,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onAccessRestriction', 8], ['onKernelRequest', 8], ['onReferrerRequest', 2]],
+            RequestEvent::class    => [['onAccessRequest', 8], ['onKernelRequest', 8], ['onReferrerRequest', 2]],
             ResponseEvent::class   => ['onKernelResponse'],
 
             LoginSuccessEvent::class => ['onLoginSuccess'],
@@ -221,10 +221,10 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $this->baseService->redirect($targetPath, [], 302);
     }
 
-    public function onAccessRestriction(RequestEvent $event)
+    public function onAccessRequest(RequestEvent $event)
     {
         $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
-        if($isSecurityRoute) return;
+        if($isSecurityRoute) return; // Rescue authenticator must always be public
 
         //
         // Prevent the average guy to see the administration
@@ -240,7 +240,6 @@ class SecuritySubscriber implements EventSubscriberInterface
         $accessRestricted |= !$this->authorizationChecker->isGranted("MAINTENANCE_ACCESS");
 
         if($accessRestricted) {
-
 
             // In case of restriction: profiler is disabled
             $this->profiler->disable();

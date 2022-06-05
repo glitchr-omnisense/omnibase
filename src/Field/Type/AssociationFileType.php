@@ -239,7 +239,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                         } else {
 
                             try { $this->propertyAccessor->setValue($entity, $fieldName, $file); }
-                            catch (Error $e) { throw new Exception("Failed to modify field \"$fieldName\" (is it an association ?), consider using \"entity_data\" option"); }
+                            catch (Error $e) { throw $e; }
                         }
 
                         $newData[] = $entity;

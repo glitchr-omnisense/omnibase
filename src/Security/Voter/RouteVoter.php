@@ -3,6 +3,8 @@
 namespace Base\Security\Voter;
 
 use Base\Routing\AdvancedRouterInterface;
+use Base\Security\LoginFormAuthenticator;
+use Base\Security\RescueFormAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -41,18 +43,27 @@ class RouteVoter extends Voter
 
                 if($route->getHost()) return true;
 
+                $allowedSubdomain = false;
+                $permittedSubdomains = $this->parameterBag->get("base.host_restriction.permitted_subdomains") ?? [];
+                if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
+                    $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
+
+                foreach($permittedSubdomains as $permittedSubdomain)
+                    $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null);
+
+                $routeName = $this->router->getRouteName();
+                if(LoginFormAuthenticator::isSecurityRoute($routeName))
+                    return true;
+                if(RescueFormAuthenticator::isSecurityRoute($routeName))
+                    return true;
+
+                if(!$allowedSubdomain) return false;
+
                 if(array_key_exists("machine",   $url) && !$this->router->keepMachine()  ) return false;
-                if(array_key_exists("subdomain", $url)) {
+                if(array_key_exists("subdomain", $url) && !$this->router->keepSubdomain())
+                    return !array_key_exists("machine",   $url) && $this->router->keepMachine();
 
-                    if(!$this->router->keepSubdomain())
-                        return !array_key_exists("machine",   $url) && $this->router->keepMachine();
-
-                    $permittedSubdomains = $this->parameterBag->get("base.host_restriction.permitted_subdomains") ?? [];
-                    foreach($permittedSubdomains ?? [] as $permittedSubdomain)
-                        if(preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null)) return true;
-                }
-
-                return false;
+                return $allowedSubdomain;
 
             default:
                 return false;

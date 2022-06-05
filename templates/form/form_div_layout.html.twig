@@ -1002,8 +1002,6 @@
     }) %}
 {% endif %}
 
-{% set isNormalized = form0.is_normalized.vars.value ? true : false %}
-
 {# todo: handle xhr errors #}
 {# 'data-cropper-err': "<div id='"~form.var.id~"'>"~('fas fa-fw fa-exclamation-circle'|iconify)~" "~('@fields.cropper.error')~"</div>", #}
 <div class="form-group form-cropper">
@@ -1028,7 +1026,10 @@
     {{ form_widget(form0, {attr:attr}) }}
 </div>
 
-{% if not isNormalized %}
+{% set isNormalized = form0.is_normalized.vars.value ? true : false %}
+{% set isEmpty = not form0.x0.vars.value and not form0.y0.vars.value and not form0.width0.vars.value and not form0.height0.vars.value %}
+
+{% if not isNormalized and not isEmpty %}
 <hr>
 <div class="form-text text-muted text-danger">
 {{"@fields.cropper.not_normalized"|trans}}

@@ -38,10 +38,9 @@ class RouterSubscriber implements EventSubscriberInterface
 
         //
         // Redirect IP if restriction enabled
-        $host = $this->settingBag->host();
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_IP", $route)) {
 
-            $event->setResponse($this->redirect(true, true, null, $host));
+            $event->setResponse(new RedirectResponse(get_url(true, true, null, $this->settingBag->host())));
             return $event->stopPropagation();
         }
 
@@ -49,17 +48,8 @@ class RouterSubscriber implements EventSubscriberInterface
         // If no host specified in Route, then check the list of permitted subdomain
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
 
-            $event->setResponse($this->redirect($this->router->keepSubdomain(), $this->router->keepMachine()));
+            $event->setResponse(new RedirectResponse($this->router->sanitize()));
             return $event->stopPropagation();
         }
-    }
-
-    public function redirect(
-        bool $keep_subdomain = true, bool $keep_machine = true,
-        ?string $scheme = null,
-        ?string $http_host = null,
-        ?string $request_uri = null): RedirectResponse
-    {
-        return new RedirectResponse(get_url($keep_subdomain, $keep_machine, $scheme, $http_host, $request_uri));
     }
 }

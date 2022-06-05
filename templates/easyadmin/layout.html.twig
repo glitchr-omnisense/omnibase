@@ -88,17 +88,17 @@
 
         {% set user_menu_dropdown %}
             <ul class="dropdown-menu dropdown-menu-end">
-                {# <li class="dropdown-user-details">
+                <li class="dropdown-user-details">
                     <div>{{ user_menu_avatar }}</div>
                     <div>
                         <span class="user-label">{{ 'user.logged_in_as'|trans(domain = 'EasyAdminBundle') }}</span>
                         <span class="user-name">{{ ea.user is null ? 'user.anonymous'|trans(domain = 'EasyAdminBundle') : ea.userMenu.name }}</span>
                     </div>
-                </li> #}
+                </li> <hr class="dropdown-divider">
 
                 {% block user_menu %}
                     {% if ea.userMenu.items|length > 0 %}
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
                         {% for item in ea.userMenu.items %}
                             <li>
                                 {% if item.isMenuSection and not loop.first %}
