@@ -95,7 +95,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $isSecurity |= RescueFormAuthenticator::isSecurityRoute($event->getRequest());
 
         $user = $token->getUser();
-        if($user && !$integrity && !$isSecurity) {
+        if(!$integrity && !$isSecurity) {
 
             $notification = new Notification("integrity", [$user]);
             $notification->send("danger");
