@@ -90,9 +90,8 @@ class IntegritySubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
         if(!$token) return true;
 
-        $integrity = $this->checkUserIntegrity() && $this->checkDoctrineChecksum();
-        $isSecurity  = LoginFormAuthenticator::isSecurityRoute($event->getRequest());
-        $isSecurity |= RescueFormAuthenticator::isSecurityRoute($event->getRequest());
+        $integrity  = $this->checkUserIntegrity() && $this->checkDoctrineChecksum();
+        $isSecurity = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
 
         $user = $token->getUser();
         if(!$integrity && !$isSecurity) {

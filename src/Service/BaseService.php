@@ -392,14 +392,13 @@ class BaseService implements RuntimeExtensionInterface
     public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
     public function getCurrentRouteName(): ?string { return $this->getRouter()->getRouteName(); }
 
-    public function generateUrl(string $urlOrRoute = "", array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): string
+    public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
     {
-        try { return $this->getRouter()->generate($urlOrRoute, $routeParameters, $referenceType); }
-        catch (RouteNotFoundException $e) { return $urlOrRoute; }
+        if(filter_var($urlOrRoute, FILTER_VALIDATE_URL)) return new RedirectResponse($urlOrRoute);
+        return new RedirectResponse($this->getRouter()->generate($urlOrRoute, $routeParameters), $state, $headers);
     }
 
-    public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse { return new RedirectResponse($this->generateUrl($urlOrRoute, $routeParameters), $state, $headers); }
-    public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): ?RedirectResponse
+    public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
     {
         $routeNameBak = $routeName;
 
@@ -434,7 +433,7 @@ class BaseService implements RuntimeExtensionInterface
         if (!$routeName) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
 
         $currentRoute = $this->getCurrentRouteName();
-        if ($routeName == $currentRoute) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+        if ($routeName == $currentRoute) return null;
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
         foreach($exceptions as $pattern)
