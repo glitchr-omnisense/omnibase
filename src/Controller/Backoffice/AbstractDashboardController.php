@@ -214,9 +214,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
-            "base.settings.logo"                 => ["translatable" => true, "form_type" => ImageType::class],
-            "base.settings.logo.animation"       => ["translatable" => true, "form_type" => ImageType::class],
-            "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "required" => false],
+            "base.settings.logo"                 => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
+            "base.settings.logo.animation"       => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
+            "base.settings.logo.backoffice"      => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
             "base.settings.title"                => ["translatable" => true],
             "base.settings.title.backoffice"     => ["translatable" => true],
             "base.settings.author"               => ["translatable" => true],
@@ -326,7 +326,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if(!$logo) $logo = $this->baseService->getSettingBag()->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
 
-        $title = $this->baseService->getSettingBag()->getScalar("base.settings.title") ?? "";
+        $title  = $this->baseService->getSettingBag()->getScalar("base.settings.title") ?? "";
         $slogan = $this->baseService->getSettingBag()->getScalar("base.settings.slogan") ?? "";
 
         $this->configureExtension($this->extension

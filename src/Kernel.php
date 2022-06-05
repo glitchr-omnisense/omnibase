@@ -23,6 +23,7 @@ class Kernel extends HttpCache
 
         // Start session here to access client information
         $timezone = User::getCookie("timezone");
+
         if( !in_array($timezone, timezone_identifiers_list()) )
             $timezone = "UTC";
 

@@ -23,9 +23,6 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
     public function match(string $pathinfo): array
     {
-        $parse = parse_url2() ?? [];
-        $this->getContext()->setHost($parse["host"] ?? "");
-
         //
         // Prevent to match custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..

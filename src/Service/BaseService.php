@@ -480,8 +480,8 @@ class BaseService implements RuntimeExtensionInterface
             throw new Exception("No token storage found in BaseService. Did you overloaded self::__construct ?");
 
         $this->tokenStorage->setToken(null);
-        if(array_key_exists("REMEMBERME", $_COOKIE))
-            setcookie("REMEMBERME", '', time()-1);
+        setcookie("REMEMBERME", '', time()-1);
+        setcookie("REMEMBERME", '', time()-1, "/", ".".get_url(false,false));
     }
 
     public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null, string $csrfFieldId = "_csrf_token"): bool

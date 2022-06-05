@@ -49,7 +49,7 @@ class RescueController extends AbstractDashboardController
         if ( ($user = $this->getUser()) ) {
 
             if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
-                return $this->redirect($referrer->getUrl() ?? $router->generate("dashboard"));
+                return $this->redirect($referrer->getUrl() ?? $this->router->generate("dashboard"));
         }
 
         // Generate form
@@ -69,7 +69,7 @@ class RescueController extends AbstractDashboardController
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
             'logo' => $logo,
-            "page_title" => $this->settingBag->getScalar("base.settings.title"),
+            "page_title" => $this->settingBag->getScalar("base.settings.title.backoffice"),
             "identifier" => $lastUsername,
             "form" => $form->createView()
         ]);

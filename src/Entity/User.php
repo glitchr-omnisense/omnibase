@@ -63,15 +63,13 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
+    private const __DEFAULT_COOKIE__ = "user:necessary";
     private const __DEFAULT_IDENTIFIER__ = "email";
-    public static $identifier = self::__DEFAULT_IDENTIFIER__;
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
-    public function killSession()
-    {
-        $this->getService()->Logout();
-    }
+    public function killSession() { $this->getService()->Logout(); }
 
+    public static $identifier = self::__DEFAULT_IDENTIFIER__;
     public function getUserIdentifier(): string
     {
         $identifier = null;
@@ -124,7 +122,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public static function getCookie(string $key = null)
     {
-        $cookie = json_decode($_COOKIE["user"] ?? "", true);
+        $cookie = json_decode($_COOKIE[self::__DEFAULT_COOKIE__] ?? "", true);
 
         if(!isset($cookie)) return null;
         if(!isset($key) || empty($key)) return $cookie;
@@ -235,7 +233,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getTimezone(): string { return $this->timezone ?? "UTC"; }
     public function setTimezone(string $timezone = null): self
     {
-        $this->timezone = $timezone ?? User::getCookie("timezone") ?? "UTC";
+        $this->timezone = $timezone ?? User::getCookie("timezone") ?? null;
         if( !in_array($this->timezone, timezone_identifiers_list()) )
             $this->timezone = "UTC";
 

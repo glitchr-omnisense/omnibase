@@ -107,6 +107,7 @@ class DiscriminatorEntry extends AbstractAnnotation
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
+
         // Recompute the map discriminator
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {

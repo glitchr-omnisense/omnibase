@@ -942,8 +942,8 @@ namespace {
 
     function array_clear(array &$array) { while(array_pop($array)) {} }
 
-    function array_prepend(array &$array, ...$value):int { return array_unshift($array, ...array_map(fn($v) => $v !== null && !is_array($v) ? [$v] : $v, $value)); }
-    function array_append(array &$array, ...$value):int { return array_push($array, ...array_map(fn($v) => $v !== null && !is_array($v) ? [$v] : $v, $value)); }
+    function array_prepend(array &$array, ...$value):int { return array_unshift($array, ...(!is_array($value) ? [$value] : $value)); }
+    function array_append (array &$array, ...$value):int { return array_push($array, ...(!is_array($value) ? [$value] : $value)); }
     function array_append_recursive()
     {
         $arrays = func_get_args();

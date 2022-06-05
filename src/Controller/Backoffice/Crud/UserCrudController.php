@@ -71,6 +71,7 @@ class UserCrudController extends AbstractCrudController
             yield FormField::addRow()->setColumns(2);
             yield PasswordField::new('plainPassword')->onlyOnForms()->allowEmpty()->setColumns(10)->showInline(false)->setRepeater(true)->setRevealer(true);
 
+            yield DateTimeField::new('activeAt')->hideOnForm();
             yield DateTimeField::new('updatedAt')->onlyOnDetail();
             yield DateTimeField::new('createdAt')->onlyOnDetail();
 

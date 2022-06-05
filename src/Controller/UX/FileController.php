@@ -199,10 +199,10 @@ class FileController extends AbstractController
         //     .. otherwise some naughty users might be generating infinite amount of image
         if($imageCrop) {
 
-            $filters[] = new CropFilter(
+            array_prepend($filters, new CropFilter(
                 $imageCrop->getX0(), $imageCrop->getY0(),
                 $imageCrop->getWidth0(), $imageCrop->getHeight0()
-            );
+            ));
         }
 
         $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options));
