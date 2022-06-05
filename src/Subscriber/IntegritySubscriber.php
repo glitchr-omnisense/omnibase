@@ -90,21 +90,21 @@ class IntegritySubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
         if(!$token) return true;
 
-        $user = $token->getUser();
-
         $integrity = $this->checkUserIntegrity() && $this->checkDoctrineChecksum();
-
         $isSecurity  = LoginFormAuthenticator::isSecurityRoute($event->getRequest());
         $isSecurity |= RescueFormAuthenticator::isSecurityRoute($event->getRequest());
 
+        $user = $token->getUser();
         if($user && !$integrity && !$isSecurity) {
 
             $notification = new Notification("integrity", [$user]);
             $notification->send("danger");
 
-            $response = $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE, [], 302);
-            $response->headers->clearCookie('REMEMBERME', "/");
+            $this->tokenStorage->setToken(NULL);
+
+            $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
             $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
+            $response->headers->clearCookie('REMEMBERME', "/");
 
             $event->setResponse($response);
             return $event->stopPropagation();

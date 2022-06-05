@@ -238,8 +238,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
              // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
-            if($isSecurityRoute)
-                return;
+            if($isSecurityRoute) return;
 
             //
             // Prevent the average guy to see the administration and debug tools
@@ -264,9 +263,6 @@ class SecuritySubscriber implements EventSubscriberInterface
                     if($response) $event->setResponse($response);
                 }
 
-                // User gets disconnected if access not granted
-                $token = $this->tokenStorage->getToken();
-                if($token) $this->tokenStorage->setToken(NULL);
                 return $event->stopPropagation();
             }
         }
