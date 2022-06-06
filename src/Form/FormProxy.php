@@ -2,21 +2,10 @@
 
 namespace Base\Form;
 
-use Base\Entity\User\Notification;
-use Base\Form\Traits\FormFlowTrait;
-
 use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\SingletonTrait;
-use Doctrine\Common\Proxy\Proxy;
-use Doctrine\ORM\EntityManager;
 
 class FormProxy implements FormProxyInterface
 {

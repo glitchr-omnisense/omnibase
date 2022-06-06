@@ -17,6 +17,7 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 
 class IntegritySubscriber implements EventSubscriberInterface
@@ -67,10 +68,11 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($user === null) return true;
 
         $session = $this->requestStack->getSession();
-        if(!$session->get("_integrity_doctrine"))
-            $session->set("_integrity_doctrine", $this->getDoctrineChecksum());
-        if(!$session->get("_integrity_secret"))
-            $session->set("_integrity_secret", $this->getSecret());
+
+        if(!$session->get("_integrity/doctrine"))
+            $session->set("_integrity/doctrine", $this->getDoctrineChecksum());
+        if(!$session->get("_integrity/secret"))
+            $session->set("_integrity/secret", $this->getSecret());
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -82,22 +84,23 @@ class IntegritySubscriber implements EventSubscriberInterface
         $integrity &= $this->checkSecretIntegrity();
         $integrity &= $this->checkDoctrineIntegrity();
 
-        $user = $token->getUser();
-        return;
         if(!$integrity) {
 
+            $user = $token->getUser();
             $notification = new Notification("integrity", [$user]);
             $notification->send("danger");
 
             $this->tokenStorage->setToken(NULL);
+            $session = $this->requestStack->getSession();
+            $session->remove("_integrity/doctrine");
+            $session->remove("_integrity/secret");
 
-            if(RescueFormAuthenticator::isSecurityRoute($event->getRequest())) $response = $event->getResponse();
-            else $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
-
-            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
+            $response = new Response();
             $response->headers->clearCookie('REMEMBERME', "/");
+            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
             $response->sendHeaders();
 
+            $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE, [], 302);
             $event->setResponse($response);
             $event->stopPropagation();
         }
@@ -175,10 +178,10 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($user === null) return true;
 
         $session = $this->requestStack->getSession();
-        if (!$session->get("_integrity_checksum")) return false;
+        if (!$session->get("_integrity/checksum")) return false;
 
         $checksum = $this->getDoctrineChecksum();
-        return $checksum == $session->get("_integrity_doctrine");
+        return $checksum == $session->get("_integrity/doctrine");
     }
 
     public function checkSecretIntegrity()
@@ -187,8 +190,8 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         $marshaller = $this->vault->getMarshaller();
         $session = $this->requestStack->getSession();
-        if (!$session->get("_integrity_secret")) return false;
+        if (!$session->get("_integrity/secret")) return false;
 
-        return $this->secret == $this->vault->reveal($marshaller, $session->get("_integrity_secret"));
+        return $this->secret == $this->vault->reveal($marshaller, $session->get("_integrity/secret"));
     }
 }
