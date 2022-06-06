@@ -40,14 +40,15 @@ class Logging extends AbstractAnnotation implements EntityExtensionInterface
         return [$log];
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
-    {
-        $reflProperty = $classMetadata->getReflectionClass()->getProperty($targetValue);
-        if($reflProperty->getDeclaringClass()->getName() == $classMetadata->getName()) {
+    // @TODO NOT CALLED IN PRODUCTION BECAUSE OF CACHE
+    // public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
+    // {
+    //     $reflProperty = $classMetadata->getReflectionClass()->getProperty($targetValue);
+    //     if($reflProperty->getDeclaringClass()->getName() == $classMetadata->getName()) {
 
-            // $classMetadata->setField
-            self::$trackedEntities[$classMetadata->getName()]   = self::$trackedEntities[$classMetadata->getName()] ?? [];
-            self::$trackedEntities[$classMetadata->getName()][] = $targetValue;
-        }
-    }
+    //         // $classMetadata->setField
+    //         self::$trackedEntities[$classMetadata->getName()]   = self::$trackedEntities[$classMetadata->getName()] ?? [];
+    //         self::$trackedEntities[$classMetadata->getName()][] = $targetValue;
+    //     }
+    // }
 }

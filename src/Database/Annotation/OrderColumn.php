@@ -63,7 +63,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public static function has(string $className, ?string $property = null): bool { return isset(self::$orderedColumns[$className]) && in_array($property, self::$orderedColumns[$className]); }
 
     protected $ordering = [];
-    public function getOrderedColumns($entity)
+    public function getOrderedColumns(mixed $entity)
     {
         $orderedColumns = [];
         foreach(self::$orderedColumns as $column) {
@@ -76,15 +76,17 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         return $orderedColumns;
     }
 
-    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null)
+    public function addOrderedColumnIfNotSet(ClassMetadata $classMetadata, ?string $property = null)
     {
-        $reflProperty = $classMetadata->getReflectionClass()->getProperty($targetValue);
-        if($reflProperty->getDeclaringClass()->getName() == $classMetadata->getName())
-            self::$orderedColumns[] = $classMetadata->getName()."::".$targetValue;
+        $className = $classMetadata->getReflectionProperty($property)->getDeclaringClass()->getName();
+        if(!in_array($className."::".$property, self::$orderedColumns))
+            self::$orderedColumns[] = $className."::".$property;
     }
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
+        $this->addOrderedColumnIfNotSet($classMetadata, $property);
+
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         $orderingRepository = $this->getRepository(Ordering::class);
 
@@ -136,32 +138,23 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $data = [];
                 foreach($properties as $property) {
 
-                    $type = $this->getClassMetadataManipulator()->getTypeOfField($entity, $property);
                     $value = $propertyAccessor->getValue($entity, $property);
 
                     if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
                     else if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
-
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
-                        if($property === "images") dump($property, $dataIdentifier);
 
-                        uasort($dataIdentifier,
-                            fn($a,$b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1))
-                        );
+                        uasort($dataIdentifier, fn($a,$b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1)));
 
-                        if($property === "images") dump($dataIdentifier);
                         $data[$property] = array_flip(array_keys($dataIdentifier));
                         ksort($data[$property]);
-
-                        if($property === "images") dump(array_keys($dataIdentifier), $data[$property], is_identity($data[$property]));
                     }
 
                     if(is_identity($data[$property]))
                         unset($data[$property]);
                 }
-
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);

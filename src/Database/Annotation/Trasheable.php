@@ -36,7 +36,7 @@ class Trasheable extends AbstractAnnotation implements EntityExtensionInterface
         return ($target == AnnotationReader::TARGET_CLASS);
     }
 
-    public static $trackedEntities   = [];
+    public static $trackedEntities   = []; // @TODO TO BE IMPLEMENTED
     public static function get():array { return self::$trackedEntities; }
     public static function has(string $className, ?string $property = null): bool { return array_key_exists($className, self::$trackedEntities); }
 

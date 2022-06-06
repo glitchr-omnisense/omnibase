@@ -17,15 +17,4 @@ class EntityExtension
         $this->extensions[get_class($extension)] = $extension;
         return $this;
     }
-
-    /**
-     * Adds mapping to the translatable and translations.
-     */
-    public static $entities   = [];
-    public static function get() { return self::$entities; }
-    public static function has($entity):bool
-    {
-        $className = is_object($entity) ? get_class($entity) : $entity;
-        return in_array($className, self::$entities);
-    }
 }

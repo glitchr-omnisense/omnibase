@@ -87,7 +87,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
                 $matches = [];
 
-                foreach($extension::get() as $column) {
+                foreach($extension::get($entity) as $column) {
 
                     list($className, $_) = explode("::", $column);
                     if(!is_instanceof($entity, $className)) continue;

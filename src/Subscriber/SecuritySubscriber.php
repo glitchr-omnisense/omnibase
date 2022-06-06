@@ -50,8 +50,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         TranslatorInterface $translator,
         BaseService $baseService,
         Referrer $referrer,
-        Profiler $profiler,
-        ParameterBagInterface $parameterBag) {
+        ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
@@ -62,8 +61,6 @@ class SecuritySubscriber implements EventSubscriberInterface
         $this->baseService = $baseService;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
-        $this->parameterBag = $parameterBag;
-
         $this->exceptions = [
             "/^locale_/",
             "/^ux_/",
@@ -234,7 +231,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if($accessRestricted) {
 
             // In case of restriction: profiler is disabled
-            $this->profiler->disable();
+            if($this->profiler) $this->profiler->disable();
 
              // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());

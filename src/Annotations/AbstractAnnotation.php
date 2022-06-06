@@ -20,7 +20,6 @@ use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Exception;
-use League\Flysystem\FilesystemOperator;
 
 abstract class AbstractAnnotation implements AnnotationInterface
 {

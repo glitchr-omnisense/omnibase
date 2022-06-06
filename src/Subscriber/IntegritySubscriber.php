@@ -92,12 +92,14 @@ class IntegritySubscriber implements EventSubscriberInterface
 
             $this->tokenStorage->setToken(NULL);
             $session = $this->requestStack->getSession();
-            $session->remove("_integrity/doctrine");
             $session->remove("_integrity/secret");
+            $session->remove("_integrity/doctrine");
 
             $response = new Response();
             $response->headers->clearCookie('REMEMBERME', "/");
-            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
+            if(($host = parse_url(get_url(false,false))["host"] ?? null))
+                $response->headers->clearCookie('REMEMBERME', "/", ".".$host);
+
             $response->sendHeaders();
 
             $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE, [], 302);

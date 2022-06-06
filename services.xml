@@ -610,8 +610,7 @@
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
             <argument type="service" id="referrer" />
-            <argument type="service" id="profiler" />
-            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Subscriber\IntegritySubscriber">
