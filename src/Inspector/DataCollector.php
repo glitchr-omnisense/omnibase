@@ -50,7 +50,7 @@ class DataCollector extends AbstractDataCollector
 
     public function getMethod() { return $this->data['method']; }
 
-    public function collectDataBundle(string $bundle)
+    public function collectDataBundle(string $bundle, ?string $bundleSuffix = null)
     {
         $bundleIdentifier = $this->getBundleIdentifier($bundle);
         if(!$bundleIdentifier) return false;
@@ -60,12 +60,13 @@ class DataCollector extends AbstractDataCollector
 
         $bundleVersion = \Composer\InstalledVersions::getPrettyVersion($bundleIdentifier);
         $bundleDevRequirements = !\Composer\InstalledVersions::isInstalled($bundleIdentifier, false);
+        $bundleSuffix = $bundleSuffix ? "@".$bundleSuffix : "";
 
         $this->dataBundles[$bundle] = [
             "identifier"  => $bundleIdentifier,
             "name" => trim(str_rstrip(mb_ucwords(camel2snake(class_basename($bundle), " ")), "Bundle")),
             "location" => $bundleLocation,
-            "version"  => str_lstrip($bundleVersion, "v"),
+            "version"  => str_lstrip($bundleVersion, "v").$bundleSuffix,
             "dev_requirements"  => $bundleDevRequirements,
         ];
 
@@ -75,12 +76,14 @@ class DataCollector extends AbstractDataCollector
     public function collect(Request $request, Response $response, $exception = null)
     {
         $context = $this->adminContextProvider->getContext();
+        $dbname  = $this->doctrine->getConnection($this->doctrine->getDefaultConnectionName())->getParams()["dbname"] ?? null;
+        $dbname  = str_shorten($dbname, 10, SHORTEN_MIDDLE, "[..]");
 
         $this->collectDataBundle(BaseBundle::class);
-        $this->collectDataBundle(DoctrineBundle::class);
         $this->collectDataBundle(TwigBundle::class);
         $this->collectDataBundle(EasyAdminBundle::class);
         $this->collectDataBundle(ApiPlatformBundle::class);
+        $this->collectDataBundle(DoctrineBundle::class, $dbname);
 
         $this->data = array_map_recursive(fn($v) => $this->cloneVar($v), $this->collectData($context));
         $this->data["_bundles"] = $this->dataBundles;
