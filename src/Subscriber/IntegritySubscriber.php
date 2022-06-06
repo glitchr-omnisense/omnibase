@@ -178,7 +178,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($user === null) return true;
 
         $session = $this->requestStack->getSession();
-        if (!$session->get("_integrity/checksum")) return false;
+        if (!$session->get("_integrity/doctrine")) return false;
 
         $checksum = $this->getDoctrineChecksum();
         return $checksum == $session->get("_integrity/doctrine");
