@@ -343,10 +343,10 @@
             <figcaption id="{{id}}_figcaption">
                 <div class="figwrapper">
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-                    <span><i class="fas fa-image" id="{{id}}_preview"></i></span>
+                    <span><i class="fas fa-search-plus" id="{{id}}_preview"></i></span>
                     <span>{{ clipboard("copy", form.vars.value|imagine) }}</span>
-                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify }}</a></span>
-                    <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fas fa-fw fa-eye"|iconify({"style":"font-size: 0.9em;"}) }}</a></span>
+                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify({"style":"font-size: 0.95em;bottom:3px;position:relative"}) }}</a></span>
+                    <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fas fa-fw fa-image"|iconify }}</a></span>
                 {% else %}
                     <span><i class="fas fa-plus-circle"></i></span>
                 {% endif %}
@@ -406,7 +406,7 @@
 {% set download = form.vars.download ?? [] %}
 {% set clippable = form.vars.clippable ?? [] %}
 
-{% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-images" : "fas fa-2x fa-fw fa-image" %}
+{% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-fa-search-plus" : "fas fa-2x fa-fw fa-image" %}
 {% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify)~"</a>" %}
 {% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"}))~"</a>" %}
 {% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
