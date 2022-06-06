@@ -1202,6 +1202,7 @@ namespace {
             // Call user function with defaults parameters if required
             try { $ret = call_user_func_with_defaults($callback, $key, $entry, $callback, $counter, $depth); }
             catch(Exception $e) { throw $e; }
+
             // Process generators
             if($ret instanceof Generator) {
 

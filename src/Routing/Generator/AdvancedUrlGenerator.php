@@ -2,6 +2,8 @@
 
 namespace Base\Routing\Generator;
 
+use Base\Security\LoginFormAuthenticator;
+use Base\Security\RescueFormAuthenticator;
 use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;
 use Exception;
@@ -9,17 +11,22 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Route;
 
 class AdvancedUrlGenerator extends CompiledUrlGenerator
 {
     use BaseTrait;
 
+    protected $compiledRoutes;
+    public function getCompiledRoutes():array { return $this->compiledRoutes; }
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
-        // NB: This generator needs separate context as it calls its corresponding Matcher..
+        // NB: This generator needs separate context as it internally calls its corresponding Matcher in generates..
         //     (.. and Matcher class is changing context.)
         $context = new RequestContext($context->getBaseUrl(), $context->getMethod(), $context->getHost(), $context->getScheme(), $context->getHttpPort(), $context->getHttpsPort(), $context->getPathInfo(), $context->getQueryString());
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
+
+        $this->compiledRoutes = $compiledRoutes;
     }
 
     protected function resolveUrl(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
@@ -27,13 +34,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Transforms requested route by adding parameters
         if($routeName === null) return null;
 
-        if(($route = $this->getRouter()->getRouteCollection()->get($routeName))) {
+        if(($route = $this->getRouter()->getRoute($routeName))) {
 
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
 
             if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
-                $url = parse_url2(get_url());
+                $url = parse_url2();
                 $parameterNames = array_flip($matches[1]);
                 $routeParameters = array_merge(
                     array_intersect_key($url, $parameterNames),
@@ -57,6 +64,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
             try { return parent::generate($routeName.".".LocaleProvider::getDefaultLang(), $routeParameters, $referenceType); }
             catch (RouteNotFoundException $e) { throw $e; }
+
         }
 
         $request = $this->getRouter()->getRequest();
@@ -142,7 +150,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         if($routeGroupUrl !== null && $routeUrl !== null) {
 
-            $keys = array_keys(array_diff_key($this->getRouter()->getRouteParameters($routeUrl), $this->getRouter()->getRouteParameters($routeGroupUrl)));
+            $keys = array_keys(array_diff_key($this->getRouter()->getRouteDefaults($routeUrl), $this->getRouter()->getRouteDefaults($routeGroupUrl)));
             $routeParameters = array_key_removes($routeParameters, ...$keys);
         }
 
@@ -152,5 +160,45 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         catch(Exception $e) { if ($routeDefaultName == $routeName) throw $e; }
 
         return $this->resolveUrl($routeDefaultName, $routeParameters, $referenceType);
+    }
+
+    public function sanitize(string $url): string {
+
+        $url = parse_url2();
+
+        $allowedSubdomain = false;
+        $permittedSubdomains = $this->getParameterBag()->get("base.host_restriction.permitted_subdomains") ?? [];
+        if(!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain())
+            $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
+
+        foreach($permittedSubdomains as $permittedSubdomain)
+            $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null);
+
+        // Special case for login form.. to be redirected to rescue authenticator if no access right
+        $routeName = $this->getRouter()->getRouteName();
+        if(!LoginFormAuthenticator::isSecurityRoute($routeName) && !RescueFormAuthenticator::isSecurityRoute($routeName))
+        {
+            // Special case for WWW subdomain
+            if(!array_key_exists("subdomain", $url) && !array_key_exists("machine", $url) && !$allowedSubdomain) {
+                $url["subdomain"] = "www";
+            } else if( array_key_exists("subdomain", $url) && !$allowedSubdomain) {
+
+                if($url["subdomain"] === "www") $url = array_key_removes($url, "subdomain");
+                else $url["subdomain"] = "www";
+            }
+
+            if(array_key_exists("machine",   $url) && !$this->getRouter()->keepMachine()  )
+                $url = array_key_removes($url, "machine");
+
+            if(array_key_exists("subdomain", $url) && !$this->getRouter()->keepSubdomain())
+                if(array_key_exists("machine",   $url) || !$this->getRouter()->keepMachine())
+                    $url = array_key_removes($url, "subdomain");
+        }
+
+        return compose_url(
+            $url["scheme"] ?? null, $url["user"] ?? null, $url["password"] ?? null,
+            $url["machine"] ?? null, $url["subdomain"] ?? null, $url["domain"] ?? null, $url["port"] ?? null,
+            $url["path"] ?? null,
+        );
     }
 }

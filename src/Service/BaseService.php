@@ -386,7 +386,6 @@ class BaseService implements RuntimeExtensionInterface
     public function getRequest(): ?Request { return $this->getRouter()->getRequest(); }
     public function getCurrentRequest(): ?Request { return $this->getRequest(); }
 
-    public function hasRoute(string $routeName): bool { return $this->getRouter()->hasRoute($routeName); }
     public function getRoute(?string $url): ?string { return $this->getRouter()->getRoute($url); }
     public function getCurrentRoute(): ?string { return $this->getRouter()->getRoute(); }
     public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }

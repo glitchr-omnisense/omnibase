@@ -5,7 +5,6 @@ namespace Base\Subscriber;
 use Base\Database\Annotation\Vault;
 use Base\Entity\User;
 use Base\Entity\User\Notification;
-use Base\Security\LoginFormAuthenticator;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
 
@@ -176,7 +175,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($user === null) return true;
 
         $session = $this->requestStack->getSession();
-        if (!$session->get("_user_checksum")) return false;
+        if (!$session->get("_integrity_checksum")) return false;
 
         $checksum = $this->getDoctrineChecksum();
         return $checksum == $session->get("_integrity_doctrine");
@@ -188,8 +187,8 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         $marshaller = $this->vault->getMarshaller();
         $session = $this->requestStack->getSession();
-        if (!$session->get("_user_checksum")) return false;
+        if (!$session->get("_integrity_secret")) return false;
 
-        return $this->secret == $this->vault->reveal($marshaller, $session->get("_integrity_doctrine"));
+        return $this->secret == $this->vault->reveal($marshaller, $session->get("_integrity_secret"));
     }
 }

@@ -4,14 +4,15 @@ namespace Base\Routing;
 
 use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Routing\Matcher\AdvancedUrlMatcher;
-use Base\Security\LoginFormAuthenticator;
-use Base\Security\RescueFormAuthenticator;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBag;
+
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
@@ -36,6 +37,12 @@ class AdvancedRouter implements AdvancedRouterInterface
         $this->useCustomRouter = $parameterBag->get("base.router.use_custom_engine");
         $this->keepMachine     = $parameterBag->get("base.router.shorten.keep_machine");
         $this->keepSubdomain   = $parameterBag->get("base.router.shorten.keep_subdomain");
+    }
+
+    public function warmUp(string $cacheDir): array
+    {
+        if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
+        return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : [];
     }
 
     public function isBackOffice(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
@@ -80,53 +87,90 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function keepMachine(): bool { return $this->keepMachine; }
     public function keepSubdomain(): bool { return $this->keepSubdomain; }
 
-    public function getRouteCollection(): RouteCollection { return $this->router->getRouteCollection(); }
     public function getContext(): RequestContext { return $this->router->getContext(); }
     public function setContext(RequestContext $context) { $this->router->setContext($context); }
 
+    public function getGenerator(): UrlGeneratorInterface { return  $this->router->getGenerator(); }
     public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string { return $this->router->generate($name, $parameters, $referenceType); }
+    public function sanitize(string $url): string
+    {
+        if($url === null) $url = get_url();
 
+        $generator = $this->router->getGenerator();
+        if($generator instanceof AdvancedUrlGenerator)
+            return $generator->sanitize($url);
+
+        return $url;
+    }
+
+    public function getMatcher(): UrlMatcherInterface { return  $this->router->getMatcher(); }
     public function match(string $pathinfo)       : array { return $this->router->match($pathinfo); }
     public function matchRequest(Request $request): array { return $this->router->matchRequest($request); }
 
-    public function warmUp(string $cacheDir): array
-    {
-        if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
-        return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : $this->getRouteCollection();
-    }
+    public function getRouteCollection(): RouteCollection { return $this->router->getRouteCollection(); }
 
     public function getRequestUri(): ?string { return $this->getRequest() ? $this->getRequest()->getRequestUri() : $_SERVER["REQUEST_URI"] ?? null; }
     public function getRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
-    public function getRoute(?string $routeUrl = null, ): ?Route
+
+    protected $routeList = [];
+    public function getRoute(?string $routeNameOrUrl = null): ?Route
     {
-        if ($routeUrl === null) $routeUrl = $this->getRequestUri();
+        if ($routeNameOrUrl === null) $routeNameOrUrl = $this->getRequestUri();
 
-        $routeMatch = $this->getRouteMatch($routeUrl);
-        if(!$routeMatch) return null;
+        $routeName = $routeNameOrUrl;
+        if (filter_var($routeNameOrUrl, FILTER_VALIDATE_URL))
+            $routeName = $this->getRouteName($routeNameOrUrl);
 
-        $routeName = $routeMatch["_route"];
-        if(array_key_exists("_group", $routeMatch))
-            $routeName .= ".".$routeMatch["_group"];
+        if(array_key_exists($routeName, $this->routeList))
+            return $this->routeList[$routeName];
 
-        $routeName = $routeMatch["_route"];
-        if(array_key_exists("_locale", $routeMatch))
-            $routeName .= ".".$routeMatch["_locale"];
+        $compiledRoutes = [];
+        $generator = $this->router->getGenerator();
+        $matcher   = $this->router->getMatcher();
 
-        return $this->router->getRouteCollection()->get($routeName);
+        if(!$generator instanceof AdvancedUrlGenerator || !$matcher instanceof AdvancedUrlMatcher)
+            return $this->router->getRouteCollection()->get($routeName) ?? null;
+
+        $compiledRoutes = $generator->getCompiledRoutes();
+
+        if(array_key_exists($routeName, $compiledRoutes)) {
+
+            $args = array_transforms(fn($k, $v): array =>
+                [$k, in_array($k, [3,4]) ? $matcher->path($v) : $v],
+                $compiledRoutes[$routeName]
+            );
+
+            $this->routeList[$routeName] = new Route($args[3], array_intersect_key($args[1], array_flip($args[0])), $args[2], [], $args[4], $args[5], $args[6]);
+            return $this->routeList[$routeName];
+        }
+
+        return null;
     }
 
-    public function hasRoute(string $routeName): bool { return $this->getRouteName($routeName) !== null; }
+    public function getRouteDefaults(?string $routeNameOrUrl = null): array
+    {
+        $route = $this->getRoute($routeNameOrUrl);
+        return $route ? $route->getDefaults() : [];
+    }
+
     public function getRouteName(?string $routeUrl = null): ?string
     {
         if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());
+
         $routeMatch = $this->getRouteMatch($routeUrl);
         return $routeMatch ? $routeMatch["_route"] : null;
     }
 
-    public function getRouteParameters(?string $routeUrl = null): array
+    public function getRouteGroups(?string $routeName): array
     {
-        $route = $this->getRoute($routeUrl);
-        return $route ? $route->getDefaults() : [];
+        $generator = $this->router->getGenerator();
+        if ($generator instanceof AdvancedUrlGenerator)
+            $routeNames = array_keys($generator->getCompiledRoutes());
+
+        // The next line should never be triggered as the generator is overloaded in __constructor
+        if($routeNames === null) $routeNames = array_keys($this->getRouteCollection()->all());
+
+        return $this->getMatcher()->groups($routeName);
     }
 
     public function getRouteMatch(?string $routeUrl = null): ?array
@@ -135,69 +179,5 @@ class AdvancedRouter implements AdvancedRouterInterface
 
         try { return $this->match($routeUrl); }
         catch (ResourceNotFoundException $e) { return null; }
-    }
-
-    public function getRouteGroups(?string $routeName): array
-    {
-        $routeName = explode(".", $routeName ?? "")[0];
-        return array_unique(array_keys(array_transforms(
-
-            function($k, $route) use ($routeName) :?array {
-
-                if($k == $routeName) return ["", $route];
-                if(str_starts_with($k.".", $routeName)) {
-
-                    $kSplit = explode(".", $k);
-                    $isLocalized = array_key_exists("_locale", $route->getDefaults());
-                    if($isLocalized && count($kSplit) < 3) $k = "";
-                    else $k = explode(".", $k)[1] ?? "";
-
-                    return [$k, $route];
-                }
-
-                return null;
-
-            }, $this->router->getRouteCollection()->all()
-        )));
-    }
-
-    public function sanitize(string $url = null) {
-
-        if($url === null) $url = parse_url2(get_url());
-
-        $allowedSubdomain = false;
-        $permittedSubdomains = $this->parameterBag->get("base.host_restriction.permitted_subdomains") ?? [];
-        if(!$this->keepMachine() && !$this->keepSubdomain())
-            $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
-
-        foreach($permittedSubdomains as $permittedSubdomain)
-            $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null);
-
-        // Special case for login form.. to be redirected to rescue authenticator if no access right
-        $routeName = $this->getRouteName();
-        if(!LoginFormAuthenticator::isSecurityRoute($routeName) && !RescueFormAuthenticator::isSecurityRoute($routeName))
-        {
-            // Special case for WWW subdomain
-            if(!array_key_exists("subdomain", $url) && !array_key_exists("machine", $url) && !$allowedSubdomain) {
-                $url["subdomain"] = "www";
-            } else if( array_key_exists("subdomain", $url) && !$allowedSubdomain) {
-
-                if($url["subdomain"] === "www") $url = array_key_removes($url, "subdomain");
-                else $url["subdomain"] = "www";
-            }
-
-            if(array_key_exists("machine",   $url) && !$this->keepMachine()  )
-                $url = array_key_removes($url, "machine");
-
-            if(array_key_exists("subdomain", $url) && !$this->keepSubdomain())
-                if(array_key_exists("machine",   $url) || !$this->keepMachine())
-                    $url = array_key_removes($url, "subdomain");
-        }
-
-        return compose_url(
-            $url["scheme"] ?? null, $url["user"] ?? null, $url["password"] ?? null,
-            $url["machine"] ?? null, $url["subdomain"] ?? null, $url["domain"] ?? null, $url["port"] ?? null,
-            $url["path"] ?? null,
-        );
     }
 }
