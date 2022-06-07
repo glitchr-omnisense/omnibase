@@ -406,7 +406,7 @@
 {% set download = form.vars.download ?? [] %}
 {% set clippable = form.vars.clippable ?? [] %}
 
-{% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-fa-search-plus" : "fas fa-2x fa-fw fa-image" %}
+{% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-search-plus" : "fas fa-2x fa-fw fa-image" %}
 {% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify)~"</a>" %}
 {% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"}))~"</a>" %}
 {% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
