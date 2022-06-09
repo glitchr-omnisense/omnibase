@@ -36,6 +36,10 @@ impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Exit impersonation</a>"
 
+access_restricted:
+    public_restriction: "This website is currently <b>under restricted access</b> for unauthentified users."
+    user_restriction: "This website is currently <b>under restricted access</b> for basic users."
+    admin_restriction: "This website is currently <b>under restricted access</b> for administrators."
 maintenance:
     banner: This website is currently <b>under maintenance</b>. (Only super administrators can see this page for the moment!)
 

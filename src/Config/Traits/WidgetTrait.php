@@ -125,7 +125,7 @@ trait WidgetTrait
 
         if(!is_array($itemOrArray)) $itemOrArray = [$itemOrArray];
         foreach ($itemOrArray as $item) {
-            if(!($item instanceof MenuItemInterface))
+            if($item && !($item instanceof MenuItemInterface))
                 throw new \Exception("Invalid section widget item provided: ". $item);
         }
 

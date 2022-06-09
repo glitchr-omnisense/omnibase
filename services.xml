@@ -795,6 +795,10 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
         </service>
 
+        <service id="Base\Field\Configurator\QuillConfigurator">
+            <tag name="ea.field_configurator" />
+        </service>
+
         <service id="Base\Field\Configurator\StockConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />

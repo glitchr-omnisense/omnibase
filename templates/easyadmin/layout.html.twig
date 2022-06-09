@@ -422,6 +422,8 @@
                                                 <hr>
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{width}};">
 
+                                            {% elseif content_widget.getAsDto().getType() == "separator" %}
+                                             <hr>
                                             {% elseif content_widget.getAsDto().getType() == "url" %}
                                                 <li>
                                                     <a href="{{ content_widget.getAsDto().getLinkUrl() }}">

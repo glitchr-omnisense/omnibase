@@ -220,20 +220,41 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onAccessRequest(RequestEvent $event)
     {
+        if(!$event->isMainRequest()) return;
+
+        $token = $this->tokenStorage->getToken();
+        $user = $token ? $token->getUser() : null;
+
         //
         // Redirect if basic access not granted
-        $accessRestricted  = !$this->authorizationChecker->isGranted("PUBLIC_ACCESS");
-        $accessRestricted |= !$this->authorizationChecker->isGranted("USER_ACCESS");
-        $accessRestricted |= !$this->authorizationChecker->isGranted("ADMIN_ACCESS");
-        $accessRestricted |= !$this->authorizationChecker->isGranted("EDITOR_ACCESS");
-        $accessRestricted |= !$this->authorizationChecker->isGranted("MAINTENANCE_ACCESS");
+        $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
+        $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
+        $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
 
+        $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
+
+            //
+            // Check for user special grants (based on roles)
+            $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
+            if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
+            if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
+
+            if($user != null && $specialGrant) {
+
+                     if(!$adminAccess) $msg = "admin_restriction";
+                else if(!$userAccess)  $msg = "user_restriction";
+                else $msg = "public_restriction";
+
+                $notification = new Notification("access_restricted.".$msg);
+                $notification->send("warning");
+                return;
+            }
 
             // In case of restriction: profiler is disabled
             if($this->profiler) $this->profiler->disable();
 
-             // Rescue authenticator must always be public
+                // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
             if($isSecurityRoute) return;
 
@@ -250,7 +271,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->getCurrentRouteName($event);
-            $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirection");
+            $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirect");
             if($currentRouteName != $accessDeniedRedirection) {
 
                 $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;

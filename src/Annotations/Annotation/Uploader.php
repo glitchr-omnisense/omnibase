@@ -270,7 +270,7 @@ class Uploader extends AbstractAnnotation
 
             if (filter_var($entry, FILTER_VALIDATE_URL)) {
 
-                if(!$this->fetch) throw new UploadException("URL provided, but Uploader is not configured for that.");
+                if(!$this->fetch) return true;
                 $newList[$index] = new File(fetch_url($entry));
             }
         }

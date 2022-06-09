@@ -170,11 +170,6 @@ class BaseService implements RuntimeExtensionInterface
         $this->adminContextProvider = new AdminContextProvider($this->requestStack);
     }
 
-
-
-
-
-
     /*
      * Stylesheet and javascripts blocks
      */
@@ -393,7 +388,7 @@ class BaseService implements RuntimeExtensionInterface
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
     {
-        if(filter_var($urlOrRoute, FILTER_VALIDATE_URL)) return new RedirectResponse($urlOrRoute);
+        if(filter_var($urlOrRoute, FILTER_VALIDATE_URL) || str_contains($urlOrRoute, "/")) return new RedirectResponse($urlOrRoute);
         return new RedirectResponse($this->getRouter()->generate($urlOrRoute, $routeParameters), $state, $headers);
     }
 

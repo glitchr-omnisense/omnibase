@@ -6,12 +6,14 @@ use Base\Field\Type\QuillType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Form\Type\TextEditorType;
-use \Symfony\Component\Validator\Constraints\Length;
 
 final class QuillField implements FieldInterface
 {
     use FieldTrait;
+
+    public const OPTION_SHORTEN_LENGTH    = 'shortenStrLength';
+    public const OPTION_SHORTEN_POSITION  = 'shortenStrPosition';
+    public const OPTION_SHORTEN_SEPARATOR = 'shortenStrSeparator';
 
     public static function new(string $propertyName, ?string $label = null): self
     {
@@ -19,6 +21,16 @@ final class QuillField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label)
             ->setTemplateName('crud/field/textarea')
+            ->shorten()
             ->setFormType(QuillType::class);
+    }
+
+    public function shorten(int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): self
+    {
+        $this->setCustomOption(self::OPTION_SHORTEN_LENGTH, $length);
+        $this->setCustomOption(self::OPTION_SHORTEN_POSITION, $position);
+        $this->setCustomOption(self::OPTION_SHORTEN_SEPARATOR, $separator);
+
+        return $this;
     }
 }

@@ -37,21 +37,25 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if(($route = $this->getRouter()->getRoute($routeName))) {
 
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
-            if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
+            if(str_contains($route->getHost().$route->getPath(), "{") && str_contains($route->getHost().$route->getPath(), "}")) {
 
-                $parse = parse_url2(get_url());
-                $parameterNames = array_flip($matches[1]);
-                $routeParameters = array_merge(
-                    array_intersect_key($parse, $parameterNames),
-                    $route->getDefaults(),
-                    $routeParameters,
-                );
+                // dump($route->getHost().$route->getPath());
+                if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
-                $search  = array_map(fn($k) => "{".$k."}", array_keys($parse));
-                $replace = array_values($parse);
-                foreach($routeParameters as $key => &$routeParameter) {
-                    $routeParameter = str_replace($search, $replace, $routeParameter);
-                    if($key == "host") $routeParameter = str_lstrip($routeParameter, "www.");
+                    $parse = parse_url2(get_url());
+                    $parameterNames = array_flip($matches[1]);
+                    $routeParameters = array_merge(
+                        array_intersect_key($parse, $parameterNames),
+                        $route->getDefaults(),
+                        $routeParameters,
+                    );
+
+                    $search  = array_map(fn($k) => "{".$k."}", array_keys($parse));
+                    $replace = array_values($parse);
+                    foreach($routeParameters as $key => &$routeParameter) {
+                        $routeParameter = str_replace($search, $replace, $routeParameter);
+                        if($key == "host") $routeParameter = str_lstrip($routeParameter, "www.");
+                    }
                 }
             }
         }
@@ -112,6 +116,8 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             try { return parent::generate($routeName, $routeParameters, $referenceType); }
             catch (Exception $e ) { throw $e; }
         }
+
+        // dump("-----------------------");
 
         //
         // Update context

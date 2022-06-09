@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Base\Config\Menu\CrudWidgetItem;
 use Base\Config\Menu\EntityWidgetItem;
 use Base\Config\Menu\SectionWidgetItem;
+use Base\Config\Menu\SeparatorWidgetItem;
 use Base\Controller\Backoffice\AbstractCrudController;
 
 use Base\Model\IconizeInterface;
@@ -32,6 +33,11 @@ class WidgetItem
     public static function setAdminContextProvider(AdminContextProvider $adminContextProvider)
     {
         self::$adminContextProvider = $adminContextProvider;
+    }
+
+    public static function separator()
+    {
+        return new SeparatorWidgetItem();
     }
 
     public static function linkToCrud(string $entityFqcnOrCrudController, ?string $label = null, ?string $icon = null)
