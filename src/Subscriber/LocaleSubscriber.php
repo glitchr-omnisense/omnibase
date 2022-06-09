@@ -3,6 +3,7 @@
 namespace Base\Subscriber;
 
 use App\Entity\User;
+use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -39,7 +40,7 @@ class LocaleSubscriber implements EventSubscriberInterface
                ?? User::getCookie("locale")
                ?? $this->localeProvider->getLocale();
 
-        $this->localeProvider->setLocale($locale, $event->getRequest());
+        $this->localeProvider->setLocale($this->localeProvider->getLocale($locale), $event->getRequest());
         $this->localeProvider->markAsLate();
     }
 }

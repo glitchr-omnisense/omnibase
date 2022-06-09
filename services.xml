@@ -35,6 +35,7 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
+            <argument type="service" id="referrer" />
         </service>
 
         <service id="Base\Controller\UX\FileController">

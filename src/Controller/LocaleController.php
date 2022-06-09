@@ -18,10 +18,11 @@ class LocaleController extends AbstractController
      */
     protected $localeProvider;
 
-    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router)
+    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, Referrer $referrer)
     {
         $this->localeProvider = $localeProvider;
         $this->router         = $router;
+        $this->referrer       = $referrer;
     }
 
     /**
@@ -29,6 +30,8 @@ class LocaleController extends AbstractController
      */
     public function ChangeTo(Request $request, Referrer $referrer, ?string $locale = null)
     {
+        $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
+
         $locale = $locale ? $this->localeProvider->getLocale($locale) : null;
         if($locale === null)
             $request->getSession()->remove('_locale');
@@ -39,8 +42,8 @@ class LocaleController extends AbstractController
         $referrerName = $this->router->getRouteName(strval($referrer));
         if($referrerName !== "locale_changeto") {
 
-            try { return $this->router->generate($referrerName.$lang); }
-            catch (RouteNotFoundException $e) { return $this->router->generate($referrerName); }
+            try { return $this->redirect($this->router->generate($referrerName.$lang)); }
+            catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName)); }
         }
 
         $baseDir = $request->getBasePath();
