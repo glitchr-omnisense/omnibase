@@ -2,31 +2,31 @@
 
 namespace Base\Form\Extension;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\BaseService;
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\FormBuilderInterface;
-
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 use Symfony\Component\Form\AbstractTypeExtension;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-
-
 class FormTypeExtension extends AbstractTypeExtension
 {
-    protected $defaultEnabled;
-    public function __construct(BaseService $baseService)
+    /**
+     * @var BaseService
+     */
+    protected $baseService;
+
+    /**
+     * @var ClassMetadataManipulator
+     */
+    protected $classMetadataManipulator;
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->baseService = $baseService;
+        $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
     /**
@@ -47,7 +47,6 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-
         $this->browseView( $view, $form, $options);
     }
 
@@ -55,6 +54,9 @@ class FormTypeExtension extends AbstractTypeExtension
     {
         if($options["form2"]) $this->applyForm2($view);
         if($options["easyadmin"]) $this->applyEA($view, $form);
+
+        if($this->baseService->isDebug())
+            $this->markAsDbColumns($view, $form, $options);
 
         foreach($view->children as $field => $childView) {
 
@@ -101,6 +103,28 @@ class FormTypeExtension extends AbstractTypeExtension
                 $view->vars["row_attr"]["class"] = "";
 
             $view->vars["row_attr"]["class"] .= " ".$columns;
+        }
+    }
+
+    public function markAsDbColumns(FormView $view, FormInterface $form, array $options) {
+
+        $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
+        if($this->classMetadataManipulator->isEntity($dataClass)) {
+
+            $view->vars["is_dbcolumn"] = true;
+
+            $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
+            foreach($classMetadata->getFieldNames() as $fieldName) {
+
+                $childView = $view->children[$fieldName] ?? null;
+                if($childView) $childView->vars["is_dbcolumn"] = true;
+            }
+
+            foreach($classMetadata->getAssociationNames() as $fieldName) {
+
+                $childView = $view->children[$fieldName] ?? null;
+                if($childView) $childView->vars["is_dbcolumn"] = true;
+            }
         }
     }
 }

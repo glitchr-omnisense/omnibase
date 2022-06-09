@@ -97,7 +97,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
             $response = new Response();
             $response->headers->clearCookie('REMEMBERME', "/");
-            if(($host = parse_url(get_url(false,false))["host"] ?? null))
+            if(($host = parse_url(format_url(get_url(), FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN))["host"] ?? null))
                 $response->headers->clearCookie('REMEMBERME', "/", ".".$host);
 
             $response->sendHeaders();

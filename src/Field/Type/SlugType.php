@@ -2,6 +2,7 @@
 
 namespace Base\Field\Type;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\AutovalidateInterface;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\Collection;
@@ -12,15 +13,13 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-/**
- * @author Jonathan Scheiber <contact@jmsche.fr>
- */
 final class SlugType extends AbstractType implements AutovalidateInterface
 {
 
-    public function __construct(BaseService $baseService)
+    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->baseService = $baseService;
+        $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
     public function getParent() : ?string { return TextType::class; }
@@ -29,14 +28,14 @@ final class SlugType extends AbstractType implements AutovalidateInterface
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver
-            ->setRequired(['target'])
-            ->setAllowedTypes('target', ['string', 'null'])
             ->setDefaults([
                 "separator" => "-",
                 "keep"   => null,
                 "lower"  => true,
                 "lock"   => null,
-                "strict" => null
+                "strict" => null,
+                "target" => null,
+                "required" => false
             ]);
 
             $resolver->setNormalizer('strict', function (Options $options, $value) {
@@ -57,8 +56,17 @@ final class SlugType extends AbstractType implements AutovalidateInterface
         $view->vars["strict"] = json_encode($options["strict"]);
         $view->vars["lock"]   = json_encode($options["lock"]);
 
+        // Make sure field is not rquired when slugis nullable
+        $dataClass = $form->getParent()->getConfig()->getDataClass();
+        if($dataClass && $this->classMetadataManipulator->hasField($dataClass, $form->getName())) {
+
+            $fieldMapping = $this->classMetadataManipulator->getFieldMapping($dataClass, $form->getName());
+            $isNullable   = $fieldMapping["nullable"] ?? false;
+            $view->vars["required"] = $options["required"] || !$isNullable;
+        }
+
         // Check if path is reacheable..
-        if(str_starts_with($options["target"], ".")) {
+        if($options["target"] !== null && str_starts_with($options["target"], ".")) {
 
             $view->ancestor = $view->parent;
 

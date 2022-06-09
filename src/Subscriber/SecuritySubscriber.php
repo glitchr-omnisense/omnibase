@@ -195,8 +195,8 @@ class SecuritySubscriber implements EventSubscriberInterface
         if($this->isException($currentRoute)) return;
 
         $session = $event->getRequest()->getSession();
-        $session->remove('_security.main.target_path');
-        $session->remove('_security.account.target_path');
+        $session->remove('_security.main.target_path');    // Internal definition by firewall
+        $session->remove('_security.account.target_path'); // Internal definition by firewall
 
         $currentRouteIsLoginForm = in_array($currentRoute, [
             LoginFormAuthenticator::LOGOUT_ROUTE,
@@ -392,7 +392,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
                 if($isAuthenticated) {
 
-                    $active = daydiff($user->isActive()) == -1 ? "first" : "back";
+                    $active = daydiff($user->getActiveAt()) < 0 ? "first" : "back";
 
                          if(time_is_between($user->getActiveAt(), "05:00:00", "10:00:00")) $period = "morning";
                     else if(time_is_between($user->getActiveAt(), "12:00:00", "15:00:00")) $period = "afternoon";

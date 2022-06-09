@@ -40,7 +40,7 @@ class RouterSubscriber implements EventSubscriberInterface
         // Redirect IP if restriction enabled
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_IP", $route)) {
 
-            $event->setResponse(new RedirectResponse(get_url(true, true, null, $this->settingBag->host())));
+            $event->setResponse(new RedirectResponse(get_url(null, $this->settingBag->host())));
             return $event->stopPropagation();
         }
 
@@ -48,7 +48,15 @@ class RouterSubscriber implements EventSubscriberInterface
         // If no host specified in Route, then check the list of permitted subdomain
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_HOST", $route)) {
 
-            $event->setResponse(new RedirectResponse($this->router->sanitize()));
+            $event->setResponse(new RedirectResponse($this->router->format(get_url())));
+            return $event->stopPropagation();
+        }
+
+        //
+        // If no host specified in Route, then check the list of permitted subdomain
+        if($route && !$this->authorizationChecker->isGranted("VALIDATE_PATH", $route)) {
+
+            $event->setResponse(new RedirectResponse($this->router->format(get_url())));
             return $event->stopPropagation();
         }
     }

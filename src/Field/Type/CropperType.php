@@ -78,7 +78,6 @@ class CropperType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
             $form = $event->getForm();
-
             $fields = array_reverse(array_merge(array_reverse([
 
                 // Displayed variables

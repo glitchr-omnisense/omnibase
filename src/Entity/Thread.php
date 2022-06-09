@@ -52,7 +52,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-box"]; }
 
-    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? get_class($this); }
+    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->entity(self::class); }
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags      = new ArrayCollection();

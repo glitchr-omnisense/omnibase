@@ -20,11 +20,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
     protected $doctrine;
     protected $em;
 
-    public function __construct(ManagerRegistry $doctrine, TranslatorInterface $translator)
+    public function __construct(TranslatorInterface $translator, ManagerRegistry $doctrine)
     {
         $this->doctrine = $doctrine;
-        $this->translator = $translator;
-        parent::__construct();
+        parent::__construct($translator);
     }
 
     public function getDoctrine()

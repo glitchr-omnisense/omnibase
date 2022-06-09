@@ -480,7 +480,7 @@ class BaseService implements RuntimeExtensionInterface
 
         $this->tokenStorage->setToken(null);
         setcookie("REMEMBERME", '', time()-1);
-        setcookie("REMEMBERME", '', time()-1, "/", ".".get_url(false,false));
+        setcookie("REMEMBERME", '', time()-1, "/", ".".format_url(get_url(), FORMAT_URL_NOSUBDOMAIN | FORMAT_URL_NOMACHINE));
     }
 
     public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null, string $csrfFieldId = "_csrf_token"): bool

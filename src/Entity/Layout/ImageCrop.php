@@ -20,10 +20,13 @@ class ImageCrop implements LinkableInterface
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $routeParameters = array_merge($routeParameters, [
+        $hashId = $this->getImageService()->obfuscate($this->getImage()->getSource());
+        if($hashId === null) return null;
+
+        $routeParameters = array_filter(array_merge($routeParameters, [
             "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(),
-            "hashid"     => $this->getImageService()->obfuscate($this->getImage()->getSource())
-        ]);
+            "hashid"     => $hashId
+        ]));
 
         return $this->getRouter()->generate("ux_imageCrop", $routeParameters, $referenceType);
     }

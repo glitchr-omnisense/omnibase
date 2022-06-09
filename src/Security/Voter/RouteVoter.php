@@ -16,6 +16,7 @@ class RouteVoter extends Voter
 {
     const    VALIDATE_IP = "VALIDATE_IP";
     const  VALIDATE_HOST = "VALIDATE_HOST";
+    const  VALIDATE_PATH = "VALIDATE_PATH";
 
     public function __construct(AdvancedRouterInterface $router, ParameterBagInterface $parameterBag)
     {
@@ -25,19 +26,23 @@ class RouteVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return class_implements_interface($this->router, AdvancedRouterInterface::class) && $subject instanceof Route && in_array($attribute, [self::VALIDATE_IP, self::VALIDATE_HOST]);
+        return class_implements_interface($this->router, AdvancedRouterInterface::class) && $subject instanceof Route && in_array($attribute, [self::VALIDATE_IP, self::VALIDATE_PATH, self::VALIDATE_HOST]);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $route, TokenInterface $token): bool
     {
-        $url = parse_url2();
+        $url = get_url();
 
         //
         // Select proper ballot
         switch($attribute) {
 
             case self::VALIDATE_IP:
-               return !array_key_exists("ip", $url) || $this->parameterBag->get("base.host_restriction.ip_access");
+                $parse = parse_url2($url);
+                return !array_key_exists("ip", $parse) || $this->parameterBag->get("base.host_restriction.ip_access");
+
+            case self::VALIDATE_PATH:
+                return $url == sanitize_url($url);
 
             case self::VALIDATE_HOST:
 
@@ -48,8 +53,9 @@ class RouteVoter extends Voter
                 if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
                     $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
 
+                $parse = parse_url2($url);
                 foreach($permittedSubdomains as $permittedSubdomain)
-                    $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null);
+                    $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $parse["subdomain"] ?? null);
 
                 $routeName = $this->router->getRouteName();
                 if(LoginFormAuthenticator::isSecurityRoute($routeName))
@@ -59,9 +65,9 @@ class RouteVoter extends Voter
 
                 if(!$allowedSubdomain) return false;
 
-                if(array_key_exists("machine",   $url) && !$this->router->keepMachine()  ) return false;
-                if(array_key_exists("subdomain", $url) && !$this->router->keepSubdomain())
-                    return !array_key_exists("machine",   $url) && $this->router->keepMachine();
+                if(array_key_exists("machine",   $parse) && !$this->router->keepMachine()  ) return false;
+                if(array_key_exists("subdomain", $parse) && !$this->router->keepSubdomain())
+                    return !array_key_exists("machine",   $parse) && $this->router->keepMachine();
 
                 return $allowedSubdomain;
 

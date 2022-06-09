@@ -21,8 +21,11 @@
 
 {# Overloaded form template.. #}
 {%- block form2_label  -%}
-    {# {{dump(form.vars.is_column)}} #}
-    {{- form_label(form, null, {'label_html': true})  -}}
+    {% set label = form_label(form, null, {'label_html': true}) %}
+    {% if label is not empty %}
+        {{- app.debug and form.vars.is_dbcolumn is defined ? "fas fa-fw fa-database"|iconify : "" -}}&nbsp;
+        {{- label|raw -}}
+    {% endif %}
 {%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
 {%- block form2_errors -%}
@@ -32,7 +35,7 @@
 {% endif %}
 {%- endblock -%}
 
-{%- block form2_help   -%}
+{%- block form2_help -%}
     {% if help is not empty %}
     <span class="data-help">
         <i class="far fa-question-circle" data-toggle="tooltip" data-bs-placement="right" title="{{help}}"></i>
@@ -197,33 +200,33 @@
 {%- block slug_widget -%}
 
 {# Search for target inside form based on parent including translation #}
-{% set form = form.ancestor %}
-
+{% set targetForm = form.ancestor %}
 {% for child in target %}
 
-    {% set form = form[child] %}
+    {% set targetForm = targetForm[child] %}
 
     {% if child == "translations" %}
-        {% if form.vars.default_locale is defined and form.vars.default_locale in form|keys %}
-            {% set form = form[form.vars.default_locale] %}
+        {% if targetForm.vars.default_locale is defined and targetForm.vars.default_locale in targetForm|keys %}
+            {% set targetForm = targetForm[targetForm.vars.default_locale] %}
         {% else %}
-            {% set form = form|first %}
+            {% set targetForm = targetForm|first %}
         {% endif %}
     {% endif %}
 {% endfor %}
 
 {# Define slug parameters #}
 {% set attr = attr|merge({
-    'data-slug-field': target is not null,
+    'data-slug-field': form.vars.id,
     'data-slug-keep': keep,
     'data-slug-strict': strict,
     'data-slug-lower': lower,
     'data-slug-lock': lock,
-    'data-target': form.vars.id
+    'data-slug-target': targetForm.vars.id,
+    'required': form.vars.required
 }) %}
 
 <div class="input-group">
-    {{ block('form_widget') }}
+    {{ form_widget(form, {attr:attr}) }}
     <div class="input-group-append">
         <button class="input-group-text" type="button">
             <i class="fas {{ target is not empty ? "fa-lock" : "fa-unlock" }} fa-fw"></i>
@@ -271,9 +274,7 @@
         'data-toggle-url'                   : form.vars.toogle_url
     }) %}
 
-    <div class="form-checkbox">
-    {{ form_widget(form, { attr: attr }) }}
-    </div>
+    <div class="form-checkbox">{{ form_widget(form, { attr: attr }) }}</div>
 
     {% if form.vars.confirmation_check or form.vars.confirmation_uncheck %}
     <div class="modal fade" id="{{ form.vars.id }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ form.vars.id }}-modal">
@@ -315,10 +316,6 @@
     {% endif %}
 </div>
 {%- endblock -%}
-
-{# {%- block imageupload_label -%}
-    {{ form_label(form, null, {'required': required})}}
-{% endblock imageupload_label %} #}
 
 {%- block imageupload_widget -%}
 {% set attr = attr|merge({
@@ -454,14 +451,24 @@
 
         {{ form_widget(form.file, { attr: form.file.vars.attr}) }}
 
-        <div class="input-group">
+        {% if (allow_reupload or value is null) %}
+        <div class="input-group field-raw">
+            {% if allow_url %} <div class="input-group-text">{{ "fas fa-paperclip"|iconify }}</div>{% endif %}
             {{ form_widget(form.raw, { attr: form.raw.vars.attr|merge({'class': (files is empty ? 'last' : "") ~ (form.raw.vars.attr.class is defined ? ' ' ~ form.raw.vars.attr.class : ''), accept: mime_types|join(',') }) }) }}
             {% if allow_delete and not form.vars.disabled %}
             <div id="{{id}}_deleteBtn" class="input-group-text deleteBtn {% if files is empty %}hidden{% endif %}">
-                <span  style="cursor:pointer;">&#x2715;</span>
+                <span style="cursor:pointer;">&#x2715;</span>
             </div>
             {% endif %}
         </div>
+        {% endif %}
+
+        {% if (allow_url or value is null) %}
+        <div class="input-group field-url">
+            <div class="input-group-text">{{ "fas fa-link"|iconify }}</div>
+            {{ form_widget(form.url, { attr: form.url.vars.attr|merge({'placeholder': ("@fields.fileupload.download_placeholder"|trans)}) }) }}
+        </div>
+        {% endif %}
 
     {% endif %}
     </div>
@@ -961,8 +968,7 @@
 {%- block cropper_widget -%}
 
 {# Search for target inside form based on parent including translation #}
-{% set form0 = form %}
-{% set targetForm = form0.ancestor %}
+{% set targetForm = form.ancestor %}
 {% for child in target %}
 
     {% set targetForm = targetForm[child] %}
@@ -976,7 +982,7 @@
     {% endif %}
 {% endfor %}
 
-{% set quadrantForm = form0.ancestor %}
+{% set quadrantForm = form.ancestor %}
 {% for child in quadrant %}
 
     {% set quadrantForm = quadrantForm[child] %}
@@ -991,8 +997,8 @@
 {% endfor %}
 
 {% set attr = attr|merge({
-    'data-cropper': form0.vars.cropper,
-    'data-cropper-field': form0.vars.id
+    'data-cropper': form.vars.cropper,
+    'data-cropper-field': form.vars.id
 }) %}
 
 {% if form.vars.quadrant is not null %}
@@ -1007,27 +1013,33 @@
 <div class="form-group form-cropper">
     <div class="cropper">
         <img id="{{ id }}_image" class="hidden" src="{{targetForm.vars.value|imagine}}">
-        <div id="{{ id }}_loader" class="loader"><div class="loader-spinner"></div> {{ '@fields.cropper.loading.wait'|trans }}</div>
+        <div id="{{ id }}_loader" class="loader">
+            {% if targetForm.vars.value is not empty%}
+                <div class="loader-spinner"></div> {{ '@fields.cropper.loading.wait'|trans }}
+            {% else %}
+                {{ '@fields.cropper.no_image'|trans }}
+            {% endif %}
+            </div>
 
         <div class="hidden cropper-actions" id="{{ id }}_actions">
             <button class="btn btn-warning" type="button" data-cropper-reset="true">{{"fas fa-undo"|iconify}}</button>
-            {% for label,aspectRatio in form0.vars.aspectRatios %}
-                <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}" data-labelledby="{{form0.vars.id ~ "_label"}}" data-labelledby-value="{{ label|trans }}">{{ label|trans }}</button>
+            {% for label,aspectRatio in form.vars.aspectRatios %}
+                <button class="btn btn-primary" type="button" data-aspect-ratio="{{aspectRatio}}" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="{{ label|trans }}">{{ label|trans }}</button>
             {% endfor %}
 
-            {% if form0.vars.aspectRatios is defined and form0.vars.aspectRatios is not empty %}
-                <button class="btn btn-primary" type="button" data-aspect-ratio="NAN" data-labelledby="{{form0.vars.id ~ "_label"}}" data-labelledby-value="">{{ "@fields.cropper.aspect_ratio.free"|trans }}</button>
+            {% if form.vars.aspectRatios is defined and form.vars.aspectRatios is not empty %}
+                <button class="btn btn-primary" type="button" data-aspect-ratio="NAN" data-labelledby="{{form.vars.id ~ "_label"}}" data-labelledby-value="">{{ "@fields.cropper.aspect_ratio.free"|trans }}</button>
             {% endif %}
         </div>
     </div>
 
     {%- set attr = attr|merge({'class': 'form-cropper-fields' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {%- set attr = attr|merge({'disabled': 'disabled' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {{ form_widget(form0, {attr:attr}) }}
+    {{ form_widget(form, {attr:attr}) }}
 </div>
 
-{% set isNormalized = form0.is_normalized.vars.value ? true : false %}
-{% set isEmpty = not form0.x0.vars.value and not form0.y0.vars.value and not form0.width0.vars.value and not form0.height0.vars.value %}
+{% set isNormalized = form.is_normalized.vars.value ? true : false %}
+{% set isEmpty = not form.x0.vars.value and not form.y0.vars.value and not form.width0.vars.value and not form.height0.vars.value %}
 
 {% if not isNormalized and not isEmpty %}
 <hr>

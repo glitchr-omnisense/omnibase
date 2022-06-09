@@ -16,8 +16,9 @@ class FileField implements FieldInterface
 
     public const OPTION_RENDER_FORMAT  = "renderFormat";
 
-    public const OPTION_ALLOW_DOWNLOAD = "allowDownload";
     public const OPTION_SHOWFIRST = "showFirst";
+    public const OPTION_ALLOW_URL = "allow_url";
+    public const OPTION_ALLOW_REUPLOAD = "allow_reupload";
     public const OPTION_PREFERRED_DOWNLOAD_NAME = "preferredDownloadName";
 
     public static function new(string $propertyName, ?string $label = null): self
@@ -31,7 +32,7 @@ class FileField implements FieldInterface
             ->addCssClass('file-widget')
             ->setTemplatePath('@EasyAdmin/crud/field/file.html.twig')
             ->setTextAlign(TextAlign::CENTER)
-            ->setCustomOption(self::OPTION_ALLOW_DOWNLOAD, false)
+            ->setCustomOption(self::OPTION_ALLOW_URL, false)
             ->setCustomOption(self::OPTION_SHOWFIRST, false)
             ->setFormTypeOptionIfNotSet("data_class", null);
     }
@@ -42,9 +43,15 @@ class FileField implements FieldInterface
         return $this;
     }
 
-    public function allowDownload(bool $allowDownload = true): self
+    public function downloadable(bool $allowDownload = true): self
     {
-        $this->setCustomOption(self::OPTION_ALLOW_DOWNLOAD, $allowDownload);
+        $this->setFormTypeOption(self::OPTION_ALLOW_URL, $allowDownload);
+        return $this;
+    }
+
+    public function noReupload(bool $noReupload = true): self
+    {
+        $this->setFormTypeOption(self::OPTION_ALLOW_REUPLOAD, !$noReupload);
         return $this;
     }
 

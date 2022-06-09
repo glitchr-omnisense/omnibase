@@ -20,6 +20,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -116,13 +117,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
 
             $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
-
-            $form->add('file', HiddenType::class, ["required" => $options["required"]]);
-
-            if($options["title"] !== null)
-                $form->add("title", TextType::class, $options["title"]);
-            if($options["allow_url"])
-                $form->add("url", UrlType::class);
+            $form->add('file', HiddenType::class);
 
             $mimeTypes   = $options["mime_types"] ?? Uploader::getMimeTypes($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName()) ;
             $maxFilesize = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
@@ -131,10 +126,18 @@ class FileType extends AbstractType implements DataMapperInterface
 
             if(!$options["dropzone"]) {
 
-                $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+                if($options["title"] !== null)
+                    $form->add("title", TextType::class, $options["title"]);
+                if($options["allow_url"])
+                    $form->add("url", UrlType::class, [
                         "required"    => $options["required"] && ($data === null) && ($options["cropper"] ?? null) === null,
+                    ]);
+
+                $form->add('raw', \Symfony\Component\Form\Extension\Core\Type\FileType::class, [
+                        "required"    => $options["required"] && (!$options["allow_url"] && $data === null) && ($options["cropper"] ?? null) === null,
                         "multiple"    => $options["multiple"],
-                        "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])]
+                        "constraints" => [new File(["max_size" => $maxFilesize, "mime_types" => $mimeTypes])],
+                        "disabled"    => !$options["allow_reupload"] && $data !== null
                 ]);
             }
 
@@ -204,6 +207,9 @@ class FileType extends AbstractType implements DataMapperInterface
 
         if(!is_array($files)) $files = $files ? [$files] : [];
         $view->vars["files"] = array_filter($files);
+
+        $view->vars["allow_reupload"] = $options["allow_reupload"];
+        $view->vars["allow_url"]      = $options["allow_url"];
 
         $view->vars['max_files'] = $view->vars['max_files'] ?? $options["max_files"];
         $view->vars['max_size'] = Uploader::getMaxFilesize($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName());
@@ -333,11 +339,21 @@ class FileType extends AbstractType implements DataMapperInterface
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $childForm = iterator_to_array($forms);
+        $childForms = iterator_to_array($forms);
+        $options = current($childForms)->getParent()->getConfig()->getOptions();
 
-        $rawData  = $childForm['raw']->getData() ?? null;
-        $processedData = $childForm['file']->getData() ?? null;
+        $fileData = $childForms['file']->getData() ?? null;
+        $rawData  = null;
+        if ($options["allow_reupload"])
+            $rawData  = $childForms['raw']->getData() ?? null;
 
-        $viewData = ($rawData ? $rawData : null) ?? ($processedData ? $processedData : null) ?? null;
+        $urlData  = null;
+        if ($options["allow_url"]) {
+
+            $urlData = $childForms['url']->getData() ?? null;
+            $urlData = filter_var($urlData, FILTER_VALIDATE_URL) ? fetch_url($urlData) : null;
+        }
+
+        $viewData = ($rawData ? $rawData : null) ?? ($urlData ? $urlData : null) ?? ($fileData ? $fileData : null) ?? null;
     }
 }

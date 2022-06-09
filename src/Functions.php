@@ -25,28 +25,26 @@ namespace {
         }, $input);
     }
 
-    function get_url(bool $keep_machine = true, bool $keep_subdomain = true,
-                    ?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
+    function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
     {
         $scheme      ??= $_SERVER["REQUEST_SCHEME"] ?? null;
         $http_host   ??= $_SERVER["HTTP_HOST"]      ?? null;
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        return format_url(
-              compose_url($scheme,null,null,null,null,$http_host,null,$request_uri),
-              $keep_machine, $keep_subdomain
-        );
+        return compose_url($scheme, null, null, null, null, $http_host, null, $request_uri == "/" ? null : $request_uri);
     }
 
-    function format_url(?string $url = null, bool $keep_machine = true, bool $keep_subdomain = true) : ?string
-    {
-        if(is_cli()) return null;
+    function sanitize_url(string $url) { return format_url($url); }
 
+    define("FORMAT_URL_NOMACHINE", 1);
+    define("FORMAT_URL_NOSUBDOMAIN", 2);
+    function format_url(string $url, int $format = 0) : ?string
+    {
         $parse = parse_url2($url);
         if($parse === false) return null;
 
-        if(!$keep_machine  ) $parse = array_key_removes($parse, "machine");
-        if(!$keep_subdomain) $parse = array_key_removes($parse, "subdomain");
+        if($format & FORMAT_URL_NOMACHINE  ) $parse = array_key_removes($parse, "machine");
+        if($format & FORMAT_URL_NOSUBDOMAIN) $parse = array_key_removes($parse, "subdomain");
 
         return compose_url(
             $parse["scheme"] ?? null,
@@ -56,7 +54,8 @@ namespace {
             $parse["subdomain"] ?? null,
             $parse["domain"] ?? $parse["host"] ?? null,
             $parse["port"] ?? null,
-            $parse["path"] ?? null);
+            str_replace("//", "/", $parse["path"] ?? null),
+            $parse["query"] ?? null);
     }
 
     function compose_url(
@@ -66,7 +65,7 @@ namespace {
         ?string $machine = null,
         ?string $subdomain = null,
         ?string $domain = null,
-        string|int|null $port = null, ?string $path = null): array|string|int|false|null
+        string|int|null $port = null, ?string $path = null, ?string $query = null): array|string|int|false|null
     {
         $scheme    = ($domain && $scheme   ) ? $scheme."://" : null;
         $user      = ($domain && $user     ) ? $user."@" : null;
@@ -76,14 +75,13 @@ namespace {
         $machine   = ($domain && $machine  ) ? $machine . "." : null;
         $port      = ($domain && $port     ) ? ":".$port : null;
 
-        return $scheme.$machine.$subdomain.$domain.$user.$password.$path;
+        $query     =  $query ? "?".$query : null;
+
+        return $scheme.$machine.$subdomain.$domain.$user.$password.$path.$query;
     }
 
-    function parse_url2(string $url = null, int $component = -1): array|string|int|false|null
+    function parse_url2(string $url, int $component = -1): array|string|int|false|null
     {
-        if($url === null) $url = get_url();
-        if($url === null) return null;
-
         $noscheme = !str_contains($url, "://");
         if($noscheme) $url = "file://".$url;
 
@@ -96,7 +94,7 @@ namespace {
         if($noscheme) unset($parse["scheme"]);
 
         $path = str_rstrip($parse['path'] ?? "", "/");
-        $parse["path"] = $path;
+        $parse["path"] = str_replace("//", "/", $path);
 
         $root = str_rstrip($url, $parse['path']);
         if(!empty($root)) $parse["root"] = $root;
@@ -270,12 +268,42 @@ namespace {
         return preg_match("/^HTTP\/[0-9]\.[0-9] ".$status."/", $header);
     }
 
-    function fetch_url(string $url, string $prefix = "php", string $tmpdir = "/tmp")
+    function fetch_url(string $url, string $prefix = "file", string $tmpdir = "/tmp")
     {
         $tmpfname = tempnam($tmpdir, $prefix);
-        file_put_contents($tmpfname, file_get_contents($url));
+
+        $contents = curl_get_contents($url);
+        if($contents === false)
+            file_put_contents($tmpfname, $contents);
 
         return $tmpfname;
+    }
+
+    function curl_get_contents(string $url) {
+
+        $ch = curl_init();
+        $header[0] = "Accept: text/xml,application/xml,application/xhtml+xml,";
+        $header[0] .= "text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
+        $header[] = "Cache-Control: max-age=0";
+        $header[] = "Connection: keep-alive";
+        $header[] = "Keep-Alive: 300";
+        $header[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
+        $header[] = "Accept-Language: en-us,en;q=0.5";
+        $header[] = "Pragma: ";
+        curl_setopt( $ch, CURLOPT_HTTPHEADER, $header );
+
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_URL, $url);
+
+        // I have added below two lines
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        return $data;
     }
 
     function is_tmpfile(string $fname):bool { return belongs_to($fname, sys_get_temp_dir()); }
@@ -1770,7 +1798,6 @@ namespace {
     function daydiff(null|string|int|DateTime $datetime):int
     {
         $datetime = castdatetime($datetime);
-
         $today = new DateTime("today");
         $diff  = $today->diff( $datetime->setTime( 0, 0, 0 ) );
         return (integer) $diff->format( "%R%a" );

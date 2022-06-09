@@ -56,6 +56,7 @@ clipboard:
     paste: Collé !
 
 cropper:
+  no_image: "Aucune image à charger."
   not_normalized: "Ce recadrage utilise l'ancien système de coordonnées (dépend de la taille de l'image recadrée). Sauvegardez pour corriger le problème."
   loading:
     wait: "Merci de patienter.."
@@ -119,6 +120,7 @@ fileupload:
       remove_file: "Supprimer"
       remove_file_confirmation: "Merci de confirmer la demande suppression."
 
+    download_placeholder: "Inserer le lien à télécharger ici."
     max_size: "La taille de fichier maximale autorisée est de {0}."
     max_size_feedback: "L'image selectionnée est trop volumineuse ({0})."
     mime_type: "{0, plural,

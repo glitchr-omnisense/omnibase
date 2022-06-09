@@ -97,7 +97,7 @@ class SecurityController extends AbstractController
 
             $response = $this->redirectToRoute(LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE);
             $response->headers->clearCookie('REMEMBERME', "/");
-            $response->headers->clearCookie('REMEMBERME', "/", ".".get_url(false,false));
+            $response->headers->clearCookie('REMEMBERME', "/", ".".format_url(get_url(),FORMAT_URL_NOMACHINE|FORMAT_URL_NOSUBDOMAIN));
 
             return $response;
         }

@@ -6,6 +6,7 @@ use Exception;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use UnexpectedValueException;
 
 /**
@@ -15,8 +16,9 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 {
     public string $constraintClass;
 
-    public function __construct()
+    public function __construct(TranslatorInterface $translator)
     {
+        $this->translator = $translator;
         $this->constraintClass = preg_replace('/Validator$/', '', get_called_class());
     }
 
@@ -46,7 +48,11 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
         $value = is_stringeable($value) ? $value : "";
 
-    $this->buildViolation = $this->context->buildViolation($constraint->message .".".strtolower($this->getConstraintType()));
+        $message = $this->translator->trans($constraint->message);
+        if ($message == $constraint->message)
+            $message = $constraint->message;
+
+        $this->buildViolation = $this->context->buildViolation($message);
         $this->setParameter('field', $this->getPropertyName());
         $this->setParameter('value', $value);
 

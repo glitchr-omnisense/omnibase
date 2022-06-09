@@ -29,6 +29,7 @@ use Symfony\Component\Serializer\Encoder\CsvEncoder;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Question\ChoiceQuestion;
 
 #[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
@@ -152,13 +153,13 @@ class DoctrineDatabaseImportCommand extends Command
 
         $this->addOption('spreadsheet', null, InputOption::VALUE_OPTIONAL, 'Import selected spreadsheet (e.g. 1,3,4 [NB: starts from 1])');
         $this->addOption('extension',   null, InputOption::VALUE_OPTIONAL, 'Specify file extension to be used');
-        $this->addOption('nrows',       null, InputOption::VALUE_OPTIONAL, 'Only read N-rows', null);
-        $this->addOption('iskip',       null, InputOption::VALUE_OPTIONAL, 'Skip i-entries', 0);
+        $this->addOption('entries',     null, InputOption::VALUE_OPTIONAL, 'Only read N-rows', null);
+        $this->addOption('skip',        null, InputOption::VALUE_OPTIONAL, 'Skip i-entries', 0);
         $this->addOption('batch',       null, InputOption::VALUE_OPTIONAL, 'Persist by batch of X entries.', 25);
         $this->addOption('show',        null, InputOption::VALUE_NONE, 'Show all details');
         $this->addOption('notify',      null, InputOption::VALUE_NONE, 'Send notification if needed');
         $this->addOption('force',       null, InputOption::VALUE_NONE, 'Import without asking confirmation.');
-        $this->addOption('on-fly',       null, InputOption::VALUE_NONE, 'Import on the fly (while hydratation)');
+        $this->addOption('on-fly',      null, InputOption::VALUE_NONE, 'Import on the fly (while hydratation)');
 
         parent::configure();
     }
@@ -176,10 +177,11 @@ class DoctrineDatabaseImportCommand extends Command
         $batch        = $input->getOption("batch");
         $onFly        = $input->getOption("on-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
-        $nrows        = (int) $input->getOption("nrows");
-        $iskip        = (int) $input->getOption("iskip");
 
-        if(!$nrows) $nrows = null;
+        $entries        = (int) $input->getOption("entries");
+        $skip        = (int) $input->getOption("skip");
+
+        if(!$entries) $entries = null;
 
         $output->writeln("");
         if($path) $output->writeln(' <info>You have just selected:</info> '.$path);
@@ -212,6 +214,19 @@ class DoctrineDatabaseImportCommand extends Command
                 throw new Exception("Missing extension in filename. Please use \"--extension\" option.");
         }
 
+        //
+        // Default case if no selected spreadsheet
+        if($spreadsheets === null)
+        {
+            $helper = $this->getHelper('question');
+            $question = new ChoiceQuestion(' <info>Please choose which spreadsheet to process </info>: (separated with,', array_keys($rawData));
+            $question->setMultiselect(true);
+
+            $spreadsheets = array_keys($helper->ask($input, $output, $question));
+        }
+
+        //
+        // Import required spreadsheets
         $baseClass  = [];
 
         $entities   = [];
@@ -289,7 +304,7 @@ class DoctrineDatabaseImportCommand extends Command
             // Process them
             foreach($rawData[$spreadsheet] as &$data) {
 
-                if($counter < $iskip || ($nrows !== null && $counter > $nrows+$iskip-1)) {
+                if($counter < $skip || ($entries !== null && $counter > $entries+$skip-1)) {
                     $counter++;
                     continue;
                 }
@@ -329,7 +344,7 @@ class DoctrineDatabaseImportCommand extends Command
                 // Loop over entries
                 foreach($entries as &$_) {
 
-                    $progressBar->advance();
+                    if($progressBar) $progressBar->advance();
                     $counter++;
 
                     $keyDepth = [];
@@ -534,7 +549,7 @@ class DoctrineDatabaseImportCommand extends Command
             }
         }
 
-        $progressBar->finish();
+        if($progressBar) $progressBar->finish();
         $output->writeln('');
         $output->writeln('');
 
@@ -672,9 +687,6 @@ class DoctrineDatabaseImportCommand extends Command
         $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
         $output->writeln($msg);
         $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
-
-        $output->section()->writeln("");
-        return Command::SUCCESS;
 
         $output->section()->writeln("");
         return Command::SUCCESS;

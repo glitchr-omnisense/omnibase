@@ -75,6 +75,7 @@ clipboard:
 
 
 cropper:
+  no_image: "No image to load."
   not_normalized: "This image crop is storing previous coordinate system (image size-dependent). Please save to fix it."
   loading:
     wait: "Please wait a little bit.."
@@ -117,6 +118,7 @@ fileupload:
     remove_file: "Remove file"
     remove_file_confirmation: "Are you sure you want to remove this upload?"
 
+  download_placeholder: "Enter an URL to download."
   max_size: "The maximum file size allowed is {0}."
   max_size_feedback: "Image submitted is too big {0}."
   mime_type: "{0, plural,

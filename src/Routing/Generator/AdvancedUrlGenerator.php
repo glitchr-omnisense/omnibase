@@ -37,19 +37,18 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if(($route = $this->getRouter()->getRoute($routeName))) {
 
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
-
             if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
-                $url = parse_url2();
+                $parse = parse_url2(get_url());
                 $parameterNames = array_flip($matches[1]);
                 $routeParameters = array_merge(
-                    array_intersect_key($url, $parameterNames),
+                    array_intersect_key($parse, $parameterNames),
                     $route->getDefaults(),
                     $routeParameters,
                 );
 
-                $search  = array_map(fn($k) => "{".$k."}", array_keys($url));
-                $replace = array_values($url);
+                $search  = array_map(fn($k) => "{".$k."}", array_keys($parse));
+                $replace = array_values($parse);
                 foreach($routeParameters as $key => &$routeParameter) {
                     $routeParameter = str_replace($search, $replace, $routeParameter);
                     if($key == "host") $routeParameter = str_lstrip($routeParameter, "www.");
@@ -79,24 +78,24 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if($routeParameters !== null) {
 
             // Use either parameters or $_SERVER variables to determine the host to provide
-            $url = parse_url2(get_url(true, true,
+            $parse = parse_url2(get_url(
                 array_pop_key("_scheme", $routeParameters) ?? $this->getSettingBag()->scheme(),
                 array_pop_key("_host", $routeParameters) ?? $this->getSettingBag()->host() ,
                 array_pop_key("_base_dir", $routeParameters) ?? $this->getSettingBag()->base_dir(),
             ));
 
-            if($url && array_key_exists("host", $url))
-                $this->getContext()->setHost($url["host"]);
-            if($url && array_key_exists("base_dir", $url))
-                $this->getContext()->setBaseUrl($url["base_dir"]);
+            if($parse && array_key_exists("host", $parse))
+                $this->getContext()->setHost($parse["host"]);
+            if($parse && array_key_exists("base_dir", $parse))
+                $this->getContext()->setBaseUrl($parse["base_dir"]);
 
         } else {
 
-            $url = parse_url2(); // Make sure also it gets the basic context
-            if($url && array_key_exists("host", $url))
-                $this->getContext()->setHost($url["host"]);
-            if($url && array_key_exists("base_dir", $url))
-                $this->getContext()->setBaseUrl($url["base_dir"]);
+            $parse = parse_url2(get_url()); // Make sure also it gets the basic context
+            if($parse && array_key_exists("host", $parse))
+                $this->getContext()->setHost($parse["host"]);
+            if($parse && array_key_exists("base_dir", $parse))
+                $this->getContext()->setBaseUrl($parse["base_dir"]);
         }
 
         return $routeParameters;
@@ -145,6 +144,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         // Strip unused variables from main group
         try { $routeUrl      = $this->resolveUrl($routeBase, $routeParameters, $referenceType); }
         catch(Exception $e) { $routeUrl = null; }
+
         try { $routeGroupUrl = $this->resolveUrl($routeBase.$routeGroup, $routeParameters, $referenceType); }
         catch(Exception $e) { $routeGroupUrl = null; }
 
@@ -154,6 +154,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $routeParameters = array_key_removes($routeParameters, ...$keys);
         }
 
+
         //
         // Try to compute subgroup (or base one)
         try { return $this->resolveUrl($routeName, $routeParameters, $referenceType); }
@@ -162,9 +163,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         return $this->resolveUrl($routeDefaultName, $routeParameters, $referenceType);
     }
 
-    public function sanitize(string $url): string {
+    public function format(string $url): string {
 
-        $url = parse_url2();
+        $parse = parse_url2($url);
 
         $allowedSubdomain = false;
         $permittedSubdomains = $this->getParameterBag()->get("base.host_restriction.permitted_subdomains") ?? [];
@@ -172,33 +173,33 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
 
         foreach($permittedSubdomains as $permittedSubdomain)
-            $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $url["subdomain"] ?? null);
+            $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $parse["subdomain"] ?? null);
 
         // Special case for login form.. to be redirected to rescue authenticator if no access right
         $routeName = $this->getRouter()->getRouteName();
         if(!LoginFormAuthenticator::isSecurityRoute($routeName) && !RescueFormAuthenticator::isSecurityRoute($routeName))
         {
             // Special case for WWW subdomain
-            if(!array_key_exists("subdomain", $url) && !array_key_exists("machine", $url) && !$allowedSubdomain) {
-                $url["subdomain"] = "www";
-            } else if( array_key_exists("subdomain", $url) && !$allowedSubdomain) {
+            if(!array_key_exists("subdomain", $parse) && !array_key_exists("machine", $parse) && !$allowedSubdomain) {
+                $parse["subdomain"] = "www";
+            } else if( array_key_exists("subdomain", $parse) && !$allowedSubdomain) {
 
-                if($url["subdomain"] === "www") $url = array_key_removes($url, "subdomain");
-                else $url["subdomain"] = "www";
+                if($parse["subdomain"] === "www") $parse = array_key_removes($parse, "subdomain");
+                else $parse["subdomain"] = "www";
             }
 
-            if(array_key_exists("machine",   $url) && !$this->getRouter()->keepMachine()  )
-                $url = array_key_removes($url, "machine");
+            if(array_key_exists("machine",   $parse) && !$this->getRouter()->keepMachine()  )
+                $parse = array_key_removes($parse, "machine");
 
-            if(array_key_exists("subdomain", $url) && !$this->getRouter()->keepSubdomain())
-                if(array_key_exists("machine",   $url) || !$this->getRouter()->keepMachine())
-                    $url = array_key_removes($url, "subdomain");
+            if(array_key_exists("subdomain", $parse) && !$this->getRouter()->keepSubdomain())
+                if(array_key_exists("machine",   $parse) || !$this->getRouter()->keepMachine())
+                    $parse = array_key_removes($parse, "subdomain");
         }
 
         return compose_url(
-            $url["scheme"] ?? null, $url["user"] ?? null, $url["password"] ?? null,
-            $url["machine"] ?? null, $url["subdomain"] ?? null, $url["domain"] ?? null, $url["port"] ?? null,
-            $url["path"] ?? null,
+            $parse["scheme"] ?? null, $parse["user"] ?? null, $parse["password"] ?? null,
+            $parse["machine"] ?? null, $parse["subdomain"] ?? null, $parse["domain"] ?? null, $parse["port"] ?? null,
+            $parse["path"] ?? null,
         );
     }
 }

@@ -92,13 +92,13 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function getGenerator(): UrlGeneratorInterface { return  $this->router->getGenerator(); }
     public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string { return $this->router->generate($name, $parameters, $referenceType); }
-    public function sanitize(string $url): string
+    public function format(string $url): string
     {
         if($url === null) $url = get_url();
 
         $generator = $this->router->getGenerator();
         if($generator instanceof AdvancedUrlGenerator)
-            return $generator->sanitize($url);
+            return $generator->format($url);
 
         return $url;
     }
@@ -115,12 +115,10 @@ class AdvancedRouter implements AdvancedRouterInterface
     protected $routeList = [];
     public function getRoute(?string $routeNameOrUrl = null): ?Route
     {
-        if ($routeNameOrUrl === null) $routeNameOrUrl = $this->getRequestUri();
+        if ($routeNameOrUrl === null)
+            $routeNameOrUrl = $this->getRequestUri();
 
-        $routeName = $routeNameOrUrl;
-        if (filter_var($routeNameOrUrl, FILTER_VALIDATE_URL))
-            $routeName = $this->getRouteName($routeNameOrUrl);
-
+        $routeName = $this->getRouteName($routeNameOrUrl);
         if(array_key_exists($routeName, $this->routeList))
             return $this->routeList[$routeName];
 

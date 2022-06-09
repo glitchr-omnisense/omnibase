@@ -507,9 +507,13 @@
             <argument type="service" id="base.service.image" />
        </service>
 
-        <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
-        <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
         <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
+        <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
 
         <service id="Base\Twig\Extension\MathTwigExtension"        ><tag name="twig.extension" /></service>
         <service id="Base\Twig\Extension\ClassTwigExtension"       ><tag name="twig.extension" /></service>
@@ -526,7 +530,10 @@
             Validation constraints
 
             -->
-        <service id="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
+        <service id="Base\Validator\ConstraintValidator">
+            <tag name="validator.constraint_validator" />
+            <argument type="service" id="translator" />
+        </service>
         <service id="Base\Validator\Constraints\AlphanumericValidator"     parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\AlphanumericPlusValidator" parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\FileValidator"             parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
@@ -536,9 +543,7 @@
         <service id="Base\Validator\ConstraintEntityValidator" parent="Base\Validator\ConstraintValidator">
             <tag name="validator.constraint_validator" />
             <argument type="service" id="doctrine" />
-            <argument type="service" id="translator" />
         </service>
-
         <service id="Base\Validator\Constraints\UniqueEntityValidator"     parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\StringCaseEntityValidator" parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
 
@@ -723,7 +728,10 @@
         <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\SlugType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\SlugType"><tag name="form.type" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
 
         <service id="Base\Controller\UX\DropzoneController">
             <tag name="controller.service_arguments" />
