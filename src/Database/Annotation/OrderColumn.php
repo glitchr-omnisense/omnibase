@@ -140,6 +140,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     $value = $propertyAccessor->getValue($entity, $property);
 
+                    // ARRAY ARE NOT SUPPORTED YET.. SOME TESTS PERFORMED WITH USER ROLE FOR INSTANCE..
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
                     else*/ if($value instanceof Collection) {
 

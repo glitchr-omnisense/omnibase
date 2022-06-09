@@ -3,7 +3,7 @@
 namespace Base\Field;
 
 use Base\Field\Type\IconType;
-use Base\Model\IconProviderInterface;
+use Base\Model\IconProvider\IconAdapterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
@@ -31,7 +31,7 @@ class IconField extends SelectField implements FieldInterface
         return $this;
     }
 
-    public function setAdapter(IconProviderInterface|string $objectOrClass)
+    public function setAdapter(IconAdapterInterface|string $objectOrClass)
     {
         $this->setFormTypeOption("adapter", is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);
         return $this;
