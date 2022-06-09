@@ -58,7 +58,7 @@ class Referrer
         return $route;
     }
 
-    public function setUrl(string $url)
+    public function setUrl(?string $url)
     {
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
         return $this;

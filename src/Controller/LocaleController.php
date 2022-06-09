@@ -42,6 +42,8 @@ class LocaleController extends AbstractController
         $referrerName = $this->router->getRouteName(strval($referrer));
         if($referrerName !== "locale_changeto") {
 
+            $referrer->setUrl(null);
+
             try { return $this->redirect($this->router->generate($referrerName.$lang)); }
             catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName)); }
         }
@@ -49,6 +51,7 @@ class LocaleController extends AbstractController
         $baseDir = $request->getBasePath();
         if(!$baseDir) $baseDir = "/";
 
+        $referrer->setUrl(null);
         return $this->redirect($baseDir);
     }
 }
