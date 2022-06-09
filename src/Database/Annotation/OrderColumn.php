@@ -140,8 +140,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     $value = $propertyAccessor->getValue($entity, $property);
 
-                    if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
-                    else if($value instanceof Collection) {
+                    /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
+                    else*/ if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
@@ -152,7 +152,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                         ksort($data[$property]);
                     }
 
-                    if(is_identity($data[$property]))
+                    if(array_key_exists($property, $data) && is_identity($data[$property]))
                         unset($data[$property]);
                 }
 
