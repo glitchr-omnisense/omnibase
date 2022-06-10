@@ -19,7 +19,7 @@
     {% else %}
         {% set icon = '<i class="fas fa-fw fa-image fa-2x"></i>' %}
     {% endif %}
-    
+
     {% if field.formattedValue is iterable %}
 
         {% if ea.crud.currentAction == 'detail' %}
@@ -57,8 +57,8 @@
 {% elseif renderFormat == 'count' or field.value is iterable %}
 
     <span class="badge badge-secondary">
-        {% if field is iterable %}
-            {{ field.formattedValue|length }}
+        {% if field.value is iterable %}
+            {{ field.value|length }}
         {% else %}
             {{ (field.formattedValue is not empty)|default("0") }}
         {% endif %}

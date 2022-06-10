@@ -12,7 +12,7 @@
     {% else %}
         {% set icon = '<i class="fas fa-fw fa-image fa-2x"></i>' %}
     {% endif %}
-    
+
     {% if field.value is iterable %}
 
         {% set counter = field.formattedValue.count %}
@@ -26,7 +26,7 @@
     {% else %}
         {% set images = field.value is empty or null ? [] : [field.value] %}
     {% endif %}
-    
+
     {% if showFirst %}
         {% set images = [images|first] %}
     {% endif %}
@@ -65,7 +65,7 @@
         {% endif %}
     {% endif %}
 
-{% elseif 'toMany' == field.customOptions.get('associationType') %}
+{% elseif 'toMany' == field.customOptions.get('associationType') and field.customOptions.get('renderFormat') != "count"%}
 
     {% if showFirst and field.formattedValue.count is defined %}
         {% set displayLimit = displayLimit > 0 ? displayLimit - 1 : displayLimit %}
@@ -73,7 +73,7 @@
 
     {% set stillMore = "" %}
     {% set others = [] %}
-    
+
     {% for other in field.formattedValue.others %}
         {% if displayLimit > others|length %}
             {% set others = others|merge([other|stringify]) %}
@@ -135,9 +135,9 @@
 {% else %}
 
      <span class="badge badge-secondary">
-     {% if field.customOptions.get('renderFormat') == "count" %} 
+     {% if field.customOptions.get('renderFormat') == "count" %}
         {{ is_countable(field.value) ? field.value|length : "-" }}
-     {% elseif field.customOptions.get('renderFormat') == "text" %} 
+     {% elseif field.customOptions.get('renderFormat') == "text" %}
         {% if field.customOptions.get('relatedUrl') is not null %}
             <a href="{{ field.customOptions.get('relatedUrl') }}">{{ field.formattedValue|default("-") }}</a>
         {% else %}

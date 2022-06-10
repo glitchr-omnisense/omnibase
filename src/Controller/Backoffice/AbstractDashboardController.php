@@ -300,8 +300,9 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     $this->slotRepository->flush();
                 }
 
-                $widgets = $data[$path] ?? [];
-                $widgetSlot->setWidgets($widgets);
+                $widget = $data[$path] ?? null;
+                if(is_array($widget)) $widget = first($widget);
+                $widgetSlot->setWidget($widget);
             }
 
 
