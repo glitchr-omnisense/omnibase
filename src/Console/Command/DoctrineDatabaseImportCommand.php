@@ -168,7 +168,7 @@ class DoctrineDatabaseImportCommand extends Command
     {
         if($input->hasArgument("path")) $path = $input->getArgument("path");
 
-        $notify            = $input->getOption("notify");
+        $notify       = $input->getOption("notify");
         if(!$notify) $this->baseService->getNotifier()->disable();
 
         $show         = $input->getOption("show");
@@ -178,8 +178,8 @@ class DoctrineDatabaseImportCommand extends Command
         $onFly        = $input->getOption("on-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
 
-        $entries        = (int) $input->getOption("entries");
-        $skip        = (int) $input->getOption("skip");
+        $entries      = (int) $input->getOption("entries");
+        $skip         = (int) $input->getOption("skip");
 
         if(!$entries) $entries = null;
 
@@ -219,10 +219,10 @@ class DoctrineDatabaseImportCommand extends Command
         if($spreadsheets === null)
         {
             $helper = $this->getHelper('question');
-            $question = new ChoiceQuestion(' <info>Please choose which spreadsheet to process </info>: (separated with,', array_keys($rawData));
+            $question = new ChoiceQuestion(' <info>Please choose which spreadsheet to process </info>: (separated with ,)', array_keys($rawData));
             $question->setMultiselect(true);
 
-            $spreadsheets = array_keys($helper->ask($input, $output, $question));
+            $spreadsheets = array_map(fn($i) => array_search($i,  array_keys($rawData)), $helper->ask($input, $output, $question));
         }
 
         //
@@ -327,8 +327,7 @@ class DoctrineDatabaseImportCommand extends Command
         }
 
         $output->writeln(' Hydrating entities..'.($onFly ? " and import them on the fly" : null));
-
-        if($totalData) $progressBar = new ProgressBar($output, $totalData);
+        $progressBar = $totalData ? new ProgressBar($output, $totalData) : null;
 
         $entityParentColumn = null;
         $entityUniqueValues = [];
