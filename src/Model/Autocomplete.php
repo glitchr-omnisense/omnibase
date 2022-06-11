@@ -73,6 +73,7 @@ class Autocomplete
         [
             "id"   => $id ?? null,
             "icon" => $icon,
+            "search" => null,
             "text" => is_string($text) ? castcase($text, $entryOptions["format"]) : $text,
             "html" => $entryOptions["html"] ? $html : null,
             "data" => $data,

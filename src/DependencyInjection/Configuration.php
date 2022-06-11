@@ -558,7 +558,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
 
                     ->arrayNode('select2')->addDefaultsIfNotSet()
-                        ->children()
+                        ->children() // NB: I use full because of some CSS class that needs to be added to container..
                             ->scalarNode('javascript')
                                 ->info('')
                                 ->defaultValue("bundles/base/vendor/select2/select2-4.0.13.full.min.js")
@@ -568,6 +568,12 @@ class Configuration implements ConfigurationInterface
                             ->scalarNode('stylesheet')
                                 ->info('')
                                 ->defaultValue("bundles/base/vendor/select2/select2-4.0.13.min.css")
+                                ->end()
+                        ->end()
+                        ->children()
+                            ->scalarNode('i18n')
+                                ->info('')
+                                ->defaultValue("bundles/base/vendor/select2/i18n")
                                 ->end()
                         ->end()
                         ->children()

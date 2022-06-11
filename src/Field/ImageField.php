@@ -10,8 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 class ImageField extends FileField implements FieldInterface
 {
-    use FieldTrait;
-
     public const OPTION_RENDER_FORMAT  = "renderFormat";
 
     public static function new(string $propertyName, ?string $label = null): self

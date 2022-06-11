@@ -26,6 +26,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 

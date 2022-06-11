@@ -3,6 +3,7 @@
 namespace Base\Controller\Backoffice\Crud\Layout\Widget\Set;
 
 use Base\Controller\Backoffice\Crud\Layout\WidgetCrudController;
+use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Set\Menu;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Field\DiscriminatorField;
@@ -20,12 +21,12 @@ class MenuCrudController extends WidgetCrudController
     public function configureFields(string $pageName, ...$args): iterable
     {
         yield DiscriminatorField::new()->setTextAlign(TextAlign::RIGHT);
-        yield SlugField::new('path')->setSeparator("-")->hideOnIndex()->setColumns(6)->setTargetFieldName("translations.title");
+        yield SelectField::new('widgets')->setClass(Widget::class)->showVertical()->setColumns(6)->setFilter("^".Menu::class, "^".Slot::class);
+        yield SlugField::new('path')->setSeparator(".")->hideOnIndex()->setColumns(6)->setTargetFieldName("translations.title");
         yield TranslationField::new('title')->setExcludedFields("content")->setFields([
             "title"   => ["form_type" => TextType::class],
             "excerpt" => ["form_type" => TextareaType::class]
         ]);
 
-        yield SelectField::new('widgets')->turnVertical()->setColumns(6)->setFilter("^".Menu::class, "^".Slot::class);
     }
 }

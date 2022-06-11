@@ -4,7 +4,8 @@ namespace Base\Controller\UX;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\Autocomplete;
-
+use Base\Service\Obfuscator;
+use Base\Service\ObfuscatorInterface;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Base\Traits\BaseTrait;
@@ -27,25 +28,13 @@ class AutocompleteController extends AbstractController
      */
     protected $paginator;
 
-    public function __construct(TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(ObfuscatorInterface $obfuscator, TranslatorInterface $translator, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->hashIds = new Hashids($this->getService()->getSalt());
+        $this->obfuscator = $obfuscator;
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->paginator = $paginator;
         $this->autocomplete = new Autocomplete($translator);
-    }
-
-    public function encode(array $array) : string
-    {
-        $hex = bin2hex(serialize($array));
-        return $this->hashIds->encodeHex($hex);
-    }
-
-    public function decode(string $hash): array
-    {
-        $hex = $this->hashIds->decodeHex($hash);
-        return $hex ? unserialize(hex2bin($hex)) : [];
     }
 
     /**
@@ -53,7 +42,7 @@ class AutocompleteController extends AbstractController
      */
     public function Main(Request $request, string $hashid): Response
     {
-        $dict    = $this->decode($hashid);
+        $dict    = $this->obfuscator->decode($hashid);
         $token   = $dict["token"] ?? null;
         $fields  = $dict["fields"] ?? null;
         $filters = $dict["filters"] ?? null;
@@ -64,8 +53,10 @@ class AutocompleteController extends AbstractController
         $expectedMethod = $this->getService()->isDebug() ? "GET" : "POST";
         if ($this->isCsrfTokenValid("select2", $token) && $request->getMethod() == $expectedMethod) {
 
-            $term = mb_strtolower($request->get("term")) ?? "";
-            $page = $request->get("page") ?? 1;
+            $term = strtolower(str_strip_accents($request->get("term")) ?? "");
+            $meta = explode(".", $request->get("page") ?? "");
+            $page     = max(1, intval($meta[0] ?? 1));
+            $bookmark = max(0, intval($meta[1] ?? 0));
 
             $results = [];
             $pagination = false;
@@ -78,23 +69,56 @@ class AutocompleteController extends AbstractController
 
                 $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
 
-                $book = $this->paginator->paginate($entries, $page);
-                $pagination = $book->getTotalPages() > $book->getPage();
+                do {
 
-                foreach($book as $entry)
-                    $results[] = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html]);
+                    $book = $this->paginator->paginate($entries, $page);
+                    if($page > $book->getTotalPages())
+                        throw $this->createNotFoundException("Page Not Found");
+
+                    $bookIsFull = false;
+
+                    $index = 0;
+                    foreach($book as $entry) {
+
+                        if($index++ < $bookmark) continue;
+                        $bookmark = $index;
+
+                        $entry = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html]);
+                        $search = strtolower(str_strip_accents(strval($entry["search"] ?? $entry["text"])));
+                        if(str_contains($search, $term))
+                            $results[] = $entry;
+
+                        $bookIsFull = count($results) >= $book->getPageSize();
+                        if($bookIsFull) break;
+                    }
+
+                    $bookmark = $bookmark % $book->getPageSize();
+                    $page++;
+
+                } while($page <= $book->getTotalPages() && !$bookIsFull);
+
+                $pagination = [];
+                $pagination["more"] = $book->getTotalPages() > $book->getPage();
+                if ($pagination["more"]) {
+
+                    $page = $book->getPage();
+                    $bookmark = ($book->getBookmark()+1) % $book->getPageSize();
+                    if($bookmark == 0) $page++;
+
+                    $pagination["page"] = $page.".".$bookmark;
+                }
 
             } else if ($this->classMetadataManipulator->isEnumType($class) || $this->classMetadataManipulator->isSetType($class)) {
 
                 $values = $class::getPermittedValues();
                 foreach($values as $value)
-                    $results[] = $this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html]);
+                    $results[] = array_values(array_filter($this->autocomplete->resolve($value, $class, ["format" => $format, "html" => $html]), fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
             }
 
-            $array = [];
-            $array["pagination"] = ["more" => $pagination];
-            $array["results"] = !empty($results) ? $results : [];
-            $array["results"] = array_values(array_filter($array["results"], fn($r) => !empty($fields) || str_contains(mb_strtolower(strval($r["text"])), $term)));
+            $array = [
+                "pagination" => $pagination,
+                "results" => $results
+            ];
 
             return new JsonResponse($array);
         }

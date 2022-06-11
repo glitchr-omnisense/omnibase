@@ -97,6 +97,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
 
             'select2'          => [],
+            'select2-i18n'     => $this->baseService->getParameterBag("base.vendor.select2.i18n"),
             'select2-js'       => $this->baseService->getParameterBag("base.vendor.select2.javascript"),
             'select2-css'      => $this->baseService->getParameterBag("base.vendor.select2.stylesheet"),
             'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
@@ -540,7 +541,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $selectOpts["multivalue"] = $options["multivalue"];
 
             if(!array_key_exists("language", $selectOpts))
-                     $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));
+                $selectOpts["language"] = $this->localeProvider->getLang($this->localeProvider->getLocale($options["language"]));
 
             if(!array_key_exists("tokenSeparators", $selectOpts))
                      $selectOpts["tokenSeparators"] = $selectOpts["tokenSeparators"] ?? $options["tokenSeparators"];
@@ -658,8 +659,9 @@ class SelectType extends AbstractType implements DataMapperInterface
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
 
             // Import select2
-            $this->baseService->addHtmlContent("javascripts:head", $options["select2-js"]);
             $this->baseService->addHtmlContent("stylesheets:head", $options["select2-css"]);
+            $this->baseService->addHtmlContent("javascripts:head", $options["select2-js"]);
+            $this->baseService->addHtmlContent("javascripts:head", $options["select2-i18n"]."/".$selectOpts["language"].".js");
             $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
     }

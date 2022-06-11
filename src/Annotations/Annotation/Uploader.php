@@ -57,7 +57,7 @@ class Uploader extends AbstractAnnotation
         $this->config    = $data["config"]     ?? [];
         $this->mimeTypes = $data["mime_types"] ?? [];
 
-        $this->maxSize   = str2dec($data["max_size"] ?? UploadedFile::getMaxFilesize());
+        $this->maxSize   = str2dec($data["max_size"] ?? 8*UploadedFile::getMaxFilesize())/8;
     }
 
     protected $ancestorEntity = null;

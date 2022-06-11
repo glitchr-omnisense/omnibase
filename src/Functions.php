@@ -442,9 +442,10 @@ namespace {
     const  BINARY_PREFIX = array("", "ki", "mi", "gi", "ti", "pi", "ei", "zi", "yi");
     const DECIMAL_PREFIX = array("", "k",  "m",  "g",  "t",  "p",  "e",  "z",  "y");
 
+
     function byte2bit(int $num): int { return 8*$num; } // LMFAO !
     function bit2byte(int $num): int { return $num/8; } // LMFAO !
-    function byte2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num/8, $unitPrefix).BYTE_PREFIX[0]; }
+    function byte2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix).BYTE_PREFIX[0]; }
     function  bit2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string { return dec2str($num, $unitPrefix).BIT_PREFIX[0]; }
     function  dec2str(int $num, array $unitPrefix = DECIMAL_PREFIX): string
     {
@@ -1668,6 +1669,10 @@ namespace {
         catch (Exception $e) { return false; }
 
         return true;
+    }
+
+    function str_strip_accents($str) {
+        return strtr(utf8_decode($str), utf8_decode('àáâãäçèéêëìíîïñòóôõöùúûüýÿÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜÝ'), 'aaaaaceeeeiiiinooooouuuuyyAAAAACEEEEIIIINOOOOOUUUUY');
     }
 
     function dec2alphabet(string $s)

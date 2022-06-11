@@ -3,6 +3,7 @@
 namespace Base\Twig;
 
 use Base\Component\HttpFoundation\Referrer;
+use Base\Service\LocaleProvider;
 use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
@@ -34,14 +35,15 @@ class AppVariable
      */
     protected $parameterBag;
 
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, SettingBag $settingBag, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, SettingBag $settingBag, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->settingBag  = $settingBag;
         $this->referrer  = $referrer;
         $this->twig      = $twig;
         $this->bag       = $parameterBag;
-
         $this->meta      = [];
+
+        $this->localeProvider = $localeProvider;
         $this->random    = new RandomVariable();
         $this->easyadmin = new EasyAdminVariable($adminUrlGenerator);
         $this->setProxy($appVariable);
@@ -52,6 +54,13 @@ class AppVariable
     public function referrer() { return $this->referrer; }
 
     public function meta(array $meta = []) { return $this->meta = array_merge($this->meta, $meta); }
+
+    public function locale()  {
+        return [
+            "lang" => $this->localeProvider->getLang(),
+            "country" => $this->localeProvider->getCountry()
+        ];
+    }
 
     public function getGlobals() {
 

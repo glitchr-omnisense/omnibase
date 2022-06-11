@@ -107,7 +107,7 @@
         'data-select2-options' : select2,
         'data-select2-href'    : form.vars["select2-href"]|default("")|urldecode,
         'data-select2-sortable': form.vars["select2-sortable"],
-        'data-tabulation'      : form.vars["tabulation"]
+        'data-select2-tabulation'      : form.vars["tabulation"]
     }) %}
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
@@ -220,6 +220,7 @@
     'data-slug-keep': keep,
     'data-slug-strict': strict,
     'data-slug-lower': lower,
+    'data-slug-separator': separator,
     'data-slug-lock': lock,
     'data-slug-target': targetForm.vars.id,
     'required': form.vars.required

@@ -4,6 +4,7 @@ namespace Base\Service;
 
 use Base\Model\Pagination;
 use Doctrine\ORM\Query;
+use InvalidArgumentException;
 use Symfony\Component\Routing\RouterInterface;
 
 class Paginator implements PaginatorInterface
@@ -15,7 +16,7 @@ class Paginator implements PaginatorInterface
         $this->baseService = $baseService;
     }
 
-    public function paginate(array|Query $arrayOrQuery, int $page = 0, int $pageSize = 0, int $pageRange = 0): ?Pagination
+    public function paginate(array|Query $arrayOrQuery, int $page = 1, int $pageSize = 0, int $pageRange = 0): ?Pagination
     {
         $pageSize      = ($pageSize  < 1 ? $this->baseService->getParameterBag("base.paginator.page_size") : $pageSize);
         $pageRange     = ($pageRange < 1 ? $this->baseService->getParameterBag("base.paginator.page_range") : $pageRange);
@@ -23,10 +24,10 @@ class Paginator implements PaginatorInterface
         $pageTemplate  = $this->baseService->getParameterBag("base.paginator.default_template");
 
         $pagination = new Pagination($arrayOrQuery, $this->router, $parameterName);
-        $pagination->setPage($page);
         $pagination->setPageSize($pageSize);
         $pagination->setPageRange($pageRange);
         $pagination->setTemplate($pageTemplate);
+        $pagination->setPage($page);
 
         return $pagination;
     }

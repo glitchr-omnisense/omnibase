@@ -51,10 +51,11 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
-        $view->vars["keep"]   = $options["keep"] ? preg_quote($options["keep"]) : null;
-        $view->vars["lower"]  = json_encode($options["lower"]);
-        $view->vars["strict"] = json_encode($options["strict"]);
-        $view->vars["lock"]   = json_encode($options["lock"]);
+        $view->vars["keep"]      = $options["keep"]      ? preg_quote($options["keep"])      : null;
+        $view->vars["separator"] = $options["separator"] ?$options["separator"] : null;
+        $view->vars["lower"]     = json_encode($options["lower"]);
+        $view->vars["strict"]    = json_encode($options["strict"]);
+        $view->vars["lock"]      = json_encode($options["lock"]);
 
         // Make sure field is not rquired when slugis nullable
         $dataClass = $form->getParent()->getConfig()->getDataClass();

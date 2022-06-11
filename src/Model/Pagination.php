@@ -2,20 +2,15 @@
 
 namespace Base\Model;
 
-use App\Entity\Thread;
-use Base\Entity\User\Notification;
-use Base\Enum\SpamApi;
 use Base\Exception\InvalidPageException;
-use Base\Model\SpamProtectionInterface;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator as instance;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Iterator;
 use Symfony\Component\Routing\RouterInterface;
+use Countable;
+use Iterator;
+use UnexpectedValueException;
 
-class Pagination implements PaginationInterface, Iterator
+class Pagination implements PaginationInterface, Iterator, Countable
 {
     protected $router;
     private $build;
@@ -42,11 +37,14 @@ class Pagination implements PaginationInterface, Iterator
         $this->router = $router;
     }
 
-    public function rewind(): void   { $this->pageIter = 0; }
-    public function next(): void     { $this->pageIter++; }
-    public function key(): mixed     { return ($this->page-1)*$this->pageSize + $this->pageIter+1;    }
-    public function valid(): bool    { return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0; }
-    public function current(): mixed { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
+    public function rewind(): void      { $this->pageIter = 0; }
+    public function next(): void        { $this->pageIter++; }
+
+    public function count():int         { return $this->totalCount % $this->pageSize; }
+    public function key(): mixed        { return ($this->page-1) * $this->pageSize + $this->pageIter + 1;    }
+    public function valid(): bool       { return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0; }
+    public function current(): mixed    { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
+    public function getBookmark():mixed { return $this->pageIter % $this->getPageSize(); }
 
     public function get() { return $this->instance; }
     public function getQuery(): ?Query { return $this->isQuery() ? $this->instance->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults ($this->pageSize) : null; }
@@ -57,9 +55,10 @@ class Pagination implements PaginationInterface, Iterator
     public function getTotalPages()
     {
         $pageSize = $this->getPageSize();
+        if(!$pageSize) throw new UnexpectedValueException("No page size defined");
 
         if($this->getTotalCount() <= $pageSize) return 1;
-        return ceil(($pageSize < 1 ? 1 : $this->getTotalCount()/$pageSize));
+        return ceil(max(1, $this->getTotalCount()/$pageSize));
     }
 
     public function getTemplate() { return $this->template; }
@@ -99,7 +98,8 @@ class Pagination implements PaginationInterface, Iterator
     public function getPage() { return $this->page; }
     public function setPage($page)
     {
-        $page = ($page < 0 ? 0 : $page);
+        $page = min(max(1, $page), $this->getTotalPages());
+
         if($this->page != $page) {
             $this->page = $page;
             $this->build = true;

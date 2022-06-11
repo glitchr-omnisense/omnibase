@@ -7,10 +7,12 @@ use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 
 class SelectField implements FieldInterface
 {
-    use FieldTrait;
+    use FieldTrait; // __construct must be redefined because of insane EA exclusion scope &#$@!
+    public function __construct() { $this->dto = new FieldDto(); }
 
     public const OPTION_CONFIRMATION_MODAL_ON_CHECK = 'confirmationModalOnCheck';
     public const OPTION_CONFIRMATION_MODAL_ON_UNCHECK = 'confirmationModalOnUncheck';
@@ -96,8 +98,8 @@ class SelectField implements FieldInterface
         return $this;
     }
 
-    public function turnHorizontal(bool $horizontal) { return $this->turnVertical(!$horizontal); }
-    public function turnVertical(bool $vertical = true)
+    public function turnHorizontal(bool $horizontal) { return $this->showVertical(!$horizontal); }
+    public function showVertical(bool $vertical = true)
     {
         return $this->setFormTypeOption("vertical", $vertical);
     }

@@ -8,11 +8,13 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use Base\Field\Type\FileType;
 use Base\Field\Type\ImageType;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 class FileField implements FieldInterface
 {
-    use FieldTrait;
+    use FieldTrait; // __construct must be redefined because of insane EA exclusion scope &#$@!
+    public function __construct() { $this->dto = new FieldDto(); }
 
     public const OPTION_RENDER_FORMAT  = "renderFormat";
 

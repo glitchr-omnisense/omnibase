@@ -4,7 +4,6 @@ namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Widget;
-use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget\Attachment;
 use Base\Model\IconizeInterface;
 
@@ -12,7 +11,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Widget\AttachmentBoxRepository;
+use Base\Repository\Layout\Widget\Set\AttachmentBoxRepository;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentBoxRepository::class)

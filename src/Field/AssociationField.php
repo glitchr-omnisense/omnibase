@@ -99,8 +99,8 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
-    public function turnHorizontal(bool $horizontal) { return $this->turnVertical(!$horizontal); }
-    public function turnVertical(bool $vertical = true)
+    public function turnHorizontal(bool $horizontal) { return $this->showVertical(!$horizontal); }
+    public function showVertical(bool $vertical = true)
     {
         return $this->setFormTypeOption("vertical", $vertical);
     }

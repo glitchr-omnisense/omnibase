@@ -74,6 +74,7 @@ class LocaleProvider implements LocaleProviderInterface
                 throw new \Exception("You cannot call ".$method.", after \"".$location."\" got triggered.");
             }
 
+            // Symfony request needs underscore separator, regardless of the constant defined above
             $request->setLocale(substr_replace($locale, "_", 2, 1));
         }
 
