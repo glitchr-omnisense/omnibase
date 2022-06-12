@@ -61,16 +61,13 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         if($routeNames === null) $routeNames = array_keys($this->getRouter()->getRouteCollection()->all());
 
         $routeName = explode(".", $routeName ?? "")[0];
-        return array_filter(array_map(function($r) use ($routeName) {
+        $routeGroups = array_filter($routeNames, fn($r) => $r === $routeName || str_starts_with($r, $routeName."."));
+        $routeGroups = array_merge(
+            array_map(fn($r) => str_rstrip($r, ".".LocaleProvider::getDefaultLang()), $routeGroups),
+            $routeGroups
+        );
 
-                if($r == $routeName) return "";
-                if(str_starts_with($r, $routeName."."))
-                    return str_rstrip(substr($r, strlen($routeName)+1), ".".LocaleProvider::getDefaultLang());
-
-                return null;
-            }
-
-        , $routeNames));
+        return array_unique($routeGroups);
     }
 
     public function match(string $pathinfo): array

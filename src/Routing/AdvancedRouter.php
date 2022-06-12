@@ -127,50 +127,44 @@ class AdvancedRouter implements AdvancedRouterInterface
     public function getRequestUri(): ?string { return $this->getRequest() ? $this->getRequest()->getRequestUri() : $_SERVER["REQUEST_URI"] ?? null; }
     public function getRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
 
-    private $route = [];
+    //
+    // NB: Don't get confused, here. This route is not same annotation and...
+    // ... is computed based on compiled routes from generator (not matcher)
+    protected array $routes = [];
     public function getRoute(?string $routeNameOrUrl = null): ?Route
     {
         if ($routeNameOrUrl === null)
             $routeNameOrUrl = $this->getRequestUri();
 
-        if(array_key_exists($routeNameOrUrl, $this->route))
-            return $this->route[$routeNameOrUrl];
-
         $routeName = $this->getRouteName($routeNameOrUrl);
-        $generator = $this->router->getGenerator();
-        $matcher   = $this->router->getMatcher();
+        if(array_key_exists($routeName, $this->routes))
+            return $this->routes[$routeName];
 
-        if(!$generator instanceof AdvancedUrlGenerator || !$matcher instanceof AdvancedUrlMatcher)
-            return $this->router->getRouteCollection()->get($routeName) ?? null;
+        $generator = $this->getGenerator();
+        $matcher   = $this->getMatcher();
+        $lang      = $this->localeProvider->getLang();
 
         $compiledRoutes = $generator->getCompiledRoutes();
-        $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName.".".$this->localeProvider->getLang()] ?? null;
+        $compiledRoute = $compiledRoutes[$routeName] ?? $compiledRoutes[$routeName.".".$lang] ?? null;
         if($compiledRoute !== null) {
 
             $args = array_transforms(fn($k, $v): array => [$k, in_array($k, [3,4]) ? $matcher->path($v) : $v], $compiledRoute);
             $locale = $args[1]["_locale"] ?? null;
             $locale = $locale ? ["_locale" => $locale] : [];
 
-            $this->route[$routeName] = new Route(
+            $this->routes[$routeName] = new Route(
                 $args[3],
                 array_intersect_key($args[1], array_flip($args[0])),
                 array_merge($locale, $args[2]), [],
                 $args[4], $args[5], $args[6]
             );
 
-            return $this->route[$routeName];
+            return $this->routes[$routeName];
         }
 
         return null;
     }
 
-    public function getRouteDefaults(?string $routeNameOrUrl = null): array
-    {
-        $route = $this->getRoute($routeNameOrUrl);
-        return $route ? $route->getDefaults() : [];
-    }
-
-    public function hasRoute(string $routeUrl) : bool { return $this->getRouteName($routeUrl) !== null; }
     public function getRouteName(?string $routeUrl = null): ?string
     {
         if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());
@@ -180,53 +174,27 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $routeMatch ? $routeMatch["_route"] : null;
     }
 
-    protected array $routeGroups;
-    public function getRouteGroups(string $routeName): array
+    public function getRouteGroups(string $routeNameOrUrl): array
     {
-        $hash = $this->getRouteHash($routeName);
+        $routeName = $this->getRouteName($routeNameOrUrl);
 
-        $this->routeGroups ??= $this->cacheRouteGroups->get() ?? [];
-        if(array_key_exists($hash, $this->routeGroups))
-            return $this->routeGroups[$hash];
+        $matcher = $this->router->getMatcher();
+        if ($matcher instanceof AdvancedUrlMatcher)
+           return $matcher->groups($routeName);
 
-        $generator = $this->router->getGenerator();
-        if ($generator instanceof AdvancedUrlGenerator)
-            $routeNames = array_keys($generator->getCompiledRoutes());
-
-        // The next line should never be triggered as the generator is overloaded in __constructor
-        if($routeNames === null) $routeNames = array_keys($this->getRouteCollection()->all());
-        $this->routeGroups[$hash] = $this->getMatcher()->groups($routeName);
-
-        if ($this->cacheRouteGroups !== null)
-            $this->cache->save($this->cacheRouteGroups->set($this->routeGroups));
-        return $this->routeGroups[$hash];
+        return $routeName ? [$routeName] : [];
     }
 
-    protected array $routeMatch;
     public function getRouteMatch(?string $routeUrl = null): ?array
     {
         if($routeUrl === null) $routeUrl = $this->getRequestUri();
 
-        $hash = $this->getRouteHash($routeUrl);
-
-        $this->routeMatch ??= $this->cacheRouteMatches->get() ?? [];
-        if(array_key_exists($hash, $this->routeMatch))
-            return $this->routeMatch[$hash];
-
-        try { $this->routeMatch[$hash] = $this->match($routeUrl); }
-        catch (ResourceNotFoundException $e) { $this->routeMatch[$hash] = null; }
-
-        if ($this->cacheRouteMatches !== null)
-            $this->cache->save($this->cacheRouteMatches->set($this->routeMatch));
-        return $this->routeMatch[$hash];
+        try { return $this->match($routeUrl); }
+        catch (ResourceNotFoundException $e) { return null; }
     }
 
-    public function getRouteHash(string $routeNameOrUrl, array $routeParameters = [], int $referenceType = UrlGenerator::ABSOLUTE_PATH)
+    public function getRouteHash(string $routeNameOrUrl)
     {
-        return $routeNameOrUrl . ";" .
-            serialize($routeParameters).";".
-            $referenceType.";".
-            serialize($this->getContext()
-        );
+        return $routeNameOrUrl . ";" . serialize($this->getContext());
     }
 }

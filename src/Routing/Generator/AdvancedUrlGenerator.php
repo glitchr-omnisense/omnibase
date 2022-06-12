@@ -20,6 +20,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     protected $compiledRoutes;
 
     public function getCompiledRoutes():array { return $this->compiledRoutes; }
+
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
         // NB: This generator needs separate context as it internally calls its corresponding Matcher in generates..
@@ -37,7 +38,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
     {
         // Transforms requested route by adding parameters
         if($routeName === null) return null;
-
         if(($route = $this->getRouter()->getRoute($routeName))) {
 
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
@@ -56,6 +56,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                     $search  = array_map(fn($k) => "{".$k."}", array_keys($parse));
                     $replace = array_values($parse);
                     foreach($routeParameters as $key => &$routeParameter) {
+
                         $routeParameter = $routeParameter ? str_replace($search, $replace, $routeParameter) : $routeParameter;
                         if($key == "host") $routeParameter = str_lstrip($routeParameter, "www.");
                     }
@@ -125,60 +126,44 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         // Check whether the route is already cached
         $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
-        if(array_key_exists($hash, $this->cachedRoutes))
-            return $this->cachedRoutes[$hash];
+        if(array_key_exists($hash, $this->cachedRoutes)) {
 
-        // Implement route subgroup to improve connectivity
-        // between logical routes in case of multiple @Route annotations
-        $currentRouteName = $this->getRouter()->getRouteName();
-        $currentRouteName = $currentRouteName ? explode(".", $this->getRouter()->getRouteName()) : [];
-        $routeName = explode(".", $routeName) ?? $currentRouteName;
-
-        $routeGroup = count($routeName) > 1 ? tail($routeName) : null;
-        $routeGroup = $routeGroup ?? (count($currentRouteName) > 1 ? tail($currentRouteName) : null);
-        $routeGroup = $routeGroup ?? [];
-        $routeGroup = $routeGroup ? ".".implode(".",$routeGroup) : null;
-
-        $routeBase = $routeName[0];
-        $routeName = $routeBase.$routeGroup;
-        if(!$routeName) $routeName = $this->getRouter()->getRouteName($this->resolveUrl($routeBase, $routeParameters, $referenceType));
-
-        // Prepare the default route if not found.
-        // In case a group doesn't exists, it will be replaced by the first group found in the route collection list.
-        $routeGroups = $this->getRouter()->getRouteGroups($routeName);
-
-        $routeDefaultGroup = first($routeGroups);
-        $routeDefaultName = $routeBase.($routeDefaultGroup ? ".".$routeDefaultGroup : "");
-        if(!$routeDefaultName) $routeDefaultName = $this->getRouter()->getRouteName($this->resolveUrl($routeBase, $routeParameters, $referenceType));
-
-        //
-        // Strip unused variables from main group
-        $cachedRoutes = null;
-        try { $cachedRoutes      = $this->resolveUrl($routeBase, $routeParameters, $referenceType); }
-        catch(Exception $e) {}
-
-        $routeGroupUrl = null;
-        try { $routeGroupUrl = $this->resolveUrl($routeBase.$routeGroup, $routeParameters, $referenceType); }
-        catch(Exception $e) {}
-
-        if($routeGroupUrl !== null && $cachedRoutes !== null) {
-
-            $keys = array_keys(array_diff_key($this->getRouter()->getRouteDefaults($cachedRoutes), $this->getRouter()->getRouteDefaults($routeGroupUrl)));
-            $routeParameters = array_key_removes($routeParameters, ...$keys);
+            $cachedRoute = $this->cachedRoutes[$hash];
+            return $this->resolveUrl($cachedRoute["_name"], $routeParameters, $referenceType);
         }
+
+        $routeGroups  = $this->getRouter()->getRouteGroups($routeName);
+        $routeDefaultName = first($routeGroups);
+        $routes = array_filter(array_transforms(fn($k, $routeName): array => [$routeName, $this->getRouter()->getRoute($routeName)], $routeGroups));
 
         //
         // Try to compute subgroup (or base one)
-        try { $this->cachedRoutes[$hash] = $this->resolveUrl($routeName, $routeParameters, $referenceType); }
-        catch(Exception $e) { if ($routeDefaultName == $routeName) throw $e; }
+        $routeUrl = null;
+        $routeRequirements = $routes[$routeName]->getRequirements();
 
-        $this->cachedRoutes[$hash] ??= $this->resolveUrl($routeDefaultName, $routeParameters, $referenceType);
+        try { $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType); }
+        catch(Exception $e) {
+
+            if ($routeName == $routeDefaultName) throw $e;
+
+            $routeName = $routeDefaultName;
+            $routeRequirements = $routes[$routeName]->getRequirements();
+            $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
+        }
 
         $cache = $this->getRouter()->getCache();
         $cacheRoutes = $this->getRouter()->getCacheRoutes();
-        if($cacheRoutes !== null) $cache->save($cacheRoutes->set($this->cachedRoutes));
+        if($cacheRoutes !== null) {
 
-        return $this->cachedRoutes[$hash];
+            $this->cachedRoutes[$hash] = [
+                "_name" => $routeName,
+                "_requirements" => $routeRequirements
+            ];
+
+            $cache->save($cacheRoutes->set($this->cachedRoutes));
+        }
+
+        return $routeUrl;
     }
 
     public function format(string $url): string {
