@@ -15,12 +15,10 @@ use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
 use Base\Security\RescueFormAuthenticator;
-use Base\Service\ParameterBagInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Symfony\Component\HttpKernel\Event\TerminateEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Security\Http\Event\LogoutEvent;

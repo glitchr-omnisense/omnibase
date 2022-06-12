@@ -1,15 +1,19 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
+
+{% set leadingHash = field.customOptions.get('leadingHash') ? "#" : "" %}
+
 {% if field.formattedValue is iterable %}
+
     <span class="badge badge-secondary" title="{{ field.value }}">
         {% if field.formattedValue['url'] is defined and field.formattedValue['url'] is not null %}
             {{ clipboard("copy", field.formattedValue['url'], {style:"font-size:13pt; margin-right:0.25em;"}) }}
-            <a href="{{ field.formattedValue['url'] }}">#{{ field.formattedValue['slug']|raw|nl2br }}</a>
+            <a href="{{ field.formattedValue['url'] }}">{{leadingHash ~ field.formattedValue['slug']|raw|nl2br }}</a>
         {% else %}
             #{{ field.formattedValue['slug']|raw|nl2br }}
         {% endif %}
     </span>
 {% else %}
-    <span class="badge badge-secondary" title="{{ field.value }}">#{{ field.formattedValue|raw|nl2br }}</span>
+    <span class="badge badge-secondary" title="{{ field.value }}">{{ leadingHash ~ field.formattedValue|raw|nl2br }}</span>
 {% endif %}

@@ -14,6 +14,7 @@ final class SlugField implements FieldInterface
 {
     use FieldTrait;
 
+    public const OPTION_LEADING_HASH = 'leadingHash';
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
     public const OPTION_UNLOCK_CONFIRMATION_MESSAGE = 'unlockConfirmationMessage';
 
@@ -25,6 +26,7 @@ final class SlugField implements FieldInterface
             ->setTemplateName('crud/field/text')
             ->setTemplatePath('@EasyAdmin/crud/field/slug.html.twig')
             ->setFormType(SlugType::class)
+            ->showLeadingHash()
             ->setCustomOption(self::OPTION_TARGET_FIELD_NAME, null)
             ->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, null)
             ->addCssClass('field-text')
@@ -47,6 +49,12 @@ final class SlugField implements FieldInterface
     {
         $this->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, $message);
 
+        return $this;
+    }
+
+    public function showLeadingHash(bool $show = true): self
+    {
+        $this->setCustomOption(self::OPTION_LEADING_HASH, $show);
         return $this;
     }
 }

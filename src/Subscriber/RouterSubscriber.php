@@ -33,8 +33,8 @@ class RouterSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $route = $this->router->getRoute();
         if(!$event->isMainRequest()) return ;
+        $route = $this->router->getRoute();
 
         //
         // Redirect IP if restriction enabled

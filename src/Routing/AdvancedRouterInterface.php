@@ -24,5 +24,5 @@ interface AdvancedRouterInterface extends RouterInterface, RequestMatcherInterfa
     public function getRouteName(?string $routeUrl = null): ?string;
     public function getRouteMatch(?string $routeUrl = null): ?array;
     public function getRouteDefaults(?string $routeNameOrUrl = null): array;
-    public function getRouteGroups(?string $routeName): array;
+    public function getRouteGroups(string $routeName): array;
 }

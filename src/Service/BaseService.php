@@ -10,8 +10,6 @@ use Base\Traits\BaseTrait;
 use Base\Service\ParameterBagInterface;
 use Symfony\Component\Form\FormInterface;
 
-use Symfony\Component\HttpKernel\KernelInterface;
-
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
@@ -46,7 +44,12 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Contracts\EventDispatcher\Event;
 
-// TODO: Clean up advanced router proxy methods;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\KernelInterface;
+
 class BaseService implements RuntimeExtensionInterface
 {
     use BaseTrait;
@@ -168,6 +171,21 @@ class BaseService implements RuntimeExtensionInterface
 
         // EA provider
         $this->adminContextProvider = new AdminContextProvider($this->requestStack);
+    }
+
+    public function exec(string $command, array $arguments = [])
+    {
+        $application = new Application($this->kernel);
+        $application->setAutoExit(false);
+
+        $input = new ArrayInput(array_merge($arguments, ['command' => $command]));
+        $output = new BufferedOutput();
+        dump($input);
+        $application->run($input, $output);
+
+        $content = $output->fetch();
+        dump($content);
+        return new Response($content);
     }
 
     /*

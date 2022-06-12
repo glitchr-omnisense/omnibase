@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\Model\Sharer\SharerAdapterInterface;
 
-class SocialSharer
+class Sharer
 {
     protected $adapters = [];
     public function getAdapters() { return $this->adapters; }

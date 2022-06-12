@@ -9,6 +9,7 @@ use Symfony\Component\Asset\Packages;
 
 use DateTime;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class SettingBag implements SettingBagInterface
 {
@@ -19,11 +20,15 @@ class SettingBag implements SettingBagInterface
      */
     protected $packages;
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Packages $packages, string $environment)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityManager            = $classMetadataManipulator->getEntityManager();
         $this->settingRepository        = $classMetadataManipulator->getRepository(Setting::class);
+
+        $this->cache           = $cache;
+        $this->cacheName       = "setting_bag." . hash('md5', self::class);
+        $this->cacheSettingBag = !is_cli() ? $cache->getItem($this->cacheName) : null;
 
         $this->packages       = $packages;
         $this->localeProvider = $localeProvider;

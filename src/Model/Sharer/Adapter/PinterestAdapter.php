@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Model\SocialSharer\Adapter;
+namespace Base\Model\Sharer\Adapter;
 
-use Base\Model\SocialSharer\AbstractSharerAdapter;
+use Base\Model\Sharer\AbstractSharerAdapter;
 
 class PinterestAdapter extends AbstractSharerAdapter
 {

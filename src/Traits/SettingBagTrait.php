@@ -121,7 +121,7 @@ trait SettingBagTrait
         try {
 
             $fn = $path ? (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
-                          (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheAll" : "findAll");
+                        (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheAll" : "findAll");
 
             $settings = $this->settingRepository->$fn($path);
             if ($settings instanceof Query)
@@ -173,10 +173,10 @@ trait SettingBagTrait
 
             return $settings;
         }
-
         return $this->get($path, $locale)["_self"] ?? null;
     }
 
+    protected array $settingBag;
     public function get(null|string|array $path = null, ?string $locale = null): array
     {
         if(is_array($paths = $path)) {
@@ -188,9 +188,16 @@ trait SettingBagTrait
             return $settings;
         }
 
+        $this->settingBag ??= $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
+        if(array_key_exists($path.":".$locale, $this->settingBag))
+            return $this->settingBag[$path.":".$locale];
+
         $values = $this->getRaw($path) ?? [];
 
-        return array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
+        $this->settingBag[$path.":".$locale] = $this->settingBag[$path.":".$locale] ?? array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
+        if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+
+        return $this->settingBag[$path.":".$locale];
     }
 
     public function set(string $path, $value, ?string $locale = null)
@@ -200,6 +207,9 @@ trait SettingBagTrait
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
 
         $setting->translate($locale)->setValue($value);
+        unset($this->settingBag[$path.":".$locale]);
+
+        if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
         $this->entityManager->flush();
         return $this;
@@ -241,6 +251,8 @@ trait SettingBagTrait
     {
         $setting = $this->settingRepository->findOneByInsensitivePath($path);
         if($setting instanceof Setting) {
+
+            unset($this->settingBag[$path]);
 
             $this->entityManager->remove($setting);
             $this->entityManager->flush();

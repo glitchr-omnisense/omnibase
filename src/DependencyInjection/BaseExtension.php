@@ -44,7 +44,7 @@ class BaseExtension extends Extension
         $container->registerForAutoconfiguration(EntityExtensionInterface::class)->addTag('base.entity_extension');
         $container->registerForAutoconfiguration(AnnotationInterface::class)->addTag('base.annotation');
         $container->registerForAutoconfiguration(IconAdapterInterface::class)->addTag('base.icon_provider');
-        $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.social_sharer');
+        $container->registerForAutoconfiguration(SharerAdapterInterface::class)->addTag('base.service.sharer');
         $container->registerForAutoconfiguration(CurrencyApiInterface::class)->addTag('base.currency_api');
     }
 

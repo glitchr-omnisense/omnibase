@@ -516,8 +516,6 @@ class EntityHydrator
         return $this;
     }
 
-
-
     protected function findAssociation($entityName, $identifier): mixed
     {
         if(is_object($identifier)) return $identifier;

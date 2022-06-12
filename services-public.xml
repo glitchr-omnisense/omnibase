@@ -12,7 +12,7 @@
 
         <service id="base.service" alias="Base\Service\BaseService" />
         <service id="base.service.icon" alias="Base\Service\IconProvider" />
-        <service id="base.service.sharer" alias="Base\Service\SocialSharer" />
+        <service id="base.service.sharer" alias="Base\Service\Sharer" />
 
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
@@ -20,8 +20,8 @@
         <service id="base.service.file" alias="Base\Service\FileService" />
         <service id="Base\Service\FileServiceInterface" alias="base.service.file"/>
 
-        <service id="base.service.obfuscator" alias="Base\Service\Obfuscator" />
-        <service id="Base\Service\ObfuscatorInterface" alias="base.service.obfuscator"/>
+        <service id="obfuscator" alias="Base\Service\Obfuscator" />
+        <service id="Base\Service\ObfuscatorInterface" alias="obfuscator"/>
 
         <service id="base.filesystem" alias="Base\Service\Filesystem" />
         <service id="setting_bag" alias="Base\Service\Settings" />
@@ -33,8 +33,8 @@
         <service id="Base\Notifier\NotifierInterface" alias="base.notifier"/>
         <service id="base.translator" alias="Base\Service\Translator" />
         <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
-        <service id="base.parameter_bag" alias="Base\Service\ParameterBag" />
-        <service id="Base\Service\ParameterBagInterface" alias="base.parameter_bag"/>
+        <service id="parameter_bag.hot" alias="Base\Service\ParameterBag" />
+        <service id="Base\Service\ParameterBagInterface" alias="parameter_bag.hot"/>
         <service id="base.widget_provider" alias="Base\Service\WidgetProvider" />
         <service id="Base\Service\WidgetProviderInterface" alias="base.widget_provider"/>
         <service id="base.paginator" alias="Base\Service\Paginator" />

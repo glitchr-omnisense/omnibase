@@ -1,10 +1,10 @@
 <?php
 
-namespace Base\Model\SocialSharer\Adapter;
+namespace Base\Model\Sharer\Adapter;
 
-use Base\Model\SocialSharer\AbstractSharerAdapter;
+use Base\Model\Sharer\AbstractSharerAdapter;
 
-class FacebookAdapter extends AbstractSharerAdapter
+class TwitterAdapter extends AbstractSharerAdapter
 {
     // public static function getName(): string { return "fa"; }
     // public static function getOptions(): array { return ["class" => "fa-fw"]; }

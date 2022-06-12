@@ -20,7 +20,7 @@ class SettingCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function () {
 
-            yield SlugField::new('path')->setColumns(6)->setTargetFieldName("translations.label");
+            yield SlugField::new('path')->showLeadingHash(false)->setColumns(6)->setTargetFieldName("translations.label");
             yield TextField::new('bag')->setColumns(6);
             yield BooleanField::new('locked')->setColumns(6)->withConfirmation();
 

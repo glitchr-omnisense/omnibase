@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Model\SocialSharer;
+namespace Base\Model\Sharer;
 
 interface SharerAdapterInterface
 {

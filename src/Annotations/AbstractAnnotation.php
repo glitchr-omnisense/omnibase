@@ -4,6 +4,7 @@ namespace Base\Annotations;
 
 use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Factory\EntityHydrator;
 use Base\Service\Filesystem;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -148,7 +149,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
         return $entityData;
     }
 
-    public static function getOldEntity($entity): ?object { return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity)); }
+    public static function getOldEntity($entity): ?object { return self::getEntityFromData(get_class($entity), self::getOldEntityData($entity), [], EntityHydrator::OBJECT_PROPERTIES); }
     public static function getOldEntityData($entity): ?array
     {
         $changeSet  = self::getEntityChangeSet($entity);

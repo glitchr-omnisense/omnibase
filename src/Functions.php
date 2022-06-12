@@ -647,6 +647,7 @@ namespace {
 
         return $haystack;
     }
+
     function str_lstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
         if($haystack === null) return null;
@@ -1171,12 +1172,17 @@ namespace {
         $image->destroy();
     }
 
+    define("ARRAY_USE_KEYS"  , 0);
+    define("ARRAY_USE_VALUES", 1);
+    function array_contains   (array $haystack, string $needle, int $mode = ARRAY_USE_KEYS) { return array_filter($haystack, fn($k,$v) => str_contains   ($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH); }
+    function array_starts_with(array $haystack, string $needle, int $mode = ARRAY_USE_KEYS) { return array_filter($haystack, fn($k,$v) => str_starts_with($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH); }
+    function array_ends_with  (array $haystack, string $needle, int $mode = ARRAY_USE_KEYS) { return array_filter($haystack, fn($k,$v) => str_ends_with  ($mode == ARRAY_USE_KEYS ? $k : $v, $needle), ARRAY_FILTER_USE_BOTH); }
+
     define("FORMAT_IDENTITY",     0); // "no changes"
     define("FORMAT_TITLECASE",    1); // Lorem Ipsum Dolor Sit Amet
     define("FORMAT_SENTENCECASE", 2); // Lorem ipsum dolor sit amet
     define("FORMAT_LOWERCASE",    3); // lorem ipsum dolor sit amet
     define("FORMAT_UPPERCASE",    4); // LOREM IPSUM DOLOR SIT AMET
-
     function call_user_func_with_defaults(callable $fn, ...$args): mixed
     {
         $reflectionFn = new ReflectionFunction($fn);
@@ -1526,7 +1532,7 @@ namespace {
         return $keys;
     }
 
-    function array_occurence_removes(array $array, $value, int $limit = 1)
+    function array_occurrence_removes(array $array, $value, int $limit = 1)
     {
         while($limit-- > 0 && ($pos = array_search($value, $array)) !== false)
             array_splice($array, $pos, 1);

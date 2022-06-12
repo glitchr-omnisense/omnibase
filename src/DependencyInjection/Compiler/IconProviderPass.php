@@ -17,7 +17,7 @@ class IconProviderPass implements CompilerPassInterface
 
         $definition = $container->findDefinition(IconProvider::class);
 
-        $taggedServices = $container->findTaggedServiceIds('base.icon_provider');
+        $taggedServices = $container->findTaggedServiceIds('base.service.icon');
         foreach ($taggedServices as $id => $tags)
             $definition->addMethodCall('addAdapter', [new Reference($id)]);
     }

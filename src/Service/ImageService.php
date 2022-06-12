@@ -35,10 +35,10 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
 
-        $this->maxResolution = $parameterBag->get("base.image.max_resolution");
-        $this->maxQuality    = $parameterBag->get("base.image.max_quality");
-        $this->enableWebp    = $parameterBag->get("base.image.enable_webp");
-        $this->noImage       = $parameterBag->get("base.image.no_image");
+        $this->maxResolution = $parameterBag->get("base.images.max_resolution");
+        $this->maxQuality    = $parameterBag->get("base.images.max_quality");
+        $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
+        $this->noImage       = $parameterBag->get("base.images.no_image");
 
         // Local cache directory for filtered images
         $this->localCache = "local.cache";

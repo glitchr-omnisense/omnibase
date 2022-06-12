@@ -11,13 +11,14 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
 use Symfony\Component\Routing\RequestContext;
-use Symfony\Component\Routing\Route;
 
 class AdvancedUrlGenerator extends CompiledUrlGenerator
 {
     use BaseTrait;
 
+    protected $cachedRoutes;
     protected $compiledRoutes;
+
     public function getCompiledRoutes():array { return $this->compiledRoutes; }
     public function __construct(array $compiledRoutes, RequestContext $context, LoggerInterface $logger = null, string $defaultLocale = null)
     {
@@ -27,6 +28,9 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
 
         $this->compiledRoutes = $compiledRoutes;
+        $this->cachedRoutes   = $this->getRouter()->getCacheRoutes() !== null
+            ? $this->getRouter()->getCacheRoutes()->get() ?? []
+            : [];
     }
 
     protected function resolveUrl(string $routeName, array $routeParameters = [], int $referenceType = self::ABSOLUTE_PATH): ?string
@@ -39,7 +43,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             if($route->getHost()) $referenceType = self::ABSOLUTE_URL;
             if(str_contains($route->getHost().$route->getPath(), "{") && str_contains($route->getHost().$route->getPath(), "}")) {
 
-                // dump($route->getHost().$route->getPath());
                 if(preg_match_all("/{(\w*)}/", $route->getHost().$route->getPath(), $matches)) {
 
                     $parse = parse_url2(get_url());
@@ -53,7 +56,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
                     $search  = array_map(fn($k) => "{".$k."}", array_keys($parse));
                     $replace = array_values($parse);
                     foreach($routeParameters as $key => &$routeParameter) {
-                        $routeParameter = str_replace($search, $replace, $routeParameter);
+                        $routeParameter = $routeParameter ? str_replace($search, $replace, $routeParameter) : $routeParameter;
                         if($key == "host") $routeParameter = str_lstrip($routeParameter, "www.");
                     }
                 }
@@ -77,16 +80,15 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         return $routeName ? parent::generate($routeName, [], $referenceType) : null;
     }
 
-    public function resolveParameters(?array $routeParameters = null)
+    public function resolveParameters(?array $routeParameters = null, int $referenceType = self::ABSOLUTE_PATH): ?array
     {
         if($routeParameters !== null) {
 
             // Use either parameters or $_SERVER variables to determine the host to provide
-            $parse = parse_url2(get_url(
-                array_pop_key("_scheme", $routeParameters) ?? $this->getSettingBag()->scheme(),
-                array_pop_key("_host", $routeParameters) ?? $this->getSettingBag()->host() ,
-                array_pop_key("_base_dir", $routeParameters) ?? $this->getSettingBag()->base_dir(),
-            ));
+            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getSettingBag()->scheme();
+            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getSettingBag()->host();
+            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getSettingBag()->base_dir();
+            $parse     = parse_url2(get_url($scheme, $host, $baseDir));
 
             if($parse && array_key_exists("host", $parse))
                 $this->getContext()->setHost($parse["host"]);
@@ -117,11 +119,14 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             catch (Exception $e ) { throw $e; }
         }
 
-        // dump("-----------------------");
-
         //
         // Update context
-        $routeParameters = $this->resolveParameters($routeParameters);
+        $routeParameters = $this->resolveParameters($routeParameters, $referenceType);
+
+        // Check whether the route is already cached
+        $hash = $this->getRouter()->getRouteHash($routeName, $routeParameters, $referenceType);
+        if(array_key_exists($hash, $this->cachedRoutes))
+            return $this->cachedRoutes[$hash];
 
         // Implement route subgroup to improve connectivity
         // between logical routes in case of multiple @Route annotations
@@ -148,25 +153,32 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         //
         // Strip unused variables from main group
-        try { $routeUrl      = $this->resolveUrl($routeBase, $routeParameters, $referenceType); }
-        catch(Exception $e) { $routeUrl = null; }
+        $cachedRoutes = null;
+        try { $cachedRoutes      = $this->resolveUrl($routeBase, $routeParameters, $referenceType); }
+        catch(Exception $e) {}
 
+        $routeGroupUrl = null;
         try { $routeGroupUrl = $this->resolveUrl($routeBase.$routeGroup, $routeParameters, $referenceType); }
-        catch(Exception $e) { $routeGroupUrl = null; }
+        catch(Exception $e) {}
 
-        if($routeGroupUrl !== null && $routeUrl !== null) {
+        if($routeGroupUrl !== null && $cachedRoutes !== null) {
 
-            $keys = array_keys(array_diff_key($this->getRouter()->getRouteDefaults($routeUrl), $this->getRouter()->getRouteDefaults($routeGroupUrl)));
+            $keys = array_keys(array_diff_key($this->getRouter()->getRouteDefaults($cachedRoutes), $this->getRouter()->getRouteDefaults($routeGroupUrl)));
             $routeParameters = array_key_removes($routeParameters, ...$keys);
         }
 
-
         //
         // Try to compute subgroup (or base one)
-        try { return $this->resolveUrl($routeName, $routeParameters, $referenceType); }
+        try { $this->cachedRoutes[$hash] = $this->resolveUrl($routeName, $routeParameters, $referenceType); }
         catch(Exception $e) { if ($routeDefaultName == $routeName) throw $e; }
 
-        return $this->resolveUrl($routeDefaultName, $routeParameters, $referenceType);
+        $this->cachedRoutes[$hash] ??= $this->resolveUrl($routeDefaultName, $routeParameters, $referenceType);
+
+        $cache = $this->getRouter()->getCache();
+        $cacheRoutes = $this->getRouter()->getCacheRoutes();
+        if($cacheRoutes !== null) $cache->save($cacheRoutes->set($this->cachedRoutes));
+
+        return $this->cachedRoutes[$hash];
     }
 
     public function format(string $url): string {

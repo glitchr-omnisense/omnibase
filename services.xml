@@ -102,6 +102,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="assets.packages" />
+            <argument type="service" id="cache.adapter" />
             <bind key="$environment">%kernel.environment%</bind>
         </service>
 
@@ -111,17 +112,17 @@
             <argument type="service" id="notifier.channel_policy" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="cache.adapter" />
-            <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="parameter_bag.hot" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\DependencyInjection\CacheWarmer" public="true" >
-            <tag name="kernel.cache_warmer" />
-            <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.service.icon" />
-        </service>
+        <service id="Base\Cache\IconWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
+        <service id="Base\Cache\ImageWarmer"       public="true"><tag name="kernel.cache_warmer" /></service>
+        <service id="Base\Cache\LocaleWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
+        <service id="Base\Cache\SpreadsheetWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
+        <service id="Base\Cache\UploadWarmer"      public="true" ><tag name="kernel.cache_warmer" /></service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
@@ -133,7 +134,7 @@
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="base.parameter_bag" />
+            <argument type="service" id="parameter_bag.hot" />
             <argument type="service" id="base.notifier" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="locale_provider" />
@@ -374,7 +375,7 @@
         <service id="Base\Service\FileService"  public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="router" />
-            <argument type="service" id="base.service.obfuscator" />
+            <argument type="service" id="obfuscator" />
             <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="base.filesystem" />
         </service>
@@ -403,11 +404,11 @@
         <service id="imagine.adapter.svg"     class="Base\Imagine\Svg\Imagine"><call method="setMetadataReader"><argument type="service" id="imagine.meta_data.reader" /></call></service>
 
 
-        <service id="Base\Service\SocialSharer" public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Service\Sharer" public="true"><tag name="twig.runtime" /></service>
 
-        <service id="Base\Model\SocialSharer\Adapter\FacebookAdapter" ><tag name="base.social_sharer" /></service>
-        <service id="Base\Model\SocialSharer\Adapter\TwitterAdapter"  ><tag name="base.social_sharer" /></service>
-        <service id="Base\Model\SocialSharer\Adapter\PinterestAdapter"><tag name="base.social_sharer" /></service>
+        <service id="Base\Model\Sharer\Adapter\FacebookAdapter" ><tag name="base.service.sharer" /></service>
+        <service id="Base\Model\Sharer\Adapter\TwitterAdapter"  ><tag name="base.service.sharer" /></service>
+        <service id="Base\Model\Sharer\Adapter\PinterestAdapter"><tag name="base.service.sharer" /></service>
 
         <service id="Base\Service\IconProvider" public="true">
             <tag name="twig.runtime" />
@@ -418,13 +419,13 @@
         </service>
 
         <service id="Base\Model\IconProvider\Adapter\FontAwesomeAdapter">
-            <tag name="base.icon_provider" />
+            <tag name="base.service.icon" />
             <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
             <bind key="$javascript">%base.vendor.font_awesome.javascript%</bind>
             <bind key="$stylesheet">%base.vendor.font_awesome.stylesheet%</bind>
         </service>
         <service id="Base\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
-            <tag name="base.icon_provider" />
+            <tag name="base.service.icon" />
             <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
         </service>
@@ -748,7 +749,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="base.service.obfuscator" />
+            <argument type="service" id="obfuscator" />
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.paginator" />

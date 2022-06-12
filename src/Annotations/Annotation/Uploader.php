@@ -6,8 +6,6 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Exception\InvalidMimeTypeException;
 use Base\Exception\InvalidSizeException;
-use Base\Exception\MissingPublicPathException;
-use Base\Validator\Constraints\File as ConstraintsFile;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -15,7 +13,6 @@ use Exception;
 
 use League\Flysystem\Local\LocalFilesystemAdapter;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
-use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
@@ -27,13 +24,13 @@ use Symfony\Component\Uid\Uuid;
  * @Annotation
  * @Target({"CLASS", "PROPERTY"})
  * @Attributes({
- *   @Attribute("storage",      type = "string"),
- *   @Attribute("pool",         type = "string"),
- *   @Attribute("missable",     type = "boolean"),
- *   @Attribute("fetch",        type = "boolean"),
- *
- *   @Attribute("max_size",     type = "string"),
- *   @Attribute("mime_types",   type = "array")
+ *   @Attribute("storage",    type = "string"),
+ *   @Attribute("pool",       type = "string"),
+ *   @Attribute("missable",   type = "boolean"),
+ *   @Attribute("fetch",      type = "boolean"),
+ *   @Attribute("max_size",   type = "string"),
+ *   @Attribute("mime_types", type = "array"),
+ *   @Attribute("formats",    type = "array")
  * })
  */
 class Uploader extends AbstractAnnotation
@@ -44,6 +41,7 @@ class Uploader extends AbstractAnnotation
     protected bool $fetch;
     protected bool $missable;
     protected array $config;
+    protected array $formats;
     protected array $mimeTypes;
     protected int   $maxSize;
 
@@ -56,6 +54,7 @@ class Uploader extends AbstractAnnotation
         $this->fetch     = $data["fetch"]      ?? false;
         $this->config    = $data["config"]     ?? [];
         $this->mimeTypes = $data["mime_types"] ?? [];
+        $this->formats   = $data["formats"]    ?? [];
 
         $this->maxSize   = str2dec($data["max_size"] ?? 8*UploadedFile::getMaxFilesize())/8;
     }
@@ -73,6 +72,7 @@ class Uploader extends AbstractAnnotation
     protected function getConfig(): array { return $this->config; }
 
     public function getStorage() { return $this->storage; }
+    public function getFormats() { return $this->formats; }
 
     public function getPool() { return $this->pool; }
     public function getMissable() { return $this->missable; }

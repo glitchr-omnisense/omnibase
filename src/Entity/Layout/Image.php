@@ -54,7 +54,7 @@ class Image implements IconizeInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-images"]; }
 
-    public function __toString() { return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.image.no_image") ?? ""; }
+    public function __toString() { return Uploader::getPublic($this, "source") ?? $this->getService()->getParameterBag("base.images.no_image") ?? ""; }
     public function __construct($src = null)
     {
         $this->crops = new ArrayCollection();
