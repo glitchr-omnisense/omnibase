@@ -4,7 +4,7 @@ namespace Base\Controller\UX;
 
 use Base\Annotations\Annotation\Sitemap;
 use Base\Annotations\AnnotationReader;
-use Base\Component\HttpFoundation\XmlResponse;
+use Base\Response\XmlResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 

@@ -2,7 +2,7 @@
 
 namespace Base\Subscriber;
 
-use Base\Component\HttpFoundation\Referrer;
+use Base\Service\ReferrerInterface;
 use Base\Entity\User;
 
 use Base\Service\BaseService;
@@ -15,6 +15,7 @@ use Base\Entity\User\Token;
 use Base\EntityEvent\UserEvent;
 use Base\Enum\UserRole;
 use Base\Security\RescueFormAuthenticator;
+use Base\Service\LocaleProvider;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -47,12 +48,15 @@ class SecuritySubscriber implements EventSubscriberInterface
         TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator,
         BaseService $baseService,
-        Referrer $referrer,
+        LocaleProvider $localeProvider,
+        ReferrerInterface $referrer,
         ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
+
+        $this->localeProvider = $localeProvider;
         $this->entityManager = $entityManager;
         $this->userRepository = $entityManager->getRepository(User::class);
 
@@ -73,7 +77,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onAccessRequest', 8], ['onKernelRequest', 8], ['onReferrerRequest', 2]],
+            RequestEvent::class    => [['onAccessRequest', 6], ['onKernelRequest', 5], ['onReferrerRequest', 2]],
             ResponseEvent::class   => ['onKernelResponse'],
 
             LoginSuccessEvent::class => ['onLoginSuccess'],
@@ -244,8 +248,12 @@ class SecuritySubscriber implements EventSubscriberInterface
                 else if(!$userAccess)  $msg = "user_restriction";
                 else $msg = "public_restriction";
 
-                $notification = new Notification("access_restricted.".$msg);
-                $notification->send("warning");
+                if(!$this->localeProvider->hasChanged()) {
+
+                    $notification = new Notification("access_restricted.".$msg);
+                    $notification->send("warning");
+                }
+
                 return;
             }
 

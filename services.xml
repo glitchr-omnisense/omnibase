@@ -17,7 +17,7 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Component\HttpFoundation\Referrer" public="true">
+        <service id="Base\Service\Referrer" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
         </service>
@@ -146,7 +146,7 @@
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">
-            <argument type="service" id="request_stack" />
+            <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
         </service>
@@ -320,6 +320,7 @@
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="locale_provider" />
+            <argument type="service" id="router" />
             <argument type="service" id="translator" />
         </service>
 
@@ -616,6 +617,7 @@
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="referrer" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>

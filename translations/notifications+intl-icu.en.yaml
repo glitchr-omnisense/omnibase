@@ -5,17 +5,17 @@ login:
         normal: "Hi {0}! You just logged in."
         alien :  "Welcome, visitor from the outside! Please consider signing up!"
         day:
-            first: "Have a good day, {0} !"
-            back: "Have a good day again, {0} !"
+            first: "Hello day, {0} !"
+            back: "Hello again, {0} !"
         morning:
-            first: "Have a good morning, {0} !"
-            back: "Have a good morning again, {0} !"
+            first: "Good morning, {0} !"
+            back: "Good morning again, {0} !"
         afternoon:
-            first: "Have a good afternoon, {0} !"
-            back: "Have a good afternoon again, {0} !"
+            first: "Good afternoon, {0} !"
+            back: "Good afternoon again, {0} !"
         evening:
-            first: "Have a good evening, {0} !"
-            back: "Have a good evening again, {0} !"
+            first: "Good evening, {0} !"
+            back: "Good evening again, {0} !"
 
     already: "You are already logged in !"
     partial: "You're partially logged in ! Please sign in to get full access right."

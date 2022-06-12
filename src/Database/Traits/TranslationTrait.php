@@ -50,7 +50,7 @@ trait TranslationTrait
 
     public function getLocale(): ?string
     {
-        if($this->locale) return LocaleProvider::getLang($this->locale).LocaleProvider::SEPARATOR.LocaleProvider::getCountry($this->locale);
+        if($this->locale) return $this->getLocaleProvider()->normalize($this->locale);
 
         if($this->getTranslatable() === null)
             return null;
@@ -60,7 +60,7 @@ trait TranslationTrait
 
     public function setLocale(string $locale)
     {
-        $this->locale = LocaleProvider::getLang($locale).LocaleProvider::SEPARATOR.LocaleProvider::getCountry($locale);
+        $this->locale = $this->getLocaleProvider()->normalize($locale);
         return $this;
     }
 

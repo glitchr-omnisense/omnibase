@@ -28,7 +28,7 @@ use Base\Entity\User\Token;
 use Base\Form\Type\Security\ResetPasswordType;
 use App\Repository\UserRepository;
 use Base\Annotations\Annotation\Iconize;
-use Base\Component\HttpFoundation\Referrer;
+use Base\Service\ReferrerInterface;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Base\Security\RescueFormAuthenticator;
@@ -53,7 +53,7 @@ class SecurityController extends AbstractController
      * @Route("/login", name="security_login")
      * @Iconize("fas fa-fw fa-sign-in-alt")
      */
-    public function Login(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
+    public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
         if($this->baseService->isMaintenance())
@@ -90,7 +90,7 @@ class SecurityController extends AbstractController
      * @Route("/logout", name="security_logout")
      * @Iconize("fas fa-fw fa-sign-out-alt")
      */
-    public function Logout(Referrer $referrer, Request $request)
+    public function Logout(ReferrerInterface $referrer, Request $request)
     {
         // If user is found.. go to the logout request page
         if($this->getUser()) {

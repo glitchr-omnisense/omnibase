@@ -54,7 +54,7 @@ namespace {
             $parse["subdomain"] ?? null,
             $parse["domain"] ?? $parse["host"] ?? null,
             $parse["port"] ?? null,
-            str_replace("//", "/", $parse["path"] ?? null),
+            str_replace("//", "/", $parse["path"] ?? ""),
             $parse["query"] ?? null);
     }
 
@@ -77,9 +77,11 @@ namespace {
 
         $query     =  $query ? "?".$query : null;
 
-        return $scheme.$machine.$subdomain.$domain.$user.$password.$path.$query;
+        $url = $scheme.$machine.$subdomain.$domain.$user.$password.$path.$query;
+        return $url ? $url : "/";
     }
 
+    // NB: Path variable should not be removed, at most empty string..
     function parse_url2(string $url, int $component = -1): array|string|int|false|null
     {
         $noscheme = !str_contains($url, "://");
@@ -88,15 +90,16 @@ namespace {
         $parse = parse_url($url, $component);
         if($parse === false) return false;
 
-        foreach($parse as $_)
-            $_ = str_lstrip("file://", $_);
+        foreach($parse as &$_)
+            $_ = str_lstrip($_, "file://");
 
         if($noscheme) unset($parse["scheme"]);
 
         $path = str_rstrip($parse['path'] ?? "", "/");
         $parse["path"] = str_replace("//", "/", $path);
 
-        $root = str_rstrip($url, $parse['path']);
+        $root = str_strip($url, "file://", [$parse['path'], "/"]);
+
         if(!empty($root)) $parse["root"] = $root;
 
         if(array_key_exists("host", $parse)) {
@@ -120,11 +123,11 @@ namespace {
 
                 if(array_key_exists("subdomain", $parse)) {
 
-                    $_ = explode(".", $parse["subdomain"]);
-                    $parse["subdomain"] = array_pop($_);
+                    $list = explode(".", $parse["subdomain"]);
+                    $parse["subdomain"] = array_pop($list);
 
-                    if(!empty($_))
-                        $parse["machine"] = implode(".", $_);
+                    if(!empty($list))
+                        $parse["machine"] = implode(".", $list);
                 }
 
                 $domain = explode(".", $match[0]);
@@ -620,11 +623,7 @@ namespace {
     function str_strip(?string $haystack, array|string $lneedle = " ", array|string $rneedle = " ", bool $recursive = true): ?string { return str_rstrip(str_lstrip($haystack, $lneedle, $recursive), $rneedle, $recursive); }
     function str_rstrip(?string $haystack, array|string $needle = " ", bool $recursive = true): ?string
     {
-        if(empty($needle)) return $haystack;
-        $needleLength = strlen($needle);
-
         if($haystack === null) return null;
-
         if(is_array($needle)) {
 
             $lastHaystack = null;
@@ -639,6 +638,8 @@ namespace {
         }
 
         $needleLength = strlen($needle);
+        if(!$needleLength) return $haystack;
+
         while(strlen($haystack) === strrpos($haystack, $needle) + $needleLength) {
 
             $haystack = substr($haystack, 0, strlen($haystack)-$needleLength);
@@ -664,8 +665,11 @@ namespace {
             return $haystack;
         }
 
+        $needleLength = strlen($needle);
+        if(!$needleLength) return $haystack;
+
         while(!empty($needle) && 0 === strpos($haystack, $needle)) {
-            $haystack = substr($haystack, strlen($needle));
+            $haystack = substr($haystack, $needleLength);
             if(!$recursive) break;
         }
 

@@ -6,6 +6,7 @@ use Base\Routing\Generator\AdvancedUrlGenerator;
 use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;
 use Exception;
+use Generator;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
@@ -27,12 +28,13 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     {
         return [
             '_controller' => 'Symfony\\Bundle\\FrameworkBundle\\Controller\\RedirectController::urlRedirectAction',
-            'path' => $path,
-            'permanent' => true,
-            'scheme' => $scheme,
-            'httpPort' => $this->context->getHttpPort(),
-            'httpsPort' => $this->context->getHttpsPort(),
-            '_route' => $route,
+            '_route'      => $route,
+
+            'path'        => $path,
+            'permanent'   => true,
+            'scheme'      => $scheme,
+            'httpPort'    => $this->context->getHttpPort(),
+            'httpsPort'   => $this->context->getHttpsPort(),
         ];
     }
 
@@ -51,21 +53,27 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
     public function groups(?string $routeName): array
     {
-        $routeNames = null;
 
         $generator = $this->getRouter()->getGenerator();
         if ($generator instanceof AdvancedUrlGenerator)
             $routeNames = array_keys($generator->getCompiledRoutes());
 
         // The next line should never be triggered as the generator is overloaded in __constructor
-        if($routeNames === null) $routeNames = array_keys($this->getRouter()->getRouteCollection()->all());
+        $routeNames ??= array_keys($this->getRouter()->getRouteCollection()->all());
 
         $routeName = explode(".", $routeName ?? "")[0];
-        $routeGroups = array_filter($routeNames, fn($r) => $r === $routeName || str_starts_with($r, $routeName."."));
-        $routeGroups = array_merge(
-            array_map(fn($r) => str_rstrip($r, ".".LocaleProvider::getDefaultLang()), $routeGroups),
-            $routeGroups
-        );
+        $routeGroups = array_transforms(function($k,$_routeName) use ($routeName) : ?Generator {
+
+            if($_routeName !== $routeName && !str_starts_with($_routeName, $routeName."."))
+                return null;
+
+            $_routeNameWithoutLocale = str_rstrip($_routeName, ".".LocaleProvider::getDefaultLang());
+            if($_routeName != $_routeNameWithoutLocale)
+                yield null => $_routeNameWithoutLocale;
+
+            yield null => $_routeName;
+
+        }, $routeNames);
 
         return array_unique($routeGroups);
     }
@@ -87,8 +95,9 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
         $parse = parse_url2(get_url()) ?? [];
         $parse = array_merge($parse, $parsePathinfo);
-
         $this->getContext()->setHost($parse["host"] ?? "");
-        return parent::match($parse["path"] ?? $pathinfo);
+
+        try { return parent::match($parse["path"] ?? $pathinfo); }
+        catch(Exception $e) { throw $e; }
     }
 }

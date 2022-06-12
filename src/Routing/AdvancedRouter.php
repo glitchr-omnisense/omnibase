@@ -12,7 +12,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
@@ -38,11 +37,11 @@ class AdvancedRouter implements AdvancedRouterInterface
         $this->parameterBag = $parameterBag;
         $this->localeProvider = $localeProvider;
 
-        $this->cache             = $cache;
+        $this->cache             = !is_cli() && $parameterBag->get("base.router.use_cache") ? $cache : null;
         $this->cacheName         = "router." . hash('md5', self::class);
-        $this->cacheRoutes       = !is_cli() ? $cache->getItem($this->cacheName.".routes") : null;
-        $this->cacheRouteMatches = !is_cli() ? $cache->getItem($this->cacheName.".route_matches" ) : null;
-        $this->cacheRouteGroups  = !is_cli() ? $cache->getItem($this->cacheName.".route_groups" ) : null;
+        $this->cacheRoutes       = $cache ? $cache->getItem($this->cacheName.".routes") : null;
+        $this->cacheRouteMatches = $cache ? $cache->getItem($this->cacheName.".route_matches" ) : null;
+        $this->cacheRouteGroups  = $cache ? $cache->getItem($this->cacheName.".route_groups" ) : null;
 
         $this->useCustomRouter = $parameterBag->get("base.router.use_custom_engine");
         $this->keepMachine     = $parameterBag->get("base.router.shorten.keep_machine");
@@ -60,6 +59,7 @@ class AdvancedRouter implements AdvancedRouterInterface
         return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : [];
     }
 
+    public function getLang(?string $locale = null):string { return $this->localeProvider->getLang($locale); }
     public function isBackOffice(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
     public function isProfiler(mixed $request = null)
     {
@@ -153,7 +153,7 @@ class AdvancedRouter implements AdvancedRouterInterface
             $locale = $locale ? ["_locale" => $locale] : [];
 
             $this->routes[$routeName] = new Route(
-                $args[3],
+                sanitize_url($args[3]),
                 array_intersect_key($args[1], array_flip($args[0])),
                 array_merge($locale, $args[2]), [],
                 $args[4], $args[5], $args[6]
@@ -193,8 +193,8 @@ class AdvancedRouter implements AdvancedRouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
-    public function getRouteHash(string $routeNameOrUrl)
+    public function getRouteHash(string $routeNameOrUrl): string
     {
-        return $routeNameOrUrl . ";" . serialize($this->getContext());
+        return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localeProvider->getLang();
     }
 }

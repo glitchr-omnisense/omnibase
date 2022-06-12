@@ -4,7 +4,7 @@ namespace Base\Security;
 
 use App\Entity\User;
 use App\Enum\UserRole;
-use Base\Component\HttpFoundation\Referrer;
+use Base\Service\ReferrerInterface;
 use Base\Service\BaseService;
 use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -41,7 +41,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     protected $csrfTokenManager;
     protected $router;
 
-    public function __construct(Referrer $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
+    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
     {
         $this->referrer       = $referrer;
         $this->entityManager  = $entityManager;

@@ -5,7 +5,7 @@ namespace Base\Controller;
 use App\Entity\User              as User;
 
 use Base\Annotations\Annotation\Iconize;
-use Base\Component\HttpFoundation\Referrer;
+use Base\Service\ReferrerInterface;
 use Base\Form\Type\Security\LoginType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -40,7 +40,7 @@ class RescueController extends AbstractDashboardController
      * @Route("/rescue", name="security_rescue")
      * @Iconize({"fas fa-lock","fas fa-unlock"})
      */
-    public function LoginRescue(Request $request, Referrer $referrer, AuthenticationUtils $authenticationUtils): Response
+    public function LoginRescue(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // Last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();

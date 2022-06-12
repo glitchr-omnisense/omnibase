@@ -3,7 +3,7 @@
     <ul class="locale">
     {% for locale in available_locales %}
         {% set current = (locale == current_locale) ? "active" : null %}
-        <li><a href="{{ path(switch_route, {locale: locale}) }}" {{ html_attributes({"class":current}) }}>{{ locale|country }} | {{ locale|lang_name|capitalize}}</a></li>
+        <li><a href="{{ path(switch_route, {_locale: locale|lang}) }}" {{ html_attributes({"class":current}) }}>{{ locale|country }} | {{ locale|lang_name|capitalize}}</a></li>
     {% endfor %}
     </ul>
 </div>

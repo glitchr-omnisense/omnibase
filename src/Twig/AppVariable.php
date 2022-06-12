@@ -2,7 +2,7 @@
 
 namespace Base\Twig;
 
-use Base\Component\HttpFoundation\Referrer;
+use Base\Service\ReferrerInterface;
 use Base\Service\LocaleProvider;
 use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
@@ -35,7 +35,7 @@ class AppVariable
      */
     protected $parameterBag;
 
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, SettingBag $settingBag, ParameterBagInterface $parameterBag, Referrer $referrer, Environment $twig, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, SettingBag $settingBag, ParameterBagInterface $parameterBag, ReferrerInterface $referrer, Environment $twig, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->settingBag  = $settingBag;
         $this->referrer  = $referrer;

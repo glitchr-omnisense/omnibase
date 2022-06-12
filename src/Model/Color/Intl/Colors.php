@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Component\Intl;
+namespace Base\Model\Color\Intl;
 
 use Symfony\Component\Intl\Exception\MissingResourceException;
 use Symfony\Component\Intl\Intl;

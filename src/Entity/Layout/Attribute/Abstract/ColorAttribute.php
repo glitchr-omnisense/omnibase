@@ -2,7 +2,7 @@
 
 namespace Base\Entity\Layout\Attribute\Abstract;
 
-use Base\Component\Intl\Colors;
+use Base\Model\Color\Intl\Colors;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Field\Type\ColorType;
 use Base\Model\IconizeInterface;

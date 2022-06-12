@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Component\Intl\Colors;
+use Base\Model\Color\Intl\Colors;
 use Base\Service\BaseService;
 use Base\Service\FileService;
 use Base\Service\IconProvider;

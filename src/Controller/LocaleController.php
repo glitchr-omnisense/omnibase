@@ -2,7 +2,7 @@
 
 namespace Base\Controller;
 
-use Base\Component\HttpFoundation\Referrer;
+use Base\Service\ReferrerInterface;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,7 +18,7 @@ class LocaleController extends AbstractController
      */
     protected $localeProvider;
 
-    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, Referrer $referrer)
+    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, ReferrerInterface $referrer)
     {
         $this->localeProvider = $localeProvider;
         $this->router         = $router;
@@ -26,32 +26,26 @@ class LocaleController extends AbstractController
     }
 
     /**
-     * @Route("/changeto/{locale}", name="locale_changeto")
+     * @Route("/change/to/{_locale}", name="locale_changeto")
      */
-    public function ChangeTo(Request $request, Referrer $referrer, ?string $locale = null)
+    public function ChangeTo(Request $request, ReferrerInterface $referrer, ?string $_locale = null)
     {
-        $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
-
-        $locale = $locale ? $this->localeProvider->getLocale($locale) : null;
-        if($locale === null)
+        if($_locale === null)
             $request->getSession()->remove('_locale');
-        else if (in_array($locale, $this->localeProvider->getAvailableLocales()))
-            $request->getSession()->set('_locale', $locale);
 
-        $lang = $locale ? ".".LocaleProvider::getLang($locale) : "";
+        $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
         $referrerName = $this->router->getRouteName(strval($referrer));
+        $referrer->setUrl(null);
+
         if($referrerName !== "locale_changeto") {
 
             $referrer->setUrl(null);
+            $lang = $_locale ? ".".$this->localeProvider->getLang($_locale) : "";
 
             try { return $this->redirect($this->router->generate($referrerName.$lang)); }
             catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName)); }
         }
 
-        $baseDir = $request->getBasePath();
-        if(!$baseDir) $baseDir = "/";
-
-        $referrer->setUrl(null);
-        return $this->redirect($baseDir);
+        return $this->redirect($request->getBasePath());
     }
 }

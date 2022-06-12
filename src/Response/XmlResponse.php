@@ -1,9 +1,8 @@
 <?php
 
-namespace Base\Component\HttpFoundation;
+namespace Base\Response;
 
 use DOMDocument;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class XmlResponse extends Response

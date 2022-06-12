@@ -28,7 +28,7 @@ class RouterSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        return [KernelEvents::REQUEST  => ['onKernelRequest', 256]];
+        return [KernelEvents::REQUEST  => ['onKernelRequest', 7]];
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -56,7 +56,7 @@ class RouterSubscriber implements EventSubscriberInterface
         // If no host specified in Route, then check the list of permitted subdomain
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_PATH", $route)) {
 
-            $event->setResponse(new RedirectResponse($this->router->format(get_url())));
+            $event->setResponse(new RedirectResponse(sanitize_url(get_url())));
             return $event->stopPropagation();
         }
     }

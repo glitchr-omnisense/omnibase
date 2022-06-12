@@ -408,8 +408,11 @@ class Configuration implements ConfigurationInterface
                             ->info('Use custom router')
                             ->defaultValue(True)
                             ->end()
-                    ->end()
-                    ->children()
+                        ->booleanNode('use_cache')
+                            ->info('Use cache router')
+                            ->defaultValue(True)
+                            ->end()
+
                         ->arrayNode('shorten')->addDefaultsIfNotSet()
                             ->children()
                                 ->booleanNode('keep_machine')
