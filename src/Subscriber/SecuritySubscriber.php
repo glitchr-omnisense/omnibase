@@ -223,6 +223,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onAccessRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
+        if(str_starts_with($event->getRequest()->getPathInfo(), "/_wdt")) return; // Special case for _wdt
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
@@ -268,6 +269,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // Prevent average guy to see the administration and debug tools
             if($this->baseService->isProfiler() && !$this->authorizationChecker->isGranted("BACKOFFICE"))
                 throw new NotFoundHttpException();
+
             if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKOFFICE"))
                 if(!$isSecurityRoute) throw new NotFoundHttpException();
 
