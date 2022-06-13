@@ -243,8 +243,6 @@ class FileType extends AbstractType implements DataMapperInterface
                 $view->vars['clippable'] = json_encode(array_transforms(function($k,$v):array {
                     return $v !== null ? [basename($v), $this->fileService->isImage($v)] : null;
                 }, array_filter($view->vars['value'])));
-
-                dump($form->getName(), $view->vars["path"]);
             }
 
             $view->vars["value"] = implode("|", array_map(fn($v) => $v !== null ? basename($v) : null, $view->vars["value"]));
@@ -252,7 +250,6 @@ class FileType extends AbstractType implements DataMapperInterface
         } else {
 
             $view->vars['path']      = $this->fileService->isImage($view->vars["value"]) ? $this->imageService->imagine($view->vars["value"]) : null;
-            dump($form->getName(), $view->vars["path"]);
             $view->vars['download']  = $this->fileService->downloadable($view->vars["value"]);
             $view->vars['clippable'] = $this->fileService->isImage($view->vars["value"]);
         }
