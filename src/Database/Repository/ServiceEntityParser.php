@@ -8,7 +8,6 @@ use Base\Database\Walker\TranslatableWalker;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use ReflectionClass;
@@ -1159,7 +1158,7 @@ class ServiceEntityParser
         return $qb;
     }
 
-    protected function orderBy(QueryBuilder $qb, $orderBy)
+    protected function orderBy(QueryBuilder $qb, string|array|null $orderBy)
     {
         if(!$orderBy) return $qb;
 

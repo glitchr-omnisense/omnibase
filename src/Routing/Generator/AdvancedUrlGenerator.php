@@ -4,7 +4,6 @@ namespace Base\Routing\Generator;
 
 use Base\Security\LoginFormAuthenticator;
 use Base\Security\RescueFormAuthenticator;
-use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -67,11 +66,11 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
 
         if(!str_ends_with($routeName, ".".$this->getRouter()->getLang())) {
-            try { return sanitize_url(parent::generate($routeName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType)); }
+            try { return parent::generate($routeName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
             catch (RouteNotFoundException $e) { }
         }
 
-        try { return sanitize_url(parent::generate($routeName, $routeParameters, $referenceType)); }
+        try { return parent::generate($routeName, $routeParameters, $referenceType); }
         catch (RouteNotFoundException $e) { throw $e; }
 
     }

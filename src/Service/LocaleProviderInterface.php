@@ -14,4 +14,6 @@ interface LocaleProviderInterface
     public static function getDefaultLocale(): ?string;
     public static function getFallbackLocales(): array;
     public static function getAvailableLocales(): array;
+
+    public static function normalize(string|array $locale, string $separator = LocaleProvider::SEPARATOR): string|array;
 }

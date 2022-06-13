@@ -47,6 +47,7 @@ class MaintenanceSubscriber implements EventSubscriberInterface
 
     public function onRequestEvent(RequestEvent $event)
     {
+        return;
         // Exception triggered
         if( empty($this->getCurrentRouteName($event)) ) return;
 

@@ -2,16 +2,12 @@
 
 namespace Base\Field;
 
-use Base\Field\Type\DiscriminatorType;
-
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class DiscriminatorField extends SelectField implements FieldInterface
 {
-    use FieldTrait;
 
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';
     public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';
@@ -24,7 +20,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
             ->setProperty($propertyName)
             ->setLabel($label ?? "Type")
             ->setTemplateName('crud/field/text')
-            ->setFormType(HiddenType::class)
+            ->setFormType(HiddenType::class) // To be replaced by DiscriminatorType once ready..
             ->setCustomOption(self::OPTION_SHOW, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_SHOW_FIRST, self::SHOW_ALL)
             ->setCustomOption(self::OPTION_DISCRIMINATOR_AUTOLOAD, false)

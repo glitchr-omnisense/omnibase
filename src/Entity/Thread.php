@@ -152,7 +152,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     }
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true, nullable=true)
+     * @ORM\Column(type="string", length=255, unique=true)
      * @Slugify(reference="title")
      */
     protected $slug;
@@ -377,11 +377,42 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
+    public function getKeywords(?string $locale = null, int $depth = 0): array
+    {
+        $keywords = $this->translate($locale)->getKeywords();
+        if($depth > 0) $keywords ??= ($this->getParent() ? $this->getParent()->getKeywords($locale, --$depth) : null);
+
+        return $keywords;
+    }
+
+    public function setKeywords(?string $keywords, ?string $locale = null, int $depth = 0)
+    {
+        if($depth > 0)
+            return $this->translate($locale)->setKeywords(empty($keywords) || $keywords === $this->getParent()->getKeywords($locale, --$depth) ? null : $keywords);
+
+        return $this->translate($locale)->setKeywords($keywords);
+    }
+
+    public function getHeadline(?string $locale = null, int $depth = 0): ?string
+    {
+        $headline = $this->translate($locale)->getHeadline();
+        if($depth > 0) $headline ??= ($this->getParent() ? $this->getParent()->getHeadline($locale, --$depth) : null);
+
+        return $headline;
+    }
+
+    public function setHeadline(?string $headline, ?string $locale = null, int $depth = 0)
+    {
+        if($depth > 0)
+            return $this->translate($locale)->setHeadline(empty($headline) || $headline === $this->getParent()->getHeadline($locale, --$depth) ? null : $headline);
+
+        return $this->translate($locale)->setHeadline($headline);
+    }
+
     public function getTitle(?string $locale = null, int $depth = 0): ?string
     {
         $title = $this->translate($locale)->getTitle();
-        if($depth > 0)
-            $title = $title ?? ($this->getParent() ? $this->getParent()->getTitle($locale, --$depth) : null);
+        if($depth > 0) $title ??= ($this->getParent() ? $this->getParent()->getTitle($locale, --$depth) : null);
 
         return $title;
     }
@@ -397,8 +428,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function getExcerpt(?string $locale = null, int $depth = 0): ?string
     {
         $excerpt = $this->translate($locale)->getExcerpt();
-        if($depth > 0)
-            $excerpt = $excerpt ?? ($this->getParent() ? $this->getParent()->getExcerpt($locale, --$depth) : null);
+        if($depth > 0) $excerpt ??= ($this->getParent() ? $this->getParent()->getExcerpt($locale, --$depth) : null);
 
         return $excerpt;
     }
@@ -414,8 +444,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function getContent(?string $locale = null, int $depth = 0): ?string
     {
         $content = $this->translate($locale)->getContent();
-        if($depth > 0)
-            $content = $content ?? ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
+        if($depth > 0) $content ??= ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
 
         return $content;
     }

@@ -153,7 +153,7 @@ class AdvancedRouter implements AdvancedRouterInterface
             $locale = $locale ? ["_locale" => $locale] : [];
 
             $this->routes[$routeName] = new Route(
-                sanitize_url($args[3]),
+                $args[3],
                 array_intersect_key($args[1], array_flip($args[0])),
                 array_merge($locale, $args[2]), [],
                 $args[4], $args[5], $args[6]

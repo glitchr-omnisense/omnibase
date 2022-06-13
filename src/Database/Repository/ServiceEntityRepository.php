@@ -6,6 +6,12 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
 
+
+/**
+ * @method Entity[]    findBy*(...array $customs,
+ *      array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ */
+
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
 {
     public static function getFqcnEntityName()

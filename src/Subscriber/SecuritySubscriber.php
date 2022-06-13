@@ -260,7 +260,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // In case of restriction: profiler is disabled
             if($this->profiler) $this->profiler->disable();
 
-                // Rescue authenticator must always be public
+            // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
             if($isSecurityRoute) return;
 

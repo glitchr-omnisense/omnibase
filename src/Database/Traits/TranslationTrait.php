@@ -4,8 +4,8 @@ namespace Base\Database\Traits;
 
 use Base\Database\TranslatableInterface;
 use Base\Service\LocaleProvider;
+use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
-use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints as Assert;
 
 trait TranslationTrait
@@ -50,7 +50,7 @@ trait TranslationTrait
 
     public function getLocale(): ?string
     {
-        if($this->locale) return $this->getLocaleProvider()->normalize($this->locale);
+        if($this->locale) return LocaleProvider::normalize($this->locale);
 
         if($this->getTranslatable() === null)
             return null;
@@ -60,7 +60,7 @@ trait TranslationTrait
 
     public function setLocale(string $locale)
     {
-        $this->locale = $this->getLocaleProvider()->normalize($locale);
+        $this->locale = LocaleProvider::normalize($locale);
         return $this;
     }
 

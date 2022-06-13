@@ -115,7 +115,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
             $propertyAccessor->setValue($entity, $property, $entityValue);
 
-        } else if($entityValue instanceof PersistentCollection) {
+        } else if($entityValue instanceof PersistentCollection && $entityValue->getOwner() == $entity) {
 
             $reflProp = new ReflectionProperty(PersistentCollection::class, "collection");
             $reflProp->setAccessible(true);

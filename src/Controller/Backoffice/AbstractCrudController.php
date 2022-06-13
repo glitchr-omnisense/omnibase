@@ -340,9 +340,13 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return parent::configureResponseParameters($responseParameters);
     }
 
+    protected $showId = true;
+    public function showId() { $this->showId = true;  }
+    public function hideId() { $this->showId = false; }
+
     public function configureFields(string $pageName, ...$args): iterable
     {
-        array_prepend($args, fn() => yield IdField::new());
+        array_prepend($args, fn() => yield ($this->showId ? IdField::new() : IdField::new()->hideOnIndex()) );
 
         $yields = $this->yield($args);
         $simpleYields      = array_filter_recursive(array_filter($yields, fn($k) => preg_match("/^[0-9.]+$/", $k), ARRAY_FILTER_USE_KEY));

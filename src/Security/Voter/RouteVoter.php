@@ -42,7 +42,9 @@ class RouteVoter extends Voter
                 return !array_key_exists("ip", $parse) || $this->parameterBag->get("base.host_restriction.ip_access");
 
             case self::VALIDATE_PATH:
-                return $url == sanitize_url($url);
+
+                $format = str_ends_with($this->router->getRoute($url)->getPath(), "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
+                return $url == sanitize_url($url, $format) || $url == sanitize_url($url);
 
             case self::VALIDATE_HOST:
 

@@ -2,8 +2,6 @@
 
 namespace Base\Subscriber;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Service\BaseService;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
@@ -16,8 +14,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Event\ResponseEvent;
-use Twig\Environment;
 
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
@@ -54,8 +50,10 @@ class EasyAdminSubscriber implements EventSubscriberInterface
         $crud = $this->adminContextProvider->getContext()->getCrud();
         if($crud == null) return;
         try {
+
             $entity = $this->adminContextProvider->getContext()->getEntity();
             $entityCrudController = AbstractCrudController::getCrudControllerFqcn($entity->getInstance());
+
         } catch (\TypeError $e) { return; }
 
         // Redirect to proper CRUD controller

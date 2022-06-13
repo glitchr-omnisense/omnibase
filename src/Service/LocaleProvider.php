@@ -48,7 +48,7 @@ class LocaleProvider implements LocaleProviderInterface
         $this->translator   = $translator;
 
         self::$defaultLocale    = self::$defaultLocale   ?? self::normalize($parameterBag->get("kernel.default_locale"));
-        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalizeArray($this->translator->getFallbackLocales());
+        self::$fallbackLocales  = self::$fallbackLocales ?? self::normalize($this->translator->getFallbackLocales());
     }
 
     protected static $isLate = null; // Turns on when on kernel request
@@ -138,12 +138,45 @@ class LocaleProvider implements LocaleProviderInterface
         $lang           = $this->getLang($locale);
         $langCountries  = $availableCountries[$lang] ?? $this->getLocales()[$lang] ?? [];
 
-        $country = $locale ? substr($locale,3,2) : null;
+        $country = substr($locale,3,2);
+        $country = $country ? $country : null;
         $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
 
         return $country;
     }
 
-    public function normalize(?string $locale, $separator = self::SEPARATOR): string { return $this->getLang($locale) . self::SEPARATOR . $this->getCountry($locale); }
-    public function normalizeArray(?array $locales): ?array { return array_map(fn ($l) => $this->normalize($l), $locales); }
+    public static function normalize(string|array $locale, string $separator = self::SEPARATOR): string|array
+    {
+        //
+        // Shape array elements
+        if(is_array($locale)) {
+
+            $locales = [];
+            foreach($locale as $l)
+                $locales[] = self::normalize($l, $separator);
+
+            return $locales;
+        }
+
+        //
+        // Correct length, perhaps wrong separator.. just normalize
+        if(strlen($locale) == 5) return substr($locale,0,2) . self::SEPARATOR . substr($locale,3,2);
+
+        //
+        // Missing information.. try to guess..
+        $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : null;
+        $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [substr($l,0,2), [substr($l,3,2)]] : null, self::getAvailableLocales());
+
+        $lang = $locale ? substr($locale,0,2) : null;
+        if ($lang === null || !array_key_exists($lang, self::getLocales()))
+            $lang = substr(self::getDefaultLocale(),0,2);
+
+        $langCountries  = $availableCountries[$lang] ?? [];
+
+        $country = substr($locale,3,2);
+        $country = $country ? $country : null;
+        $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
+
+        return $lang.self::SEPARATOR.$country;
+    }
 }

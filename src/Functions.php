@@ -34,11 +34,17 @@ namespace {
         return compose_url($scheme, null, null, null, null, $http_host, null, $request_uri == "/" ? null : $request_uri);
     }
 
-    function sanitize_url(string $url) { return format_url($url); }
+    define("SANITIZE_URL_STANDARD", 0);
+    define("SANITIZE_URL_NOMACHINE", 1);
+    define("SANITIZE_URL_NOSUBDOMAIN", 2);
+    define("SANITIZE_URL_KEEPSLASH", 4);
+    function sanitize_url(string $url, int $format = SANITIZE_URL_STANDARD) { return format_url($url, $format); }
 
-    define("FORMAT_URL_NOMACHINE", 1);
-    define("FORMAT_URL_NOSUBDOMAIN", 2);
-    function format_url(string $url, int $format = 0) : ?string
+    define("FORMAT_URL_STANDARD", SANITIZE_URL_STANDARD);
+    define("FORMAT_URL_NOMACHINE", SANITIZE_URL_NOMACHINE);
+    define("FORMAT_URL_NOSUBDOMAIN", SANITIZE_URL_NOSUBDOMAIN);
+    define("FORMAT_URL_KEEPSLASH", SANITIZE_URL_KEEPSLASH);
+    function format_url(string $url, int $format = FORMAT_URL_STANDARD) : ?string
     {
         $parse = parse_url2($url);
         if($parse === false) return null;
@@ -46,6 +52,7 @@ namespace {
         if($format & FORMAT_URL_NOMACHINE  ) $parse = array_key_removes($parse, "machine");
         if($format & FORMAT_URL_NOSUBDOMAIN) $parse = array_key_removes($parse, "subdomain");
 
+        $pathEndsWithSlash = str_ends_with($url, "/");
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
@@ -54,7 +61,7 @@ namespace {
             $parse["subdomain"] ?? null,
             $parse["domain"] ?? $parse["host"] ?? null,
             $parse["port"] ?? null,
-            str_replace("//", "/", $parse["path"] ?? ""),
+            str_replace("//", "/", $parse["path"] ?? "").( ($format & FORMAT_URL_KEEPSLASH) && $pathEndsWithSlash ? "/" : ""),
             $parse["query"] ?? null);
     }
 
@@ -1045,6 +1052,60 @@ namespace {
             return $keys[$position + 1];
 
         return false;
+    }
+
+    function is_multidimensional(array $array) {
+        return count($array) !== count($array, COUNT_RECURSIVE);
+    }
+
+    function array_filter_column(array $array, ?callable $callback = null): array
+    {
+        if(!is_multidimensional($array)) return $array;
+
+        $empties = [];
+        foreach(first($array) as $key => $_) {
+
+            $error = array_column($array, $key);
+            if(empty(array_filter($error, $callback)) ) $empties[] =  $key;
+        }
+
+        foreach($array as &$entry)
+            $entry = array_filter($entry, fn($e) => !in_array($e, $empties) );
+
+        return $array;
+    }
+
+    function dump_var(mixed $value)
+    {
+        echo "<pre>";
+        print_r($value);
+        echo "</pre>";
+    }
+
+    function str_accent($text) {
+
+        $utf8 = array(
+            '/[áàâãªä]/u'   =>   'a',
+            '/[ÁÀÂÃÄ]/u'    =>   'A',
+            '/[ÍÌÎÏ]/u'     =>   'I',
+            '/[íìîï]/u'     =>   'i',
+            '/[éèêë]/u'     =>   'e',
+            '/[ÉÈÊË]/u'     =>   'E',
+            '/[óòôõºö]/u'   =>   'o',
+            '/[ÓÒÔÕÖ]/u'    =>   'O',
+            '/[úùûü]/u'     =>   'u',
+            '/[ÚÙÛÜ]/u'     =>   'U',
+            '/ç/'           =>   'c',
+            '/Ç/'           =>   'C',
+            '/ñ/'           =>   'n',
+            '/Ñ/'           =>   'N',
+            '/–/'           =>   '-', // UTF-8 hyphen to "normal" hyphen
+            '/[’‘‹›‚]/u'    =>   ' ', // Literally a single quote
+            '/[“”«»„]/u'    =>   ' ', // Double quote
+            '/ /'           =>   ' ', // nonbreaking space (equiv. to 0x160)
+        );
+
+        return preg_replace(array_keys($utf8), array_values($utf8), $text);
     }
 
     function pathinfo_extension(string $path, ?string $extension = null)

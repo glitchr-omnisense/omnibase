@@ -6,7 +6,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
 use Base\Field\Type\ImageType;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 class ImageField extends FileField implements FieldInterface
 {
