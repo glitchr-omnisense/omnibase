@@ -277,6 +277,7 @@
             <argument type="service" id="error_handler.error_renderer.html" />
             <argument type="service" id="router" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\UX\SitemapController">

@@ -13,15 +13,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer;
 use Symfony\Component\ErrorHandler\Exception\FlattenException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 class ErrorController extends AbstractController
 {
     private $baseService;
-    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, BaseService $baseService)
+    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, BaseService $baseService, ?Profiler $profiler = null)
     {
         $this->baseService = $baseService;
         $this->router = $router;
         $this->htmlErrorRenderer = $htmlErrorRenderer;
+        $this->profiler = $profiler;
     }
 
     public function Main(\Throwable $exception)
@@ -50,6 +52,8 @@ class ErrorController extends AbstractController
 
     public function Rescue(\Throwable $exception): Response
     {
+        $this->profiler->disable();
+
         $flattenException = $this->htmlErrorRenderer->render($exception);
 
         ob_start();
