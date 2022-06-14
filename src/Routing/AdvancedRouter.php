@@ -75,6 +75,20 @@ class AdvancedRouter implements AdvancedRouterInterface
         return $route == "_wdt" || $route == "_profiler";
     }
 
+    public function isWdt(mixed $request = null)
+    {
+        if(!$request) $request = $this->requestStack->getCurrentRequest();
+        if ($request instanceof KernelEvent)
+            $request = $request->getRequest();
+        else if($request instanceof RequestStack)
+            $request = $request->getCurrentRequest();
+        else if(!$request instanceof Request)
+            return false;
+
+        $route = $this->getRouteName();
+        return $route == "_wdt";
+    }
+
     public function isEasyAdmin(mixed $request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();

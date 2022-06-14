@@ -620,6 +620,7 @@
             <argument type="service" id="base.service" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="referrer" />
+            <argument type="service" id="router" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
 

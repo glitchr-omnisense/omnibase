@@ -22,6 +22,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -50,11 +51,13 @@ class SecuritySubscriber implements EventSubscriberInterface
         BaseService $baseService,
         LocaleProvider $localeProvider,
         ReferrerInterface $referrer,
+        RouterInterface $router,
         ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->translator  = $translator;
+        $this->router  = $router;
 
         $this->localeProvider = $localeProvider;
         $this->entityManager = $entityManager;
@@ -223,7 +226,7 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onAccessRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
-        if(str_starts_with($event->getRequest()->getPathInfo(), "/_wdt")) return; // Special case for _wdt
+        if( $this->router->isWdt($event) ) return; // Special case for _wdt
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
