@@ -118,6 +118,7 @@
             <argument type="service" id="setting_bag" />
         </service>
 
+        <service id="Base\Cache\BaseWarmer"        public="true"><tag name="kernel.cache_warmer" priority="1"/><argument type="service" id="base.service" /></service>
         <service id="Base\Cache\IconWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
         <service id="Base\Cache\ImageWarmer"       public="true"><tag name="kernel.cache_warmer" /></service>
         <service id="Base\Cache\LocaleWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>

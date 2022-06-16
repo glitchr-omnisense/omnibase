@@ -76,6 +76,16 @@ class Uploader extends AbstractAnnotation
 
     public function getPool() { return $this->pool; }
     public function getMissable() { return $this->missable; }
+
+    public function getDeclaringEntity(mixed $entity, string $fieldName)
+    {
+        $entityName = is_object($entity) ? get_class($entity) : $entity;
+        $classMetadata = $this->getClassMetadata($entityName);
+        $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+
+        return $fieldMapping["declared"] ?? $entityName;
+    }
+
     public function getPath(mixed $entity, string $fieldName, ?string $uuid = null): ?string
     {
         $pool     = $this->pool;
@@ -84,13 +94,15 @@ class Uploader extends AbstractAnnotation
         if($uuid && !preg_match('/^[a-f0-9\-]{36}$/i', $uuid))
             return null;
 
+        // Find field declaring entity
+        $entity = $this->getDeclaringEntity($entity, $fieldName);
         $namespaceDir = "";
         if($entity) {
 
             $namespace = (is_string($entity) ? $entity : get_class($entity));
             $namespaceRoot = "Entity";
             $namespaceDir = implode("/", array_map("lcfirst", explode("\\",
-                                substr($namespace, strpos($namespace, $namespaceRoot)-1))
+                                substr($namespace, strpos($namespace, $namespaceRoot)+strlen($namespaceRoot)))
                             ));
         }
 
