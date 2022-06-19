@@ -59,6 +59,7 @@
 
         "phpoffice/phpspreadsheet": "^1.23",
         "easycorp/easyadmin-bundle": "^4.0",
+	"easycorp/easyadmin-no-final-plugin": "^1.0",
         "league/flysystem-bundle": "^2.2",
 
         "nelmio/security-bundle": "^3.0",

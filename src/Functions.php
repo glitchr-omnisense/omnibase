@@ -484,7 +484,7 @@ namespace {
         $unitPrefix = mb_strtolower(strrev($matches[2]));
         $units      = strrev($matches[1]);
 
-        if(in_array($units,  BIT_PREFIX)) $val *= 1; // LMFAO !
+        if(in_array($units,  BIT_PREFIX)) $val *= 1; // LMFAO
         if(in_array($units, BYTE_PREFIX)) $val *= 8;
         if ($unitPrefix) {
 

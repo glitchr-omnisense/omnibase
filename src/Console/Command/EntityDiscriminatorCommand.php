@@ -6,6 +6,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
@@ -18,10 +19,10 @@ use Symfony\Component\Console\Attribute\AsCommand;
 class EntityDiscriminatorCommand extends Command
 {
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        BaseService $baseService, LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($baseService, $localeProvider, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 

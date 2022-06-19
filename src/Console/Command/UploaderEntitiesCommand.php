@@ -23,10 +23,10 @@ use Symfony\Component\Console\Attribute\AsCommand;
 class UploaderEntitiesCommand extends Command
 {
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        BaseService $baseService, LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         UploadWarmer $uploadWarmer)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($baseService, $localeProvider, $translator, $entityManager, $parameterBag);
 
         $this->uploadWarmer = $uploadWarmer;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -38,11 +38,9 @@ class UploaderEntitiesCommand extends Command
         $this->addOption('property', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific property ?');
         $this->addOption('uuid', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific uuid ?');
 
-        $this->addOption('show',   false, InputOption::VALUE_NONE, 'Do you want to list entities using "Uploader" annotation ?');
         $this->addOption('warmup', false, InputOption::VALUE_NONE, 'Do you want to all formats based on "Uploader" annotation ?');
 
         $this->addOption('orphans',        false, InputOption::VALUE_NONE, 'Do you want to get orphans ?');
-        $this->addOption('show-orphans',   false, InputOption::VALUE_NONE, 'Do you want to show orphans ?');
         $this->addOption('delete-orphans', false, InputOption::VALUE_NONE, 'Do you want to delete orphans ?');
     }
 

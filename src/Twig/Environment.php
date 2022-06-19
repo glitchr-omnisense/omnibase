@@ -148,7 +148,6 @@ class Environment extends TwigEnvironment
             $this->htmlContent[$location] = [];
 
         $this->htmlContent[$location][] = $content;
-
         return $this;
     }
 }

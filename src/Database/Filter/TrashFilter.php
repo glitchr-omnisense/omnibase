@@ -15,7 +15,6 @@ class TrashFilter extends SQLFilter
 
     public function addFilterConstraint(ClassMetadata $targetEntity, $alias): string
     {
-
         if($this->getService()->isGranted(UserRole::SUPERADMIN)) return "";
 
         $trasheableAnnotation = AnnotationReader::getAnnotationReader()->getClassAnnotations($targetEntity->getName(), Trasheable::class);

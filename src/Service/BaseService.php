@@ -4,7 +4,6 @@ namespace Base\Service;
 
 use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
 use Base\Database\Factory\EntityHydratorInterface;
 use Base\Traits\BaseTrait;
 
@@ -179,15 +178,15 @@ class BaseService implements RuntimeExtensionInterface
      */
     public function settings() { return $this->getSettingBag(); } // Used in twig environment
 
-    public function getParameterTwig(string $name = "") { $this->getTwig()->getParameterTwig($name); }
-    public function addParameterTwig(string $name, $newValue) { $this->getTwig()->addParameterTwig($name, $newValue); }
-    public function hasParameterTwig(string $name) { $this->getTwig()->hasParameter($name); }
-    public function setParameterTwig(string $name, mixed $value) { $this->getTwig()->setParameter($name, $value); }
-    public function appendParameterTwig($name, mixed $value) { $this->getTwig()->appendParameter($name, $value); }
-    public function renderHtmlContent(string $location) { $this->getTwig()->renderHtmlContent($location); }
+    public function getParameterTwig(string $name = "") { return $this->getTwig()->getParameterTwig($name); }
+    public function addParameterTwig(string $name, $newValue) { return $this->getTwig()->addParameterTwig($name, $newValue); }
+    public function hasParameterTwig(string $name) { return $this->getTwig()->hasParameter($name); }
+    public function setParameterTwig(string $name, mixed $value) { return $this->getTwig()->setParameter($name, $value); }
+    public function appendParameterTwig($name, mixed $value) { return $this->getTwig()->appendParameter($name, $value); }
+    public function renderHtmlContent(string $location) { return $this->getTwig()->renderHtmlContent($location); }
     public function getHtmlContent(string $location) { return $this->getTwig()->getHtmlContent($location); }
     public function removeHtmlContent(string $location) { return $this->getTwig()->removeHtmlContent($location); }
-    public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = []) { $this->getTwig()->addHtmlContent($location,$contentOrArrayOrFile,$options); }
+    public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = []) { return $this->getTwig()->addHtmlContent($location,$contentOrArrayOrFile,$options); }
 
 
 

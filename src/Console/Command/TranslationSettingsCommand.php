@@ -3,6 +3,7 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
+use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -18,10 +19,10 @@ use Symfony\Component\Console\Attribute\AsCommand;
 class TranslationSettingsCommand extends Command
 {
     public function __construct(
-        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        BaseService $baseService, LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         SettingBagInterface $settingBag)
     {
-        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($baseService, $localeProvider, $translator, $entityManager, $parameterBag);
         $this->settingBag = $settingBag;
     }
 

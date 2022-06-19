@@ -111,8 +111,6 @@ class FormTypeExtension extends AbstractTypeExtension
         $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
         if($this->classMetadataManipulator->isEntity($dataClass)) {
 
-            $view->vars["is_dbcolumn"] = true;
-
             $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
             foreach($classMetadata->getFieldNames() as $fieldName) {
 
