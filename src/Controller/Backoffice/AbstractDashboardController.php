@@ -430,47 +430,41 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureActions(): Actions
     {
-        return parent::configureActions()
-            ->add(Crud::PAGE_INDEX, Action::DETAIL)
+        return Actions::new()
+            ->addBatchAction(Action::BATCH_DELETE)
 
-            ->update(Crud::PAGE_INDEX, Action::NEW,
+            ->add(Crud::PAGE_INDEX, Action::NEW,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
-            ->update(Crud::PAGE_INDEX, Action::DETAIL,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-search')->setLabel(""))
-            ->update(Crud::PAGE_INDEX, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt')->setLabel(""))
-            ->update(Crud::PAGE_INDEX, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt')->setLabel(""))
-
-            ->reorder(Crud::PAGE_DETAIL, [Action::INDEX, Action::DELETE,  Action::EDIT])
-            ->update(Crud::PAGE_DETAIL, Action::INDEX,
-            fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
-            ->update(Crud::PAGE_DETAIL, Action::EDIT,
+            ->add(Crud::PAGE_INDEX, Action::DETAIL,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-search'))
+            ->add(Crud::PAGE_INDEX, Action::EDIT,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
-            ->update(Crud::PAGE_DETAIL, Action::DELETE,
+            ->add(Crud::PAGE_INDEX, Action::DELETE,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
 
-            ->add(Crud::PAGE_EDIT, Action::INDEX) // Adding return button..
-            ->add(Crud::PAGE_EDIT, Action::DELETE)
-            ->add(Crud::PAGE_EDIT, Action::DETAIL)
-            ->update(Crud::PAGE_EDIT, Action::DETAIL,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-search')->setLabel(""))
-            ->update(Crud::PAGE_EDIT, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt')->setLabel(""))
-            ->update(Crud::PAGE_EDIT, Action::INDEX,
+            ->add(Crud::PAGE_DETAIL, Action::INDEX,
+            fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
+            ->add(Crud::PAGE_DETAIL, Action::EDIT,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
+            ->add(Crud::PAGE_DETAIL, Action::DELETE,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
+
+            ->add(Crud::PAGE_EDIT, Action::DETAIL,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-search'))
+            ->add(Crud::PAGE_EDIT, Action::DELETE,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
+            ->add(Crud::PAGE_EDIT, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
-            ->update(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-save'))
-            ->update(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE,
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
 
-            ->add(Crud::PAGE_NEW, Action::INDEX) // Adding return button..
-            ->reorder(Crud::PAGE_NEW, [Action::INDEX, Action::SAVE_AND_ADD_ANOTHER, Action::SAVE_AND_RETURN])
-            ->update(Crud::PAGE_NEW, Action::INDEX,
+            ->add(Crud::PAGE_NEW, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-backspace'))
-            ->update(Crud::PAGE_NEW, Action::SAVE_AND_RETURN,
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
-            ->update(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'));
     }
 

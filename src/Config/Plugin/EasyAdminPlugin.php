@@ -13,7 +13,7 @@ use Composer\IO\IOInterface;
 use Composer\Package\PackageInterface;
 use Composer\Plugin\PluginInterface;
 
-final class NoFinalClassPlugin implements PluginInterface, EventSubscriberInterface
+final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
 {
     private IOInterface $io;
 

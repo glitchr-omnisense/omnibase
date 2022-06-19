@@ -190,7 +190,6 @@
 
         <!-- Commands -->
         <service id="Base\Console\Command" public="true">
-            <argument type="service" id="base.service" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -299,6 +298,11 @@
         </service>
 
         <service id="Base\Subscriber\MaintenanceSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Subscriber\EagerSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.service" />
         </service>

@@ -21,11 +21,10 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'icon:entities', aliases:[], description:'')]
 class IconEntitiesCommand extends Command
 {
-    public function __construct(
-        BaseService $baseService, LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         ClassMetadataManipulator $classMetadataManipulator)
     {
-        parent::__construct($baseService, $localeProvider, $translator, $entityManager, $parameterBag);
+        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 

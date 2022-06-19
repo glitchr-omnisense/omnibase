@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class Command extends SymfonyCommand
 {
-    public function __construct(BaseService $baseService /* EAGER LOADING */, LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
+    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
     {
         $this->localeProvider = $localeProvider;
         $this->translator     = $translator;
