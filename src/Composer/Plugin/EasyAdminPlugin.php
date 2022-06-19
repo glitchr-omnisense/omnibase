@@ -18,7 +18,8 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
     private IOInterface $io;
 
     public function activate(Composer $composer, IOInterface $io)
-    {
+    {        dump("AH !");
+
         $this->io = $io;
     }
 
@@ -40,6 +41,7 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
 
     public function onPackageInstall(PackageEvent $event)
     {
+        dump("OK !");
         if (!$this->isComposerWorkingOn('easycorp/easyadmin-bundle', $event) && !$this->isComposerWorkingOn('xkzl/base-bundle', $event))
             return;
 
@@ -49,6 +51,7 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
 
     public function onPackageUpdate(PackageEvent $event)
     {
+        dump("OK !");
         if (!$this->isComposerWorkingOn('easycorp/easyadmin-bundle', $event) && !$this->isComposerWorkingOn('xkzl/base-bundle', $event))
             return;
 
