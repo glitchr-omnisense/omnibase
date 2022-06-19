@@ -3,12 +3,12 @@
     "type": "symfony-bundle",
     "description": "Base helper integration for Symfony",
     "keywords": ["symfony", "base", "helper"],
-    "homepage": "https://gitlab.glitchr.dev/repository-public/symfony",
+    "homepage": "https://gitlab.glitchr.dev/public-repository/symfony",
     "license": "MIT",
     "authors": [
         {
             "name": "Marco Meyer",
-            "email": "marco.meyerconde@gmail.com"
+            "email": "marco.meyer@glitchr.io"
         }
     ],
     "autoload": {
@@ -23,7 +23,8 @@
     },
     "require": {
         "php": "^8.0",
-        "composer-plugin-api": "^2.0",
+
+        "xkzl/base-plugin": "^1.0",
 
         "symfony/framework-bundle": "^6.0",
         "symfony/dotenv": "^6.0",
@@ -72,15 +73,11 @@
     "require-dev": {
         "phpunit/phpunit": "^8.5",
         "wapmorgan/php-deprecation-detector": "^2.0",
-        "composer/composer": "^2.0"
     },
     "config": {
         "preferred-install": {
             "*": "dist"
         },
         "sort-packages": true
-    },
-    "extra": {
-      "class": "Base\\Composer\\Plugin\\EasyAdminPlugin"
     }
 }
