@@ -77,7 +77,6 @@
     },
     "config": {
         "preferred-install": {"*": "dist"},
-        "sort-packages": true,
-        "allow-plugins": {"xkzl/base-plugin": true}
+        "sort-packages": true
     }
 }
