@@ -19,6 +19,7 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
 
     public function activate(Composer $composer, IOInterface $io)
     {
+        dump("OK !");
         $this->io = $io;
     }
 
