@@ -3,10 +3,12 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
-use Base\Service\SettingBag;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
+use Base\Service\ParameterBagInterface;
+use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,13 +17,12 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'translation:settings', aliases:[], description:'')]
 class TranslationSettingsCommand extends Command
 {
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, SettingBag $settings)
+    public function __construct(
+        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        SettingBagInterface $settingBag)
     {
-        $this->translator = $translator;
-        $this->localeProvider = $localeProvider;
-
-        $this->settings = $settings;
-        parent::__construct();
+        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
+        $this->settingBag = $settingBag;
     }
 
     protected function configure(): void
@@ -44,7 +45,7 @@ class TranslationSettingsCommand extends Command
 
         $rawSettings    = array_transforms(
             fn($k, $v):array => $path ? [$k ? $path.".".$k : $path, $v] : [$k,$v],
-            $this->settings->denormalize($this->settings->getRaw($path))
+            $this->settingBag->denormalize($this->settingBag->getRaw($path))
         );
 
         if(!$rawSettings) throw new \Exception("No settings found for \"$path\"");

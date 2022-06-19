@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Exception\InvalidArgumentException;
  */
 class NotBlank extends Constraint
 {
-    public $message = 'not_blank';
+    public $message = '@validators.not_blank';
     public $allowNull = false;
     public $normalizer;
 

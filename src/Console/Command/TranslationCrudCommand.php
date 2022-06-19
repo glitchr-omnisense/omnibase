@@ -5,8 +5,6 @@ namespace Base\Console\Command;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Service\LocaleProvider;
-use Base\Service\LocaleProviderInterface;
-use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,13 +14,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'translation:crud', aliases:[], description:'')]
 class TranslationCrudCommand extends Command
 {
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider)
-    {
-        $this->translator = $translator;
-        $this->localeProvider = $localeProvider;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('crud',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific CRUD controller ?');

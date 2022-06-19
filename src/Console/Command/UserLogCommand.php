@@ -5,25 +5,15 @@ namespace Base\Console\Command;
 use App\Entity\User;
 use Base\Entity\Extension\Log;
 
-use Base\Service\BaseService;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Base\Console\Command;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Base\Console\Command;
 
 #[AsCommand(name:'user:log', aliases:[], description:'')]
 class UserLogCommand extends Command
 {
-    public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
-    {
-        $this->entityManager = $entityManager;
-        $this->baseService = $baseService;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('user',         null, InputOption::VALUE_OPTIONAL, 'Should I consider them with a specific user ?');
@@ -56,7 +46,7 @@ class UserLogCommand extends Command
         else {
 
             $expiry = $input->getOption('expiry');
-            $defaultExpiry = $this->baseService->getParameterBag("base.extension.logging_default_expiry");
+            $defaultExpiry = $this->parameterBag->get("base.extension.logging_default_expiry");
 
             // Format monitored entries
             $user = $userRepository->loadUserByIdentifier($userIdentifier);
@@ -82,7 +72,7 @@ class UserLogCommand extends Command
             } else {
 
                 // Monitored listeners
-                $monitoredEntries = $this->baseService->getParameterBag("base.logging") ?? [];
+                $monitoredEntries = $this->parameterBag->get("base.logging") ?? [];
                 foreach ($monitoredEntries as $key => $entry) {
 
                     if (!array_key_exists("event", $entry))

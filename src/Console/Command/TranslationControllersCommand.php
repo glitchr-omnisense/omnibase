@@ -4,25 +4,14 @@ namespace Base\Console\Command;
 
 use Base\Console\Command;
 use Base\Service\LocaleProvider;
-use Base\Service\LocaleProviderInterface;
-use Base\Service\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(name:'translation:controllers', aliases:[], description:'')]
 class TranslationControllersCommand extends Command
 {
-    public function __construct(TranslatorInterface $translator, LocaleProviderInterface $localeProvider, RouterInterface $router)
-    {
-        $this->translator = $translator;
-        $this->localeProvider = $localeProvider;
-        $this->router = $router;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('controller', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific controller ?');

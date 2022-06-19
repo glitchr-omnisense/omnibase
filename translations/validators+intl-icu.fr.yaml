@@ -36,10 +36,7 @@ password:
       other {Le mot de passe doit contenir au moins # caractères}
    }"
 
-
-not_blank:
-   property: "Ce champ ne peut pas être vide."
-   class: "Le champ \"{field}\" est vide."
+not_blank: "Le champ \"{field}\" est vide."
 
 widget_slot:
    name:

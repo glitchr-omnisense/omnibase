@@ -17,13 +17,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'user:notifications', aliases:[], description:'')]
 class UserNotificationCommand extends Command
 {
-    public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
-    {
-        $this->entityManager = $entityManager;
-        $this->baseService = $baseService;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('user',  null, InputOption::VALUE_REQUIRED, 'Should I consider them with a specific user ?');

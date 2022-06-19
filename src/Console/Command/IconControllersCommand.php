@@ -16,12 +16,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'icon:controllers', aliases:[], description:'')]
 class IconControllersCommand extends Command
 {
-    public function __construct(RouterInterface $router)
-    {
-        $this->router = $router;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('controller',   null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific controller ?');

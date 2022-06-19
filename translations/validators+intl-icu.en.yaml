@@ -29,9 +29,7 @@ password:
    min_length: "Password is expected to be {0} long."
    min_strength: "Minimum required strength is {0}."
 
-not_blank:
-   property: "Field \"{label}\" is blank."
-   class: "All fields are blank."
+not_blank: "Field \"{label}\" is blank."
 
 widget_slot:
    name:

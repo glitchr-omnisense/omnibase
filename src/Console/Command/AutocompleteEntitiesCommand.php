@@ -10,6 +10,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\AutocompleteInterface;
+use Base\Service\LocaleProviderInterface;
+use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -17,11 +20,12 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'autocomplete:entities', aliases:[], description:'')]
 class AutocompleteEntitiesCommand extends Command
 {
-    public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(
+        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->entityManager = $entityManager;
+        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
         $this->classMetadataManipulator = $classMetadataManipulator;
-        parent::__construct();
     }
 
     protected function configure(): void

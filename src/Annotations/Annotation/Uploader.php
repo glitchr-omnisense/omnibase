@@ -136,6 +136,7 @@ class Uploader extends AbstractAnnotation
                 }
 
                 $path = $that->getPath($entity, $fieldName, $uuidOrFile);
+
                 $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
                 if($pathPublic) $pathList[] = $pathPublic;
                 elseif($that->getMissable()) $pathList[] = $uuidOrFile;
@@ -374,7 +375,7 @@ class Uploader extends AbstractAnnotation
         try { $this->uploadFiles($entity, null, $fieldName); }
         catch(Exception $e) {
 
-            $this->deleteFiles([], $entity, $fieldName);
+            $this->deleteFiles(null, $entity, $fieldName);
             self::setFieldValue($entity, $fieldName, null);
 
             throw $e;
@@ -404,6 +405,6 @@ class Uploader extends AbstractAnnotation
 
     public function postRemove(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
     {
-        $this->deleteFiles([], $entity, $fieldName);
+        $this->deleteFiles(null, $entity, $fieldName);
     }
 }
