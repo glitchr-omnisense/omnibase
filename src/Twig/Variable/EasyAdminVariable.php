@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Twig;
+namespace Base\Twig\Variable;
 
 use Base\Controller\Backoffice\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;

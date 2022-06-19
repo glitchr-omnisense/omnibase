@@ -15,12 +15,6 @@ class CountryType extends AbstractType
     public function getParent() : ?string { return SelectType::class; }
     public function getBlockPrefix(): string { return 'country'; }
 
-    protected $baseService;
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-    }
-
     private static $additionalList = [];
     private static $rejectCountryList = [ // Rejected just because missing flag.. to do later
         "AO", "AI", "AQ", "AW", "BM", "CW", "GS", "GI", "GL",
@@ -68,7 +62,7 @@ class CountryType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        //            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->baseService->generateUrl("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }"
+        //            'template' => "function (option) { if (!option.id) return option.text; return $('<span><img class=\"country-flag\" src=\"".$this->router->generate("bundles/base/flags/'+option.id+'.png")."\" alt=\"'+option.id+'\"> '+option.text+'</span>'); }"
 
         $resolver->setDefaults([
             'choices' => $this->getChoices(),

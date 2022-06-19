@@ -2,6 +2,7 @@
 
 namespace Base\Subscriber;
 
+use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
 
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
@@ -12,9 +13,9 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProfilerSubscriber implements EventSubscriberInterface
 {
-    public function __construct(BaseService $baseService)
+    public function __construct(RouterInterface $router)
     {
-        $this->baseService = $baseService;
+        $this->router = $router;
     }
 
     public static function getSubscribedEvents(): array
@@ -27,13 +28,13 @@ class ProfilerSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if($this->baseService->isProfiler($event) && !$this->baseService->isDebug())
+        if($this->router->isProfiler($event) && !$this->router->isDebug())
             throw new NotFoundHttpException("Page not found.");
     }
 
     public function onKernelResponse(ResponseEvent $event)
     {
-        if ($this->baseService->isDebug()) {
+        if ($this->router->isDebug()) {
 
             $request = $event->getRequest();
             if ($request->isXmlHttpRequest()) {

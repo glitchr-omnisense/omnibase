@@ -4,12 +4,12 @@
 namespace Base\Field\Type;
 
 use Base\Model\AutovalidateInterface;
-use Base\Service\BaseService;
+
+use Base\Twig\Environment;
 use Base\Validator\Constraints\Password;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
-use Symfony\Component\Form\Extension\Core\DataTransformer\ValueToDuplicatesTransformer;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType as SymfonyPasswordType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
@@ -20,10 +20,10 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class PasswordType extends AbstractType implements AutovalidateInterface, DataMapperInterface
 {
-    public function __construct(TranslatorInterface $translator, BaseService $baseService)
+    public function __construct(TranslatorInterface $translator, Environment $twig)
     {
         $this->translator = $translator;
-        $this->baseService = $baseService;
+        $this->twig = $twig;
     }
 
     public function getBlockPrefix(): string { return 'password2'; }
@@ -43,7 +43,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
         $view->vars["suggestions"]  = $options["suggestions"];
         $view->vars["required"]     = $options["required"] ?? true;
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-password.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-password.js");
     }
 
     public function configureOptions(OptionsResolver $resolver)

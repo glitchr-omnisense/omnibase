@@ -3,6 +3,8 @@
 namespace Base\Field\Type;
 
 use Base\Service\BaseService;
+use Base\Service\TranslatorInterface;
+use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
@@ -18,7 +20,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class CollectionType extends AbstractType
 {
-    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
+    public function __construct(Environment $twig, TranslatorInterface $translator)
+    {
+        $this->twig = $twig;
+        $this->translator = $translator;
+    }
+
     public function getBlockPrefix(): string { return 'collection2'; }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -80,7 +87,7 @@ class CollectionType extends AbstractType
                 $prototypeOptions['required'] = $options['entry_required'];
 
             $prototypeOptions["label"] = "__prototype__";
-            $prototypeOptions['attr']['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->baseService->getTranslator()->trans("@fields.array.value");
+            $prototypeOptions['attr']['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->translator->trans("@fields.array.value");
             $prototype = $builder->create($options['prototype_name'], $options['entry_type'], $prototypeOptions);
             $builder->setAttribute('prototype', $prototype->getForm());
         }
@@ -168,6 +175,6 @@ class CollectionType extends AbstractType
             array_splice($prototypeView->vars['block_prefixes'], $prefixOffset, 0, $this->getBlockPrefix().'_entry');
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-collection.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-collection.js");
     }
 }

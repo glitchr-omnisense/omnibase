@@ -2,17 +2,16 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\BaseService;
+use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class BooleanType extends AbstractType
 {
-    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
+    public function __construct(Environment $twig) { $this->twig = $twig; }
 
     public function getBlockPrefix(): string { return 'boolean'; }
     public function getParent() : ?string { return CheckboxType::class; }
@@ -36,6 +35,6 @@ class BooleanType extends AbstractType
         $view->vars["toogle_url"] = $options["toogle_url"];
         $view->vars["inline"] = $options["inline"];
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
     }
 }

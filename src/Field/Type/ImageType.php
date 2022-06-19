@@ -27,8 +27,8 @@ class ImageType extends FileType
             ],
 
             'cropper'     => null,
-            'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
-            'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
+            'cropper-js'  => $this->parameterBag->get("base.vendor.cropperjs.javascript"),
+            'cropper-css' => $this->parameterBag->get("base.vendor.cropperjs.stylesheet"),
 
             'mime_types'  => ["image/*"]
         ]);
@@ -52,17 +52,17 @@ class ImageType extends FileType
         if(!($view->vars["mime_types"] ?? false) )
              $view->vars["mime_types"] = "image/*";
 
-        $view->vars["thumbnail"] = $this->baseService->getAsset($options["thumbnail"]);
+        $view->vars["thumbnail"] = $this->twig->getAsset($options["thumbnail"]);
         $view->vars["modal"]     = json_encode($options["modal"]);
 
         $view->vars["cropper"] = null;
         if(is_array($options["cropper"])) {
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
+            $view->vars["ajax"]     = $this->twig->getAsset("ux/dropzone/" . $token);
 
-            $this->baseService->addHtmlContent("javascripts:head", $options["cropper-js"]);
-            $this->baseService->addHtmlContent("stylesheets:head", $options["cropper-css"]);
+            $this->twig->addHtmlContent("javascripts:head", $options["cropper-js"]);
+            $this->twig->addHtmlContent("stylesheets:head", $options["cropper-css"]);
 
             if(!array_key_exists('viewMode',     $options["cropper"])) $options["cropper"]['viewMode']         = 2;
             if(!array_key_exists('autoCropArea', $options["cropper"])) $options["cropper"]['autoCropArea'] = true;
@@ -74,6 +74,6 @@ class ImageType extends FileType
             $view->vars["cropper"]  = json_encode($options["cropper"]);
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-image.js");
     }
 }

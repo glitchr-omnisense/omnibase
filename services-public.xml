@@ -55,11 +55,10 @@
 
         <service id="base.entity_extension" alias="Base\Database\Factory\EntityExtension" />
 
-        <service id="twig.extension.base"       alias="Base\Twig\Extension\BaseTwigExtension" />
-        <service id="base.twig_loader"          alias="Base\Twig\Loader\FilesystemLoader" />
-        <service id="base.twig.app_variable"    alias="Base\Twig\AppVariable" />
-        <service id="base.twig.random_variable" alias="Base\Twig\RandomVariable" />
-        <service id="base.twig.ea_variable"     alias="Base\Twig\EasyAdminVariable" />
+        <service id="twig.extension.base"           alias="Base\Twig\Extension\BaseTwigExtension" />
+        <service id="twig.loader.filesystem"        alias="Base\Twig\Loader\FilesystemLoader" />
+        <service id="twig.random_variable" alias="Base\Twig\Variable\RandomVariable" />
+        <service id="twig.ea_variable"     alias="Base\Twig\Variable\EasyAdminVariable" />
 
         <service id="base.form.proxy"   alias="Base\Form\FormProxyInterface" />
         <service id="base.form.factory" alias="Base\Form\FormFactoryInterface" />

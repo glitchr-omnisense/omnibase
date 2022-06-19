@@ -2,7 +2,9 @@
 
 namespace Base\Subscriber;
 
-use Base\Service\BaseService;
+use Base\Routing\RouterInterface;
+use Base\Service\ParameterBag;
+use Base\Twig\Environment;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -12,10 +14,13 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 
 class TwigSubscriber implements EventSubscriberInterface
 {
-    public function __construct(BaseService $baseService)
+    public function __construct(Environment $twig, ParameterBag $parameterBag, RouterInterface $router)
     {
-        $this->baseService = $baseService;
-        $this->autoAppend  = $this->baseService->getParameterBag("base.twig.autoappend");
+        $this->twig         = $twig;
+        $this->parameterBag = $parameterBag;
+        $this->router       = $router;
+
+        $this->autoAppend   = $this->parameterBag->get("base.twig.autoappend");
     }
 
     public static function getSubscribedEvents(): array
@@ -35,7 +40,7 @@ class TwigSubscriber implements EventSubscriberInterface
         if ($contentType && !str_contains($contentType, "text/html"))
             return false;
 
-        if ($this->baseService->isProfiler())
+        if ($this->router->isProfiler())
             return false;
 
         if (!$event->isMainRequest())
@@ -46,20 +51,20 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->baseService->addHtmlContent("stylesheets:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.clipboardjs.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.dockjs.stylesheet")));
-        $this->baseService->addHtmlContent("stylesheets", $this->baseService->getAsset("bundles/base/app.css"));
+        $this->twig->addHtmlContent("stylesheets:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery-ui.stylesheet")));
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox.stylesheet")));
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.stylesheet")));
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.dockjs.stylesheet")));
+        $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset("bundles/base/app.css"));
 
-        $this->baseService->addHtmlContent("javascripts:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery.javascript")));
-        $this->baseService->addHtmlContent("javascripts:head", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.jquery-ui.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.lightbox2b.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.cookie-consent.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.clipboardjs.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset($this->baseService->getParameterBag("base.vendor.dockjs.javascript")));
-        $this->baseService->addHtmlContent("javascripts", $this->baseService->getAsset("bundles/base/app.js"));
+        $this->twig->addHtmlContent("javascripts:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery.javascript")));
+        $this->twig->addHtmlContent("javascripts:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery-ui.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox2b.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.cookie-consent.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset($this->parameterBag->get("base.vendor.dockjs.javascript")));
+        $this->twig->addHtmlContent("javascripts", $this->twig->getAsset("bundles/base/app.js"));
     }
 
     public function onKernelResponse(ResponseEvent $event)
@@ -69,22 +74,22 @@ class TwigSubscriber implements EventSubscriberInterface
             $response = $event->getResponse();
             $content = $response->getContent();
 
-            $noscripts   = $this->baseService->getHtmlContent("noscripts");
+            $noscripts   = $this->twig->getHtmlContent("noscripts");
             $content = preg_replace('/<body\b[^>]*>/', "$0".$noscripts, $content, 1);
 
-            $stylesheetsHead = $this->baseService->getHtmlContent("stylesheets:head");
+            $stylesheetsHead = $this->twig->getHtmlContent("stylesheets:head");
             $content = preg_replace('/(head\b[^>]*>)(.*?)(<link|<style)/s', "$1$2".$stylesheetsHead."$3", $content, 1);
 
-            $stylesheets = $this->baseService->getHtmlContent("stylesheets");
+            $stylesheets = $this->twig->getHtmlContent("stylesheets");
             $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets."$0", $content, 1);
 
-            $javascriptsHead = $this->baseService->getHtmlContent("javascripts:head");
+            $javascriptsHead = $this->twig->getHtmlContent("javascripts:head");
             $content = preg_replace('/(head\b[^>]*>)(.*?)(<script)/s', "$1$2".$javascriptsHead."$3", $content, 1);
 
-            $javascripts = $this->baseService->getHtmlContent("javascripts");
+            $javascripts = $this->twig->getHtmlContent("javascripts");
             $content = preg_replace('/<\/head\b[^>]*>/', $javascripts."$0", $content, 1);
 
-            $javascriptsBody = $this->baseService->getHtmlContent("javascripts:body");
+            $javascriptsBody = $this->twig->getHtmlContent("javascripts:body");
             $content = preg_replace('/<\/body\b[^>]*>/', "$0".$javascriptsBody, $content, 1);
 
             if(!is_instanceof($response, [StreamedResponse::class, BinaryFileResponse::class]))

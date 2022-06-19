@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\AutovalidateInterface;
-use Base\Service\BaseService;
+use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -16,9 +16,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 final class SlugType extends AbstractType implements AutovalidateInterface
 {
 
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(Environment $twig, ClassMetadataManipulator $classMetadataManipulator)
     {
-        $this->baseService = $baseService;
+        $this->twig = $twig;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -46,7 +46,7 @@ final class SlugType extends AbstractType implements AutovalidateInterface
 
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-slug.js");
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)

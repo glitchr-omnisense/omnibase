@@ -5,12 +5,9 @@ namespace Base\Field\Configurator;
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\SelectField;
-use Base\Field\Type\SelectType;
 use Base\Model\Autocomplete;
-use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
@@ -18,17 +15,15 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class SelectConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator, BaseService $baseService)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, AdminUrlGenerator $adminUrlGenerator)
     {
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->baseService = $baseService;
 
         $this->autocomplete = new Autocomplete($this->translator);
     }

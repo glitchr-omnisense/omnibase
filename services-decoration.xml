@@ -30,6 +30,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
+        <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
         <service id="Base\Routing\AdvancedRouter" decorates="router">
             <argument type="service" id=".inner" />
             <argument type="service" id="request_stack" />
@@ -38,6 +39,11 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="cache.adapter" />
             <bind key="$debug">%kernel.debug%</bind>
+        </service>
+
+        <service id="Base\Twig\Environment" parent="twig" decorates="twig">
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="setting_bag" />
         </service>
     </services>
 </container>

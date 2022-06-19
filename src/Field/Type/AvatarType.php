@@ -43,6 +43,6 @@ class AvatarType extends ImageType
         $view->vars['avatar'] = $view->vars['files'][0] ?? null;
         $view->vars['files']  = [];
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-avatar.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-avatar.js");
     }
 }

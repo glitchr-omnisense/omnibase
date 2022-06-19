@@ -4,19 +4,21 @@ namespace Base\Subscriber;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Base\Service\BaseService;
+use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Twig\Environment;
 
 class AnalyticsSubscriber implements EventSubscriberInterface
 {
-    public function __construct(BaseService $baseService, TranslatorInterface $translator, Environment $twig, UserRepository $userRepository, ?GaService $googleAnalyticsService = null)
+    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router, TranslatorInterface $translator, Environment $twig, UserRepository $userRepository, ?GaService $googleAnalyticsService = null)
     {
-        $this->baseService = $baseService;
+        $this->tokenStorage = $tokenStorage;
+        $this->router = $router;
 
         $this->twig = $twig;
         $this->translator = $translator;
@@ -36,12 +38,14 @@ class AnalyticsSubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->baseService->isProfiler()) return;
-        if(!$this->baseService->isEasyAdmin()) return;
+        if($this->router->isProfiler()) return;
+        if(!$this->router->isEasyAdmin()) return;
 
-        $user = $this->baseService->getUser();
+        $token = $this->tokenStorage->getToken();
+        $user = $token ? $token->getUser() : null;
 
-        $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : [];
+        //$onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
+        $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u->isActive());
 
         $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [

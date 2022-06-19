@@ -2,7 +2,7 @@
 
 namespace Base\Security\Voter;
 
-use Base\Routing\AdvancedRouterInterface;
+use Base\Routing\RouterInterface;
 use Base\Security\LoginFormAuthenticator;
 use Base\Security\RescueFormAuthenticator;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -18,7 +18,7 @@ class RouteVoter extends Voter
     const  VALIDATE_HOST = "VALIDATE_HOST";
     const  VALIDATE_PATH = "VALIDATE_PATH";
 
-    public function __construct(AdvancedRouterInterface $router, ParameterBagInterface $parameterBag)
+    public function __construct(RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->router       = $router;
         $this->parameterBag = $parameterBag;
@@ -26,7 +26,7 @@ class RouteVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return class_implements_interface($this->router, AdvancedRouterInterface::class) && $subject instanceof Route && in_array($attribute, [self::VALIDATE_IP, self::VALIDATE_PATH, self::VALIDATE_HOST]);
+        return class_implements_interface($this->router, RouterInterface::class) && $subject instanceof Route && in_array($attribute, [self::VALIDATE_IP, self::VALIDATE_PATH, self::VALIDATE_HOST]);
     }
 
     protected function voteOnAttribute(string $attribute, mixed $route, TokenInterface $token): bool

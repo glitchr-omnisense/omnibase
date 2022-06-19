@@ -6,8 +6,8 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 
-use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
+use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
@@ -37,11 +37,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
      */
     protected $classMetadataManipulator = null;
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, BaseService $baseService)
+    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Environment $twig)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->localeProvider = $localeProvider;
-        $this->baseService = $baseService;
+        $this->twig = $twig;
     }
 
     public function getBlockPrefix(): string { return 'translatable'; }
@@ -179,7 +179,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             }
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-translatable.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-translatable.js");
     }
 
     public function getTranslationFields(string $translationClass, array $options): array

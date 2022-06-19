@@ -29,6 +29,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\Layout\Attribute\Common\BaseAttribute;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
+use Base\Twig\Environment;
 
 class AttributeType extends AbstractType implements DataMapperInterface
 {
@@ -44,9 +45,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
     public function getBlockPrefix(): string { return 'attribute'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, BaseService $baseService)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, Environment $twig)
     {
-        $this->baseService   = $baseService;
+        $this->twig   = $twig;
         $this->formFactory   = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
@@ -105,7 +106,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $view->vars["allow_delete"] = $options["allow_delete"];
         $view->vars["allow_add"]    = $options["allow_add"];
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-attribute.js");
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options): void

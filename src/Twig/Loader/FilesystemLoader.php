@@ -2,14 +2,12 @@
 
 namespace Base\Twig\Loader;
 
-use Twig\Error\LoaderError;
 use Twig\Loader\ChainLoader;
 use Twig\Environment;
-use Twig\Source;
 
 use Base\Service\BaseService;
 use Base\Twig\AppVariable;
-use Base\Twig\RandomVariable;
+use Base\Twig\Variable\RandomVariable;
 use Exception;
 
 /**

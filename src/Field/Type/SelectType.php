@@ -9,8 +9,11 @@ use Base\Form\FormFactory;
 use Base\Model\Autocomplete;
 use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
+use Base\Service\ObfuscatorInterface;
+use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -31,6 +34,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Traversable;
 
@@ -39,32 +43,36 @@ class SelectType extends AbstractType implements DataMapperInterface
     /** @var ClassMetadataManipulator */
     protected $classMetadataManipulator;
 
-    /** @var BaseService */
-    protected $baseService;
+    /** @var Environment */
+    protected $twig;
 
     /** @var FormFactory */
     protected $formFactory;
 
-    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator, BaseService $baseService, RouterInterface $router)
+    public function __construct(
+        FormFactory $formFactory, EntityManagerInterface $entityManager, TranslatorInterface $translator,
+        ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,
+        LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator,
+        Environment $twig, AuthorizationChecker $authorizationChecker, ObfuscatorInterface $obfuscator, ParameterBagInterface $parameterBag, RouterInterface $router)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->baseService = $baseService;
+        $this->twig = $twig;
         $this->translator = $translator;
         $this->entityManager = $entityManager;
-        $this->hashIds = new Hashids($this->baseService->getSalt());
+        $this->obfuscator = $obfuscator;
+        $this->parameterBag = $parameterBag;
+        $this->authorizationChecker = $authorizationChecker;
 
         $this->formFactory = $formFactory;
         $this->localeProvider = $localeProvider;
         $this->adminUrlGenerator = $adminUrlGenerator;
         $this->router = $router;
+
         $this->autocomplete = new Autocomplete($this->translator);
     }
 
     public function getBlockPrefix(): string { return 'select2'; }
-
-    public function encode(array $array) : string { return $this->hashIds->encodeHex(bin2hex(serialize($array)));  }
-    public function decode(string $hash): array   { return unserialize(hex2bin($this->hashIds->decodeHex($hash))); }
 
     protected static $icons = [];
     public static function getIcons(): array
@@ -97,10 +105,10 @@ class SelectType extends AbstractType implements DataMapperInterface
             'choice_label'     => function($value, $label, $id) { return $label; },   // Return translated label
 
             'select2'          => [],
-            'select2-i18n'     => $this->baseService->getParameterBag("base.vendor.select2.i18n"),
-            'select2-js'       => $this->baseService->getParameterBag("base.vendor.select2.javascript"),
-            'select2-css'      => $this->baseService->getParameterBag("base.vendor.select2.stylesheet"),
-            'theme'            => $this->baseService->getParameterBag("base.vendor.select2.theme"),
+            'select2-i18n'     => $this->parameterBag->get("base.vendor.select2.i18n"),
+            'select2-js'       => $this->parameterBag->get("base.vendor.select2.javascript"),
+            'select2-css'      => $this->parameterBag->get("base.vendor.select2.stylesheet"),
+            'theme'            => $this->parameterBag->get("base.vendor.select2.theme"),
             'empty_data'       => null,
 
             // Generic parameters
@@ -134,7 +142,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'autocomplete_data'                => null,
             'autocomplete_processResults'      => null,
             'autocomplete_delay'               => 500,
-            'autocomplete_type'                => $this->baseService->isDebug() ? "GET" : "POST",
+            'autocomplete_type'                => $this->router->isDebug() ? "GET" : "POST",
 
             // Sortable option
             'sortable'              => null
@@ -487,7 +495,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 "token"      => $this->csrfTokenManager->getToken("select2")->getValue()
             ];
 
-            $hash = $this->encode($array);
+            $hash = $this->obfuscator->encode($array);
 
             //
             // Prepare select2 options
@@ -631,7 +639,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $themeCssFile = $themeArray[0];
                 }
 
-                $this->baseService->addHtmlContent("stylesheets:head", $themeCssFile);
+                $this->twig->addHtmlContent("stylesheets:head", $themeCssFile);
             }
 
             //
@@ -639,7 +647,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
 
             $href = null;
-            if($options["href"] === null && $crudController && $this->baseService->isGranted(UserRole::ADMIN)) {
+            if($options["href"] === null && $crudController && $this->authorizationChecker->isGranted(UserRole::ADMIN)) {
 
                 $href = $this->adminUrlGenerator
                         ->unsetAll()
@@ -659,10 +667,10 @@ class SelectType extends AbstractType implements DataMapperInterface
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
 
             // Import select2
-            $this->baseService->addHtmlContent("stylesheets:head", $options["select2-css"]);
-            $this->baseService->addHtmlContent("javascripts:head", $options["select2-js"]);
-            $this->baseService->addHtmlContent("javascripts:head", $options["select2-i18n"]."/".$selectOpts["language"].".js");
-            $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
+            $this->twig->addHtmlContent("stylesheets:head", $options["select2-css"]);
+            $this->twig->addHtmlContent("javascripts:head", $options["select2-js"]);
+            $this->twig->addHtmlContent("javascripts:head", $options["select2-i18n"]."/".$selectOpts["language"].".js");
+            $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");
         }
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\EntityEvent;
+namespace Base\EntityDispatcher\Event;
 
 use Base\Entity\Thread;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -11,17 +11,15 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class ThreadEvent extends Event
 {
-    public const PUBLISH = 'thread.publish';
-
-    protected $thread;
+    public const SCHEDULED   = 'thread.scheduled';
+    public const PUBLISHABLE = 'thread.publishable';
+    public const PUBLISHED   = 'thread.published';
 
     public function __construct(Thread $thread)
     {
         $this->thread = $thread;
     }
 
-    public function getThread(): Thread
-    {
-        return $this->thread;
-    }
+    protected $thread;
+    public function getThread(): Thread { return $this->thread; }
 }

@@ -1,7 +1,6 @@
 <?php
 
-namespace Base\Twig;
-
+namespace Base\Twig\Variable;
 use Symfony\Component\Uid\Uuid;
 
 class RandomVariable

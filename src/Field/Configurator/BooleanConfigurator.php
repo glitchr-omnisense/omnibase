@@ -4,6 +4,7 @@ namespace Base\Field\Configurator;
 
 use Base\Field\BooleanField;
 use Base\Service\BaseService;
+use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
@@ -18,11 +19,11 @@ final class BooleanConfigurator implements FieldConfiguratorInterface
     private AdminUrlGenerator $adminUrlGenerator;
     private ?CsrfTokenManagerInterface $csrfTokenManager;
 
-    public function __construct(AdminUrlGenerator $adminUrlGenerator, BaseService $baseService, ?CsrfTokenManagerInterface $csrfTokenManager = null)
+    public function __construct(AdminUrlGenerator $adminUrlGenerator, Environment $twig, ?CsrfTokenManagerInterface $csrfTokenManager = null)
     {
         $this->adminUrlGenerator = $adminUrlGenerator;
-        $this->baseService       = $baseService;
         $this->csrfTokenManager  = $csrfTokenManager;
+        $this->twig              = $twig;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -58,6 +59,6 @@ final class BooleanConfigurator implements FieldConfiguratorInterface
             $field->setCssClass($field->getCssClass().' has-switch');
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-boolean.js");
     }
 }

@@ -4,11 +4,11 @@ namespace Base\Field\Type;
 
 use Base\Enum\Quadrant\Quadrant;
 use Base\Enum\Quadrant\Quadrant8;
-use Base\Service\BaseService;
+
+use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
@@ -19,10 +19,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'quadrant'; }
 
-    public function __construct(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-    }
+    public function __construct(Environment $twig) { $this->twig = $twig; }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
@@ -46,7 +43,7 @@ class QuadrantType extends AbstractType implements DataMapperInterface
         $view->vars['icons']      = $options["class"]::getIcons();
         $view->vars['default']    = $options["class"]::getDefault();
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-quadrant.js");
     }
 
     public function mapDataToForms($viewData, Traversable $forms) { }

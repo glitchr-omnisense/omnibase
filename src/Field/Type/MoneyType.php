@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\BaseService;
+use Base\Twig\Environment;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -13,7 +13,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
     public const LABEL_ONLY = 1;
     public const LABELCODE_ONLY = 2;
 
-    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
+    public function __construct(Environment $twig) { $this->twig = $twig; }
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $targetPath = explode(".", $options["currency_target"]);
@@ -67,7 +67,7 @@ class MoneyType extends \Symfony\Component\Form\Extension\Core\Type\MoneyType
             break;
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-money.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-money.js");
     }
 
     /**

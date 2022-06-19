@@ -39,9 +39,9 @@ class SlugConfigurator implements FieldConfiguratorInterface
             $field->setFormTypeOption('attr.data-confirm-text', $this->translator->trans($unlockConfirmationMessage, [], $context->getI18n()->getTranslationDomain()));
         }
 
-        $entity = $entityDto->getInstance();
-        $slug = PropertyAccess::createPropertyAccessor()->getValue($entity, $field->getProperty());
-        if(class_implements_interface($entityDto->getInstance(), LinkableInterface::class))
-            $field->setFormattedValue(["url" => $entity->__toLink() ?? null, "slug" => $slug]);
+        // $entity = $entityDto->getInstance();
+        // $slug = PropertyAccess::createPropertyAccessor()->getValue($entity, $field->getProperty());
+        // if(class_implements_interface($entityDto->getInstance(), LinkableInterface::class))
+        //     $field->setFormattedValue(["url" => $entity->__toLink() ?? null, "slug" => $slug]);
     }
 }

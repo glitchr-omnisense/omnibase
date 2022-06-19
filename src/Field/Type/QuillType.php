@@ -2,8 +2,8 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\BaseService;
-
+use Base\Service\ParameterBagInterface;
+use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -15,11 +15,16 @@ use Traversable;
 
 class QuillType extends AbstractType implements DataMapperInterface
 {
-    /** @var BaseService */
-    protected $baseService;
-    public function __construct(BaseService $baseService)
+    /** @var Environment */
+    protected $twig;
+
+    /** @var ParameterBagInterface */
+    protected $parameterBag;
+
+    public function __construct(ParameterBagInterface $parameterBag, Environment $twig)
     {
-        $this->baseService = $baseService;
+        $this->parameterBag = $parameterBag;
+        $this->twig = $twig;
     }
 
     public function getParent(): ?string { return HiddenType::class; }
@@ -28,13 +33,13 @@ class QuillType extends AbstractType implements DataMapperInterface
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'highlight-js'  => $this->baseService->getParameterBag("base.vendor.highlight.javascript"),
-            'highlight-css' => $this->baseService->getParameterBag("base.vendor.highlight.stylesheet"),
-            'quill-js'      => $this->baseService->getParameterBag("base.vendor.quill.javascript"),
-            'quill-css'     => $this->baseService->getParameterBag("base.vendor.quill.stylesheet"),
+            'highlight-js'  => $this->parameterBag->get("base.vendor.highlight.javascript"),
+            'highlight-css' => $this->parameterBag->get("base.vendor.highlight.stylesheet"),
+            'quill-js'      => $this->parameterBag->get("base.vendor.quill.javascript"),
+            'quill-css'     => $this->parameterBag->get("base.vendor.quill.stylesheet"),
             'empty_data', null,
 
-            'theme' => $this->baseService->getParameterBag("base.vendor.quill.theme"),
+            'theme' => $this->parameterBag->get("base.vendor.quill.theme"),
             'placeholder' => "Compose an epic..",
             'height' => "250px",
             'modules' => [
@@ -77,11 +82,11 @@ class QuillType extends AbstractType implements DataMapperInterface
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
         // Import highlight
-        $this->baseService->addHtmlContent("javascripts:head", $options["highlight-js"]);
-        $this->baseService->addHtmlContent("stylesheets:head", $options["highlight-css"]);
+        $this->twig->addHtmlContent("javascripts:head", $options["highlight-js"]);
+        $this->twig->addHtmlContent("stylesheets:head", $options["highlight-css"]);
 
         // Import quill
-        $this->baseService->addHtmlContent("javascripts:head", $options["quill-js"]);
+        $this->twig->addHtmlContent("javascripts:head", $options["quill-js"]);
 
         $view->vars["id"] = str_replace("-", "_", $view->vars["id"]);
 
@@ -94,7 +99,7 @@ class QuillType extends AbstractType implements DataMapperInterface
             $themeCssFile = $themeArray[0];
         }
 
-        $this->baseService->addHtmlContent("stylesheets:head", $themeCssFile);
+        $this->twig->addHtmlContent("stylesheets:head", $themeCssFile);
         $modules = $options["modules"] ?? [];
 
         $quillOpts = [];
@@ -107,7 +112,7 @@ class QuillType extends AbstractType implements DataMapperInterface
 
         //
         // Default quill initialializer
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
     }
 
     public function mapDataToForms($viewData, Traversable $forms) { }

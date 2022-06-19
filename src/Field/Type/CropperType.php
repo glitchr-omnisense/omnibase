@@ -6,6 +6,8 @@ use Base\Entity\Layout\ImageCrop;
 use Base\Enum\Quadrant\Quadrant8;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
+use Base\Service\ParameterBagInterface;
+use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
@@ -24,11 +26,12 @@ class CropperType extends AbstractType implements DataMapperInterface
 {
     public function getBlockPrefix(): string { return 'cropper'; }
 
-    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, BaseService $baseService)
+    public function __construct(FormFactory $formFactory, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag, Environment $twig)
     {
         $this->formFactory = $formFactory;
         $this->entityManager = $entityManager;
-        $this->baseService = $baseService;
+        $this->parameterBag = $parameterBag;
+        $this->twig = $twig;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
@@ -49,8 +52,8 @@ class CropperType extends AbstractType implements DataMapperInterface
                 "center"       => true,
             ],
 
-            'cropper-js'  => $this->baseService->getParameterBag("base.vendor.cropperjs.javascript"),
-            'cropper-css' => $this->baseService->getParameterBag("base.vendor.cropperjs.stylesheet"),
+            'cropper-js'  => $this->parameterBag->get("base.vendor.cropperjs.javascript"),
+            'cropper-css' => $this->parameterBag->get("base.vendor.cropperjs.stylesheet"),
 
             "quadrant"          => null,
             "target"         => null,
@@ -117,7 +120,7 @@ class CropperType extends AbstractType implements DataMapperInterface
         $view->vars["cropper"]      = json_encode($options["cropper"]);
         $view->vars["aspectRatios"] = $options["aspectRatios"];
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-cropper.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-cropper.js");
     }
 
     public function finishView(FormView $view, FormInterface $form, array $options)

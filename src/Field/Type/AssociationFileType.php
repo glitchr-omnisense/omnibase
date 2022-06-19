@@ -142,7 +142,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             if($path instanceof Collection) $path = $path->toArray();
 
             $path = is_array($path) ? begin($path) ?? null : $path;
-            return [basename($path), $e->getId()];
+            return $path === null ? [] : [basename($path), $e->getId()];
 
         }, ($data instanceof Collection) ? $data->toArray() : []));
     }

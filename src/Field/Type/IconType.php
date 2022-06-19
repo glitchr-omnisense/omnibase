@@ -15,8 +15,8 @@ class IconType extends SelectType implements SelectInterface
     public static $iconProvider = null;
     public function __construct(...$args)
     {
+        self::$iconProvider = array_pop($args);
         parent::__construct(...$args);
-        self::$iconProvider = $this->baseService->getIconProvider();
     }
 
     public function configureOptions(OptionsResolver $resolver)
@@ -24,7 +24,7 @@ class IconType extends SelectType implements SelectInterface
         parent::configureOptions($resolver);
         $resolver->setDefaults([
             "class"   => null,
-            "adapter"   => $this->baseService->getParameterBag("base.icon_provider.default_adapter"),
+            "adapter"   => $this->parameterBag->get("base.icon_provider.default_adapter"),
 
             "autocomplete" => true,
             "autocomplete_pagesize" => 200,
@@ -53,7 +53,7 @@ class IconType extends SelectType implements SelectInterface
 
             $relationship = pathinfo_relationship($asset);
             $location = $relationship == "javascript" ? "javascripts" : "stylesheets";
-            $this->baseService->addHtmlContent($location, $asset);
+            $this->twig->addHtmlContent($location, $asset);
         }
     }
 

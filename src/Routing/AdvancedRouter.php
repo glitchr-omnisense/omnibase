@@ -7,11 +7,13 @@ use Base\Routing\Matcher\AdvancedUrlMatcher;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBag;
-
+use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
@@ -20,7 +22,9 @@ use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Router;
 use Symfony\Contracts\Cache\CacheInterface;
 
-class AdvancedRouter implements AdvancedRouterInterface
+use Symfony\Contracts\EventDispatcher\Event;
+
+class AdvancedRouter implements RouterInterface
 {
     protected $router;
 
@@ -60,6 +64,9 @@ class AdvancedRouter implements AdvancedRouterInterface
     }
 
     public function getLang(?string $locale = null):string { return $this->localeProvider->getLang($locale); }
+
+    public function isCli(): bool { return is_cli(); }
+    public function isDebug(): bool { return $this->debug; }
     public function isBackOffice(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
     public function isProfiler(mixed $request = null)
     {
@@ -138,8 +145,9 @@ class AdvancedRouter implements AdvancedRouterInterface
 
     public function getRouteCollection(): RouteCollection { return $this->router->getRouteCollection(); }
 
-    public function getRequestUri(): ?string { return $this->getRequest() ? $this->getRequest()->getRequestUri() : $_SERVER["REQUEST_URI"] ?? null; }
-    public function getRequest(): ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
+    public function getRequestUri() : ?string  { return $this->getRequest() ? $this->getRequest()->getRequestUri() : $_SERVER["REQUEST_URI"] ?? null; }
+    public function getRequest()    : ?Request { return $this->requestStack ? $this->requestStack->getCurrentRequest() : null; }
+    public function getMainRequest(): ?Request { return $this->requestStack ? $this->requestStack->getMainRequest() : null; }
 
     //
     // NB: Don't get confused, here. This route is not same annotation and...
@@ -207,8 +215,81 @@ class AdvancedRouter implements AdvancedRouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
+    public function getRouteFirewall(?string $routeUrl = null): ?string
+    {
+        if($routeUrl === null) $routeUrl = $this->getRequestUri();
+
+        $matcher = $this->router->getMatcher();
+        if ($matcher instanceof AdvancedUrlMatcher)
+           return $matcher->firewall($routeUrl);
+
+        return null;
+    }
+
     public function getRouteHash(string $routeNameOrUrl): string
     {
         return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localeProvider->getLang();
+    }
+
+
+    public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
+    {
+        if(filter_var($urlOrRoute, FILTER_VALIDATE_URL) || str_contains($urlOrRoute, "/"))
+            return new RedirectResponse($urlOrRoute);
+
+        return new RedirectResponse($this->generate($urlOrRoute, $routeParameters), $state, $headers);
+    }
+
+    public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
+    {
+        $routeNameBak = $routeName;
+
+        $event = null;
+        if(array_key_exists("event", $headers)) {
+            $event = $headers["event"];
+            if(! ($event instanceof Event) )
+                throw new InvalidArgumentException("header variable \"event\" must be ".Event::class.", currently: ".(is_object($event) ? get_class($event) : gettype($event)));
+            unset($headers["event"]);
+        }
+
+        $exceptions = [];
+        if(array_key_exists("exceptions", $headers)) {
+            $exceptions = $headers["exceptions"];
+            if(!is_string($exceptions) && !is_array($exceptions))
+                throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
+            unset($headers["exceptions"]);
+        }
+
+        $callback = null;
+        if(array_key_exists("callback", $headers)) {
+
+            $callback = $headers["callback"];
+            if(!is_callable($callback))
+                throw new InvalidArgumentException("header variable \"callback\" must be callable, currently: ".(is_object($callback) ? get_class($callback) : gettype($callback)));
+
+            unset($headers["callback"]);
+        }
+
+        $url   = $this->generate($routeName, $routeParameters) ?? $routeName;
+        $routeName = $this->getRouteName($url);
+        if (!$routeName) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+
+        $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
+        foreach($exceptions as $pattern)
+            if (preg_match($pattern, $this->getRouteName())) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+
+        $response = new RedirectResponse($url, $state, $headers);
+        if($event && method_exists($event, "setResponse")) $event->setResponse($response);
+
+        // Callable action if redirection happens
+        if(is_callable($callback)) $callback();
+
+        return $response;
+    }
+
+    public function reloadRequest(?Request $request = null): RedirectResponse
+    {
+        $request = $request ?? $this->getRequest();
+        return $this->redirect($request->get('_route'));
     }
 }

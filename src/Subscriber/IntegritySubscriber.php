@@ -78,7 +78,7 @@ class IntegritySubscriber implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event)
     {
         $token = $this->tokenStorage->getToken();
-        if(!$token) return true;
+        if(!$token) return;
 
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();

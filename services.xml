@@ -72,8 +72,13 @@
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Subscriber\TwigSubscriber"    ><tag name="kernel.event_subscriber" /><argument type="service" id="base.service" /></service>
+<service id="Base\Subscriber\ProfilerSubscriber"><tag name="kernel.event_subscriber" /><argument type="service" id="router" /></service>
+        <service id="Base\Subscriber\TwigSubscriber"    >
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="router" />
+        </service>
         <service id="Base\Subscriber\ParameterBagSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="parameter_bag" />
@@ -82,14 +87,15 @@
 
         <service id="Base\Subscriber\EasyAdminSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="router" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
         <service id="Base\Subscriber\AnalyticsSubscriber">
             <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="security.token_storage" />
+            <argument type="service" id="router" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig" />
             <argument type="service" id="App\Repository\UserRepository" />
@@ -128,6 +134,7 @@
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
             <argument type="service" id="request_stack" />
+            <argument type="service" id="security.firewall.map" />
             <argument type="service" id="twig" />
             <argument type="service" id="twig.extension.base" />
             <argument type="service" id="slugger" />
@@ -359,11 +366,6 @@
             <argument type="service" id="base.entity_extension" />
         </service>
 
-        <service id="Base\EntitySubscriber\ThreadSubscriber">
-            <tag name="doctrine.event_subscriber" />
-            <argument type="service" id="event_dispatcher" />
-        </service>
-
         <service id="Base\Service\SpamChecker" public="true">
             <argument type="service" id="request_stack" />
             <argument type="service" id="monolog.http_client" />
@@ -495,13 +497,13 @@
         <service id="Base\Twig\Loader\FilesystemLoader">
             <tag name="twig.loader" />
             <argument type="service" id="twig" />
-            <argument type="service" id="base.twig.app_variable" />
-            <argument type="service" id="base.twig.random_variable" />
+            <argument type="service" id="twig.app_variable" />
+            <argument type="service" id="twig.random_variable" />
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Twig\RandomVariable"    public="true"><tag name="twig.runtime" /></service>
-        <service id="Base\Twig\EasyAdminVariable" public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Twig\Variable\RandomVariable"    public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Twig\Variable\EasyAdminVariable" public="true"><tag name="twig.runtime" /></service>
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
@@ -511,14 +513,6 @@
             <argument type="service" id="base.service.icon" />
             <argument type="service" id="base.service.image" />
        </service>
-
-        <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
-        <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
-            <argument type="service" id="base.service" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-        </service>
 
         <service id="Base\Twig\Extension\MathTwigExtension"        ><tag name="twig.extension" /></service>
         <service id="Base\Twig\Extension\ClassTwigExtension"       ><tag name="twig.extension" /></service>
@@ -530,11 +524,15 @@
         <service id="Base\Twig\Extension\PaginatorTwigExtension"   ><tag name="twig.extension" /><argument type="service" id="translator" /></service>
         <service id="Base\Twig\Extension\BreadgrinderTwigExtension"><tag name="twig.extension" /><argument type="service" id="base.breadgrinder" /></service>
 
-        <!--
+        <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
+        <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
 
-            Validation constraints
-
-            -->
+        <!-- Validation constraints -->
         <service id="Base\Validator\ConstraintValidator">
             <tag name="validator.constraint_validator" />
             <argument type="service" id="translator" />
@@ -646,11 +644,22 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\EntitySubscriber\UserSubscriber">
-            <tag name="doctrine.event_subscriber" />
-            <argument type="service" id="security.token_storage" />
+        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
+            <tag name="doctrine.event_subscriber" priority="-1" />
+        </service>
+        <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
+            <tag name="doctrine.event_subscriber" priority="-1" />
+        </service>
+        <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
+        <service id="Base\EntitySubscriber\ThreadSubscriber"><tag name="kernel.event_subscriber" /></service>
+        <service id="Base\EntitySubscriber\UserSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="router" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <service id="Base\Form\Type\Layout\SettingListType">
@@ -665,19 +674,19 @@
         <service id="Base\Field\Type\PasswordType">
             <tag name="form.type" />
             <argument type="service" id="translator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Field\Type\TranslationType">
             <tag name="form.type" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Field\Type\BooleanType">
             <tag name="form.type" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Field\Type\RouteType">
@@ -694,11 +703,14 @@
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="obfuscator" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
         </service>
 
-        <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
+        <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /><argument type="service" id="base.service.icon" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
 
         <service id="Base\Field\Type\AssociationType">
@@ -720,7 +732,7 @@
             <tag name="form.type" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Field\Type\DiscriminatorType">
@@ -729,14 +741,30 @@
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Field\Type\QuillType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Field\Type\ColorType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\QuillType"><tag name="form.type" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="twig" />
+        </service>
+        <service id="Base\Field\Type\MoneyType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\NumberType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\StockType"><tag name="form.type" /><argument type="service" id="twig" /></service>
+        <service id="Base\Field\Type\DateTimePickerType"><tag name="form.type" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="twig" />
+        </service>
+        <service id="Base\Field\Type\ColorType">
+            <tag name="form.type" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="parameter_bag" />
+        </service>
+        <service id="Base\Field\Type\ColorPickerType">
+            <tag name="form.type" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="parameter_bag" />
+        </service>
         <service id="Base\Field\Type\SlugType"><tag name="form.type" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
@@ -830,9 +858,6 @@
             <argument type="service" id="translator" />
         </service>
 
-        <service id="Base\Serializer\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>
-        <service id="Base\Serializer\Encoder\ExcelEncoder"><tag name="serializer.encoder" /></service>
-
         <service id="Base\Field\Configurator\CropperConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\AvatarConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\ImageConfigurator"><tag name="ea.field_configurator" /></service>
@@ -850,7 +875,7 @@
         <service id="Base\Field\Configurator\BooleanConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="twig" />
             <argument type="service" id="security.csrf.token_manager" on-invalid="null" />
         </service>
 
@@ -875,16 +900,6 @@
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
-            <argument type="service" id="base.service" />
-        </service>
-
-        <service id="Base\Inspector\DataCollector">
-            <tag name="data_collector" id="base" template="inspector/data_collector.html.twig" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
-            <argument type="service" id="doctrine" />
-            <argument type="service" id="parameter_bag" />
-            <argument type="service" id="router" />
-            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Field\Configurator\RoleConfigurator"          parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
@@ -895,6 +910,8 @@
         <service id="Base\Field\Configurator\AttributeConfigurator"     parent="Base\Field\Configurator\SelectConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\IconConfigurator"          parent="Base\Field\Configurator\SelectConfigurator">
             <tag name="ea.field_configurator" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="twig" />
             <argument type="service" id="base.service.icon" />
         </service>
 
@@ -926,6 +943,18 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="ea_extension" />
             <argument type="service" id="translator" />
+            <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Serializer\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>
+        <service id="Base\Serializer\Encoder\ExcelEncoder"><tag name="serializer.encoder" /></service>
+
+        <service id="Base\Inspector\DataCollector">
+            <tag name="data_collector" id="base" template="inspector/data_collector.html.twig" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="router" />
             <argument type="service" id="base.service" />
         </service>
 

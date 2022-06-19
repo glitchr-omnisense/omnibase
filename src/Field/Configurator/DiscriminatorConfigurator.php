@@ -55,7 +55,6 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
         $classCrudController = AbstractCrudController::getCrudControllerFqcn($entityDto->getInstance());
 
         $field->setValue($discriminatorValue);
-
         $formattedValues = [];
         $array   = explode("_", $field->getValue());
         foreach($array as $key => $value) {

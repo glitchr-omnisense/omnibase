@@ -3,19 +3,23 @@
 namespace Base\Traits;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Routing\AdvancedRouterInterface;
+use Base\Database\Factory\EntityHydratorInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use Base\Routing\RouterInterface;
 use Base\Service\SettingBag;
 use Base\Service\IconProvider;
-use Base\Service\ImageService;
+use Base\Service\ImageServiceInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
-use Twig\Environment;
-
+use Base\Twig\Environment;
+use Base\Twig\Extension\BaseTwigExtension;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Security\Http\FirewallMapInterface;
 
 trait BaseCommonTrait {
 
@@ -43,9 +47,32 @@ trait BaseCommonTrait {
      * @var TranslatorInterface
      */
     protected static $translator = null;
-
     public static function setTranslator(?TranslatorInterface $translator) {
         self::$translator = $translator;
+    }
+
+    /**
+     * @var RequestStack
+     */
+    protected static $requestStack = null;
+    public static function setRequestStack(RequestStack $requestStack) {
+        self::$requestStack = $requestStack;
+    }
+
+    /**
+     * @var EntityManagerInterface
+     */
+    protected static $entityManager = null;
+    public static function setEntityManager(EntityManagerInterface $entityManager) {
+        self::$entityManager = $entityManager;
+    }
+
+    /**
+     * @var EntityHydratorInterface
+     */
+    protected static $entityHydrator = null;
+    public static function setEntityHydrator(EntityHydratorInterface $entityHydrator) {
+        self::$entityHydrator = $entityHydrator;
     }
 
     /**
@@ -76,19 +103,31 @@ trait BaseCommonTrait {
      * @var ImageServiceInterface
      */
     protected static $imageService = null;
-    public static function setImageService(?ImageService $imageService) {  self::$imageService = $imageService; }
+    public static function setImageService(?ImageServiceInterface $imageService) {  self::$imageService = $imageService; }
 
     /**
-     * @var AdvancedRouterInterface
+     * @var FirewallMapInterface
+     */
+    protected static $firewallMap = null;
+    public static function setFirewallMap(?FirewallMapInterface $firewallMap) {  self::$firewallMap = $firewallMap; }
+
+    /**
+     * @var RouterInterface
      */
     protected static $router = null;
-    public static function setRouter(AdvancedRouterInterface $router) { self::$router = $router; }
+    public static function setRouter(RouterInterface $router) { self::$router = $router; }
 
     /**
      * @var Environment
      */
     protected static $twig;
     public static function setTwig(Environment $twig) { self::$twig = $twig; }
+
+    /**
+     * @var BaseTwigExtension
+     */
+    protected static $twigExtension = null;
+    public static function setTwigExtension(BaseTwigExtension $twigExtension) {  self::$twigExtension = $twigExtension; }
 
     /**
      * @var SettingBag

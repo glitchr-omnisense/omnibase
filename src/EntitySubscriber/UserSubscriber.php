@@ -2,142 +2,118 @@
 
 namespace Base\EntitySubscriber;
 
-use App\Entity\User;
-
-use Base\EntityEvent\UserEvent;
+use Base\Entity\User\Notification;
+use Base\Entity\User\Token;
+use Base\EntityDispatcher\Event\UserEvent;
+use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
-
-use Doctrine\ORM\Events;
-use Doctrine\Common\EventSubscriber;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\PreUpdateEventArgs;
-
-use Exception;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
-class UserSubscriber implements EventSubscriber
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class UserSubscriber implements EventSubscriberInterface
 {
     /**
      * @var BaseService
      */
-    private $baseService;
-    private $tokenStorage;
+    protected $router;
+    protected $tokenStorage;
 
-    protected array $events;
-    public function __construct(TokenStorageInterface $tokenStorage, EventDispatcherInterface $dispatcher, BaseService $baseService, ){
+    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router){
 
-        $this->dispatcher   = $dispatcher;
-        $this->baseService  = $baseService;
+        $this->router       = $router;
         $this->tokenStorage = $tokenStorage;
-        $this->events       = [];
     }
 
-    public function getSubscribedEvents() : array
+    public static function getSubscribedEvents() : array
     {
         return
         [
-            Events::postUpdate,
-            Events::preUpdate,
-            Events::postPersist,
-            Events::prePersist
+            UserEvent::REGISTER => ['onRegistration'],
+            UserEvent::APPROVAL => ['onApproval'],
+            UserEvent::VERIFIED => ['onVerification'],
+            UserEvent::ENABLED  => ['onEnabling'],
+            UserEvent::DISABLED => ['onDisabling'],
+            UserEvent::KICKED   => ['onKickout']
         ];
     }
 
-    public function addEvent(User $user, string $event)
+    public function onEnabling(UserEvent $event)
     {
-        $id = spl_object_id($user);
+        $user = $event->getUser();
+        if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
-        if(!array_key_exists($id, $this->events))
-            $this->events[$id] = [];
+        $notification = new Notification("accountWelcomeBack.success", [$user]);
+        $notification->setUser($user);
 
-        if(!in_array($event, $this->events[$id]))
-            $this->events[$id][$event] = false;
+        if($this->tokenStorage->getToken()->getUser() == $user)
+            $notification->send("success");
     }
 
-    public function dispatchEvents($user)
+    public function onDisabling(UserEvent $event)
     {
-        $id = spl_object_id($user);
-        if (!array_key_exists($id, $this->events)) return;
+        $user = $event->getUser();
+        if($this->tokenStorage->getToken()->getUser() != $user) return; // Only notify when user requests itself
 
-        foreach ($this->events[$id] as $event => $triggered) {
+        $notification = new Notification("accountGoodbye.success", [$user]);
+        $notification->setUser($user);
+        $notification->setHtmlTemplate("@Base/security/email/account_goodbye.html.twig");
 
-            $this->events[$id][$event] = true;
-            if(!$triggered) // Dispatch only once
-                $this->dispatcher->dispatch(new UserEvent($user), $event);
+            $notification->send("success")->send("email");
+    }
+
+    public function onKickout(UserEvent $event) { }
+
+    public function onVerification(UserEvent $event) { }
+
+    public function onRegistration(UserEvent $event)
+    {
+        $token = $this->tokenStorage->getToken();
+
+        $user = $event->getUser();
+        if($token && $token->getUser() != $user) return; // Only notify when user requests itself
+
+        if ($user->isVerified()) { // Social account connection
+
+            $notification = new Notification("verifyEmail.success");
+            $notification->send("success");
+
+            $this->userRepository->flush($user);
+
+        } else {
+
+            /**
+             * @var \App\Entity\User\Token
+             */
+            $verifyEmailToken = new Token('verify-email', 3600);
+            $user->addToken($verifyEmailToken);
+
+            $notification = new Notification('verifyEmail.check');
+            $notification->setUser($user);
+            $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
+
+            $this->userRepository->flush($user);
+            $notification->send("email")->send("success");
         }
+
+        $this->router->redirectToRoute("user_profile", [], 302);
     }
 
-    public function prePersist(LifecycleEventArgs $event)
+    public function onApproval(UserEvent $event)
     {
-        $user = $event->getObject();
-        if (!$user instanceof User) return;
+        $user = $event->getUser();
 
-        // Update only if required
-        $this->addEvent($user, UserEvent::REGISTER);
-    }
+        $adminApprovalToken = $user->getValidToken("admin-approval");
+        if ($adminApprovalToken) {
 
-    public function preUpdate(PreUpdateEventArgs $event)
-    {
-        $user = $event->getObject();
-        if (!$user instanceof User) return;
+            $adminApprovalToken->revoke();
 
-        // Update only if required
-        $oldUser = $this->baseService->getOriginalEntity($event);
-        if (!$oldUser instanceof User) return;
+            $notification = new Notification("adminApproval.approval");
+            $notification->setUser($user);
+            $notification->setHtmlTemplate("@Base/security/email/admin_approval_confirm.html.twig");
+            $notification->send("email");
+        }
 
-        if($user->isApproved() && !$oldUser->isApproved())
-            $this->addEvent($user, UserEvent::APPROVAL);
-
-        if($user->isVerified() && !$oldUser->isVerified())
-            $this->addEvent($user, UserEvent::VERIFIED);
-
-        if($user->isEnabled() && !$oldUser->isEnabled())
-            $this->addEvent($user, UserEvent::ENABLED);
-
-        if($user->isDisabled() && !$oldUser->isDisabled())
-            $this->addEvent($user, UserEvent::DISABLED);
-
-        if($user->isKicked() && !$oldUser->isKicked())
-            $this->addEvent($user, UserEvent::KICKED);
-
-        if($user->isLocked() && !$oldUser->isLocked())
-            $this->addEvent($user, UserEvent::LOCKED);
-
-        if($user->isBanned() && !$oldUser->isBanned())
-            $this->addEvent($user, UserEvent::BANNED);
-
-        if(!$user->isGhost() && $oldUser->isGhost())
-            $this->addEvent($user, UserEvent::GHOST);
-    }
-
-    public function postPersist(LifecycleEventArgs $event): void
-    {
-        $user = $event->getObject();
-        if (!$user instanceof User) return;
-
-        $this->dispatchEvents($user);
-    }
-
-    public function postUpdate(LifecycleEventArgs $event): void
-    {
-        $user = $event->getObject();
-        if (!$user instanceof User) return;
-
-        $this->dispatchEvents($user);
-    }
-
-    public function preRemove(LifecycleEventArgs $event): void
-    {
-        $user = $event->getObject();
-        if (!$user instanceof User) return;
-
-        $impersonator = null;
-        if ($this->tokenStorage->getToken() instanceof SwitchUserToken)
-            $impersonator = $this->tokenStorage->getToken()->getOriginalToken()->getUser();
-
-        if($impersonator == $this->tokenStorage->getToken()->getUser() || $user == $this->tokenStorage->getToken()->getUser())
-            throw new Exception("Unauthorized action: you can't delete your own account");
+        $this->userRepository->flush($user);
     }
 }

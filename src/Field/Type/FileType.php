@@ -8,6 +8,9 @@ use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Base\Service\FileService;
 use Base\Service\ImageService;
+use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
+use Base\Twig\Environment;
 use Base\Validator\Constraints\File;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
@@ -20,7 +23,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -31,12 +33,17 @@ class FileType extends AbstractType implements DataMapperInterface
     protected $baseService;
     protected $translator;
 
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager, FormFactory $formFactory, ImageService $imageService)
+    public function __construct(
+        ParameterBagInterface $parameterBag, TranslatorInterface $translator, Environment $twig,
+        ClassMetadataManipulator $classMetadataManipulator, CsrfTokenManagerInterface $csrfTokenManager,
+        FormFactory $formFactory, BaseService $baseService, ImageService $imageService)
     {
-        $this->baseService              = $baseService;
         $this->classMetadataManipulator = $classMetadataManipulator;
 
-        $this->translator       = $baseService->getTranslator();
+        $this->baseService      = $baseService;
+        $this->parameterBag     = $parameterBag;
+        $this->translator       = $translator;
+        $this->twig             = $twig;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->formFactory      = $formFactory;
 
@@ -62,8 +69,8 @@ class FileType extends AbstractType implements DataMapperInterface
             'empty_data'   => null,
 
             'dropzone'     => [],
-            'dropzone-js'  => $this->baseService->getParameterBag("base.vendor.dropzone.javascript"),
-            'dropzone-css' => $this->baseService->getParameterBag("base.vendor.dropzone.stylesheet"),
+            'dropzone-js'  => $this->parameterBag->get("base.vendor.dropzone.javascript"),
+            'dropzone-css' => $this->parameterBag->get("base.vendor.dropzone.stylesheet"),
 
             'allow_delete' => true,
             "allow_delete[confirmation]" => true,
@@ -80,12 +87,12 @@ class FileType extends AbstractType implements DataMapperInterface
             'obfusca'        => false,
 
             'sortable'     => null,
-            'sortable-js'  => $this->baseService->getParameterBag("base.vendor.sortablejs.javascript"),
+            'sortable-js'  => $this->parameterBag->get("base.vendor.sortablejs.javascript"),
 
             'lightbox'     => ['resizeDuration' => 500, 'fadeDuration' => 250, 'imageFadeDuration' => 100],
-            'lightbox-css' => $this->baseService->getParameterBag("base.vendor.lightbox.stylesheet"),
-            'lightbox-js'  => $this->baseService->getParameterBag("base.vendor.lightbox.javascript"),
-            'lightbox2b-js'  => $this->baseService->getParameterBag("base.vendor.lightbox2b.javascript"),
+            'lightbox-css' => $this->parameterBag->get("base.vendor.lightbox.stylesheet"),
+            'lightbox-js'  => $this->parameterBag->get("base.vendor.lightbox.javascript"),
+            'lightbox2b-js'  => $this->parameterBag->get("base.vendor.lightbox2b.javascript"),
 
             'thumbnail_width'  => null,
             'thumbnail_height' => 250,
@@ -182,9 +189,9 @@ class FileType extends AbstractType implements DataMapperInterface
         $view->vars["lightbox"] = null;
         if(is_array($options["lightbox"])) {
 
-            $this->baseService->addHtmlContent("javascripts", $options["lightbox-js"]);
-            $this->baseService->addHtmlContent("javascripts", $options["lightbox2b-js"]);
-            $this->baseService->addHtmlContent("stylesheets", $options["lightbox-css"]);
+            $this->twig->addHtmlContent("javascripts", $options["lightbox-js"]);
+            $this->twig->addHtmlContent("javascripts", $options["lightbox2b-js"]);
+            $this->twig->addHtmlContent("stylesheets", $options["lightbox-css"]);
 
             $view->vars["lightbox"]  = json_encode($options["lightbox"]);
         }
@@ -265,8 +272,8 @@ class FileType extends AbstractType implements DataMapperInterface
 
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
-            if($options["dropzone-js"] ) $this->baseService->addHtmlContent("javascripts:head", $options["dropzone-js"]);
-            if($options["dropzone-css"]) $this->baseService->addHtmlContent("stylesheets:head", $options["dropzone-css"]);
+            if($options["dropzone-js"] ) $this->twig->addHtmlContent("javascripts:head", $options["dropzone-js"]);
+            if($options["dropzone-css"]) $this->twig->addHtmlContent("stylesheets:head", $options["dropzone-css"]);
 
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             $view->vars["attr"]["class"] = "dropzone";
@@ -297,17 +304,17 @@ class FileType extends AbstractType implements DataMapperInterface
                 $options["dropzone"]["maxFiles"] -= count(explode("|", $view->vars["value"]));
 
             $token = $this->csrfTokenManager->getToken("dropzone")->getValue();
-            $view->vars["ajax"]     = $this->baseService->getAsset("ux/dropzone/" . $token);
+            $view->vars["ajax"]     = $this->twig->getAsset("ux/dropzone/" . $token);
             $options["dropzone"]["url"] = $view->vars["ajax"];
 
             $view->vars["dropzone"]  = json_encode($options["dropzone"]);
 
             $view->vars["sortable"]  = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])
-            $this->baseService->addHtmlContent("javascripts:head", $options["sortable-js"]);
+            $this->twig->addHtmlContent("javascripts:head", $options["sortable-js"]);
         }
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");
     }
 
     public function mapDataToForms($viewData, \Traversable $forms): void

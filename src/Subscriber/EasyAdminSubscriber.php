@@ -2,24 +2,27 @@
 
 namespace Base\Subscriber;
 
-use Base\Controller\Backoffice\AbstractCrudController;
-use Base\Service\BaseService;
+use InvalidArgumentException;
+
 use EasyCorp\Bundle\EasyAdminBundle\Exception\EntityNotFoundException;
 use EasyCorp\Bundle\EasyAdminBundle\Exception\ForbiddenActionException;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use InvalidArgumentException;
+
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
+use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Routing\RouterInterface;
+
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
-    public function __construct(BaseService $baseService, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(RouterInterface $router, AdminContextProvider $adminContextProvider, AdminUrlGenerator $adminUrlGenerator)
     {
-        $this->baseService = $baseService;
+        $this->router = $router;
 
         $this->adminContextProvider = $adminContextProvider;
         $this->adminUrlGenerator = $adminUrlGenerator;
@@ -43,9 +46,9 @@ class EasyAdminSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $e)
     {
-        if($this->baseService->getRequestStack()->getMainRequest() != $e->getRequest()) return;
-        if($this->baseService->isProfiler()) return;
-        if(!$this->baseService->isEasyAdmin()) return;
+        if($this->router->getMainRequest() != $e->getRequest()) return;
+        if($this->router->isProfiler()) return;
+        if(!$this->router->isEasyAdmin()) return;
 
         $crud = $this->adminContextProvider->getContext()->getCrud();
         if($crud == null) return;
@@ -69,13 +72,13 @@ class EasyAdminSubscriber implements EventSubscriberInterface
                 ->setAction($crud->getCurrentAction())
                 ->generateUrl();
 
-            $e->setResponse($this->baseService->redirect($url));
+            $e->setResponse($this->router->redirect($url));
         }
     }
 
     public function onKernelException(ExceptionEvent $e)
     {
-        if(!$this->baseService->isDebug()) {
+        if(!$this->router->isDebug()) {
 
             $request   = $e->getRequest();
             $exception = $e->getThrowable();
@@ -95,7 +98,7 @@ class EasyAdminSubscriber implements EventSubscriberInterface
             }
 
             if(!$eaCanonicException)
-                $e->setResponse($this->baseService->redirect($request));
+                $e->setResponse($this->router->redirect($request));
 
             $e->stopPropagation();
         }

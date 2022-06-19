@@ -7,6 +7,8 @@ use Base\Service\LocaleProvider;
 use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
+use Base\Twig\Variable\EasyAdminVariable;
+use Base\Twig\Variable\RandomVariable;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Twig\Environment;
 

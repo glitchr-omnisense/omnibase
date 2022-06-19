@@ -11,6 +11,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\DataMapperInterface;
 
 use Base\Service\BaseService;
+use Base\Service\ParameterBagInterface;
+use Base\Twig\Environment;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -20,20 +22,24 @@ use Symfony\Component\Form\FormEvents;
  */
 final class ColorType extends AbstractType
 {
-    /** @var BaseService */
-    protected $baseService;
-    public function __construct(BaseService $baseService) { $this->baseService = $baseService; }
+    /** @var Environment */
+    protected $twig;
 
-    public function getBlockPrefix(): string
+    /** @var ParameterBag */
+    protected $parameterBag;
+
+    public function __construct(Environment $twig, ParameterBagInterface $parameterBag)
     {
-        return 'jscolor';
+        $this->twig = $twig;
+        $this->parameterBag = $parameterBag;
     }
 
+    public function getBlockPrefix(): string { return 'jscolor'; }
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
             'jscolor'     => [],
-            'jscolor-js'  => $this->baseService->getParameterBag("base.vendor.jscolor.javascript"),
+            'jscolor-js'  => $this->parameterBag->get("base.vendor.jscolor.javascript"),
             'is_nullable' => true
         ]);
     }
@@ -76,6 +82,6 @@ final class ColorType extends AbstractType
         $options["value"] = expandhex($view->vars["value"], true);
 
         // Import JSColor
-        $this->baseService->addHtmlContent("javascripts:head", $options["jscolor-js"]);
+        $this->twig->addHtmlContent("javascripts:head", $options["jscolor-js"]);
     }
 }

@@ -15,6 +15,8 @@ class IconConfigurator extends SelectConfigurator
     public function __construct(...$args)
     {
         $this->iconProvider = array_pop($args);
+        $this->twig         = array_pop($args);
+        $this->parameterBag = array_pop($args);
         parent::__construct(...$args);
     }
 
@@ -31,14 +33,14 @@ class IconConfigurator extends SelectConfigurator
         if( null !== $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME))
             $icon = $propertyAccessor->getValue($entityDto->getInstance(), $field->getCustomOption(IconField::OPTION_TARGET_FIELD_NAME));
 
-        $adapter = $field->getFormTypeOption("adapter") ?? $this->baseService->getParameterBag("base.icon_provider.default_adapter");
+        $adapter = $field->getFormTypeOption("adapter") ?? $this->parameterBag->get("base.icon_provider.default_adapter");
         $adapter = $this->iconProvider->getAdapter($adapter);
 
         foreach($adapter->getAssets() as $asset) {
 
             $relationship = pathinfo_relationship($asset);
             $location = $relationship == "javascript" ? "javascripts" : "stylesheets";
-            $this->baseService->addHtmlContent($location, $asset);
+            $this->twig->addHtmlContent($location, $asset);
         }
 
         $field->setCustomOption("iconColor", $icon);

@@ -2,9 +2,8 @@
 
 namespace Base\Service;
 
-use Base\Routing\AdvancedRouterInterface;
+use Base\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
 
 class Referrer implements ReferrerInterface
 {
@@ -15,7 +14,7 @@ class Referrer implements ReferrerInterface
     private $router;
 
     public function __toString() : string { return $this->getUrl() ?? ""; }
-    public function __construct(RequestStack $requestStack, AdvancedRouterInterface $router)
+    public function __construct(RequestStack $requestStack, RouterInterface $router)
     {
         $this->requestStack = $requestStack;
         $this->router       = $router;
@@ -59,6 +58,7 @@ class Referrer implements ReferrerInterface
             $targetPath = $request->request->get('referer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
         }
+
         if(!$targetRoute) {
             $targetPath = $request->request->get('referrer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;

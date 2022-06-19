@@ -4,6 +4,8 @@ namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Service\BaseService;
+use Base\Service\TranslatorInterface;
+use Base\Twig\Environment;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,9 +17,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ArrayType extends CollectionType
 {
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(Environment $twig, TranslatorInterface $translator, ClassMetadataManipulator $classMetadataManipulator)
     {
-        parent::__construct($baseService);
+        parent::__construct($twig, $translator);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
     public function getBlockPrefix(): string { return 'array'; }
@@ -60,9 +62,9 @@ class ArrayType extends CollectionType
             if (null !== $options['entry_required'])
                 $prototypeOptions['required'] = $options['entry_required'];
 
-           // $prototypeOptions['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->baseService->getTranslator()->trans("@fields.array.value");
+            // $prototypeOptions['placeholder'] = $prototypeOptions['attr']['placeholder'] ?? $this->translator->trans("@fields.array.value");
             $prototype = $builder->create($options['prototype_name'], FormType::class, ["label" => false])
-                ->add($options["prototype_key"], TextType::class, ["label" => false, "attr" => ["placeholder" => $this->baseService->getTranslator()->trans("@fields.array.key")]])
+                ->add($options["prototype_key"], TextType::class, ["label" => false, "attr" => ["placeholder" => $this->translator->trans("@fields.array.key")]])
                 ->add($options['prototype_name'], $options['entry_type'], $prototypeOptions);
 
             $builder->setAttribute('prototype', $prototype->getForm());
@@ -82,6 +84,6 @@ class ArrayType extends CollectionType
         $view->vars["pattern"] = $options["pattern"];
         $view->vars["placeholder"] = $options["placeholder"];
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-array.js");
     }
 }

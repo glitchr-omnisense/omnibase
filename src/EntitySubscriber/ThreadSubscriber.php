@@ -2,79 +2,32 @@
 
 namespace Base\EntitySubscriber;
 
-use Base\Entity\Thread;
-use Base\EntityEvent\ThreadEvent;
-use Base\Enum\ThreadState;
-use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
-use Doctrine\ORM\Events;
-use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Base\EntityDispatcher\Event\ThreadEvent;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ThreadSubscriber implements EventSubscriberInterface
 {
     protected array $events;
-    public function __construct($dispatcher) {
-        $this->dispatcher = $dispatcher;
-        $this->events = [];
-    }
 
-    public function getSubscribedEvents() : array
+    public static function getSubscribedEvents() : array
     {
-        return [
-            Events::postUpdate,
-            Events::preUpdate,
-            Events::postPersist,
-            Events::prePersist
+        return
+        [
+            ThreadEvent::SCHEDULED   => ['onSchedule'],
+            ThreadEvent::PUBLISHABLE => ['onPublishable'],
+            ThreadEvent::PUBLISHED   => ['onPublished'],
         ];
     }
 
-    public function prePersist(LifecycleEventArgs $event)
+    public function onSchedule(ThreadEvent $event)
     {
-        $thread = $event->getObject();
-        if (!$thread instanceof Thread) return;
-
-        // Update publishable articles
-        if ($thread->isScheduled() && $thread->isPublishable())
-            $thread->setState(ThreadState::PUBLISH);
-
-        if ($thread->isPublished())
-            $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISH;
     }
 
-    public function preUpdate(LifecycleEventArgs $event)
+    public function onPublishable(ThreadEvent $event)
     {
-        $thread = $event->getObject();
-        if (!$thread instanceof Thread) return;
-
-        // Update publishable articles
-        if ($thread->isScheduled() && $thread->isPublishable()) {
-
-            $thread->setState(ThreadState::PUBLISH);
-            $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISH;
-        }
     }
 
-    public function postPersist(LifecycleEventArgs $event): void
+    public function onPublished(ThreadEvent $event)
     {
-        $thread = $event->getObject();
-        if (!$thread instanceof Thread) return;
-
-        $this->dispatchEvents($thread);
-    }
-
-    public function postUpdate(LifecycleEventArgs $event): void
-    {
-        $thread = $event->getObject();
-        if (!$thread instanceof Thread) return;
-
-        $this->dispatchEvents($thread);
-    }
-
-    public function dispatchEvents($thread) {
-
-        $id = spl_object_id($thread);
-        if(!array_key_exists($id, $this->events)) return;
-
-        foreach($this->events[$id] as $event)
-            $this->dispatcher->dispatch(new ThreadEvent($thread), $event);
     }
 }

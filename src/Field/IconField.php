@@ -10,8 +10,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
 class IconField extends SelectField implements FieldInterface
 {
-    use FieldTrait;
-
     public const OPTION_TARGET_FIELD_NAME = 'targetFieldName';
 
     public static function new(string $propertyName, ?string $label = null): self

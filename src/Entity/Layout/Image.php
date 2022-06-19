@@ -35,17 +35,20 @@ class Image implements IconizeInterface
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         $filters = array_pop_key("filters", $routeParameters) ?? [];
+        if($this->getSource() === null) return null;
 
-        $cropIdentifier = array_pop_key("crop", $routeParameters);
-        if(is_array($cropIdentifier)) {
-            $filters[] = new ThumbnailFilter($cropIdentifier[0] ?? null, $cropIdentifier[0] ?? null);
-            $cropIdentifier = implode(":", array_slice($cropIdentifier, 0, 2));
+        $thumbnail  = array_pop_key("thumbnail", $routeParameters);
+        $identifier = array_pop_key("crop", $routeParameters);
+        if(is_array($thumbnail)) {
+
+            $filters[] = new ThumbnailFilter($thumbnail[0] ?? null, $thumbnail[1] ?? null);
+            $identifier ??= implode(":", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
-        $routeName = $cropIdentifier ? "ux_imageCrop" : "ux_image" ;
+        $routeName = $identifier ? "ux_imageCrop" : "ux_image" ;
         $routeParameters = array_merge($routeParameters, [
+            "identifier" => $identifier,
             "hashid" => $this->getImageService()->obfuscate($this->getSource(), [], $filters),
-            "identifier" => $cropIdentifier
         ]);
 
         return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);

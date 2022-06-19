@@ -19,10 +19,12 @@ class MaintenanceSubscriber implements EventSubscriberInterface
     * @var string
     */
     private $homepageRoute;
+
     /**
     * @var array
     */
     private $exceptionRoute;
+
     /**
     * @var string
     */

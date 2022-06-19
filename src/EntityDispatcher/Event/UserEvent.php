@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\EntityEvent;
+namespace Base\EntityDispatcher\Event;
 
 use Base\Entity\User;
 use Symfony\Contracts\EventDispatcher\Event;
@@ -22,15 +22,11 @@ class UserEvent extends Event
     public const GHOST    = 'user.ghost'   ;
     public const BANNED   = 'user.banned'  ;
 
-    protected $user;
-
     public function __construct(User $user)
     {
         $this->user = $user;
     }
 
-    public function getUser(): User
-    {
-        return $this->user;
-    }
+    protected $user;
+    public function getUser(): User { return $this->user; }
 }

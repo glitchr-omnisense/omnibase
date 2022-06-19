@@ -10,16 +10,20 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\DBAL\Types\ArrayType;
-use Doctrine\ORM\EntityManagerInterface;
+
 use Exception;
 use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionObject;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Event\LifecycleEventArgs;
+use Doctrine\ORM\Event\PreUpdateEventArgs;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
-class EntityHydrator
+class EntityHydrator implements EntityHydratorInterface
 {
     /**
      * @var EntityManagerInterface
@@ -70,9 +74,9 @@ class EntityHydrator
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->entityManager = $entityManager;
+
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessorBuilder()->enableMagicCall()->getPropertyAccessor();
-        $this->serializer = new Serializer([new ObjectNormalizer()]);
     }
 
     public function hydrate(mixed $entity, null|array|object $data = [], array $fieldExceptions = [], int $aggregateModel = self::DEFAULT_AGGREGATE, ...$constructArguments): mixed
@@ -529,5 +533,49 @@ class EntityHydrator
             return $this->entityManager->getReference($entityName, $identifier);
 
         return $this->entityManager->find($entityName, $identifier);
+    }
+
+
+    public function getEntityFromData($classname, $data): ?object
+    {
+        if($data === null) return null;
+
+        $fieldNames = $this->entityManager->getClassMetadata($classname)->getFieldNames();
+        $fields  = array_intersect_key($data, array_flip($fieldNames));
+        $associations = array_diff_key($data, array_flip($fieldNames));
+
+        $entity = $this->hydrate($classname, array_merge($fields, $associations));
+        return $entity;
+    }
+
+
+    protected static $entitySerializer = null;
+    public function getOriginalEntity($eventOrEntity)
+    {
+        if(!self::$entitySerializer)
+            self::$entitySerializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+
+        $data = $this->getOriginalEntityData($eventOrEntity);
+
+        if(!$eventOrEntity instanceof LifecycleEventArgs) $oldEntity = $eventOrEntity;
+        else $oldEntity = $eventOrEntity->getObject();
+
+        return $this->hydrate($oldEntity, $data);
+    }
+
+    public function getOriginalEntityData($eventOrEntity)
+    {
+        $entity = $this->classMetadataManipulator->isEntity($eventOrEntity) ? $eventOrEntity : $eventOrEntity->getObject();
+        $originalEntityData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
+
+        if($eventOrEntity instanceof PreUpdateEventArgs) {
+
+            $event = $eventOrEntity;
+            foreach($event->getEntityChangeSet() as $field => $data)
+                $originalEntityData[$field] = $data[0];
+
+        }
+
+        return $originalEntityData;
     }
 }

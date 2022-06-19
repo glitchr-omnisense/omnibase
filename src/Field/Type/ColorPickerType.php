@@ -9,7 +9,9 @@ use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Base\Service\BaseService;
+use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
+use Base\Twig\Environment;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
@@ -50,10 +52,11 @@ final class ColorPickerType extends AbstractType
     /** @var TranslatorInterface */
     protected $translator;
 
-    public function __construct(TranslatorInterface $translator, BaseService $baseService)
+    public function __construct(TranslatorInterface $translator, Environment $twig, ParameterBagInterface $parameterBag)
     {
-        $this->baseService = $baseService;
-        $this->translator = $translator;
+        $this->translator   = $translator;
+        $this->twig         = $twig;
+        $this->parameterBag = $parameterBag;
     }
 
     public function getParent() : ?string { return TextType::class; }
@@ -198,8 +201,8 @@ final class ColorPickerType extends AbstractType
                 ],
             ],
 
-            'pickr-js'  => $this->baseService->getParameterBag("base.vendor.pickr.javascript"),
-            'pickr-css'  => $this->baseService->getParameterBag("base.vendor.pickr.stylesheet"),
+            'pickr-js'  => $this->parameterBag->get("base.vendor.pickr.javascript"),
+            'pickr-css'  => $this->parameterBag->get("base.vendor.pickr.stylesheet"),
             'is_nullable' => true
         ]);
     }
@@ -238,7 +241,7 @@ final class ColorPickerType extends AbstractType
         }
         $options["value"] = $view->vars['value'];
 
-        $this->baseService->addHtmlContent("javascripts:head", $options["pickr-js"]);
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-color.js");
+        $this->twig->addHtmlContent("javascripts:head", $options["pickr-js"]);
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-color.js");
     }
 }

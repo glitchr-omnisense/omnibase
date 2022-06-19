@@ -5,6 +5,7 @@ namespace Base\Service;
 use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
+use Base\Database\Factory\EntityHydratorInterface;
 use Base\Traits\BaseTrait;
 
 use Base\Service\ParameterBagInterface;
@@ -49,6 +50,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
+use Symfony\Component\Security\Http\FirewallMapInterface;
 
 class BaseService implements RuntimeExtensionInterface
 {
@@ -81,11 +83,6 @@ class BaseService implements RuntimeExtensionInterface
     protected $csrfTokenManager;
 
     /**
-     * @var EntityManagerInterface
-     */
-    protected $entityManager;
-
-    /**
      * @var Container
      */
     protected $container;
@@ -98,21 +95,11 @@ class BaseService implements RuntimeExtensionInterface
         return $this->container->getServiceIds();
     }
 
-    /**
-     * @var RequestStack
-     */
-    protected $requestStack;
-    public function getRequestStack(): RequestStack { return $this->requestStack; }
-
-    /**
-     * @var BaseTwigExtension
-     */
-    protected static $twigExtension = null;
-    public static function getTwigExtension(): BaseTwigExtension { return self::$twigExtension; }
-
     public function __construct(
         KernelInterface $kernel,
         RequestStack $requestStack,
+        FirewallMapInterface $firewallMap,
+
         Environment $twig,
         BaseTwigExtension $baseTwigExtension,
 
@@ -132,7 +119,7 @@ class BaseService implements RuntimeExtensionInterface
         ImageService $imageService,
         IconProvider $iconProvider,
 
-        EntityHydrator $entityHydrator,
+        EntityHydratorInterface $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->setInstance($this);
@@ -150,8 +137,6 @@ class BaseService implements RuntimeExtensionInterface
         $this->tokenStorage             = $tokenStorage;
         $this->csrfTokenManager         = $csrfTokenManager;
         $this->formFactory              = $formFactory;
-        $this->requestStack             = $requestStack;
-        $this->entityHydrator           = $entityHydrator;
 
         // Additional containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
@@ -161,16 +146,19 @@ class BaseService implements RuntimeExtensionInterface
         $this->setLocaleProvider($localeProvider);
         $this->setTwig($twig);
         $this->setRouter($this->container->get("router"));
+        $this->setFirewallMap($firewallMap);
         $this->setParameterBag($parameterBag);
         $this->setTranslator($this->container->get("translator"));
         $this->setSlugger($slugger);
         $this->setEntityManager($entityManager);
+        $this->setEntityHydrator($entityHydrator);
+        $this->setRequestStack($requestStack);
         $this->setEnvironment($this->kernel->getEnvironment());
         $this->setUserIdentifier($this->getParameterBag("base.user.identifier"));
         $this->setNotifier($notifier);
 
         // EA provider
-        $this->adminContextProvider = new AdminContextProvider($this->requestStack);
+        $this->adminContextProvider = new AdminContextProvider($requestStack);
     }
 
     public function exec(string $command, array $arguments = [])
@@ -180,155 +168,26 @@ class BaseService implements RuntimeExtensionInterface
 
         $input = new ArrayInput(array_merge($arguments, ['command' => $command]));
         $output = new BufferedOutput();
-        dump($input);
         $application->run($input, $output);
 
         $content = $output->fetch();
-        dump($content);
         return new Response($content);
     }
 
     /*
      * Stylesheet and javascripts blocks
      */
-    public function settings() { return $this->getSettingBag(); }
+    public function settings() { return $this->getSettingBag(); } // Used in twig environment
 
-    public function getParameterTwig(string $name = "")
-    {
-        if (!isset(self::$twig))
-            throw new Exception("No twig found in BaseService. Did you overloaded self::__construct ?");
-
-        $globals = self::$twig->getGlobals();
-        if(!$name) return $globals;
-
-        return (array_key_exists($name, $globals)) ? $globals[$name] : null;
-    }
-
-    public function addParameterTwig(string $name, $newValue)
-    {
-        if (!isset(self::$twig))
-            throw new Exception("No twig found in BaseService. Did you overloaded self::__construct ?");
-
-        $value = $this->getParameterTwig($name);
-        if ($value == null) $value = $newValue;
-        else {
-
-            if (is_string($value)) $value .= "\n" . $newValue;
-            else if (is_array($value)) $value += array_merge($value, $newValue);
-            else if (is_numeric($value)) $value += $newValue;
-            else if (is_object($value) && is_object($newValue) && method_exists($value, '__add')) $value += $newValue;
-            else throw new Exception("Ambiguity for merging the two \"$name\" entities..");
-        }
-
-        return self::$twig->addGlobal($name, $value);
-    }
-
-    public function hasParameterTwig(string $name)
-    {
-        if (!isset(self::$twig))
-            throw new Exception("No twig found in BaseService. Did you overloaded self::__construct ?");
-
-        return self::$twig->getGlobals()[$name] ?? null;
-    }
-
-    public function setParameterTwig(string $name, $value)
-    {
-        if (!isset(self::$twig))
-            throw new Exception("No twig found in BaseService. Did you overloaded self::__construct ?");
-
-        return self::$twig->addGlobal($name, $value);
-    }
-
-    public function appendParameterTwig($name, $value)
-    {
-        if (!isset(self::$twig))
-            throw new Exception("No twig found in BaseService. Did you overloaded self::__construct ?");
-
-        $parameter = self::$twig->getGlobals()[$name] ?? null;
-        if(is_string($parameter)) self::$twig->addGlobal($name, $parameter.$value);
-        if( is_array($parameter)) self::$twig->addGlobal($name, array_merge($parameter,$value));
-        throw new Exception("Unknown merging method for \"$name\"");
-    }
-
-    private $htmlContent = [];
-
-    public function renderHtmlContent(string $location)
-    {
-        $htmlContent = $this->getHtmlContent($location);
-        if(!empty($htmlContent))
-            $this->removeHtmlContent($location);
-
-        return $htmlContent;
-    }
-
-    public function getHtmlContent(string $location)
-    {
-        return trim(implode(PHP_EOL,array_unique($this->htmlContent[$location] ?? [])));
-    }
-
-    public function removeHtmlContent(string $location)
-    {
-        if(array_key_exists($location, $this->htmlContent))
-            unset($this->htmlContent[$location]);
-
-        return $this;
-    }
-
-    public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = [])
-    {
-        if(empty($contentOrArrayOrFile)) return $this;
-
-        if(is_array($contentOrArrayOrFile)) {
-
-            foreach($contentOrArrayOrFile as $content)
-                $this->addHtmlContent($location, $content, $options);
-
-            return $this;
-        }
-
-        $relationship = pathinfo_relationship($contentOrArrayOrFile);
-        if(!$relationship) {
-
-            $content = $contentOrArrayOrFile;
-
-        } else {
-
-            // Compute options
-            $relationship = $options["rel"] ?? $relationship;
-            array_values_remove($options, "rel");
-
-            $attributes = html_attributes($options);
-
-            // Convert into html tag
-            switch($relationship) {
-
-                case "javascript":
-                    $content = "<script src='".$this->getAsset($contentOrArrayOrFile)."' ".$attributes."></script>";
-                    break;
-
-                case "icon":
-                case "preload":
-                case "stylesheet":
-                default:
-                    $content = "<link rel='".$relationship."' href='".$this->getAsset($contentOrArrayOrFile)."' ".$attributes.">";
-                    break;
-            }
-        }
-
-        if(!array_key_exists($location, $this->htmlContent))
-            $this->htmlContent[$location] = [];
-
-        $this->htmlContent[$location][] = $content;
-
-        return $this;
-    }
-
-
-
-
-
-
-
+    public function getParameterTwig(string $name = "") { $this->getTwig()->getParameterTwig($name); }
+    public function addParameterTwig(string $name, $newValue) { $this->getTwig()->addParameterTwig($name, $newValue); }
+    public function hasParameterTwig(string $name) { $this->getTwig()->hasParameter($name); }
+    public function setParameterTwig(string $name, mixed $value) { $this->getTwig()->setParameter($name, $value); }
+    public function appendParameterTwig($name, mixed $value) { $this->getTwig()->appendParameter($name, $value); }
+    public function renderHtmlContent(string $location) { $this->getTwig()->renderHtmlContent($location); }
+    public function getHtmlContent(string $location) { return $this->getTwig()->getHtmlContent($location); }
+    public function removeHtmlContent(string $location) { return $this->getTwig()->removeHtmlContent($location); }
+    public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = []) { $this->getTwig()->addHtmlContent($location,$contentOrArrayOrFile,$options); }
 
 
 
@@ -353,11 +212,11 @@ class BaseService implements RuntimeExtensionInterface
     public function hasGet()     { return isset($_GET); }
     public function hasSession() { return isset($_SESSION); }
     public function addSession($name, $value) { $this->getSession()->set($name, $value); }
-    public function removeSession($name) { return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->remove($name) : null; }
+    public function removeSession($name) { return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->remove($name) : null; }
     public function getSession($name = null)
     {
-        if(!$name) return $this->requestStack->getSession();
-        return ($this->requestStack && $this->requestStack->getSession()->has($name)) ? $this->requestStack->getSession()->get($name) : null;
+        if(!$name) return $this->getRequestStack()->getSession();
+        return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->get($name) : null;
     }
 
     public function createForm($type, $data = null, array $options = []): FormInterface { return $this->formFactory->create($type, $data, $options); }
@@ -384,7 +243,7 @@ class BaseService implements RuntimeExtensionInterface
         if($parse["scheme"] ?? false)
             return $url;
 
-        $request = $this->requestStack->getCurrentRequest();
+        $request = $this->getRequestStack()->getCurrentRequest();
         $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
         $baseDir = $baseDir ."/";
         $path = trim($parse["path"]);
@@ -573,21 +432,20 @@ class BaseService implements RuntimeExtensionInterface
      * Doctrine related methods
      *
      */
-    public function setEntityManager(EntityManagerInterface $entityManager) { $this->entityManager = $entityManager; }
-    public function getEntityManager(bool $reopen = false): ?EntityManagerInterface
-    {
-        if (!$this->entityManager) return null;
-        if (!$this->entityManager->isOpen()) {
+    // public function getEntityManager(bool $reopen = false): ?EntityManagerInterface
+    // {
+    //     if (!$this->entityManager) return null;
+    //     if (!$this->entityManager->isOpen()) {
 
-            if(!$reopen) return null;
-            $this->entityManager = $this->entityManager->create(
-                $this->entityManager->getConnection(),
-                $this->entityManager->getConfiguration()
-            );
-        }
+    //         if(!$reopen) return null;
+    //         $this->entityManager = $this->entityManager->create(
+    //             $this->entityManager->getConnection(),
+    //             $this->entityManager->getConfiguration()
+    //         );
+    //     }
 
-        return $this->entityManager;
-    }
+    //     return $this->entityManager;
+    // }
 
     public function inDoctrine($entity): bool
     {
@@ -607,7 +465,7 @@ class BaseService implements RuntimeExtensionInterface
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         $entity = $eventOrEntity->getObject();
-        $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
+        $originalEntityData = $this->getEntityManager()->getUnitOfWork()->getOriginalEntityData($entity);
 
         if($eventOrEntity instanceof PreUpdateEventArgs) {
 

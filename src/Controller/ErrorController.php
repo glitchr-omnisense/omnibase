@@ -4,7 +4,7 @@ namespace Base\Controller;
 use Base\Service\BaseService;
 
 use Base\Entity\User\Notification;
-use Base\Routing\AdvancedRouterInterface;
+use Base\Routing\RouterInterface;
 use Error;
 use ErrorException;
 use Exception;
@@ -18,7 +18,7 @@ use Symfony\Component\HttpKernel\Profiler\Profiler;
 class ErrorController extends AbstractController
 {
     private $baseService;
-    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, AdvancedRouterInterface $router, BaseService $baseService, ?Profiler $profiler = null)
+    public function __construct(HtmlErrorRenderer $htmlErrorRenderer, RouterInterface $router, BaseService $baseService, ?Profiler $profiler = null)
     {
         $this->baseService = $baseService;
         $this->router = $router;

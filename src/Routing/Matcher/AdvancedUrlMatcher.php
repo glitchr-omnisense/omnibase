@@ -7,6 +7,7 @@ use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;
 use Exception;
 use Generator;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
@@ -76,6 +77,11 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         }, $routeNames);
 
         return array_unique($routeGroups);
+    }
+
+    public function firewall(string $pathinfo): ?string
+    {
+        return $this->getFirewallMap()->getFirewallConfig(Request::create($pathinfo))->getName();
     }
 
     public function match(string $pathinfo): array

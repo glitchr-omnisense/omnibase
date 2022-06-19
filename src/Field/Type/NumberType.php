@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\BaseService;
+use Base\Twig\Environment;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -10,9 +10,9 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
 {
     public function getBlockPrefix(): string { return 'number2'; }
-    public function __construct(BaseService $baseService)
+    public function __construct(Environment $twig)
     {
-        $this->baseService = $baseService;
+        $this->twig = $twig;
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -29,7 +29,7 @@ class NumberType extends \Symfony\Component\Form\Extension\Core\Type\NumberType
         $view->vars["disabled"]     = $options["disabled"];
         $view->vars["autocomplete"]     = $options["autocomplete"];
 
-        $this->baseService->addHtmlContent("javascripts:body", "bundles/base/form-type-number.js");
+        $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-number.js");
     }
 
     public function configureOptions(OptionsResolver $resolver)
