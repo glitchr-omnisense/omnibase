@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyCorp\Bundle\EasyAdminBundle\Config;
+namespace Base\Config;
 
 use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
 use function Symfony\Component\Translation\t;
