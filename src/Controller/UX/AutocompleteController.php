@@ -132,7 +132,7 @@ class AutocompleteController extends AbstractController
      */
     public function Icons(Request $request, string $provider, int $pageSize, string $hashid): Response
     {
-        $dict    = $this->decode($hashid);
+        $dict    = $this->obfuscator->decode($hashid);
 
         $token   = $dict["token"] ?? null;
         $format  = $dict["capitalize"] ? FORMAT_TITLECASE : FORMAT_SENTENCECASE;

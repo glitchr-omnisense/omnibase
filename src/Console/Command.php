@@ -2,6 +2,10 @@
 
 namespace Base\Console;
 
+use Base\Service\LocaleProviderInterface;
+use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -11,6 +15,21 @@ use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class Command extends SymfonyCommand
 {
+    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag)
+    {
+        $this->localeProvider = $localeProvider;
+        $this->translator     = $translator;
+        $this->entityManager  = $entityManager;
+        $this->parameterBag   = $parameterBag;
+
+        parent::__construct();
+    }
+
+    protected function getTranslator()    { return $this->translator; }
+    protected function getParameterBag()  { return $this->parameterBag; }
+    protected function getEntityManager() { return $this->entityManager; }
+    protected function getLocaleProvider(){ return $this->localeProvider; }
+
     protected function configure(): void
     {
         $this->addOption('purpose', null, InputOption::VALUE_OPTIONAL, 'Show command description ?');

@@ -798,26 +798,33 @@
             <argument type="service" id="validator" />
         </service>
 
-        <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
+        <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\CropperType"><tag name="form.type" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Field\Type\AvatarType" parent="Base\Field\Type\ImageType"><tag name="form.type" /></service>
         <service id="Base\Field\Type\ImageType"  parent="Base\Field\Type\FileType" ><tag name="form.type" /></service>
         <service id="Base\Field\Type\FileType">
             <tag name="form.type" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="twig" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.service" />
             <argument type="service" id="base.service.image" />
         </service>
 
-        <service id="Base\Field\Type\CollectionType"><tag name="form.type" /><argument type="service" id="base.service" /></service>
         <service id="Base\Field\Type\ArrayType" parent="Base\Field\Type\CollectionType"><tag name="form.type" /><argument type="service" id="base.database.metadata_manipulator" /></service>
+        <service id="Base\Field\Type\CollectionType"><tag name="form.type" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="translator" />
+        </service>
 
         <service id="Base\Field\Configurator\IdConfigurator">
             <tag name="ea.field_configurator" />

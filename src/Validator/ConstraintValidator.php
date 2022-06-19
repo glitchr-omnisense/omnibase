@@ -40,7 +40,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
     }
     public function getConstraintType()
     {
-        return empty($this->getPropertyName()) ? "CLASS" : "PROPERTY";
+        return empty($this->getPropertyName()) ? "class" : "property";
     }
 
     protected $buildViolation = null;
@@ -48,11 +48,7 @@ abstract class ConstraintValidator extends \Symfony\Component\Validator\Constrai
 
         $value = is_stringeable($value) ? $value : "";
 
-        $message = $this->translator->trans($constraint->message);
-        if ($message == $constraint->message)
-            $message = $constraint->message;
-
-        $this->buildViolation = $this->context->buildViolation($message);
+        $this->buildViolation = $this->context->buildViolation($constraint->message);
         $this->setParameter('field', $this->getPropertyName());
         $this->setParameter('value', $value);
 

@@ -4,11 +4,14 @@ namespace Base\Console\Command;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\AnnotationReader;
-
+use Base\Cache\UploadWarmer;
 use Base\Service\BaseService;
 
 use League\Flysystem\FileAttributes;
 use Base\Console\Command;
+use Base\Service\LocaleProviderInterface;
+use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -19,12 +22,13 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'uploader:entities', aliases:[], description:'')]
 class UploaderEntitiesCommand extends Command
 {
-    public function __construct(EntityManagerInterface $entityManager, BaseService $baseService)
+    public function __construct(
+        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        UploadWarmer $uploadWarmer)
     {
-        parent::__construct();
+        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
 
-        $this->entityManager = $entityManager;
-        $this->baseService = $baseService;
+        $this->uploadWarmer = $uploadWarmer;
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
@@ -35,6 +39,7 @@ class UploaderEntitiesCommand extends Command
         $this->addOption('uuid', null, InputOption::VALUE_OPTIONAL, 'Should I consider a specific uuid ?');
 
         $this->addOption('show',   false, InputOption::VALUE_NONE, 'Do you want to list entities using "Uploader" annotation ?');
+        $this->addOption('warmup', false, InputOption::VALUE_NONE, 'Do you want to all formats based on "Uploader" annotation ?');
 
         $this->addOption('orphans',        false, InputOption::VALUE_NONE, 'Do you want to get orphans ?');
         $this->addOption('show-orphans',   false, InputOption::VALUE_NONE, 'Do you want to show orphans ?');
@@ -43,42 +48,38 @@ class UploaderEntitiesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->entityName    = str_strip($input->getOption('entity'), "App\\Entity\\");
-        $this->property      = $input->getOption('property');
-        $this->uuid          = $input->getOption('uuid');
+        $this->entityName    ??= str_strip($input->getOption('entity'), "App\\Entity\\");
+        $this->property      ??= $input->getOption('property');
+        $this->uuid          ??= $input->getOption('uuid');
+        $this->verbose       ??= $input->getOption('verbose');
+        $this->warmup        ??= $input->getOption('warmup');
+        $this->orphans       ??= $input->getOption('orphans');
+        $this->deleteOrphans ??= $input->getOption('delete-orphans');
 
-        $this->showEntries   = $input->getOption('show');
-        $this->verbose       = $input->getOption('verbose');
-
-        $this->orphans       = $input->getOption('orphans');
-        $this->showOrphans   = $input->getOption('show-orphans');
-        $this->deleteOrphans = $input->getOption('delete-orphans');
-
-       $output->section()->writeln("\n Looking for \"".Uploader::class."\" annotations...\n");
+        $output->section()->writeln("\n <info>Looking for \"".Uploader::class."\"</info> annotations...");
 
         $nTotalFiles   = 0;
         $nTotalOrphans = 0;
         $nTotalFields  = 0;
 
-        $this->appEntities = "App\\Entity\\".$this->entityName;
+        $this->appEntities ??= "App\\Entity\\".$this->entityName;
         $appAnnotations = $this->getUploaderAnnotations($this->appEntities);
         if(!$appAnnotations)
             $output->section()->write("\t<warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
 
-        $this->baseEntities = "Base\\Entity\\".$this->entityName;
+        $this->baseEntities ??= "Base\\Entity\\".$this->entityName;
         $baseAnnotations = $this->getUploaderAnnotations($this->baseEntities);
         if(!$baseAnnotations)
             $output->section()->write("\t<warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
 
+        if($this->verbose)
+            $output->section()->writeln("");
+
         $annotations = array_merge($appAnnotations, $baseAnnotations);
         foreach($annotations as $class => $_) {
 
-            if(str_starts_with($class, "Base\\Entity\\".$this->entityName) || str_starts_with($class, "App\\Entity\\".$this->entityName)) $output->section()->write("\t<info>Processing $class..</info>");
-            else {
-
-                $output->section()->write("\t<warning>Skipping $class..</warning>");
+            if(!str_starts_with($class, "Base\\Entity\\".$this->entityName) && !str_starts_with($class, "App\\Entity\\".$this->entityName))
                 continue;
-            }
 
             $noPropertyFound = true;
             foreach($_ as $field => $annotation) {
@@ -88,7 +89,7 @@ class UploaderEntitiesCommand extends Command
 
                 $annotation = last($annotation);
                 if($annotation->getMissable()) {
-                    $output->section()->write("\t           $class::$field <warning>Uploader annotation is missable.. No orphan..</warning>");
+                    if($this->verbose) $output->section()->write("\t           $class::$field <warning> is missable.. cannot have orphan..</warning>");
                     continue;
                 }
 
@@ -100,23 +101,25 @@ class UploaderEntitiesCommand extends Command
                 $nTotalFiles += count($fileList);
                 $noPropertyFound = false;
 
-                if($this->uuid) $output->section()->writeln("\t           $class::$field <ln>UUID \"$this->uuid\" found.</ln>");
-                else $output->section()->writeln("\t           $class::$field <ln>".count($fileList)." file(s) found.</ln>");
+                if($this->verbose) {
+                    if($this->uuid) $output->section()->writeln("\t           $class::$field <ln>UUID \"$this->uuid\" found.</ln>");
+                    else $output->section()->writeln("\t           $class::$field <ln>".count($fileList)." file(s) found.</ln>");
+                }
 
-                if($this->showEntries) {
+                if($this->verbose) {
 
                     foreach($fileList as $file)
                         $output->section()->writeln("\t           <ln>* ./".str_lstrip($file,$publicPath)."</ln>");
                 }
 
-                if($this->orphans || $this->showOrphans || $this->deleteOrphans) {
+                if($this->orphans || $this->deleteOrphans) {
 
                     $orphanFiles = $this->getOrphanFiles($class, $field, $annotation);
                     $nOrphans = count($orphanFiles);
                     $nTotalOrphans += $nOrphans;
 
-                    $output->section()->writeln("\t           Looking for orphan files in $publicPath <warning>$nOrphans orphan file(s) found.</warning>");
-                    if($this->showOrphans) {
+                    $output->section()->writeln("\t           <info>Looking for orphan files</info> in $publicPath <warning>$nOrphans orphan file(s) found.</warning>");
+                    if($this->verbose) {
                         foreach($orphanFiles as $file)
                             $output->section()->writeln("\t           <warning>* ./".str_lstrip($file,$publicPath)."</warning>");
                     }
@@ -132,7 +135,7 @@ class UploaderEntitiesCommand extends Command
             }
 
             if($noPropertyFound) {
-                $output->section()->write("\t           $class::$field <warning>not declared in this class..</warning>");
+                if($this->verbose) $output->section()->write("\t           $class::$field <warning>not declared in this class..</warning>");
                 $nTotalFields--;
             }
         }

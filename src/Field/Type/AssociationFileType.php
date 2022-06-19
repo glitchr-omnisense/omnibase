@@ -194,7 +194,6 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
         $parentEntity = $parentForm->getParent() ? $parentForm->getParent()->getData() : null;
-
         $options = $parentForm->getConfig()->getOptions();
         $options["data_class"] = $options["data_class"] ?? $this->formFactory->guessClass($parentForm, $options);
         $options["multiple"]   = $options["multiple"]   ?? $this->formFactory->guessMultiple($parentForm, $options);

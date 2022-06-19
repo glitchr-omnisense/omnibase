@@ -15,12 +15,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 #[AsCommand(name:'thread:publishable', aliases:[], description:'')]
 class ThreadPublishableCommand extends Command
 {
-    public function __construct(EntityManagerInterface $entityManager)
-    {
-        $this->entityManager = $entityManager;
-        parent::__construct();
-    }
-
     protected function configure(): void
     {
         $this->addOption('publish', null, InputOption::VALUE_NONE, 'Should I publish them ?');

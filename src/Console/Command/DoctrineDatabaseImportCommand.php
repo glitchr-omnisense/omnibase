@@ -11,7 +11,10 @@ use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Entity\Thread;
 use Base\Model\GraphInterface;
+use Base\Notifier\Notifier;
 use Base\Service\BaseService;
+use Base\Service\LocaleProviderInterface;
+use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\Common\Collections\Collection;
@@ -55,17 +58,17 @@ class DoctrineDatabaseImportCommand extends Command
     const PARENT_NOT_FOUND    =  2;
     const ALREADY_IN_DATABASE =  3;
 
-    public function __construct(EntityManagerInterface $entityManager, EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, TranslatorInterface $translator, BaseService $baseService)
+    public function __construct(
+        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+        EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, Notifier $notifier)
     {
-        parent::__construct();
+        parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);
 
-        $this->baseService    = $baseService;
-        $this->entityManager  = $entityManager;
         $this->entityHydrator = $entityHydrator;
+        $this->notifier       = $notifier;
+
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
-
-        $this->translator = $translator;
         $this->serializer = new Serializer([], [
             new XmlEncoder(),
             new CsvEncoder(),
@@ -169,7 +172,7 @@ class DoctrineDatabaseImportCommand extends Command
         if($input->hasArgument("path")) $path = $input->getArgument("path");
 
         $notify       = $input->getOption("notify");
-        if(!$notify) $this->baseService->getNotifier()->disable();
+        if(!$notify) $this->notifier->disable();
 
         $show         = $input->getOption("show");
         $force        = $input->getOption("force");
