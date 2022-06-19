@@ -23,7 +23,7 @@
     },
     "require": {
         "php": "^8.0",
-        "composer/composer-plugin-api": "^2.0",
+        "composer-plugin-api": "^2.0",
 
         "symfony/framework-bundle": "^6.0",
         "symfony/dotenv": "^6.0",
