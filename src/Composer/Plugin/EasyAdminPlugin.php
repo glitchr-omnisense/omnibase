@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Config\Plugin;
+namespace Base\Composer\Plugin;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;
@@ -19,7 +19,6 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
 
     public function activate(Composer $composer, IOInterface $io)
     {
-        dump("OK !");
         $this->io = $io;
     }
 
@@ -41,20 +40,20 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
 
     public function onPackageInstall(PackageEvent $event)
     {
-        if (!$this->isComposerWorkingOn('easycorp/easyadmin-bundle', $event) && !$this->isComposerWorkingOn('easycorp/easyadmin-no-final-plugin', $event)) {
+        if (!$this->isComposerWorkingOn('easycorp/easyadmin-bundle', $event) && !$this->isComposerWorkingOn('xkzl/base-bundle', $event))
             return;
-        }
 
         $this->removeFinalFromAllEasyAdminClasses();
+        $this->changePrivateToProtectedPropertiesAllEasyAdminClasses();
     }
 
     public function onPackageUpdate(PackageEvent $event)
     {
-        if (!$this->isComposerWorkingOn('easycorp/easyadmin-bundle', $event)) {
+        if (!$this->isComposerWorkingOn('easycorp/easyadmin-bundle', $event) && !$this->isComposerWorkingOn('xkzl/base-bundle', $event))
             return;
-        }
 
         $this->removeFinalFromAllEasyAdminClasses();
+        $this->changePrivateToProtectedPropertiesAllEasyAdminClasses();
     }
 
     public function removeFinalFromAllEasyAdminClasses()
@@ -70,6 +69,21 @@ final class EasyAdminPlugin implements PluginInterface, EventSubscriberInterface
         }
 
         $this->io->write('Updated all EasyAdmin PHP files to make classes non-final');
+    }
+
+    public function changePrivateToProtectedPropertiesAllEasyAdminClasses()
+    {
+        $vendorDirPath = $this->getVendorDirPath();
+        $easyAdminDirPath = $vendorDirPath.'/easycorp/easyadmin-bundle';
+        foreach ($this->getFilePathsOfAllEasyAdminClasses($easyAdminDirPath) as $filePath) {
+            file_put_contents(
+                $filePath,
+                str_replace('final class ', 'class ', file_get_contents($filePath)),
+                flags: \LOCK_EX
+            );
+        }
+
+        $this->io->write('Updated all EasyAdmin PHP files to turn private properties into protected properties');
     }
 
     private function isComposerWorkingOn(string $packageName, PackageEvent $event): bool
