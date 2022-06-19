@@ -1,6 +1,6 @@
 <?php
 
-namespace EasyCorp\Bundle\EasyAdminBundle;
+namespace Base\Config\Plugin;
 
 use Composer\Composer;
 use Composer\DependencyResolver\Operation\InstallOperation;

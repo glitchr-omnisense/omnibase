@@ -23,6 +23,8 @@
     },
     "require": {
         "php": "^8.0",
+        "composer-plugin-api": "^2.0",
+
         "symfony/framework-bundle": "^6.0",
         "symfony/dotenv": "^6.0",
         "symfony/config": "^6.0",
@@ -63,13 +65,13 @@
 
         "nelmio/security-bundle": "^3.0",
         "nelmio/cors-bundle": "^2.2",
-	"hashids/hashids": "^4.1",
+        "hashids/hashids": "^4.1",
 
         "doctrine/doctrine-bundle": "^2.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^8.5",
-	"wapmorgan/php-deprecation-detector": "^2.0"
+        "wapmorgan/php-deprecation-detector": "^2.0"
     },
     "config": {
         "preferred-install": {
