@@ -44,8 +44,8 @@ use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\Widget\Link;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Translator;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
+use Base\Config\Action;
+use Base\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -448,6 +448,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
             ->add(Crud::PAGE_DETAIL, Action::DELETE,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-prev'))
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-next'))
 
             ->add(Crud::PAGE_EDIT, Action::DETAIL,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-search'))
@@ -459,6 +463,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-save'))
             ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
+            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-prev'))
+            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT,
+                fn (Action $action) => $action->setIcon('fas fa-fw fa-next'))
 
             ->add(Crud::PAGE_NEW, Action::INDEX,
                 fn (Action $action) => $action->setIcon('fas fa-fw fa-backspace'))

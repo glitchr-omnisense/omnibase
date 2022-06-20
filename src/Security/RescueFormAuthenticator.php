@@ -18,7 +18,11 @@ class RescueFormAuthenticator extends LoginFormAuthenticator
 
     public static function isSecurityRoute(Request|string $routeOrRequest)
     {
-        return in_array(is_string($routeOrRequest) ? $routeOrRequest : $routeOrRequest->attributes->get('_route'), [self::RESCUE_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
+        return in_array(is_string($routeOrRequest) ? $routeOrRequest : $routeOrRequest->attributes->get('_route'), [
+            self::RESCUE_ROUTE,
+            self::LOGOUT_ROUTE,
+            self::LOGOUT_REQUEST_ROUTE
+        ]);
     }
 
     public function supports(Request $request): ?bool

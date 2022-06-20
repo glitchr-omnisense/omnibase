@@ -4,9 +4,8 @@ namespace Base\Security;
 
 use App\Entity\User;
 use App\Enum\UserRole;
+use Base\Routing\RouterInterface;
 use Base\Service\ReferrerInterface;
-use Base\Service\BaseService;
-use Symfony\Component\Routing\RouterInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Google\ReCaptcha\Badge\CaptchaBadge;
@@ -14,6 +13,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 use Symfony\Component\Security\Core\Security;
@@ -39,22 +39,27 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     protected $entityManager;
     protected $csrfTokenManager;
+    protected $authorizationChecker;
     protected $router;
 
-    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, BaseService $baseService)
+    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->referrer       = $referrer;
         $this->entityManager  = $entityManager;
+        $this->authorizationChecker  = $authorizationChecker;
         $this->userRepository = $entityManager->getRepository(User::class);
 
-        $this->router           = $router;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->baseService      = $baseService;
+        $this->router           = $router;
     }
 
     public static function isSecurityRoute(Request|string $routeOrRequest)
     {
-        return in_array(is_string($routeOrRequest) ? $routeOrRequest : $routeOrRequest->attributes->get('_route'), [self::LOGIN_ROUTE, self::LOGOUT_ROUTE, self::LOGOUT_REQUEST_ROUTE]);
+        return in_array(is_string($routeOrRequest) ? $routeOrRequest : $routeOrRequest->attributes->get('_route'), [
+            self::LOGIN_ROUTE,
+            self::LOGOUT_ROUTE,
+            self::LOGOUT_REQUEST_ROUTE
+        ]);
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
@@ -109,14 +114,12 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
         // Check if target path provided via $_POST..
         $targetPath = $this->referrer;
-        $targetRoute = $this->baseService->getRouteName($targetPath);
-
         $request->getSession()->remove("_target_path");
 
-        if ($targetPath && !$this->isSecurityRoute($targetRoute))
-            return $this->baseService->redirect($targetPath);
+        if ($targetPath && !$this->isSecurityRoute($targetPath) && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
+            return $this->router->redirect($targetPath);
 
-        return $this->baseService->redirectToRoute($this->baseService->getRouteName("/"));
+        return $this->router->redirectToRoute($this->router->getRouteName("/"));
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response

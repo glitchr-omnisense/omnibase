@@ -12,9 +12,6 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
      */
     protected function createBuiltInAction(string $pageName, string $actionName): Action
     {
-        $action = parent::createBuiltInAction($pageName, $actionName);
-        if($action) return $action;
-
         if (Action::GOTO_PREV === $actionName) {
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'EasyAdminBundle'))
                 ->setCssClass('action-'.Action::GOTO_PREV)
@@ -33,6 +30,31 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->linkToCrudAction(Action::EDIT);
         }
 
-        throw new \InvalidArgumentException(sprintf('The "%s" action is not a built-in action, so you can\'t add or configure it via its name. Either refer to one of the built-in actions or create a custom action called "%s".', $actionName, $actionName));
+        dump($actionName);
+        exit(1);
+        return parent::createBuiltInAction($pageName, $actionName);
+    }
+
+    protected function doAddAction(string $pageName, Action|string $actionNameOrObject, bool $isBatchAction = false)
+    {
+        $actionName = \is_string($actionNameOrObject) ? $actionNameOrObject : (string) $actionNameOrObject;
+        $action = \is_string($actionNameOrObject) ? $this->createBuiltInAction($pageName, $actionNameOrObject) : $actionNameOrObject;
+
+        if (null !== $this->dto->getAction($pageName, $actionName)) {
+            throw new \InvalidArgumentException(sprintf('The "%s" action already exists in the "%s" page, so you can\'t add it again. Instead, you can use the "updateAction()" method to update any options of an existing action.', $actionName, $pageName));
+        }
+
+        $actionDto = $action->getAsDto();
+        if ($isBatchAction) {
+            $actionDto->setType(Action::TYPE_BATCH);
+        }
+
+        if (Crud::PAGE_INDEX === $pageName && Action::DELETE === $actionName) {
+            $this->dto->prependAction($pageName, $actionDto);
+        } else {
+            $this->dto->appendAction($pageName, $actionDto);
+        }
+
+        return $this;
     }
 }

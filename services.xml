@@ -447,6 +447,7 @@
             <argument type="service" id="router" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="security.firewall.map" />
         </service>
 
          <service id="Base\Security\Voter\RouteVoter">
@@ -576,7 +577,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="router" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="security.authorization_checker" />
         </service>
 
         <service id="Base\Subscriber\SecuritySubscriber">
