@@ -23,7 +23,7 @@
     },
     "require": {
         "php": "^8.0",
-        "xkzl/base-plugin": "1.0",
+        "xkzl/base-plugin": "^1.0",
 
         "symfony/framework-bundle": "^6.0",
         "symfony/dotenv": "^6.0",
@@ -70,7 +70,6 @@
         "doctrine/doctrine-bundle": "^2.6"
     },
     "require-dev": {
-        "xkzl/base-plugin": "1.0.*-dev",
         "phpunit/phpunit": "^8.5",
         "wapmorgan/php-deprecation-detector": "^2.0"
     },
