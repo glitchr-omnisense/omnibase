@@ -23,7 +23,7 @@
     },
     "require": {
         "php": "^8.0",
-        "xkzl/base-plugin": "1.0.*-dev",
+        "xkzl/base-plugin": "1.0",
 
         "symfony/framework-bundle": "^6.0",
         "symfony/dotenv": "^6.0",
