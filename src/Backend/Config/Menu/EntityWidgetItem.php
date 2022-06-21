@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Config\Menu;
+namespace Base\Backend\Config\Menu;
 
-use Base\Config\WidgetItem;
+use Base\Backend\Config\WidgetItem;
 use Base\Controller\Backoffice\AbstractCrudController;
 use Exception;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
@@ -14,7 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 
-final class CrudWidgetItem implements MenuItemInterface
+final class EntityWidgetItem implements MenuItemInterface
 {
     use MenuItemTrait;
 
@@ -27,7 +27,8 @@ final class CrudWidgetItem implements MenuItemInterface
         $this->dto->setIcon($icon);
         $this->dto->setRouteParameters([
             EA::CRUD_ACTION => 'index',
-            EA::CRUD_CONTROLLER_FQCN => $crudController,
+            EA::CRUD_CONTROLLER_FQCN => null,
+            EA::ENTITY_FQCN => $crudController::getEntityFqcn(),
             EA::ENTITY_ID => null,
         ]);
     }

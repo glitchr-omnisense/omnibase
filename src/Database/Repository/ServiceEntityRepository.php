@@ -31,6 +31,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $entityManager = $this->getEntityManager();
         $classMetadataManipulator = new ClassMetadataManipulator($this->getEntityManager());
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
+
         $this->serviceParser = new ServiceEntityParser($this, $entityManager, $entityHydrator);
     }
 

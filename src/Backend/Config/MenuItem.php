@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Config;
+namespace Base\Backend\Config;
 
-use Base\Config\Menu\RouteMenuItem;
+use Base\Backend\Config\Menu\RouteMenuItem;
 use Base\Service\IconProvider;
 use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\CrudMenuItem;

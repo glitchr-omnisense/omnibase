@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Field\Filter;
+namespace Base\Backend\Filter;
 
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;

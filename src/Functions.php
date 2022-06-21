@@ -474,6 +474,17 @@ namespace {
         return strval($factor > 0 ? $quotient.@mb_ucfirst($unitPrefix[$factor]) : $num);
     }
 
+    function only_alphachars(string $str) { return preg_replace("/[^a-zA-Z]+/", "", $str); }
+    function only_alphanumerics(string $str) { return preg_replace("/[^a-zA-Z0-9]+/", "", $str); }
+    function trim_brackets(string $str, $brackets = "()")
+    {
+        $leftBracket  = preg_quote($brackets[0] ?? "");
+        $rightBracket = preg_quote($brackets[1] ?? "");
+        if(!$leftBracket && !$rightBracket) return $str;
+
+        return trim(preg_replace('/\s*'.$leftBracket.'[^)]*'.$rightBracket.'/', '', $str));
+    }
+
     function str2dec(string $str): int
     {
         $val = trim($str);
@@ -1631,6 +1642,30 @@ namespace {
         return $array;
     }
 
+    function array_key_removes_numerics(array $array, bool $recursive = true)
+    {
+        $arrayOut = [];
+        foreach($array as $k => $v) {
+
+            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_numerics($v);
+            else if(!is_numeric($k)) $arrayOut[$k] = $v;
+        }
+
+        return $arrayOut;
+    }
+
+    function array_key_removes_string(array $array, bool $recursive = true)
+    {
+        $arrayOut = [];
+        foreach($array as $k => $v) {
+
+            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v);
+            else if(is_numeric($k)) $arrayOut[$k] = $v;
+        }
+
+        return $arrayOut;
+    }
+
     function array_key_explodes(array|string $separator, array $array, int $limit = PHP_INT_MAX)
     {
         return array_transforms(function($k, $v, $callback, $_, $depth) use ($separator, $limit) :array {
@@ -1844,7 +1879,7 @@ namespace {
     function array_order(array $array, array $reference)
     {
         $order = [];
-        foreach($reference as $key => $value) {
+        foreach($reference as $value) {
 
             $order[] = array_search($value, $array);
             $array = array_key_removes($array, end($order));

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Config;
+namespace Base\Backend\Config;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;

@@ -1,0 +1,100 @@
+<?php
+
+namespace Base\Backend\Config;
+
+use Doctrine\ORM\EntityManagerInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
+use EasyCorp\Bundle\EasyAdminBundle\Dto\ActionConfigDto;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+
+use function Symfony\Component\Translation\t;
+
+class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
+{
+    protected $adminUrlGenerator;
+    protected $entityManager;
+    protected function __construct(ActionConfigDto $actionConfigDto, AdminUrlGenerator $adminUrlGenerator, EntityManagerInterface $entityManager)
+    {
+        $this->dto = $actionConfigDto;
+        $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->entityManager = $entityManager;
+    }
+
+    public static function new(...$args)
+    {
+        $dto = new ActionConfigDto();
+        return new static($dto, ...$args);
+    }
+
+    /**
+     * The $pageName is needed because sometimes the same action has different config
+     * depending on where it's displayed (to display an icon in 'detail' but not in 'index', etc.).
+     */
+    protected function createBuiltInAction(string $pageName, string $actionName): EaAction
+    {
+        if (Action::SEPARATOR === $actionName) {
+            return Action::new(Action::SEPARATOR, "")
+                ->setCssClass('action-'.Action::SEPARATOR)
+                ->displayAsSeparator()
+                ->linkToCrudAction(Action::SEPARATOR);
+        }
+
+        if (Action::GROUP === $actionName) {
+            return Action::new(Action::GROUP, ":::")
+                ->setCssClass('action-'.Action::GROUP)
+                ->displayAsDropdown()
+                ->linkToCrudAction(Action::GROUP);
+        }
+
+        if (Action::SAVE_AND_CONTINUE === $actionName) {
+            return Action::new(Action::SAVE_AND_CONTINUE, t(Crud::PAGE_EDIT === $pageName ? 'action.save_and_continue' : 'action.create_and_continue', domain: 'EasyAdminBundle'), 'far fa-edit')
+                ->setCssClass('action-'.Action::SAVE_AND_CONTINUE)
+                ->addCssClass('btn btn-secondary action-save text-success')
+                ->displayAsButton()
+                ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
+                ->linkToCrudAction(Crud::PAGE_EDIT === $pageName ? Action::EDIT : Action::NEW);
+        }
+
+        if (Action::GOTO_PREV === $actionName) {
+            return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'EasyAdminBundle'))
+                ->setCssClass('action-'.Action::GOTO_PREV)
+                ->addCssClass('btn btn-secondary action-save')
+                ->displayAsTooltip()
+                ->linkToUrl(function (mixed $entity) {
+
+                    $entityRepository = $this->entityManager->getRepository(get_class($entity));
+                    $prevEntity = $entityRepository->findPreviousOneByClassOf($entity->getId(), get_class($entity));
+                    return $prevEntity ? $this->adminUrlGenerator->setEntityId($prevEntity->getId())->generateUrl() : "";
+                });
+        }
+
+        if (Action::GOTO_NEXT === $actionName) {
+            return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'EasyAdminBundle'))
+                ->setCssClass('action-'.Action::GOTO_NEXT)
+                ->addCssClass('btn btn-secondary action-save')
+                ->displayAsTooltip()
+                ->linkToUrl(function (mixed $entity) {
+
+                    $entityRepository = $this->entityManager->getRepository(get_class($entity));
+                    $nextEntity = $entityRepository->findNextOneByClassOf($entity->getId(), get_class($entity));
+                    return $nextEntity ? $this->adminUrlGenerator->setEntityId($nextEntity->getId())->generateUrl() : "";
+                });
+
+        }
+
+        return parent::createBuiltInAction($pageName, $actionName);
+    }
+
+    public function add(string $pageName, EaAction|string $actionNameOrObject, string $actionIcon = "", callable $callable = null)
+    {
+        parent::add($pageName, $actionNameOrObject);
+        $actionDto = $this->dto->getAction($pageName, $actionNameOrObject);
+        $actionDto->setIcon($actionIcon);
+
+        if($callable != null)
+            parent::update($pageName, $actionNameOrObject, $callable);
+
+        return $this;
+    }
+}

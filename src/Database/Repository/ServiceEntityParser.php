@@ -22,22 +22,29 @@ class ServiceEntityParser
     public const ALIAS_ENTITY = 'e';
     public const ALIAS_TRANSLATIONS = 't';
 
-    public const REQUEST_FIND      = "find";
-    public const REQUEST_CACHE     = "cache";
-    public const REQUEST_COUNT     = "count";
-    public const REQUEST_DISTINCT  = "distinctCount";
-    public const REQUEST_LENGTH    = "lengthOf";
+    public const REQUEST_FIND         = "find";
+    public const REQUEST_CACHE        = "cache";
+    public const REQUEST_COUNT        = "count";
+    public const REQUEST_DISTINCT     = "distinctCount";
+    public const REQUEST_LENGTH       = "lengthOf";
 
-    public const SPECIAL_ALL    = "All";
-    public const SPECIAL_ONE    = "One";
-    public const SPECIAL_ATMOST = "AtMost";
-    public const SPECIAL_LAST   = "Last";
-    public const SPECIAL_RAND   = "Randomly";
+    public const SPECIAL_ALL     = "All";
+    public const SPECIAL_ONE     = "One";
+    public const SPECIAL_RAND    = "Randomly";
+    public const SPECIAL_ATMOST  = "AtMost(?P<atMost>[0-9])*";
+    public const SPECIAL_LASTONE = "LastOne";
+    public const SPECIAL_LAST    = "Last(?P<last>[0-9])*";
+    public const SPECIAL_PREVONE = "PreviousOne";
+    public const SPECIAL_PREV    = "Previous(?P<prev>[0-9]*)";
+    public const SPECIAL_NEXTONE = "NextOne";
+    public const SPECIAL_NEXT    = "Next(?P<next>[0-9]*)";
+
+    protected static function getSpecial(string $special): string { return only_alphanumerics(trim_brackets($special)); }
     protected static function getSpecials(): array
     {
-        return [self::SPECIAL_ALL, self::SPECIAL_ONE, self::SPECIAL_ATMOST, self::SPECIAL_LAST, self::SPECIAL_RAND];
+        return [self::SPECIAL_ALL , self::SPECIAL_ONE, self::SPECIAL_ATMOST, self::SPECIAL_LAST, self::SPECIAL_LASTONE,
+                self::SPECIAL_RAND, self::SPECIAL_PREVONE, self::SPECIAL_NEXTONE, self::SPECIAL_PREV, self::SPECIAL_NEXT];
     }
-
 
     // Default options
     public const OPTION_EQUAL         = "EqualTo";
@@ -62,15 +69,17 @@ class ServiceEntityParser
     public const OPTION_NOT_ENDING_WITH   = "NotEndingWith";
 
     // Custom options
-    public const OPTION_INSENSITIVE    = "Insensitive";
-    public const OPTION_WITH_ROUTE     = "WithRoute";
-    public const OPTION_PARTIAL        = "Partial";
-    public const OPTION_MODEL          = "Model";
-    public const OPTION_INSTANCEOF     = "InstanceOf";
-    public const OPTION_NOT_INSTANCEOF = "NotInstanceOf";
-    public const OPTION_MEMBEROF       = "MemberOf";
-    public const OPTION_NOT_MEMBEROF   = "NotMemberOf";
-    public const OPTION_BUT            = "But";
+    public const OPTION_INSENSITIVE          = "Insensitive";
+    public const OPTION_WITH_ROUTE           = "WithRoute";
+    public const OPTION_PARTIAL              = "Partial";
+    public const OPTION_MODEL                = "Model";
+    public const OPTION_CLASSOF              = "ClassOf";
+    public const OPTION_NOT_CLASSOF          = "NotClassOf";
+    public const OPTION_INSTANCEOF           = "InstanceOf";
+    public const OPTION_NOT_INSTANCEOF       = "NotInstanceOf";
+    public const OPTION_MEMBEROF             = "MemberOf";
+    public const OPTION_NOT_MEMBEROF         = "NotMemberOf";
+    public const OPTION_BUT                  = "But";
 
     public const OPTION_CLOSESTTO        = "ClosestTo";
     public const OPTION_FARESTTO         = "FarestTo";
@@ -107,9 +116,10 @@ class ServiceEntityParser
 
         foreach(self::getSpecials() as $special) {
 
+            $special = self::getSpecial($special);
             if($special == self::SPECIAL_ALL) continue;
-            $specialMethod = "__".self::REQUEST_FIND.$special.self::SEPARATOR_BY;
 
+            $specialMethod = "__".self::REQUEST_FIND.$special.self::SEPARATOR_BY;
             if(!method_exists($this, $specialMethod))
                 throw new Exception("Special \"$special\" option is missing its find method : ".$specialMethod);
         }
@@ -119,12 +129,39 @@ class ServiceEntityParser
     protected function __findRandomlyBy (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->__findBy   ($selectAs, $criteria, array_merge(["id" => "rand"], $orderBy ?? []), $groupBy, $limit, $offset); }
     protected function __findAll        (array $selectAs = [],                       $orderBy = null, $groupBy = null                               ): ?Query { return $this->__findBy   ($selectAs,        [], $orderBy, $groupBy, null, null);   }
     protected function __findOneBy      (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               )         { return $this->__findBy   ($selectAs, $criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
-    protected function __findLastBy     (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               )         { return $this->__findOneBy($selectAs, $criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
-    protected function __findAtMostBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               ): ?Query
+    protected function __findLastOneBy  (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               )         { return $this->__findOneBy($selectAs, $criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
+    protected function __findLastBy     (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               ): ?Query
     {
         $limit = array_unshift($criteria);
+        return $this->__findBy($selectAs, $criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, $limit, null) ?? null;
+    }
+
+    protected function __findAtMostBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               ): ?Query
+    {
+        $limit = array_pop_key("special:atMost", $criteria);
         return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit, null);
     }
+
+    protected function __findPreviousBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null): ?Query
+    {
+        $limit = array_pop_key("special:prev", $criteria);
+        $orderBy["id"] = "DESC";
+        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit);
+    }
+
+    protected function __findNextBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null): ?Query
+    {
+        $limit = array_pop_key("special:prev", $criteria);
+        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit);
+    }
+
+    protected function __findPreviousOneBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null)
+    {
+        $orderBy["id"] = "DESC";
+        return $this->__findOneBy($selectAs, $criteria, $orderBy, $groupBy);
+    }
+
+    protected function __findNextOneBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findOneBy($selectAs, $criteria, $orderBy, $groupBy); }
 
     protected function __lengthOf     (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null) { return $this->getQueryWithLength($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset)->getResult(); }
     protected function __distinctCount(array $selectAs = [], array $criteria = [],                  $groupBy = null): int { return $this->__count($selectAs, $criteria, self::COUNT_DISTINCT, $groupBy); }
@@ -248,6 +285,8 @@ class ServiceEntityParser
 
                 str_contains($field, self::OPTION_INSTANCEOF )       ||
                 str_contains($field, self::OPTION_NOT_INSTANCEOF )   ||
+                str_contains($field, self::OPTION_CLASSOF )       ||
+                str_contains($field, self::OPTION_NOT_CLASSOF )   ||
                 str_contains($field, self::OPTION_MEMBEROF )         ||
                 str_contains($field, self::OPTION_NOT_MEMBEROF )     ||
 
@@ -289,9 +328,10 @@ class ServiceEntityParser
         // Find and sort the "With" list
         $withs = array_filter([
             self::OPTION_WITH_ROUTE => strpos($method, self::OPTION_WITH_ROUTE)
-            /* ... */
+            /* ... more type of options here */
         ],fn ($value)  => ($value !== false));
         asort($withs);
+
 
         // Here are the resulting parameters
         $routeParameters = null;
@@ -333,51 +373,83 @@ class ServiceEntityParser
         $by = self::SEPARATOR_BY;
         $for = self::SEPARATOR_FOR;
 
-        if (preg_match('/^((?:'.$findRequest.')(?:'.$specials.')?'.$by.')(.*)/', $method, $matches)) {
+        $special = null;
+        $magicExtra = [];
+        $magicFn = null;
+        $byNames = [];
 
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[2];
+        if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
 
-        } else if (preg_match('/^((?:'.$findRequest.')(?:'.$specials.')?)(.*)/', $method, $matches)) {
+            $byNames = array_pop_key("names", $magicExtra);
+            $special = array_pop_key("special", $magicExtra);
+            $special = $special ? only_alphachars(ucfirst($special)) : null;
 
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[2];
+            $magicFn = only_alphachars(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
-        } else if (preg_match('/^('.$countRequest.')(?:'.$for.'([^'.$by.']*))?'.$by.'(.*)/', $method, $matches)) {
+        } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?)(?P<names>.*)/', $method, $magicExtra)) {
 
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[3] ?? "";
+            $byNames = array_pop_key("names", $magicExtra);
+            $special = array_pop_key("special", $magicExtra);
+            $special = $special ? only_alphachars(ucfirst($special)) : null;
 
-            $this->setColumn(lcfirst($matches[2]) ?? null);
+            $magicFn = only_alphachars(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
-        } else if (preg_match('/^('.$countRequest.')(?:'.$for.'([^'.$by.']*))?(.*)/', $method, $matches)) {
+        } else if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?'.$by.'(?P<names>.*)/', $method, $magicExtra)) {
 
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[3] ?? "";
+            $byNames = array_pop_key("names", $magicExtra);
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
-            $this->setColumn(lcfirst($matches[2]) ?? null);
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
-        } else if (preg_match('/^('.$lengthRequest.')([^'.$by.']+)'.$by.'(.*)/', $method, $matches)) {
 
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[3] ?? "";
+        } else if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?(?P<names>.*)/', $method, $magicExtra)) {
 
-            $this->setColumn(lcfirst($matches[2]) ?? null);
+            $byNames = array_pop_key("names", $magicExtra);
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
-        } else if (preg_match('/^('.$lengthRequest.')([^'.$by.']+)(.*)/', $method, $matches)) {
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
-            $magicFn = $matches[1] ?? "";
-            $byNames = $matches[3] ?? "";
 
-            $this->setColumn(lcfirst($matches[2]) ?? null);
+        } else if (preg_match('/^(?P<fn>'.$lengthRequest.')(?P<column>[^'.$by.']+)'.$by.'(?P<names>.*)/', $method, $magicExtra)) {
+
+            $byNames = array_pop_key("names", $magicExtra);
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
+
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
+
+        } else if (preg_match('/^(?P<fn>'.$lengthRequest.')(?P<column>[^'.$by.']+)(?P<names>.*)/', $method, $magicExtra)) {
+
+            $byNames = array_pop_key("names", $magicExtra);
+
+            $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
+            $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
+
+            $this->setColumn(lcfirst(array_pop_key("column", $magicExtra)) ?? null);
 
         } else {
 
             throw new Exception(sprintf(
                 'Undefined method "%s". The method name must start with ' .
-                'either cache[One|Randomly|AtMost|Last|All][By], find[One|Randomly|AtMost|Last][By], distinctCount, count, lengthOf!',
+                'either cache[PreviousOne|NextOne|One|Randomly|AtMost|Next|Previous|Last|LastOne|All][By], find[PreviousOne|NextOne|One|Randomly|AtMost|Next|Previous|Last|LastOne][By], distinctCount, count, lengthOf!',
                 $method
             ));
+        }
+
+        // Handle special cases
+        if(in_array($special, [self::getSpecial(self::SPECIAL_NEXTONE), self::getSpecial(self::SPECIAL_NEXT)])) {
+
+            $id = $this->addCriteria("id", array_shift($arguments));
+            $this->addCustomOption($id, self::OPTION_GREATER);
+
+        } else if( in_array($special, [self::getSpecial(self::SPECIAL_PREVONE), self::getSpecial(self::SPECIAL_PREV)]) ) {
+
+            $id = $this->addCriteria("id", array_shift($arguments));
+            $this->addCustomOption($id, self::OPTION_LOWER);
         }
 
         // Reveal obvious logical ambiguities..
@@ -411,6 +483,7 @@ class ServiceEntityParser
 
             $closestTo = $farestTo = false;
             $instanceOf = $notInstanceOf = false;
+            $classOf = $notClassOf = false;
             $memberOf   = $notMemberOf   = false;
 
             $operator = self::OPTION_EQUAL;
@@ -435,6 +508,10 @@ class ServiceEntityParser
                     $option = self::OPTION_INSTANCEOF;
                 else if ( str_ends_with($by, self::OPTION_NOT_INSTANCEOF) )
                     $option = self::OPTION_NOT_INSTANCEOF;
+                else if ( str_ends_with($by, self::OPTION_CLASSOF) )
+                    $option = self::OPTION_CLASSOF;
+                else if ( str_ends_with($by, self::OPTION_NOT_CLASSOF) )
+                    $option = self::OPTION_NOT_CLASSOF;
                 else if ( str_ends_with($by, self::OPTION_MEMBEROF) )
                     $option = self::OPTION_MEMBEROF;
                 else if ( str_ends_with($by, self::OPTION_NOT_MEMBEROF) )
@@ -511,6 +588,16 @@ class ServiceEntityParser
 
                     case self::OPTION_NOT_INSTANCEOF:
                         $notInstanceOf = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
+                        break;
+
+                    case self::OPTION_CLASSOF:
+                        $classOf = true;
+                        list($method, $by) = $this->stripByEnd($method, $by, $option);
+                        break;
+
+                    case self::OPTION_NOT_CLASSOF:
+                        $notClassOf = true;
                         list($method, $by) = $this->stripByEnd($method, $by, $option);
                         break;
 
@@ -612,6 +699,28 @@ class ServiceEntityParser
                     $this->addCustomOption($id, self::OPTION_NOT_INSTANCEOF);
                 }
 
+            } else if ($classOf) {
+
+                $fieldValue = array_shift($arguments);
+                if(!empty($fieldValue)) {
+
+                    $by = lcfirst(self::OPTION_CLASSOF);
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    $this->addCustomOption($id, self::OPTION_CLASSOF);
+                }
+
+            } else if ($notClassOf) {
+
+                $fieldValue = array_shift($arguments);
+                if(!empty($fieldValue)) {
+
+                    $by = lcfirst(self::OPTION_NOT_CLASSOF);
+
+                    $id = $this->addCriteria($by, $fieldValue);
+                    $this->addCustomOption($id, self::OPTION_NOT_CLASSOF);
+                }
+
             } else if ($memberOf) {
 
                 $fieldValue = array_shift($arguments);
@@ -709,6 +818,7 @@ class ServiceEntityParser
         foreach($arguments as $i => $arg)
             $magicArgs[$i] = $arg; // +1 because of array shift
 
+        //
         // Mark as cacheable (to be used in self::getQueryBuilder)
         if(str_starts_with($magicFn, self::REQUEST_CACHE)) {
 
@@ -730,7 +840,8 @@ class ServiceEntityParser
         $magicFn = "__".$magicFn;
 
         $magicArgs[0] = $magicArgs[0] ?? [];
-        $magicArgs[1] = array_merge($magicArgs[1] ?? [], $this->criteria ?? []);
+        $magicArgs[1] = array_merge($magicArgs[1] ?? [], $this->criteria ?? []); // Criteria
+        $magicArgs[1] = array_merge($magicArgs[1], array_transforms(fn($k,$v) :array => ["special:".$k, $v], $magicExtra));
 
         return [$magicFn, $magicArgs];
     }
@@ -753,13 +864,17 @@ class ServiceEntityParser
         $isNotMemberOf   = $this->findCustomOption($fieldRoot, self::OPTION_NOT_MEMBEROF);
         $isInstanceOf    = $this->findCustomOption($fieldRoot, self::OPTION_INSTANCEOF);
         $isNotInstanceOf = $this->findCustomOption($fieldRoot, self::OPTION_NOT_INSTANCEOF);
+        $isClassOf    = $this->findCustomOption($fieldRoot, self::OPTION_CLASSOF);
+        $isNotClassOf = $this->findCustomOption($fieldRoot, self::OPTION_NOT_CLASSOF);
 
         $tableOperator   =
 
-            ($this->findCustomOption ($fieldRoot, self::OPTION_INSTANCEOF)   ? self::OPTION_INSTANCEOF        :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_MEMBEROF)     ? self::OPTION_MEMBEROF          :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_INSTANCEOF)   ? self::OPTION_NOT_INSTANCEOF:
-            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_MEMBEROF)     ? self::OPTION_NOT_MEMBEROF  :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_INSTANCEOF)    ? self::OPTION_INSTANCEOF    :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_INSTANCEOF)? self::OPTION_NOT_INSTANCEOF:
+            ($this->findCustomOption ($fieldRoot, self::OPTION_CLASSOF)       ? self::OPTION_CLASSOF       :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_CLASSOF)   ? self::OPTION_NOT_CLASSOF   :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_MEMBEROF)      ? self::OPTION_MEMBEROF      :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_MEMBEROF)  ? self::OPTION_NOT_MEMBEROF  :
 
             // Datetime related options
             ($this->findCustomOption ($fieldRoot, self::OPTION_OVER)          ? self::OPTION_OVER          :
@@ -781,7 +896,7 @@ class ServiceEntityParser
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER         :
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   :
             ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL     : self::OPTION_EQUAL
-        )))))))))))))))))));
+        )))))))))))))))))))));
 
         if(is_array($tableOperator))
             throw new Exception("Too many operator requested for \"$fieldName\": ".implode(",", $tableOperator));
@@ -792,6 +907,8 @@ class ServiceEntityParser
             case self::OPTION_NOT_MEMBEROF:
             case self::OPTION_INSTANCEOF:
             case self::OPTION_NOT_INSTANCEOF:
+            case self::OPTION_CLASSOF:
+            case self::OPTION_NOT_CLASSOF:
                 $tableColumn = self::ALIAS_ENTITY;
                 break;
 
@@ -853,6 +970,62 @@ class ServiceEntityParser
 
             if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
             return $qb->expr()->orX(...$instanceOf);
+
+        } else if($isClassOf || $isNotClassOf) {
+
+            // Cast to array
+            if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
+
+            $classOf = [];
+            $notClassOf = [];
+            foreach ($fieldValue as $value) {
+
+                $className = ltrim($value, "^");
+                $classMetadata = $this->entityManager->getClassMetadata($className);
+                $classChildren = array_filter(array_values($classMetadata->discriminatorMap), fn($c) => $c != $className && is_instanceof($c, $className));
+
+                if($isClassOf) {
+
+                    if( !str_starts_with($value, "^") ) {
+
+                        $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
+                        foreach($classChildren as $child)
+                            $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
+
+                        $classOf[] = $qb->expr()->andX(...$subQb);
+
+                    } else {
+
+                        $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
+                        foreach($classChildren as $child)
+                            $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
+
+                        $classOf[] = $qb->expr()->orX(...$subQb);
+                    }
+
+                } else {
+
+                    if( str_starts_with($value, "^") ) {
+
+                        $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
+                        foreach($classChildren as $child)
+                            $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
+
+                        $classOf[] = $qb->expr()->orX(...$subQb);
+
+                    } else {
+
+                        $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
+                        foreach($classChildren as $child)
+                            $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
+
+                        $classOf[] = $qb->expr()->andX(...$subQb);
+                    }
+                }
+            }
+
+            if($notClassOf) $classOf[] = $qb->expr()->andX(...$notClassOf);
+            return $qb->expr()->orX(...$classOf);
 
         } else if($isMemberOf || $isNotMemberOf) {
 

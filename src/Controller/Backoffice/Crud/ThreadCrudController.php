@@ -6,7 +6,7 @@ use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Enum\ThreadState;
 use Base\Field\DateTimePickerField;
 use Base\Field\DiscriminatorField;
-use Base\Field\Filter\DiscriminatorFilter;
+use Base\Backend\Filter\DiscriminatorFilter;
 
 use Base\Field\SelectField;
 use Base\Field\SlugField;

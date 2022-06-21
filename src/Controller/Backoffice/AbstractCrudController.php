@@ -2,7 +2,7 @@
 
 namespace Base\Controller\Backoffice;
 
-use Base\Config\Extension;
+use Base\Backend\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
@@ -35,11 +35,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
      */
     protected $classMetadataManipulator;
 
-    /**
-     * @var BaseService
-     */
-    protected $baseService;
-
     public function __construct(
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
@@ -47,7 +42,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         EntityManagerInterface $entityManager,
         RequestStack $requestStack,
         Extension $extension,
-        TranslatorInterface $translator, BaseService $baseService)
+        TranslatorInterface $translator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
 
@@ -57,7 +52,6 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->extension = $extension;
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
-        $this->baseService = $baseService;
 
         $this->crud = null;
     }

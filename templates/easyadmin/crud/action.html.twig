@@ -9,21 +9,102 @@
         {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
     {% endif %}
 
+    {% if linkUrl is not empty %}
     <a class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
        href="{{ linkUrl }}"
        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
         {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-        <span>{{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))}}</span>
+        <span>
+            {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+            {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
+        </span>
     </a>
+    {% endif %}
+
+{% elseif 'separator' == action.htmlElement %}
+
+    <span class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}></span>
 
 {% elseif 'button' == action.htmlElement %}
 
-    <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-        <span class="btn-label">
-            {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-            {{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))}}
+    {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+
+    {% if action.crudActionName == "group" %}
+        TODO..
+        <span class="input-group dropdown {{ action.type == 'entity' ? 'd-inline' : ''}} action-discriminator">
+        {#
+            {% set actionHtmlAttributes = action.htmlAttributes %}
+            {% set discriminatorMap     = actionHtmlAttributes["li"] %}
+            {% set actionHtmlAttributes = actionHtmlAttributes | filter((v, k) => k != 'li') %}
+
+            <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
+                {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+                {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
+            </a>
+
+            {% if discriminatorMap|length > 0 %}
+            <button type="button" class="btn btn-primary dropdown-toggle root-allowed dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden"></span>
+            </button>
+            {% endif %}
+
+            {% if discriminatorMap|length > 0 %}
+            <ul class="dropdown-menu dropdown-menu-end">
+                {% for group,entities in discriminatorMap %}
+                    {% if entities|length != 1 %}
+                        {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
+                        {% if group is not empty %}
+                            <li class="dropdown-item label-group">
+                            {% set label = ("@entities."~group~".singular")|trans(domain = ea.getTranslationDomain()) %}
+                            {{- label !=  ("@entities."~group~".singular") ? label|capitalize : action.label|trans|capitalize -}}
+                            </li>
+                        {% endif %}
+                    {% endif %}
+
+                    {% for crudEntity in entities %}
+
+                        {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
+                        {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
+                        {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
+                        <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
+                            {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                            {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
+                            {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                        </a></li>
+
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+            {% endif %} #}
         </span>
-    </button>
+
+    {% else %}
+        <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
+        data-toggle="tooltip" title="{{- actionLabel != action.label ? actionLabel : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+            <span class="btn-label">
+                <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
+            </span>
+        </button>
+    {% endif %}
+
+{% elseif 'tooltip' == action.htmlElement %}
+
+    {% set linkUrl = action.linkUrl %}
+    {% if action.crudActionName == "index" and action.type == "entity" %}
+        {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
+    {% endif %}
+
+    {% if linkUrl is not empty %}
+        {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+        <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
+        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
+            data-toggle="tooltip" title="{{- actionLabel != action.label ? actionLabel : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+            <span class="btn-label">
+                <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
+            </span>
+        </a>
+    {% endif %}
 
 {% elseif 'discriminator' == action.htmlElement %}
 
@@ -56,7 +137,8 @@
 
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle')) }}
+            {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+            {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
         </a>
 
         {% if discriminatorMap|length > 0 %}
@@ -69,7 +151,8 @@
 
         <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {{ action.label|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle')) }}
+            {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+            {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
         </span>
 
     {% endif %}
@@ -79,18 +162,23 @@
         {% for group,entities in discriminatorMap %}
             {% if entities|length != 1 %}
                 {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
-                {% if group is not empty %}<li class="dropdown-item label-group">{{("@entities."~group~".singular")|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))|capitalize }}</li>{% endif %}
+                {% if group is not empty %}
+                    <li class="dropdown-item label-group">
+                    {% set label = ("@entities."~group~".singular")|trans(domain = ea.getTranslationDomain()) %}
+                    {{- label !=  ("@entities."~group~".singular") ? label|capitalize : action.label|trans|capitalize -}}
+                    </li>
+                {% endif %}
             {% endif %}
 
             {% for crudEntity in entities %}
 
                 {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
-                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = _entity_config.translation_domain|default('EasyAdminBundle'))|capitalize %}
+                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
                 {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
                 <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
                     {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                     {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                    {{ label | trans }}
+                    {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
                 </a></li>
 
             {% endfor %}
@@ -99,4 +187,9 @@
     {% endif %}
 </span>
 
+{% else %}
+    <span class="text-danger"><i class="action-icon fas fa-fw fa-exclamation-triangle"></i>
+    {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+    "{{ actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst }}" cannot be rendered as "{{action.htmlElement}}"
+    </span>
 {% endif %}

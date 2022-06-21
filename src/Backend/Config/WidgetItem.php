@@ -1,14 +1,14 @@
 <?php
 
-namespace Base\Config;
+namespace Base\Backend\Config;
 
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 
-use Base\Config\Menu\CrudWidgetItem;
-use Base\Config\Menu\EntityWidgetItem;
-use Base\Config\Menu\SectionWidgetItem;
-use Base\Config\Menu\SeparatorWidgetItem;
+use Base\Backend\Config\Menu\CrudWidgetItem;
+use Base\Backend\Config\Menu\EntityWidgetItem;
+use Base\Backend\Config\Menu\SectionWidgetItem;
+use Base\Backend\Config\Menu\SeparatorWidgetItem;
 use Base\Controller\Backoffice\AbstractCrudController;
 
 use Base\Model\IconizeInterface;

@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Config\Traits;
+namespace Base\Backend\Config\Traits;
 
-use Base\Config\Menu\SectionWidgetItem;
+use Base\Backend\Config\Menu\SectionWidgetItem;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 
 trait WidgetTrait

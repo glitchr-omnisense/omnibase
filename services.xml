@@ -456,7 +456,6 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-
         <service id="Base\Database\Factory\EntityExtension" public="true" />
         <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Versionable"><tag name="base.entity_extension" /></service>
@@ -892,7 +891,7 @@
             <argument type="service" id="base.service.icon" />
         </service>
 
-        <service id="Base\Config\Extension" public="true"><argument type="service" id="twig" /></service>
+        <service id="Base\Backend\Config\Extension" public="true"><argument type="service" id="twig" /></service>
         <service id="Base\Controller\Backoffice\AbstractDashboardController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
@@ -904,7 +903,11 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="router" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="base.service.icon" />
+            <argument type="service" id="base.service.image" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\Controller\Backoffice\AbstractCrudController">
@@ -920,7 +923,6 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="ea_extension" />
             <argument type="service" id="translator" />
-            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Serializer\Encoder\AcoEncoder"><tag name="serializer.encoder" /></service>

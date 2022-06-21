@@ -2,7 +2,7 @@
 
 namespace Base\Controller\Backoffice\Crud\Layout;
 
-use Base\Config\Extension;
+use Base\Backend\Config\Extension;
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Controller\Backoffice\AbstractDashboardController;
 use Base\Field\CollectionField;

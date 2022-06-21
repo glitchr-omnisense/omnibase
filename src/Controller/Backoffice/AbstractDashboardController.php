@@ -23,8 +23,8 @@ use App\Entity\Layout\Widget\Page;
 
 use App\Controller\Backoffice\Crud\UserCrudController;
 use Base\Entity\Layout\Image;
-use Base\Config\WidgetItem;
-use Base\Config\MenuItem;
+use Base\Backend\Config\WidgetItem;
+use Base\Backend\Config\MenuItem;
 use Base\Service\BaseService;
 
 use App\Enum\UserRole;
@@ -39,13 +39,11 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
-use Base\Config\Extension;
+use Base\Backend\Config\Extension;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\Widget\Link;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Translator;
-use Base\Config\Action;
-use Base\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
@@ -53,7 +51,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\HttpFoundation\Request;
 
-use Base\Config\Traits\WidgetTrait;
+use Base\Backend\Config\Traits\WidgetTrait;
 use Base\Entity\Extension\Log;
 use Base\Entity\Extension\Revision;
 use Base\Entity\Extension\Ordering;
@@ -63,14 +61,22 @@ use Base\Entity\Thread\Taxon;
 use Base\Field\Type\PasswordType;
 use Base\Field\Type\RouteType;
 use Base\Field\Type\SelectType;
-
+use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Actions as EaActions;
+use Base\Backend\Config\Action;
+use Base\Backend\Config\Actions;
+use Base\Routing\RouterInterface;
+use Base\Service\IconProvider;
+use Base\Service\ImageService;
+use Base\Service\SettingBagInterface;
+use Base\Twig\Environment;
+use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /* "abstract" (remove because of routes) */
@@ -78,7 +84,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 {
     use WidgetTrait;
 
-    protected $baseService;
     protected $adminUrlGenerator;
 
     public const TRANSLATION_DASHBOARD = "dashboard";
@@ -92,7 +97,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         AdminContextProvider $adminContextProvider,
         AdminUrlGenerator $adminUrlGenerator,
         RouterInterface $router,
-        BaseService $baseService) {
+        IconProvider $iconProvider,
+        ImageService $imageService,
+        Environment $twig,
+        EntityManagerInterface $entityManager,
+        SettingBagInterface $settingBag) {
 
         $this->extension = $extension;
         $this->requestStack = $requestStack;
@@ -104,12 +113,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         MenuItem::$translator = $translator;
 
         MenuItem::$router = $router;
-        MenuItem::$iconProvider = $baseService->getIconProvider();
+        MenuItem::$iconProvider = $iconProvider;
 
-        $this->baseService           = $baseService;
-        $this->settingRepository     = $baseService->getEntityManager()->getRepository(Setting::class);
-        $this->widgetRepository      = $baseService->getEntityManager()->getRepository(Widget::class);
-        $this->slotRepository        = $baseService->getEntityManager()->getRepository(Slot::class);
+        $this->twig              = $twig;
+        $this->imageService      = $imageService;
+        $this->settingBag        = $settingBag;
+        $this->entityManager     = $entityManager;
+
+        $this->settingRepository = $entityManager->getRepository(Setting::class);
+        $this->widgetRepository  = $entityManager->getRepository(Widget::class);
+        $this->slotRepository    = $entityManager->getRepository(Slot::class);
     }
 
     public function getExtension() { return $this->extension; }
@@ -145,7 +158,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         ]), array_reverse($fields)));
 
         if(empty($fields))
-            $fields = array_fill_keys($this->baseService->getSettingBag()->getPaths("api"), []);
+            $fields = array_fill_keys($this->settingBag->getPaths("api"), []);
 
         foreach($fields as $key => $field) {
 
@@ -182,7 +195,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->baseService->getSettingBag()->getRawScalar($fields)
+                $this->settingBag->getRawScalar($fields)
             );
 
             foreach($settings as $setting)
@@ -197,7 +210,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $notification->setUser($this->getUser());
             $notification->send("success");
 
-            return $this->baseService->refresh();
+            return $this->router->reloadRequest();
         }
 
         return $this->render('backoffice/apikey.html.twig', [
@@ -235,7 +248,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.mail.name"              => ["translatable" => true],
             "base.settings.http.scheme"            => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
             "base.settings.http.host"              => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
-            "base.settings.http.base_dir"          => ["form_type" => HiddenType::class, "data" => $this->baseService->getAsset("/")],
+            "base.settings.http.base_dir"          => ["form_type" => HiddenType::class, "data" => $this->twig->getAsset("/")],
         ]), array_reverse($fields)));
 
         foreach($fields as $name => &$options) {
@@ -253,7 +266,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->baseService->getSettingBag()->getRawScalar($fields)
+                $this->settingBag->getRawScalar($fields)
             );
 
 
@@ -266,7 +279,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->settingRepository->flush();
 
-            return $this->baseService->refresh();
+            return $this->router->reloadRequest();
         }
 
         return $this->render('backoffice/settings.html.twig', [
@@ -310,7 +323,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $notification->setUser($this->getUser());
             $notification->send("success");
 
-            return $this->baseService->refresh();
+            return $this->router->reloadRequest();
         }
 
         return $this->render('backoffice/widgets.html.twig', ["form" => $form->createView()]);
@@ -323,12 +336,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureDashboard(): Dashboard
     {
-        $logo  = $this->baseService->getSettingBag()->getScalar("base.settings.logo.backoffice");
-        if(!$logo) $logo = $this->baseService->getSettingBag()->getScalar("base.settings.logo");
+        $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");
+        if(!$logo) $logo = $this->settingBag->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
 
-        $title  = $this->baseService->getSettingBag()->getScalar("base.settings.title") ?? "";
-        $slogan = $this->baseService->getSettingBag()->getScalar("base.settings.slogan") ?? "";
+        $title  = $this->settingBag->getScalar("base.settings.title") ?? "";
+        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? "";
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")
@@ -337,8 +350,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->setWidgets($this->configureWidgetItems())
         );
 
-        $logo = $this->baseService->getAsset($logo);
-        $logo = $this->baseService->getImageService()->thumbnail($logo, 500, 500);
+        $logo = $this->twig->getAsset($logo);
+        $logo = $this->imageService->thumbnail($logo, 500, 500);
         return parent::configureDashboard()
             ->setFaviconPath("/favicon.ico")
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
@@ -430,50 +443,31 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     public function configureActions(): Actions
     {
-        return Actions::new()
-            ->addBatchAction(Action::BATCH_DELETE)
+        return Actions::new($this->adminUrlGenerator, $this->entityManager)
 
-            ->add(Crud::PAGE_INDEX, Action::NEW,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
-            ->add(Crud::PAGE_INDEX, Action::DETAIL,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-search'))
-            ->add(Crud::PAGE_INDEX, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
-            ->add(Crud::PAGE_INDEX, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
+            ->add(Crud::PAGE_INDEX, Action::NEW, 'fas fa-fw fa-edit')
+            ->add(Crud::PAGE_INDEX, Action::EDIT, 'fas fa-fw fa-pencil-alt', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DETAIL, 'fas fa-fw fa-search', fn(EaAction $a) => $a->setLabel(""))
+            ->add(Crud::PAGE_INDEX, Action::DELETE, 'fas fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
 
-            ->add(Crud::PAGE_DETAIL, Action::INDEX,
-            fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
-            ->add(Crud::PAGE_DETAIL, Action::EDIT,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-pencil-alt'))
-            ->add(Crud::PAGE_DETAIL, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-prev'))
-            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-next'))
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_NEXT, 'fas fa-fw fa-angle-right')
+            ->add(Crud::PAGE_DETAIL, Action::INDEX, 'fas fa-fw fa-undo')
+            ->add(Crud::PAGE_DETAIL, Action::GOTO_PREV, 'fas fa-fw fa-angle-left')
+            ->add(Crud::PAGE_DETAIL, Action::EDIT, 'fas fa-fw fa-pencil-alt')
+            ->add(Crud::PAGE_DETAIL, Action::DELETE, 'fas fa-fw fa-trash-alt')
 
-            ->add(Crud::PAGE_EDIT, Action::DETAIL,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-search'))
-            ->add(Crud::PAGE_EDIT, Action::DELETE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-trash-alt'))
-            ->add(Crud::PAGE_EDIT, Action::INDEX,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-undo'))
-            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-save'))
-            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
-            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-prev'))
-            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-next'))
+            ->add(Crud::PAGE_EDIT, Action::INDEX, 'fas fa-fw fa-undo')
+            ->add(Crud::PAGE_EDIT, Action::DELETE, 'fas fa-fw fa-trash-alt')
+            ->add(Crud::PAGE_EDIT, Action::DETAIL, 'fas fa-fw fa-search')
+            ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
+            ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fas fa-fw fa-angle-right')
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN, 'fas fa-fw fa-save')
+            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fas fa-fw fa-edit')
+            ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fas fa-fw fa-angle-left')
 
-            ->add(Crud::PAGE_NEW, Action::INDEX,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-backspace'))
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'))
-            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER,
-                fn (Action $action) => $action->setIcon('fas fa-fw fa-edit'));
+            ->add(Crud::PAGE_NEW, Action::INDEX, 'fas fa-fw fa-backspace')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_RETURN, 'fas fa-fw fa-edit')
+            ->add(Crud::PAGE_NEW, Action::SAVE_AND_ADD_ANOTHER, 'fas fa-fw fa-edit');
     }
 
     public function configureUserMenu(UserInterface $user): UserMenu
@@ -482,7 +476,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
         $avatar = ($user->getAvatarFile() ? $user->getAvatar() : null);
-        $avatar = $this->baseService->getImageService()->thumbnail($avatar, 200, 200);
+        $avatar = $this->imageService->thumbnail($avatar, 200, 200);
 
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)
@@ -496,7 +490,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         WidgetItem::setAdminUrlGenerator($this->adminUrlGenerator);
         WidgetItem::setAdminContextProvider($this->adminContextProvider);
-
         $widgets = $this->addSectionWidgetItem($widgets, WidgetItem::section('LAYOUT', null, 1));
         if ($this->isGranted('ROLE_EDITOR')) {
 

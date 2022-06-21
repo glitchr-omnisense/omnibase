@@ -37,8 +37,11 @@ class Translator implements TranslatorInterface
     public function trans(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true):string
     {
         if($id === null) return null;
+
+        $domainFallback = null;
         if($id instanceof TranslatableMessage) {
-            $domain = $id->getDomain();
+            $domainFallback = $id->getDomain();
+            $domain ??= $domainFallback;
             $parameters = array_merge($id->getParameters(), $parameters);
             $id = $id->getMessage();
         }
@@ -47,6 +50,7 @@ class Translator implements TranslatorInterface
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
         $atBegin   = str_starts_with($id, "@");
 
+        $domainFallback    = $domainFallback && str_starts_with($domainFallback, "@") ? substr($domainFallback, 1) : ($domainFallback ?? null);
         $domain    = $domain && str_starts_with($domain, "@") ? substr($domain, 1) : ($domain ?? null);
         if ($id && $customId) {
 
@@ -59,13 +63,16 @@ class Translator implements TranslatorInterface
         } else if($recursive) { // Check if recursive dot structure
 
             $count = 0;
-            $fn = function ($key) use ($id, $parameters, $domain, $locale) { return $this->trans($id, $parameters, $domain, $locale, false); };
+            $fn = fn($k) => $this->trans($id, $parameters, $domain, $locale, false);
 
             $ret = preg_replace_callback("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $fn, $id, -1, $count);
             if ($ret != $id) return $ret;
 
             $ret = $this->translator->trans($ret, $parameters, $domain, $locale);
-            if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) return $id;
+            if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) {
+                $ret = $this->translator->trans($ret, $parameters, $domainFallback, $locale);
+                if(preg_match("/^{[a-zA-Z0-9]*}$/", $ret)) return $id;
+            }
 
             return $ret;
         }
@@ -113,8 +120,21 @@ class Translator implements TranslatorInterface
             if($trans != $trans2) $trans = $trans2;
         }
 
-        if ($trans == $id && !$this->isDebug)
-            $trans = $this->translator->trans($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
+        if ($trans == $id) {
+
+            $trans2 = null;
+            while($trans != $trans2 && $recursive) {
+
+                $trans2 = $this->trans($trans, $parameters, $domainFallback, $locale, false);
+                if($trans != $trans2) $trans = $trans2;
+            }
+
+            if(!$this->isDebug) {
+                $trans = $this->translator->trans($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
+                if ($trans == $id)
+                    $trans = $this->translator->trans($id, $parameters, $domainFallback, LocaleProvider::getDefaultLocale());
+            }
+        }
 
         if ($trans == $id && $customId)
             return ($domain && $atBegin ? "@".$domain.".".$id : $id);

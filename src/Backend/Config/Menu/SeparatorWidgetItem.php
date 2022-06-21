@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Config\Menu;
+namespace Base\Backend\Config\Menu;
 
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;

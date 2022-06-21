@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Config\Menu;
+namespace Base\Backend\Config\Menu;
 
-use Base\Config\MenuItem;
+use Base\Backend\Config\MenuItem;
 
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;

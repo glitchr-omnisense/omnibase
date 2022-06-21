@@ -45,5 +45,9 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="setting_bag" />
         </service>
+
+        <service id="Base\Backend\Factory\AdminContextFactory" parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory">
+            <argument type="service" id="ea_extension" />
+        </service>
     </services>
 </container>

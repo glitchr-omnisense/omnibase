@@ -15,6 +15,11 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var LocaleProvider
+     */
+    protected $localeProvider;
+
     public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, TranslatorInterface $translator)
     {
         $this->localeProvider = $localeProvider;
@@ -37,23 +42,23 @@ class LocaleSubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        $locale  = $this->localeProvider->getLocale();
-
         $_locale = $this->router->match($event->getRequest()->getPathInfo())["_locale"] ?? null;
         $_locale = $_locale ? $this->localeProvider->getLocale($_locale) : null;
         if($_locale !== null) {
 
             $event->getRequest()->getSession()->set('_locale', $_locale);
             $this->localeProvider->markAsChanged();
+            $locale = $_locale;
         }
 
-        $locale   = $event->getRequest()->getSession()->get("_locale");
+        $locale ??= $event->getRequest()->getSession()->get("_locale");
         $locale ??= User::getCookie("locale");
         $locale ??= $this->localeProvider->getLocale();
 
         // Normalize locale
         $locale = $this->localeProvider->normalize($locale);
 
+        // Set new locale
         $this->localeProvider->setLocale($locale, $event->getRequest());
         $this->localeProvider->markAsLate();
     }

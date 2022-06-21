@@ -2,7 +2,7 @@
 
 namespace Base\Controller\Backoffice\Crud;
 
-use Base\Config\Extension;
+use Base\Backend\Config\Extension;
 use Base\Controller\Backoffice\AbstractCrudController;
 use Base\Controller\Backoffice\AbstractDashboardController;
 use Base\Field\AvatarField;

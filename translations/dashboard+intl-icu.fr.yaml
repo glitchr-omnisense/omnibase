@@ -29,7 +29,9 @@ crud:
 
 # ACTION buttons
 action:
-  index: "Retour"
+  index: "Index"
   create_and_continue: 'Créer et continuer'
   save: 'Enregistrer'
   save_and_continue: 'Enregistrer et continuer'
+  goto_next: "Suivant"
+  goto_prev: "Précédent"
