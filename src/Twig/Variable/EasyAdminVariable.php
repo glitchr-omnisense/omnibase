@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Variable;
 
-use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backend\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 

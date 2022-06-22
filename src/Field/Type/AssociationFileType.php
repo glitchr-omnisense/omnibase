@@ -4,7 +4,7 @@ namespace Base\Field\Type;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Uploader;
-use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Form\FormFactory;

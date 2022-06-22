@@ -2,7 +2,7 @@
 
 namespace Base\Field\Configurator;
 
-use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\DiscriminatorField;
 use Base\Field\SelectField;

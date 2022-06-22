@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Controller\Backoffice\AbstractDashboardController;
+use Base\Controller\Backend\AbstractDashboardController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Model\Autocomplete;

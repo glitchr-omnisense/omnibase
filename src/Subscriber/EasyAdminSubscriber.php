@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
-use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Routing\RouterInterface;
 
 class EasyAdminSubscriber implements EventSubscriberInterface

@@ -67,7 +67,7 @@ class AdvancedRouter implements RouterInterface
 
     public function isCli(): bool { return is_cli(); }
     public function isDebug(): bool { return $this->debug; }
-    public function isBackOffice(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
+    public function isBackend(mixed $request = null) { return $this->isEasyAdmin($request) || $this->isProfiler($request); }
     public function isProfiler(mixed $request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();

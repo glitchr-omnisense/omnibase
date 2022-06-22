@@ -9,7 +9,7 @@ use Base\Backend\Config\Menu\CrudWidgetItem;
 use Base\Backend\Config\Menu\EntityWidgetItem;
 use Base\Backend\Config\Menu\SectionWidgetItem;
 use Base\Backend\Config\Menu\SeparatorWidgetItem;
-use Base\Controller\Backoffice\AbstractCrudController;
+use Base\Controller\Backend\AbstractCrudController;
 
 use Base\Model\IconizeInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
