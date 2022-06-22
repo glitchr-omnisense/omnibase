@@ -182,6 +182,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         if ($form instanceof FormEvent)
             $form = $form->getForm();
 
+        if(!array_key_exists("multiple", $options)) $options["multiple"] = false;
         if($options["multiple"] === null) {
 
             $parentForm = $form->getParent();
@@ -234,6 +235,8 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
             $form = $form->getForm();
 
         $options = $options ?? $form->getConfig()->getOptions();
+        if(!array_key_exists("sortable", $options)) $options["sortable"] = false;
+
         if($options["sortable"] === null) {
 
             $parentForm = $form->getParent();
@@ -259,6 +262,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     public function guessChoices(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
+        if(!array_key_exists("choices", $options)) $options["choices"] = null;
 
         if (!$options["choices"]) {
 
@@ -283,11 +287,13 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     public function guessChoiceAutocomplete(FormInterface|FormBuilderInterface $form, ?array $options = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
+        if(!array_key_exists("choices", $options)) $options["choices"] = [];
+        if(!array_key_exists("autocomplete", $options)) $options["autocomplete"] = null;
 
         if($options["choices"]) return false;
         if($options["autocomplete"] === null && $options["class"]) {
 
-            $target = $options["class"];
+            $target = $options["class"] ?? null;
             if($this->classMetadataManipulator->isEntity($target))
                 return true;
             if($this->classMetadataManipulator->isEnumType($target))
@@ -302,6 +308,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
     public function guessChoiceFilter(FormInterface|FormBuilderInterface $form, ?array $options = null, $data = null)
     {
         $options = $options ?? $form->getConfig()->getOptions();
+        if(!array_key_exists("choices_filter", $options)) $options["choices_filter"] = false;
 
         if ($options["choice_filter"] === false) return [];
         if ($options["choice_filter"] === null) {

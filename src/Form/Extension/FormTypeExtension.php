@@ -3,6 +3,7 @@
 namespace Base\Form\Extension;
 
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -20,12 +21,18 @@ class FormTypeExtension extends AbstractTypeExtension
     protected $baseService;
 
     /**
+     * @var FormFactory
+     */
+    protected $formFactory;
+
+    /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator;
-    public function __construct(BaseService $baseService, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(BaseService $baseService, FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->baseService = $baseService;
+        $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -55,8 +62,10 @@ class FormTypeExtension extends AbstractTypeExtension
         if($options["form2"]) $this->applyForm2($view);
         if($options["easyadmin"]) $this->applyEA($view, $form);
 
-        if($this->baseService->isDebug())
+        if($this->baseService->isDebug()) {
             $this->markAsDbColumns($view, $form, $options);
+            $this->markAsSortable($view, $form, $options);
+        }
 
         foreach($view->children as $field => $childView) {
 
@@ -124,5 +133,9 @@ class FormTypeExtension extends AbstractTypeExtension
                 if($childView) $childView->vars["is_dbcolumn"] = true;
             }
         }
+    }
+    public function markAsSortable(FormView $view, FormInterface $form, array $options) {
+
+        $view->vars["sortable"] = $this->formFactory->guessSortable($form, $options);
     }
 }

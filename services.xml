@@ -498,6 +498,7 @@
         <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
         <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 

@@ -55,7 +55,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         return
         [
             RequestEvent::class      => [['onKernelRequest', 8]],
-            LoginSuccessEvent::class => ['onLoginSuccess'],
+            LoginSuccessEvent::class => ['onLoginSuccess', 1],
         ];
     }
 

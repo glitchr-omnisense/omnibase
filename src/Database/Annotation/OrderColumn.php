@@ -11,6 +11,7 @@ use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\ArrayType;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -44,11 +45,13 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
 
-            $isEnum = is_instanceof($doctrineType, EnumType::class);
+            $isArray = is_instanceof($doctrineType, ArrayType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
+            // SET is not supported yet.. Select2 issue sorting settype
+            // $isSet  = is_instanceof($doctrineType, SetType::class);
 
-            if(!$isEnum && !$isToMany)
-                throw new \Exception("Unexpected column type found for @OrderColumn \"".$targetValue."\" found in \"".$object->getName()."\": expecting \"Collection\" or \"array\"");
+            if(/*!$isSet &&*/ !$isArray && !$isToMany)
+                return false;
 
             $siblingAnnotations = $this->getAnnotationReader()->getDefaultPropertyAnnotations($object->getName(), OrderBy::class);
             if(array_key_exists($targetValue, $siblingAnnotations))

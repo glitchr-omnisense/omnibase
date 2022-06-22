@@ -15,8 +15,8 @@ crud:
       placeholder: "{0} or /go/to/route"
 
 action:
-  goto_next: "Next"
-  goto_prev: "Previous"
+  goto_next: "Next %entity_label_singular%"
+  goto_prev: "Previous %entity_label_singular%"
 
   create_and_continue: 'Create and continue'
   save: 'Save'

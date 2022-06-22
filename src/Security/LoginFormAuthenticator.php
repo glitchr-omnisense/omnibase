@@ -53,9 +53,9 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $this->router           = $router;
     }
 
-    public static function isSecurityRoute(Request|string $routeOrRequest)
+    public static function isSecurityRoute(Request|string $routeNameOrRequest)
     {
-        return in_array(is_string($routeOrRequest) ? $routeOrRequest : $routeOrRequest->attributes->get('_route'), [
+        return in_array(is_string($routeNameOrRequest) ? $routeNameOrRequest : $routeNameOrRequest->attributes->get('_route'), [
             self::LOGIN_ROUTE,
             self::LOGOUT_ROUTE,
             self::LOGOUT_REQUEST_ROUTE
@@ -114,10 +114,11 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
         // Check if target path provided via $_POST..
         $targetPath = $this->referrer;
+        $targetName = $this->router->getRouteName($targetPath);
         $request->getSession()->remove("_target_path");
 
-        if ($targetPath && !$this->isSecurityRoute($targetPath) && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
-            return $this->router->redirect($targetPath);
+        if ($targetPath && !static::isSecurityRoute($targetName) && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
+             return $this->router->redirect($targetPath);
 
         return $this->router->redirectToRoute($this->router->getRouteName("/"));
     }

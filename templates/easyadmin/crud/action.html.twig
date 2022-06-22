@@ -16,7 +16,7 @@
         {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
         <span>
             {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-            {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
+            {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
         </span>
     </a>
     {% endif %}
@@ -81,7 +81,7 @@
 
     {% else %}
         <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
-        data-toggle="tooltip" title="{{- actionLabel != action.label ? actionLabel : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+        data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
             <span class="btn-label">
                 <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
             </span>
@@ -99,7 +99,7 @@
         {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
         <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
         {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
-            data-toggle="tooltip" title="{{- actionLabel != action.label ? actionLabel : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+            data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
             <span class="btn-label">
                 <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
             </span>
@@ -138,7 +138,7 @@
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
             {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-            {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
+            {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
         </a>
 
         {% if discriminatorMap|length > 0 %}
@@ -152,7 +152,7 @@
         <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
             {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-            {{- actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst -}}
+            {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
         </span>
 
     {% endif %}
@@ -190,6 +190,6 @@
 {% else %}
     <span class="text-danger"><i class="action-icon fas fa-fw fa-exclamation-triangle"></i>
     {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-    "{{ actionLabel != action.label ? actionLabel : action.label|trans|mb_ucfirst }}" cannot be rendered as "{{action.htmlElement}}"
+    "{{ actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst }}" cannot be rendered as "{{action.htmlElement}}"
     </span>
 {% endif %}
