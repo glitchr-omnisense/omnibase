@@ -1,3 +1,7 @@
+debug:
+  is_sortable: "Ce champ peut être reordonné"
+  is_dbcolumn: "Ce champ est en connexion directe avec base de donnée"
+
 boolean:
   title: "Action démandée sur \"{0}\""
   text: Es-tu certain de vouloir confirmer cette action ?

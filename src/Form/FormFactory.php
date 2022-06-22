@@ -236,7 +236,9 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
         $options = $options ?? $form->getConfig()->getOptions();
         if(!array_key_exists("sortable", $options)) $options["sortable"] = false;
+        if(!array_key_exists("multivalue", $options)) $options["multivalue"] = false;
 
+        if($options["multivalue"]) return false;
         if($options["sortable"] === null) {
 
             $parentForm = $form->getParent();

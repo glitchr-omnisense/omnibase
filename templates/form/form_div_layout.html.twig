@@ -22,8 +22,9 @@
 {# Overloaded form template.. #}
 {%- block form2_label  -%}
     {% set label = form_label(form, null, {'label_html': true}) %}
+    {{- app.debug and form.vars.is_dbcolumn is defined ? "fas fa-fw fa-database"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn"|trans)}) : "" -}}
+    {{- app.debug and form.vars.is_sortable ? "fas fa-fw fa-sync"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable"|trans)}) : "" -}}&nbsp;
     {% if label is not empty %}
-        {{- app.debug and form.vars.is_dbcolumn is defined ? "fas fa-fw fa-database"|iconify : "" -}}&nbsp;
         {{- label|raw -}}
     {% endif %}
 {%- endblock -%}

@@ -136,6 +136,6 @@ class FormTypeExtension extends AbstractTypeExtension
     }
     public function markAsSortable(FormView $view, FormInterface $form, array $options) {
 
-        $view->vars["sortable"] = $this->formFactory->guessSortable($form, $options);
+        $view->vars["is_sortable"] = $this->formFactory->guessSortable($form, $options);
     }
 }
