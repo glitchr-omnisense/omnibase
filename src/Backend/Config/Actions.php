@@ -47,12 +47,23 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->linkToCrudAction(Action::GROUP);
         }
 
+        if (Action::SAVE_AND_RETURN === $actionName) {
+            return Action::new(Action::SAVE_AND_RETURN, t(Crud::PAGE_EDIT === $pageName ? 'action.save' : 'action.create', domain: 'EasyAdminBundle'))
+                ->setCssClass('action-'.Action::SAVE_AND_RETURN)
+                ->addCssClass('btn btn-primary action-save')
+                ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
+                ->displayAsButton()
+                ->renderAsTooltip()
+                ->linkToCrudAction(Crud::PAGE_EDIT === $pageName ? Action::EDIT : Action::NEW);
+        }
+
         if (Action::SAVE_AND_CONTINUE === $actionName) {
             return Action::new(Action::SAVE_AND_CONTINUE, t(Crud::PAGE_EDIT === $pageName ? 'action.save_and_continue' : 'action.create_and_continue', domain: 'EasyAdminBundle'), 'far fa-edit')
                 ->setCssClass('action-'.Action::SAVE_AND_CONTINUE)
                 ->addCssClass('btn btn-secondary action-save text-success')
-                ->displayAsButton()
                 ->setHtmlAttributes(['type' => 'submit', 'name' => 'ea[newForm][btn]', 'value' => $actionName])
+                ->displayAsButton()
+                ->renderAsTooltip()
                 ->linkToCrudAction(Crud::PAGE_EDIT === $pageName ? Action::EDIT : Action::NEW);
         }
 
@@ -60,7 +71,8 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'EasyAdminBundle'))
                 ->setCssClass('action-'.Action::GOTO_PREV)
                 ->addCssClass('btn btn-secondary action-save')
-                ->displayAsTooltip()
+                ->displayAsButton()
+                ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
@@ -73,7 +85,8 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'EasyAdminBundle'))
                 ->setCssClass('action-'.Action::GOTO_NEXT)
                 ->addCssClass('btn btn-secondary action-save')
-                ->displayAsTooltip()
+                ->displayAsButton()
+                ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));

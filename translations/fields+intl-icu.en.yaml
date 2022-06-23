@@ -1,6 +1,8 @@
 debug:
   is_sortable: "This field can be sorted"
   is_dbcolumn: "This field has a direct connection with database"
+  is_alias: "This field is an alias to another variable name"
+  is_multiple: "This field can have multiple values"
 
 boolean:
   title: "Toggle switch on \"{0}\""

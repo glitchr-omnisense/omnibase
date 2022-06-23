@@ -2,7 +2,7 @@
 
 namespace Base\Entity;
 
-use Base\Database\Factory\EntityExtension;
+use Base\Database\Annotation\OrderColumn;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
 use Base\Traits\BaseTrait;
@@ -43,6 +43,7 @@ class ThreadTranslation implements TranslationInterface
 
     /**
      * @ORM\Column(type="array")
+     * @OrderColumn
      */
     protected $keywords = [];
     public function getKeywords(): array { return $this->keywords; }

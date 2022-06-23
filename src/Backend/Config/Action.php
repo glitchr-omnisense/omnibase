@@ -9,9 +9,9 @@ class Action extends \EasyCorp\Bundle\EasyAdminBundle\Config\Action
     public const SEPARATOR = 'separator';
     public const GROUP = 'group';
 
-    public function displayAsTooltip()
+    public function renderAsTooltip()
     {
-        $this->dto->setHtmlElement('tooltip');
+        $this->dto->addHtmlAttributes(['tooltip' => true]);
 
         return $this;
     }

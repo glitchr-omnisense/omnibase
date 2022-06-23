@@ -1,6 +1,8 @@
 debug:
   is_sortable: "Ce champ peut être reordonné"
   is_dbcolumn: "Ce champ est en connexion directe avec base de donnée"
+  is_alias: "Ce champ est un alias"
+  is_multiple: "Ce champ peut prendre plusieurs entrées"
 
 boolean:
   title: "Action démandée sur \"{0}\""

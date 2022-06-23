@@ -6,14 +6,12 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Factory\EntityExtensionInterface;
-use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\ArrayType;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
 use Doctrine\ORM\PersistentCollection;
@@ -103,7 +101,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $className = first($className);
         if($className === null) return;
 
-        try { $entityValue = $propertyAccessor->getValue($entity, $property); }
+        try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
         catch (Exception $e) { return; }
 
         $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
@@ -111,6 +109,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
         $data = $ordering->getEntityData();
         $orderedIndexes = $data[$property] ?? [];
+
+        $nEntries = count($entityValue);
+        while(count($orderedIndexes) < $nEntries)
+            $orderedIndexes[] = count($orderedIndexes);
+
         if(is_array($entityValue)) {
 
             $entityValue = array_map(fn($k) => $entityValue[$k], $orderedIndexes);
@@ -143,9 +146,9 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     $value = $propertyAccessor->getValue($entity, $property);
 
-                    // ARRAY ARE NOT SUPPORTED YET.. SOME TESTS PERFORMED WITH USER ROLE FOR INSTANCE..
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
-                    else*/ if($value instanceof Collection) {
+                    else*/
+                     if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);

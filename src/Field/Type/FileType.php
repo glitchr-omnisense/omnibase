@@ -124,6 +124,7 @@ class FileType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
 
             $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
+            $options["sortable"] = $this->formFactory->guessSortable($form, $options);
             $form->add('file', HiddenType::class);
 
             $mimeTypes   = $options["mime_types"] ?? Uploader::getMimeTypes($options["class"] ?? $entity ?? null, $options["data_mapping"] ?? $form->getName()) ;
@@ -185,6 +186,7 @@ class FileType extends AbstractType implements DataMapperInterface
         $entity = $parent->getData();
 
         $options["multiple"] = $this->formFactory->guessMultiple($form, $options);
+        $options["sortable"] = $this->formFactory->guessSortable($form, $options);
 
         $view->vars["lightbox"] = null;
         if(is_array($options["lightbox"])) {
@@ -311,7 +313,7 @@ class FileType extends AbstractType implements DataMapperInterface
 
             $view->vars["sortable"]  = json_encode($options["sortable"]);
             if($options["sortable"] && $options["sortable-js"])
-            $this->twig->addHtmlContent("javascripts:head", $options["sortable-js"]);
+                $this->twig->addHtmlContent("javascripts:head", $options["sortable-js"]);
         }
 
         $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-file.js");

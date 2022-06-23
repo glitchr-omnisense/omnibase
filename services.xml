@@ -394,9 +394,9 @@
 
         <service id="Base\Model\IconProvider\Adapter\FontAwesomeAdapter">
             <tag name="base.service.icon" />
-            <bind key="$metadata">%base.vendor.font_awesome.metadata%</bind>
-            <bind key="$javascript">%base.vendor.font_awesome.javascript%</bind>
-            <bind key="$stylesheet">%base.vendor.font_awesome.stylesheet%</bind>
+            <bind key="$metadata">%base.vendor.fontawesome.metadata%</bind>
+            <bind key="$javascript">%base.vendor.fontawesome.javascript%</bind>
+            <bind key="$stylesheet">%base.vendor.fontawesome.stylesheet%</bind>
         </service>
         <service id="Base\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
             <tag name="base.service.icon" />

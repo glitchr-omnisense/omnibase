@@ -470,6 +470,7 @@ class ClassMetadataManipulator
         return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
     }
 
+    public function isAlias(string $entityName, array|string $fieldPath): ?string { return $this->getFieldName($entityName, $fieldPath) != $fieldPath; }
     public function getFieldName(string $entityName, array|string $fieldPath): ?string { return $this->resolveFieldPath($entityName, $fieldPath); }
     public function resolveFieldPath($entityOrClassOrMetadata, array|string $fieldPath): ?string
     {

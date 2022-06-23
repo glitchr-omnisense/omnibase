@@ -190,18 +190,18 @@ class ImageService extends FileService implements ImageServiceInterface
             $localCache = array_pop_key("local_cache", $config);
             if(!is_string($localCache)) $localCache = $this->localCache;
 
-            if(!$this->filesystem->fileExists($pathCache, "local.cache")) {
+            if(!$this->filesystem->fileExists($pathCache, $localCache)) {
 
                 $filteredPath = $this->filter($path, $filters, $config) ?? $path;
                 if(!file_exists($filteredPath)) return $this->noImage;
 
-                $this->filesystem->mkdir(dirname($pathCache), "local.cache");
-                $this->filesystem->write($pathCache, file_get_contents($filteredPath), "local.cache");
+                $this->filesystem->mkdir(dirname($pathCache), $localCache);
+                $this->filesystem->write($pathCache, file_get_contents($filteredPath), $localCache);
 
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }
 
-            return $this->filesystem->prefixPath($pathCache, "local.cache");
+            return $this->filesystem->prefixPath($pathCache, $localCache);
         }
 
         //

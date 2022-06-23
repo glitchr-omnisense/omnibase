@@ -467,7 +467,7 @@ class Configuration implements ConfigurationInterface
                     ->end()
                 ->arrayNode('vendor')->addDefaultsIfNotSet()
                     ->children()
-                        ->arrayNode('font_awesome')->addDefaultsIfNotSet()
+                        ->arrayNode('fontawesome')->addDefaultsIfNotSet()
                             ->children()
                                 ->scalarNode('metadata')
                                     ->info('YAML metadata location')

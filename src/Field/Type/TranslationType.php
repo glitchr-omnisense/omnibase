@@ -11,6 +11,7 @@ use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use InvalidArgumentException;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -97,7 +98,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             $translationClass = $this->getTranslationClass($form);
             $translationFields = $this->getTranslationFields($translationClass, $options);
 
-            foreach ($locales as $key => $locale) {
+            foreach ($locales as $locale) {
 
                 if (!isset($translationFields[$locale]))
                     continue;
@@ -114,10 +115,41 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 if($options["single_locale"] && \count($dataLocale) == 1)
                     $defaultLocale = $locale = $dataLocale[0];
 
+                $options["locale"] = $locale;
+
                 if($locale == $defaultLocale || in_array($locale, $options['required_locales'], true))
                     $entityOptions["entry_required"] = true;
                 else if(!empty($options['required_locales'])) // /!\ Telling required locales explicitely makes all subfields optionals
                     $entityOptions["entry_required"] = in_array($locale, $options['required_locales'], true);
+
+                // Special case for required option (allowing to turn translation requirements depending on some options..)
+                foreach($entityOptions["fields"] as &$translationField) {
+
+                    if(array_key_exists("required", $translationField) && $translationField["required"] instanceof \Closure) {
+
+                        $reflFn = new \ReflectionFunction($translationField["required"]);
+
+                        if($reflFn->getNumberOfParameters() != 3 )
+                            throw new InvalidArgumentException("required-callable method is expecting 3 arguments: \"\$value\", \"\$locale\", \"\$options\"");
+
+                        $parameterRequired = $reflFn->getParameters()[0];
+                        if($parameterRequired->getType() != "bool")
+                            throw new InvalidArgumentException("\$value parameter in \"required\" closure must be a boolean");
+
+                        $parameterLocale   = $reflFn->getParameters()[1];
+                        if($parameterLocale->getType() != "string")
+                            throw new InvalidArgumentException("\$locale parameter in \"required\" closure must be a string");
+
+                        $parameterOptions  = $reflFn->getParameters()[2];
+                        if($parameterOptions->getType() != "array")
+                            throw new InvalidArgumentException("\$options parameter in \"required\" closure must be an array");
+
+                        if($reflFn->getReturnType() != "bool")
+                            throw new InvalidArgumentException("Return type of \"required\" closure must be a boolean");
+
+                        $translationField["required"] = $translationField["required"]($entityOptions["entry_required"] ?? false, $locale, $options);
+                    }
+                }
 
                 if($options["multiple"]) {
 

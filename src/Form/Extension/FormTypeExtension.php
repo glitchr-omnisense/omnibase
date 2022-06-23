@@ -63,8 +63,8 @@ class FormTypeExtension extends AbstractTypeExtension
         if($options["easyadmin"]) $this->applyEA($view, $form);
 
         if($this->baseService->isDebug()) {
-            $this->markAsDbColumns($view, $form, $options);
-            $this->markAsSortable($view, $form, $options);
+            $this->markDbProperties($view, $form, $options);
+            $this->markOptions($view, $form, $options);
         }
 
         foreach($view->children as $field => $childView) {
@@ -134,8 +134,37 @@ class FormTypeExtension extends AbstractTypeExtension
             }
         }
     }
-    public function markAsSortable(FormView $view, FormInterface $form, array $options) {
 
-        $view->vars["is_sortable"] = $this->formFactory->guessSortable($form, $options);
+    public function markDbProperties(FormView $view, FormInterface $form, array $options) {
+
+        $dataClass = $options["class"] ?? $form->getConfig()->getDataClass();
+        if($this->classMetadataManipulator->isEntity($dataClass)) {
+
+            $classMetadata = $this->classMetadataManipulator->getClassMetadata($dataClass);
+            foreach($view->children as $childView) // Alias is marked by default and remove if field found..
+                $childView->vars["is_alias"] = true;
+
+            foreach($classMetadata->getFieldNames() as $fieldName) {
+
+                $childView = $view->children[$fieldName] ?? null;
+                if($childView) $childView->vars["is_dbcolumn"] = true;
+
+                unset($childView->vars["is_alias"]);
+            }
+
+            foreach($classMetadata->getAssociationNames() as $fieldName) {
+
+                $childView = $view->children[$fieldName] ?? null;
+                if($childView) $childView->vars["is_dbcolumn"] = true;
+
+                unset($childView->vars["is_alias"]);
+            }
+        }
+    }
+
+    public function markOptions(FormView $view, FormInterface $form, array $options) {
+
+        if($this->formFactory->guessSortable($form, $options)) $view->vars["is_sortable"] = true;
+        if($this->formFactory->guessMultiple($form, $options)) $view->vars["is_multiple"] = true;
     }
 }

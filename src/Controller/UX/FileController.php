@@ -43,13 +43,18 @@ class FileController extends AbstractController
      */
     protected $imageCropRepository;
 
-    public function __construct(Filesystem $filesystem, ImageService $imageService, ImageCropRepository $imageCropRepository)
+    public function __construct(Filesystem $filesystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?bool $localCache = null)
     {
         $this->imageCropRepository = $imageCropRepository;
         $this->imageService = $imageService;
         $this->fileService  = cast($imageService, FileService::class);
         $this->filesystem   = $filesystem;
+
+        $this->localCache = $localCache;
     }
+
+    protected $localCache;
+
 
     /**
      * @Route("/contents/{hashid}", name="serve")
@@ -61,13 +66,22 @@ class FileController extends AbstractController
 
         $path     = $args["path"];
 
-        $contents = $this->filesystem->read($path, $args["local_cache"] ?? null);
+        $contents = $this->filesystem->read($path, $args["storage"] ?? null);
         if($contents === null) throw $this->createNotFoundException();
 
         $options = $args["options"];
         $options["attachment"] = $args["attachment"] ?? null;
 
         return $this->fileService->serveContents($contents, 200, $options);
+    }
+
+    /**
+     * @Route("/images/cacheless/{hashid}/image.webp", name="imageWebp_cacheless")
+     */
+    public function ImageWebpCacheless($hashid): Response
+    {
+        $this->localCache = false;
+        return $this->ImageWebp($hashid);
     }
 
     /**
@@ -88,8 +102,21 @@ class FileController extends AbstractController
         $options = $args["options"];
         $filters = $args["filters"];
 
-        $path = $this->imageService->filter($args["path"], new WebpFilter(null, $filters, $options), ["local_cache" => true]);
+        $localCache = array_pop_key("local_cache", $options);
+        $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
+
+        $path = $this->imageService->filter($args["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache]);
+
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+    }
+
+    /**
+     * @Route("/images/{hashid}/image.svg", name="imageSvg_cacheless")
+     */
+    public function ImageSvgCacheless($hashid): Response
+    {
+        $this->localCache = false;
+        return $this->ImageSvg($hashid);
     }
 
     /**
@@ -107,8 +134,21 @@ class FileController extends AbstractController
         if($mimeType != "image/svg+xml")
             return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
-        $path = $this->imageService->filter($args["path"], new SvgFilter(null, $filters, $options), ["local_cache" => true]);
+        $localCache = array_pop_key("local_cache", $options);
+        $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
+
+        $path = $this->imageService->filter($args["path"], new SvgFilter(null, $filters, $options), ["local_cache" => $localCache]);
         return $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
+    }
+
+    /**
+     * @Route("/images/cacheless/{hashid}", name="image_cacheless")
+     * @Route("/images/cacheless/{hashid}/image.{extension}", name="imageExtension_cacheless")
+     */
+    public function ImageCacheless($hashid, string $extension = null): Response
+    {
+        $this->localCache = false;
+        return $this->Image($hashid, $extension);
     }
 
     /**
@@ -128,12 +168,25 @@ class FileController extends AbstractController
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
-        if ($extension == null)
+        if ($extension == null || !in_array($extension, $extensions))
             return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
-        $path = $this->imageService->filter($args["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => true]);
+        $localCache = array_pop_key("local_cache", $options);
+        $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
+
+        $path = $this->imageService->filter($args["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
+
+    /**
+     * @Route("/images/cacheless/{identifier}/{hashid}", name="imageCrop_cacheless")
+     * @Route("/images/cacheless/{identifier}/{hashid}/image.{extension}", name="imageCropExtension_cacheless")
+     */
+   public function ImageCropCacheless($hashid, string $identifier, string $extension = null): Response
+   {
+       $this->localCache = false;
+       return $this->ImageCrop($hashid, $identifier, $extension);
+   }
 
     /**
      * @Route("/images/{identifier}/{hashid}", name="imageCrop")
@@ -148,11 +201,11 @@ class FileController extends AbstractController
 
         $filters = $args["filters"];
         $options = $args["options"];
-        $path = $args["path"];
+        $path    = $args["path"];
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
-        if ($extension == null)
+        if ($extension == null || !in_array($extension, $extensions))
             return $this->redirectToRoute("ux_imageCropExtension", ["hashid" => $hashid, "identifier" => $identifier, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
 
         //
@@ -205,7 +258,10 @@ class FileController extends AbstractController
             ));
         }
 
-        $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options));
-        return  $this->imageService->serve($path, 200, ["local_cache" => true, "http_cache" => $path !== null]);
+        $localCache = array_pop_key("local_cache", $options);
+        $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
+
+        $path = $this->imageService->filter($path, new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
+        return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 }

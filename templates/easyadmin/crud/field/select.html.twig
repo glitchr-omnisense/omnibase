@@ -6,7 +6,7 @@
 {% set showFirst    = field.customOptions.get('showFirst') %}
 {% set show         = field.customOptions.get('show') %}
 {% set iconAlign    = field.customOptions.get('iconAlign') %}
-<span>
+<span class="badges">
 {% if field.value is iterable %}
 
     {% if showFirst %}
@@ -32,7 +32,7 @@
             <span class="badge badge-secondary">
                 {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if showFirst == 1 %}
-                    {{formattedValue.text|striptags|default("-")}}  
+                    {{formattedValue.text|striptags|default("-")}}
                 {% elseif showFirst == 2 %}
                     <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text|striptags }}">{{ icon ? icon|raw : formattedValue.text|striptags|default("-") }}</div>
                 {% else %}
@@ -74,7 +74,7 @@
         {%- elseif not hasEntries -%}
             <span class="badge badge-secondary">0</span>
         {%- endif -%}
-        
+
     {% else %}
 
         {%- if not hasEntries -%}
@@ -92,7 +92,7 @@
             <span class="badge badge-secondary">
                 {% if fieldLink is not null %}<a href="{{fieldLink}}">{% endif %}
                 {% if show == 1 %}
-                    {{formattedValue.text|striptags|default("-")}}  
+                    {{formattedValue.text|striptags|default("-")}}
                 {% elseif show == 2 %}
                     <div data-toggle="tooltip" data-placement="top" title="{{ formattedValue.text|striptags }}">{{ icon ? icon|raw : formattedValue.text|striptags|default("-") }}</div>
                 {% else %}
@@ -125,7 +125,7 @@
     {% set hasEntries = field.formattedValue is not empty %}
 
     {% if showFirst %}
-    
+
         {%- if not hasEntries -%}
             <span class="badge badge-secondary">-</span>
         {% endif %}
@@ -162,7 +162,7 @@
         {%- elseif not hasEntries -%}
             <span class="badge badge-secondary">0</span>
         {%- endif -%}
-        
+
     {% else %}
 
         {%- if not hasEntries -%}

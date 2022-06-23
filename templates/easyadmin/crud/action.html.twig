@@ -10,15 +10,28 @@
     {% endif %}
 
     {% if linkUrl is not empty %}
-    <a class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
-       href="{{ linkUrl }}"
-       {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-        {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-        <span>
-            {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-            {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
-        </span>
-    </a>
+
+        {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+
+        {% set renderTooltip = action.htmlAttributes.tooltip ?? false %}
+        {% if renderTooltip %}
+            <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
+            {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
+                data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+                <span class="btn-label">
+                    <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
+                </span>
+            </a>
+        {% else %}
+            <a href="{{ linkUrl }}" class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
+            {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
+                <span>
+                    {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
+                </span>
+            </a>
+        {% endif %}
+
     {% endif %}
 
 {% elseif 'separator' == action.htmlElement %}
@@ -80,30 +93,24 @@
         </span>
 
     {% else %}
-        <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
-        data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
-            <span class="btn-label">
-                <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
-            </span>
-        </button>
-    {% endif %}
 
-{% elseif 'tooltip' == action.htmlElement %}
-
-    {% set linkUrl = action.linkUrl %}
-    {% if action.crudActionName == "index" and action.type == "entity" %}
-        {% set linkUrl = app.request.get("referrer") ?? linkUrl %}
-    {% endif %}
-
-    {% if linkUrl is not empty %}
-        {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-        <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
-        {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
+        {% set renderTooltip = action.htmlAttributes.tooltip ?? false %}
+        {% if renderTooltip %}
+            <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
             data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
-            <span class="btn-label">
-                <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
-            </span>
-        </a>
+                <span class="btn-label">
+                    <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
+                </span>
+            </button>
+        {% else %}
+            <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                <span class="btn-label">
+                    {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
+                    {%- if action.label is not empty -%}<span class="action-label">{{ action.label|trans|raw }}</span>{%- endif -%}
+                </span>
+            </button>
+        {% endif %}
+
     {% endif %}
 
 {% elseif 'discriminator' == action.htmlElement %}

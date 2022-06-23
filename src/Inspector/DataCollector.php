@@ -193,7 +193,7 @@ class DataCollector extends AbstractDataCollector
                 'Twig Autoappending' => $this->parameterBag->get("base.twig.autoappend"),
                 'Form2 Override' => $this->parameterBag->get("base.twig.use_form2"),
                 'Bootstrap Support' => $this->parameterBag->get("base.twig.use_bootstrap"),
-                'Font Awesome icons' => $this->parameterBag->get("base.vendor.font_awesome.metadata"),
+                'Font Awesome icons' => $this->parameterBag->get("base.vendor.fontawesome.metadata"),
             ];
 
         return $data;

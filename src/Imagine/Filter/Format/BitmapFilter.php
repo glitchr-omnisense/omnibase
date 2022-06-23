@@ -6,6 +6,7 @@ use Base\Imagine\FilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
+use Imagine\Image\Palette\RGB;
 
 class BitmapFilter implements BitmapFilterInterface
 {
@@ -30,6 +31,7 @@ class BitmapFilter implements BitmapFilterInterface
         $this->options  = $options;
 
         $this->mimeTypes = new MimeTypes();
+        $this->palette = new RGB();
     }
 
     public function getFilters() { return $this->filters; }
@@ -60,6 +62,9 @@ class BitmapFilter implements BitmapFilterInterface
     public function apply(ImageInterface $image): ImageInterface
     {
         $mimeType = mime_content_type2($image->metadata()->get("filepath"));
+        $image
+            ->usePalette($this->palette)
+            ->strip();
 
         $extension = $this->getExtension() ?? $this->mimeTypes->getExtensions($mimeType)[0] ?? null;
         pathinfo_extension($this->path, $extension);
