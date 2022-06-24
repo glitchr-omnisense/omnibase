@@ -924,6 +924,8 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="ea_extension" />
+            <argument type="service" id="setting_bag" />
+            <argument type="service" id="router" />
             <argument type="service" id="translator" />
         </service>
 

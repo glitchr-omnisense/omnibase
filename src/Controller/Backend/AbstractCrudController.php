@@ -6,7 +6,9 @@ use Base\Backend\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Model\IconizeInterface;
+use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
+use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\QueryBuilder;
@@ -42,6 +44,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         EntityManagerInterface $entityManager,
         RequestStack $requestStack,
         Extension $extension,
+        SettingBagInterface $settingBag,
+        RouterInterface $router,
         TranslatorInterface $translator)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -52,6 +56,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $this->extension = $extension;
         $this->translator = $translator;
         $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->settingBag = $settingBag;
+        $this->router = $router;
 
         $this->crud = null;
     }

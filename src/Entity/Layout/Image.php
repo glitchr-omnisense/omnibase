@@ -47,7 +47,7 @@ class Image implements IconizeInterface
 
         $routeName = $identifier ? "ux_imageCrop" : "ux_image" ;
         $routeParameters = array_merge($routeParameters, [
-            "identifier" => $identifier,
+            "identifier" => is_array($identifier) ? implode(":", $identifier) : $identifier,
             "hashid" => $this->getImageService()->obfuscate($this->getSource(), [], $filters),
         ]);
 

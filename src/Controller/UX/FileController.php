@@ -228,7 +228,7 @@ class FileController extends AbstractController
         }
 
         // Providing a "width:height" information
-        if($imageCrop === null && preg_match("/([0-9]*):([0-9]*)/", $identifier, $matches)) {
+        if($imageCrop === null && preg_match("/([0-9]*)[:x]([0-9]*)/", $identifier, $matches)) {
 
             $width   = $matches[1];
             $width0  = $width/$naturalWidth;
