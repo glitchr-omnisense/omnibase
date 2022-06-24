@@ -29,7 +29,7 @@
         <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
             <i class="fas fa-external-link-square-alt"></i>
         </a>{% endif %}
-
+        {{- form_help(form) -}}
     {% else %}
         <label>&nbsp;</label>
     {% endif %}
@@ -61,7 +61,7 @@
     {# {%- set attr = attr|merge({'class': 'form-control' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%} #}
     {# {%- set row_attr = row_attr|merge({'class': 'form-group' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%} #}
     <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
-        <span>{{- form_label(form) -}}{{- form_help(form) -}}</span>
+        <span>{{- form_label(form) -}}</span>
 
         {% set _form_error = form_errors(form, {row_attr:{}}) %}
         {% if _form_error is not empty %}

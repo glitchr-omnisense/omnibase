@@ -19,6 +19,7 @@ use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 class ImageService extends FileService implements ImageServiceInterface
@@ -256,8 +257,12 @@ class ImageService extends FileService implements ImageServiceInterface
             if(!$this->filesystem->fileExists($pathCache, $localCache)) {
 
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
-                if(!file_exists($filteredPath)) return $this->noImage;
+                if(!file_exists($filteredPath)) {
 
+                    // TODO Perhaps use an option in base.yaml to display "noimage" or exception..
+                    //if($this->router->isDebug()) throw new NotFoundHttpException("Image \"$filteredPath\" not found.");
+                    return $this->noImage;
+                }
                 $this->filesystem->mkdir(dirname($pathCache), $localCache);
                 $this->filesystem->write($pathCache, file_get_contents($filteredPath), $localCache);
 

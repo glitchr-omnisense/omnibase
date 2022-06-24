@@ -110,7 +110,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         $data = $ordering->getEntityData();
         $orderedIndexes = $data[$property] ?? [];
 
-        $nEntries = count($entityValue);
+        $nEntries = $entityValue instanceof Collection ? $entityValue->count() : count($entityValue ?? []);
         while(count($orderedIndexes) < $nEntries)
             $orderedIndexes[] = count($orderedIndexes);
 

@@ -2,6 +2,7 @@
 
 namespace Base\Form\Extension;
 
+use App\Enum\UserRole;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
@@ -62,7 +63,7 @@ class FormTypeExtension extends AbstractTypeExtension
         if($options["form2"]) $this->applyForm2($view);
         if($options["easyadmin"]) $this->applyEA($view, $form);
 
-        if($this->baseService->isDebug()) {
+        if($this->baseService->isDebug() && $this->baseService->isGranted(UserRole::ADMIN) && $this->baseService->getRouter()->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
         }
