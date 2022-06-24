@@ -70,10 +70,14 @@ class Uploader extends AbstractAnnotation
 
     protected function getContents(): string { return file_get_contents($this->file["tmp_name"]); }
     protected function getConfig(): array { return $this->config; }
-
     public function getStorage() { return $this->storage; }
     public function getFormats() { return $this->formats; }
 
+    public function storage() { return $this->storage; }
+    public function formats() { return $this->formats; }
+    public function mimeTypes() { return $this->mimeTypes; }
+
+    public function isImage() { return !empty(array_filter($this->mimeTypes, fn($type) => str_starts_with($type, "image/"))); }
     public function getPool() { return $this->pool; }
     public function getMissable() { return $this->missable; }
 

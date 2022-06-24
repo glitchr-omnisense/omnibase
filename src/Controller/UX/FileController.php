@@ -15,8 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
-use Exception;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /** @Route("", name="ux_") */
 class FileController extends AbstractController
@@ -89,15 +87,14 @@ class FileController extends AbstractController
      */
     public function ImageWebp($hashid): Response
     {
-        if(!$this->imageService->isWebpEnabled())
-            return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
-
         $args = $this->imageService->resolve($hashid);
         if(!$args) throw $this->createNotFoundException();
 
+        $webp = $args["webp"] ?? $this->imageService->isWebpEnabled();
+        if(!$webp) return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+
         $mimeType = $args["mimetype"] ?? $this->imageService->getMimeType($args["path"]);
-        if($mimeType == "image/svg+xml")
-            return $this->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if($mimeType == "image/svg+xml") return $this->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $options = $args["options"];
         $filters = $args["filters"];
@@ -106,7 +103,6 @@ class FileController extends AbstractController
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
 
         $path = $this->imageService->filter($args["path"], new WebpFilter(null, $filters, $options), ["local_cache" => $localCache]);
-
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 

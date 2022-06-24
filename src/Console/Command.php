@@ -12,6 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Console\Output\ConsoleOutputInterface;
 
 class Command extends SymfonyCommand
@@ -23,6 +24,7 @@ class Command extends SymfonyCommand
         $this->entityManager  = $entityManager;
         $this->parameterBag   = $parameterBag;
 
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
         parent::__construct();
     }
 

@@ -49,7 +49,12 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function webp   (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate("ux_imageWebp", [], $path, array_merge($config, ["filters" => $filters])); }
     public function image  (array|string|null $path, array $filters = [], array $config = []): array|string|null { return $this->generate("ux_image"    , [], $path, array_merge($config, ["filters" => $filters])); }
-    public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null { return browser_supports_webp() ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config); }
+    public function imagine(array|string|null $path, array $filters = [], array $config = []): array|string|null
+    {
+        $supports_webp = array_pop_key("webp", $config) ?? browser_supports_webp();
+        return $supports_webp ? $this->webp($path, $filters, $config) : $this->image($path, $filters, $config);
+    }
+
     public function imagify(null|array|string $path, array $attributes = []): ?string
     {
         if(!$path) return $path;
@@ -138,14 +143,14 @@ class ImageService extends FileService implements ImageServiceInterface
         return parent::serve($file, $status, $headers);
     }
 
-    public function filter(?string $path, FilterInterface|array $filters = [], array $config = []): ?string
+    public function isCached(?string $path, FilterInterface|array $filters = [], array $config = []): bool
     {
         if(!is_array($filters)) $filters = [$filters];
 
         //
         // Resolve nested paths
         $args    = $this->resolve($path, $filters);
-        $path    = $args["path"]; // Cache directory location
+        $path    = $args["path"] ?? $path; // Cache directory location
         $filters = $args["filters"];
 
         //
@@ -185,14 +190,72 @@ class ImageService extends FileService implements ImageServiceInterface
 
         //
         // Compute a response.. (if cache not found)
-        if ($config["local_cache"] ?? false) {
+        if ($config["local_cache"] ?? true) {
+
+            $localCache = array_pop_key("local_cache", $config);
+            if(!is_string($localCache)) $localCache = $this->localCache;
+
+            return $this->filesystem->fileExists($pathCache, $localCache);
+        }
+
+        return false;
+    }
+
+    public function filter(?string $path, FilterInterface|array $filters = [], array $config = []): ?string
+    {
+        if(!is_array($filters)) $filters = [$filters];
+
+        //
+        // Resolve nested paths
+        $args    = $this->resolve($path, $filters);
+        $path    = $args["path"] ?? $path; // Cache directory location
+        $filters = $args["filters"];
+
+        //
+        // Apply image resolution limitation
+        if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
+            throw new Exception("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+
+        //
+        // Extract last filter
+        $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
+        $formatter = end($filters);
+        if($formatter === null)
+            throw new Exception("Last filter is missing.");
+
+        //
+        // Apply size limitation to bitmap only
+        if(class_implements_interface($formatter, BitmapFilterInterface::class)) {
+
+            $definitionFilters = array_filter($formatter->getFilters(), fn($f) => $f instanceof ThumbnailFilter);
+            if(empty($definitionFilters))
+                $formatter->addFilter(new $this->maxResolution);
+
+            if(!class_implements_interface($formatter, FormatFilterInterface::class))
+                throw new \Exception("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+        }
+
+        $filtersButLast = array_slice($filters, 0, count($filters)-1);
+        foreach($filtersButLast as $filter) {
+
+            if(class_implements_interface($filter, FormatFilterInterface::class))
+                throw new \Exception("Only last filter must implement \"".FormatFilterInterface::class."\"");
+        }
+
+        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $config["storage"] ?? null);
+        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        $pathCache = path_suffix($pathRelative, $pathSuffixes);
+
+        //
+        // Compute a response.. (if cache not found)
+        if ($config["local_cache"] ?? true) {
 
             $localCache = array_pop_key("local_cache", $config);
             if(!is_string($localCache)) $localCache = $this->localCache;
 
             if(!$this->filesystem->fileExists($pathCache, $localCache)) {
 
-                $filteredPath = $this->filter($path, $filters, $config) ?? $path;
+                $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
                 if(!file_exists($filteredPath)) return $this->noImage;
 
                 $this->filesystem->mkdir(dirname($pathCache), $localCache);

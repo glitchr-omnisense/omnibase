@@ -129,7 +129,6 @@
         <service id="Base\Cache\ImageWarmer"       public="true"><tag name="kernel.cache_warmer" /></service>
         <service id="Base\Cache\LocaleWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
         <service id="Base\Cache\SpreadsheetWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
-        <service id="Base\Cache\UploadWarmer"      public="true" ><tag name="kernel.cache_warmer" /></service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
@@ -206,10 +205,12 @@
 
         <service id="Base\Console\Command\UserLogCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\UserNotificationCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
-        <service id="Base\Console\Command\UploaderImagesCommand" parent="Base\Console\Command\UploaderEntitiesCommand"><tag name="console.command" /></service>
-        <service id="Base\Console\Command\UploaderEntitiesCommand" parent="Base\Console\Command">
+        <service id="Base\Console\Command\UploaderEntitiesCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
+        <service id="Base\Console\Command\UploaderImagesCropCommand" parent="Base\Console\Command\UploaderImagesCommand"><tag name="console.command" /></service>
+        <service id="Base\Console\Command\UploaderImagesCommand" parent="Base\Console\Command\UploaderEntitiesCommand">
             <tag name="console.command" />
-            <argument type="service" id="Base\Cache\UploadWarmer" />
+            <argument type="service" id="base.service.image" />
+            <argument type="service" id="Base\Controller\UX\FileController" />
         </service>
 
         <service id="Base\Console\Command\TranslationControllersCommand" parent="Base\Console\Command"><tag name="console.command" /></service>

@@ -871,6 +871,12 @@ namespace {
         return str_replace("/", "\\", basename(str_replace('\\', '/', $class)));
     }
 
+    function basenameWithoutExtension(string $path): string
+    {
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        return basename($path, $ext ? ".".$ext : "");
+    }
+
     function class_namespace(array|object|string|null $arrayOrObjectOrClass) { return class_dirname($arrayOrObjectOrClass); }
     function class_dirname(array|object|string|null $arrayOrObjectOrClass)
     {
@@ -1027,7 +1033,7 @@ namespace {
 
     function browser_supports_webp(): bool
     {
-        if(strpos( $_SERVER['HTTP_ACCEPT'] ?? [], 'image/webp' ) !== false)
+        if(strpos( $_SERVER['HTTP_ACCEPT'] ?? "", 'image/webp' ) !== false)
             return true;
 
         if(browser_name() == "Safari" && version_compare("14.0", browser_version()) < 0)
