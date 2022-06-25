@@ -70,6 +70,11 @@ class BaseBundle extends Bundle
         $entityManager->getFilters()->enable("vault_filter");
     }
 
+    public function getProjectDir()
+    {
+        return $this->container->get('kernel')->getProjectDir()."/src/";
+    }
+
     public function defineDoctrineTypes()
     {
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
@@ -78,8 +83,7 @@ class BaseBundle extends Bundle
             $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
         } catch(Exception $e) { dump($e);}
 
-        $projectDir = $this->container->get('kernel')->getProjectDir()."/src/";
-        $classList = BaseBundle::getAllClasses($projectDir . "./Enum");
+        $classList = BaseBundle::getAllClasses($this->getProjectDir() . "./Enum");
         $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
 
         /* Register enum types: priority to App namespace */

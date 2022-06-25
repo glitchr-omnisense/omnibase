@@ -4,6 +4,7 @@ namespace Base\Imagine\Filter\Basic;
 
 use Base\Imagine\FilterInterface;
 use Imagine\Image\Box;
+use Imagine\Image\BoxInterface;
 use Imagine\Image\ImageInterface;
 
 class ThumbnailFilter implements FilterInterface
@@ -27,5 +28,58 @@ class ThumbnailFilter implements FilterInterface
         if($this->width  === null) $this->width  = $ratio*($this->height ?? $height);
 
         return $image->thumbnail(new Box($this->width, $this->height), $this->mode, $this->filter);
+    }
+
+    public function getWidth() { return $this->width; }
+    public function getHeight() { return $this->height; }
+    public function getMode() { return $this->mode; }
+
+    public function resize(BoxInterface $imageSize)
+    {
+        $mode = $this->mode & 0xffff;
+
+        $allowUpscale = (bool) ($mode & ImageInterface::THUMBNAIL_FLAG_UPSCALE);
+        $size = new Box($this->width, $this->height);
+
+        if ($size->getWidth() === $imageSize->getWidth() && $size->getHeight() === $imageSize->getHeight()) {
+            // The thumbnail size is the same as the wanted size.
+            return $size;
+        }
+        if (!$allowUpscale && $size->contains($imageSize)) {
+            // Thumbnail is smaller than the image and we are not upscaling
+            return $size;
+        }
+
+        $ratios = array(
+            $size->getWidth() / $imageSize->getWidth(),
+            $size->getHeight() / $imageSize->getHeight(),
+        );
+
+        switch ($mode) {
+
+            case ImageInterface::THUMBNAIL_OUTBOUND:
+                // Crop the image so that it fits the wanted size
+                $ratio = max($ratios);
+                if ($imageSize->contains($size)) {
+                    // Downscale the image
+                   return $size;
+                }
+
+                if ($allowUpscale) {
+                    // Upscale the image so that the max dimension will be the wanted one
+                    $imageSize = $imageSize->scale($ratio);
+                }
+
+                return new Box(
+                    min($imageSize->getWidth(), $size->getWidth()),
+                    min($imageSize->getHeight(), $size->getHeight())
+                );
+
+            case ImageInterface::THUMBNAIL_INSET:
+            default:
+
+                $ratio = min($ratios);
+                return $imageSize->scale($ratio);
+        }
     }
 }

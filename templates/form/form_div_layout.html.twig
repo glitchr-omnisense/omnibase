@@ -549,6 +549,11 @@
 
 {%- block association_row -%}
 
+    {% set hiddenOnly = true %}
+    {% for formChild in form.children %}
+        {% set hiddenOnly = not hiddenOnly ? hiddenOnly : ("hidden" in formChild.vars.block_prefixes) %}
+    {% endfor %}
+
     {% if form.parent.parent is null and multiple %}
 
         {% if form.children is iterable %}
@@ -591,6 +596,7 @@
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
         {%- set attr = attr|merge({'class': 'form-group form-entity' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+        {%- set attr = attr|merge({'class': (hiddenOnly ? "hidden" : "") ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
 
         {% if group %}
             {{ form_widget(form, {attr: attr}) }}

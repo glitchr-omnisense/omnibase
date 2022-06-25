@@ -33,5 +33,5 @@ action:
   create_and_continue: 'Créer et continuer'
   save: 'Enregistrer'
   save_and_continue: 'Enregistrer et continuer'
-  goto_next: "%entity_label_singular% suivant"
-  goto_prev: "%entity_label_singular% précédent"
+  goto_next: "Suivant"
+  goto_prev: "Précédent"

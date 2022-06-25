@@ -36,6 +36,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
 
+        $this->timeout           = $parameterBag->get("base.images.timeout");
         $this->notFoundException = $parameterBag->get("base.images.not_found");
         $this->maxResolution     = $parameterBag->get("base.images.max_resolution");
         $this->maxQuality        = $parameterBag->get("base.images.max_quality");
@@ -257,6 +258,8 @@ class ImageService extends FileService implements ImageServiceInterface
 
             if(!$this->filesystem->fileExists($pathCache, $localCache)) {
 
+                set_time_limit($this->timeout);
+
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
                 if(!file_exists($filteredPath)) {
 
@@ -268,6 +271,8 @@ class ImageService extends FileService implements ImageServiceInterface
 
                 $this->filesystem->mkdir(dirname($pathCache), $localCache);
                 $this->filesystem->write($pathCache, file_get_contents($filteredPath), $localCache);
+
+                set_time_limit(30);
 
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }

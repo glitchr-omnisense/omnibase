@@ -3,6 +3,10 @@
 namespace Base\Controller\UX;
 
 use Base\Imagine\Filter\Basic\CropFilter;
+use Base\Imagine\Filter\Basic\Definition\HighDefinitionFilter;
+use Base\Imagine\Filter\Basic\Definition\QuadHighDefinitionFilter;
+use Base\Imagine\Filter\Basic\Definition\StandardDefinitionFilter;
+use Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\Format\WebpFilter;
@@ -15,6 +19,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
+use Imagine\Filter\Basic\Thumbnail;
+use Imagine\Image\Box;
 
 /** @Route("", name="ux_") */
 class FileController extends AbstractController

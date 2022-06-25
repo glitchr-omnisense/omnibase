@@ -200,6 +200,18 @@ trait SettingBagTrait
         return $this->settingBag[$path.":".$locale];
     }
 
+    public function clearAll() { return $this->clear(null); }
+    public function clear(null|string|array $path, ?string $locale = null)
+    {
+        if(is_array($paths = $path))
+            return $this->clear($path, $locale);
+
+        if($path) array_pop_key($path.":".$locale, $this->settingBag);
+        else $this->settingBag = [];
+
+        if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+    }
+
     public function set(string $path, $value, ?string $locale = null)
     {
         $setting = $this->generateRaw($path, $locale);

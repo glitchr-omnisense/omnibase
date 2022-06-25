@@ -182,8 +182,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $session = $this->requestStack->getSession();
         if (!$session->get("_integrity/doctrine")) return false;
 
-        $checksum = $this->getDoctrineChecksum();
-        return $checksum == $session->get("_integrity/doctrine");
+        return $this->getDoctrineChecksum() == $session->get("_integrity/doctrine");
     }
 
     public function checkSecretIntegrity()

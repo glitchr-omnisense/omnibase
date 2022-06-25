@@ -4,31 +4,54 @@ namespace Base\Console\Command;
 
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\AnnotationReader;
+use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Entity\Layout\Image;
 use Base\Entity\Layout\ImageCrop;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
+use Imagine\Image\Box;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\Console\Question\Question;
 
 #[AsCommand(name:'uploader:images:crop', aliases:[], description:'')]
 class UploaderImagesCropCommand extends UploaderImagesCommand
 {
     protected $input;
     protected $output;
-
+    protected $maxDefinition;
     protected function configure(): void
     {
         $this->addOption('normalize', false, InputOption::VALUE_NONE, 'Do you want to update coordinate system ?');
+        $this->addOption('max-definition', false, InputOption::VALUE_NONE, 'Which max definition to use ?');
         parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->normalize   ??= $input->getOption('normalize');
+        $this->normalize     ??= $input->getOption('normalize');
+
+        $this->maxDefinition ??= $input->getOption('max-definition');
+        if($this->normalize) {
+
+            if($this->maxDefinition == null) {
+
+                $helper = $this->getHelper('question');
+                $definitions = BaseBundle::getAllClasses(BaseBundle::getBundleLocation()."/Imagine/Filter/Basic/Definition");
+                $question = new ChoiceQuestion('Please select a resolution class to be used for renormalization.', $definitions, false);
+
+                $definition = $helper->ask($input, $output, $question);
+                if($definition == null) return Command::FAILURE;
+
+                $this->maxDefinition = new $definition();
+            }
+        }
+
         $this->entityName  ??= str_strip($input->getOption('entity') ?? Image::class, ["App\\Entity\\", "Base\\Entity\\"]);
         $this->appEntities ??= "App\\Entity\\".$this->entityName;
         if(!is_instanceof($this->appEntities, Image::class)) {
@@ -57,10 +80,19 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
             $output->section()->writeln("\n <info>Looking for \"".ImageCrop::class."\"</info> to normalize..");
 
             $imageCrops = $this->imageCropRepository->findAll();
+            $nNormalizable = 0;
+            foreach($imageCrops as $imageCrop)
+                if(!$imageCrop->isNormalized()) $nNormalizable++;
 
             $iProcess = 0;
             $iProcessAndNormalized = 0;
             $nTotalCrops = count($imageCrops);
+
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(' You are about to normalize '.$nNormalizable.' element(s) using '.class_basename(get_class($this->maxDefinition)).', do you want to continue? [y/n] ', false);
+            if (!$helper->ask($input, $output, $question))
+                return Command::FAILURE;
+
 
             foreach($imageCrops as $imageCrop) {
 
@@ -70,6 +102,12 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
                     $naturalWidth  = $imageCrop->getNaturalWidth();
                     $naturalHeight = $imageCrop->getNaturalHeight();
+
+                    $box = new Box($imageCrop->getNaturalWidth(), $imageCrop->getNaturalHeight());
+                    $box = $this->maxDefinition->resize($box);
+
+                    $naturalWidth = $box->getWidth();
+                    $naturalHeight = $box->getHeight();
 
                     $x = $imageCrop->getX();
                     $imageCrop->setX0($x/$naturalWidth);
@@ -86,13 +124,14 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
                 $iProcess++;
             }
-
             if($iProcessAndNormalized) {
 
+                $output->section()->writeln("");
                 $msg = ' [OK] Nothing to update - image crops are already in sync & normalized. ';
                 $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
                 $output->writeln($msg);
                 $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+                $output->section()->writeln("");
 
             } else {
 
