@@ -697,7 +697,7 @@
                 <h2 class="accordion-header">
 
                     {# `is_empty` is used because some internal keys are marked by a starting "_" #}
-                    {% set is_empty = empty(form.children|keys|filter((v, k) => str_starts_with(k, '_') )) %}
+                    {% set is_empty = empty(form.children|keys|filter((v, k) => not str_starts_with(k, '_') )) %}
 
                     {% set _href    =  href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
                     {% set linkable = _href is not null and form.vars.value is not null and is_empty %}
