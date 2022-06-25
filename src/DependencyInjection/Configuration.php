@@ -257,7 +257,7 @@ class Configuration implements ConfigurationInterface
                             ->defaultValue(1)
                             ->end()
                         ->scalarNode('timeout')
-                            ->defaultValue(1)
+                            ->defaultValue(60)
                             ->end()
                         ->scalarNode('enable_webp')
                             ->defaultValue(true)
