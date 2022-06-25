@@ -71,7 +71,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_PREV, t('action.goto_prev', domain: 'EasyAdminBundle'))
                 ->setCssClass('action-'.Action::GOTO_PREV)
                 ->addCssClass('btn btn-secondary action-save')
-                ->displayAsButton()
+                ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
@@ -85,7 +85,7 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
             return Action::new(Action::GOTO_NEXT, t('action.goto_next', domain: 'EasyAdminBundle'))
                 ->setCssClass('action-'.Action::GOTO_NEXT)
                 ->addCssClass('btn btn-secondary action-save')
-                ->displayAsButton()
+                ->displayAsLink()
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 

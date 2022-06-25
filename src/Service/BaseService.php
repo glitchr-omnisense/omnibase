@@ -410,7 +410,6 @@ class BaseService implements RuntimeExtensionInterface
         if (!isset($this->authorizationChecker))
             throw new Exception("No authorization checker found in BaseService. Did you overloaded self::__construct ?");
 
-        if ($this->getToken() === null) return false;
         return $this->authorizationChecker->isGranted($attribute, $subject);
     }
 

@@ -26,6 +26,14 @@ class Referrer implements ReferrerInterface
         return $this;
     }
 
+    public function sameSite() : bool
+    {
+        $currentHost = parse_url2(get_url())["host"] ?? null;
+        $targetHost  = parse_url2($this->getUrl())["host"] ?? $currentHost ?? null;
+
+        return $currentHost == $targetHost;
+    }
+
     public function getUrl() : ?string
     {
         $request = $this->requestStack->getMainRequest();

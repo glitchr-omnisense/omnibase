@@ -119,7 +119,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             LoginFormAuthenticator::LOGOUT_ROUTE,
             LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE,
             LoginFormAuthenticator::LOGIN_ROUTE,
-            RescueFormAuthenticator::RESCUE_ROUTE]
+            RescueFormAuthenticator::LOGIN_ROUTE]
         );
 
         $session->set('_target_path', $currentRoute == $targetRoute || $currentRouteIsLoginForm ? $targetPath : null);
@@ -128,7 +128,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             LoginFormAuthenticator::LOGOUT_ROUTE,
             LoginFormAuthenticator::LOGOUT_REQUEST_ROUTE,
             LoginFormAuthenticator::LOGIN_ROUTE,
-            RescueFormAuthenticator::RESCUE_ROUTE]
+            RescueFormAuthenticator::LOGIN_ROUTE]
         );
 
         if ($targetPath && !$targetRouteIsLoginForm)
@@ -188,7 +188,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND"))
                 if(!$isSecurityRoute) throw new NotFoundHttpException();
 
-            // Nonetheless exception access is alway possible
+            // Nonetheless exception access is always possible
             if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))
                 return;
 
@@ -198,7 +198,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             if($currentRouteName != $accessDeniedRedirection) {
 
                 $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;
-                $response ??= $this->baseService->redirect(RescueFormAuthenticator::RESCUE_ROUTE);
+                $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 $event->setResponse($response);
                 return $event->stopPropagation();

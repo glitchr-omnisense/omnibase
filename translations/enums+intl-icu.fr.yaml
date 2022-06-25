@@ -9,23 +9,23 @@ entity_action:
     singular: "suppression"
     plural: "suppressions"
 
-user_role: 
+user_role:
   singular: "générique"
   plural: "génériques"
 
-  role_superadmin: 
+  role_superadmin:
     singular: "super administrateur"
     plural: "super administrateurs"
 
-  role_admin: 
+  role_admin:
     singular: "administrateur"
     plural: "administrateurs"
 
-  role_user: 
+  role_user:
     singular: "utilisateur"
     plural: "utilisateurs"
 
-  role_social: 
+  role_social:
     singular: "réseau social"
     plural: "réseaux sociaux"
 
@@ -49,56 +49,56 @@ thread_state:
   singular: "statut"
   plural: "statut"
 
-  state_draft: 
+  state_draft:
     singular: "brouillon"
     plural: "brouillons"
-  state_future: 
+  state_future:
     singular: "planifié"
     plural: "planifiés"
-  state_publish: 
+  state_publish:
     singular: "publié"
     plural: "publiés"
-  state_publish_secret: 
+  state_publish_secret:
     singular: "invisible"
     plural: "invisibles"
-  state_publish_archive: 
+  state_publish_archive:
     singular: "archivé"
     plural: "archivés"
-  state_publish_password: 
+  state_publish_password:
     singular: "protégé"
     plural: "protégés"
 
 thread_workflow:
-  workflow_approved: 
+  workflow_approved:
     singular: "approuvé"
     plural: "approuvés"
-  workflow_pending: 
+  workflow_pending:
     singular: "en attente"
     plural: "en attente"
-  workflow_rejected: 
+  workflow_rejected:
     singular: "refusé"
     plural: "refusés"
-  workflow_suspended: 
+  workflow_suspended:
     singular: "suspendu"
     plural: "suspendus"
-  workflow_deleted: 
+  workflow_deleted:
     singular: "supprimé"
     plural: "supprimés"
-    
+
 spam_score:
   singular: "score"
   plural: "scores"
 
-  no_text: 
+  no_text:
     singular: "texte manquant"
     plural: "textes manquants"
-  not_spam: 
+  not_spam:
     singular: "texte validé"
     plural: "textes validés"
-  maybe_spam: 
+  maybe_spam:
     singular: "spam potentiel"
     plural: "spam potentiels"
-  blatant_spam: 
+  blatant_spam:
     singular: "spam détecté"
     plural: "spam détectés"
 
@@ -106,13 +106,13 @@ gender:
   singular: "genre"
   plural: "genres"
 
-  male: 
+  male:
     singular: "homme"
     plural: "hommes"
-  female: 
+  female:
     singular: "femme"
     plural: "femme"
-  hybrid: 
+  hybrid:
     singular: "hybride"
     plural: "hybrides"
   genderless:
@@ -123,13 +123,13 @@ log_level:
   singular: "degré"
   plural: "degrés"
 
-  info: 
+  info:
     singular: "info"
     plural: "infos"
-  debug: 
+  debug:
     singular: "debug"
     plural: "debug"
-  warning: 
+  warning:
     singular: "danger"
     plural: "dangers"
   critical:
@@ -140,13 +140,16 @@ spam_api:
   singular: "spam"
   plural: "spams"
 
-  akismet: 
+  akismet:
     singular: "akismet"
     plural: "akismet"
 
 quadrant:
   singular: "cadran cardinal"
   plural: "cadrans cardinaux"
+  origin:
+    singular: centre
+    plural: quadrant.east.singular
   east:
     singular: est
     plural: quadrant.east.singular

@@ -56,15 +56,16 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     public static function isSecurityRoute(Request|string $routeNameOrRequest)
     {
         return in_array(is_string($routeNameOrRequest) ? $routeNameOrRequest : $routeNameOrRequest->attributes->get('_route'), [
-            self::LOGIN_ROUTE,
-            self::LOGOUT_ROUTE,
-            self::LOGOUT_REQUEST_ROUTE
+            static::LOGIN_ROUTE,
+            static::LOGOUT_ROUTE,
+            static::LOGOUT_REQUEST_ROUTE
         ]);
     }
 
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
-        return new RedirectResponse($this->router->generate(static::LOGIN_ROUTE));
+        $route = $this->authorizationChecker->isGranted("EXCEPTION_ACCESS") ? RescueFormAuthenticator::LOGIN_ROUTE : static::LOGIN_ROUTE;
+        return new RedirectResponse($this->router->generate($route));
     }
 
     public function supports(Request $request): ?bool
@@ -117,8 +118,9 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
         $targetName = $this->router->getRouteName($targetPath);
         $request->getSession()->remove("_target_path");
 
-        if ($targetPath && !static::isSecurityRoute($targetName) && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath))
-             return $this->router->redirect($targetPath);
+        if ($targetPath->getUrl() && $targetPath->sameSite() && !static::isSecurityRoute($targetName) && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS", $targetPath)) {
+            return $this->router->redirect($targetPath);
+        }
 
         return $this->router->redirectToRoute($this->router->getRouteName("/"));
     }

@@ -102,7 +102,7 @@ class IntegritySubscriber implements EventSubscriberInterface
 
             $response->sendHeaders();
 
-            $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::RESCUE_ROUTE, [], 302);
+            $response = $this->baseService->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE, [], 302);
             $event->setResponse($response);
             $event->stopPropagation();
         }
