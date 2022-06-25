@@ -262,7 +262,7 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('no_image')
                             ->defaultValue("%kernel.project_dir%/public/bundles/base/image.svg")
                             ->end()
-                        ->booleanNode('notfound_exception')
+                        ->booleanNode('not_found')
                             ->defaultValue(false)
                             ->end()
                         ->scalarNode('warmup')

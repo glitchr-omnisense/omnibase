@@ -683,7 +683,7 @@
 
     {% if group %}
 
-        {% set href = form_parent(form).vars.href ?? null %}
+        {% set href = form.vars.href ?? null %}
         {% set allows_deleting_items = form_parent(form).vars.allow_delete %}
         {% set delete_item_button %}
             <button type="button" class="btn btn-link btn-link-danger form-collection-delete-button"
@@ -696,36 +696,38 @@
             <div class="accordion-item">
                 <h2 class="accordion-header">
 
-                    {% set _href    =  href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
-                    {% set linkable = _href is not null and form.vars.value is not null and form.children is empty %}
+                    {# `is_empty` is used because some internal keys are marked by a starting "_" #}
+                    {% set is_empty = empty(form.children|keys|filter((v, k) => str_starts_with(k, '_') )) %}
 
+                    {% set _href    =  href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
+                    {% set linkable = _href is not null and form.vars.value is not null and is_empty %}
                     {%- if linkable -%}
-                        <a class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
+                    <a class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {%- else -%}
-                        <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ form.children is empty ? 'style="cursor:default;"' : '' }}
-                                type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
+
+                    <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
+                            type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {%- endif -%}
 
-                        <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-                        {% set label = form_parent(form).vars.entry_label ?? null %}
-                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
-                        {% if  label != false %}
-                            {{ label|default(value)|stringify }}
-                        {% endif %}
+                    <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
+                    {% set label = form_parent(form).vars.entry_label ?? null %}
+                    {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
+                    {% if  label != false %}{{ label|default(value)|stringify }}{% endif %}
 
                     {{ linkable ? "</a>": "</button>" }}
 
                     <div class="form-collection-buttons">
                         {% if form.vars.value is not null %}
-                            {% if _href is not null %}
-                                <a target='_blank' href="{{ _href }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
-                            {% else %}
-                                {% set url = form.vars.value.__toLink() ?? null %}
-                                {% if url is not empty %}
-                                {{ url ? clipboard("copy", url)|raw : "" }}
-                                <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
-                                {% endif %}
+
+                            {% set url = form.vars.value.__toLink() ?? null %}
+                            {% if url is not empty %}
+                            {{ url ? clipboard("copy", url)|raw : "" }}<a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
                             {% endif %}
+
+                            {% if _href is not null %}
+                            <a target='_blank' href="{{ _href|urldecode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
+                            {% endif %}
+
                         {% endif %}
                         {% if allows_deleting_items %}
                             {{ delete_item_button }}
@@ -733,9 +735,10 @@
                     </div>
                 </h2>
 
-                {% if form.children is not empty %}
+                {% if not is_empty %}
                 <div id="{{ id }}-contents" class="accordion-collapse collapse {{ collapsed ? '' : 'show'}}">
                     <div class="accordion-body">
+
                         {{ form_widget(form, {attr:attr}) }}
                     </div>
                 </div>
@@ -773,7 +776,7 @@
 {%- endblock collection2_entry_widget -%}
 
 {%- block collection2_empty -%}
-    <div class="empty collection-empty"></div>
+    <div class="empty collection-empty"><div class="form-text">{{ '@fields.collection.empty'|trans }}</div></div>
 {%- endblock collection2_empty -%}
 
 {%- block array_row -%}

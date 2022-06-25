@@ -55,12 +55,12 @@ select:
   token_separator: "Tags are split using: {0}"
 
 collection:
-  empty: Empty
+  empty: This collection is empty !
 
 array:
   key: "Key"
   value: "Value"
-  empty: Empty
+  empty: This field is empty !
 
 color:
   button:

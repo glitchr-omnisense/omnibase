@@ -36,10 +36,11 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
 
-        $this->maxResolution = $parameterBag->get("base.images.max_resolution");
-        $this->maxQuality    = $parameterBag->get("base.images.max_quality");
-        $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
-        $this->noImage       = $parameterBag->get("base.images.no_image");
+        $this->notFoundException = $parameterBag->get("base.images.not_found");
+        $this->maxResolution     = $parameterBag->get("base.images.max_resolution");
+        $this->maxQuality        = $parameterBag->get("base.images.max_quality");
+        $this->enableWebp        = $parameterBag->get("base.images.enable_webp");
+        $this->noImage           = $parameterBag->get("base.images.no_image");
 
         // Local cache directory for filtered images
         $this->localCache = "local.cache";
@@ -259,10 +260,12 @@ class ImageService extends FileService implements ImageServiceInterface
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
                 if(!file_exists($filteredPath)) {
 
-                    // TODO Perhaps use an option in base.yaml to display "noimage" or exception..
-                    //if($this->router->isDebug()) throw new NotFoundHttpException("Image \"$filteredPath\" not found.");
+                    if($this->notFoundException)
+                        throw new NotFoundHttpException("Image \"$filteredPath\" not found.");
+
                     return $this->noImage;
                 }
+
                 $this->filesystem->mkdir(dirname($pathCache), $localCache);
                 $this->filesystem->write($pathCache, file_get_contents($filteredPath), $localCache);
 

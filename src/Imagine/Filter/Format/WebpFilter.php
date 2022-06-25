@@ -32,6 +32,9 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
         $this->path    = $path.".webp";
         $this->filters = $filters;
 
+        if(array_key_exists("quality", $options))
+            $options["quality"] *= $options["quality"] < 1 ? 100 : 1;
+
         parent::__construct($this->path, $options);
     }
 

@@ -94,6 +94,10 @@ final class BaseTwigExtension extends AbstractExtension
 
             new TwigFunction('html_attributes', 'html_attributes', ["is_safe" => ['all']]),
 
+            new TwigFunction('str_starts_with', "str_starts_with"),
+            new TwigFunction('str_ends_with'  , "str_ends_with"  ),
+            new TwigFunction('empty',           "empty"),
+
             new TwigFunction('urlify',          [$this,               'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('iconify',         [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFunction('asset',           [$this,               'asset']),
@@ -133,6 +137,7 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucfirst',     [$this, 'mb_ucfirst']),
             new TwigFilter('mb_ucwords',     [$this, 'mb_ucwords']),
             new TwigFilter('second',         "second"),
+            new TwigFilter('empty',          "empty"),
 
             new TwigFilter('trans',          [Translator::class, 'trans']),
             new TwigFilter('time',           [Translator::class, 'time']),

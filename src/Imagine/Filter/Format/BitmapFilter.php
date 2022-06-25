@@ -30,6 +30,9 @@ class BitmapFilter implements BitmapFilterInterface
         $this->filters = $filters;
         $this->options  = $options;
 
+        if(array_key_exists("quality", $options))
+            $options["quality"] /= $options["quality"] <= 1 ? 100 : 1;
+
         $this->mimeTypes = new MimeTypes();
         $this->palette = new RGB();
     }

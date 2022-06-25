@@ -83,12 +83,12 @@ select:
   token_separator: "Les étiquettes peuvent être séparées à l'aide des caractères : {0}"
 
 collection:
-  empty: Vide
+  empty: Cette collection est vide !
 
 array:
   key: "Variable"
   value: "Valeur"
-  empty: Vide
+  empty: Ce champ est vide
 
 color:
   button:

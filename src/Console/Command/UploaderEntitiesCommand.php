@@ -35,7 +35,7 @@ class UploaderEntitiesCommand extends Command
         $this->orphans       ??= $input->getOption('orphans');
         $this->deleteOrphans ??= $input->getOption('delete-orphans');
 
-        $output->section()->writeln("\n <info>Looking for \"".Uploader::class."\"</info> annotations...");
+        $output->section()->writeln("\n <info>Looking for \"".Uploader::class."\"</info> annotations..");
 
         $nTotalFiles   = 0;
         $nTotalOrphans = 0;
@@ -44,12 +44,12 @@ class UploaderEntitiesCommand extends Command
         $this->appEntities ??= "App\\Entity\\".$this->entityName;
         $appAnnotations = $this->getUploaderAnnotations($this->appEntities);
         if(!$appAnnotations)
-            $output->section()->writeln(" <warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
+            $output->section()->writeln("\t<warning>Uploader annotation not found for \"$this->appEntities\"</warning>");
 
         $this->baseEntities ??= "Base\\Entity\\".$this->entityName;
         $baseAnnotations = $this->getUploaderAnnotations($this->baseEntities);
         if(!$baseAnnotations)
-            $output->section()->writeln(" <warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
+            $output->section()->writeln("\t<warning>Uploader annotation not found for \"$this->baseEntities\"</warning>");
 
         $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
 

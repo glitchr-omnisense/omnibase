@@ -9,10 +9,10 @@ use Base\Entity\Layout\Image;
 use Base\Entity\Layout\ImageCrop;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
-use Base\Imagine\Filter\Format\WebpFilter;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputOption;
 
 #[AsCommand(name:'uploader:images:crop', aliases:[], description:'')]
 class UploaderImagesCropCommand extends UploaderImagesCommand
@@ -20,8 +20,15 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
     protected $input;
     protected $output;
 
+    protected function configure(): void
+    {
+        $this->addOption('normalize', false, InputOption::VALUE_NONE, 'Do you want to update coordinate system ?');
+        parent::configure();
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->normalize   ??= $input->getOption('normalize');
         $this->entityName  ??= str_strip($input->getOption('entity') ?? Image::class, ["App\\Entity\\", "Base\\Entity\\"]);
         $this->appEntities ??= "App\\Entity\\".$this->entityName;
         if(!is_instanceof($this->appEntities, Image::class)) {
@@ -45,6 +52,59 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         $this->imageRepository = $this->entityManager->getRepository(Image::class);
         $this->imageCropRepository = $this->entityManager->getRepository(ImageCrop::class);
 
+        if($this->normalize) {
+
+            $output->section()->writeln("\n <info>Looking for \"".ImageCrop::class."\"</info> to normalize..");
+
+            $imageCrops = $this->imageCropRepository->findAll();
+
+            $iProcess = 0;
+            $iProcessAndNormalized = 0;
+            $nTotalCrops = count($imageCrops);
+
+            foreach($imageCrops as $imageCrop) {
+
+                $output->section()->writeln("             <warning>* Image #".$imageCrop->getImage()->getId()." \"".$imageCrop->getLabel()."\" .. (".($iProcess+1)."/".$nTotalCrops.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
+
+                if(!$imageCrop->isNormalized()) {
+
+                    $naturalWidth  = $imageCrop->getNaturalWidth();
+                    $naturalHeight = $imageCrop->getNaturalHeight();
+
+                    $x = $imageCrop->getX();
+                    $imageCrop->setX0($x/$naturalWidth);
+                    $y = $imageCrop->getY();
+                    $imageCrop->setY0($y/$naturalHeight);
+                    $width  = $imageCrop->getWidth();
+                    $imageCrop->setWidth0($width/$naturalWidth);
+                    $height = $imageCrop->getHeight();
+                    $imageCrop->setHeight0($height/$naturalHeight);
+
+                    $this->entityManager->flush($imageCrop);
+                    $iProcessAndNormalized++;
+                }
+
+                $iProcess++;
+            }
+
+            if($iProcessAndNormalized) {
+
+                $msg = ' [OK] Nothing to update - image crops are already in sync & normalized. ';
+                $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+                $output->writeln($msg);
+                $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+
+            } else {
+
+                $msg = ' [OK] '.$nTotalCrops.' image crops found: '.$iProcess.' crop(s) processed ; '.$iProcessAndNormalized.' crop(s) renormalized !';
+                $output->writeln('');
+                $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+                $output->writeln($msg);
+                $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+                $output->writeln('');
+            }
+        }
+
         return parent::execute($input, $output);
     }
 
@@ -64,7 +124,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
                 if($this->ibatch >= $this->batch && $this->batch > 0) {
 
-                    $msg = ' [WARNING] Batch limit reached out - Program stopped for cache memory reason. Set the `--batch` limit higher, if you wish. ';
+                    $msg = ' [WARN] Batch limit reached out - Program stopped for cache memory reason. Set the `--batch` limit higher, if you wish. ';
                     $this->output->writeln('');
                     $this->output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
                     $this->output->writeln($msg);
