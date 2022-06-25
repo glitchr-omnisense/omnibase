@@ -115,8 +115,8 @@ class CropFilter implements FilterInterface
         list($w,$h)   = $this->getSize($image);
 
         $filter = new Crop(
-            new Point($x - $x0, $y - $y0),
-            new Box  ($w - $x0, $h - $y0)
+            new Point((int) $x - $x0, (int) $y - $y0),
+            new Box  ((int) $w - $x0, (int) $h - $y0)
         );
 
         try { return $filter->apply($image); }
