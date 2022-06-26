@@ -195,7 +195,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 } else {
 
                     $this->output->section()->writeln("             <ln>* Warming up main image \"".str_lstrip($file,$publicDir)."\" .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
-                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$identifier, OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ", OutputInterface::VERBOSITY_DEBUG);
 
                     $this->fileController->ImageWebp($hashidWebp);
                     $this->fileController->Image($hashid, $extension);
@@ -205,7 +205,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
                 foreach($imageCrops as $imageCrop) {
 
-                    $identifier = $imageCrop->getSlug() ?? $imageCrop->getWidth().":".$imageCrop->getHeight();
+                    $identifier = $imageCrop->getSlug() ?? $imageCrop->getWidth()."x".$imageCrop->getHeight();
                     if($this->isCached($file, $imageCrop)) {
 
                         $this->output->section()->writeln("             <warning>  Already cached \"".str_lstrip($file,$publicDir)."\" (".$identifier.") .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
@@ -219,7 +219,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                         $this->fileController->ImageCrop($hashid, $identifier, $extension);
                     }
 
-                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$identifier, OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$identifier, OutputInterface::VERBOSITY_DEBUG);
                 }
             }
         }

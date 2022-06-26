@@ -294,8 +294,17 @@ class ImageService extends FileService implements ImageServiceInterface
         if($formatter instanceof BitmapFilter) // Take care to set proper palette
             $image->usePalette(is_cmyk($path) ? new CMYK() : new RGB());
 
-        foreach ($filters as $filter) // Apply filters
-            $image = $filter->apply($image);
+        // Apply filters
+        foreach ($filters as $filter) {
+
+            $oldImage = $image;
+            $image = $filter->apply($oldImage);
+            $oldImage->__destruct();
+        }
+
+        // Last filter is in charge of saving the final image
+        // So we can safely destroy it
+        $image->__destruct();
 
         return $formatter->getPath();
     }
