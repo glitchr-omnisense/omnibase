@@ -30,7 +30,7 @@ use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
-
+use Base\Service\LocaleProvider;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)

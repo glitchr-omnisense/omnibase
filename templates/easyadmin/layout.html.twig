@@ -109,7 +109,7 @@
                                        target="{{ item.linkTarget }}" rel="{{ item.linkRel }}"
                                        referrerpolicy="origin-when-cross-origin">
                                         {% if item.icon is not empty %}<i class="fa fa-fw {{ item.icon }}"></i>{% endif %}
-                                        <span>{{ item.label|trans }}</span>
+                                        <span>{{ item.label|trans_quiet|default(item.label) }}</span>
                                     </a>
                                 {% endif %}
                             </li>
@@ -375,7 +375,7 @@
                                     </section>
                                 {% endblock content_header_wrapper %}
 
-                                <section id="main" class="content-body">
+                                <section id="main" class="content-body page-wrapper">
                                 {% block main %}
 
                                     {% set content = block('content') is defined ? block('content') : '' %}
@@ -410,8 +410,8 @@
                                                 <div class="content-panel m-md-1 with-background without-header without-footer"
                                                     style="height:90%; padding:0.8em 0.6em 0.6em 0.6em;">
 
-                                                <fieldset style="height: 100%; margin:0; padding:0.5em 0 1.5em 0.5em;">
-                                                    <legend>{{content_widget.getAsDto().getLabel()|trans|upper }}</legend>
+                                                <fieldset>
+                                                    <legend>{{content_widget.getAsDto().getLabel()|trans(domain = 'backoffice') }}</legend>
                                                 <hr>
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{width}};">
 
@@ -421,14 +421,14 @@
                                                 <li>
                                                     <a href="{{ content_widget.getAsDto().getLinkUrl() }}">
                                                         <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst }}</span>
+                                                        <span>{{ content_widget.getAsDto().getLabel()|mb_ucfirst }}</span>
                                                     </a>
                                                 </li>
                                             {% else %}
                                                 <li>
                                                     <a href="{{ content_widget.generateUrl() }}">
                                                         <i class="fa-fw {{ content_widget.getAsDto().getIcon() }}"></i>
-                                                        <span>{{ content_widget.getAsDto().getLabel()|trans|mb_ucfirst }}</span>
+                                                        <span>{{ content_widget.getAsDto().getLabel()|mb_ucfirst }}</span>
                                                     </a>
                                                 </li>
                                             {% endif %}

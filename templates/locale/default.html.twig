@@ -1,5 +1,5 @@
 <div class="locale-default">
-    <span class="label">{{ "@messages.locale.lang.singular"|trans }}</span>
+    <span class="label">{{ "@messages.locale.lang._singular"|trans }}</span>
     <ul class="locale">
     {% for locale in available_locales %}
         {% set current = (locale == current_locale) ? "active" : null %}

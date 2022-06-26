@@ -1,188 +1,188 @@
 entity_action:
   action_insert:
-    singular: "insertion"
-    plural: "insertions"
+    _singular: "insertion"
+    _plural: "insertions"
   action_update:
-    singular: "update"
-    plural: "updates"
+    _singular: "update"
+    _plural: "updates"
   action_delete:
-    singular: "deletion"
-    plural: "deletions"
+    _singular: "deletion"
+    _plural: "deletions"
 
 user_role:
-  singular: "generic"
-  plural: "generics"
+  _singular: "generic"
+  _plural: "generics"
 
   role_superadmin:
-    singular: "super administrator"
-    plural: "super administrators"
+    _singular: "super administrator"
+    _plural: "super administrators"
 
   role_admin:
-    singular: "administrator"
-    plural: "administrators"
+    _singular: "administrator"
+    _plural: "administrators"
 
   role_user:
-    singular: "user"
-    plural: "users"
+    _singular: "user"
+    _plural: "users"
 
   role_social:
-    singular: "social account"
-    plural: "social accounts"
+    _singular: "social account"
+    _plural: "social accounts"
 
 upload_state:
-  singular: "upload state"
-  plural: "upload states"
+  _singular: "upload state"
+  _plural: "upload states"
 
   upload_error:
-    singular: "unknown error"
-    plural: "unknown errors"
+    _singular: "unknown error"
+    _plural: "unknown errors"
 
   upload_filesize:
-    singular: "file size"
-    plural: "file sizes"
+    _singular: "file size"
+    _plural: "file sizes"
 
   upload_mimetype:
-    singular: "file mimetype"
-    plural: "file mimetypes"
+    _singular: "file mimetype"
+    _plural: "file mimetypes"
 
 thread_state:
-  singular: "state"
-  plural: "state"
+  _singular: "state"
+  _plural: "state"
 
   state_draft:
-    singular: "draft"
-    plural: "drafts"
+    _singular: "draft"
+    _plural: "drafts"
   state_future:
-    singular: "future"
-    plural: "future"
+    _singular: "future"
+    _plural: "future"
   state_publish:
-    singular: "published"
-    plural: "published"
+    _singular: "published"
+    _plural: "published"
   state_publish_secret:
-    singular: "secret"
-    plural: "secrets"
+    _singular: "secret"
+    _plural: "secrets"
   state_publish_archive:
-    singular: "archived"
-    plural: "archived"
+    _singular: "archived"
+    _plural: "archived"
   state_publish_password:
-    singular: "protected"
-    plural: "protected"
+    _singular: "protected"
+    _plural: "protected"
 
 thread_workflow:
   workflow_approved:
-    singular: "approved"
-    plural: "approved"
+    _singular: "approved"
+    _plural: "approved"
   workflow_pending:
-    singular: "pending"
-    plural: "pending"
+    _singular: "pending"
+    _plural: "pending"
   workflow_rejected:
-    singular: "rejected"
-    plural: "rejected"
+    _singular: "rejected"
+    _plural: "rejected"
   workflow_suspended:
-    singular: "suspended"
-    plural: "suspended"
+    _singular: "suspended"
+    _plural: "suspended"
   workflow_deleted:
-    singular: "deleted"
-    plural: "deleted"
+    _singular: "deleted"
+    _plural: "deleted"
 
 spam_score:
-  singular: "score"
-  plural: "scores"
+  _singular: "score"
+  _plural: "scores"
 
   no_text:
-    singular: "no text"
-    plural: "no text"
+    _singular: "no text"
+    _plural: "no text"
   not_spam:
-    singular: "text approved"
-    plural: "texts approved"
+    _singular: "text approved"
+    _plural: "texts approved"
   maybe_spam:
-    singular: "potential spam"
-    plural: "potential spams"
+    _singular: "potential spam"
+    _plural: "potential spams"
   blatant_spam:
-    singular: "blatant spam"
-    plural: "blatant spams"
+    _singular: "blatant spam"
+    _plural: "blatant spams"
 
 gender:
-  singular: "gender"
-  plural: "genders"
+  _singular: "gender"
+  _plural: "genders"
 
   male:
-    singular: "man"
-    plural: "men"
+    _singular: "man"
+    _plural: "men"
   female:
-    singular: "woman"
-    plural: "women"
+    _singular: "woman"
+    _plural: "women"
   hybrid:
-    singular: "hybrid"
-    plural: "hybrids"
+    _singular: "hybrid"
+    _plural: "hybrids"
   genderless:
-    singular: "genderless"
-    plural: "genderless"
+    _singular: "genderless"
+    _plural: "genderless"
 
 log_level:
-  singular: "log level"
-  plural: "log levels"
+  _singular: "log level"
+  _plural: "log levels"
 
   info:
-    singular: "info"
-    plural: "info"
+    _singular: "info"
+    _plural: "info"
   debug:
-    singular: "debug"
-    plural: "debug"
+    _singular: "debug"
+    _plural: "debug"
   warning:
-    singular: "warning"
-    plural: "warnings"
+    _singular: "warning"
+    _plural: "warnings"
   critical:
-    singular: "critical"
-    plural: "criticals"
+    _singular: "critical"
+    _plural: "criticals"
 
 spam_api:
-  singular: "spam"
-  plural: "spams"
+  _singular: "spam"
+  _plural: "spams"
 
   akismet:
-    singular: "akismet"
-    plural: "akismet"
+    _singular: "akismet"
+    _plural: "akismet"
 
 quadrant:
-  singular: "cardinal quadrant"
-  plural: "cardinal quadrants"
+  _singular: "cardinal quadrant"
+  _plural: "cardinal quadrants"
   origin:
-    singular: center
-    plural: quadrant.east.singular
+    _singular: center
+    _plural: quadrant.east.singular
   east:
-    singular: east
-    plural: quadrant.east.singular
+    _singular: east
+    _plural: quadrant.east.singular
   south:
-    singular: south
-    plural: quadrant.south.singular
+    _singular: south
+    _plural: quadrant.south.singular
   west:
-    singular: west
-    plural: quadrant.west.singular
+    _singular: west
+    _plural: quadrant.west.singular
   north:
-    singular: north
-    plural: quadrant.north.singular
+    _singular: north
+    _plural: quadrant.north.singular
 
 quadrant8:
-  singular: "ordinal quadrant"
-  plural: "ordinal quadrants"
+  _singular: "ordinal quadrant"
+  _plural: "ordinal quadrants"
   northeast:
-    singular: north-east
-    plural: quadrant.northeast.singular
+    _singular: north-east
+    _plural: quadrant.northeast.singular
   northwest:
-    singular: north-west
-    plural: quadrant.northwest.singular
+    _singular: north-west
+    _plural: quadrant.northwest.singular
   southeast:
-    singular: south-east
-    plural: quadrant.southeast.singular
+    _singular: south-east
+    _plural: quadrant.southeast.singular
   southwest:
-    singular: south-west
-    plural: quadrant.southwest.singular
+    _singular: south-west
+    _plural: quadrant.southwest.singular
 
 quadrant16:
-  singular: "intercardinal quadrant"
-  plural: "intercardinal quadrants"
+  _singular: "intercardinal quadrant"
+  _plural: "intercardinal quadrants"
 
 quadrant32:
-  singular: "32-wind quadrant"
-  plural: "32-wind quadrants"
+  _singular: "32-wind quadrant"
+  _plural: "32-wind quadrants"

@@ -19,6 +19,9 @@ class LocaleProvider implements LocaleProviderInterface
     protected $translator = null;
 
     public const SEPARATOR = "-";
+    public static function __toLocale (string $locale, ?string $separator = self::SEPARATOR): string { return substr($locale,0,2).$separator.substr($locale,3,2); }
+    public static function __toLang (string $locale): string { return substr($locale,0,2); }
+    public static function __toCountry (string $locale): string { return substr($locale,3,2); }
 
     private static ?array $locales = null;
     public static function getLocales()
@@ -77,7 +80,7 @@ class LocaleProvider implements LocaleProviderInterface
             $request->setLocale(substr_replace($locale, "_", 2, 1));
         }
 
-        $this->translator->setLocale($locale);
+        $this->translator->setLocale(substr_replace($locale, "_", 2, 1));
 
         $this->hasChanged = $currentLocale !== $locale;
         return $this;

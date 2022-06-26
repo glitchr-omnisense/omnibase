@@ -240,7 +240,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL);
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(       $class, null, Translator::TRANSLATION_PLURAL);
                         else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
                         else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
 
@@ -292,7 +292,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL);
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(       $class, null, Translator::TRANSLATION_PLURAL);
                         else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
                         else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
 
@@ -575,7 +575,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(        $class, Translator::TRANSLATION_PLURAL);
+                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->entity(       $class, null, Translator::TRANSLATION_PLURAL);
                     else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
                     else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($text, $class, Translator::TRANSLATION_PLURAL);
                     else $text = is_string($key) ? $key : $text;

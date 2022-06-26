@@ -18,13 +18,13 @@ words:
 
 locale:
     lang:
-        singular: Langue
-        plural: Langues
+        _singular: Langue
+        _plural: Langues
     country:
-        singular: Pays
-        plural: Pays
+        _singular: Pays
+        _plural: Pays
 
-dashboard:
+backoffice:
     title: "Administration"
 
 profile:

@@ -1,15 +1,15 @@
 {% extends "@EasyAdmin/layout.html.twig" %}
 
-{% block content_icon  %}{{ iconify("dashboard_apikey")|closest(1)|raw }}{% endblock %}
-{% block content_title %}{{ title("dashboard_apikey") }}{% endblock %}
-{% block content_excerpt  %}{{ excerpt("dashboard_apikey") }}{% endblock %}
+{% block content_icon  %}{{ iconify("backoffice_apikey")|closest(1)|raw }}{% endblock %}
+{% block content_title %}{{ title("backoffice_apikey") }}{% endblock %}
+{% block content_excerpt  %}{{ excerpt("backoffice_apikey") }}{% endblock %}
 {% block content %}
 
 {% if form.children|length > 1 %}
     {{ form(form) }}
 {% else %}
     <div class="text-center">
-    {{"@controllers.dashboard_apikey.empty"|trans}}
+    {{"@controllers.backoffice_apikey.empty"|trans}}
     </div>
 {% endif %}
 

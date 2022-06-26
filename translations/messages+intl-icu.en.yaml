@@ -18,13 +18,13 @@ words:
 
 locale:
     lang:
-        singular: Language
-        plural: Languages
+        _singular: Language
+        _plural: Languages
     country:
-        singular: Country
-        plural: Countries
+        _singular: Country
+        _plural: Countries
 
-dashboard:
+backoffice:
     title: "Go to dashboard"
 
 profile:

@@ -3,16 +3,14 @@
 namespace Base\Backend\Config\Menu;
 
 use Base\Backend\Config\MenuItem;
-
+use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\MenuItemTrait;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Menu\MenuItemInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\RouteMenuItem as EaRouteMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use Exception;
 
-class RouteMenuItem implements MenuItemInterface
+class RouteMenuItem extends EaRouteMenuItem
 {
-    use MenuItemTrait;
-
     public function __construct(string $routeName, array $routeParameters, ?string $label = null, ?string $icon = null)
     {
         if (MenuItem::$translator == null)
@@ -20,13 +18,15 @@ class RouteMenuItem implements MenuItemInterface
         if (MenuItem::$router == null)
             throw new Exception("Router is missing");
 
-        $this->dto = new MenuItemDto();
+        $label = $label ? MenuItem::$translator->transQuiet($label, [], Translator::DOMAIN_BACKEND) : $label;
 
+        $this->dto = new MenuItemDto();
         $this->dto->setLinkUrl(MenuItem::$router->generate($routeName, $routeParameters));
-        $this->dto->setLabel($label ?? MenuItem::$translator->trans("@controllers.".$routeName.".title"));
+        $this->dto->setLabel($label ?? MenuItem::$translator->route($routeName));
         $this->dto->setType(MenuItemDto::TYPE_URL);
         $this->dto->setIcon($icon);
-        if($icon === null && MenuItem::$iconProvider != null) {
+
+        if ($icon === null && MenuItem::$iconProvider != null) {
             $icons = MenuItem::$iconProvider->getRouteIcons($routeName);
             if($icons) $this->dto->setIcon(closest($icons, 1) ?? null);
         }

@@ -140,6 +140,8 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('empty',          "empty"),
 
             new TwigFilter('trans',          [Translator::class, 'trans']),
+            new TwigFilter('trans_quiet',    [Translator::class, 'transQuiet']),
+            new TwigFilter('trans_exists',   [Translator::class, 'transExists']),
             new TwigFilter('time',           [Translator::class, 'time']),
             new TwigFilter('enum',           [Translator::class, 'enum']),
             new TwigFilter('entity',         [Translator::class, 'entity']),

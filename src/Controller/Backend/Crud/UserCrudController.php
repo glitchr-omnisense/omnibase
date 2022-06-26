@@ -12,7 +12,7 @@ use Base\Field\RoleField;
 use Base\Field\BooleanField;
 
 use Base\Field\EmailField;
-
+use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
@@ -32,12 +32,11 @@ class UserCrudController extends AbstractCrudController
             $extension->setImage($entity->getAvatar());
 
             $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
-            $entityLabel = $this->translator->trans($userClass.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
-            if($entityLabel == $userClass.".singular") $entityLabel = null;
-            else $extension->setTitle(mb_ucwords($entityLabel));
+            $entityLabel = $this->translator->transQuiet($userClass.".".Translator::TRANSLATION_SINGULAR, [], Translator::DOMAIN_ENTITY);
+            if($entityLabel) $extension->setTitle(mb_ucwords($entityLabel));
 
-            $entityLabel = $entityLabel ?? $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
-            $entityLabel = !empty($entityLabel) ? mb_ucwords($entityLabel) : "";
+            $entityLabel ??= $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
+            $entityLabel   = $entityLabel ? mb_ucwords($entityLabel) : "";
 
             $impersonate = null;
             if($this->isGranted("ROLE_EDITOR") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
@@ -48,7 +47,7 @@ class UserCrudController extends AbstractCrudController
             if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);
             else {
                 $extension->setTitle($entity.$impersonate);
-                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("crud.user.since", [$entity->getCreatedAt()->format("Y")], AbstractDashboardController::TRANSLATION_DASHBOARD));
+                $extension->setText($entityLabel." #".$entity->getId()." | ".$this->translator->trans("crud.user.since", [$entity->getCreatedAt()->format("Y")], Translator::DOMAIN_BACKEND));
             }
         }
 
@@ -60,8 +59,8 @@ class UserCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function() {
 
-            yield BooleanField::new("isApproved")->withConfirmation()->showInline()->setColumns(2);
-            yield FormField::addRow()->setColumns(10);
+            yield BooleanField::new("isApproved")->withConfirmation()->showInline()->setColumns(3);
+            yield FormField::addRow()->setColumns(9);
             yield AvatarField::new('avatar')->hideOnDetail()->setCropper();
 
             yield FormField::addRow()->setColumns(2);

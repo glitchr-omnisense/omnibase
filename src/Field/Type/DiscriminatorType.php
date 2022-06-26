@@ -7,6 +7,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Model\Autocomplete;
 use Base\Model\IconizeInterface;
+use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -84,7 +85,7 @@ class DiscriminatorType extends AbstractType
         $formattedValues["icon"] = class_implements_interface($class, IconizeInterface::class) ? $class::__iconizeStatic()[0] ?? null : null;
 
 
-        $text = $translator->trans($entry.".singular", [], AbstractDashboardController::TRANSLATION_ENTITY);
+        $text = $translator->trans($entry.".".Translator::TRANSLATION_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
         switch($format) {
 
             case FORMAT_TITLECASE:

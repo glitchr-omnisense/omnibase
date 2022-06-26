@@ -134,12 +134,12 @@ fileupload:
         }"
   file_counter:
       none: "No files found."
-      singular: "{0} file found."
-      plural: "{0} files found."
+      _singular: "{0} file found."
+      _plural: "{0} files found."
   file_counter_max:
       none: "You cannot add any more files."
-      singular: "You can still add {0} file."
-      plural: "You can still add {0} files."
+      _singular: "You can still add {0} file."
+      _plural: "You can still add {0} files."
 
 imageupload:
   alt: "Alternative"

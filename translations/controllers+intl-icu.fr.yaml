@@ -38,11 +38,11 @@ security_maintenance:
             }"
   progress: "Progression {0}%"
 
-dashboard:
+backoffice:
   title: "Administration"
   excerpt: ""
 
-dashboard_settings:
+backoffice_settings:
   title: "Paramètres du site"
   excerpt: "Élements configurables du site"
 
@@ -51,7 +51,7 @@ dashboard_settings:
   failed: "Échec de modification des paramètres."
   valid: Vérifier et sauvegarder les nouveaux paramètres
 
-dashboard_widgets:
+backoffice_widgets:
   title: "Personnalisations"
   excerpt: "Emplacements de widgets pré-définis"
   valid: Mettre à jour les emplacements
@@ -60,7 +60,7 @@ dashboard_widgets:
   success: "Les widgets du site ont correctement été mis à jour."
   failed: "Échec de la mise à jour des widgets."
 
-dashboard_apikey:
+backoffice_apikey:
   title: "Clés API"
   excerpt: "Informations sensibles permettant la connexion aux API de services"
 

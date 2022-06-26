@@ -1,148 +1,148 @@
 
 user:
-  singular: "utilisateur"
-  plural: "utilisateurs"
+  _singular: "utilisateur"
+  _plural: "utilisateurs"
 
   group:
-    singular: "groupe"
-    plural: "groupes"
+    _singular: "groupe"
+    _plural: "groupes"
   permission:
-    singular: "permission"
-    plural: "permissions"
+    _singular: "permission"
+    _plural: "permissions"
   notification:
-    singular: "notification"
-    plural: "notifications"
+    _singular: "notification"
+    _plural: "notifications"
   penalty:
-    singular: "pénalité"
-    plural: "pénalités"
+    _singular: "pénalité"
+    _plural: "pénalités"
   token:
-    singular: "jeton"
-    plural: "jetons"
+    _singular: "jeton"
+    _plural: "jetons"
 
 extension:
   revision:
-    singular: "révision"
-    plural: "révisions"
+    _singular: "révision"
+    _plural: "révisions"
   ordering:
-    singular: "tri"
-    plural: "tris"
+    _singular: "tri"
+    _plural: "tris"
   log:
-    singular: "historique"
-    plural: "historiques"
+    _singular: "historique"
+    _plural: "historiques"
   trash_ball:
-    singular: "poubelle"
-    plural: "poubelle"
+    _singular: "poubelle"
+    _plural: "poubelle"
 
 thread:
-  singular: "fil"
-  plural: "fils"
+  _singular: "fil"
+  _plural: "fils"
 
   mention:
-    singular: "mention"
-    plural: "mentions"
+    _singular: "mention"
+    _plural: "mentions"
   tag:
-    singular: "étiquette"
-    plural: "étiquettes"
+    _singular: "étiquette"
+    _plural: "étiquettes"
   like:
-    singular: "j'aime"
-    plural: "j'aime"
+    _singular: "j'aime"
+    _plural: "j'aime"
   taxon:
-    singular: "taxonomie"
-    plural: "taxonomies"
+    _singular: "taxonomie"
+    _plural: "taxonomies"
 
 layout:
   image:
-    singular: "image"
-    plural: "images"
+    _singular: "image"
+    _plural: "images"
   image_crop:
-    singular: "découpage d'image"
-    plural: "découpages d'images"
+    _singular: "découpage d'image"
+    _plural: "découpages d'images"
   short:
-    singular: "raccourci"
-    plural: "raccourcis"
+    _singular: "raccourci"
+    _plural: "raccourcis"
   widget:
-    singular: "personnalisation"
-    plural: "personnalisations"
+    _singular: "personnalisation"
+    _plural: "personnalisations"
     
     page:
-      singular: "page"
-      plural: "pages"
+      _singular: "page"
+      _plural: "pages"
     link:
-      singular: "lien"
-      plural: "liens"
+      _singular: "lien"
+      _plural: "liens"
     attachment:
-      singular: "pièce jointe"
-      plural: "pièces jointes"
+      _singular: "pièce jointe"
+      _plural: "pièces jointes"
     route:
-      singular: "route"
-      plural: "routes"
+      _singular: "route"
+      _plural: "routes"
     slot:
-      singular: emplacement
-      plural: "emplacements"
+      _singular: emplacement
+      _plural: "emplacements"
 
     set:
       linkset:
-        singular: "jeu de liens"
-        plural: "jeux de liens"
+        _singular: "jeu de liens"
+        _plural: "jeux de liens"
       network:
-        singular: "réseau"
-        plural: "réseaux"
+        _singular: "réseau"
+        _plural: "réseaux"
       attachment_box:
-        singular: "ensemble de pièces jointes"
-        plural: "ensembles de pièces jointes"
+        _singular: "ensemble de pièces jointes"
+        _plural: "ensembles de pièces jointes"
       menu:
-        singular: "menu"
-        plural: "menu"
+        _singular: "menu"
+        _plural: "menu"
       book:
-        singular: "livre"
-        plural: "livres"
+        _singular: "livre"
+        _plural: "livres"
 
   attribute:
-    singular: attribut
-    plural: attributs
+    _singular: attribut
+    _plural: attributs
 
     hyperlink:
-      singular: "lien hypertexte"
-      plural: "liens hypertextes"
+      _singular: "lien hypertexte"
+      _plural: "liens hypertextes"
 
     abstract:
-      singular: attribut
-      plural: attributs
+      _singular: attribut
+      _plural: attributs
 
       abstract_attribute:
-        singular: attribut
-        plural: attributs
+        _singular: attribut
+        _plural: attributs
       hyperpattern_attribute:
-        singular: "modèle de liens"
-        plural: "modèles de liens"
+        _singular: "modèle de liens"
+        _plural: "modèles de liens"
       color_attribute:
-        singular: "couleur"
-        plural: "couleur"
+        _singular: "couleur"
+        _plural: "couleur"
       number_attribute:
-        singular: "nombre"
-        plural: "nombres"
+        _singular: "nombre"
+        _plural: "nombres"
       text_attribute:
-        singular: "ligne de texte"
-        plural: "lignes de texte"
+        _singular: "ligne de texte"
+        _plural: "lignes de texte"
       textarea_attribute:
-        singular: "zone de texte"
-        plural: "zones de texte"
+        _singular: "zone de texte"
+        _plural: "zones de texte"
       datetime_attribute:
-        singular: "dateheure"
-        plural: "dateheures"
+        _singular: "dateheure"
+        _plural: "dateheures"
       percent_attribute:
-        singular: "pourcentage"
-        plural: "pourcentages"
+        _singular: "pourcentage"
+        _plural: "pourcentages"
       array_attribute:
-        singular: "groupe"
-        plural: "groupes"
+        _singular: "groupe"
+        _plural: "groupes"
       image_attribute:
-        singular: "image"
-        plural: "images"
+        _singular: "image"
+        _plural: "images"
       scalar_attribute:  
-        singular: scalaire
-        plural: scalaires
+        _singular: scalaire
+        _plural: scalaires
 
   setting:
-    singular: "paramètre"
-    plural: "paramètres"
+    _singular: "paramètre"
+    _plural: "paramètres"

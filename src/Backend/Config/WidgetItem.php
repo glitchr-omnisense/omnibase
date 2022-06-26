@@ -12,6 +12,7 @@ use Base\Backend\Config\Menu\SeparatorWidgetItem;
 use Base\Controller\Backend\AbstractCrudController;
 
 use Base\Model\IconizeInterface;
+use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\LogoutMenuItem;
@@ -56,9 +57,9 @@ class WidgetItem
         $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-        $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural");
-        if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural");
-        if($label == $entityTranslationPrefix.".plural") $label = camel2snake(class_basename($entityFqcnOrCrudController), " ");
+        $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+        $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+        $label ??= camel2snake(class_basename($entityFqcnOrCrudController), " ");
 
         if(!$icon) {
             $icon = class_implements_interface($entityFqcnOrCrudController, IconizeInterface::class) ? $entityFqcnOrCrudController::__iconizeStatic()[0] : null;
@@ -99,9 +100,9 @@ class WidgetItem
             $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
             $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-            $label = $label ?? self::$translator->trans($crudTranslationPrefix.".plural");
-            if($label == $crudTranslationPrefix.".plural") $label = self::$translator->trans($entityTranslationPrefix.".plural");
-            if($label == $entityTranslationPrefix.".plural") $label = camel2snake(class_basename($labelOrEntityFqcn), " ");
+            $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+            $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+            $label ??= camel2snake(class_basename($labelOrEntityFqcn), " ");
 
             if(!$icon) {
                 $icon = class_implements_interface($labelOrEntityFqcn, IconizeInterface::class) ? $labelOrEntityFqcn::__iconizeStatic()[0] : null;

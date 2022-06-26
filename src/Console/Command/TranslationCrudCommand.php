@@ -5,6 +5,7 @@ namespace Base\Console\Command;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Service\LocaleProvider;
+use Base\Service\Translator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -71,8 +72,8 @@ class TranslationCrudCommand extends Command
                     $path = explode("\\", $crud);
                     $path = str_strip(implode(".", tail($path, 4)), "", "CrudController");
 
-                    $translationPath = "@EasyAdminBundle.crud.".camel2snake($path).".".$action.".".$suffix;
-                    $translationPathStr = $prefix."@EasyAdminBundle[$currentLocale].<ln>crud.".camel2snake($path).".".$action.".".$suffix."</ln>";
+                    $translationPath = "@".Translator::DOMAIN_BACKEND.".crud.".camel2snake($path).".".$action.".".$suffix;
+                    $translationPathStr = $prefix."@".Translator::DOMAIN_BACKEND."[$currentLocale].<ln>crud.".camel2snake($path).".".$action.".".$suffix."</ln>";
                     $translation = $this->translator->trans($translationPath, [], null, $currentLocale);
 
                     if($translation == $translationPath) $trans .= "<warning>".$translationPathStr."</warning><red> = \"no translation found\"</red> (possible entity fallback)";

@@ -11,13 +11,13 @@
 
     {% if linkUrl is not empty %}
 
-        {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+        {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
 
         {% set renderTooltip = action.htmlAttributes.tooltip ?? false %}
         {% if renderTooltip %}
             <a href="{{ linkUrl }}" class="{{ action.cssClass }}"
             {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
-                data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+                data-toggle="tooltip" title="{{- actionLabel ? actionLabel|e('html_attr')|mb_ucfirst : "" -}}">
                 <span class="btn-label">
                     <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
                 </span>
@@ -26,9 +26,7 @@
             <a href="{{ linkUrl }}" class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
             {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
                 {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
-                <span>
-                    {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
-                </span>
+                <span>{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}</span>
             </a>
         {% endif %}
 
@@ -40,7 +38,7 @@
 
 {% elseif 'button' == action.htmlElement %}
 
-    {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
+    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
 
     {% if action.crudActionName == "group" %}
         TODO..
@@ -69,8 +67,8 @@
                         {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
                         {% if group is not empty %}
                             <li class="dropdown-item label-group">
-                            {% set label = ("@entities."~group~".singular")|trans(domain = ea.getTranslationDomain()) %}
-                            {{- label !=  ("@entities."~group~".singular") ? label|capitalize : action.label|trans|capitalize -}}
+                            {% set label = ("@entities."~group~"._singular")|trans(domain = ea.getTranslationDomain()) %}
+                            {{- label !=  ("@entities."~group~"._singular") ? label|capitalize : action.label|trans|capitalize -}}
                             </li>
                         {% endif %}
                     {% endif %}
@@ -97,7 +95,7 @@
         {% set renderTooltip = action.htmlAttributes.tooltip ?? false %}
         {% if renderTooltip %}
             <button class="{{ action.cssClass }}" {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}
-            data-toggle="tooltip" title="{{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|e('html_attr')|mb_ucfirst -}}">
+            data-toggle="tooltip" title="{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}">
                 <span class="btn-label">
                     <i class="{{ action.icon|default("far fa-question-circle") }}"></i>
                 </span>
@@ -144,8 +142,8 @@
 
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-            {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
+            {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+            {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </a>
 
         {% if discriminatorMap|length > 0 %}
@@ -158,8 +156,8 @@
 
         <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-            {{- actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst -}}
+            {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+            {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </span>
 
     {% endif %}
@@ -171,8 +169,8 @@
                 {% if not loop.first %} <li><hr class="dropdown-divider"></li>{% endif %}
                 {% if group is not empty %}
                     <li class="dropdown-item label-group">
-                    {% set label = ("@entities."~group~".singular")|trans(domain = ea.getTranslationDomain()) %}
-                    {{- label !=  ("@entities."~group~".singular") ? label|capitalize : action.label|trans|capitalize -}}
+                    {% set label = ("@entities."~group~"._singular")|trans(domain = ea.getTranslationDomain()) %}
+                    {{- label !=  ("@entities."~group~"._singular") ? label|capitalize : action.label|trans|capitalize -}}
                     </li>
                 {% endif %}
             {% endif %}
@@ -196,7 +194,7 @@
 
 {% else %}
     <span class="text-danger"><i class="action-icon fas fa-fw fa-exclamation-triangle"></i>
-    {% set actionLabel = action.label|trans(domain = ea.getTranslationDomain()) %}
-    "{{ actionLabel != action.label ? (actionLabel|mb_ucfirst) : action.label|trans|mb_ucfirst }}" cannot be rendered as "{{action.htmlElement}}"
+    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+    "{{- actionLabel ? actionLabel|mb_ucfirst : action.label -}}" cannot be rendered as "{{action.htmlElement}}"
     </span>
 {% endif %}

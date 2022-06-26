@@ -69,9 +69,12 @@ class UploaderEntitiesCommand extends Command
                 if($annotation->getDeclaringEntity($class, $field) != $class)
                     continue;
 
+
                 if($annotation->getMissable()) {
                     $output->section()->writeln("              $class::$field <warning> is missable.. cannot have orphan..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     continue;
+                } else {
+                    $output->section()->writeln("              Processing <info>$class::$field</info>..");
                 }
 
                 $this->preProcess($class, $field, $annotation);

@@ -46,7 +46,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
 
         //$onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
         $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
-        $activeUsers = array_filter($onlineUsers, fn($u) => $u->isActive());
+        $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
         $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),

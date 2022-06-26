@@ -188,7 +188,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
             }
 
             if(count($fields) > 0)
-                $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "dashboard_settings.valid"]);
+                $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "backoffice_settings.valid"]);
             });
     }
 

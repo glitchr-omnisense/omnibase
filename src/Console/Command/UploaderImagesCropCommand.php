@@ -195,6 +195,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 } else {
 
                     $this->output->section()->writeln("             <ln>* Warming up main image \"".str_lstrip($file,$publicDir)."\" .. (".($i+1)."/".$N.")</ln>", OutputInterface::VERBOSITY_VERBOSE);
+                    $this->output->section()->writeln("                - Memory usage: ".round(memory_get_usage()/1024/1024)."MB; File: ".implode(", ", $annotation->mimeTypes())." (incl. WEBP); ".$identifier, OutputInterface::VERBOSITY_VERY_VERBOSE);
 
                     $this->fileController->ImageWebp($hashidWebp);
                     $this->fileController->Image($hashid, $extension);

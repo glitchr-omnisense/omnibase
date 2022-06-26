@@ -107,7 +107,7 @@ class WidgetListType extends AbstractType implements DataMapperInterface
             }
 
             if(count($options["widgets"]) > 0)
-                $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "dashboard_widgets.valid"]);
+                $form->add('valid', SubmitType::class, ["translation_domain" => "controllers", "label_format" => "backoffice_widgets.valid"]);
         });
     }
 

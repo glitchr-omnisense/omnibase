@@ -136,7 +136,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/backoffice", name="dashboard")
+     * @Route("/backoffice", name="backoffice")
      * @Iconize({"fas fa-fw fa-toolbox", "fas fa-fw fa-home"})
      */
     public function index(): Response
@@ -145,7 +145,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     }
 
     /**
-     * @Route("/backoffice/apikey", name="dashboard_apikey")
+     * @Route("/backoffice/apikey", name="backoffice_apikey")
      * @Iconize({"fas fa-fw fa-fingerprint", "fas fa-fw fa-key"})
      */
     public function ApiKey(Request $request, array $fields = []): Response
@@ -207,7 +207,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $this->settingRepository->flush();
 
-            $notification = new Notification("@controllers.dashboard_apikey.success");
+            $notification = new Notification("@controllers.backoffice_apikey.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -222,7 +222,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/backoffice/settings", name="dashboard_settings")
+     * @Route("/backoffice/settings", name="backoffice_settings")
      * @Iconize("fas fa-fw fa-tools")
      */
     public function Settings(Request $request, array $fields = []): Response
@@ -273,7 +273,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
-            $notification = new Notification("@controllers.dashboard_settings.success");
+            $notification = new Notification("@controllers.backoffice_settings.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -291,7 +291,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     /**
      * Link to this controller to start the "connect" process
      *
-     * @Route("/backoffice/widgets", name="dashboard_widgets")
+     * @Route("/backoffice/widgets", name="backoffice_widgets")
      * @Iconize("fas fa-fw fa-th-large")
      */
     public function Widgets(Request $request, array $widgetSlots = []): Response
@@ -320,7 +320,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
 
-            $notification = new Notification("@controllers.dashboard_widgets.success");
+            $notification = new Notification("@controllers.backoffice_widgets.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
 
@@ -419,10 +419,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $menu   = [];
         $menu[] = MenuItem::section();
-        $menu[] = MenuItem::linkToRoute("dashboard", [], "Home");
-        $menu[] = MenuItem::linkToRoute("dashboard_apikey");
-        $menu[] = MenuItem::linkToRoute("dashboard_settings");
-        $menu[] = MenuItem::linkToRoute("dashboard_widgets");
+        $menu[] = MenuItem::linkToRoute("backoffice", [], "Home");
+        $menu[] = MenuItem::linkToRoute("backoffice_apikey");
+        $menu[] = MenuItem::linkToRoute("backoffice_settings");
+        $menu[] = MenuItem::linkToRoute("backoffice_widgets");
         $menu[] = MenuItem::linkToRoute("app_index", [], 'Back to website', 'fas fa-fw fa-door-open');
 
         $menu[] = MenuItem::section('BUSINESS CARD');

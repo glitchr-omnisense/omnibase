@@ -49,7 +49,7 @@ class RescueController extends AbstractDashboardController
         if ( ($user = $this->getUser()) ) {
 
             if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
-                return $this->redirect($referrer->getUrl() ?? $this->router->generate("dashboard"));
+                return $this->redirect($referrer->getUrl() ?? $this->router->generate("backoffice"));
         }
 
         // Generate form
@@ -65,7 +65,7 @@ class RescueController extends AbstractDashboardController
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',
-            'target_path' => $this->router->generate('dashboard'),
+            'target_path' => $this->router->generate('backoffice'),
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
             'logo' => $logo,

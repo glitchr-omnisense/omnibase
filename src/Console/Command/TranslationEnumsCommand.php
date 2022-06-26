@@ -5,6 +5,7 @@ namespace Base\Console\Command;
 use Base\BaseBundle;
 use Base\Console\Command;
 use Base\Service\LocaleProvider;
+use Base\Service\Translator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,7 +17,7 @@ class TranslationEnumsCommand extends Command
     protected function configure(): void
     {
         $this->addOption('enum', null, InputOption::VALUE_OPTIONAL, 'Should I consider only a specific enum ?');
-        $this->addOption('suffix', null, InputOption::VALUE_OPTIONAL, 'Should I add a specific translation suffix to the default path ?', "singular");
+        $this->addOption('suffix', null, InputOption::VALUE_OPTIONAL, 'Should I add a specific translation suffix to the default path ?', Translator::TRANSLATION_SINGULAR);
         $this->addOption('locale', null, InputOption::VALUE_OPTIONAL, 'Should I display only a specific locale ?');
     }
 

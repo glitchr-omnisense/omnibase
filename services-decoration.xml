@@ -49,5 +49,11 @@
         <service id="Base\Backend\Factory\AdminContextFactory" parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory">
             <argument type="service" id="ea_extension" />
         </service>
+
+        <service id="Base\Backend\Field\Configurator\CommonPreConfigurator"
+            parent="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator"
+            decorates="EasyCorp\Bundle\EasyAdminBundle\Field\Configurator\CommonPreConfigurator">
+            <argument type="service" id="translator" />
+        </service>
     </services>
 </container>
