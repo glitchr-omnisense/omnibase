@@ -48,8 +48,14 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
     public function apply(ImageInterface $image): ImageInterface
     {
-        foreach($this->filters as $filter)
-            $image = $filter->apply($image);
+        foreach($this->filters as $filter){
+
+            $oldImage = $image;
+            $image = $filter->apply($oldImage);
+
+            if(spl_object_id($image) != spl_object_id($oldImage))
+                $oldImage->__destruct();
+        }
 
         return parent::apply($image);
     }

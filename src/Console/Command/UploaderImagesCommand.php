@@ -42,7 +42,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
     protected function configure(): void
     {
         $this->addOption('warmup', false, InputOption::VALUE_NONE, 'Do you want to warm up image crops ?');
-        $this->addOption('batch' , false, InputOption::VALUE_OPTIONAL, 'Process data by batch of X entries', 50);
+        $this->addOption('batch' , false, InputOption::VALUE_OPTIONAL, 'Process data by batch of X entries', false);
         parent::configure();
     }
 
@@ -107,7 +107,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 if($this->ibatch >= $this->batch && $this->batch > 0) {
 
                     if($i == 0) return;
-                    $msg = ' [WARN] Batch limit reached out - Program stopped for cache memory reason. Set the `--batch` limit higher, if you wish. ';
+                    $msg = ' [WARN] Batch limit reached out - Set the `--batch` limit higher, if you wish. ';
                     $this->output->writeln('');
                     $this->output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
                     $this->output->writeln($msg);

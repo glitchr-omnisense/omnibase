@@ -299,7 +299,8 @@ class ImageService extends FileService implements ImageServiceInterface
 
             $oldImage = $image;
             $image = $filter->apply($oldImage);
-            $oldImage->__destruct();
+            if(spl_object_id($image) != spl_object_id($oldImage))
+                $oldImage->__destruct();
         }
 
         // Last filter is in charge of saving the final image

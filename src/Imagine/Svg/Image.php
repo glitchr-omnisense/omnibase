@@ -43,6 +43,13 @@ class Image extends AbstractImage
         $this->palette = new RGB();
     }
 
+
+    public function __destruct()
+    {
+        // Nothing to do for svg.. I assume..
+        // To be improved if needed :)
+    }
+
     public function __toString(): string
     {
         return $this->get('svg');

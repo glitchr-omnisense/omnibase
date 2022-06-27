@@ -163,7 +163,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
 
                 if($this->ibatch >= $this->batch && $this->batch > 0) {
 
-                    $msg = ' [WARN] Batch limit reached out - Program stopped for cache memory reason. Set the `--batch` limit higher, if you wish. ';
+                    $msg = ' [WARN] Batch limit reached out - Set the `--batch` limit higher, if you wish. ';
                     $this->output->writeln('');
                     $this->output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
                     $this->output->writeln($msg);

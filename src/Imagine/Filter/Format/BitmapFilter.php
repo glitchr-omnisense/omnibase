@@ -72,8 +72,14 @@ class BitmapFilter implements BitmapFilterInterface
         $extension = $this->getExtension() ?? $this->mimeTypes->getExtensions($mimeType)[0] ?? null;
         pathinfo_extension($this->path, $extension);
 
-        foreach($this->filters as $filter)
-            $image = $filter->apply($image);
+        foreach($this->filters as $filter){
+
+            $oldImage = $image;
+            $image = $filter->apply($oldImage);
+
+            if(spl_object_id($image) != spl_object_id($oldImage))
+                $oldImage->__destruct();
+        }
 
         return $this->path === null ? $image : $image->save($this->path, $this->options);
     }
