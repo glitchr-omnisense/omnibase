@@ -99,11 +99,11 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
         return parent::createBuiltInAction($pageName, $actionName);
     }
 
-    public function add(string $pageName, EaAction|string $actionNameOrObject, string $actionIcon = "", callable $callable = null)
+    public function add(string $pageName, EaAction|string $actionNameOrObject, ?string $actionIcon = null, callable $callable = null)
     {
         parent::add($pageName, $actionNameOrObject);
         $actionDto = $this->dto->getAction($pageName, $actionNameOrObject);
-        $actionDto->setIcon($actionIcon);
+        if($actionIcon) $actionDto->setIcon($actionIcon);
 
         if($callable != null)
             parent::update($pageName, $actionNameOrObject, $callable);

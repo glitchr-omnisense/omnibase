@@ -11,7 +11,7 @@
 
     {% if linkUrl is not empty %}
 
-        {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+        {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
 
         {% set renderTooltip = action.htmlAttributes.tooltip ?? false %}
         {% if renderTooltip %}
@@ -25,7 +25,7 @@
         {% else %}
             <a href="{{ linkUrl }}" class="{{ isIncludedInDropdown|default(false) ? 'dropdown-item' }} {{ action.cssClass }}"
             {% for name, value in action.htmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
+               {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i> {% endif -%}
                 <span>{{- actionLabel ? actionLabel|mb_ucfirst : "" -}}</span>
             </a>
         {% endif %}
@@ -38,10 +38,11 @@
 
 {% elseif 'button' == action.htmlElement %}
 
-    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
 
     {% if action.crudActionName == "group" %}
         TODO..
+        {{dump(action)}}
         <span class="input-group dropdown {{ action.type == 'entity' ? 'd-inline' : ''}} action-discriminator">
         {#
             {% set actionHtmlAttributes = action.htmlAttributes %}
@@ -142,7 +143,7 @@
 
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+            {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </a>
 
@@ -156,7 +157,7 @@
 
         <span class="dropdown-toggle {{ action.cssClass }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}  data-bs-toggle="dropdown" aria-expanded="false">
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
-            {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+            {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
             {{- actionLabel ? actionLabel|mb_ucfirst : "" -}}
         </span>
 
@@ -194,7 +195,7 @@
 
 {% else %}
     <span class="text-danger"><i class="action-icon fas fa-fw fa-exclamation-triangle"></i>
-    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet) %}
+    {% set actionLabel = action.label|trans_quiet(domain = ea.getTranslationDomain())|default(action.label|trans_quiet)|default(action.label) %}
     "{{- actionLabel ? actionLabel|mb_ucfirst : action.label -}}" cannot be rendered as "{{action.htmlElement}}"
     </span>
 {% endif %}
