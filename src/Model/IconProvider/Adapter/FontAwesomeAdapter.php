@@ -2,6 +2,7 @@
 
 namespace Base\Model\IconProvider\Adapter;
 
+use Base\Model\IconizeInterface;
 use Base\Model\IconProvider\AbstractIconAdapter;
 
 class FontAwesomeAdapter extends AbstractIconAdapter
@@ -34,8 +35,15 @@ class FontAwesomeAdapter extends AbstractIconAdapter
         ];
     }
 
-    public function supports(string $icon): bool
+    public function supports(IconizeInterface|string|null $icon): bool
     {
+        if($icon === null) return false;
+
+        if ($icon instanceof IconizeInterface) {
+            $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
+            $icon = first($icon);
+        }
+
         $knownPrefix = array_merge([$this->getName()], array_map(
             fn($s) => $this->getClass($s),
             [self::STYLE_SOLID, self::STYLE_REGULAR, self::STYLE_LIGHT, self::STYLE_THIN, self::STYLE_DUOTONE, self::STYLE_BRANDS, self::STYLE_KIT]

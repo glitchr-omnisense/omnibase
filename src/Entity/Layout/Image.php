@@ -19,6 +19,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
+use Base\Enum\Quadrant\Quadrant8;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
@@ -108,6 +109,7 @@ class Image implements IconizeInterface
      */
     protected $quadrant = Quadrant::O;
     public function getQuadrant(): string { return $this->quadrant; }
+    public function getQuadrantPosition(): string { return Quadrant8::getPosition($this->quadrant); }
     public function setQuadrant(string $quadrant): self
     {
         $this->quadrant = $quadrant;

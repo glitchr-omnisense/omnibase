@@ -52,10 +52,10 @@ class IconProvider
         if(class_exists($idOrClass))
             return $this->adapters[$idOrClass] ?? null;
 
-        foreach($this->adapters as $provider) {
+        foreach($this->adapters as $adapter) {
 
-            if ($provider->supports($idOrClass))
-                return $provider;
+            if ($adapter->supports($idOrClass))
+                return $adapter;
         }
 
         return null;
@@ -77,7 +77,7 @@ class IconProvider
     {
         if(!$icon) return $icon;
 
-        $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $this->getRouteIcons($icon) ?? $icon;
+        $icon = $icon instanceof IconizeInterface ? ($icon->__iconize() ?? $icon->__iconizeStatic()) : $this->getRouteIcons($icon) ?? $icon;
         if(is_array($icon))
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 

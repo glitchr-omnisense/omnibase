@@ -2,6 +2,7 @@
 
 namespace Base\Model\IconProvider\Adapter;
 
+use Base\Model\IconizeInterface;
 use Base\Model\IconProvider\AbstractIconAdapter;
 
 class BootstrapTwitterAdapter extends AbstractIconAdapter
@@ -24,8 +25,15 @@ class BootstrapTwitterAdapter extends AbstractIconAdapter
         $this->getVersion();
     }
 
-    public function supports(string $icon): bool
+    public function supports(IconizeInterface|string|null $icon): bool
     {
+        if ($icon === null) return false;
+
+        if ($icon instanceof IconizeInterface) {
+            $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
+            $icon = first($icon);
+        }
+
         return count(array_filter(explode(" ", $icon), fn($id) => $id == $this->getName()));
     }
 

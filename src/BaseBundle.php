@@ -3,8 +3,10 @@
 namespace Base;
 
 use Base\DependencyInjection\Compiler\AnnotationPass;
+use Base\DependencyInjection\Compiler\CurrencyApiPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
 use Base\DependencyInjection\Compiler\IconProviderPass;
+use Base\DependencyInjection\Compiler\SharerPass;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
 use Exception;
@@ -39,6 +41,8 @@ class BaseBundle extends Bundle
         $container->addCompilerPass(new AnnotationPass());
         $container->addCompilerPass(new IconProviderPass());
         $container->addCompilerPass(new EntityExtensionPass());
+        $container->addCompilerPass(new SharerPass());
+        $container->addCompilerPass(new CurrencyApiPass());
 
         /* Register aliased repositories */
         foreach(self::$aliasRepositoryList as $baseRepository => $aliasedRepository) {
