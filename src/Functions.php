@@ -93,7 +93,7 @@ namespace {
     {
         $noscheme = !str_contains($url, "://");
         if($noscheme) $url = "file://".$url;
-        
+
         $parse = parse_url($url, $component);
         if($parse === false) return false;
 
@@ -104,11 +104,11 @@ namespace {
 
         $path = str_rstrip($parse['path'] ?? "", "/");
         $parse["path"] = str_replace("//", "/", $path);
-        
+
         $tail = str_strip($url, ["file://", $base], "/");
         $root = str_strip($url, ["file://", $base], $tail);
         if(!empty($root)) $parse["root"] = $root;
-        
+
         if(array_key_exists("host", $parse)) {
 
             //
@@ -285,15 +285,15 @@ namespace {
         $tmpfname = tempnam($tmpdir, $prefix);
 
         $contents = curl_get_contents($url);
-        if($contents === false)
+        if($contents !== false)
             file_put_contents($tmpfname, $contents);
 
         return $tmpfname;
     }
 
-    function curl_get_contents(string $url) {
+    function curl_get_contents(string $url, bool $follow_location = true, bool $verify_ssl = false) {
 
-        $ch = curl_init();
+        $curl = curl_init();
         $header[0] = "Accept: text/xml,application/xml,application/xhtml+xml,";
         $header[0] .= "text/html;q=0.9,text/plain;q=0.8,image/png,*/*;q=0.5";
         $header[] = "Cache-Control: max-age=0";
@@ -302,18 +302,21 @@ namespace {
         $header[] = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
         $header[] = "Accept-Language: en-us,en;q=0.5";
         $header[] = "Pragma: ";
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, $header );
 
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $header );
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $follow_location);
 
-        // I have added below two lines
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_exec($curl);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_URL, $url);
 
-        $data = curl_exec($ch);
-        curl_close($ch);
+        // I have added below two lines.. because of some certificate issue
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $verify_ssl);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $verify_ssl);
+
+        $data = curl_exec($curl);
+        curl_close($curl);
 
         return $data;
     }
@@ -1917,7 +1920,7 @@ namespace {
     function daydiff(null|string|int|DateTime $datetime):?int
     {
         if($datetime == null) return null;
-        
+
         $datetime = castdatetime($datetime);
         $today = new DateTime("today");
         $diff  = $today->diff( $datetime->setTime( 0, 0, 0 ) );

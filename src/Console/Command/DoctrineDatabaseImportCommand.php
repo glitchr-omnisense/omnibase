@@ -12,7 +12,6 @@ use Base\Database\Type\SetType;
 use Base\Entity\Thread;
 use Base\Model\GraphInterface;
 use Base\Notifier\Notifier;
-use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\Translator;
@@ -37,6 +36,7 @@ use Symfony\Component\Console\Question\ChoiceQuestion;
 #[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
 {
+    public const OFFSET_TOP = 2;
     /**
      * @var EntityManager
      */
@@ -162,7 +162,7 @@ class DoctrineDatabaseImportCommand extends Command
         $this->addOption('show',        null, InputOption::VALUE_NONE, 'Show all details');
         $this->addOption('notify',      null, InputOption::VALUE_NONE, 'Send notification if needed');
         $this->addOption('force',       null, InputOption::VALUE_NONE, 'Import without asking confirmation.');
-        $this->addOption('on-fly',      null, InputOption::VALUE_NONE, 'Import on the fly (while hydratation)');
+        $this->addOption('on-the-fly',      null, InputOption::VALUE_NONE, 'Import right after each single entity got hydrated');
 
         parent::configure();
     }
@@ -178,7 +178,7 @@ class DoctrineDatabaseImportCommand extends Command
         $force        = $input->getOption("force");
         $extension    = $input->getOption("extension");
         $batch        = $input->getOption("batch");
-        $onFly        = $input->getOption("on-fly");
+        $onTheFly        = $input->getOption("on-the-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
 
         $entries      = (int) $input->getOption("entries");
@@ -214,7 +214,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $rawData = $this->serializer->decode(file_get_contents2($path), 'csv');
 
             default:
-                throw new Exception("Missing extension in filename. Please use \"--extension\" option.");
+                throw new Exception("File extension couldn't be determine.. Please use \"--extension\" option.");
         }
 
         //
@@ -329,7 +329,7 @@ class DoctrineDatabaseImportCommand extends Command
             }
         }
 
-        $output->writeln(' Hydrating entities..'.($onFly ? " and import them on the fly" : null));
+        $output->writeln(' Hydrating entities..'.($onTheFly ? " and import them on the fly" : null));
         $progressBar = $totalData ? new ProgressBar($output, $totalData) : null;
 
         $entityParentColumn = null;
@@ -344,7 +344,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                 //
                 // Loop over entries
-                foreach($entries as &$_) {
+                foreach($entries as $iEntry => &$_) {
 
                     if($progressBar) $progressBar->advance();
                     $counter++;
@@ -355,7 +355,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                     list($entityName, $entry) = $_;
 
-                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($spreadsheet, &$entityParentColumn, &$entityUniqueValues, $entityName, &$entityUniqueKeys, &$targetEntity, &$keyDepth) : ?array {
+                    $entry = array_transforms(function($k,$v,$fn,$i,$d) use ($iEntry, $spreadsheet, &$entityParentColumn, &$entityUniqueValues, $entityName, &$entityUniqueKeys, &$targetEntity, &$keyDepth) : ?array {
 
                         list($fieldName, $special) = array_pad(explode(":", $k, 2),2,null);
                         $keyDepth[$d] = $fieldName;
@@ -380,7 +380,7 @@ class DoctrineDatabaseImportCommand extends Command
                         if ($special) {
 
                             $resolvedFieldPath = $this->classMetadataManipulator->resolveFieldPath($entityName, $fieldPath);
-                            if($resolvedFieldPath === null) throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\"");
+                            if($resolvedFieldPath === null) throw new Exception("Cannot resolve field path \"$fieldPath\" for \"$entityName\" for entry #".($iEntry+self::OFFSET_TOP+1));
 
                             $fieldName = explode(".", $resolvedFieldPath);
                             $fieldName = end($fieldName);
@@ -418,10 +418,17 @@ class DoctrineDatabaseImportCommand extends Command
 
                                                 $vBak = $v;
                                                 if($isToOneSide) $v = $targetRepository->findOneBy($vBak);
-                                                else $v = array_filter(array_map(fn($e) => $targetRepository->findOneBy($e), $vBak));
+                                                else $v = array_filter(array_map(function($e) use ($targetName, $targetRepository, $iEntry) {
+
+                                                    if(!is_array($e))
+                                                        throw new Exception("Failed to find parse \"".$targetName."\" unexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ?)");
+
+                                                    return $targetRepository->findOneBy($e);
+
+                                                }, $vBak));
 
                                                 if($v === null)
-                                                    throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\"");
+                                                    throw new Exception("Failed to find \"".$targetName."\" with parameters \"".serialize($vBak)."\" for entry #".($iEntry+self::OFFSET_TOP+1));
                                             }
                                         }
 
@@ -433,13 +440,13 @@ class DoctrineDatabaseImportCommand extends Command
                                         $enumType = substr($special, 0, strlen($special)-1);
 
                                         $typeOfField = $this->classMetadataManipulator->getTargetClass($targetName, $fieldName);
-                                        if(!is_instanceof($typeOfField, $enumType)) throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\"");
+                                        if(!is_instanceof($typeOfField, $enumType)) throw new Exception("Incompatibility between EnumType provided \"".$enumType."\" and database type \"".$typeOfField."\" for entry #".($iEntry+self::OFFSET_TOP+1));
 
                                         if (is_instanceof($enumType, SetType::class))
                                             $v = array_map(fn($k) => $enumType::getValue($k), $v);
                                         else if (is_instanceof($enumType, EnumType::class))
                                             $v = $enumType::getValue($v) ;
-                                        else throw new Exception("Class must be either ".EnumType::class." or ".SetType::class);
+                                        else throw new Exception("Class must be either \"".EnumType::class."\" or \"".SetType::class."\" for entry #".($iEntry+self::OFFSET_TOP+1));
 
                                         break;
                                 }
@@ -511,7 +518,7 @@ class DoctrineDatabaseImportCommand extends Command
                         $entities[$spreadsheet][$baseName][] = $entity;
                         $entityStates[$spreadsheet][$baseName][] = $state;
 
-                        if ($onFly && $state == self::VALID_ENTITY) {
+                        if ($onTheFly && $state == self::VALID_ENTITY) {
 
                             try {
 
@@ -524,7 +531,7 @@ class DoctrineDatabaseImportCommand extends Command
                                 $counter++;
 
                             } catch (\Exception $e) {
-                                $msg = " Failed to write ".$this->translator->entity($entity)."(".$entity.")  ";
+                                $msg = " Failed to write ".$this->translator->entity($entity)."(".$entity.") for entry #".($iEntry+self::OFFSET_TOP+1);
                                 $output->writeln('');
                                 $output->writeln('');
                                 $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));
@@ -546,7 +553,7 @@ class DoctrineDatabaseImportCommand extends Command
                     $occurences = array_filter(array_count_values($values), fn($v) => $v > 1);
                     $duplicates = !empty($occurences);
                     if($duplicates)
-                        throw new Exception("Duplicate entries \"".implode(",", array_unique(array_keys($occurences)))."\" found for $targetName::$".$uniqueKey);
+                        throw new Exception("Duplicate entries \"".implode(",", array_unique(array_keys($occurences)))."\" found for $targetName::$".$uniqueKey ."(for entry #".($iEntry+self::OFFSET_TOP+1));
                 }
             }
         }
@@ -571,7 +578,7 @@ class DoctrineDatabaseImportCommand extends Command
             $count  = $countData > 0 ? $countNewData."/".$countData : "0";
             $plural = ($countNewData > 1);
 
-            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], $plural ? Translator::TRANSLATION_PLURAL : Translator::TRANSLATION_SINGULAR)) .'</ln>';
+            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], null, $plural ? Translator::TRANSLATION_PLURAL : Translator::TRANSLATION_SINGULAR)) .'</ln>';
 
         }, array_keys(array_filter($entityData)))));
 
@@ -594,7 +601,7 @@ class DoctrineDatabaseImportCommand extends Command
                         switch($state) {
 
                             case self::VALID_ENTITY :
-                                $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onFly ? " just got imported on the fly" : "is ready for import")." !");
+                                $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onTheFly ? " just got imported on the fly" : "is ready for import")." !");
                                 break;
 
                             case self::ALREADY_IN_DATABASE:
@@ -627,7 +634,7 @@ class DoctrineDatabaseImportCommand extends Command
             return Command::SUCCESS;
         }
 
-        if(!$onFly) {
+        if(!$onTheFly) {
 
             if($force) $apply = "y";
             else {

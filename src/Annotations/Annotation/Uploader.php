@@ -264,7 +264,7 @@ class Uploader extends AbstractAnnotation
 
         $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
         if($potentialMemoryLeak)
-            throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName.". Did you called unit of work change set ? Please process file manually");
+            throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName."\n Did you called unit of work change set ? Please process file manually");
 
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
@@ -292,6 +292,9 @@ class Uploader extends AbstractAnnotation
             }
         }
 
+        $entityId = $entity->getId();
+        $entityId = $entityId ? "#".$entityId : "";
+
         // Field value can be an array or just a single path
         $fileList = array_values(array_intersect($newList, $oldList));
         foreach (array_diff($newList, $oldList) as $index => $entry) {
@@ -312,7 +315,7 @@ class Uploader extends AbstractAnnotation
                 throw new FileNotFoundException("File got erased \"$fieldName\" in ".get_class($entity).".");
 
             if ($file->getSize() > $this->maxSize)
-                throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity).".");
+                throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity)." ".$entityId.".");
 
             //
             // Check mime restriction
@@ -321,7 +324,7 @@ class Uploader extends AbstractAnnotation
                 $compatibleMimeType |= preg_match( "/".str_replace("/", "\/", $mimeType)."/", $file->getMimeType());
 
             if(!$compatibleMimeType)
-                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." (expected: \"".implode(", ", $this->mimeTypes)."\").");
+                throw new InvalidMimeTypeException("Invalid MIME type \"".$file->getMimeType()."\" received for field \"$fieldName\" in ".get_class($entity)." ".$entityId." (expected: \"".implode(", ", $this->mimeTypes)."\").");
 
             //
             // Upload files
