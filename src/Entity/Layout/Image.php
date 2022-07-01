@@ -43,12 +43,12 @@ class Image implements IconizeInterface
         if(is_array($thumbnail)) {
 
             $filters[] = new ThumbnailFilter($thumbnail[0] ?? null, $thumbnail[1] ?? null);
-            $identifier ??= implode(":", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
+            $identifier ??= implode("x", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
         $routeName = $identifier ? "ux_imageCrop" : "ux_image" ;
         $routeParameters = array_merge($routeParameters, [
-            "identifier" => is_array($identifier) ? implode(":", $identifier) : $identifier,
+            "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
             "hashid" => $this->getImageService()->obfuscate($this->getSource(), [], $filters),
         ]);
 
