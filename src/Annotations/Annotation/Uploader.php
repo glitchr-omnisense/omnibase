@@ -315,7 +315,7 @@ class Uploader extends AbstractAnnotation
                 throw new FileNotFoundException("File got erased \"$fieldName\" in ".get_class($entity).".");
 
             if ($file->getSize() > $this->maxSize)
-                throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity)." ".$entityId.".");
+                throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity)." ".$entityId.". (".$file->getSize()."B > ".$this->maxSize."B)");
 
             //
             // Check mime restriction
