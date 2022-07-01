@@ -25,7 +25,6 @@ use App\Controller\Backend\Crud\UserCrudController;
 use Base\Entity\Layout\Image;
 use Base\Backend\Config\WidgetItem;
 use Base\Backend\Config\MenuItem;
-use Base\Service\BaseService;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
@@ -62,7 +61,6 @@ use Base\Field\Type\PasswordType;
 use Base\Field\Type\RouteType;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions as EaActions;
 use Base\Backend\Config\Action;
 use Base\Backend\Config\Actions;
 use Base\Routing\RouterInterface;
@@ -74,8 +72,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -86,7 +82,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     protected $adminUrlGenerator;
 
-    public const TRANSLATION_DASHBOARD = "dashboard";
+    public const TRANSLATION_DASHBOARD = "backoffice";
     public const TRANSLATION_ENTITY    = "entities";
     public const TRANSLATION_ENUM      = "enums";
 
