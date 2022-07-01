@@ -2,11 +2,13 @@
 
 namespace Base\Model\IconProvider;
 
+use Base\Model\IconizeInterface;
+
 interface IconAdapterInterface
 {
     public function load(): array;
-    public function supports(string $icon): bool;
-    public function iconify(string $icon, array $attributes): string;
+    public function supports(IconizeInterface|string|null $icon): bool;
+    public function iconify (IconizeInterface|string $icon, array $attributes): string;
 
     public static function getName(): string;
     public static function getOptions(): array;

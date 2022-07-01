@@ -98,9 +98,9 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('str_ends_with'  , "str_ends_with"  ),
             new TwigFunction('empty',           "empty"),
 
-            new TwigFunction('urlify',          [$this,               'urlify' ], ["is_safe" => ['all']]),
-            new TwigFunction('iconify',         [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-            new TwigFunction('asset',           [$this,               'asset']),
+            new TwigFunction('urlify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
+            new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
+            new TwigFunction('asset',   [$this,               'asset']),
         ];
     }
 

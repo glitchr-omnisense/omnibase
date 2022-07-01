@@ -22,6 +22,7 @@ class ArrayType extends CollectionType
         parent::__construct($twig, $translator);
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
+
     public function getBlockPrefix(): string { return 'array'; }
     public function configureOptions(OptionsResolver $resolver): void
     {

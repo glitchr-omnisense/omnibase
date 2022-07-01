@@ -2,6 +2,7 @@
 
 namespace Base\Model\IconProvider;
 
+use Base\Model\IconizeInterface;
 use Symfony\Component\Yaml\Yaml;
 
 abstract class AbstractIconAdapter implements IconAdapterInterface
@@ -54,8 +55,13 @@ abstract class AbstractIconAdapter implements IconAdapterInterface
         return $this->version;
     }
 
-    public function iconify(string $icon, array $attributes = []): string
+    public function iconify(IconizeInterface|string $icon, array $attributes = []): string
     {
+        if ($icon instanceof IconizeInterface) {
+            $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
+            $icon = first($icon);
+        }
+
         $options = $this->getOptions();
 
         $class = trim(implode(" ", [$attributes["class"] ?? null, $options["class"] ?? null, $icon]));

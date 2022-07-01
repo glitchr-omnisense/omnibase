@@ -16,7 +16,6 @@ class SharerPass implements CompilerPassInterface
             return;
 
         $definition = $container->findDefinition(Sharer::class);
-
         $taggedServices = $container->findTaggedServiceIds('base.service.sharer');
         foreach ($taggedServices as $id => $tags)
             $definition->addMethodCall('addAdapter', [new Reference($id)]);

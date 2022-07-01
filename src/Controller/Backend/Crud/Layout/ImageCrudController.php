@@ -9,14 +9,13 @@ use Base\Field\CollectionField;
 use Base\Field\ImageField;
 use Base\Field\QuadrantField;
 use Base\Field\Type\CropperType;
-use Base\Field\Type\NumberType;
 use Base\Field\Type\SlugType;
+use Base\Service\Translator;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 class ImageCrudController extends AbstractCrudController
 {

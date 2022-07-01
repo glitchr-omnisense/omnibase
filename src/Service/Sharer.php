@@ -2,7 +2,9 @@
 
 namespace Base\Service;
 
+use Base\Model\LinkableInterface;
 use Base\Model\Sharer\SharerAdapterInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class Sharer
 {
@@ -13,41 +15,34 @@ class Sharer
         if(class_exists($idOrClass))
             return $this->adapters[$idOrClass] ?? null;
 
-        foreach($this->adapters as $provider) {
+        foreach($this->adapters as $adapter) {
 
-            if ($provider->supports($idOrClass))
-                return $provider;
+            if ($adapter->getIdentifier() == $idOrClass)
+                return $adapter;
         }
 
         return null;
     }
 
-    public function addAdapter(SharerAdapterInterface $provider): self
+    public function addAdapter(SharerAdapterInterface $adapter): self
     {
-        $this->adapters[get_class($provider)] = $provider;
+        $this->adapters[get_class($adapter)] = $adapter;
         return $this;
     }
 
-    public function removeAdapter(SharerAdapterInterface $provider): self
+    public function removeAdapter(SharerAdapterInterface $adapter): self
     {
-        array_values_remove($this->adapters, $provider);
+        array_values_remove($this->adapters, $adapter);
         return $this;
     }
 
-    // public function iconify(null|string|array|IconizeInterface $icon, array $attributes = []) : null|string|array
-    // {
-    //     if(!$icon) return $icon;
+    public function share(string $adapterId, LinkableInterface|string $url, array $options = [], ?string $template = null)
+    {
+        $adapter = $this->getAdapter($adapterId);
+        if(!$adapter) return "";
 
-    //     $icon = $icon instanceof IconizeInterface ? $icon->__iconize() : $this->getRouteIcons($icon) ?? $icon;
-    //     if(is_array($icon))
-    //         return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
+        $options["url"] = $url instanceof LinkableInterface ? $url->__toLink([], UrlGeneratorInterface::ABSOLUTE_URL) : $url;
 
-    //         foreach($this->adapters as $provider) {
-
-    //             if ($provider->supports($icon))
-    //                 return $provider->iconify($icon, $attributes);
-    //     }
-
-    //     // return $this->imageService->imagify($icon, $attributes);
-    // }
+        return $adapter->generate($options, $template);
+    }
 }
