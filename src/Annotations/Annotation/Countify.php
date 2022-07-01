@@ -37,7 +37,7 @@ class Countify extends AbstractAnnotation
     {
         $this->referenceColumn = $data['reference'] ?? null;
 
-        switch($data["type"])
+        switch($data["type"] ?? "")
         {
             default:
             case self::COUNT_CHARS:

@@ -43,7 +43,7 @@ class RouteVoter extends Voter
 
             case self::VALIDATE_PATH:
 
-                $format = str_ends_with($this->router->getRoute($url)->getPath(), "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
+                $format = str_ends_with($url, "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
                 return $url == sanitize_url($url, $format) || $url == sanitize_url($url);
 
             case self::VALIDATE_HOST:

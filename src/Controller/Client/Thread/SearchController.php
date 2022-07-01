@@ -2,26 +2,16 @@
 
 namespace Base\Controller\Client\Thread;
 
-use App\Entity\User;
-use App\Repository\UserRepository;
-
-use App\Form\User\ProfileEditType;
-use App\Form\User\ProfileSearchType;
 use Base\Entity\Thread;
 use Base\Enum\ThreadState;
 use Base\Form\Data\Thread\SearchData;
 use Base\Form\Type\Thread\SearchbarType;
 use Base\Form\Type\Thread\SearchType;
-use Base\Repository\ThreadRepository;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Endroid\QrCode\QrCode;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SearchController extends AbstractController
 {

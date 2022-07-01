@@ -89,11 +89,11 @@ namespace {
     }
 
     // NB: Path variable should not be removed, at most empty string..
-    function parse_url2(string $url, int $component = -1): array|string|int|false|null
+    function parse_url2(string $url, int $component = -1, string $base = "/"): array|string|int|false|null
     {
         $noscheme = !str_contains($url, "://");
         if($noscheme) $url = "file://".$url;
-
+        
         $parse = parse_url($url, $component);
         if($parse === false) return false;
 
@@ -104,11 +104,11 @@ namespace {
 
         $path = str_rstrip($parse['path'] ?? "", "/");
         $parse["path"] = str_replace("//", "/", $path);
-
-        $root = str_strip($url, "file://", [$parse['path'], "/"]);
-
+        
+        $tail = str_strip($url, ["file://", $base], "/");
+        $root = str_strip($url, ["file://", $base], $tail);
         if(!empty($root)) $parse["root"] = $root;
-
+        
         if(array_key_exists("host", $parse)) {
 
             //
@@ -145,6 +145,8 @@ namespace {
 
         if(array_key_exists("root", $parse))
             $parse["url"] = $root.$path;
+        if(!array_key_exists("base_dir", $parse))
+            $parse["base_dir"] = $base;
 
         return $parse;
     }
@@ -1912,8 +1914,10 @@ namespace {
              ( is_string($datetime) ?  new DateTime($datetime) : (clone $datetime));
     }
 
-    function daydiff(null|string|int|DateTime $datetime):int
+    function daydiff(null|string|int|DateTime $datetime):?int
     {
+        if($datetime == null) return null;
+        
         $datetime = castdatetime($datetime);
         $today = new DateTime("today");
         $diff  = $today->diff( $datetime->setTime( 0, 0, 0 ) );

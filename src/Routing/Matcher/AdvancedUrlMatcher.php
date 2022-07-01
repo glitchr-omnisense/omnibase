@@ -81,7 +81,8 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
     public function firewall(string $pathinfo): ?string
     {
-        return $this->getFirewallMap()->getFirewallConfig(Request::create($pathinfo))->getName();
+        $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
+        return $this->getFirewallMap()->getFirewallConfig($request)->getName();
     }
 
     public function match(string $pathinfo): array
@@ -96,14 +97,15 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
         //
         // Custom match implementation
-        $parsePathinfo = parse_url2($pathinfo);
+        $parsePathinfo = parse_url2($pathinfo, -1, $this->getRouter()->getBaseDir());
         if($parsePathinfo === false) return $match;
 
-        $parse = parse_url2(get_url()) ?? [];
+        $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()) ?? [];
         $parse = array_merge($parse, $parsePathinfo);
         $this->getContext()->setHost($parse["host"] ?? "");
-
-        try { return parent::match($parse["path"] ?? $pathinfo); }
+        $this->getContext()->setBaseUrl($parse["base_dir"] ?? "");
+        
+        try { return parent::match(str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl())); }
         catch(Exception $e) { throw $e; }
     }
 }

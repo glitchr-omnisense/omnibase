@@ -13,7 +13,6 @@ class WorkflowState extends EnumType implements IconizeInterface
     const REVIEWING = "WORKFLOW_REVIEWING";
     const REJECTED  = "WORKFLOW_REJECTED";
     const APPROVED  = "WORKFLOW_APPROVED";
-    const DELETED   = "WORKFLOW_DELETED";
 
     public function __iconize(): ?array { return null; }
     public static function __iconizeStatic(): ?array
@@ -25,7 +24,6 @@ class WorkflowState extends EnumType implements IconizeInterface
             self::PENDING   => ["fas fa-pause-circle"],
             self::REJECTED  => ["fas fa-times-circle"],
             self::REVIEWING => ["fas fa-times-circle"],
-            self::DELETED   => ["fas fa-trash-alt"],
         ];
     }
 }

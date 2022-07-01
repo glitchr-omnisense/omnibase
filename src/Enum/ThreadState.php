@@ -13,6 +13,7 @@ class ThreadState extends EnumType implements IconizeInterface
     const SECRET   = "STATE_PUBLISH_SECRET";
     const ARCHIVE  = "STATE_PUBLISH_ARCHIVE";
     const PASSWORD = "STATE_PUBLISH_PASSWORD";
+    const DELETE   = "STATE_DELETE";
 
     public function __iconize(): ?array { return null; }
     public static function __iconizeStatic(): ?array
@@ -24,6 +25,7 @@ class ThreadState extends EnumType implements IconizeInterface
             self::SECRET   => ["fas fa-eye-slash"],
             self::ARCHIVE  => ["fas fa-archive"],
             self::PASSWORD => ["fas fa-key"],
+            self::DELETE   => ["fas fa-trash-alt"],
         ];
     }
 }

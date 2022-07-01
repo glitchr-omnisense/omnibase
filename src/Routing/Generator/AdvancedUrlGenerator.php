@@ -80,11 +80,12 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         if($routeParameters !== null) {
 
             // Use either parameters or $_SERVER variables to determine the host to provide
-            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getSettingBag()->scheme();
-            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getSettingBag()->host();
-            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getSettingBag()->base_dir();
-            $parse     = parse_url2(get_url($scheme, $host, $baseDir));
-
+            $scheme    = array_pop_key("_scheme"  , $routeParameters) ?? $this->getRouter()->getScheme();
+            $host      = array_pop_key("_host"    , $routeParameters) ?? $this->getRouter()->getHost();
+            $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
+            $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
+            $parse["base_dir"] = $baseDir;
+            
             if($parse && array_key_exists("host", $parse))
                 $this->getContext()->setHost($parse["host"]);
             if($parse && array_key_exists("base_dir", $parse))
@@ -92,7 +93,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         } else {
 
-            $parse = parse_url2(get_url()); // Make sure also it gets the basic context
+            $parse = parse_url2(get_url(), -1, $this->getRouter()->getBaseDir()); // Make sure also it gets the basic context
             if($parse && array_key_exists("host", $parse))
                 $this->getContext()->setHost($parse["host"]);
             if($parse && array_key_exists("base_dir", $parse))

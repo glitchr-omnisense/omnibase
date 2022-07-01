@@ -79,7 +79,9 @@ class AdvancedRouter implements RouterInterface
             return false;
 
         $route = $this->getRouteName();
-        return $route == "_wdt" || $route == "_profiler";
+        if(!$route) return false;
+        
+        return str_starts_with($route, "_wdt") || str_starts_with($route, "_profiler");
     }
 
     public function isWdt(mixed $request = null)
@@ -93,7 +95,9 @@ class AdvancedRouter implements RouterInterface
             return false;
 
         $route = $this->getRouteName();
-        return $route == "_wdt";
+        if(!$route) return false;
+        
+        return str_starts_with($route, "_wdt");
     }
 
     public function isEasyAdmin(mixed $request = null)
@@ -187,6 +191,10 @@ class AdvancedRouter implements RouterInterface
         return null;
     }
 
+    public function getHost(): ?string    { return $_SERVER['HTTP_HOST'] ?? $this->settingBag->host(); }
+    public function getBaseDir(): ?string { return $_SERVER['CONTEXT_PREFIX'] ?? $this->settingBag->base_dir() ?? "/"; }
+    public function getScheme(): ?string  { return $this->settingBag->scheme(); }
+
     public function getRouteName(?string $routeUrl = null): ?string
     {
         if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());
@@ -246,17 +254,21 @@ class AdvancedRouter implements RouterInterface
 
         $event = null;
         if(array_key_exists("event", $headers)) {
+
             $event = $headers["event"];
             if(! ($event instanceof Event) )
                 throw new InvalidArgumentException("header variable \"event\" must be ".Event::class.", currently: ".(is_object($event) ? get_class($event) : gettype($event)));
+
             unset($headers["event"]);
         }
 
         $exceptions = [];
         if(array_key_exists("exceptions", $headers)) {
+
             $exceptions = $headers["exceptions"];
             if(!is_string($exceptions) && !is_array($exceptions))
                 throw new InvalidArgumentException("header variable \"exceptions\" must be of type \"array\" or \"string\", currently: ".(is_object($exceptions) ? get_class($exceptions) : gettype($exceptions)));
+
             unset($headers["exceptions"]);
         }
 

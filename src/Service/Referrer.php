@@ -4,6 +4,8 @@ namespace Base\Service;
 
 use Base\Routing\RouterInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
+use  Base\Security\LoginFormAuthenticator;
+use  Base\Security\RescueFormAuthenticator;
 
 class Referrer implements ReferrerInterface
 {
@@ -20,8 +22,20 @@ class Referrer implements ReferrerInterface
         $this->router       = $router;
     }
 
+    public function isVetoed(?string $routeName) 
+    {
+        if(!$routeName) return false;
+        if(RescueFormAuthenticator::isSecurityRoute($routeName))
+            return true;
+
+        if(LoginFormAuthenticator::isSecurityRoute($routeName))
+            return true;
+    }
+    
     public function setUrl(?string $url)
     {
+        $route = $url ? $this->router->getRouteName($url) : null;
+
         $this->requestStack->getMainRequest()->getSession()->set('_target_path', $url);
         return $this;
     }
@@ -42,34 +56,44 @@ class Referrer implements ReferrerInterface
         // Target path fallbacks
         $targetPath = $request->request->get('_target_path');
         $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
-        if(!$targetRoute) {
+        $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
+
+        if(!$targetRoute && !$this->isVetoed($targetRoute)) {
             $targetPath = $request->getSession()->get('_target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
+            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         // Security fallbacks
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.main.target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
+            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
+
         if(!$targetRoute) {
             $targetPath = $request->getSession()->get('_security.account.target_path');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
+            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         // Default referrer
         if(!$targetRoute) {
             $targetPath = $request->headers->get("referer"); // Yes.. with the legendary misspelling.
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
+            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
+
         if(!$targetRoute) {
             $targetPath = $request->request->get('referer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
+            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         if(!$targetRoute) {
             $targetPath = $request->request->get('referrer');
             $targetRoute = $targetPath ? $this->router->getRouteName($targetPath) : null;
+            $targetRoute = !$this->isVetoed($targetRoute) ? $targetRoute : null;
         }
 
         return $targetPath ? $targetPath : null;

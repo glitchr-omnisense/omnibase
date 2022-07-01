@@ -29,6 +29,10 @@ user_role:
     _singular: "réseau social"
     _plural: "réseaux sociaux"
 
+  role_editor: 
+    _singular: "éditeur"
+    _plural: "éditeurs"
+
 upload_state:
   _singular: "état de téléchargement"
   _plural: "états de téléchargements"

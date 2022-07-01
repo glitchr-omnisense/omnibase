@@ -40,13 +40,11 @@ class AccessVoter extends Voter
         $user    = $subject instanceof User ? $subject : null;
         $url     = is_string($subject) || $subject instanceof Referrer ? $subject : get_url();
 
-        //
-        // Select proper ballot
         switch($attribute) {
 
             case self::ADMIN_ACCESS:
                 $access  = filter_var($this->settingBag->getScalar("base.settings.admin_access"), FILTER_VALIDATE_BOOLEAN);
-                $access |= $user && $user->isGranted("ROLE_EDITOR");
+                $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
                 return $access;
 
             case self::USER_ACCESS:
@@ -71,8 +69,9 @@ class AccessVoter extends Voter
                 $firewallNames = $this->parameterBag->get("base.access_restriction.firewalls");
                 $isRestrictedFirewall = false;
 
+                $firewallNameUrl = $this->router->getRouteFirewall($url);
                 foreach($firewallNames as $firewallName)
-                    $isRestrictedFirewall |= $this->router->getRouteFirewall($url) == $firewallName;
+                    $isRestrictedFirewall |= $firewallNameUrl == $firewallName;
 
                 if(!$isRestrictedFirewall) return true;
 

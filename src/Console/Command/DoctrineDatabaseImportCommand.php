@@ -58,7 +58,8 @@ class DoctrineDatabaseImportCommand extends Command
     const PARENT_NOT_FOUND    =  2;
     const ALREADY_IN_DATABASE =  3;
 
-    public function __construct(LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
+    public function __construct(
+        LocaleProviderInterface $localeProvider, TranslatorInterface $translator, EntityManagerInterface $entityManager, ParameterBagInterface $parameterBag,
         EntityHydrator $entityHydrator, ClassMetadataManipulator $classMetadataManipulator, Notifier $notifier)
     {
         parent::__construct($localeProvider, $translator, $entityManager, $parameterBag);

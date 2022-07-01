@@ -28,6 +28,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Component\HttpKernel\KernelEvents;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
@@ -75,19 +76,19 @@ class SecuritySubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            SwitchUserEvent::class => ['onSwitchUser'],
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
-            RequestEvent::class    => [['onAccessRequest', 6], ['onKernelRequest', 5], ['onReferrerRequest', 2]],
-            ResponseEvent::class   => ['onKernelResponse'],
+            RequestEvent::class    => [
+                ['onAccessRequest', 6], 
+                ['onReferrerRequest', 5], ['onKernelRequest', 5], 
+            ],
 
+            ResponseEvent::class   => ['onKernelResponse'],
             LoginSuccessEvent::class => ['onLoginSuccess'],
             LoginFailureEvent::class => ['onLoginFailure'],
             LogoutEvent::class       => ['onLogout'],
         ];
     }
-
-    public function onSwitchUser(SwitchUserEvent $event) { }
 
     public function getCurrentRouteName($event) { return $event->getRequest()->get('_route'); }
 
@@ -142,13 +143,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
+        dump($token, $user);
 
         //
         // Redirect if basic access not granted
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-
+        
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
@@ -200,6 +202,8 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
+                dump($response);
+                exit(1);
                 $event->setResponse($response);
                 return $event->stopPropagation();
             }

@@ -262,6 +262,11 @@ class BaseService implements RuntimeExtensionInterface
     public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
     public function getCurrentRouteName(): ?string { return $this->getRouter()->getRouteName(); }
 
+    public function generateUrl(string $routeName, array $routeParameters = []): string
+    {
+        return $this->getRouter()->generate($routeName, $routeParameters);
+    }
+
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
     {
         if(filter_var($urlOrRoute, FILTER_VALIDATE_URL) || str_contains($urlOrRoute, "/")) return new RedirectResponse($urlOrRoute);
@@ -300,7 +305,8 @@ class BaseService implements RuntimeExtensionInterface
 
         $url   = $this->getRouter()->generate($routeName, $routeParameters) ?? $routeName;
         $routeName = $this->getRouteName($url);
-        if (!$routeName) throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
+        if (!$routeName)
+            throw new RouteNotFoundException(sprintf('Unable to generate a URL for the named route "%s" as such route does not exist.', $routeNameBak));
 
         $exceptions = is_string($exceptions) ? [$exceptions] : $exceptions;
         foreach($exceptions as $pattern)

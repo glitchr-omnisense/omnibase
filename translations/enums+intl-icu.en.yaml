@@ -13,6 +13,10 @@ user_role:
   _singular: "generic"
   _plural: "generics"
 
+  role_editor: 
+    _singular: "editor"
+    _plural: "editors"
+    
   role_superadmin:
     _singular: "super administrator"
     _plural: "super administrators"
