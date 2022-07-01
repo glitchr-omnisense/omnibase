@@ -143,7 +143,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
-        dump($token, $user);
 
         //
         // Redirect if basic access not granted
@@ -202,8 +201,6 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
-                dump($response);
-                exit(1);
                 $event->setResponse($response);
                 return $event->stopPropagation();
             }
