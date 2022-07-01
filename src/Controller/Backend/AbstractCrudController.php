@@ -284,9 +284,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $entity = $this->getEntity();
         if(!$entity) return $extension;
 
-        $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
-
-        $entityLabel = mb_ucfirst($this->translator->transQuiet($userClass.".".Translator::TRANSLATION_PLURAL, [], AbstractDashboardController::TRANSLATION_ENTITY));
+        $entityLabel = mb_ucfirst($this->translator->entity($entity, null, AbstractDashboardController::TRANSLATION_ENTITY));
         if($entityLabel) $extension->setTitle($entityLabel);
 
         $entityLabel ??= $this->getEntityLabelInSingular();
