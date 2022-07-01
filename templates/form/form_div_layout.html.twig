@@ -43,7 +43,7 @@
     {% else %}
         <label>&nbsp;</label>
     {% endif %}
-        {% if badges is empty %}<span class="badge badge-secondary label"> {{ badges }} </span>{% endif %}
+    <span class="badge badge-secondary label">{{- badges|trim -}}</span>
     </div>
     {% endif %}
 
