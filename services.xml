@@ -239,7 +239,7 @@
             <tag name="console.command" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
-            <argument type="service" id="notifier" />
+            <argument type="service" id="base.notifier" />
         </service>
 
         <!-- Controllers -->

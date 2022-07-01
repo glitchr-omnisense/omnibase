@@ -266,9 +266,6 @@ class Translator implements TranslatorInterface
         if(!is_array($options)) $options = [$options];
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
 
-        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
-        $property  = $property ? ".".self::TRANSLATION_PROPERTIES.".".camel2snake($property)  : "";
-
         $gender = null;
         if(in_array(self::TRANSLATION_MASCULINE, $options)) $gender = self::TRANSLATION_MASCULINE;
         else if(in_array(self::TRANSLATION_FEMININE, $options)) $gender = self::TRANSLATION_FEMININE;
@@ -279,7 +276,10 @@ class Translator implements TranslatorInterface
         else if(in_array(self::TRANSLATION_SINGULAR, $options)) $noun = self::TRANSLATION_SINGULAR;
         $noun = $noun     ? ".".$noun  : "";
 
-        $trans   = $this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender.$noun), [], self::DOMAIN_ENTITY);
+        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
+        $property = $property ? ".".$property : "";
+
+        $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender.$noun), [], self::DOMAIN_ENTITY);
         $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property.$noun), [], self::DOMAIN_ENTITY);
         $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender), [], self::DOMAIN_ENTITY);
         $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property), [], self::DOMAIN_ENTITY);
@@ -293,9 +293,6 @@ class Translator implements TranslatorInterface
         if(!is_array($options)) $options = [$options];
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
 
-        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
-        $property  = $property ? ".".self::TRANSLATION_PROPERTIES.".".camel2snake($property)  : "";
-
         $gender = null;
         if(in_array(self::TRANSLATION_MASCULINE, $options)) $gender = self::TRANSLATION_MASCULINE;
         else if(in_array(self::TRANSLATION_FEMININE, $options)) $gender = self::TRANSLATION_FEMININE;
@@ -305,6 +302,9 @@ class Translator implements TranslatorInterface
         if(in_array(self::TRANSLATION_PLURAL, $options)) $noun = self::TRANSLATION_PLURAL;
         else if(in_array(self::TRANSLATION_SINGULAR, $options)) $noun = self::TRANSLATION_SINGULAR;
         $noun = $noun     ? ".".$noun  : "";
+
+        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
+        $property = $property ? ".".$property : "";
 
         if($this->transExists(mb_strtolower($entityOrClassName.$property.$gender.$noun), self::DOMAIN_ENTITY)) return true;
         if($this->transExists(mb_strtolower($entityOrClassName.$property.$noun), self::DOMAIN_ENTITY)) return true;
