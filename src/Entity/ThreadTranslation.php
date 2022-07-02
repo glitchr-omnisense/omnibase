@@ -77,5 +77,4 @@ class ThreadTranslation implements TranslationInterface
 
         return $this;
     }
-
 }

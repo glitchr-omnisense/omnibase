@@ -61,7 +61,7 @@ class RescueController extends AbstractDashboardController
 
         $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
         $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
-
+        
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',

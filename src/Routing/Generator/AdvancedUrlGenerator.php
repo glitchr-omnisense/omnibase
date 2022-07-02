@@ -136,7 +136,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         try { $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType); }
         catch(Exception $e) {
 
-            if ($routeName == $routeDefaultName) throw $e;
+            if ($routeName == $routeDefaultName || $routeDefaultName === null) throw $e;
 
             $routeName = $routeDefaultName;
             $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);

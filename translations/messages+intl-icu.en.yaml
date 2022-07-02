@@ -25,7 +25,7 @@ locale:
         _plural: Countries
 
 backoffice:
-    title: "Go to dashboard"
+    title: "Go to backoffice"
 
 profile:
     title: "See my profile"

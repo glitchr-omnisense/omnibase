@@ -445,7 +445,7 @@ class SecurityController extends AbstractController
      *
      * @Route("/m", name="security_maintenance")
      */
-    public function Main(): Response
+    public function Maintenance(): Response
     {
         $downtime = $uptime = 0;
 
@@ -479,5 +479,37 @@ class SecurityController extends AbstractController
             'downtime'   => $downtime,
             'uptime'     => $uptime
         ]);
+    }
+
+
+    /**
+     * Link to this controller to start the birth
+     *
+     * @Route("/s", name="security_birth")
+     */
+    public function Birth(): Response
+    {
+        $birthdate     = $this->baseService->getParameterBag("base.settings.birthdate");
+        
+        // $bornToBeAlive = 
+
+        dump($birthdate);
+        exit(1);
+        // $downtime = $downtime ? strtotime($downtime) : 0;
+        // $uptime = $uptime ? strtotime($uptime) : 0;
+
+        // $remainingTime = $uptime - time();
+        // if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;
+        // if (  $uptime-time() < 0 || $uptime < 1) $uptime = 0;
+
+        // if( !$downtime || ($uptime-$downtime <= 0) || ($uptime-time() <= 0) ) $percentage = -1;
+        // else $percentage = round(100 * (time()-$downtime)/($uptime-$downtime));
+
+        // return $this->render('@Base/security/maintenance.html.twig', [
+        //     'remainingTime' => $remainingTime,
+        //     'percentage' => $percentage,
+        //     'downtime'   => $downtime,
+        //     'uptime'     => $uptime
+        // ]);
     }
 }
