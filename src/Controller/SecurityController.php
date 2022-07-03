@@ -33,20 +33,22 @@ use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\ParameterBagInterface;
+use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Security\Core\Authentication\Token\RememberMeToken;
 
 class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService, TokenStorageInterface $tokenStorage)
+    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService, TokenStorageInterface $tokenStorage, TranslatorInterface $translator)
     {
-        $this->baseService = $baseService;
-        $this->userRepository = $userRepository;
+        $this->baseService     = $baseService;
+        $this->translator      = $translator;
+
+        $this->userRepository  = $userRepository;
         $this->tokenRepository = $tokenRepository;
-        $this->entityManager = $entityManager;
-        $this->tokenStorage = $tokenStorage;
+        $this->entityManager   = $entityManager;
+        $this->tokenStorage    = $tokenStorage;
     }
 
     /**
@@ -485,31 +487,19 @@ class SecurityController extends AbstractController
     /**
      * Link to this controller to start the birth
      *
-     * @Route("/s", name="security_birth")
+     * @Route("/b", name="security_birth")
      */
     public function Birth(): Response
     {
-        $birthdate     = $this->baseService->getParameterBag("base.settings.birthdate");
+        $birthdate = $this->baseService->getSettingBag()->getScalar("base.settings.birthdate");
+        if($birthdate == null) return $this->redirect("app_index");
         
-        // $bornToBeAlive = 
+        $now           = time();
+        $bornToBeAlive = $birthdate->getTimestamp() - $now;
 
-        dump($birthdate);
-        exit(1);
-        // $downtime = $downtime ? strtotime($downtime) : 0;
-        // $uptime = $uptime ? strtotime($uptime) : 0;
-
-        // $remainingTime = $uptime - time();
-        // if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;
-        // if (  $uptime-time() < 0 || $uptime < 1) $uptime = 0;
-
-        // if( !$downtime || ($uptime-$downtime <= 0) || ($uptime-time() <= 0) ) $percentage = -1;
-        // else $percentage = round(100 * (time()-$downtime)/($uptime-$downtime));
-
-        // return $this->render('@Base/security/maintenance.html.twig', [
-        //     'remainingTime' => $remainingTime,
-        //     'percentage' => $percentage,
-        //     'downtime'   => $downtime,
-        //     'uptime'     => $uptime
-        // ]);
+        $birthdate = $this->translator->time($bornToBeAlive);
+        return $this->render('@Base/security/birthdate.html.twig', [
+            'birthdate'  => $birthdate
+        ]);
     }
 }

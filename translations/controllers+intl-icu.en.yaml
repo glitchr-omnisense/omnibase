@@ -23,6 +23,9 @@ user_profile:
 user_settings:
   title: "My Settings"
 
+security_birthdate:
+  title: "Coming soon !"
+
 security_maintenance:
   title: "Temporarily down for maintenance!"
   description: "{downtime, plural,

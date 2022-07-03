@@ -22,13 +22,13 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
-use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
+
+use Base\Service\ParameterBagInterface;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
@@ -51,6 +51,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         LocaleProvider $localeProvider,
         ReferrerInterface $referrer,
         RouterInterface $router,
+        ParameterBagInterface $parameterBag,
         ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
@@ -71,6 +72,14 @@ class SecuritySubscriber implements EventSubscriberInterface
             "/^user(?:.*)$/",
             "/^security(?:.*)$/",
         ];
+
+        $this->parameterBag = $parameterBag;
+        $this->maintenanceException   = $this->parameterBag->get("base.maintenance.exception");
+        $this->maintenanceException[] = "security_rescue";
+
+        $this->homepageRoute = $this->parameterBag->get("base.homepage");
+        $this->maintenanceRoute = $this->parameterBag->get("base.maintenance.redirect");
+
     }
 
     public static function getSubscribedEvents(): array
@@ -194,7 +203,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 return;
 
             // If not, then user is redirected to a specific route
-            $currentRouteName = $this->getCurrentRouteName($event);
+            $currentRouteName = $this->router->getRouteName();
             $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirect");
             if($currentRouteName != $accessDeniedRedirection) {
 
@@ -242,7 +251,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $user->approve();
             $this->userRepository->flush($user);
 
-        } else if($this->baseService->getParameterBag("base.user.autoapprove")) {
+        } else if($this->baseService->getthis->parameterBag("base.user.autoapprove")) {
 
             $user->approve();
             $this->userRepository->flush($user);
@@ -367,4 +376,69 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
+
+
+
+
+
+    public function onMaintenance(RequestEvent $event)
+    {
+        // Exception triggered
+        if( empty( $this->router->getRouteName()) ) return;
+
+        if(!$this->baseService->isMaintenance()) {
+
+            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->router->getRouteName()))
+                $this->router->redirectToRoute($this->homepageRoute, [], 302, ["event" => $event]);
+
+            return;
+        }
+
+        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_EDITOR")) {
+
+            $notification = new Notification("maintenance.banner");
+            $notification->send("warning");
+            return;
+        }
+
+        // Disconnect user
+        $this->baseService->Logout();
+
+        // Apply redirection to maintenance page
+        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->router->getRouteName());
+        foreach($this->maintenanceException as $exception)
+            $isException |= preg_match('/^'.$exception.'/', $this->router->getRouteName());
+
+        if (!$isException)
+            $this->router->redirectToRoute($this->maintenanceRoute, [], 302, ["event" => $event]);
+
+        // Stopping page execution
+        $event->stopPropagation();
+    }
+
+    public function onBirth(RequestEvent $event)
+    {
+        if( empty( $this->router->getRouteName()) ) return;
+
+        if($this->router->isProfiler() ) return;
+        if($this->router->isEasyAdmin()) return;
+        if($this->baseService->isBorn()) return;
+
+        dump($this->isAccessRestricted($this->baseService->getUser()));
+        if(!$this->isAccessRestricted($this->baseService->getUser())) return;
+        if(!$this->router->getRouteFirewall()->isSecurityEnabled()) return;
+
+        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_EDITOR")) {
+
+            $notification = new Notification("birth.banner");
+            $notification->send("warning");
+            return;
+        }
+
+        if($this->router->getRouteName() != "security_birth") {
+            $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
+            $event->stopPropagation();
+        }
+    }
+
 }

@@ -20,6 +20,7 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Router;
+use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
@@ -223,7 +224,18 @@ class AdvancedRouter implements RouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
-    public function getRouteFirewall(?string $routeUrl = null): ?string
+    public function isRouteSecure(?string $routeUrl = null): ?bool
+    {
+        if($routeUrl === null) $routeUrl = $this->getRequestUri();
+
+        $matcher = $this->router->getMatcher();
+        if ($matcher instanceof AdvancedUrlMatcher)
+           return $matcher->security($routeUrl);
+
+        return null;
+    }
+
+    public function getRouteFirewall(?string $routeUrl = null): ?FirewallConfig
     {
         if($routeUrl === null) $routeUrl = $this->getRequestUri();
 

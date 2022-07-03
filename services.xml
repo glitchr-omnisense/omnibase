@@ -282,6 +282,7 @@
             <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="base.service" />
             <argument type="service" id="security.token_storage" />
+            <argument type="service" id="translator" />
         </service>
 
         <!-- Type declaration -->
@@ -297,11 +298,6 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
-        </service>
-
-        <service id="Base\Subscriber\MaintenanceSubscriber">
-            <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Subscriber\EagerSubscriber">
@@ -598,6 +594,7 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="referrer" />
             <argument type="service" id="router" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
 

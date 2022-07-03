@@ -225,18 +225,17 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $fields = array_reverse(array_merge(array_reverse([
             "base.settings.logo"                   => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
-            "base.settings.logo.animation"         => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
             "base.settings.logo.backoffice"        => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
             "base.settings.title"                  => ["translatable" => true],
-            "base.settings.title.backoffice"       => ["translatable" => true],
-            "base.settings.author"                 => ["translatable" => true],
-            "base.settings.description"            => ["form_type" => TextareaType::class, "translatable" => true],
-            "base.settings.keywords"               => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
+            "base.settings.title.backoffice"       => ["translatable" => true, "required" => false],
+            "base.settings.author"                 => ["translatable" => true, "required" => false],
+            "base.settings.description"            => ["form_type" => TextareaType::class, "translatable" => true, "required" => false],
+            "base.settings.keywords"               => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"                 => ["translatable" => true, "required" => false],
             "base.settings.birthdate"              => ["form_type" => DateTimePickerType::class],
             "base.settings.access_denied_redirect" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class   , "required" => false],
-            "base.settings.anonymous_access"       => ["roles" => "ROLE_ADMIN" , "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.user_access"            => ["roles" => "ROLE_ADMIN" , "form_type" => CheckboxType::class, "required" => false],
+            "base.settings.anonymous_access"       => ["roles" => "ROLE_SUPERADMIN" , "form_type" => CheckboxType::class, "required" => false],
+            "base.settings.user_access"            => ["roles" => "ROLE_SUPERADMIN" , "form_type" => CheckboxType::class, "required" => false],
             "base.settings.admin_access"           => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
             "base.settings.maintenance"            => ["form_type" => CheckboxType::class      , "required" => false],
             "base.settings.maintenance.downtime"   => ["form_type" => DateTimePickerType::class, "required" => false],
@@ -337,22 +336,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if(!$logo) $logo = $this->settingBag->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
 
-        $title  = $this->settingBag->getScalar("base.settings.title") ?? "";
-        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? "";
+        $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
+        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.subtitle", [], self::TRANSLATION_DASHBOARD);
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")
             ->setTitle($title)
             ->setText($slogan)
+            ->setLogo($logo)
             ->setWidgets($this->configureWidgetItems())
         );
 
         $logo = $this->twig->getAsset($logo);
         $logo = $this->imageService->thumbnail($logo, 500, 500);
+
         return parent::configureDashboard()
             ->setFaviconPath("/favicon.ico")
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
-            ->setTitle('<img src="'.$logo.'">');
+            ->setTitle($title);
     }
 
     public function addRoles(array &$menu, string $class)

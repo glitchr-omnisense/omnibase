@@ -8,6 +8,9 @@ thread_search:
   excerpt: "Rechercher dans l'extrait"
   title: "Rechercher dans le titre"
 
+security_birthdate:
+  title: "À bientôt pour le lancement !"
+
 security_login:
   title: "Se Connecter"
 security_logout:

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Matcher\CompiledUrlMatcher;
 use Symfony\Component\Routing\Matcher\RedirectableUrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 
 class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMatcherInterface
 {
@@ -79,10 +80,16 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         return array_unique($routeGroups);
     }
 
-    public function firewall(string $pathinfo): ?string
+    public function security(string $pathinfo): bool
     {
         $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
-        return $this->getFirewallMap()->getFirewallConfig($request)->getName();
+        dump( $this->getFirewallMap()->getFirewallConfig($request));
+        return $this->getFirewallMap()->getFirewallConfig($request) == true;
+    }
+    public function firewall(string $pathinfo): ?FirewallConfig
+    {
+        $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
+        return $this->getFirewallMap()->getFirewallConfig($request);
     }
 
     public function match(string $pathinfo): array

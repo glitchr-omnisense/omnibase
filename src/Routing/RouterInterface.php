@@ -11,6 +11,7 @@ use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface as SymfonyRouterInterface;
+use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
@@ -38,7 +39,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getRouteName(?string $routeUrl = null): ?string;
     public function getRouteMatch(?string $routeUrl = null): ?array;
     public function getRouteGroups(string $routeName): array;
-    public function getRouteFirewall(?string $routeUrl = null): ?string;
+    public function getRouteFirewall(?string $routeUrl = null): ?FirewallConfig;
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;
     public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;

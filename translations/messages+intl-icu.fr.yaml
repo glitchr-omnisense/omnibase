@@ -49,7 +49,7 @@ base:
             }"
     months: "{0, plural,
                 =0 { }
-                other {#  }
+                other {# mois }
             }"
     days: "{0, plural,
                 =0 { }

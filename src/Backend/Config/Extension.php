@@ -35,6 +35,14 @@ class Extension
         return $this;
     }
 
+    protected array $logo;
+    public function getLogo(?string $pageName = null): ?string { return $this->getFallback("logo", $pageName); }
+    public function setLogo(string $logo, ?string $pageName = null)
+    {
+        $this->logo[$pageName ?? self::PAGE_DEFAULT] = $logo;
+        return $this;
+    }
+
     protected array $help;
     public function getHelp(?string $pageName = null): ?string { return $this->getFallback("help", $pageName); }
     public function setHelp(string $help, ?string $pageName = null)

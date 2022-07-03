@@ -155,7 +155,9 @@
                                         <div id="header-logo">
                                             {% block header_logo %}
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
-                                                    <div class="logo-custom">{{ ea.dashboardTitle|raw }}</div>
+                                                    <div class="logo-custom">
+                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(800,800) }}" />
+                                                    </div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>
                                                 </a>
                                             {% endblock header_logo %}

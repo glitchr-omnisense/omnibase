@@ -328,6 +328,7 @@ class BaseService implements RuntimeExtensionInterface
     }
 
     public function isMaintenance() { return $this->getSettingBag()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
+    public function isBorn() { return $this->getSettingBag()->birthdate() < (new \DateTime("now")); }
     public function isDevelopment() { return $this->isDebug() || $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_"); }
     public function isProduction()  { return !$this->isDevelopment(); }
 

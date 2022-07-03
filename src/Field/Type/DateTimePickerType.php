@@ -35,6 +35,7 @@ class DateTimePickerType extends AbstractType
             "required" => false,
 
             "datetimepicker" => [
+                // "debug" => true,
                 "keepOpen" => true,
                 "format" => "YYYY-MM-DD HH:mm:ss", // JS Datetime Format
                 "sideBySide" => true,
