@@ -15,8 +15,8 @@ class SearchController extends AbstractController
 {
     public function __construct(EntityManagerInterface $entityManager)
     {
-        if(BaseBundle::hasDoctrine()) 
-            $this->userRepository = $entityManager->getRepository(UserRepository::class);
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository = $entityManager->getRepository(User::class);
     }
 
     /**

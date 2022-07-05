@@ -13,7 +13,7 @@ class ProfileController extends AbstractController
 {
     public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->userRepository = $entityManager->getRepository(UserRepository::class);
+        $this->userRepository = $entityManager->getRepository(User::class);
     }
 
     /**

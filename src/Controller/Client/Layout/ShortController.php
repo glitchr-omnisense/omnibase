@@ -2,8 +2,10 @@
 
 namespace Base\Controller\Client\Layout;
 
+use Base\BaseBundle;
 use Base\Repository\Layout\ShortRepository;
-use Base\Service\Settings;
+use Base\Service\SettingBagInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,10 +18,12 @@ class ShortController extends AbstractController
      */
     protected $shortRepository;
 
-    public function __construct(Settings $settings, ShortRepository $shortRepository)
+    public function __construct(SettingBagInterface $settingBag, EntityManagerInterface $entityManager)
     {
-        $this->settings = $settings;
-        $this->shortRepository = $shortRepository;
+        $this->settingBag = $settingBag;
+
+        if(BaseBundle::hasDoctrine())
+            $this->shortRepository = $entityManager->getRepository(User::class);
     }
 
     /**
@@ -34,6 +38,6 @@ class ShortController extends AbstractController
         $short = $this->shortRepository->findOneBySlug($slug);
         if($short === null) throw new NotFoundException("Page requested doesn't exist.");
 
-        return $this->redirect($this->settings->url($short->getUrl()));
+        return $this->redirect($this->settingBag->url($short->getUrl()));
     }
 }

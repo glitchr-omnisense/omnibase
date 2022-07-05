@@ -14,8 +14,8 @@ class WidgetProvider implements WidgetProviderInterface
     public function __construct(EntityManagerInterface $entityManager)
     {
         if(BaseBundle::hasDoctrine()) {
-            $this->widgetRepository = $entityManager->getRepository(WidgetRepository::class);
-            $this->widgetSlotRepository = $entityManager->getRepository(WidgetSlotRepository::class);
+            $this->widgetRepository = $entityManager->getRepository(Widget::class);
+            $this->widgetSlotRepository = $entityManager->getRepository(Slot::class);
         }
     }
 

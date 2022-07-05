@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -26,8 +27,8 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         $this->translator = $translator;
 
         if(BaseBundle::hasDoctrine())
-            $this->userRepository = $entityManager->getRepository(UserRepository::class);
-            
+            $this->userRepository = $entityManager->getRepository(User::class);
+
         $this->gaService = $googleAnalyticsService;
     }
 

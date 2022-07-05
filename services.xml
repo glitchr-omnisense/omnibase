@@ -45,24 +45,23 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="base.filesystem" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="App\Repository\Layout\ImageCropRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Controller\Client\Layout\WidgetController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
-            <argument type="service" id="App\Repository\Layout\Widget\PageRepository" />
-            <argument type="service" id="App\Repository\Layout\Widget\AttachmentRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+
         <service id="Base\Controller\Client\Layout\ShortController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="setting_bag" />
-            <argument type="service" id="App\Repository\Layout\ShortRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Subscriber\RouterSubscriber">
@@ -558,13 +557,14 @@
 
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+
         <service id="Base\Controller\Client\User\SettingsController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="base.service" />
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Security\UserChecker"           >

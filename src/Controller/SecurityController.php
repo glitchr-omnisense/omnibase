@@ -46,12 +46,12 @@ class SecurityController extends AbstractController
         $this->baseService     = $baseService;
         $this->translator      = $translator;
         $this->tokenStorage    = $tokenStorage;
-        
+
         $this->entityManager   = $entityManager;
         if(BaseBundle::hasDoctrine()) {
 
-            $this->userRepository  = $entityManager->getRepository(UserRepository::class);
-            $this->tokenRepository = $entityManager->getRepository(TokenRepository::class);
+            $this->userRepository  = $entityManager->getRepository(User::class);
+            $this->tokenRepository = $entityManager->getRepository(Token::class);
         }
     }
 
