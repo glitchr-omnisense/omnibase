@@ -128,14 +128,16 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('highlight',      [$this, 'highlight']),
             new TwigFilter('array_flatten',  [$this, 'array_flatten']),
             new TwigFilter('filesize',       [$this, 'filesize']),
-            new TwigFilter('datetime',       [$this, 'datetime'],    ['needs_environment' => true]),
+            new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
+            new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
+            new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
             new TwigFilter('less_than',      [$this, 'less_than']),
             new TwigFilter('greater_than',   [$this, 'greater_than']),
             new TwigFilter('filter',         [$this, 'filter'], ['needs_environment' => true]),
             new TwigFilter('transforms',     [$this, 'transforms'], ['needs_environment' => true]),
             new TwigFilter('pad',            [$this, 'pad']),
-            new TwigFilter('mb_ucfirst',     [$this, 'mb_ucfirst']),
-            new TwigFilter('mb_ucwords',     [$this, 'mb_ucwords']),
+            new TwigFilter('mb_ucfirst',     'mb_ucfirst'),
+            new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
             new TwigFilter('empty',          "empty"),
 
@@ -173,10 +175,6 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('thumbnail_upscale ', [ImageService::class, 'thumbnail_upscale ']),
         ];
     }
-
-
-    public function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_ucfirst($string, $encoding); }
-    public function mb_ucwords(string $string, ?string $encoding = null, ?string $separator = null): string { return mb_ucwords($string, $encoding, $separator); }
 
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
@@ -256,10 +254,41 @@ final class BaseTwigExtension extends AbstractExtension
         return forward_static_call_array([$class, $method], $args);
     }
 
-    public function datetime(Environment $env, $date, string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): string
+    public function datetime(Environment $env, $date, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
+        if(is_array($pattern)) {
+
+            $array = [];
+            foreach($pattern as $p)
+                $array[] = $this->datetime($env, $date, $p, $dateFormat, $timeFormat, $timezone, $calendar, $locale);
+
+            return $array;
+        }
+
         if(is_string($date)) return $date;
         return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    public function countdown(Environment $env, \DateTime $datetime, array $parameters = []): string
+    {
+        $now = time();
+        $timestamp = $datetime->getTimestamp();
+
+        return $env->render("@Base/progress/countdown.html.twig", array_merge($parameters, [
+            "id" => rand(),
+            "datetime"  => $datetime,
+            "countdown" => $timestamp - $now,
+            "timestamp" => $timestamp,
+        ]));
+    }
+
+    public function progress(Environment $env, \DateTime $start, \DateTime $end, array $parameters = []): string
+    {
+        return $env->render("@Base/progress/progressbar.html.twig", array_merge($parameters, [
+            "id" => rand(), 
+            "progress-start" => $start->getTimestamp(), 
+            "progress-end" => $end->getTimestamp()
+        ]));
     }
 
     public function url(?string $url): ?string

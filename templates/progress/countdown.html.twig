@@ -1,0 +1,20 @@
+{% set time = countdown %}
+{% set seconds = (time  % 60) %}
+{% set time    = (time // 60) %}
+{% set minutes = (time  % 60) %}
+{% set time    = (time // 60) %}
+{% set hours   = (time  % 24) %}
+{% set time    = (time // 60) %}
+{% set days    = (time  % 30) %}
+{% set time    = (time // 60) %}
+{% set months  = (time  % 12) %}
+{% set years   = (time // 12) %}
+
+{% set time =        "<span class='countdown-group'><div class='countdown-item blink countdown-years'  >" ~ years   ~ "</div> <span class='countdown-unit blink' data-singular='" ~ ("@messages.base.years"  |trans([1])) ~ "' data-plural='" ~ ("@messages.base.years"  |trans([2])) ~ "'>" ~ ("@messages.base.years"  |trans([years])) ~ "</span><span class='countdown-separator'>,</span> </span>" %}
+{% set time = time ~ "<span class='countdown-group'><div class='countdown-item blink countdown-months' >" ~ months  ~ "</div> <span class='countdown-unit blink' data-singular='" ~ ("@messages.base.months" |trans([1])) ~ "' data-plural='" ~ ("@messages.base.months" |trans([2])) ~ "'>" ~ ("@messages.base.months" |trans([months])) ~ "</span><span class='countdown-separator'>,</span> </span>" %}
+{% set time = time ~ "<span class='countdown-group'><div class='countdown-item blink countdown-days'   >" ~ days    ~ "</div> <span class='countdown-unit blink' data-singular='" ~ ("@messages.base.days"   |trans([1])) ~ "' data-plural='" ~ ("@messages.base.days"   |trans([2])) ~ "'>" ~ ("@messages.base.days"   |trans([days])) ~ "</span><span class='countdown-separator'>,</span> </span>" %}
+{% set time = time ~ "<span class='countdown-group'><div class='countdown-item blink countdown-hours'  >" ~ hours   ~ "</div> <span class='countdown-unit blink' data-singular='" ~ ("@messages.base.hours"  |trans([1])) ~ "' data-plural='" ~ ("@messages.base.hours"  |trans([2])) ~ "'>" ~ ("@messages.base.hours"  |trans([hours])) ~ "</span><span class='countdown-separator'>,</span> </span>" %}
+{% set time = time ~ "<span class='countdown-group'><div class='countdown-item blink countdown-minutes'>" ~ minutes ~ "</div> <span class='countdown-unit blink' data-singular='" ~ ("@messages.base.minutes"|trans([1])) ~ "' data-plural='" ~ ("@messages.base.minutes"|trans([2])) ~ "'>" ~ ("@messages.base.minutes"|trans([minutes])) ~ "</span><span class='countdown-separator'>,</span> </span>" %}
+{% set time = time ~ "<span class='countdown-group'><div class='countdown-item blink countdown-seconds'>" ~ seconds ~ "</div> <span class='countdown-unit blink' data-singular='" ~ ("@messages.base.seconds"|trans([1])) ~ "' data-plural='" ~ ("@messages.base.seconds"|trans([2])) ~ "'>" ~ ("@messages.base.seconds"|trans([seconds])) ~ "</span>  </span>"%}
+
+{{ ("<div id='countdown-"~id~"' class='countdown invisible "~(class ?? '')~"' data-timestamp='"~timestamp~"'>" ~ time ~ "</div>") | replace({',,': ',', '  ': ' '}) | trim(" ,") | raw }}

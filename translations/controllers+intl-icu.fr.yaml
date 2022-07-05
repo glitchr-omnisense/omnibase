@@ -9,8 +9,11 @@ thread_search:
   title: "Rechercher dans le titre"
 
 security_birthdate:
-  title: "À bientôt pour le lancement !"
+  title: "À vos agendas, rendez-vous pris"
 
+app_index:
+  title: Retour au site
+  
 security_login:
   title: "Se Connecter"
 security_logout:

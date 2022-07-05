@@ -36,12 +36,12 @@ impersonator:
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Retour à ton compte</a>"
 
 access_restricted:
-    public_restriction: "Le site est actuellement en accès limité pour les visiteurs."
-    user_restriction: "Le site est actuellement en accès limité pour les utilisateurs."
-    admin_restriction: "Le site est actuellement en accès limité pour les administrateurs."
+    public_restriction: "Le site est actuellement en accès limité pour les utilisateurs."
+    user_restriction: "Le site est actuellement en accès limité pour les administrateurs."
+    admin_restriction: "Le site est actuellement en accès limité pour les super-administrateurs."
 
 maintenance:
-    banner: Ce site est actuellement en cours de <b>maintenance</b>. (Seul les super administrateurs peuvent voir cette page pour le moment !)
+    banner: Ce site est actuellement en cours de <b>maintenance</b>. (Seul les super-administrateurs peuvent voir cette page pour le moment !)
 
 logout:
     success: "{0} Tu es maintenant déconnecté."

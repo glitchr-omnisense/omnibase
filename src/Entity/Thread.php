@@ -39,6 +39,8 @@ use Base\Repository\ThreadRepository;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * 
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
@@ -93,6 +95,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     /**
      * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
      * @ORM\JoinColumn(onDelete="SET NULL")
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $parent;
     public function getParent(): ?self { return $this->parent; }
@@ -107,6 +110,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $children;
     public function getChildren(): Collection { return $this->children; }

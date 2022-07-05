@@ -15,6 +15,9 @@ security_login:
 security_logout:
   title: "Logout"
 
+app_index:
+  title: Return to website
+  
 security_register:
   validation_required: This account requires to be verified
 
@@ -24,7 +27,7 @@ user_settings:
   title: "My Settings"
 
 security_birthdate:
-  title: "Coming soon !"
+  title: "We will soon be online"
 
 security_maintenance:
   title: "Temporarily down for maintenance!"

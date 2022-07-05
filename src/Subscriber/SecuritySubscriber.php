@@ -88,7 +88,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class    => [
-                ['onAccessRequest', 6], 
+                ['onBirthRequest', 6], ['onMaintenanceRequest', 6], ['onAccessRequest', 6], 
                 ['onReferrerRequest', 5], ['onKernelRequest', 5], 
             ],
 
@@ -145,10 +145,12 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $this->baseService->redirect($targetPath, [], 302);
     }
 
-    public function onAccessRequest(RequestEvent $event)
+    public function onAccessRequest(?RequestEvent $event = null): bool
     {
-        if(!$event->isMainRequest()) return;
-        if( $this->router->isWdt($event) ) return; // Special case for _wdt
+        if(!$this->router->getRouteFirewall()->isSecurityEnabled()) return true;
+
+        if(!$event->isMainRequest()) return true;
+        if( $this->router->isWdt($event) ) return true; // Special case for _wdt
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
@@ -180,7 +182,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                     $notification->send("warning");
                 }
 
-                return;
+                return true;
             }
 
             // In case of restriction: profiler is disabled
@@ -188,7 +190,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
-            if($isSecurityRoute) return;
+            if($isSecurityRoute) return true;
 
             //
             // Prevent average guy to see the administration and debug tools
@@ -200,20 +202,32 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // Nonetheless exception access is always possible
             if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))
-                return;
+                return true;
 
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->router->getRouteName();
             $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirect");
-            if($currentRouteName != $accessDeniedRedirection) {
+            if(is_array($accessDeniedRedirection)) {
+            
+                $accessDeniedRedirectionWithLocale = array_filter($accessDeniedRedirection, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
+                if(!empty($accessDeniedRedirectionWithLocale))
+                    $accessDeniedRedirection = $accessDeniedRedirectionWithLocale;
+
+                $accessDeniedRedirection = first($accessDeniedRedirection);
+            }
+
+            if($currentRouteName != str_rstrip($accessDeniedRedirection, ".".$this->localeProvider->getLang())) {
 
                 $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
-                $event->setResponse($response);
-                return $event->stopPropagation();
+                if($event) $event->setResponse($response);
+                if($event) $event->stopPropagation();
+                return false;
             }
         }
+
+        return true;
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -381,10 +395,9 @@ class SecuritySubscriber implements EventSubscriberInterface
 
 
 
-    public function onMaintenance(RequestEvent $event)
+    public function onMaintenanceRequest(RequestEvent $event)
     {
-        // Exception triggered
-        if( empty( $this->router->getRouteName()) ) return;
+        if($this->onAccessRequest($event)) return;
 
         if(!$this->baseService->isMaintenance()) {
 
@@ -416,17 +429,14 @@ class SecuritySubscriber implements EventSubscriberInterface
         $event->stopPropagation();
     }
 
-    public function onBirth(RequestEvent $event)
+    public function onBirthRequest(RequestEvent $event)
     {
-        if( empty( $this->router->getRouteName()) ) return;
-
+        if($this->router->getRouteName() == "security_birth") return;
+        if($this->onAccessRequest($event)) return;
+     
         if($this->router->isProfiler() ) return;
         if($this->router->isEasyAdmin()) return;
         if($this->baseService->isBorn()) return;
-
-        dump($this->isAccessRestricted($this->baseService->getUser()));
-        if(!$this->isAccessRestricted($this->baseService->getUser())) return;
-        if(!$this->router->getRouteFirewall()->isSecurityEnabled()) return;
 
         if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_EDITOR")) {
 

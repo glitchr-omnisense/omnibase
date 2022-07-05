@@ -351,7 +351,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         $logo = $this->imageService->thumbnail($logo, 500, 500);
 
         return parent::configureDashboard()
-            ->setFaviconPath("/favicon.ico")
+            ->setFaviconPath("favicon.ico")
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
             ->setTitle($title);
     }

@@ -63,6 +63,7 @@
         "league/flysystem-bundle": "^2.2",
 
         "nelmio/security-bundle": "^3.0",
+        "nelmio/cors-bundle": "^2.2",
         "hashids/hashids": "^4.1",
 
         "doctrine/doctrine-bundle": "^2.6",

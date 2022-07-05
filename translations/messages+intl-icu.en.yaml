@@ -40,35 +40,37 @@ base:
     return: "Previous page"
     returnUrl: "<a href=\"{0}\">Previous page</a>"
     csrfToken: "Invalid CSRF token. Please try again"
+    datetime: "on {0} at {1}"
+    countdown: "in {0}"
     years: "{0, plural,
                 =0 { }
-                =1 {# year }
-                other {# years }
+                =1 {year }
+                other {years }
             }"
     months: "{0, plural,
                 =0 { }
-                =1 {# month }
-                other {# months }
+                =1 {month }
+                other {months }
             }"
     days: "{0, plural,
             =0 { }
-            =1 {# day }
-            other {# days }
+            =1 {day }
+            other {days }
             }"
     hours: "{0, plural,
             =0 { }
-            =1 {# hour }
-            other {# hours }
+            =1 {hour }
+            other {hours }
             }"
     minutes: "{0, plural,
                 =0 { }
-                =1 {# minute }
-                other {# minutes }
+                =1 {minute }
+                other {minutes }
             }"
     seconds: "{0, plural,
                 =0 { }
-                =1 {# second }
-                other {# seconds }
+                =1 {second }
+                other {seconds }
             }"
 
 user_analytics:

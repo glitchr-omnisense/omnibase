@@ -314,32 +314,4 @@ class Translator implements TranslatorInterface
 
         return false;
     }
-
-    public function time(int $time): string
-    {
-        if($time > 0) {
-
-            $seconds = fmod  ($time, 60);
-            $time    = intdiv($time, 60);
-            $minutes = fmod  ($time, 60);
-            $time    = intdiv($time, 60);
-            $hours   = fmod  ($time, 24);
-            $time    = intdiv($time, 24);
-            $days    = fmod  ($time, 30);
-            $time    = intdiv($time, 30);
-            $months  = fmod  ($time, 12);
-            $years   = intdiv($time, 12);
-
-            return str_replace([",,", "  "], [",", " "], trim(
-                $this->trans("base.years",   [$years]  ).", ".
-                $this->trans("base.months",  [$months] ).", ".
-                $this->trans("base.days",    [$days]   ).", ".
-                $this->trans("base.hours",   [$hours]  ).", ".
-                $this->trans("base.minutes", [$minutes]).", ".
-                $this->trans("base.seconds", [$seconds]),", "
-            ));
-        }
-
-        return "";
-    }
 }

@@ -487,17 +487,13 @@ class SecurityController extends AbstractController
     /**
      * Link to this controller to start the birth
      *
-     * @Route("/b", name="security_birth")
+     * @Route({"fr": "/est/bientot/en/ligne", "en":"/is/coming/soon"}, name="security_birth")
      */
     public function Birth(): Response
     {
         $birthdate = $this->baseService->getSettingBag()->getScalar("base.settings.birthdate");
         if($birthdate == null) return $this->redirect("app_index");
         
-        $now           = time();
-        $bornToBeAlive = $birthdate->getTimestamp() - $now;
-
-        $birthdate = $this->translator->time($bornToBeAlive);
         return $this->render('@Base/security/birthdate.html.twig', [
             'birthdate'  => $birthdate
         ]);
