@@ -15,7 +15,7 @@ interface NotifierInterface extends \Symfony\Component\Notifier\NotifierInterfac
 
     public function getTestRecipients(): array;
     public function getAdminRecipients(): array;
-    public function getTechnicalRecipient(): RecipientInterface;
+    public function getTechnicalRecipient(): ?RecipientInterface;
 
     public function isTest(RecipientInterface $recipient): bool;
     public function getPolicy(): ChannelPolicyInterface;

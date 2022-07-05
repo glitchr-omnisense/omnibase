@@ -50,10 +50,13 @@ class RouteVoter extends Voter
 
                 if($route->getHost()) return true;
 
+                $restrictedDomain = $this->parameterBag->get("base.host_restriction.restricted_domain");
                 $allowedSubdomain = false;
                 $permittedSubdomains = $this->parameterBag->get("base.host_restriction.permitted_subdomains") ?? [];
-                if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
-                    $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
+                if(!$restrictedDomain)
+                    $permittedSubdomains[] = "^.*$"; // Special case if both subdomain and machine are unallowed
+                else if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
+                    $permittedSubdomains[] = "^$"; // Special case if both subdomain and machine are unallowed
 
                 $parse = parse_url2($url);
                 foreach($permittedSubdomains as $permittedSubdomain)

@@ -2,6 +2,8 @@
 
 namespace Base;
 
+use Base\Database\Filter\TrashFilter;
+use Base\Database\Filter\VaultFilter;
 use Base\DependencyInjection\Compiler\AnnotationPass;
 use Base\DependencyInjection\Compiler\CurrencyApiPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
@@ -23,15 +25,68 @@ class BaseBundle extends Bundle
     public const VERSION = '1.0.0';
 
     protected static bool $boot = false;
+    protected static bool $doctrineStartup = false;
     public static function isBooted() { return self::$boot; }
+
+    public function getProjectDir()
+    {
+        return $this->container->get('kernel')->getProjectDir()."/src/";
+    }
 
     public function boot()
     {
-        $this->defineDoctrineTypes();
-        $this->defineDoctrineFilters();
-        $this->defineDoctrineWalkers();
-
+        self::$doctrineStartup = $this->doctrineStartup();
         self::$boot = true;
+    }
+
+    public static function hasDoctrine():bool { return self::$doctrineStartup; }
+    public function doctrineStartup():bool
+    {
+        $entityManager = $this->container->get('doctrine.orm.entity_manager');
+        $entityManager->getConfiguration()->setNamingStrategy(new \Base\Database\NamingStrategy());
+        // $entityManager->getConfiguration()->set
+
+        /**
+         * Testing doctrine connection
+         */
+        try { $entityManager->getConnection()->connect(); }
+        catch (\Exception $e) { return false; }
+
+        /**
+         * Doctrine types
+         */
+        $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
+        $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
+
+        $classList = BaseBundle::getAllClasses($this->getProjectDir() . "./Enum");
+        $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
+
+        /* Register enum types: priority to App namespace */
+        foreach($classList as $className) {
+
+            if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
+            else Type::addType($className::getStaticName(), $className);
+
+            $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
+        }
+        
+        /**
+         * Doctrine filters
+         */
+        $entityManager->getConfiguration()->addFilter("trash_filter", TrashFilter::class);
+        $entityManager->getFilters()->enable("trash_filter");
+        $entityManager->getConfiguration()->addFilter("vault_filter", VaultFilter::class);
+        $entityManager->getFilters()->enable("vault_filter");
+        
+        /**
+         * Doctrine walkers
+         */
+        $entityManager = $this->container->get('doctrine.orm.entity_manager');
+        $entityManager->getConfiguration()->setDefaultQueryHint(
+            Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
+        );
+
+        return true;
     }
 
     public function build(ContainerBuilder $container)
@@ -56,48 +111,6 @@ class BaseBundle extends Bundle
                     ->addTag("doctrine.repository_service")
                     ->addArgument(new Reference('doctrine'));
             }
-        }
-    }
-
-    public function defineDoctrineWalkers()
-    {
-        $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $entityManager->getConfiguration()->setDefaultQueryHint(
-            Query::HINT_CUSTOM_TREE_WALKERS, [/* No default tree walker for the moment */]
-        );
-    }
-
-    public function defineDoctrineFilters()
-    {
-        $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $entityManager->getFilters()->enable("trash_filter");
-        $entityManager->getFilters()->enable("vault_filter");
-    }
-
-    public function getProjectDir()
-    {
-        return $this->container->get('kernel')->getProjectDir()."/src/";
-    }
-
-    public function defineDoctrineTypes()
-    {
-        $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        try {
-            $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
-            $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping('set', 'array');
-        } catch(Exception $e) { dump($e);}
-
-        $classList = BaseBundle::getAllClasses($this->getProjectDir() . "./Enum");
-        $classList = array_merge(BaseBundle::getAllClasses(self::getBundleLocation() . "./Enum"), $classList);
-
-        /* Register enum types: priority to App namespace */
-        foreach($classList as $className) {
-
-            if(Type::hasType($className::getStaticName())) Type::overrideType($className::getStaticName(), $className);
-            else Type::addType($className::getStaticName(), $className);
-
-            try { $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName()); }
-            catch(Exception $e) { dump($e);}
         }
     }
 

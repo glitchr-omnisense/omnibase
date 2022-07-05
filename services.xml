@@ -27,6 +27,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="base.service" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\Controller\LocaleController">
@@ -98,7 +99,7 @@
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
@@ -171,8 +172,7 @@
 
         <service id="Base\Service\WidgetProvider" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="App\Repository\Layout\WidgetRepository" />
-            <argument type="service" id="App\Repository\Layout\Widget\SlotRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Form\Extension\FormTypeFlowExtension" >
@@ -278,8 +278,6 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="base.service" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
@@ -544,7 +542,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
         <service id="Base\Controller\Client\Thread\SearchController">
             <tag name="controller.service_arguments" />
@@ -558,7 +556,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
         <service id="Base\Controller\Client\User\SettingsController">
             <tag name="controller.service_arguments" />

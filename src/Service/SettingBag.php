@@ -2,6 +2,7 @@
 
 namespace Base\Service;
 
+use Base\BaseBundle;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Traits\SettingBagTrait;
@@ -23,8 +24,10 @@ class SettingBag implements SettingBagInterface
     public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
     {
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->entityManager            = $classMetadataManipulator->getEntityManager();
-        $this->settingRepository        = $classMetadataManipulator->getRepository(Setting::class);
+        if(BaseBundle::hasDoctrine()) {
+            $this->entityManager            = $classMetadataManipulator->getEntityManager();
+            $this->settingRepository        = $classMetadataManipulator->getRepository(Setting::class);
+        }
 
         $this->cache           = $cache;
         $this->cacheName       = "setting_bag." . hash('md5', self::class);

@@ -4,6 +4,7 @@ namespace Base\Controller;
 
 use App\Entity\User;
 
+use Base\BaseBundle;
 use Base\Entity\User\Notification;
 use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
@@ -40,15 +41,18 @@ class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, UserRepository $userRepository, TokenRepository $tokenRepository, BaseService $baseService, TokenStorageInterface $tokenStorage, TranslatorInterface $translator)
+    public function __construct(EntityManager $entityManager, BaseService $baseService, TokenStorageInterface $tokenStorage, TranslatorInterface $translator)
     {
         $this->baseService     = $baseService;
         $this->translator      = $translator;
-
-        $this->userRepository  = $userRepository;
-        $this->tokenRepository = $tokenRepository;
-        $this->entityManager   = $entityManager;
         $this->tokenStorage    = $tokenStorage;
+        
+        $this->entityManager   = $entityManager;
+        if(BaseBundle::hasDoctrine()) {
+
+            $this->userRepository  = $entityManager->getRepository(UserRepository::class);
+            $this->tokenRepository = $entityManager->getRepository(TokenRepository::class);
+        }
     }
 
     /**

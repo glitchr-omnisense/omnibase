@@ -5,6 +5,7 @@ namespace Base\Subscriber;
 use Base\Service\ReferrerInterface;
 use Base\Entity\User;
 
+use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
 
@@ -61,7 +62,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $this->localeProvider = $localeProvider;
         $this->entityManager = $entityManager;
-        $this->userRepository = $entityManager->getRepository(User::class);
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository = $entityManager->getRepository(User::class);
 
         $this->baseService = $baseService;
         $this->referrer = $referrer;
@@ -84,6 +86,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
+        if(!BaseBundle::hasDoctrine()) return [];
+
         return [
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
