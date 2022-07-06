@@ -55,7 +55,6 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
 
     public function groups(?string $routeName): array
     {
-
         $generator = $this->getRouter()->getGenerator();
         if ($generator instanceof AdvancedUrlGenerator)
             $routeNames = array_keys($generator->getCompiledRoutes());
@@ -83,9 +82,9 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     public function security(string $pathinfo): bool
     {
         $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
-        dump( $this->getFirewallMap()->getFirewallConfig($request));
         return $this->getFirewallMap()->getFirewallConfig($request) == true;
     }
+
     public function firewall(string $pathinfo): ?FirewallConfig
     {
         $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
@@ -99,8 +98,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         try { $match = parent::match($pathinfo); }
         catch (Exception $e) { $match = []; }
-        if(array_key_exists("_route", $match))
-            if(str_starts_with($match["_route"], "_")) return $match;
+        if(str_starts_with($match["_route"] ?? "", "_")) return $match;
 
         //
         // Custom match implementation

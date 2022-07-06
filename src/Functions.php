@@ -405,7 +405,7 @@ namespace {
 
         return $backtrace;
     }
-
+    
     define("SHORTEN_FRONT", -1); // [..] dolor sit amet
     define("SHORTEN_MIDDLE", 0); // Lorem ipsum [..] amet
     define("SHORTEN_BACK",   1); // Lorem ipsum dolor [..]
@@ -1141,7 +1141,7 @@ namespace {
         return $array;
     }
 
-    function dump_var(mixed $value)
+    function dumplight(mixed $value)
     {
         echo "<pre>";
         print_r($value);

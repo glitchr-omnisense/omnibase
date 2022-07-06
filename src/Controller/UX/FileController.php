@@ -3,6 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\BaseBundle;
+use Base\Entity\Layout\ImageCrop;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;

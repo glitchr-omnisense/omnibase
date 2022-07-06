@@ -49,8 +49,8 @@ class AdvancedRouter implements RouterInterface
         $this->cacheRouteGroups  = $cache ? $cache->getItem($this->cacheName.".route_groups" ) : null;
 
         $this->useCustomRouter = $parameterBag->get("base.router.use_custom_engine");
-        $this->keepMachine     = $parameterBag->get("base.router.shorten.keep_machine");
-        $this->keepSubdomain   = $parameterBag->get("base.router.shorten.keep_subdomain");
+        $this->keepMachine     = $parameterBag->get("base.router.reduction.keep_machine");
+        $this->keepSubdomain   = $parameterBag->get("base.router.reduction.keep_subdomain");
     }
 
     public function getCache() { return $this->cache; }
@@ -193,8 +193,13 @@ class AdvancedRouter implements RouterInterface
     }
 
     public function getHost(): ?string    { return $_SERVER['HTTP_HOST'] ?? $this->settingBag->host(); }
-    public function getBaseDir(): ?string { return $_SERVER['CONTEXT_PREFIX'] ?? $this->settingBag->base_dir() ?? "/"; }
-    public function getScheme(): ?string  { return $this->settingBag->scheme(); }
+    public function getScheme(): ?string  { return $this->settingBag->scheme(); } // not use REQUEST_SCHEME (scheme is imposed)
+    public function getBaseDir(): ?string 
+    { 
+        $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
+        return $baseDir ?? $this->settingBag->base_dir() ?? "/";
+    }
+
 
     public function getRouteName(?string $routeUrl = null): ?string
     {

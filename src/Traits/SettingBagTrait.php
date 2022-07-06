@@ -118,7 +118,7 @@ trait SettingBagTrait
             return $settings;
         }
 
-        if(!BaseBundle::hasDoctrine()) return null;
+        if(!BaseBundle::hasDoctrine()) return [];
         try {
 
             $fn = $path ? (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :

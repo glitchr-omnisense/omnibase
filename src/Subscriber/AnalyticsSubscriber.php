@@ -5,7 +5,6 @@ namespace Base\Subscriber;
 use Base\BaseBundle;
 
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
