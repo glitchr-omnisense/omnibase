@@ -310,7 +310,6 @@ class Translator implements TranslatorInterface
         if($this->transQuiet(mb_strtolower($entityOrClassName.$property.$noun), [], self::DOMAIN_ENTITY)) return true;
         if($this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender), [], self::DOMAIN_ENTITY)) return true;
         if($this->transQuiet(mb_strtolower($entityOrClassName.$property), [], self::DOMAIN_ENTITY)) return true;
-        if($this->transQuiet(mb_strtolower($entityOrClassName.$gender), [], self::DOMAIN_ENTITY)) return true;
 
         return false;
     }

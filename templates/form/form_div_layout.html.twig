@@ -35,10 +35,11 @@
     <div class="label-wrapper">
         {% if labelTrim is not empty %}
             {{- label|raw -}}
-            {% if form.vars.href is defined and form.vars.href is not null and not form.vars.multiple and form.vars.value %}
+            {% if form.vars.href is defined and form.vars.href is not iterable and form.vars.href is not null and not form.vars.multiple and form.vars.value %}
             <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
                 <i class="fas fa-external-link-square-alt"></i>
             </a>{% endif %}
+
             {{- form_help(form) -}}
         {% else %}
             <label>&nbsp;</label>
