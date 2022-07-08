@@ -164,7 +164,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-
+        
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
@@ -191,6 +191,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // In case of restriction: profiler is disabled
             if($this->profiler) $this->profiler->disable();
+            if($this->redirectOnDeny) return true;
 
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
@@ -395,23 +396,20 @@ class SecuritySubscriber implements EventSubscriberInterface
         return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
 
+    protected $redirectOnDeny = false;
     public function onMaintenanceRequest(RequestEvent $event)
     {
+        if($this->redirectOnDeny) return;
         if(!$event->isMainRequest()) return;
-        if ($this->router->getRouteName() == "security_maintenance") return;
-        if(!$this->onAccessRequest($event)) return;
-
-        if($this->maintenanceProvider->redirectOnDeny($event))
-            $event->stopPropagation();
+        
+        $this->redirectOnDeny |= $this->maintenanceProvider->redirectOnDeny($event);
     }
 
     public function onBirthRequest(RequestEvent $event)
     {
+        if($this->redirectOnDeny) return;
         if(!$event->isMainRequest()) return;
-        if ($this->router->getRouteName() == "security_birth") return;
-        if(!$this->onAccessRequest($event)) return;
-
-        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale()))
-            $event->stopPropagation();
+       
+        $this->redirectOnDeny |= $this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale());
     }
 }

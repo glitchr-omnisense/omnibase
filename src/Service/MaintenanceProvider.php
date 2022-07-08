@@ -10,6 +10,11 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class MaintenanceProvider implements MaintenanceProviderInterface
 {
+    protected $remainingTime = 0;
+    protected $percentage = -1;
+    protected $uptime = 0;
+    protected $downtime = 0;
+
     protected $router;
     public function __construct(RouterInterface $router, SettingBagInterface $settingBag, AuthorizationCheckerInterface $authorizationChecker, ParameterBagInterface $parameterBag, LocaleProviderInterface $localeProvider, TokenStorageInterface $tokenStorage)
     {
@@ -20,10 +25,14 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->parameterBag = $parameterBag;
+        $this->parseLockPath($this->parameterBag->get("base.maintenance.lockpath"));
     }
 
+    protected $lockPath = null;
     protected function parseLockPath(?string $fname)
     {
+        if($fname == $this->lockPath) return;
+
         if ( $fname && ($f = @fopen($fname, "r")) ) {
     
             $downtime = trim(fgets($f, 4096));
@@ -52,11 +61,25 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->downtime = $downtime;
     }
 
-    public function getRemainingTime():int { return $this->remainingTime; }
-    public function getPercentage()   :int { return $this->percentage; }
+    public function getRemainingTime():int 
+    {
+        return $this->remainingTime;
+    }
 
-    public function getDowntime()     :int { return $this->downtime; }
-    public function getUptime()       :int { return $this->uptime; }
+    public function getPercentage()   :int 
+    {
+        return $this->percentage;
+    }
+
+    public function getDowntime()     :int 
+    {
+        return $this->downtime;
+    }
+
+    public function getUptime()       :int 
+    {
+        return $this->uptime;
+    }
 
     public function isUnderMaintenance():bool
     { 
@@ -75,20 +98,23 @@ class MaintenanceProvider implements MaintenanceProviderInterface
             if(preg_match('/^'.$redirectOnDeny.'/', $this->router->getRouteName())) {
 
                 $event->setResponse($this->router->redirect($homepageRoute, [], 302));
-                return false;
+                return true;
             }
-        }
 
-        if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
+            return false;
+
+        } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
 
             $notification = new Notification("maintenance.banner");
             $notification->send("warning");
             return false;
         }
 
+        if ($this->router->getRouteName() == "security_maintenance") 
+            return true;
+        if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS")) 
+            return true;
 
-        if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS"))
-            return false;
 
         $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
         

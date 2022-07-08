@@ -68,7 +68,7 @@ class AccessVoter extends Voter
                 return $access;
 
             case self::MAINTENANCE_ACCESS:
-                return $this->maintenanceProvider->isUnderMaintenance() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
+                return !$this->maintenanceProvider->isUnderMaintenance() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
                     
             case self::BIRTH_ACCESS:
                 return $this->maternityService->isBorn() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);

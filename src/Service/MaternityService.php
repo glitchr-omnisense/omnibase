@@ -62,10 +62,7 @@ class MaternityService implements MaternityServiceInterface
                 return false;
             }
 
-            return false;
-        }
-
-        if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
+        } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
 
             $birthdate = $this->getBirthdate();
             $notification = new Notification("maternity.banner", [IntlDateTime::createFromDateTime($birthdate, $locale)->format("dd MMMM YYYY"), IntlDateTime::createFromDateTime($birthdate, $locale)->format("HH:mm")]);
@@ -73,11 +70,11 @@ class MaternityService implements MaternityServiceInterface
             return false;
         }
 
+        if ($this->router->getRouteName() == "security_birth") return true;
         if ($this->authorizationChecker->isGranted("BIRTH_ACCESS"))
             return false;
 
-        if ($this->router->getRouteName() != "security_birth")
-            $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
+        $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
 
         $token = $this->tokenStorage->getToken();
         if($token && $token->getUser()) $token->getUser()->Logout();
