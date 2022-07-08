@@ -120,6 +120,18 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         return new Recipient($email, '', $locale);
     }
 
+    public function logout()
+    {
+        $token = $this->getTokenStorage()->getToken();
+        if($token === null || $token->getUser() != $this) $this->kick();
+        else {
+
+            $this->getTokenStorage()->setToken(null);
+            setcookie("REMEMBERME", '', time()-1);
+            setcookie("REMEMBERME", '', time()-1, "/", ".".format_url(get_url(), FORMAT_URL_NOSUBDOMAIN | FORMAT_URL_NOMACHINE));
+        }
+    }
+
     public static function getCookie(string $key = null)
     {
         $cookie = json_decode($_COOKIE[self::__DEFAULT_COOKIE__] ?? "", true);
@@ -212,7 +224,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
-
     public function getLocale(): ?string { return $this->locale ?? LocaleProvider::getDefaultLocale(); }
     public function setLocale(?string $locale = null): self
     {

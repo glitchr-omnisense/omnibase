@@ -15,6 +15,8 @@ use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\LocaleProvider;
+use Base\Service\MaintenanceProviderInterface;
+use Base\Service\MaternityServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -53,6 +55,8 @@ class SecuritySubscriber implements EventSubscriberInterface
         ReferrerInterface $referrer,
         RouterInterface $router,
         ParameterBagInterface $parameterBag,
+        MaintenanceProviderInterface $maintenanceProvider,
+        MaternityServiceInterface $maternityService,
         ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
@@ -65,6 +69,10 @@ class SecuritySubscriber implements EventSubscriberInterface
         if(BaseBundle::hasDoctrine())
             $this->userRepository = $entityManager->getRepository(User::class);
 
+        $this->maternityService = $maternityService;
+        $this->maintenanceProvider = $maintenanceProvider;
+        $this->parameterBag = $parameterBag;
+
         $this->baseService = $baseService;
         $this->referrer = $referrer;
         $this->profiler = $profiler;
@@ -74,14 +82,6 @@ class SecuritySubscriber implements EventSubscriberInterface
             "/^user(?:.*)$/",
             "/^security(?:.*)$/",
         ];
-
-        $this->parameterBag = $parameterBag;
-        $this->maintenanceException   = $this->parameterBag->get("base.maintenance.exception");
-        $this->maintenanceException[] = "security_rescue";
-
-        $this->homepageRoute = $this->parameterBag->get("base.homepage");
-        $this->maintenanceRoute = $this->parameterBag->get("base.maintenance.redirect");
-
     }
 
     public static function getSubscribedEvents(): array
@@ -92,7 +92,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class    => [
-                ['onBirthRequest', 6], ['onMaintenanceRequest', 6], ['onAccessRequest', 6], 
+                ['onMaintenanceRequest', 6], ['onBirthRequest', 6], ['onAccessRequest', 6], 
                 ['onReferrerRequest', 5], ['onKernelRequest', 5], 
             ],
 
@@ -164,7 +164,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-        
+
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
@@ -210,21 +210,21 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->router->getRouteName();
-            $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.redirect_on_deny");
-            if(is_array($accessDeniedRedirection)) {
+            $redirectOnDeny = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
+            if(is_array($redirectOnDeny)) {
             
-                $accessDeniedRedirectionWithLocale = array_filter($accessDeniedRedirection, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
-                if(!empty($accessDeniedRedirectionWithLocale))
-                    $accessDeniedRedirection = $accessDeniedRedirectionWithLocale;
+                $redirectOnDenyWithLocale = array_filter($redirectOnDeny, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
+                if(!empty($redirectOnDenyWithLocale))
+                    $redirectOnDeny = $redirectOnDenyWithLocale;
 
-                $accessDeniedRedirection = first($accessDeniedRedirection);
+                $redirectOnDeny = first($redirectOnDeny);
             }
 
-            if($currentRouteName != str_rstrip($accessDeniedRedirection, ".".$this->localeProvider->getLang())) {
+            if($currentRouteName != str_rstrip($redirectOnDeny, ".".$this->localeProvider->getLang())) {
 
-                $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;
+                $response   = $redirectOnDeny ? $this->baseService->redirect($redirectOnDeny) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
-
+    
                 if($event) $event->setResponse($response);
                 if($event) $event->stopPropagation();
                 return false;
@@ -269,7 +269,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $user->approve();
             $this->userRepository->flush($user);
 
-        } else if($this->baseService->getthis->parameterBag("base.user.autoapprove")) {
+        } else if($this->parameterBag->get("base.user.autoapprove")) {
 
             $user->approve();
             $this->userRepository->flush($user);
@@ -395,64 +395,19 @@ class SecuritySubscriber implements EventSubscriberInterface
         return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
 
-
-
-
-
     public function onMaintenanceRequest(RequestEvent $event)
     {
-        if($this->onAccessRequest($event)) return;
+        if(!$this->onAccessRequest($event)) return;
 
-        if(!$this->baseService->isMaintenance()) {
-
-            if(preg_match('/^'.$this->maintenanceRoute.'/', $this->router->getRouteName()))
-                $this->router->redirectToRoute($this->homepageRoute, [], 302, ["event" => $event]);
-
-            return;
-        }
-
-        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_EDITOR")) {
-
-            $notification = new Notification("maintenance.banner");
-            $notification->send("warning");
-            return;
-        }
-
-        // Disconnect user
-        $this->baseService->Logout();
-
-        // Apply redirection to maintenance page
-        $isException = preg_match('/^'.$this->maintenanceRoute.'/', $this->router->getRouteName());
-        foreach($this->maintenanceException as $exception)
-            $isException |= preg_match('/^'.$exception.'/', $this->router->getRouteName());
-
-        if (!$isException)
-            $this->router->redirectToRoute($this->maintenanceRoute, [], 302, ["event" => $event]);
-
-        // Stopping page execution
-        $event->stopPropagation();
+        if($this->maintenanceProvider->redirectOnDeny($event))
+            $event->stopPropagation();
     }
 
     public function onBirthRequest(RequestEvent $event)
     {
-        if($this->router->getRouteName() == "security_birth") return;
-        if($this->onAccessRequest($event)) return;
-     
-        if($this->router->isProfiler() ) return;
-        if($this->router->isEasyAdmin()) return;
-        if($this->baseService->isBorn()) return;
+        if(!$this->onAccessRequest($event)) return;
 
-        if($this->baseService->getUser() && $this->baseService->isGranted("ROLE_EDITOR")) {
-
-            $notification = new Notification("birth.banner");
-            $notification->send("warning");
-            return;
-        }
-
-        if($this->router->getRouteName() != "security_birth") {
-            $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
+        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale()))
             $event->stopPropagation();
-        }
     }
-
 }

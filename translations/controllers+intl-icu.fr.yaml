@@ -25,7 +25,7 @@ security_maintenance:
           other {Nous sommes actuellement en maintenance depuis le {0} à {1}. De retour très bientôt !}
         }"
   estimate: "{uptime, plural,
-                =0 {Il n'y a pas encore d'estimation. Merci de revenir plus tard.}
+                =0 {Il n'y a pas encore d'estimation de temps avant un retour à la normale. Merci de revenir plus tard.}
                 other {Le temps de maintenance restant est estimé à {0} {1} {2}.}
               }"
   days: "{0, plural,

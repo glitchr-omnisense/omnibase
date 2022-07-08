@@ -41,7 +41,9 @@ access_restricted:
     admin_restriction: "Le site est actuellement en accès limité pour les super-administrateurs."
 
 maintenance:
-    banner: Ce site est actuellement en cours de <b>maintenance</b>. (Seul les super-administrateurs peuvent voir cette page pour le moment !)
+    banner: Ce site est actuellement en cours de <b>maintenance</b>.
+maternity:
+    banner: Ce site n'est pas encore <b>publié</b>. La publication est prévue pour le {0} à {1}
 
 logout:
     success: "{0} Tu es maintenant déconnecté."

@@ -63,6 +63,7 @@ use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
 use Base\Backend\Config\Action;
 use Base\Backend\Config\Actions;
+use Base\Field\Type\BooleanType;
 use Base\Routing\RouterInterface;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
@@ -224,27 +225,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
-            "base.settings.logo"                               => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
-            "base.settings.logo.backoffice"                    => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
-            "base.settings.title"                              => ["translatable" => true],
-            "base.settings.title.backoffice"                   => ["translatable" => true, "required" => false],
-            "base.settings.meta.author"                        => ["translatable" => true, "required" => false],
-            "base.settings.meta.description"                   => ["form_type" => TextareaType::class, "translatable" => true, "required" => false],
-            "base.settings.meta.keywords"                      => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
-            "base.settings.slogan"                             => ["translatable" => true, "required" => false],
-            "base.settings.birthdate"                          => ["form_type" => DateTimePickerType::class],
-            "base.settings.access_restricted.redirect_on_deny" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class   , "required" => false],
-            "base.settings.access_restricted.anonymous_access" => ["roles" => "ROLE_SUPERADMIN" , "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.access_restricted.user_access"      => ["roles" => "ROLE_SUPERADMIN" , "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.access_restricted.admin_access"     => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.maintenance"                        => ["form_type" => CheckboxType::class],
-            "base.settings.maintenance.downtime"               => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.maintenance.uptime"                 => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.mail"                               => ["form_type" => EmailType::class],
-            "base.settings.mail.name"                          => ["translatable" => true],
-            "base.settings.http.scheme"                        => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
-            "base.settings.http.host"                          => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
-            "base.settings.http.base_dir"                      => ["form_type" => HiddenType::class, "data" => $this->twig->getAsset("/")],
+            "base.settings.logo"                                => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
+            "base.settings.logo.backoffice"                     => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
+            "base.settings.title"                               => ["translatable" => true],
+            "base.settings.title.backoffice"                    => ["translatable" => true, "required" => false],
+            "base.settings.meta.author"                         => ["translatable" => true, "required" => false],
+            "base.settings.meta.description"                    => ["form_type" => TextareaType::class, "translatable" => true, "required" => false],
+            "base.settings.meta.keywords"                       => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
+            "base.settings.slogan"                              => ["translatable" => true, "required" => false],
+            "base.settings.birthdate"                           => ["form_type" => DateTimePickerType::class],
+            "base.settings.access_restriction.redirect_on_deny" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
+            "base.settings.access_restriction.anonymous_access" => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
+            "base.settings.access_restriction.user_access"      => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
+            "base.settings.access_restriction.admin_access"     => ["roles" => "ROLE_EDITOR", "form_type" => BooleanType::class],
+            "base.settings.maintenance"                         => ["form_type" => BooleanType::class],
+            "base.settings.maintenance.downtime"                => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.maintenance.uptime"                  => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.mail"                                => ["form_type" => EmailType::class],
+            "base.settings.mail.name"                           => ["translatable" => true],
         ]), array_reverse($fields)));
 
         foreach($fields as $name => &$options) {
@@ -278,6 +276,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             return $this->router->reloadRequest();
         }
 
+        $this->settingBag->clearAll();
         return $this->render('backoffice/settings.html.twig', [
             "form" => $form->createView()
         ]);
@@ -337,7 +336,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if(!$logo) $logo = "bundles/base/logo.svg";
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
-        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.subtitle", [], self::TRANSLATION_DASHBOARD);
+        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.slogna", [], self::TRANSLATION_DASHBOARD);
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")

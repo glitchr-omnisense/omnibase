@@ -15,13 +15,18 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
+    public function useAdvancedFeatures(): bool;
     public function isProfiler($request = null);
     public function isEasyAdmin($request = null);
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 
     public function getRequest(): ?Request;
-    public function getLang(?string $locale = null): string;
+
+    public function getEnvironment(): string;
+    public function getLocale (?string $locale = null): string;
+    public function getLang(?string $lang = null): string;
+    
     public function getContext(): RequestContext;
     public function setContext(RequestContext $context);
 

@@ -3,7 +3,7 @@
 namespace Base\Controller\Backend\Crud\Extension;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Field\CollectionField;
+use Base\Enum\UserRole;
 use Base\Field\DateTimePickerField;
 use Base\Field\NumberField;
 use Base\Field\SelectField;
@@ -15,6 +15,9 @@ class TrashBallCrudController extends AbstractCrudController
 
     public function configureFields(string $pageName, ...$args): iterable
     {
+        if ($this->isGranted(UserRole::SUPERADMIN))
+            $this->entityManager->getFilters()->enable("trash_filter");
+
         return parent::configureFields($pageName, function() {
 
             yield SelectField::new('action')->hideOnForm();

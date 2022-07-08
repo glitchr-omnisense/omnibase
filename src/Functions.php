@@ -1141,6 +1141,24 @@ namespace {
         return $array;
     }
 
+    function array_search_by(array $array, string $column, mixed $value) : ?array {
+
+        if(!is_multidimensional($array)) return $array;
+
+        $results = []; 
+        foreach ($array as $k => &$v) {
+
+            if (!is_array($array[$k])) continue;
+            if (!array_key_exists($column, $array[$k]))
+                continue;
+
+            if ($array[$k][$column] === $value)
+                $results[] = $v;
+        }
+
+        return $results ? $results : null;
+    }
+
     function dumplight(mixed $value)
     {
         echo "<pre>";

@@ -10,6 +10,8 @@ use Base\Service\ImageService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use DateInterval;
+use DateTime;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
@@ -68,7 +70,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function setBase(BaseService $baseService)
     {
         $this->baseService = $baseService;
-        $this->projectDir = $this->baseService->getProjectDir();
+        $this->projectDir  = $baseService->getProjectDir();
 
         return $this;
     }
@@ -254,26 +256,32 @@ final class BaseTwigExtension extends AbstractExtension
         return forward_static_call_array([$class, $method], $args);
     }
 
-    public function datetime(Environment $env, $date, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
+    public function datetime(Environment $env, DateTime|DateInterval|int|string $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
         if(is_array($pattern)) {
 
             $array = [];
             foreach($pattern as $p)
-                $array[] = $this->datetime($env, $date, $p, $dateFormat, $timeFormat, $timezone, $calendar, $locale);
+                $array[] = $this->datetime($env, $datetime, $p, $dateFormat, $timeFormat, $timezone, $calendar, $locale);
 
             return $array;
         }
 
-        if(is_string($date)) return $date;
-        return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+        $now = time();
+        if($datetime instanceof DateTime) $datetime = $datetime->getTimestamp();
+        else if($datetime instanceof DateInterval) $datetime = $now + (int) $datetime->format("s");
+        
+        if(is_string($datetime)) return $datetime;
+        return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
-    public function countdown(Environment $env, \DateTime $datetime, array $parameters = []): string
+    public function countdown(Environment $env, DateTime|DateInterval|int|string $datetime, array $parameters = []): string
     {
         $now = time();
-        $timestamp = $datetime->getTimestamp();
-
+        if($datetime instanceof DateTime) $timestamp = $datetime->getTimestamp();
+        else if($datetime instanceof DateInterval) $timestamp = $now + (int) $datetime->format("s");
+        else $timestamp = $datetime;
+        
         return $env->render("@Base/progress/countdown.html.twig", array_merge($parameters, [
             "id" => rand(),
             "datetime"  => $datetime,
@@ -282,7 +290,7 @@ final class BaseTwigExtension extends AbstractExtension
         ]));
     }
 
-    public function progress(Environment $env, \DateTime $start, \DateTime $end, array $parameters = []): string
+    public function progress(Environment $env, DateTime $start, DateTime $end, array $parameters = []): string
     {
         return $env->render("@Base/progress/progressbar.html.twig", array_merge($parameters, [
             "id" => rand(), 

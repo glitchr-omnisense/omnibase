@@ -23,7 +23,8 @@ class BooleanType extends AbstractType
             "confirmation[onUncheck]" => true,
             "toogle_url"              => null,
             "switch"                  => true,
-            "inline"                  => false
+            "inline"                  => false,
+            "required" => false
         ]);
     }
 

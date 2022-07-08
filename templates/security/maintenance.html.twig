@@ -1,36 +1,43 @@
 {% extends 'layout1.html.twig' %}
 
 {% block content %}
-    <div class="container text-center">
-        <h2>{{ '@controllers.security_maintenance.title' | trans }}</h2><br/>
-        <p>
+<div class="container text-center">
+    {% if uptime != 0%}
+    <div class="h1-nobold">{{ "base.datetime"|trans(uptime|datetime(["dd MMMM YYYY", "HH:mm:ss"]))|raw }}</div><br/>
+    <hr>
+    {% endif %}
+    {% if remainingTime != 0%}
+    <div class="h1-nobold">{{ remainingTime|countdown({'class': 'countdown-block'}) }}</div>
+    <hr>
+    {% endif %}
+    
+    <h2>{{ '@controllers.security_maintenance.title' | trans }}</h2><br/>
+    <p>
             {{ '@controllers.security_maintenance.description' | trans({
                 downtime,
-                0:downtime|datetime("EEEE dd MMMM YYYY"),
-                1:downtime|datetime("hh:mm:ss")
+                0:downtime|datetime("dd MMMM yyyy"),
+                1:downtime|datetime("HH:mm")
                 })
             }}
 
             {% if remainingTime > 0 %} <br/> {% endif %}
-            {{ '@controllers.maintenance.estimate' | trans({
+            {{ '@controllers.security_maintenance.estimate' | trans({
                     uptime,
                     0: '@controllers.security_maintenance.days'|trans([remainingTime|date("d")]),
                     1: '@controllers.security_maintenance.hours'|trans([remainingTime|date("H")]),
                     2: '@controllers.security_maintenance.minutes'|trans([remainingTime|date("i")])
                 })
             }}
+    </p>
 
-        </p>
-
-        {% if percentage >= 0 %}
-        <br />
-        <div class="progress"style="height: 25px;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                style="width:{{percentage}}%;">
-            </div>
-        </div><br/>
-        <h4>{{ '@controllers.security_maintenance.progress' | trans([percentage]) }}</h4>
-        {% endif %}
-    </div>
-
+    {% if percentage >= 0 %}
+    <br />
+    <div class="progress"style="height: 25px;">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+            style="width:{{percentage}}%;">
+        </div>
+    </div><br/>
+    <h4>{{ '@controllers.security_maintenance.progress' | trans([percentage]) }}</h4>
+    {% endif %}
+</div>
 {% endblock %}

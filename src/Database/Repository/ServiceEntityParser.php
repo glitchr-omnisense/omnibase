@@ -5,6 +5,7 @@ namespace Base\Database\Repository;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
+use Base\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query;
@@ -243,7 +244,7 @@ class ServiceEntityParser
     protected function validateDate($date, $format = 'Y-m-d H:i:s') {
 
         $d = \DateTime::createFromFormat($format, $date);
-        return $d && $d->format($format) == $date;
+        return $d && IntlDateTime::createFromDateTime($d)->format($format) == $date;
     }
 
     public function    getCustomOption(string $id                ) { return $this->options[$id] ?? []; }

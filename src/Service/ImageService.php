@@ -36,12 +36,12 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
 
-        $this->timeout           = $parameterBag->get("base.images.timeout");
-        $this->notFoundException = $parameterBag->get("base.images.not_found");
-        $this->maxResolution     = $parameterBag->get("base.images.max_resolution");
-        $this->maxQuality        = $parameterBag->get("base.images.max_quality");
-        $this->enableWebp        = $parameterBag->get("base.images.enable_webp");
-        $this->noImage           = $parameterBag->get("base.images.no_image");
+        $this->timeout       = $parameterBag->get("base.images.timeout");
+        $this->fallback      = $parameterBag->get("base.images.fallback");
+        $this->maxResolution = $parameterBag->get("base.images.max_resolution");
+        $this->maxQuality    = $parameterBag->get("base.images.max_quality");
+        $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
+        $this->noImage       = $parameterBag->get("base.images.no_image");
 
         // Local cache directory for filtered images
         $this->localCache = "local.cache";
@@ -139,6 +139,10 @@ class ImageService extends FileService implements ImageServiceInterface
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response
     {
         if(!file_exists($file)) {
+    
+            if(!$this->fallback)
+                throw new NotFoundHttpException($file ? "Image \"$file\" not found." : "Empty path provided.");
+
             $file = $this->noImage;
             array_pop_key("http_cache", $headers);
         }
@@ -263,8 +267,8 @@ class ImageService extends FileService implements ImageServiceInterface
                 $filteredPath = $this->filter($path, $filters, array_merge($config, ["local_cache" => false])) ?? $path;
                 if(!file_exists($filteredPath)) {
 
-                    if($this->notFoundException)
-                        throw new NotFoundHttpException("Image \"$filteredPath\" not found.");
+                    if(!$this->fallback)
+                        throw new NotFoundHttpException($filteredPath ? "Image \"$filteredPath\" not found." : "Empty path provided.");
 
                     return $this->noImage;
                 }
@@ -276,7 +280,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }
-
+            
             return $this->filesystem->prefixPath($pathCache, $localCache);
         }
 

@@ -33,6 +33,8 @@ use Base\Service\ReferrerInterface;
 use Base\Form\Type\Security\ResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Base\Security\RescueFormAuthenticator;
+use Base\Service\MaintenanceProviderInterface;
+use Base\Service\MaternityServiceInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManager;
@@ -62,7 +64,7 @@ class SecurityController extends AbstractController
     public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
-        if($this->baseService->isGranted("EXCEPTION_ACCESS") || $this->baseService->isMaintenance())
+        if($this->baseService->isGranted("EXCEPTION_ACCESS") || $this->baseService->isUnderMaintenance())
             return $this->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE);
 
         // Last username entered by the user
@@ -451,39 +453,13 @@ class SecurityController extends AbstractController
      *
      * @Route("/m", name="security_maintenance")
      */
-    public function Maintenance(): Response
+    public function Maintenance(MaintenanceProviderInterface $maintenanceProvider): Response
     {
-        $downtime = $uptime = 0;
-
-        $fname = $this->baseService->getParameterBag("base.maintenance.lockpath");
-        if ( ($f = @fopen($fname, "r")) ) {
-
-            $downtime = trim(fgets($f, 4096));
-            if(!feof($f)) $uptime = trim(fgets($f, 4096));
-
-            fclose($f);
-
-        } else {
-
-            $downtime = $this->baseService->getSettingBag()->get("base.settings.maintenance_downtime")["_self"] ?? null;
-            $uptime   = $this->baseService->getSettingBag()->get("base.settings.maintenance_uptime")["_self"] ?? null;
-        }
-
-        $downtime = $downtime ? strtotime($downtime) : 0;
-        $uptime = $uptime ? strtotime($uptime) : 0;
-
-        $remainingTime = $uptime - time();
-        if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;
-        if (  $uptime-time() < 0 || $uptime < 1) $uptime = 0;
-
-        if( !$downtime || ($uptime-$downtime <= 0) || ($uptime-time() <= 0) ) $percentage = -1;
-        else $percentage = round(100 * (time()-$downtime)/($uptime-$downtime));
-
         return $this->render('@Base/security/maintenance.html.twig', [
-            'remainingTime' => $remainingTime,
-            'percentage' => $percentage,
-            'downtime'   => $downtime,
-            'uptime'     => $uptime
+            'remainingTime' => $maintenanceProvider->getRemainingTime(),
+            'percentage'    => $maintenanceProvider->getPercentage(),
+            'downtime'      => $maintenanceProvider->getDowntime(),
+            'uptime'        => $maintenanceProvider->getUptime()
         ]);
     }
 
@@ -493,10 +469,10 @@ class SecurityController extends AbstractController
      *
      * @Route({"fr": "/est/bientot/en/ligne", "en":"/is/coming/soon"}, name="security_birth")
      */
-    public function Birth(): Response
+    public function Birth(MaternityServiceInterface $maternityService): Response
     {
-        $birthdate = $this->baseService->getSettingBag()->getScalar("base.settings.birthdate");
-        if($birthdate == null) return $this->redirect("app_index");
+        $birthdate = $maternityService->getBirthdate();
+        if($birthdate == null) return $this->redirectToRoute($this->baseService->getHomepage());
         
         return $this->render('@Base/security/birthdate.html.twig', [
             'birthdate'  => $birthdate

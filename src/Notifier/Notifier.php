@@ -98,11 +98,11 @@ class Notifier implements NotifierInterface
     public function getTechnicalRecipient(): ?Recipient { return $this->technicalRecipient; }
     protected function getTechnicalSupport(): ?string
     {
-        $mail = $this->settingBag->mail();
+        $mail = $this->settingBag->getScalar("base.settings.mail");
         if(!$mail && $this->technicalRecipient) $mail = $this->technicalRecipient->getEmail();
         if(!$mail) return null;
 
-        $mailName = $this->settingBag->mail_name() ?? mb_ucfirst(explode("@", $mail)[0]);
+        $mailName = $this->settingBag->getScalar("base.settings.mail.name") ?? mb_ucfirst(explode("@", $mail)[0]);
         return $mailName." <".$mail.">";
     }
 

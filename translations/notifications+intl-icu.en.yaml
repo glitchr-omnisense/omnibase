@@ -40,9 +40,12 @@ access_restricted:
     public_restriction: "This website is currently <b>under restricted access</b> for authenticated users only."
     user_restriction: "This website is currently <b>under restricted access</b> for administrators only."
     admin_restriction: "This website is currently <b>under restricted access</b> for super-administrators only."
-maintenance:
-    banner: This website is currently <b>under maintenance</b>. (Only super-administrators can see this page for the moment!)
 
+maintenance:
+    banner: This website is currently <b>under maintenance</b>.
+maternity:
+    banner: "This website is <b>not yet</b> visible. Release date on {0} at {1}"
+    
 resetPassword:
     title: "Reset your password"
     csrfToken: "Invalid CSRF token detected. You can't reset your password"

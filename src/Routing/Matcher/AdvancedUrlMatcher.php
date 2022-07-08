@@ -98,7 +98,8 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
         try { $match = parent::match($pathinfo); }
         catch (Exception $e) { $match = []; }
-        if(str_starts_with($match["_route"] ?? "", "_")) return $match;
+        if(str_starts_with($match["_route"] ?? "", "_") || !$this->getRouter()->useAdvancedFeatures())
+            return $match;
 
         //
         // Custom match implementation
