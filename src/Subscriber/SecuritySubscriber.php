@@ -32,6 +32,7 @@ use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Base\Service\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
@@ -246,9 +247,11 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         // Notify user about the authentication method
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
-        if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
+        if ($token instanceof SwitchUserToken) {
 
-            $notification = new Notification("impersonator", [$user]);
+            $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? false;
+            
+            $notification = new Notification("impersonator", [$user, $switchParameter]);
             $notification->send("warning");
         }
 

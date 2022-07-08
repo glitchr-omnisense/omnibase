@@ -36,7 +36,7 @@ class Autocomplete
             }
 
             $className = get_class($entry);
-            $className = $this->translator->entity($className, Translator::TRANSLATION_SINGULAR);
+            $className = $this->translator->entity($className, Translator::NOUN_SINGULAR);
 
             $html = $entryOptions["html"] && is_html($autocomplete) ? $autocomplete : null;
             $text = $entryOptions["html"] && is_html($autocomplete) ? null          : $autocomplete;

@@ -63,8 +63,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
-    private const __DEFAULT_COOKIE__ = "user:necessary";
-    private const __DEFAULT_IDENTIFIER__ = "email";
+    public const __DEFAULT_COOKIE__ = "user:necessary";
+    public const __DEFAULT_IDENTIFIER__ = "email";
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
     public function killSession() { $this->getService()->Logout(); }

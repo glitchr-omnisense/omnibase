@@ -1158,6 +1158,28 @@ namespace {
 
         return $results ? $results : null;
     }
+    
+
+    function get_permutations(array $data = [], bool $duplicates = true, ?int $limit = null) {
+
+        $permutations = [[]];
+
+        for ($i = 0, $N = $limit ? min(count($data), $limit) : count($data); $i < $N; $i++) {
+
+            $buffer = [];
+            foreach ($permutations as $permutation) {
+
+                foreach ($data as $inputValue)
+                    $buffer[] = array_merge($permutation, [$inputValue]);
+
+                if(!$duplicates) $buffer = array_unique($buffer);
+            }
+
+            $permutations = $buffer;
+        }
+
+        return $permutations;
+    }
 
     function dumplight(mixed $value)
     {

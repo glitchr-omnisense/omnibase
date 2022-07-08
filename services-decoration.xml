@@ -50,6 +50,9 @@
             <argument type="service" id="router" />
         </service>
 
+        <service id="Base\Backend\Factory\MenuFactory"         parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory">
+            <argument type="service" id="router" />
+        </service>
         <service id="Base\Backend\Factory\AdminContextFactory" parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory">
             <argument type="service" id="ea_extension" />
         </service>

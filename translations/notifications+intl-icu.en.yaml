@@ -34,7 +34,7 @@ integrity: "Sorry {0}, you have been disconnected, integrity is compromised !"
 
 impersonator:
     "<b>Reminder:</b> You are currently impersonating <b>{0}</b> !
-    <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Exit impersonation</a>"
+    <a class='badge bg-warning badge-warning' href='?{1}=_exit'>Exit impersonation</a>"
 
 access_restricted:
     public_restriction: "This website is currently <b>under restricted access</b> for authenticated users only."

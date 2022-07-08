@@ -57,8 +57,8 @@ class WidgetItem
         $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
         $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-        $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
-        $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+        $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::NOUN_PLURAL);
+        $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::NOUN_PLURAL);
         $label ??= camel2snake(class_basename($entityFqcnOrCrudController), " ");
 
         if(!$icon) {
@@ -100,8 +100,8 @@ class WidgetItem
             $crudTranslationPrefix   = $crudController::getCrudTranslationPrefix();
             $entityTranslationPrefix = $crudController::getEntityTranslationPrefix();
 
-            $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
-            $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+            $label   = self::$translator->transQuiet($crudTranslationPrefix.".".Translator::NOUN_PLURAL);
+            $label ??= self::$translator->transQuiet($entityTranslationPrefix.".".Translator::NOUN_PLURAL);
             $label ??= camel2snake(class_basename($labelOrEntityFqcn), " ");
 
             if(!$icon) {

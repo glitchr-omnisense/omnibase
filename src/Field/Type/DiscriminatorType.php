@@ -85,7 +85,7 @@ class DiscriminatorType extends AbstractType
         $formattedValues["icon"] = class_implements_interface($class, IconizeInterface::class) ? $class::__iconizeStatic()[0] ?? null : null;
 
 
-        $text = $translator->trans($entry.".".Translator::TRANSLATION_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
+        $text = $translator->trans($entry.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
         switch($format) {
 
             case FORMAT_TITLECASE:

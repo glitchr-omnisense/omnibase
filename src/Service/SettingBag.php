@@ -147,7 +147,7 @@ class SettingBag implements SettingBagInterface
 
             $settings = [];
             foreach($paths as $path)
-                $settings[] = $this->getRaw($path);
+                $settings[] = $this->getRaw($path, $useCache);
 
             return $settings;
         }
@@ -190,7 +190,7 @@ class SettingBag implements SettingBagInterface
 
             $settings = [];
             foreach($paths as $path)
-                $settings[] = $this->getRawScalar($path);
+                $settings[] = $this->getRawScalar($path, $useCache);
 
             return $settings;
         }
@@ -229,7 +229,7 @@ class SettingBag implements SettingBagInterface
             return $this->settingBag[$path.":".$locale];
 
         try { $values = $this->getRaw($path) ?? []; }
-        catch (Exception $e) { return []; }
+        catch (Exception $e) { throw $e; return []; }
 
         $this->settingBag[$path.":".$locale] = $this->settingBag[$path.":".$locale] ?? array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
         if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));

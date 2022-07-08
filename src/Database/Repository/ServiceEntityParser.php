@@ -131,7 +131,7 @@ class ServiceEntityParser
     protected function __findRandomlyBy (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
     protected function __findAll        (                      $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
     protected function __findOneBy      (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
-    protected function __findLastOneBy  (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), 1     , null   , $groupBy, $selectAs) ?? null; }
+    protected function __findLastOneBy  (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']),                  $groupBy, $selectAs) ?? null; }
     protected function __findLastBy     (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query
     {
         $limit = array_unshift($criteria);

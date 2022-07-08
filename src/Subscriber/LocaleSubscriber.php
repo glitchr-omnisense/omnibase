@@ -11,6 +11,8 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Http\Event\SwitchUserEvent;
+use Symfony\Component\Security\Http\SecurityEvents;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class LocaleSubscriber implements EventSubscriberInterface
@@ -35,7 +37,18 @@ class LocaleSubscriber implements EventSubscriberInterface
           *
           * CLI: php bin/console debug:event kernel.request
           */
-        return [ KernelEvents::REQUEST => ['onKernelRequest', 128] ];
+        return [ 
+            KernelEvents::REQUEST => ['onKernelRequest', 128],
+            SecurityEvents::SWITCH_USER => 'onSwitchUser'
+        ];
+    }
+
+    public function onSwitchUser(SwitchUserEvent $event): void
+    {
+        $request = $event->getRequest();
+
+        if ($request->hasSession() && ($session = $request->getSession()))
+            $session->set('_locale', $event->getTargetUser()->getLocale());
     }
 
     public function onKernelRequest(RequestEvent $event)

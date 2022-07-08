@@ -18,11 +18,26 @@ class Translator implements TranslatorInterface
     public const DOMAIN_ENTITY   = "entities";
     public const DOMAIN_ENUM     = "enums";
 
-    public const TRANSLATION_SINGULAR     = "_singular";
-    public const TRANSLATION_PLURAL       = "_plural";
-    public const TRANSLATION_FEMININE     = "_feminine";
-    public const TRANSLATION_MASCULINE    = "_masculine";
+    public const STRUCTURE_DOT = "^[@a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+$";
+    public const STRUCTURE_DOTBRACKET = "\{[ ]*[@a-zA-Z0-9_.]+[.]{0,1}[a-zA-Z0-9_]+[ ]*\}";
+    public const STRUCTURE_BRACKETLIST = ['{}', "[]", "%%"];
+
     public const TRANSLATION_PROPERTIES   = "_properties";
+
+    public const TRANSLATION_NOUN  = "noun";
+    public const NOUN_SINGULAR     = "_singular";
+    public const NOUN_PLURAL       = "_plural";
+
+    public const TRANSLATION_GENDERNESS  = "genderness";
+    public const GENDERNESS_INCLUSIVE    = "_inclusive";
+    public const GENDERNESS_FEMININE     = "_feminine";
+    public const GENDERNESS_MASCULINE    = "_masculine";
+    public const GENDERNESS_NEUTRAL      = "_neutral";
+
+    public const TRANSLATION_POLITENESS  = "politeness";
+    public const POLITENESS_PLAIN        = "_plain";
+    public const POLITENESS_POLITE       = "_polite";
+    public const POLITENESS_FORMAL       = "_formal";
 
     public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel, ParameterBagInterface $parameterBag)
     {
@@ -35,8 +50,6 @@ class Translator implements TranslatorInterface
     public function setLocale(string $locale) { $this->translator->setLocale($locale); }
     public function getFallbackLocales(): array { return $this->translator->getFallbackLocales(); }
 
-    public const STRUCTURE_DOT = "^[@a-zA-Z0-9_.]+[.]{1}[a-zA-Z0-9_]+$";
-    public const STRUCTURE_DOTBRACKET = "\{[ ]*[@a-zA-Z0-9_.]+[.]{0,1}[a-zA-Z0-9_]+[ ]*\}";
     public function transQuiet(TranslatableMessage|string $id, array $parameters = array(), ?string $domain = null, ?string $locale = null, bool $recursive = true, bool $nullable = true): ?string
     {
         return $this->transExists($id, $domain, $locale) ? $this->trans($id, $parameters, $domain, $locale, $recursive) : ($nullable ? null : $id);
@@ -58,8 +71,8 @@ class Translator implements TranslatorInterface
         $customId  = preg_match("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $id);
         $atBegin   = str_starts_with($id, "@");
 
-        $domainFallback = $domainFallback && str_starts_with($domainFallback, "@") ? substr($domainFallback, 1) : ($domainFallback ?? null);
         $domain         = $domain         && str_starts_with($domain, "@")         ? substr($domain, 1)         : ($domain ?? null);
+        $domainFallback = $domainFallback && str_starts_with($domainFallback, "@") ? substr($domainFallback, 1) : ($domainFallback ?? null);
         if ($id && $customId) {
 
             $array  = explode(".", $id);
@@ -86,7 +99,7 @@ class Translator implements TranslatorInterface
         }
 
         // Replace parameter between brackets
-        $bracketList = ['{}', "[]", "%%"];
+        $bracketList = self::STRUCTURE_BRACKETLIST;
         foreach ($parameters as $key => $element) {
 
             $brackets = -1;
@@ -185,68 +198,82 @@ class Translator implements TranslatorInterface
         return $catalogue->has($id, $domain ?? self::DOMAIN_DEFAULT);
     }
 
-    public function enum(?string $value, string $class, string|array $options = self::TRANSLATION_SINGULAR): ?string
+    protected function parsePath(string $path)
     {
-        $declaringClass = $class;
-        while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
-
-            $declaringClass = get_parent_class($declaringClass);
-            if($declaringClass === Type::class || $declaringClass === null) {
-                $declaringClass = $class;
-                break;
-            }
-        }
-
-        $value = $value ? ".".$value : "";
-        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
-        $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
-        $class  = implode(".", array_slice(explode(".",$class), 0, $offset));
-
-        if(!is_array($options)) $options = [$options];
-
-        $gender = null;
-        if(in_array(self::TRANSLATION_MASCULINE, $options)) $gender = self::TRANSLATION_MASCULINE;
-        else if(in_array(self::TRANSLATION_FEMININE, $options)) $gender = self::TRANSLATION_FEMININE;
-        $gender = $gender ? ".".$gender  : "";
-
-        $noun = null;
-        if(in_array(self::TRANSLATION_PLURAL, $options)) $noun = self::TRANSLATION_PLURAL;
-        else if(in_array(self::TRANSLATION_SINGULAR, $options)) $noun = self::TRANSLATION_SINGULAR;
-        $noun = $noun     ? ".".$noun  : "";
-
-        return $class ? mb_ucfirst($this->trans(mb_strtolower($class.$value.$noun), [], self::DOMAIN_ENUM)) : null;
+        $entries = array_starts_with(explode(".", $path), "_");
+        return get_permutations(tail($entries, 3));
     }
 
-    public function enumExists(?string $value, string $class, string|array $options = self::TRANSLATION_SINGULAR): bool
+    protected function transPerms(string $id, array|string $options = [], ?array $parameters = [], ?string $domain = null, ?string $locale = null)
     {
-        $declaringClass = $class;
-        while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
-
-            $declaringClass = get_parent_class($declaringClass);
-            if($declaringClass === Type::class || $declaringClass === null) {
-                $declaringClass = $class;
-                break;
-            }
-        }
-
-        $value = $value ? ".".$value : "";
-        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
-        $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
-        $class  = implode(".", array_slice(explode(".",$class), 0, $offset));
-
         if(!is_array($options)) $options = [$options];
 
-        $gender = null;
-        if(in_array(self::TRANSLATION_MASCULINE, $options)) $gender = self::TRANSLATION_MASCULINE;
-        else if(in_array(self::TRANSLATION_FEMININE, $options)) $gender = self::TRANSLATION_FEMININE;
-        $gender = $gender ? ".".$gender  : "";
+        $politeness = null;
+             if(in_array(self::POLITENESS_PLAIN,  $options)) $politeness = self::POLITENESS_PLAIN;
+        else if(in_array(self::POLITENESS_POLITE, $options)) $politeness = self::POLITENESS_POLITE;
+        else if(in_array(self::POLITENESS_FORMAL, $options)) $politeness = self::POLITENESS_FORMAL;
+        $politeness = $politeness ? ".".$politeness  : "";
+
+        $genderness = null;
+             if(in_array(self::GENDERNESS_INCLUSIVE, $options)) $genderness = self::GENDERNESS_INCLUSIVE;
+        else if(in_array(self::GENDERNESS_MASCULINE, $options)) $genderness = self::GENDERNESS_MASCULINE;
+        else if(in_array(self::GENDERNESS_FEMININE , $options)) $genderness = self::GENDERNESS_FEMININE;
+        else if(in_array(self::GENDERNESS_NEUTRAL  , $options)) $genderness = self::GENDERNESS_NEUTRAL;
+        $genderness = $genderness ? ".".$genderness  : "";
 
         $noun = null;
-        if(in_array(self::TRANSLATION_PLURAL, $options)) $noun = self::TRANSLATION_PLURAL;
-        else if(in_array(self::TRANSLATION_SINGULAR, $options)) $noun = self::TRANSLATION_SINGULAR;
+             if(in_array(self::NOUN_PLURAL, $options)) $noun = self::NOUN_PLURAL;
+        else if(in_array(self::NOUN_SINGULAR, $options)) $noun = self::NOUN_SINGULAR;
         $noun = $noun     ? ".".$noun  : "";
 
-        return $class ? mb_ucfirst($this->transExists(mb_strtolower($class.$value.$noun), self::DOMAIN_ENUM)) : null;
+        $in = array_filter([$politeness, $genderness, $noun]);
+        $permutations = array_map(fn($a) => implode("", $a), get_permutations($in, true));
+        $permutations[] = "";
+
+        $trans = null;
+        foreach($permutations as $permutation) {
+ 
+            $trans = $this->transQuiet(mb_strtolower($id.$permutation), $parameters, $domain, $locale);
+            if($trans !== null) break;
+        }
+        
+        return $trans ? mb_ucfirst($trans) : mb_strtolower($id.implode("", $in));
+    }
+
+    protected function transPermExists(string $id, array|string $options = [], ?string $domain = null, ?string $locale = null, bool $localeCountry = true)
+    {
+        if(!is_array($options)) $options = [$options];
+
+        $politeness = null;
+             if(in_array(self::POLITENESS_PLAIN , $options)) $politeness = self::POLITENESS_PLAIN;
+        else if(in_array(self::POLITENESS_POLITE, $options)) $politeness = self::POLITENESS_POLITE;
+        else if(in_array(self::POLITENESS_FORMAL, $options)) $politeness = self::POLITENESS_FORMAL;
+        $politeness = $politeness ? ".".$politeness  : "";
+
+        $genderness = null;
+             if(in_array(self::GENDERNESS_INCLUSIVE, $options)) $genderness = self::GENDERNESS_INCLUSIVE;
+        else if(in_array(self::GENDERNESS_MASCULINE, $options)) $genderness = self::GENDERNESS_MASCULINE;
+        else if(in_array(self::GENDERNESS_FEMININE , $options)) $genderness = self::GENDERNESS_FEMININE;
+        else if(in_array(self::GENDERNESS_NEUTRAL  , $options)) $genderness = self::GENDERNESS_NEUTRAL;
+        $genderness = $genderness ? ".".$genderness  : "";
+
+        $noun = null;
+             if(in_array(self::NOUN_PLURAL, $options)) $noun = self::NOUN_PLURAL;
+        else if(in_array(self::NOUN_SINGULAR, $options)) $noun = self::NOUN_SINGULAR;
+        $noun = $noun     ? ".".$noun  : "";
+
+        $in = array_filter([$politeness, $genderness, $noun]);
+        $permutations = array_map(fn($a) => implode("", $a), get_permutations($in, true));
+        $permutations[] = "";
+
+        $trans = null;
+        foreach($permutations as $permutation) {
+ 
+            $trans = $this->transQuiet(mb_strtolower($id.$permutation), [], $domain, $locale, $localeCountry);
+            if($trans !== null) return true;
+        }
+
+        return false;
     }
 
     public function route(string $routeName, string $domain = null): ?string
@@ -261,58 +288,67 @@ class Translator implements TranslatorInterface
         return $this->transExists($domain.$routeName.".title");
     }
 
-    public function entity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::TRANSLATION_SINGULAR): ?string
+    public function enum(string $class, ?string $value = null, null|string|array $options = self::NOUN_SINGULAR): ?string
     {
-        if(!is_array($options)) $options = [$options];
-        if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
+        $declaringClass = $class;
+        while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
 
-        $gender = null;
-        if(in_array(self::TRANSLATION_MASCULINE, $options)) $gender = self::TRANSLATION_MASCULINE;
-        else if(in_array(self::TRANSLATION_FEMININE, $options)) $gender = self::TRANSLATION_FEMININE;
-        $gender = $gender ? ".".$gender  : "";
+            $declaringClass = get_parent_class($declaringClass);
+            if($declaringClass === Type::class || $declaringClass === null) {
+                $declaringClass = $class;
+                break;
+            }
+        }
 
-        $noun = null;
-        if(in_array(self::TRANSLATION_PLURAL, $options)) $noun = self::TRANSLATION_PLURAL;
-        else if(in_array(self::TRANSLATION_SINGULAR, $options)) $noun = self::TRANSLATION_SINGULAR;
-        $noun = $noun     ? ".".$noun  : "";
+        $value = $value ? ".".$value : "";
+        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
+        $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
+        $class  = implode(".", array_slice(explode(".",$class), 0, $offset));
 
-        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
-        $property = $property ? ".".$property : "";
-
-        $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender.$noun), [], self::DOMAIN_ENTITY);
-        $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property.$noun), [], self::DOMAIN_ENTITY);
-        $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender), [], self::DOMAIN_ENTITY);
-        $trans ??= $this->transQuiet(mb_strtolower($entityOrClassName.$property), [], self::DOMAIN_ENTITY);
-        $trans ??=                   mb_strtolower($entityOrClassName.$property.$gender.$noun);
-
-        return $entityOrClassName ? mb_ucfirst($trans) : null;
+        return $class ? $this->transPerms($class.$value, $options, [], self::DOMAIN_ENUM) : null;
     }
 
-    public function entityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::TRANSLATION_SINGULAR): bool
+    public function enumExists(string $class, ?string $value = null, string|array $options = self::NOUN_SINGULAR): bool
+    {
+        $declaringClass = $class;
+        while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
+
+            $declaringClass = get_parent_class($declaringClass);
+            if($declaringClass === Type::class || $declaringClass === null) {
+                $declaringClass = $class;
+                break;
+            }
+        }
+
+        $value = $value ? ".".$value : "";
+        $offset = is_subclass_of($class, SetType::class) ? -3 : -2;
+        $class  = $this->parseClass($declaringClass, self::PARSE_EXTENDS);
+        $class  = implode(".", array_slice(explode(".",$class), 0, $offset));
+
+        return $class ? $this->transPermExists($class.$value, $options, self::DOMAIN_ENUM) : null;
+    }
+
+    public function entity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
     {
         if(!is_array($options)) $options = [$options];
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
 
-        $gender = null;
-        if(in_array(self::TRANSLATION_MASCULINE, $options)) $gender = self::TRANSLATION_MASCULINE;
-        else if(in_array(self::TRANSLATION_FEMININE, $options)) $gender = self::TRANSLATION_FEMININE;
-        $gender = $gender ? ".".$gender  : "";
+        $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
+        $property = $property ? ".".$property : "";
 
-        $noun = null;
-        if(in_array(self::TRANSLATION_PLURAL, $options)) $noun = self::TRANSLATION_PLURAL;
-        else if(in_array(self::TRANSLATION_SINGULAR, $options)) $noun = self::TRANSLATION_SINGULAR;
-        $noun = $noun     ? ".".$noun  : "";
+        return $entityOrClassName ? $this->transPerms($entityOrClassName.camel2snake($property), $options, [], self::DOMAIN_ENTITY) : null;
+    }
+
+    public function entityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): bool
+    {
+        if(!is_array($options)) $options = [$options];
+        if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
 
         $entityOrClassName = $this->parseClass($entityOrClassName, self::PARSE_NAMESPACE);
         $property = $property ? ".".$property : "";
 
-        if($this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender.$noun), [], self::DOMAIN_ENTITY)) return true;
-        if($this->transQuiet(mb_strtolower($entityOrClassName.$property.$noun), [], self::DOMAIN_ENTITY)) return true;
-        if($this->transQuiet(mb_strtolower($entityOrClassName.$property.$gender), [], self::DOMAIN_ENTITY)) return true;
-        if($this->transQuiet(mb_strtolower($entityOrClassName.$property), [], self::DOMAIN_ENTITY)) return true;
-        if($this->transQuiet(mb_strtolower($entityOrClassName.$gender), [], self::DOMAIN_ENTITY)) return true;
+        return $this->transPermExists($entityOrClassName.camel2snake($property), $options, self::DOMAIN_ENTITY);
 
-        return false;
     }
     
     public function time(int $time): string

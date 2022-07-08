@@ -36,9 +36,10 @@ class SettingListType extends AbstractType implements DataMapperInterface
      */
     protected $classMetadataManipulator;
 
-    public function __construct(SettingBag $settingBag, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(SettingBag $settingBag, LocaleProvider $localeProvider, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->settingBag = $settingBag;
+        $this->localeProvider = $localeProvider;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -153,12 +154,14 @@ class SettingListType extends AbstractType implements DataMapperInterface
                             $bool = !empty($settingValue) && $settingValue != "0";
                             $settingTranslation->setValue($bool ? true : false);
                             break;
-
                     }
                 }
 
                 if ($isTranslatable) $intlData[$formattedField] = $translations;
-                else $unvData[$formattedField] = $translations;
+                else { 
+                    
+                    $unvData[$formattedField] = $translations;
+                }
             }
 
             $form = $event->getForm();
@@ -168,7 +171,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                     "autoload" => false,
                     "multiple" => true,
-                    "required_locales" => [LocaleProvider::getDefaultLocale()],
+                    "required_locales" => [$this->localeProvider->getDefaultLocale()],
                     "translation_class" => SettingTranslation::class,
                 ]);
 
@@ -181,6 +184,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                     "autoload" => false,
                     "multiple" => true,
+                    "locale" => $this->localeProvider->getDefaultLocale(),
                     "single_locale" => true,
                     "translation_class" => SettingTranslation::class,
                 ]);

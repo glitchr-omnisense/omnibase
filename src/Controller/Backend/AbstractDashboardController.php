@@ -260,7 +260,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->settingBag->getRawScalar($fields)
+                $this->settingBag->getRawScalar($fields, false)
             );
 
             foreach(array_diff_key($data, $settings) as $name => $setting)
@@ -364,7 +364,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if(!is_array($values)) $values = ["_self" => $values];
             $role = array_pop_key("_self", $values);
 
-            $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
+            $label = $this->translator->enum($class, $role, Translator::NOUN_PLURAL);
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
@@ -385,7 +385,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach($values as $role)  {
 
-                    $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
+                    $label = mb_ucfirst($this->translator->enum($role, $class, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
                     $url = $this->adminUrlGenerator

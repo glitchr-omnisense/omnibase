@@ -12,6 +12,7 @@ use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use DateInterval;
 use DateTime;
+use Exception;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
@@ -23,6 +24,8 @@ use Twig\TwigFilter;
 
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
 use Twig\TwigFunction;
@@ -93,12 +96,14 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('call_user_func_with_defaults', [$this, 'call_user_func_with_defaults']),
             new TwigFunction('method_exists',                [$this, 'method_exists']),
             new TwigFunction('static_call',                  [$this, 'static_call'  ]),
+            new TwigFunction('static_property',              [$this, 'static_property'  ]),
 
             new TwigFunction('html_attributes', 'html_attributes', ["is_safe" => ['all']]),
 
             new TwigFunction('str_starts_with', "str_starts_with"),
             new TwigFunction('str_ends_with'  , "str_ends_with"  ),
             new TwigFunction('empty',           "empty"),
+            new TwigFunction('property_accessor',            [$this, "property_accessor"]),
 
             new TwigFunction('urlify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
@@ -192,6 +197,31 @@ final class BaseTwigExtension extends AbstractExtension
         return twig_array_filter($env, $array, $arrow);
     }
 
+    function static_property($class, $propertyName) {
+
+        if(is_object($class)) $class = get_class($class);
+        if (!class_exists($class))
+            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid class");
+        if (!property_exists($class, $propertyName))
+            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid property");
+
+        return $class::$$propertyName;
+    }
+
+
+
+    public function property_accessor($entity, $propertyName, $enableMagicCall = false)
+    {
+        $propertyAccessorBuilder = PropertyAccess::createPropertyAccessorBuilder();
+        if($enableMagicCall) $propertyAccessorBuilder->enableMagicCall();
+        
+        $propertyAccessor =  $propertyAccessorBuilder->getPropertyAccessor();
+        if(!$propertyAccessor->isReadable($entity, $propertyName))
+            return null;
+
+        return $propertyAccessor->getValue($entity, $propertyName);
+    }
+
     public function asset($path, ?string $packageName = null) {
 
         if($path === false || $path === null) return null;
@@ -248,6 +278,8 @@ final class BaseTwigExtension extends AbstractExtension
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }
 
     function static_call($class, $method, ...$args) {
+
+        if(is_object($class)) $class = get_class($class);
         if (!class_exists($class))
             throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
         if (!method_exists($class, $method))

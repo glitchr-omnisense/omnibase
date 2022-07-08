@@ -25,7 +25,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->tokenStorage = $tokenStorage;
         $this->parameterBag = $parameterBag;
-        $this->parseLockPath($this->parameterBag->get("base.maintenance.lockpath"));
+        // $this->parseLockPath($this->parameterBag->get("base.maintenance.lockpath"));
     }
 
     protected $lockPath = null;
