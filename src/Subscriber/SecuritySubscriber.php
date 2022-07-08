@@ -164,7 +164,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-        
+
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
@@ -173,8 +173,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
             if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
             if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
-
-            if($user != null && $specialGrant) {
+            
+            if($user && $specialGrant) {
 
                      if(!$adminAccess) $msg = "admin_restriction";
                 else if(!$userAccess)  $msg = "user_restriction";
@@ -191,8 +191,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // In case of restriction: profiler is disabled
             if($this->profiler) $this->profiler->disable();
-            if($this->redirectOnDeny) return true;
-
+            
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
             if($isSecurityRoute) return true;
@@ -211,19 +210,19 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->router->getRouteName();
-            $redirectOnDeny = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
-            if(is_array($redirectOnDeny)) {
+            $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
+            if(is_array($routeRestriction)) {
             
-                $redirectOnDenyWithLocale = array_filter($redirectOnDeny, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
-                if(!empty($redirectOnDenyWithLocale))
-                    $redirectOnDeny = $redirectOnDenyWithLocale;
+                $routeRestrictionWithLocale = array_filter($routeRestriction, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
+                if(!empty($routeRestrictionWithLocale))
+                    $routeRestriction = $routeRestrictionWithLocale;
 
-                $redirectOnDeny = first($redirectOnDeny);
+                $routeRestriction = first($routeRestriction);
             }
 
-            if($currentRouteName != str_rstrip($redirectOnDeny, ".".$this->localeProvider->getLang())) {
+            if($currentRouteName != str_rstrip($routeRestriction, ".".$this->localeProvider->getLang())) {
 
-                $response   = $redirectOnDeny ? $this->baseService->redirect($redirectOnDeny) : null;
+                $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
     
                 if($event) $event->setResponse($response);
@@ -396,24 +395,19 @@ class SecuritySubscriber implements EventSubscriberInterface
         return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
     }
 
-    protected $redirectOnDeny = false;
     public function onMaintenanceRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
-        
-        $this->redirectOnDeny |= $this->maintenanceProvider->redirectOnDeny(
-            !$this->redirectOnDeny ? $event : null,
-            $this->localeProvider->getLocale()
-        );
+
+        if($this->maintenanceProvider->redirectOnDeny($event, $this->localeProvider->getLocale()))
+            $event->stopPropagation();
     }
 
     public function onBirthRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
-       
-        $this->redirectOnDeny |= $this->maternityService->redirectOnDeny(
-            !$this->redirectOnDeny ? $event : null,
-            $this->localeProvider->getLocale()
-        );
+
+        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale()))
+            $event->stopPropagation();
     }
 }

@@ -53,16 +53,14 @@ class MaternityService implements MaternityServiceInterface
         $redirectOnDeny = $this->parameterBag->get("base.site.birthdate.redirect_on_deny") ?? "security_birth";
         if($this->router->isProfiler() ) return false;
         if($this->router->isEasyAdmin()) return false;
+
         if($this->isBorn()) {
 
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
-            if(preg_match('/^'.$redirectOnDeny.'/', $this->router->getRouteName())) {
+            if ($event && preg_match('/^'.$redirectOnDeny.'/', $this->router->getRouteName()))
+                $event->setResponse($this->router->redirect($homepageRoute, [], 302));
 
-                if($event) $event->setResponse($this->router->redirect($homepageRoute, [], 302));
-                return false;
-            }
-
-            return true;
+            return false;
 
         } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
 
@@ -72,7 +70,8 @@ class MaternityService implements MaternityServiceInterface
             return false;
         }
 
-        if ($this->router->getRouteName() == "security_birth") return true;
+        if ($this->router->getRouteName() == "security_birth")
+            return false;
         if ($this->authorizationChecker->isGranted("BIRTH_ACCESS"))
             return false;
 

@@ -8,7 +8,7 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
-use Exception;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
@@ -19,7 +19,6 @@ use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 
 class ImageService extends FileService implements ImageServiceInterface
@@ -139,7 +138,7 @@ class ImageService extends FileService implements ImageServiceInterface
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response
     {
         if(!file_exists($file)) {
-    
+
             if(!$this->fallback)
                 throw new NotFoundHttpException($file ? "Image \"$file\" not found." : "Empty path provided.");
 
@@ -159,18 +158,19 @@ class ImageService extends FileService implements ImageServiceInterface
         $args    = $this->resolve($path, $filters);
         $path    = $args["path"] ?? $path; // Cache directory location
         $filters = $args["filters"];
+        $storage = $args["storage"] ?? $config["storage"] ?? null;
 
         //
         // Apply image resolution limitation
         if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
-            throw new Exception("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+            throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
 
         //
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
         if($formatter === null)
-            throw new Exception("Last filter is missing.");
+            throw new NotFoundHttpException("Last filter is missing.");
 
         //
         // Apply size limitation to bitmap only
@@ -181,19 +181,19 @@ class ImageService extends FileService implements ImageServiceInterface
                 $formatter->addFilter(new $this->maxResolution);
 
             if(!class_implements_interface($formatter, FormatFilterInterface::class))
-                throw new \Exception("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
         }
 
         $filtersButLast = array_slice($filters, 0, count($filters)-1);
         foreach($filtersButLast as $filter) {
 
             if(class_implements_interface($filter, FormatFilterInterface::class))
-                throw new \Exception("Only last filter must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
 
-        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $config["storage"] ?? null);
+        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $storage);
         $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        $pathCache = path_suffix($pathRelative, $pathSuffixes);
+        $pathCache    = path_suffix($pathRelative, $pathSuffixes);
 
         //
         // Compute a response.. (if cache not found)
@@ -217,18 +217,19 @@ class ImageService extends FileService implements ImageServiceInterface
         $args    = $this->resolve($path, $filters);
         $path    = $args["path"] ?? $path; // Cache directory location
         $filters = $args["filters"];
+        $storage = $args["storage"] ?? $config["storage"] ?? null;
 
         //
         // Apply image resolution limitation
         if(!is_instanceof($this->maxResolution, ThumbnailFilter::class))
-            throw new Exception("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
+            throw new NotFoundHttpException("Resolution filter \"".$this->maxResolution."\" must inherit from ".ThumbnailFilter::class);
 
         //
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
         if($formatter === null)
-            throw new Exception("Last filter is missing.");
+            throw new NotFoundHttpException("Last filter is missing.");
 
         //
         // Apply size limitation to bitmap only
@@ -239,19 +240,27 @@ class ImageService extends FileService implements ImageServiceInterface
                 $formatter->addFilter(new $this->maxResolution);
 
             if(!class_implements_interface($formatter, FormatFilterInterface::class))
-                throw new \Exception("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Last filter \"".($formatter ? get_class($formatter) : null)."\" must implement \"".FormatFilterInterface::class."\"");
         }
 
         $filtersButLast = array_slice($filters, 0, count($filters)-1);
         foreach($filtersButLast as $filter) {
 
             if(class_implements_interface($filter, FormatFilterInterface::class))
-                throw new \Exception("Only last filter must implement \"".FormatFilterInterface::class."\"");
+                throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
 
-        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $config["storage"] ?? null);
+        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $storage);
+	if(!$pathRelative) {
+
+            if(!$this->fallback)
+                throw new NotFoundHttpException($path ? "Image not found behind system path \"$path\"." : "Empty path provided.");
+
+            return $this->noImage;
+        }
+
         $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        $pathCache = path_suffix($pathRelative, $pathSuffixes);
+        $pathCache    = path_suffix($pathRelative, $pathSuffixes);
 
         //
         // Compute a response.. (if cache not found)
@@ -268,7 +277,7 @@ class ImageService extends FileService implements ImageServiceInterface
                 if(!file_exists($filteredPath)) {
 
                     if(!$this->fallback)
-                        throw new NotFoundHttpException($filteredPath ? "Image \"$filteredPath\" not found." : "Empty path provided.");
+                        throw new NotFoundHttpException($pathCache  ? "Image \"$pathCache\" not found." : "Empty path provided.");
 
                     return $this->noImage;
                 }
@@ -280,7 +289,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }
-            
+
             return $this->filesystem->prefixPath($pathCache, $localCache);
         }
 

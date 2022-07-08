@@ -4,10 +4,8 @@
 <div class="container text-center">
         <h1>{{ '@controllers.security_maintenance.title' | trans }}</h1><br/>
         <p>{{ '@controllers.security_maintenance.description'|trans }}</p>
-        <br/>
-        <hr>
-
         {% if percentage >= 0 %}
+        <br/><hr>
         <br/><div class="progress"style="height: 25px;">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                 style="width:{{percentage}}%;">
