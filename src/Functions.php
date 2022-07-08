@@ -27,11 +27,17 @@ namespace {
 
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
     {
-        $scheme      ??= $_SERVER["REQUEST_SCHEME"] ?? null;
-        $http_host   ??= $_SERVER["HTTP_HOST"]      ?? null;
+        $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"]?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null ;
+        $scheme = $scheme && (strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0);
+        $scheme = $scheme ? "https" : "http";
+
+        $domain  = explode(":", $http_host ?? $_SERVER["HTTP_HOST"] ?? [])[0] ?? $_SERVER["SERVER_NAME"] ?? null;
+        $port    = explode(":", $http_host ?? $_SERVER["HTTP_HOST"])[1] ?? $_SERVER["SERVER_PORT"] ?? null;
+        $port    = $port != 80 && $port != 443 ? $port : null;
+
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        return compose_url($scheme, null, null, null, null, $http_host, null, $request_uri == "/" ? null : $request_uri);
+        return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 
     define("SANITIZE_URL_STANDARD", 0);

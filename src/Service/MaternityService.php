@@ -57,7 +57,7 @@ class MaternityService implements MaternityServiceInterface
         if($this->isBorn()) {
 
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
-            if ($event && preg_match('/^'.$redirectOnDeny.'/', $this->router->getRouteName()))
+            if ($event && $redirectOnDeny == $this->router->getRouteName())
                 $event->setResponse($this->router->redirect($homepageRoute, [], 302));
 
             return false;
@@ -70,12 +70,12 @@ class MaternityService implements MaternityServiceInterface
             return false;
         }
 
-        if ($this->router->getRouteName() == "security_birth")
-            return false;
+        if ($this->router->getRouteName() == $redirectOnDeny)
+            return true;
         if ($this->authorizationChecker->isGranted("BIRTH_ACCESS"))
             return false;
 
-        if($event) $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
+        if($event) $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
 
         $token = $this->tokenStorage->getToken();
         if($token && $token->getUser()) $token->getUser()->Logout();
