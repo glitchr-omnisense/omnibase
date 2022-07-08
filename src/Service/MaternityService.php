@@ -50,7 +50,7 @@ class MaternityService implements MaternityServiceInterface
 
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool
     {
-        $redirectOnDeny = $this->parameterBag->get("base.site.birthdate.redirect_on_deny");
+        $redirectOnDeny = $this->parameterBag->get("base.site.birthdate.redirect_on_deny") ?? "security_birth";
         if($this->router->isProfiler() ) return false;
         if($this->router->isEasyAdmin()) return false;
         if($this->isBorn()) {
@@ -58,9 +58,11 @@ class MaternityService implements MaternityServiceInterface
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
             if(preg_match('/^'.$redirectOnDeny.'/', $this->router->getRouteName())) {
 
-                $event->setResponse($this->router->redirect($homepageRoute, [], 302));
+                if($event) $event->setResponse($this->router->redirect($homepageRoute, [], 302));
                 return false;
             }
+
+            return true;
 
         } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
 
@@ -74,7 +76,7 @@ class MaternityService implements MaternityServiceInterface
         if ($this->authorizationChecker->isGranted("BIRTH_ACCESS"))
             return false;
 
-        $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
+        if($event) $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
 
         $token = $this->tokenStorage->getToken();
         if($token && $token->getUser()) $token->getUser()->Logout();

@@ -64,7 +64,7 @@ class SecurityController extends AbstractController
     public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
-        if($this->baseService->isGranted("EXCEPTION_ACCESS") || $this->baseService->isUnderMaintenance())
+        if($this->baseService->isGranted("EXCEPTION_ACCESS"))
             return $this->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE);
 
         // Last username entered by the user

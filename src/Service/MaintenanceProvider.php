@@ -31,8 +31,6 @@ class MaintenanceProvider implements MaintenanceProviderInterface
     protected $lockPath = null;
     protected function parseLockPath(?string $fname)
     {
-        if($fname == $this->lockPath) return;
-
         if ( $fname && ($f = @fopen($fname, "r")) ) {
     
             $downtime = trim(fgets($f, 4096));
@@ -46,8 +44,8 @@ class MaintenanceProvider implements MaintenanceProviderInterface
             $uptime   = $this->settingBag->get("base.settings.maintenance.uptime")["_self"] ?? null;
         }
     
-        $downtime = $downtime ? strtotime($downtime) : 0;
-        $uptime = $uptime ? strtotime($uptime) : 0;
+        $downtime = $downtime ? $downtime->getTimestamp() : 0;
+        $uptime = $uptime ? $uptime->getTimestamp() : 0;
 
         $this->remainingTime = $uptime ? $uptime - time() : 0;
         if ($downtime-time() > 0 || $downtime < 1) $downtime = 0;
@@ -91,23 +89,23 @@ class MaintenanceProvider implements MaintenanceProviderInterface
 
     public function redirectOnDeny(?RequestEvent $event = null): bool
     {
-        $redirectOnDeny = $this->parameterBag->get("base.site.maintenance.redirect_on_deny");
+        $redirectOnDeny = $this->parameterBag->get("base.site.maintenance.redirect_on_deny") ?? "security_maintenance";
         if(!$this->isUnderMaintenance()) {
-            
+           
             $homepageRoute = $this->parameterBag->get("base.site.homepage");
             if(preg_match('/^'.$redirectOnDeny.'/', $this->router->getRouteName())) {
 
-                $event->setResponse($this->router->redirect($homepageRoute, [], 302));
+                if($event) $event->setResponse($this->router->redirect($homepageRoute, [], 302));
                 return true;
             }
 
             return false;
 
         } else if($this->authorizationChecker->isGranted("ROLE_EDITOR")) {
-
+           
             $notification = new Notification("maintenance.banner");
             $notification->send("warning");
-            return false;
+            return true;
         }
 
         if ($this->router->getRouteName() == "security_maintenance") 
@@ -115,8 +113,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS")) 
             return true;
 
-
-        $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
+        if($event) $this->router->redirectToRoute($redirectOnDeny, [], 302, ["event" => $event]);
         
         $token = $this->tokenStorage->getToken();
         if($token && $token->getUser()) $token->getUser()->Logout();

@@ -113,8 +113,6 @@ class BaseService implements RuntimeExtensionInterface
         SettingBag $settingBag,
         ImageService $imageService,
         IconProvider $iconProvider,
-        MaintenanceProviderInterface $maintenanceProvider, 
-        MaternityServiceInterface $maternityService, 
 
         TranslatorInterface $translator,
         RouterInterface $router, 
@@ -134,8 +132,6 @@ class BaseService implements RuntimeExtensionInterface
         $this->authorizationChecker = $authorizationChecker;
         $this->csrfTokenManager     = $csrfTokenManager;
         $this->formFactory          = $formFactory;
-        $this->maternityService     = $maternityService;
-        $this->maintenanceProvider  = $maintenanceProvider;
 
         // Additional common containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
@@ -347,8 +343,6 @@ class BaseService implements RuntimeExtensionInterface
         return $this->redirect($request->get('_route'));
     }
 
-    public function isUnderMaintenance() { return $this->maintenanceProvider->isUnderMaintenance(); }
-    public function isBorn() { return $this->maternityService->isBorn(); }
     public function isDevelopment() { return $this->isDebug() || $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_"); }
     public function isProduction()  { return !$this->isDevelopment(); }
 

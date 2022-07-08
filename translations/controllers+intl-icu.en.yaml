@@ -31,15 +31,8 @@ security_birthdate:
 
 security_maintenance:
   title: "Temporarily down for maintenance!"
-  description: "{downtime, plural,
-          =0 {}
-          other {We're currently under maintenance since {0} at {1}. We will soon be back with you.}
-        }"
+  description: "We're currently under maintenance. We will soon be back with you."
 
-  estimate: "{uptime, plural,
-                =0 {There is no time estimate at the moment. Please, check back with us later.}
-                other {The remaining downtime is estimated to be approximately {0} {1} {2}.}
-              }"
   days: "{0, plural,
             =0 {}
             =1 {# day}

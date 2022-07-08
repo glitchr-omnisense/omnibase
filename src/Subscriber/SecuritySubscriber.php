@@ -399,17 +399,21 @@ class SecuritySubscriber implements EventSubscriberInterface
     protected $redirectOnDeny = false;
     public function onMaintenanceRequest(RequestEvent $event)
     {
-        if($this->redirectOnDeny) return;
         if(!$event->isMainRequest()) return;
         
-        $this->redirectOnDeny |= $this->maintenanceProvider->redirectOnDeny($event);
+        $this->redirectOnDeny |= $this->maintenanceProvider->redirectOnDeny(
+            !$this->redirectOnDeny ? $event : null,
+            $this->localeProvider->getLocale()
+        );
     }
 
     public function onBirthRequest(RequestEvent $event)
     {
-        if($this->redirectOnDeny) return;
         if(!$event->isMainRequest()) return;
        
-        $this->redirectOnDeny |= $this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale());
+        $this->redirectOnDeny |= $this->maternityService->redirectOnDeny(
+            !$this->redirectOnDeny ? $event : null,
+            $this->localeProvider->getLocale()
+        );
     }
 }
