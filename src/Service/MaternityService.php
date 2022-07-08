@@ -76,7 +76,8 @@ class MaternityService implements MaternityServiceInterface
         if ($this->authorizationChecker->isGranted("BIRTH_ACCESS"))
             return false;
 
-        $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
+        if ($this->router->getRouteName() != "security_birth")
+            $this->router->redirectToRoute("security_birth", [], 302, ["event" => $event]);
 
         $token = $this->tokenStorage->getToken();
         if($token && $token->getUser()) $token->getUser()->Logout();

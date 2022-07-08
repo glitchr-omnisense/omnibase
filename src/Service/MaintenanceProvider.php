@@ -86,6 +86,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
             return false;
         }
 
+
         if ($this->authorizationChecker->isGranted("MAINTENANCE_ACCESS"))
             return false;
 

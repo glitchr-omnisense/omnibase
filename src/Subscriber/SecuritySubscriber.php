@@ -397,6 +397,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onMaintenanceRequest(RequestEvent $event)
     {
+        if(!$event->isMainRequest()) return;
+        if ($this->router->getRouteName() == "security_maintenance") return;
         if(!$this->onAccessRequest($event)) return;
 
         if($this->maintenanceProvider->redirectOnDeny($event))
@@ -405,6 +407,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onBirthRequest(RequestEvent $event)
     {
+        if(!$event->isMainRequest()) return;
+        if ($this->router->getRouteName() == "security_birth") return;
         if(!$this->onAccessRequest($event)) return;
 
         if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale()))
