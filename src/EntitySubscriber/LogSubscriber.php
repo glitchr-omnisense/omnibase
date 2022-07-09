@@ -6,6 +6,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Base\Entity\User;
 
+use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Entity\Extension\Log;
 
@@ -48,17 +49,20 @@ class LogSubscriber implements EventSubscriberInterface
         ParameterBagInterface $parameterBag) {
 
         $this->tokenStorage = $tokenStorage;
-        $this->userRepository = $entityManager->getRepository(User::class);
-
+        
         $this->baseService = $baseService;
         $this->parameterBag = $parameterBag;
+        
+        if(BaseBundle::hasDoctrine()) {
 
-        foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
+            $this->userRepository = $entityManager->getRepository(User::class);
+            foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
-            $dispatcher = $dispatcherLocator->get($dispatcherId);
-            if (!$dispatcher instanceof TraceableEventDispatcher) continue;
+                $dispatcher = $dispatcherLocator->get($dispatcherId);
+                if (!$dispatcher instanceof TraceableEventDispatcher) continue;
 
-            $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
+                $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
+            }
         }
     }
 
@@ -73,16 +77,13 @@ class LogSubscriber implements EventSubscriberInterface
     }
 
     private $loggingOutUser = null;
-    private $loggingOutImpersonator = null;
     public function onLogout(LogoutEvent $event)
     {
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
-        $impersonator = ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : null);
-
+        
         // Get back onLogout token information (to be used to store logs)
         $this->loggingOutUser = $user;
-        $this->loggingOutImpersonator = $impersonator;
     }
 
     protected function storeLog(KernelEvent $event, ?\Throwable $exception = null) {
@@ -95,7 +96,6 @@ class LogSubscriber implements EventSubscriberInterface
 
         // Handle security (not mandatory, $user is null if not defined)
         $token = $this->tokenStorage->getToken();
-        $impersonator = ($token instanceof SwitchUserToken ? $token->getOriginalToken()->getUser() : $this->loggingOutImpersonator);
         $user = ($token ? $token->getUser() : $this->loggingOutUser);
         if(!$user) return;
 
@@ -171,6 +171,7 @@ class LogSubscriber implements EventSubscriberInterface
                 $log->setUser($user);
 
                 $entityManager->persist($log);
+
                 $this->userRepository->flush($user);
             }
         }
@@ -179,6 +180,8 @@ class LogSubscriber implements EventSubscriberInterface
     public function onKernelTerminate(TerminateEvent $event)
     {
         if(!$this->baseService->isDebug()) return;
+        if(!BaseBundle::hasDoctrine()) return;
+
         return $this->storeLog($event);
     }
 
@@ -186,6 +189,8 @@ class LogSubscriber implements EventSubscriberInterface
     public function onKernelException(ExceptionEvent $event)
     {
         if(!$this->baseService->isDebug()) return;
+        if(!BaseBundle::hasDoctrine()) return;
+
         $exception = $event->getThrowable();
 
         // Initial exception held here, this is in case of nested exceptions..

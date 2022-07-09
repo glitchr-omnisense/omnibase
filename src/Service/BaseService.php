@@ -5,6 +5,7 @@ namespace Base\Service;
 use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydratorInterface;
+use Base\Routing\RouterInterface;
 use Base\Traits\BaseTrait;
 
 use Base\Service\ParameterBagInterface;
@@ -15,7 +16,6 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
 use Base\Twig\Extension\BaseTwigExtension;
-
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
@@ -50,6 +50,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
+use Symfony\Component\Stopwatch\Stopwatch;
 
 class BaseService implements RuntimeExtensionInterface
 {
@@ -70,11 +71,6 @@ class BaseService implements RuntimeExtensionInterface
      * @var AuthorizationCheckerInterface
      */
     protected $authorizationChecker;
-
-    /**
-     * @var TokenStorageInterface
-     */
-    protected $tokenStorage;
 
     /**
      * @var CsrfTokenManagerInterface
@@ -118,47 +114,73 @@ class BaseService implements RuntimeExtensionInterface
         ImageService $imageService,
         IconProvider $iconProvider,
 
+        TranslatorInterface $translator,
+        RouterInterface $router, 
+
         EntityHydratorInterface $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->setInstance($this);
+        $this->startTime($kernel->getStartTime());
 
         // Kernel and additional stopwatch
-        $this->kernel      = $kernel;
-        $this->container   = $kernel->getContainer();
-        $this->setProjectDir($kernel->getProjectDir());
-        $this->setStartTime();
+        $this->kernel       = $kernel;
+        $this->container    = $kernel->getContainer();
+        $this->setProjectDir ($kernel->getProjectDir());
+        $this->setEnvironment($kernel->getEnvironment());
 
-        self::$twigExtension       = $baseTwigExtension->setBase($this);
+        $this->authorizationChecker = $authorizationChecker;
+        $this->csrfTokenManager     = $csrfTokenManager;
+        $this->formFactory          = $formFactory;
 
-        // Symfony basics
-        $this->authorizationChecker     = $authorizationChecker;
-        $this->tokenStorage             = $tokenStorage;
-        $this->csrfTokenManager         = $csrfTokenManager;
-        $this->formFactory              = $formFactory;
-
-        // Additional containers
+        // Additional common containers
         $this->setClassMetadataManipulator($classMetadataManipulator);
         $this->setImageService($imageService);
         $this->setIconProvider($iconProvider);
         $this->setSettingBag($settingBag);
         $this->setLocaleProvider($localeProvider);
         $this->setTwig($twig);
-        $this->setRouter($this->container->get("router"));
+        $this->setTwigExtension($baseTwigExtension->setBase($this));
+        $this->setRouter($router);
         $this->setFirewallMap($firewallMap);
         $this->setParameterBag($parameterBag);
-        $this->setTranslator($this->container->get("translator"));
+        $this->setTranslator($translator);
         $this->setSlugger($slugger);
         $this->setEntityManager($entityManager);
         $this->setEntityHydrator($entityHydrator);
         $this->setRequestStack($requestStack);
-        $this->setEnvironment($this->kernel->getEnvironment());
-        $this->setUserIdentifier($this->getParameterBag("base.user.identifier"));
+        $this->setUserIdentifier($this->getParameterBag()->get("base.user.identifier"));
+        $this->setTokenStorage($tokenStorage);
         $this->setNotifier($notifier);
+        $this->getBackoffice();
 
         // EA provider
         $this->adminContextProvider = new AdminContextProvider($requestStack);
     }
+
+    public function getHomepage()  { return $this->getParameterBag()->get("base.site.homepage") ?? $this->getRouter()->getRoute("/"); }
+    public function getSite() 
+    { 
+        return [
+            "title"  => $this->getSettingBag()->getScalar("base.settings.title"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan"),
+            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo")
+        ];
+    }
+    public function getBackoffice() 
+    {
+        return [
+            "title"  => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.backoffice"),
+            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
+        ]; 
+    }
+    
+    public function getMeta(?string $locale = null): array 
+    { 
+        return $this->getSettingBag()->get("base.settings.meta", $locale) ?? []; 
+    }
+
 
     public function exec(string $command, array $arguments = [])
     {
@@ -188,23 +210,18 @@ class BaseService implements RuntimeExtensionInterface
     public function removeHtmlContent(string $location) { return $this->getTwig()->removeHtmlContent($location); }
     public function addHtmlContent(string $location, $contentOrArrayOrFile, array $options = []) { return $this->getTwig()->addHtmlContent($location,$contentOrArrayOrFile,$options); }
 
-
-
-
     /**
      *
      * Symfony kernel container related methods
      *
      */
-
-    private static $startTime = 0;
-    public function getExecutionTime(): float { return round(microtime(true) - self::$startTime, 2); }
-    public function execution_time() { return $this->getExecutionTime(); }
-    public function setStartTime()
+    protected $startTime = 0;
+    public function getExecutionTime(): float { return round(microtime(true) - $this->startTime, 2); }
+    public function startTime($startTime = null)
     {
-        // Provide the kernel start time as time reference
-        self::$startTime = $this->kernel->getStartTime();
-        if (is_infinite(self::$startTime)) self::$startTime = microtime(true);
+        $this->$startTime = $startTime;
+        if(!$this->startTime || is_infinite($this->startTime))
+            $this->startTime = microtime(true);
     }
 
     public function hasPost()    { return isset($_POST); }
@@ -327,7 +344,6 @@ class BaseService implements RuntimeExtensionInterface
         return $this->redirect($request->get('_route'));
     }
 
-    public function isMaintenance() { return $this->getSettingBag()->maintenance() || file_exists($this->getParameterBag("base.maintenance.lockpath")); }
     public function isDevelopment() { return $this->isDebug() || $this->kernel->getEnvironment() == "dev" || str_starts_with($this->kernel->getEnvironment(), "dev_"); }
     public function isProduction()  { return !$this->isDevelopment(); }
 
@@ -336,7 +352,6 @@ class BaseService implements RuntimeExtensionInterface
     public function isEasyAdmin() { return $this->getRouter()->isEasyAdmin(); }
     public function isProfiler() { return $this->getRouter()->isProfiler(); }
     public function isEntity($entityOrClassOrMetadata) : bool { return $this->getClassMetadataManipulator()->isEntity($entityOrClassOrMetadata); }
-
 
     /**
      *
@@ -348,16 +363,6 @@ class BaseService implements RuntimeExtensionInterface
     {
         User::$identifier = $userIdentifier;
         return $this;
-    }
-
-    public function Logout()
-    {
-        if (!isset($this->tokenStorage))
-            throw new Exception("No token storage found in BaseService. Did you overloaded self::__construct ?");
-
-        $this->tokenStorage->setToken(null);
-        setcookie("REMEMBERME", '', time()-1);
-        setcookie("REMEMBERME", '', time()-1, "/", ".".format_url(get_url(), FORMAT_URL_NOSUBDOMAIN | FORMAT_URL_NOMACHINE));
     }
 
     public function isCsrfTokenValid(string $id, $tokenOrForm, ?Request $request = null, string $csrfFieldId = "_csrf_token"): bool

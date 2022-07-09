@@ -2,13 +2,20 @@
 
 namespace Base\Twig;
 
+use Base\Routing\RouterInterface;
+use Base\Service\BaseService;
 use Base\Service\ReferrerInterface;
 use Base\Service\LocaleProvider;
+use Base\Service\MaintenanceProviderInterface;
+use Base\Service\MaternityServiceInterface;
 use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
+use Base\Twig\Variable\BackofficeVariable;
 use Base\Twig\Variable\EasyAdminVariable;
 use Base\Twig\Variable\RandomVariable;
+use Base\Twig\Variable\SiteVariable;
+use DateTime;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Twig\Environment;
 
@@ -37,37 +44,41 @@ class AppVariable
      */
     protected $parameterBag;
 
-    public function __construct(\Symfony\Bridge\Twig\AppVariable $appVariable, SettingBag $settingBag, ParameterBagInterface $parameterBag, ReferrerInterface $referrer, Environment $twig, LocaleProvider $localeProvider, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(
+        \Symfony\Bridge\Twig\AppVariable $appVariable, EasyAdminVariable $ea, RandomVariable $random, SiteVariable $site, BackofficeVariable $backoffice,
+        SettingBag $settingBag, ParameterBagInterface $parameterBag, 
+        ReferrerInterface $referrer, Environment $twig, LocaleProvider $localeProvider)
     {
-        $this->settingBag  = $settingBag;
-        $this->referrer  = $referrer;
-        $this->twig      = $twig;
-        $this->bag       = $parameterBag;
-        $this->meta      = [];
-
+        $this->settingBag     = $settingBag;
+        $this->referrer       = $referrer;
+        $this->twig           = $twig;
+        $this->parameterBag   = $parameterBag;
         $this->localeProvider = $localeProvider;
-        $this->random    = new RandomVariable();
-        $this->easyadmin = new EasyAdminVariable($adminUrlGenerator);
+        
+        $this->backoffice = $backoffice; 
+        $this->random     = $random;
+        $this->site       = $site; 
+        $this->ea         = $ea; 
+    
         $this->setProxy($appVariable);
-    }
-
-    public function bag(?string $key = null, ?array $bag = null) { return $key ? $this->bag->get($key, $bag) ?? null : $this->bag; }
-    public function settings() { return $this->settingBag->get("app.settings") ?? []; }
-    public function referrer() { return $this->referrer; }
-
-    public function meta(array $meta = []) { return $this->meta = array_merge($this->meta, $meta); }
-
-    public function locale()  {
-        return [
-            "lang" => $this->localeProvider->getLang(),
-            "country" => $this->localeProvider->getCountry()
-        ];
     }
 
     public function getGlobals() {
 
         return array_transforms(
             fn($k,$v):?array => $k != "app" && str_starts_with($k, "app") ? [str_strip($k, "app."), $v] : null,
-            $this->twig->getGlobals());
+            $this->twig->getGlobals()
+        );
+    }
+
+    public function bag(?string $key = null, ?array $bag = null) { return $key ? $this->parameterBag->get($key, $bag) ?? null : $this->parameterBag; }
+    public function settings() { return $this->settingBag->get("app.settings") ?? []; }
+    public function referrer() { return $this->referrer; }
+
+    public function locale()  {
+        return [
+            "lang" => $this->localeProvider->getLang(),
+            "country" => $this->localeProvider->getCountry()
+        ];
     }
 }

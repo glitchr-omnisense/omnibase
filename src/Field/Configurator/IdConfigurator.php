@@ -4,12 +4,14 @@ namespace Base\Field\Configurator;
 
 use Base\Entity\User;
 use Base\Field\IdField;
+use Base\Routing\RouterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
+use Symfony\Bundle\SecurityBundle\Security\FirewallMap;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
@@ -17,10 +19,11 @@ use function Symfony\Component\String\u;
 
 class IdConfigurator implements FieldConfiguratorInterface
 {
-    public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator)
+    public function __construct(AuthorizationCheckerInterface $authorizationChecker, AdminUrlGenerator $adminUrlGenerator, RouterInterface $router)
     {
         $this->authorizationChecker = $authorizationChecker;
         $this->adminUrlGenerator = $adminUrlGenerator;
+        $this->router = $router;
     }
 
     public function supports(FieldDto $field, EntityDto $entityDto): bool
@@ -35,7 +38,11 @@ class IdConfigurator implements FieldConfiguratorInterface
             $maxLength = Crud::PAGE_INDEX === $context->getCrud()->getCurrentPage() ? 7 : -1;
 
         // Check access rights and context to impersonate
-        if(!$entityDto->getInstance() instanceof User || !$this->authorizationChecker->isGranted('ROLE_EDITOR'))
+        $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
+        $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
+        
+        $field->setCustomOption(IdField::OPTION_IMPERSONATE, $switchParameter);
+        if(!$entityDto->getInstance() instanceof User || !$switchRole || !$this->authorizationChecker->isGranted($switchRole))
             $field->setCustomOption(IdField::OPTION_IMPERSONATE, false);
 
         // Formatted data

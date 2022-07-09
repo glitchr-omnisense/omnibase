@@ -2,36 +2,42 @@
 
 namespace Base\Controller;
 
-use App\Entity\User              as User;
+use App\Entity\User as User;
 
 use Base\Annotations\Annotation\Iconize;
+use Base\Controller\Backend\AbstractDashboardController;
 use Base\Service\ReferrerInterface;
 use Base\Form\Type\Security\LoginType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
-use Base\Security\RescueFormAuthenticator;
-use Base\Service\BaseService;
-use Base\Service\SettingBag;
 use Base\Service\SettingBagInterface;
+use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
-use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /* "abstract" (remove because of routes) */
-class RescueController extends AbstractDashboardController
+class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
-    public function __construct(RouterInterface $router, SettingBagInterface $settingBag)
+    public function __construct(RouterInterface $router, SettingBagInterface $settingBag, Environment $twig)
     {
         $this->router = $router;
         $this->settingBag = $settingBag;
+        $this->twig = $twig;
     }
 
     public function configureDashboard(): Dashboard
     {
-        return Dashboard::new()->setFaviconPath("/favicon.ico");
+        $logo  = $this->settingBag->getScalar("base.settings.logo.backoffice");
+        if(!$logo) $logo = $this->settingBag->getScalar("base.settings.logo");
+        if(!$logo) $logo = "bundles/base/logo.svg";
+
+        $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], AbstractDashboardController::TRANSLATION_DASHBOARD);
+        return Dashboard::new()
+            ->setFaviconPath("favicon.ico")
+            ->setTitle($title);
     }
 
     /**
@@ -61,7 +67,7 @@ class RescueController extends AbstractDashboardController
 
         $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
         $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
-
+        
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',
@@ -69,7 +75,6 @@ class RescueController extends AbstractDashboardController
             'identifier_label' => '@forms.login.identifier',
             'password_label' => '@forms.login.password',
             'logo' => $logo,
-            "page_title" => $this->settingBag->getScalar("base.settings.title.backoffice"),
             "identifier" => $lastUsername,
             "form" => $form->createView()
         ]);

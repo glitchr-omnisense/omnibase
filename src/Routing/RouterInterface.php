@@ -11,16 +11,28 @@ use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouterInterface as SymfonyRouterInterface;
+use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
+    public function useAdvancedFeatures(): bool;
     public function isProfiler($request = null);
     public function isEasyAdmin($request = null);
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 
+    public function getBaseDir(?string $locale = null, ?string $environment = null): string;
+    public function getHost(?string $locale = null, ?string $environment = null): string;
+    public function getMachine(?string $locale = null, ?string $environment = null): ?string;
+    public function getSubdomain(?string $locale = null, ?string $environment = null): ?string;
+    public function getDomain(?string $locale = null, ?string $environment = null): string;
+    public function getPort(?string $locale = null, ?string $environment = null): ?int;
+
     public function getRequest(): ?Request;
-    public function getLang(?string $locale = null): string;
+    public function getEnvironment(): string;
+    public function getLocale (?string $locale = null): string;
+    public function getLang(?string $lang = null): string;
+    
     public function getContext(): RequestContext;
     public function setContext(RequestContext $context);
 
@@ -38,7 +50,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getRouteName(?string $routeUrl = null): ?string;
     public function getRouteMatch(?string $routeUrl = null): ?array;
     public function getRouteGroups(string $routeName): array;
-    public function getRouteFirewall(?string $routeUrl = null): ?string;
+    public function getRouteFirewall(?string $routeUrl = null): ?FirewallConfig;
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;
     public function redirectToRoute(string $routeName, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse;

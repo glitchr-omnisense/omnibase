@@ -58,7 +58,7 @@ class Timestamp extends AbstractAnnotation
     {
         if(!empty($this->fields) && !in_array($targetValue, $this->fields)) return false;
 
-        return in_array("update", $this->context) || in_array("create", $this->context);
+        return in_array($this->getImpersonator() ? "impersonator" : "update", $this->context) || in_array("create", $this->context);
     }
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
@@ -70,7 +70,7 @@ class Timestamp extends AbstractAnnotation
 
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if (!in_array("update", $this->context)) return;
+        if (!in_array($this->getImpersonator() ? "impersonator" : "update", $this->context)) return;
 
         $this->setFieldValue($entity, $property, $this->getValue());
     }

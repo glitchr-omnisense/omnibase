@@ -3,18 +3,20 @@
 namespace Base\Controller\Client\User;
 
 use App\Repository\UserRepository;
-
+use Base\BaseBundle\BaseBundle;
 use Base\Entity\Thread;
 use Base\Form\Type\Thread\SearchType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class SearchController extends AbstractController
 {
-    public function __construct(UserRepository $userRepository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->userRepository = $userRepository;
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository = $entityManager->getRepository(User::class);
     }
 
     /**

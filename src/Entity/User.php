@@ -63,8 +63,8 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public        function __iconize()       : ?array { return array_map(fn($r) => UserRole::getIcon($r,0), $this->getRoles()); }
     public static function __iconizeStatic() : ?array { return ["fas fa-user"]; }
 
-    private const __DEFAULT_COOKIE__ = "user:necessary";
-    private const __DEFAULT_IDENTIFIER__ = "email";
+    public const __DEFAULT_COOKIE__ = "user:necessary";
+    public const __DEFAULT_IDENTIFIER__ = "email";
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
     public function killSession() { $this->getService()->Logout(); }
@@ -119,6 +119,18 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         $locale = $this->getLocale();
 
         return new Recipient($email, $phone, $locale);
+    }
+
+    public function logout()
+    {
+        $token = $this->getTokenStorage()->getToken();
+        if($token === null || $token->getUser() != $this) $this->kick();
+        else {
+
+            $this->getTokenStorage()->setToken(null);
+            setcookie("REMEMBERME", '', time()-1);
+            setcookie("REMEMBERME", '', time()-1, "/", ".".format_url(get_url(), FORMAT_URL_NOSUBDOMAIN | FORMAT_URL_NOMACHINE));
+        }
     }
 
     public static function getCookie(string $key = null)
@@ -224,7 +236,6 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
-
     public function getLocale(): ?string { return $this->locale ?? LocaleProvider::getDefaultLocale(); }
     public function setLocale(?string $locale = null): self
     {

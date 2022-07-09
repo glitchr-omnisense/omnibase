@@ -25,7 +25,6 @@ use App\Controller\Backend\Crud\UserCrudController;
 use Base\Entity\Layout\Image;
 use Base\Backend\Config\WidgetItem;
 use Base\Backend\Config\MenuItem;
-use Base\Service\BaseService;
 
 use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
@@ -62,9 +61,9 @@ use Base\Field\Type\PasswordType;
 use Base\Field\Type\RouteType;
 use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions as EaActions;
 use Base\Backend\Config\Action;
 use Base\Backend\Config\Actions;
+use Base\Field\Type\BooleanType;
 use Base\Routing\RouterInterface;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
@@ -74,8 +73,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
@@ -86,7 +83,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
     protected $adminUrlGenerator;
 
-    public const TRANSLATION_DASHBOARD = "dashboard";
+    public const TRANSLATION_DASHBOARD = "backoffice";
     public const TRANSLATION_ENTITY    = "entities";
     public const TRANSLATION_ENUM      = "enums";
 
@@ -228,28 +225,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     public function Settings(Request $request, array $fields = []): Response
     {
         $fields = array_reverse(array_merge(array_reverse([
-            "base.settings.logo"                   => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
-            "base.settings.logo.animation"         => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
-            "base.settings.logo.backoffice"        => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
-            "base.settings.title"                  => ["translatable" => true],
-            "base.settings.title.backoffice"       => ["translatable" => true],
-            "base.settings.author"                 => ["translatable" => true],
-            "base.settings.description"            => ["form_type" => TextareaType::class, "translatable" => true],
-            "base.settings.keywords"               => ["form_type" => SelectType::class, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
-            "base.settings.slogan"                 => ["translatable" => true, "required" => false],
-            "base.settings.birthdate"              => ["form_type" => DateTimePickerType::class],
-            "base.settings.access_denied_redirect" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class   , "required" => false],
-            "base.settings.anonymous_access"       => ["roles" => "ROLE_ADMIN" , "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.user_access"            => ["roles" => "ROLE_ADMIN" , "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.admin_access"           => ["roles" => "ROLE_EDITOR", "form_type" => CheckboxType::class, "required" => false],
-            "base.settings.maintenance"            => ["form_type" => CheckboxType::class      , "required" => false],
-            "base.settings.maintenance.downtime"   => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.maintenance.uptime"     => ["form_type" => DateTimePickerType::class, "required" => false],
-            "base.settings.mail"                   => ["form_type" => EmailType::class],
-            "base.settings.mail.name"              => ["translatable" => true],
-            "base.settings.http.scheme"            => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['REQUEST_SCHEME'] ?? $_SERVER["HTTPS"] ?? "https") == "https"],
-            "base.settings.http.host"              => ["form_type" => HiddenType::class, "data" => mb_strtolower($_SERVER['HTTP_HOST'])],
-            "base.settings.http.base_dir"          => ["form_type" => HiddenType::class, "data" => $this->twig->getAsset("/")],
+            "base.settings.logo"                                => ["translatable" => true, "multiple" => false, "form_type" => ImageType::class],
+            "base.settings.logo.backoffice"                     => ["form_type" => ImageType::class, "multiple" => false, "required" => false],
+            "base.settings.title"                               => ["translatable" => true],
+            "base.settings.title.backoffice"                    => ["translatable" => true, "required" => false],
+            "base.settings.meta.author"                         => ["translatable" => true, "required" => false],
+            "base.settings.meta.description"                    => ["form_type" => TextareaType::class, "translatable" => true, "required" => false],
+            "base.settings.meta.keywords"                       => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
+            "base.settings.slogan"                              => ["translatable" => true, "required" => false],
+            "base.settings.birthdate"                           => ["form_type" => DateTimePickerType::class],
+            "base.settings.access_restriction.redirect_on_deny" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
+            "base.settings.access_restriction.anonymous_access" => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
+            "base.settings.access_restriction.user_access"      => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
+            "base.settings.access_restriction.admin_access"     => ["roles" => "ROLE_EDITOR", "form_type" => BooleanType::class],
+            "base.settings.maintenance"                         => ["form_type" => BooleanType::class],
+            "base.settings.maintenance.downtime"                => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.maintenance.uptime"                  => ["form_type" => DateTimePickerType::class, "required" => false],
+            "base.settings.mail"                                => ["form_type" => EmailType::class],
+            "base.settings.mail.name"                           => ["translatable" => true],
         ]), array_reverse($fields)));
 
         foreach($fields as $name => &$options) {
@@ -341,22 +334,24 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if(!$logo) $logo = $this->settingBag->getScalar("base.settings.logo");
         if(!$logo) $logo = "bundles/base/logo.svg";
 
-        $title  = $this->settingBag->getScalar("base.settings.title") ?? "";
-        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? "";
+        $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
+        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.slogna", [], self::TRANSLATION_DASHBOARD);
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")
             ->setTitle($title)
             ->setText($slogan)
+            ->setLogo($logo)
             ->setWidgets($this->configureWidgetItems())
         );
 
         $logo = $this->twig->getAsset($logo);
         $logo = $this->imageService->thumbnail($logo, 500, 500);
+
         return parent::configureDashboard()
-            ->setFaviconPath("/favicon.ico")
+            ->setFaviconPath("favicon.ico")
             ->setTranslationDomain(self::TRANSLATION_DASHBOARD)
-            ->setTitle('<img src="'.$logo.'">');
+            ->setTitle($title);
     }
 
     public function addRoles(array &$menu, string $class)
@@ -368,7 +363,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if(!is_array($values)) $values = ["_self" => $values];
             $role = array_pop_key("_self", $values);
 
-            $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
+            $label = $this->translator->enum($class, $role, Translator::NOUN_PLURAL);
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
@@ -389,7 +384,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach($values as $role)  {
 
-                    $label = mb_ucfirst($this->translator->enum($role, $class, Translator::TRANSLATION_PLURAL));
+                    $label = mb_ucfirst($this->translator->enum($class, $role, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
                     $url = $this->adminUrlGenerator

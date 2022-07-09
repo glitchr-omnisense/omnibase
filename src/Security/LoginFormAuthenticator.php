@@ -64,6 +64,8 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
+        $this->referrer->setUrl($request->getUri());
+        
         $route = $this->authorizationChecker->isGranted("EXCEPTION_ACCESS") ? RescueFormAuthenticator::LOGIN_ROUTE : static::LOGIN_ROUTE;
         return new RedirectResponse($this->router->generate($route));
     }

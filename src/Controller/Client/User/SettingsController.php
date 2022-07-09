@@ -8,7 +8,9 @@ use App\Repository\UserRepository;
 
 use App\Form\Extension\Login2FAType;
 use Base\Annotations\Annotation\Iconize;
+use Base\BaseBundle;
 use Base\Entity\User\Notification;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -29,10 +31,12 @@ use Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Totp\TotpAuthenticatorInte
 class SettingsController extends AbstractController
 {
     private $baseService;
-    public function __construct(BaseService $baseService, UserRepository $userRepository)
+    public function __construct(BaseService $baseService, EntityManagerInterface $entityManager)
     {
         $this->baseService     = $baseService;
-        $this->userRepository  = $userRepository;
+
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository  = $entityManager->getRepository(User::class);
     }
 
     /**

@@ -15,14 +15,15 @@
     <link rel="stylesheet" href="{{ asset('bundles/base/easyadmin.css') }}">
 {% endblock %}
 
-{% block page_title %}{{ page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '') }}{% endblock %}
+{% block page_title %}{{ (page_title ?? ea.dashboardTitle ?? ('@forms.login.title'|trans))|raw }}{% endblock %}
 
 {% block flash_messages %}
     {{ include(ea.templatePath('flash_messages')) }}
 {% endblock flash_messages %}
 
 {% block wrapper_wrapper %}
-    {% set page_title = page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '') %}
+
+    {% set page_title = block("page_title") %}
     {% set _identifier_label = identifier_label is defined ? identifier_label|trans : 'login_page.identifier'|trans({}, 'EasyAdminBundle') %}
     {% set _password_label = password_label is defined ? password_label|trans : 'login_page.password'|trans({}, 'EasyAdminBundle') %}
     {% set _sign_in_label = sign_in_label is defined ? sign_in_label|trans : 'login_page.sign_in'|trans({}, 'EasyAdminBundle') %}
@@ -34,11 +35,11 @@
         <header class="main-header">
             <div id="header-logo" style="padding: 1em !important;">
                 {% block header_logo %}
-                    {% if page_title %}
+                    {% if logo %}
                         <div class="logo-custom">
                             <div class="logo {{ page_title|length > 14 ? 'logo-long' }}">
                                 <div class="logo-overlay">{{"security_rescue"|iconify({"class": "fa-3x"})|first|raw}}</div>
-                                <img src="{{ logo|imagine|raw }}">
+                                <img src="{{ logo|thumbnail(800,800)|raw }}">
                             </div>
                         </div>
                     {% endif %}
@@ -53,7 +54,7 @@
         {% endif %}
         <section class="content">
 
-            <h1>{{ '@forms.login.title'|trans }}</h1>
+            <h1>{{ page_title }}</h1>
 
                 {{ form_start(form) }}
 

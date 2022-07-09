@@ -91,8 +91,6 @@ class DoctrineDatabaseImportCommand extends Command
                     $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, str_rstrip(trim($entry), $entrySeparator)));
             }
 
-            if($propertyPath == "translations.fr-FR.keywords:explode(,)") exit(1);
-
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);
             if(substr_count($propertyName, "[") > 1)
                 throw new Exception("Backets \"[]\" are expected to appear only once at the end.. \"".$propertyName."\"");
@@ -179,10 +177,10 @@ class DoctrineDatabaseImportCommand extends Command
         $onTheFly        = $input->getOption("on-the-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
 
-        $entries      = (int) $input->getOption("entries");
+        $nentries      = (int) $input->getOption("entries");
         $skip         = (int) $input->getOption("skip");
 
-        if(!$entries) $entries = null;
+        if(!$nentries) $nentries = null;
 
         $output->writeln("");
         if($path) $output->writeln(' <info>You have just selected:</info> '.$path);
@@ -305,7 +303,7 @@ class DoctrineDatabaseImportCommand extends Command
             // Process them
             foreach($rawData[$spreadsheet] as &$data) {
 
-                if($counter < $skip || ($entries !== null && $counter > $entries+$skip-1)) {
+                if($counter < $skip-self::OFFSET_TOP || ($nentries !== null && $counter > $nentries+$skip-self::OFFSET_TOP-1)) {
                     $counter++;
                     continue;
                 }
@@ -591,7 +589,7 @@ class DoctrineDatabaseImportCommand extends Command
             $count  = $countData > 0 ? $countNewData."/".$countData : "0";
             $plural = ($countNewData > 1);
 
-            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], null, $plural ? Translator::TRANSLATION_PLURAL : Translator::TRANSLATION_SINGULAR)) .'</ln>';
+            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], null, $plural ? Translator::NOUN_PLURAL : Translator::NOUN_SINGULAR)) .'</ln>';
 
         }, array_keys(array_filter($entityData)))));
 

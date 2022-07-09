@@ -10,6 +10,9 @@ use Base\Service\ImageService;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
+use DateInterval;
+use DateTime;
+use Exception;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Extension\RoutingExtension;
@@ -21,6 +24,8 @@ use Twig\TwigFilter;
 
 use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
+use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccessor;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
 use Twig\TwigFunction;
@@ -68,7 +73,7 @@ final class BaseTwigExtension extends AbstractExtension
     public function setBase(BaseService $baseService)
     {
         $this->baseService = $baseService;
-        $this->projectDir = $this->baseService->getProjectDir();
+        $this->projectDir  = $baseService->getProjectDir();
 
         return $this;
     }
@@ -91,12 +96,14 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('call_user_func_with_defaults', [$this, 'call_user_func_with_defaults']),
             new TwigFunction('method_exists',                [$this, 'method_exists']),
             new TwigFunction('static_call',                  [$this, 'static_call'  ]),
+            new TwigFunction('static_property',              [$this, 'static_property'  ]),
 
             new TwigFunction('html_attributes', 'html_attributes', ["is_safe" => ['all']]),
 
             new TwigFunction('str_starts_with', "str_starts_with"),
             new TwigFunction('str_ends_with'  , "str_ends_with"  ),
             new TwigFunction('empty',           "empty"),
+            new TwigFunction('property_accessor',            [$this, "property_accessor"]),
 
             new TwigFunction('urlify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
@@ -129,14 +136,16 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('highlight',      [$this, 'highlight']),
             new TwigFilter('array_flatten',  [$this, 'array_flatten']),
             new TwigFilter('filesize',       [$this, 'filesize']),
-            new TwigFilter('datetime',       [$this, 'datetime'],    ['needs_environment' => true]),
+            new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
+            new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
+            new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
             new TwigFilter('less_than',      [$this, 'less_than']),
             new TwigFilter('greater_than',   [$this, 'greater_than']),
             new TwigFilter('filter',         [$this, 'filter'], ['needs_environment' => true]),
             new TwigFilter('transforms',     [$this, 'transforms'], ['needs_environment' => true]),
             new TwigFilter('pad',            [$this, 'pad']),
-            new TwigFilter('mb_ucfirst',     [$this, 'mb_ucfirst']),
-            new TwigFilter('mb_ucwords',     [$this, 'mb_ucwords']),
+            new TwigFilter('mb_ucfirst',     'mb_ucfirst'),
+            new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
             new TwigFilter('empty',          "empty"),
 
@@ -175,10 +184,6 @@ final class BaseTwigExtension extends AbstractExtension
         ];
     }
 
-
-    public function mb_ucfirst(string $string, ?string $encoding = null): string { return mb_ucfirst($string, $encoding); }
-    public function mb_ucwords(string $string, ?string $encoding = null, ?string $separator = null): string { return mb_ucwords($string, $encoding, $separator); }
-
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
@@ -191,6 +196,31 @@ final class BaseTwigExtension extends AbstractExtension
         };
 
         return twig_array_filter($env, $array, $arrow);
+    }
+
+    function static_property($class, $propertyName) {
+
+        if(is_object($class)) $class = get_class($class);
+        if (!class_exists($class))
+            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid class");
+        if (!property_exists($class, $propertyName))
+            throw new \Exception("Cannot call static property $propertyName on \"$class\": invalid property");
+
+        return $class::$$propertyName;
+    }
+
+
+
+    public function property_accessor($entity, $propertyName, $enableMagicCall = false)
+    {
+        $propertyAccessorBuilder = PropertyAccess::createPropertyAccessorBuilder();
+        if($enableMagicCall) $propertyAccessorBuilder->enableMagicCall();
+        
+        $propertyAccessor =  $propertyAccessorBuilder->getPropertyAccessor();
+        if(!$propertyAccessor->isReadable($entity, $propertyName))
+            return null;
+
+        return $propertyAccessor->getValue($entity, $propertyName);
     }
 
     public function asset($path, ?string $packageName = null) {
@@ -249,6 +279,8 @@ final class BaseTwigExtension extends AbstractExtension
     public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }
 
     function static_call($class, $method, ...$args) {
+
+        if(is_object($class)) $class = get_class($class);
         if (!class_exists($class))
             throw new \Exception("Cannot call static method $method on \"$class\": invalid class");
         if (!method_exists($class, $method))
@@ -257,10 +289,47 @@ final class BaseTwigExtension extends AbstractExtension
         return forward_static_call_array([$class, $method], $args);
     }
 
-    public function datetime(Environment $env, $date, string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): string
+    public function datetime(Environment $env, DateTime|DateInterval|int|string $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
-        if(is_string($date)) return $date;
-        return $this->intlExtension->formatDateTime($env, $date, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+        if(is_array($pattern)) {
+
+            $array = [];
+            foreach($pattern as $p)
+                $array[] = $this->datetime($env, $datetime, $p, $dateFormat, $timeFormat, $timezone, $calendar, $locale);
+
+            return $array;
+        }
+
+        $now = time();
+        if($datetime instanceof DateTime) $datetime = $datetime->getTimestamp();
+        else if($datetime instanceof DateInterval) $datetime = $now + (int) $datetime->format("s");
+        
+        if(is_string($datetime)) return $datetime;
+        return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    public function countdown(Environment $env, DateTime|DateInterval|int|string $datetime, array $parameters = []): string
+    {
+        $now = time();
+        if($datetime instanceof DateTime) $timestamp = $datetime->getTimestamp();
+        else if($datetime instanceof DateInterval) $timestamp = $now + (int) $datetime->format("s");
+        else $timestamp = $datetime;
+        
+        return $env->render("@Base/progress/countdown.html.twig", array_merge($parameters, [
+            "id" => rand(),
+            "datetime"  => $datetime,
+            "countdown" => $timestamp - $now,
+            "timestamp" => $timestamp,
+        ]));
+    }
+
+    public function progress(Environment $env, DateTime $start, DateTime $end, array $parameters = []): string
+    {
+        return $env->render("@Base/progress/progressbar.html.twig", array_merge($parameters, [
+            "id" => rand(), 
+            "progress-start" => $start->getTimestamp(), 
+            "progress-end" => $end->getTimestamp()
+        ]));
     }
 
     public function url(?string $url): ?string

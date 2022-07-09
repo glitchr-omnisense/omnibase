@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
@@ -19,6 +20,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Base\Twig\Environment;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 trait BaseTrait
 {
@@ -38,7 +40,8 @@ trait BaseTrait
     public static function getDataDir()       : string { return BaseService::getProjectDir() . "/data"; }
 
     public static function getClassMetadataManipulator()  : ?ClassMetadataManipulator { return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator   : BaseService::getClassMetadataManipulator(); }
-    public static function getRequestStack()  : ?RequestStack            { return (self::class === BaseService::class) ? BaseService::$requestStack : BaseService::getRequestStack(); }
+    public static function getTokenStorage()  : ?TokenStorageInterface   { return (self::class === BaseService::class) ? BaseService::$tokenStorage   : BaseService::getTokenStorage(); }
+    public static function getRequestStack()  : ?RequestStack            { return (self::class === BaseService::class) ? BaseService::$requestStack   : BaseService::getRequestStack(); }
     public static function getEntityHydrator(): ?EntityHydrator          { return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator(); }
     public static function getEntityManager() : ?EntityManagerInterface  { return (self::class === BaseService::class) ? BaseService::$entityManager  : BaseService::getEntityManager(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }

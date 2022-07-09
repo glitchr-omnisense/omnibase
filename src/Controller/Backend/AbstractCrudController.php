@@ -192,8 +192,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function getEntityDto():EntityDto { return $this->entityDto; }
     public function getEntityCollection():EntityCollection { return $this->entityCollection; }
 
-    public static function getEntityLabelInSingular() { return self::getEntityTranslationPrefix().".".Translator::TRANSLATION_SINGULAR; }
-    public static function getEntityLabelInPlural() { return self::getEntityTranslationPrefix().".".Translator::TRANSLATION_PLURAL; }
+    public static function getEntityLabelInSingular() { return self::getEntityTranslationPrefix().".".Translator::NOUN_SINGULAR; }
+    public static function getEntityLabelInPlural() { return self::getEntityTranslationPrefix().".".Translator::NOUN_PLURAL; }
     public static function getEntityIcon()
     {
         $icon = get_called_class()::getPreferredIcon() ?? null;
@@ -218,7 +218,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         $title   = $this->translator->transQuiet($crudTranslationPrefixWithAction.".title");
         $title ??= $this->translator->transQuiet($crudTranslationPrefix.".title");
-        $title ??= $this->translator->transQuiet($crudTranslationPrefix.".".Translator::TRANSLATION_PLURAL);
+        $title ??= $this->translator->transQuiet($crudTranslationPrefix.".".Translator::NOUN_PLURAL);
         $title ??= $entityLabelInPlural ?? camel2snake(class_basename($this->getEntityFqcn()), " ");
 
         $help   = $this->translator->transQuiet($crudTranslationPrefixWithAction.".help");
@@ -284,9 +284,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $entity = $this->getEntity();
         if(!$entity) return $extension;
 
-        $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
-
-        $entityLabel = mb_ucfirst($this->translator->transQuiet($userClass.".".Translator::TRANSLATION_PLURAL, [], AbstractDashboardController::TRANSLATION_ENTITY));
+        $entityLabel = mb_ucfirst($this->translator->entity($entity, null, AbstractDashboardController::TRANSLATION_ENTITY));
         if($entityLabel) $extension->setTitle($entityLabel);
 
         $entityLabel ??= $this->getEntityLabelInSingular();
@@ -297,8 +295,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
             $class = str_replace(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], ["", "", "",], get_class($entity));
             $class = implode(".", array_map("camel2snake", explode("\\", $class)));
 
-            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel2snake($class)).".".Translator::TRANSLATION_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY));
-            $extension->setTitle(mb_ucfirst($this->translator->trans(mb_strtolower(camel2snake($class)).".".Translator::TRANSLATION_PLURAL, [], AbstractDashboardController::TRANSLATION_ENTITY)));
+            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel2snake($class)).".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY));
+            $extension->setTitle(mb_ucfirst($this->translator->trans(mb_strtolower(camel2snake($class)).".".Translator::NOUN_PLURAL, [], AbstractDashboardController::TRANSLATION_ENTITY)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {
