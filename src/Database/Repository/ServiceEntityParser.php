@@ -1278,19 +1278,11 @@ class ServiceEntityParser
         if($this->classMetadata->hasAssociation($column))
             $e_column = self::ALIAS_ENTITY."_".$column;
         else if($this->classMetadata->hasField($column))
-<<<<<<< HEAD
-            $column = self::ALIAS_ENTITY.".".$column;
-        else $column = self::ALIAS_ENTITY.".id";
-
-        $qb = $this->getQueryBuilder($selectAs, $criteria, $orderBy, $groupBy);
-        $this->innerJoin($qb, $column);
-=======
             $e_column = self::ALIAS_ENTITY.".".$column;
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, null, null, $groupBy);
-        if($this->classMetadata->hasAssociation($column)) 
+        if($this->classMetadata->hasAssociation($column))
             $this->innerJoin($qb, $column);
->>>>>>> 8eaee22d431b2a8ca64d64857c7756c3a044ab1a
 
         $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
 
@@ -1305,11 +1297,7 @@ class ServiceEntityParser
         else if($this->classMetadata->hasField($column))
             $column = self::ALIAS_ENTITY.".".$column;
 
-<<<<<<< HEAD
-        $qb = $this->getQueryBuilder($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset);
-=======
         $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy);
->>>>>>> 8eaee22d431b2a8ca64d64857c7756c3a044ab1a
         $this->innerJoin($qb, $column);
 
         $qb->select("LENGTH(".self::ALIAS_ENTITY.".".$column.") as length");
