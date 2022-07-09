@@ -65,7 +65,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'form_type' => FileType::class,
 
             'entity_file'    => null,
-            'entity_inherit' => false,
+            'entity_inheritance' => false,
             'entity_data'    => [],
 
             "multiple"     => null,
@@ -219,7 +219,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     $entity = null;
                     if($file instanceof File) {
 
-                        $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
+                        $entityInheritance = $options["entity_inheritance"] ? $parentEntity : null;
                         $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
 
                     } else if( ($pos = array_search($file, $viewDataFileIndexes)) !== false ){
@@ -250,7 +250,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                 $entity = $viewData;
                 if(!$entity) {
 
-                    $entityInheritance = $options["entity_inherit"] ? $parentEntity : null;
+                    $entityInheritance = $options["entity_inheritance"] ? $parentEntity : null;
                     $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
                 }
 
