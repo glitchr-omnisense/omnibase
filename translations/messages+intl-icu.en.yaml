@@ -26,6 +26,7 @@ locale:
 
 backoffice:
     title: "Go to backoffice"
+    update: Updates have been saved.
 
 profile:
     title: "See my profile"
