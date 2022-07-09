@@ -1,4 +1,7 @@
-# CRUD controllers
+backoffice:
+  title: "Backoffice"
+  subtitle: "Manage your website"
+
 crud:
   user:
     # title: "User page"

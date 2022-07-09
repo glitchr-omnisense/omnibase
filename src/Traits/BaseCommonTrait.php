@@ -19,6 +19,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 
 trait BaseCommonTrait {
@@ -80,6 +81,12 @@ trait BaseCommonTrait {
      */
     protected static $localeProvider = null;
     public static function setLocaleProvider(?LocaleProviderInterface $localeProvider) {  self::$localeProvider = $localeProvider; }
+
+    /**
+     * @var LocaleProviderInterface
+     */
+    protected static $tokenStorage = null;
+    public static function setTokenStorage(?TokenStorageInterface $tokenStorage) {  self::$tokenStorage = $tokenStorage; }
 
     /**
      * @var SluggerInterface

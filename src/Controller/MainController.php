@@ -3,23 +3,23 @@
 namespace Base\Controller;
 
 use Base\BaseBundle;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Kernel;
 
 use  Base\Service\BaseService;
+use  Base\Service\SettingBag;
 
 class MainController extends AbstractController
 {
-    public static $foundBaseService       = false;
-    public static $foundBaseSubscriber    = false;
-    public static $foundBaseTwigExtension = false;
-
-    private $service;
-    public function __construct(BaseService $service) {
+    protected $service;
+    protected $settingBag;
+    public function __construct(BaseService $service, SettingBag $settingBag) {
 
         $this->service = $service;
+        $this->settingBag = $settingBag;
     }
 
     /**

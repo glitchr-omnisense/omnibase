@@ -9,10 +9,10 @@ use Base\Annotations\AbstractAnnotation;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Service\Filesystem;
-use Base\Traits\BaseTrait;
 use Exception;
 
 use App\Entity\User;
+use Base\Traits\BaseTrait;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use ReflectionClass;

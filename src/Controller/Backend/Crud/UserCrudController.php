@@ -31,7 +31,7 @@ class UserCrudController extends AbstractCrudController
             $extension->setImage($entity->getAvatar());
 
             $userClass = "user.".mb_strtolower(camel2snake(class_basename($entity)));
-            $entityLabel = $this->translator->transQuiet($userClass.".".Translator::TRANSLATION_SINGULAR, [], Translator::DOMAIN_ENTITY);
+            $entityLabel = $this->translator->transQuiet($userClass.".".Translator::NOUN_SINGULAR, [], Translator::DOMAIN_ENTITY);
             if($entityLabel) $extension->setTitle(mb_ucwords($entityLabel));
 
             $entityLabel ??= $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";

@@ -29,7 +29,7 @@ use Base\Enum\Quadrant\Quadrant8;
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry
  */
-class Image implements IconizeInterface
+class Image implements IconizeInterface, ImageInterface
 {
     use BaseTrait;
 
@@ -81,7 +81,7 @@ class Image implements IconizeInterface
     protected $source;
     public function getSource()     { return Uploader::getPublic($this, "source"); }
     public function getSourceFile() { return Uploader::get($this, "source"); }
-    public function setSource($source): self
+    public function setSource($source): static
     {
         $this->source = $source;
         $this->sourceMeta = null;

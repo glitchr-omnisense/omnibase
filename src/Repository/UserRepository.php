@@ -18,19 +18,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserRepository extends ServiceEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface
 {
-    public function findByRoles(string $role)
-    {
-        $qb = $this->_em->createQueryBuilder();
-
-        $qb->select('u')
-        ->from('Base\Entity\User', 'u')
-        ->where('u.roles LIKE :roles')
-        ->setParameter('roles', '%"' . $role . '"%');
-
-        return $qb->getQuery()->getResult();
-    }
-
-    public function loadUserByIdentifier($email) : ?UserInterface {
+    public function loadUserByIdentifier(string $email) : ?UserInterface {
 
         return $this->getEntityManager()->createQuery(
             'SELECT u

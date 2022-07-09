@@ -31,7 +31,7 @@
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
 
-    {% if badges is not empty or labelTrim is not empty %}
+    {# {% if badges is not empty or labelTrim is not empty %}
     <div class="label-wrapper">
         {% if labelTrim is not empty %}
             {{- label|raw -}}
@@ -46,7 +46,7 @@
         {% endif %}
         <span class="badge badge-secondary label">{{- badges|trim|raw -}}</span>
     </div>
-    {% endif %}
+    {% endif %} #}
 
 {%- endblock -%}
 {%- block form2_widget -%}{{- form_widget(form) -}}{%- endblock -%}
@@ -89,6 +89,7 @@
     {{ form_row(form) }}
 </div>
 {%- endblock -%}
+
 {%- block quill_widget -%}
 
     {% set attr = attr|merge({

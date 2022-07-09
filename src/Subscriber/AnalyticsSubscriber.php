@@ -2,10 +2,12 @@
 
 namespace Base\Subscriber;
 
+use Base\BaseBundle;
+
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -15,23 +17,24 @@ use Twig\Environment;
 
 class AnalyticsSubscriber implements EventSubscriberInterface
 {
-    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router, TranslatorInterface $translator, Environment $twig, UserRepository $userRepository, ?GaService $googleAnalyticsService = null)
+    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router, TranslatorInterface $translator, Environment $twig, EntityManagerInterface $entityManager, ?GaService $googleAnalyticsService = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->router = $router;
 
         $this->twig = $twig;
         $this->translator = $translator;
-        $this->userRepository = $userRepository;
+
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository = $entityManager->getRepository(User::class);
 
         $this->gaService = $googleAnalyticsService;
     }
 
     public static function getSubscribedEvents(): array
     {
-        return [
-            KernelEvents::REQUEST  => [['onUserRequest', 1], ['onGoogleAnalyticsRequest']]
-        ];
+        if(!BaseBundle::hasDoctrine()) return [];
+        return [ KernelEvents::REQUEST  => [['onUserRequest', 1], ['onGoogleAnalyticsRequest']] ];
     }
 
     public function onUserRequest(RequestEvent $event)

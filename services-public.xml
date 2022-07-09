@@ -24,6 +24,12 @@
         <service id="obfuscator" alias="Base\Service\Obfuscator" />
         <service id="Base\Service\ObfuscatorInterface" alias="obfuscator"/>
 
+        <service id="base.service.maintenance" alias="Base\Service\MaintenanceProvider" />
+        <service id="Base\Service\MaintenanceProviderInterface" alias="base.service.maintenance"/>
+
+        <service id="base.service.maternity" alias="Base\Service\MaternityService" />
+        <service id="Base\Service\MaternityServiceInterface" alias="base.service.maternity"/>
+
         <service id="base.filesystem" alias="Base\Service\Filesystem" />
         <service id="setting_bag" alias="Base\Service\Settings" />
 
@@ -35,7 +41,7 @@
         <service id="base.translator" alias="Base\Service\Translator" />
         <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
         <service id="parameter_bag.hot" alias="Base\Service\ParameterBag" />
-        <service id="Base\Service\ParameterBagInterface" alias="parameter_bag.hot"/>
+        <service id="Base\Service\HotParameterBagInterface" alias="parameter_bag.hot"/>
         <service id="base.widget_provider" alias="Base\Service\WidgetProvider" />
         <service id="Base\Service\WidgetProviderInterface" alias="base.widget_provider"/>
         <service id="base.paginator" alias="Base\Service\Paginator" />
@@ -55,10 +61,12 @@
 
         <service id="base.entity_extension" alias="Base\Database\Factory\EntityExtension" />
 
-        <service id="twig.extension.base"           alias="Base\Twig\Extension\BaseTwigExtension" />
-        <service id="twig.loader.filesystem"        alias="Base\Twig\Loader\FilesystemLoader" />
-        <service id="twig.random_variable" alias="Base\Twig\Variable\RandomVariable" />
-        <service id="twig.ea_variable"     alias="Base\Twig\Variable\EasyAdminVariable" />
+        <service id="twig.extension.base"      alias="Base\Twig\Extension\BaseTwigExtension" />
+        <service id="twig.loader.filesystem"   alias="Base\Twig\Loader\FilesystemLoader" />
+        <service id="twig.random_variable"     alias="Base\Twig\Variable\RandomVariable" />
+        <service id="twig.site_variable"       alias="Base\Twig\Variable\SiteVariable" />
+        <service id="twig.backoffice_variable" alias="Base\Twig\Variable\BackofficeVariable" />
+        <service id="twig.ea_variable"         alias="Base\Twig\Variable\EasyAdminVariable" />
 
         <service id="base.form.proxy"   alias="Base\Form\FormProxyInterface" />
         <service id="base.form.factory" alias="Base\Form\FormFactoryInterface" />

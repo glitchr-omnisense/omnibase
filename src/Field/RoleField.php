@@ -5,12 +5,9 @@ namespace Base\Field;
 use App\Enum\UserRole;
 use Base\Field\Type\RoleType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-class RoleField extends SelectField implements FieldInterface
+class RoleField extends SelectField
 {
-
     public static function new(string $propertyName, ?string $label = null): self
     {
         return (new self())

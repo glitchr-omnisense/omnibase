@@ -27,11 +27,17 @@ namespace {
 
     function get_url(?string $scheme = null, ?string $http_host = null, ?string $request_uri = null) : ?string
     {
-        $scheme      ??= $_SERVER["REQUEST_SCHEME"] ?? null;
-        $http_host   ??= $_SERVER["HTTP_HOST"]      ?? null;
+        $scheme = $_SERVER['HTTPS'] ?? $_SERVER["USE_HTTPS"]?? $_SERVER['REQUEST_SCHEME'] ?? $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null ;
+        $scheme = $scheme && (strcasecmp('on', $scheme) == 0 || strcasecmp('https', $scheme) == 0);
+        $scheme = $scheme ? "https" : "http";
+
+        $domain  = explode(":", $http_host ?? $_SERVER["HTTP_HOST"] ?? [])[0] ?? $_SERVER["SERVER_NAME"] ?? null;
+        $port    = explode(":", $http_host ?? $_SERVER["HTTP_HOST"])[1] ?? $_SERVER["SERVER_PORT"] ?? null;
+        $port    = $port != 80 && $port != 443 ? $port : null;
+
         $request_uri ??= $_SERVER["REQUEST_URI"]    ?? null;
 
-        return compose_url($scheme, null, null, null, null, $http_host, null, $request_uri == "/" ? null : $request_uri);
+        return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 
     define("SANITIZE_URL_STANDARD", 0);
@@ -321,6 +327,18 @@ namespace {
         return $data;
     }
 
+    function make_pair(array|string $values): array|false {
+
+        if(count($values)%2 != 0) return false;
+
+        $pairs = [];
+        for($i = 0, $N = count($values)/2; $i < $N; $i++)
+            $pairs[$values[$i]] = $values[$i+1];
+
+        return $pairs;
+    }
+
+    function at(array $array, int $index) { return $array[$index] ?? null; }
     function is_tmpfile(string $fname):bool { return belongs_to($fname, sys_get_temp_dir()); }
     function unlink_tmpfile(string $fname):bool { return is_tmpfile($fname) && file_exists($fname) ? unlink($fname) : false; }
     function belongs_to(string $fname, string $base):bool
@@ -405,7 +423,7 @@ namespace {
 
         return $backtrace;
     }
-
+    
     define("SHORTEN_FRONT", -1); // [..] dolor sit amet
     define("SHORTEN_MIDDLE", 0); // Lorem ipsum [..] amet
     define("SHORTEN_BACK",   1); // Lorem ipsum dolor [..]
@@ -895,9 +913,31 @@ namespace {
     }
 
     function is_cli(): bool { return (php_sapi_name() == "cli"); }
-    function mb_lcfirst (string $str, ?string $encoding = null): string { return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); }
-    function mb_lcwords (string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string
+    function mb_lcfirst (array|string $str, ?string $encoding = null): array|string 
+    { 
+        if(is_array($str)) {
+
+            $array = [];
+            foreach($str as $s)
+                $array[] = mb_lcfirst($s, $encoding);
+
+            return $array;
+        }
+
+        return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
+    }
+    
+    function mb_lcwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
     {
+        if(is_array($str)) {
+
+            $array = [];
+            foreach($str as $s)
+                $array[] = mb_lcwords($s, $encoding, $separators);
+
+            return $array;
+        }
+
         $separators = str_split($separators);
         foreach($separators as $separator)
             $str = implode($separator, array_map(fn($s) => mb_lcfirst($s, $encoding), explode($separator, $str)));
@@ -905,9 +945,31 @@ namespace {
         return $str;
     }
 
-    function mb_ucfirst (string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); }
-    function mb_ucwords (string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string
+    function mb_ucfirst (array|string $str, ?string $encoding = null): array|string 
+    { 
+        if(is_array($str)) {
+
+            $array = [];
+            foreach($str as $s)
+                $array[] = mb_ucfirst($s, $encoding);
+
+            return $array;
+        }
+
+        return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); 
+    }
+    
+    function mb_ucwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
     {
+        if(is_array($str)) {
+
+            $array = [];
+            foreach($str as $s)
+                $array[] = mb_ucwords($s, $encoding, $separators);
+
+            return $array;
+        }
+
         $separators = str_split($separators);
         foreach($separators as $separator)
             $str = implode($separator, array_map(fn($s) => mb_ucfirst($s, $encoding), explode($separator, $str)));
@@ -1097,7 +1159,47 @@ namespace {
         return $array;
     }
 
-    function dump_var(mixed $value)
+    function array_search_by(array $array, string $column, mixed $value) : ?array {
+
+        if(!is_multidimensional($array)) return $array;
+
+        $results = []; 
+        foreach ($array as $k => &$v) {
+
+            if (!is_array($array[$k])) continue;
+            if (!array_key_exists($column, $array[$k]))
+                continue;
+
+            if ($array[$k][$column] === $value)
+                $results[] = $v;
+        }
+
+        return $results ? $results : null;
+    }
+    
+
+    function get_permutations(array $data = [], bool $duplicates = true, ?int $limit = null) {
+
+        $permutations = [[]];
+
+        for ($i = 0, $N = $limit ? min(count($data), $limit) : count($data); $i < $N; $i++) {
+
+            $buffer = [];
+            foreach ($permutations as $permutation) {
+
+                foreach ($data as $inputValue)
+                    $buffer[] = array_merge($permutation, [$inputValue]);
+
+                if(!$duplicates) $buffer = array_unique($buffer);
+            }
+
+            $permutations = $buffer;
+        }
+
+        return $permutations;
+    }
+
+    function dumplight(mixed $value)
     {
         echo "<pre>";
         print_r($value);

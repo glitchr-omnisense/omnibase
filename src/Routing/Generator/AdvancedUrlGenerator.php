@@ -108,7 +108,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         //
         // Prevent to generate custom route with Symfony internal route.
         // NB: It breaks and gets infinite loop due to "_profiler*" route, if not set..
-        if(str_starts_with($routeName, "_")) {
+        if(str_starts_with($routeName, "_") || !$this->getRouter()->useAdvancedFeatures()) {
 
             $routeParameters = $this->resolveParameters() ?? $routeParameters;
             try { return parent::generate($routeName, $routeParameters, $referenceType); }
@@ -136,7 +136,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         try { $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType); }
         catch(Exception $e) {
 
-            if ($routeName == $routeDefaultName) throw $e;
+            if ($routeName == $routeDefaultName || $routeDefaultName === null) throw $e;
 
             $routeName = $routeDefaultName;
             $routeUrl = $this->resolveUrl($routeName, $routeParameters, $referenceType);
@@ -165,7 +165,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $parse = parse_url2($url);
 
         $allowedSubdomain = false;
-        $permittedSubdomains = $this->getParameterBag()->get("base.host_restriction.permitted_subdomains") ?? [];
+        
+        $permittedSubdomains   = array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getLocale());
+        $permittedSubdomains ??= array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getLang());
+        $permittedSubdomains ??= array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getDefaultLocale());
+        $permittedSubdomains ??= array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getDefaultLang());
+        $permittedSubdomains ??= array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", null) ?? [];
+        $permittedSubdomains = array_transforms(fn($k, $a): ?array => $a["env"] == $this->getRouter()->getEnvironment() ? [$k, $a["regex"]] : null, $permittedSubdomains);
         if(!$this->getRouter()->keepMachine() && !$this->getRouter()->keepSubdomain())
             $permittedSubdomains = "^$"; // Special case if both subdomain and machine are unallowed
 

@@ -2,6 +2,7 @@
 
 namespace Base\Twig;
 
+use Base\Routing\RouterInterface;
 use Base\Service\SettingBagInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -10,10 +11,10 @@ use Twig\Loader\LoaderInterface;
 
 class Environment extends TwigEnvironment
 {
-    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, SettingBagInterface $settingBag)
+    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, RouterInterface $router)
     {
         $this->requestStack = $requestStack;
-        $this->settingBag   = $settingBag;
+        $this->router   = $router;
 
         parent::__construct($loader, $options);
     }
@@ -27,7 +28,7 @@ class Environment extends TwigEnvironment
 
         $request = $this->requestStack->getCurrentRequest();
 
-        $baseDir = $request ? $request->getBasePath() : $this->settingBag->baseDir();
+        $baseDir = $request ? $request->getBasePath() : $this->router->getBaseDir();
         $baseDir = $baseDir ."/";
         $path = trim($parse["path"]);
         if($path == "/") return $baseDir ? $baseDir : "/";

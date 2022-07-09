@@ -3,7 +3,7 @@
 
 {% set _content_title = block('content_title') ?? null %}
 {% if _content_title is empty %}
-    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? null)|default(page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '')) %}
+    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? page_title ?? ea.dashboardTitle) %}
 {% endif %}
 
 <!DOCTYPE html>
@@ -18,7 +18,7 @@
     {% endblock head_metas %}
 
     {% set page_title_block_output %}{% block page_title %}{{ _content_title }}{% endblock %}{% endset %}
-    <title>{{ [base.settings.get("base.settings.title.backoffice")["_self"] ?? null, block('page_title_block_output') ?? _content_title|striptags|raw]|uniq|join_if_exists(" - ") }}</title>
+    <title>{{ [app.backoffice.title ?? null, block('page_title_block_output') ?? _content_title|striptags|raw]|uniq|join_if_exists(" - ") }}</title>
 
     {% block configured_stylesheets %}
         {{ include('@EasyAdmin/includes/_css_assets.html.twig', { assets: ea.assets.cssAssets ?? [] }, with_context = false) }}
@@ -155,7 +155,9 @@
                                         <div id="header-logo">
                                             {% block header_logo %}
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
-                                                    <div class="logo-custom">{{ ea.dashboardTitle|raw }}</div>
+                                                    <div class="logo-custom">
+                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(800,800) }}" />
+                                                    </div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>
                                                 </a>
                                             {% endblock header_logo %}

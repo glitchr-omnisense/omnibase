@@ -1,26 +1,19 @@
 <?php
 
 namespace Base\Controller\Client\User;
-use Base\Service\BaseService;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
 
-use App\Form\User\ProfileEditType;
-use App\Form\User\ProfileSearchType;
 use Base\Annotations\Annotation\Iconize;
-use Endroid\QrCode\QrCode;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class ProfileController extends AbstractController
 {
-    public function __construct(UserRepository $userRepository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->userRepository = $userRepository;
+        $this->userRepository = $entityManager->getRepository(User::class);
     }
 
     /**
