@@ -67,7 +67,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public const __DEFAULT_IDENTIFIER__ = "email";
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
-    public function killSession() { $this->getService()->Logout(); }
+    public function killSession() { $this->Logout(); }
 
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
     public function getUserIdentifier(): string

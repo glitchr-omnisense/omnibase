@@ -77,7 +77,8 @@ class AppVariable
 
     public function locale()  {
         return [
-            "lang" => $this->localeProvider->getLang(),
+            "_self"  => $this->localeProvider->getLocale(),
+            "lang"    => $this->localeProvider->getLang(),
             "country" => $this->localeProvider->getCountry()
         ];
     }

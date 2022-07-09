@@ -174,7 +174,6 @@ class SecuritySubscriber implements EventSubscriberInterface
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
-            
             if($user && $specialGrant) {
 
                      if(!$adminAccess) $msg = "admin_restriction";
