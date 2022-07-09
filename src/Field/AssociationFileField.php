@@ -98,7 +98,7 @@ final class AssociationFileField implements FieldInterface
 
     public function setFieldInheritance(bool $b): self
     {
-        $this->setFormTypeOption("entity_inherit", $b);
+        $this->setFormTypeOption("entity_inheritance", $b);
         return $this;
     }
 

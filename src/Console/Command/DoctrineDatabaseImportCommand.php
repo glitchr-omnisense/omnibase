@@ -177,10 +177,10 @@ class DoctrineDatabaseImportCommand extends Command
         $onTheFly        = $input->getOption("on-the-fly");
         $spreadsheets = $input->getOption("spreadsheet") !== null ? explode(",", $input->getOption("spreadsheet")) : null;
 
-        $nentries      = (int) $input->getOption("entries");
+        $entries      = (int) $input->getOption("entries");
         $skip         = (int) $input->getOption("skip");
 
-        if(!$nentries) $nentries = null;
+        if(!$entries) $entries = null;
 
         $output->writeln("");
         if($path) $output->writeln(' <info>You have just selected:</info> '.$path);
@@ -303,7 +303,7 @@ class DoctrineDatabaseImportCommand extends Command
             // Process them
             foreach($rawData[$spreadsheet] as &$data) {
 
-                if($counter < $skip-self::OFFSET_TOP || ($nentries !== null && $counter > $nentries+$skip-self::OFFSET_TOP-1)) {
+                if($counter < $skip || ($entries !== null && $counter > $entries+$skip-1)) {
                     $counter++;
                     continue;
                 }

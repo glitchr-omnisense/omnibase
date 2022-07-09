@@ -4,7 +4,6 @@ namespace Base\Controller\Backend\Crud;
 
 use Base\Backend\Config\Extension;
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Controller\Backend\AbstractDashboardController;
 use Base\Field\AvatarField;
 
 use Base\Field\PasswordField;
