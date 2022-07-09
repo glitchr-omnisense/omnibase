@@ -36,9 +36,10 @@ class SettingListType extends AbstractType implements DataMapperInterface
      */
     protected $classMetadataManipulator;
 
-    public function __construct(SettingBag $settingBag, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(SettingBag $settingBag, LocaleProvider $localeProvider, ClassMetadataManipulator $classMetadataManipulator)
     {
         $this->settingBag = $settingBag;
+        $this->localeProvider = $localeProvider;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
@@ -92,7 +93,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
             foreach($formattedFields as $formattedField => $fieldOptions) {
 
                 $field = str_replace("-", ".", $formattedField);
-                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field, $options["locale"], false) ?? new Setting($field);
+
+                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field) ?? new Setting($field);
             }
 
             $fields = ["value" => []];
@@ -114,8 +116,8 @@ class SettingListType extends AbstractType implements DataMapperInterface
 
                 // Set default label
                 if(!array_key_exists("label", $fieldOptions)) {
-                    $label = explode("-", $formattedField);
-                    $fieldOptions["label"] = $setting->getLabel() ?? mb_ucwords(str_replace("_", " ", camel2snake(end($label))));
+                    $label = explode("-", trim(str_lstrip($formattedField, ["app-settings", "base-settings"]), " -"));
+                    $fieldOptions["label"] = $setting->getLabel() ?? mb_ucwords(str_replace("_", " ", implode(" - ", $label)));
                 }
 
                 if ($fieldOptions["form_type"] == FileType::class || $fieldOptions["form_type"] == ImageType::class || $fieldOptions["form_type"] == AvatarType::class) {
@@ -152,12 +154,14 @@ class SettingListType extends AbstractType implements DataMapperInterface
                             $bool = !empty($settingValue) && $settingValue != "0";
                             $settingTranslation->setValue($bool ? true : false);
                             break;
-
                     }
                 }
 
                 if ($isTranslatable) $intlData[$formattedField] = $translations;
-                else $unvData[$formattedField] = $translations;
+                else { 
+                    
+                    $unvData[$formattedField] = $translations;
+                }
             }
 
             $form = $event->getForm();
@@ -167,7 +171,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                     "autoload" => false,
                     "multiple" => true,
-                    "required_locales" => [LocaleProvider::getDefaultLocale()],
+                    "required_locales" => [$this->localeProvider->getDefaultLocale()],
                     "translation_class" => SettingTranslation::class,
                 ]);
 
@@ -180,6 +184,7 @@ class SettingListType extends AbstractType implements DataMapperInterface
                     "fields" => $fields,
                     "autoload" => false,
                     "multiple" => true,
+                    "locale" => $this->localeProvider->getDefaultLocale(),
                     "single_locale" => true,
                     "translation_class" => SettingTranslation::class,
                 ]);

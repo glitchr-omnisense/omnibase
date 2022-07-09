@@ -7,13 +7,16 @@ use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Repository\Layout\Widget\SlotRepository as WidgetSlotRepository;
 use Base\Repository\Layout\WidgetRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
 class WidgetProvider implements WidgetProviderInterface
 {
-    public function __construct(WidgetRepository $widgetRepository, WidgetSlotRepository $widgetSlotRepository)
+    public function __construct(EntityManagerInterface $entityManager)
     {
-        $this->widgetRepository = $widgetRepository;
-        $this->widgetSlotRepository = $widgetSlotRepository;
+        if(BaseBundle::hasDoctrine()) {
+            $this->widgetRepository = $entityManager->getRepository(Widget::class);
+            $this->widgetSlotRepository = $entityManager->getRepository(Slot::class);
+        }
     }
 
     protected $widgets = [];

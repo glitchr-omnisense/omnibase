@@ -5,6 +5,7 @@ namespace Base\Subscriber;
 use Base\Service\ReferrerInterface;
 use Base\Entity\User;
 
+use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
 
@@ -14,6 +15,8 @@ use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\LocaleProvider;
+use Base\Service\MaintenanceProviderInterface;
+use Base\Service\MaternityServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -22,13 +25,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
-use Symfony\Component\Security\Http\Event\SwitchUserEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Http\Event\LoginFailureEvent;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\HttpKernel\KernelEvents;
+
+use Base\Service\ParameterBagInterface;
+use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 
 class SecuritySubscriber implements EventSubscriberInterface
 {
@@ -51,6 +55,9 @@ class SecuritySubscriber implements EventSubscriberInterface
         LocaleProvider $localeProvider,
         ReferrerInterface $referrer,
         RouterInterface $router,
+        ParameterBagInterface $parameterBag,
+        MaintenanceProviderInterface $maintenanceProvider,
+        MaternityServiceInterface $maternityService,
         ?Profiler $profiler = null) {
 
         $this->authorizationChecker = $authorizationChecker;
@@ -60,7 +67,12 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $this->localeProvider = $localeProvider;
         $this->entityManager = $entityManager;
-        $this->userRepository = $entityManager->getRepository(User::class);
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository = $entityManager->getRepository(User::class);
+
+        $this->maternityService = $maternityService;
+        $this->maintenanceProvider = $maintenanceProvider;
+        $this->parameterBag = $parameterBag;
 
         $this->baseService = $baseService;
         $this->referrer = $referrer;
@@ -75,12 +87,14 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
+        if(!BaseBundle::hasDoctrine()) return [];
+
         return [
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class    => [
-                ['onAccessRequest', 6], 
-                ['onReferrerRequest', 5], ['onKernelRequest', 5], 
+                ['onMaintenanceRequest', 6], ['onBirthRequest', 6], ['onAccessRequest', 6],
+                ['onReferrerRequest', 5], ['onKernelRequest', 5],
             ],
 
             ResponseEvent::class   => ['onKernelResponse'],
@@ -136,10 +150,12 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $this->baseService->redirect($targetPath, [], 302);
     }
 
-    public function onAccessRequest(RequestEvent $event)
+    public function onAccessRequest(?RequestEvent $event = null): bool
     {
-        if(!$event->isMainRequest()) return;
-        if( $this->router->isWdt($event) ) return; // Special case for _wdt
+        if(!$this->router->getRouteFirewall()->isSecurityEnabled()) return true;
+
+        if(!$event->isMainRequest()) return true;
+        if( $this->router->isWdt($event) ) return true; // Special case for _wdt
 
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
@@ -149,17 +165,17 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-        
+
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
             //
             // Check for user special grants (based on roles)
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
-            if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
-            if(!$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
+            if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
+            if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
 
-            if($user != null && $specialGrant) {
+            if($user && $specialGrant) {
 
                      if(!$adminAccess) $msg = "admin_restriction";
                 else if(!$userAccess)  $msg = "user_restriction";
@@ -171,15 +187,15 @@ class SecuritySubscriber implements EventSubscriberInterface
                     $notification->send("warning");
                 }
 
-                return;
+                return true;
             }
 
             // In case of restriction: profiler is disabled
             if($this->profiler) $this->profiler->disable();
-
+            
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
-            if($isSecurityRoute) return;
+            if($isSecurityRoute) return true;
 
             //
             // Prevent average guy to see the administration and debug tools
@@ -191,20 +207,32 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // Nonetheless exception access is always possible
             if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))
-                return;
+                return true;
 
             // If not, then user is redirected to a specific route
-            $currentRouteName = $this->getCurrentRouteName($event);
-            $accessDeniedRedirection = $this->baseService->getSettingBag()->getScalar("base.settings.access_denied_redirect");
-            if($currentRouteName != $accessDeniedRedirection) {
+            $currentRouteName = $this->router->getRouteName();
+            $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
+            if(is_array($routeRestriction)) {
+            
+                $routeRestrictionWithLocale = array_filter($routeRestriction, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
+                if(!empty($routeRestrictionWithLocale))
+                    $routeRestriction = $routeRestrictionWithLocale;
 
-                $response   = $accessDeniedRedirection ? $this->baseService->redirect($accessDeniedRedirection) : null;
+                $routeRestriction = first($routeRestriction);
+            }
+
+            if($currentRouteName != str_rstrip($routeRestriction, ".".$this->localeProvider->getLang())) {
+
+                $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
-
-                $event->setResponse($response);
-                return $event->stopPropagation();
+    
+                if($event) $event->setResponse($response);
+                if($event) $event->stopPropagation();
+                return false;
             }
         }
+
+        return true;
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -219,9 +247,11 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         // Notify user about the authentication method
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
-        if ($this->authorizationChecker->isGranted('IS_IMPERSONATOR')) {
+        if ($token instanceof SwitchUserToken) {
 
-            $notification = new Notification("impersonator", [$user]);
+            $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? false;
+            
+            $notification = new Notification("impersonator", [$user, $switchParameter]);
             $notification->send("warning");
         }
 
@@ -242,7 +272,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $user->approve();
             $this->userRepository->flush($user);
 
-        } else if($this->baseService->getParameterBag("base.user.autoapprove")) {
+        } else if($this->parameterBag->get("base.user.autoapprove")) {
 
             $user->approve();
             $this->userRepository->flush($user);
@@ -366,5 +396,21 @@ class SecuritySubscriber implements EventSubscriberInterface
             $this->baseService->addSession("_user", $user);
 
         return $this->baseService->redirectToRoute(LoginFormAuthenticator::LOGOUT_ROUTE, [], 302, ["event" => $event]);
+    }
+
+    public function onMaintenanceRequest(RequestEvent $event)
+    {
+        if(!$event->isMainRequest()) return;
+
+        if($this->maintenanceProvider->redirectOnDeny($event, $this->localeProvider->getLocale()))
+            $event->stopPropagation();
+    }
+
+    public function onBirthRequest(RequestEvent $event)
+    {
+        if(!$event->isMainRequest()) return;
+
+        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale()))
+            $event->stopPropagation();
     }
 }

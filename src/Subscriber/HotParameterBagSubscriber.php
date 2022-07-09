@@ -8,7 +8,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
-class ParameterBagSubscriber implements EventSubscriberInterface
+class HotParameterBagSubscriber implements EventSubscriberInterface
 {
     public function __construct($parameterBag, SettingBagInterface $settingBag)
     {

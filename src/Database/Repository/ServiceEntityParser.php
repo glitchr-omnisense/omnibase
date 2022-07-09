@@ -5,6 +5,7 @@ namespace Base\Database\Repository;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
+use Base\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query;
@@ -125,49 +126,49 @@ class ServiceEntityParser
         }
     }
 
-    protected function __findBy         (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->getQuery   ($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset);   }
-    protected function __findRandomlyBy (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query { return $this->__findBy   ($selectAs, $criteria, array_merge(["id" => "rand"], $orderBy ?? []), $groupBy, $limit, $offset); }
-    protected function __findAll        (array $selectAs = [],                       $orderBy = null, $groupBy = null                               ): ?Query { return $this->__findBy   ($selectAs,        [], $orderBy, $groupBy, null, null);   }
-    protected function __findOneBy      (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               )         { return $this->__findBy   ($selectAs, $criteria, $orderBy, $groupBy, 1, null)->getOneOrNullResult(); }
-    protected function __findLastOneBy  (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               )         { return $this->__findOneBy($selectAs, $criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, 1, null) ?? null; }
-    protected function __findLastBy     (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               ): ?Query
+    protected function __findBy         (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->getQuery   ($criteria, $orderBy                                     , $limit, $offset, $groupBy, $selectAs); }
+    protected function __findRandomlyBy (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
+    protected function __findAll        (                      $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
+    protected function __findOneBy      (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
+    protected function __findLastOneBy  (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']),                  $groupBy, $selectAs) ?? null; }
+    protected function __findLastBy     (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query
     {
         $limit = array_unshift($criteria);
-        return $this->__findBy($selectAs, $criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $groupBy, $limit, null) ?? null;
+        return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, null, $groupBy, $selectAs) ?? null;
     }
 
-    protected function __findAtMostBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null                               ): ?Query
+    protected function __findAtMostBy     (array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = []): ?Query
     {
         $limit = array_pop_key("special:atMost", $criteria);
-        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit, null);
+        return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
-    protected function __findPreviousBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null): ?Query
+    protected function __findPreviousBy   (array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = []): ?Query
     {
         $limit = array_pop_key("special:prev", $criteria);
         $orderBy["id"] = "DESC";
-        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit);
+        return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
-    protected function __findNextBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null): ?Query
+    protected function __findNextBy       (array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = []): ?Query
     {
         $limit = array_pop_key("special:prev", $criteria);
-        return $this->__findBy($selectAs, $criteria, $orderBy, $groupBy, $limit);
+        return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
-    protected function __findPreviousOneBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null)
+    protected function __findPreviousOneBy(array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = [])
     {
         $orderBy["id"] = "DESC";
-        return $this->__findOneBy($selectAs, $criteria, $orderBy, $groupBy);
+        return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
     }
 
-    protected function __findNextOneBy   (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null) { return $this->__findOneBy($selectAs, $criteria, $orderBy, $groupBy); }
-
-    protected function __lengthOf     (array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null) { return $this->getQueryWithLength($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset)->getResult(); }
-    protected function __distinctCount(array $selectAs = [], array $criteria = [],                  $groupBy = null): int { return $this->__count($selectAs, $criteria, self::COUNT_DISTINCT, $groupBy); }
-    protected function __count        (array $selectAs = [], array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, $groupBy = null)
+    protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                array $selectAs = [])      { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
+    protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, array $selectAs = [])      { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
+    protected function __distinctCountBy (array $criteria = [],                                               ?array $groupBy = null,                                array $selectAs = []): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
+    protected function __countBy         (array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null,                                array $selectAs = [])
     {
-        $query = $this->getQueryWithCount($selectAs, $criteria, $mode, $orderBy, $groupBy);
+        $mode ??= self::COUNT_ALL;
+        $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
 
         $fnResult = ($groupBy ? "getResult" : "getSingleScalarResult");
@@ -242,7 +243,7 @@ class ServiceEntityParser
     protected function validateDate($date, $format = 'Y-m-d H:i:s') {
 
         $d = \DateTime::createFromFormat($format, $date);
-        return $d && $d->format($format) == $date;
+        return $d && IntlDateTime::createFromDateTime($d)->format($format) == $date;
     }
 
     public function    getCustomOption(string $id                ) { return $this->options[$id] ?? []; }
@@ -268,9 +269,10 @@ class ServiceEntityParser
         // - "MAGIC ARGUMENTS"
         // - "MAGIC ARGUMENTS"+0: criteria
         // - "MAGIC ARGUMENTS"+1: orderBy
-        // - "MAGIC ARGUMENTS"+2: groupBy
-        // - "MAGIC ARGUMENTS"+3: limit
-        // - "MAGIC ARGUMENTS"+4: offset
+        // - "MAGIC ARGUMENTS"+2: limit
+        // - "MAGIC ARGUMENTS"+3: offset
+        // - "MAGIC ARGUMENTS"+4: groupBy
+        // - "MAGIC ARGUMENTS"+5: selectAs
 
         // Definition of the returned values
         $magicFn = null;
@@ -839,9 +841,8 @@ class ServiceEntityParser
 
         $magicFn = "__".$magicFn;
 
-        $magicArgs[0] = $magicArgs[0] ?? [];
-        $magicArgs[1] = array_merge($magicArgs[1] ?? [], $this->criteria ?? []); // Criteria
-        $magicArgs[1] = array_merge($magicArgs[1], array_transforms(fn($k,$v) :array => ["special:".$k, $v], $magicExtra));
+        $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []); // Criteria
+        $magicArgs[0] = array_merge($magicArgs[0], array_transforms(fn($k,$v) :array => ["special:".$k, $v], $magicExtra));
 
         return [$magicFn, $magicArgs];
     }
@@ -849,7 +850,6 @@ class ServiceEntityParser
 
     protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
     {
-
         $fieldID   = str_replace(".", "_", implode("_", $field));
         $fieldName = $this->getAlias($field[0]);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
@@ -1047,33 +1047,63 @@ class ServiceEntityParser
 
             if ($this->classMetadata->hasAssociation($fieldHead)) {
 
-                if($this->classMetadata->isAssociationInverseSide($fieldHead))
-                    throw new Exception("Association \"$fieldHead\" for \"".$this->classMetadata->getName()."\" is not owning side");
+                // NB:: Still useful for select.. to be improved (fetch owning side ?)
+                // if($this->classMetadata->isAssociationInverseSide($fieldHead))
+                //     throw new Exception("Association \"$fieldHead\" for \"".$this->classMetadata->getName()."\" is not owning side");
 
                 $fieldID = self::ALIAS_ENTITY."_".$fieldID;
+
+                if($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
+
+                    // Cast to array
+                    $qb = $this->innerJoin($qb, $fieldHead);
+                    if (!is_array($fieldValue)) $fieldValue = ($fieldValue !== null)? [$fieldValue] : [];
+                    foreach ($fieldValue as $subFieldID => $subFieldValue)
+                        $qb->setParameter($fieldID."_".$subFieldID, $subFieldValue);
+
+                } else {
+
+                    if(!is_array($fieldValue)) {
+
+                        $qb = $this->innerJoin($qb, $fieldHead);
+                        $qb->setParameter($fieldID, $fieldValue);
+
+                    } else {
+
+                        $fieldValue = array_filter($fieldValue);
+                        if($fieldValue) {
+
+                            $qb = $this->innerJoin($qb, $fieldHead);
+                            $qb->setParameter($fieldID, $fieldValue);
+                        }
+                    }
+                }
+
+            } else if(!is_array($fieldValue)) {
 
                 $qb = $this->innerJoin($qb, $fieldHead);
                 $qb->setParameter($fieldID, $fieldValue);
 
             } else {
 
-                $qb->setParameter($fieldID, $fieldValue);
+                $fieldValue = array_filter($fieldValue);
+                if($fieldValue) {
+                    $qb = $this->innerJoin($qb, $fieldHead);
+                    $qb->setParameter($fieldID, $fieldValue);
+                }
             }
 
             if ($isInsensitive) $tableColumn = "LOWER(" . $tableColumn . ")";
-            if ($isPartial) {
+            if ($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
 
                 if($tableOperator != self::OPTION_EQUAL && $tableOperator != self::OPTION_NOT_EQUAL)
                     throw new Exception("Invalid operator for association field \"$fieldName\": ".$tableOperator);
 
-                // Cast to array
-                if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
-
                 $expr = [];
-                foreach ($fieldValue as $_ => $_) {
+                foreach ($fieldValue as $subFieldID => $_) {
 
                     $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
-                    $expr[] = $qb->expr()->$fnExpr($tableColumn, ":$fieldID");
+                    $expr[] = $qb->expr()->$fnExpr($fieldID, ":${fieldID}_${subFieldID}");
                 }
 
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "orX" : "andX");
@@ -1085,7 +1115,7 @@ class ServiceEntityParser
                 else if($tableOperator == self::OPTION_NOT_EQUAL) $tableOperator = "NOT IN";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return "${tableColumn} ${tableOperator} (:${fieldID})";
+                return !empty($fieldValue) ? "${tableColumn} ${tableOperator} (:${fieldID})" : null;
 
             } else if($regexRequested) {
 
@@ -1102,7 +1132,7 @@ class ServiceEntityParser
 
             } else {
 
-                    if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
+                     if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
                 else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
                 else if($tableOperator == self::OPTION_GREATER)       $tableOperator = ">";
                 else if($tableOperator == self::OPTION_GREATER_EQUAL) $tableOperator = ">=";
@@ -1123,7 +1153,7 @@ class ServiceEntityParser
         throw new Exception("Failed to build expression \"".$field."\": ".$fieldValue);
     }
 
-    protected function getQueryBuilder(array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?QueryBuilder
+    protected function getQueryBuilder(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?QueryBuilder
     {
         /**
          * @QueryBuilder
@@ -1158,6 +1188,7 @@ class ServiceEntityParser
                     array_unshift($newField, $entryID);
 
                     $queryExpr = $this->buildQueryExpr($qb, $newField, $entryValue);
+                    if($queryExpr == null) continue;
 
                     // In case of association field, compare value directly
                     if ($this->classMetadata->hasAssociation($entryID)) $qb->andWhere($queryExpr);
@@ -1171,6 +1202,7 @@ class ServiceEntityParser
 
                 // Default query builder
                 $expr = $this->buildQueryExpr($qb, $field, $fieldValue);
+                if($expr == null) continue;
 
                 // Custom process in case of closest/farest
                 $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
@@ -1211,9 +1243,9 @@ class ServiceEntityParser
         return $qb;
     }
 
-    protected function getQuery(array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null): ?Query
+    protected function getQuery(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query
     {
-        $qb = $this->getQueryBuilder($selectAs, $criteria, $orderBy, $groupBy, $limit, $offset);
+        $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
         $query = $qb->getQuery();
 
         if($query->isCacheable()) {
@@ -1233,31 +1265,30 @@ class ServiceEntityParser
         return $query;
     }
 
-    protected function getQueryWithCount(array $selectAs = [], array $criteria = [], ?string $mode = "", ?array $orderBy = null, $groupBy = null)
+    protected function getQueryWithCount(array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, ?array $groupBy = null, array $selectAs = [])
     {
         if($mode == self::COUNT_ALL) $mode = "";
         if($mode && $mode != self::COUNT_DISTINCT)
             throw new Exception("Unexpected \"mode\" provided: \"". $mode."\"");
 
         $column = $this->getAlias($this->getColumn());
+        if(!$column) $column = "id";
+
         if($this->classMetadata->hasAssociation($column))
-            $column = self::ALIAS_ENTITY."_".$column;
+            $e_column = self::ALIAS_ENTITY."_".$column;
         else if($this->classMetadata->hasField($column))
-            $column = self::ALIAS_ENTITY.".".$column;
+            $e_column = self::ALIAS_ENTITY.".".$column;
 
-        $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy);
-        $this->innerJoin($qb, $column);
+        $qb = $this->getQueryBuilder($criteria, $orderBy, null, null, $groupBy);
+        if($this->classMetadata->hasAssociation($column))
+            $this->innerJoin($qb, $column);
 
-        $qb->select('COUNT('.trim($mode.' '.$column).') AS count');
-
-        $this->selectAs($qb, $selectAs);
-        $this->orderBy ($qb, $orderBy);
-        $this->groupBy ($qb, $groupBy);
+        $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
 
         return $qb->getQuery();
     }
 
-    protected function getQueryWithLength(array $selectAs = [], array $criteria = [], $orderBy = null, $groupBy = null, $limit = null, $offset = null)
+    protected function getQueryWithLength(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = [])
     {
         $column = $this->getAlias($this->getColumn());
         if($this->classMetadata->hasAssociation($column))
@@ -1265,14 +1296,10 @@ class ServiceEntityParser
         else if($this->classMetadata->hasField($column))
             $column = self::ALIAS_ENTITY.".".$column;
 
-        $qb = $this->getQueryBuilder($criteria, $orderBy, $groupBy, $limit, $offset);
+        $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy);
         $this->innerJoin($qb, $column);
 
         $qb->select("LENGTH(".self::ALIAS_ENTITY.".".$column.") as length");
-
-        $this->selectAs($qb, $selectAs);
-        $this->orderBy ($qb, $orderBy);
-        $this->groupBy ($qb, $groupBy);
 
         return $qb->getQuery();
     }
@@ -1301,7 +1328,7 @@ class ServiceEntityParser
 
             $alias = str_replace(".", "_", $column);
 
-            $column = implode(".", array_map(fn ($c) => $this->getAlias($c), explode(".", $c)));
+            $column = implode(".", array_map(fn ($c) => $this->getAlias($c), explode(".", $column)));
             $columnHead = explode(".", $column)[0] ?? $column;
 
             if($this->classMetadata->hasAssociation($columnHead))

@@ -6,14 +6,14 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-use App\Entity\Thread\Taxon;
+use Base\Database\Annotation\ColumnAlias;
+use Base\Entity\Thread\Taxon;
 
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Validator\Constraints as AssertBase;
-use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
@@ -39,6 +39,8 @@ use Base\Repository\ThreadRepository;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * 
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
@@ -93,6 +95,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     /**
      * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
      * @ORM\JoinColumn(onDelete="SET NULL")
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $parent;
     public function getParent(): ?self { return $this->parent; }
@@ -107,6 +110,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
+     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $children;
     public function getChildren(): Collection { return $this->children; }
@@ -275,12 +279,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
         return $this;
     }
-
     public function removeTaxon($taxon): self
     {
         $this->taxa->removeElement($taxon);
         return $this;
     }
+
+    /**
+     * @ColumnAlias(column="taxa")
+     */
+    protected $taxons;
+    public function getTaxons(): Collection { return $this->taxons; }
 
     /**
      * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})

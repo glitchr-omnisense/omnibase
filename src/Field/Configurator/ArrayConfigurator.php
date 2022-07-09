@@ -3,7 +3,6 @@
 namespace Base\Field\Configurator;
 
 use Base\Field\ArrayField;
-use Base\Traits\BaseTrait;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
@@ -19,8 +18,6 @@ use function Symfony\Component\String\u;
 
 class ArrayConfigurator implements FieldConfiguratorInterface
 {
-    use BaseTrait;
-
     public function supports(FieldDto $field, EntityDto $entityDto): bool
     {
         return ArrayField::class === $field->getFieldFqcn();
@@ -44,7 +41,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
 
         // TODO: check why this label (hidden by default) is not working properly
         // (generated values are always the same for all elements)
-        $field->setFormTypeOptionIfNotSet('entry_options.label', $field->getCustomOptions()->get(ArrayField::OPTION_SHOW_ENTRY_LABEL));
+        // $field->setFormTypeOptionIfNotSet('entry_options.label', $field->getCustomOptions()->get(ArrayField::OPTION_SHOW_ENTRY_LABEL));
 
         // collection items range from a simple <input text> to a complex multi-field form
         // the 'entryIsComplex' setting tells if the collection item is so complex that needs a special
@@ -67,7 +64,7 @@ class ArrayConfigurator implements FieldConfiguratorInterface
             }
 
             $formattedValue = $this->resolve($entity, ...PropertyAccess::createPropertyAccessor()->getValue($entityDto->getInstance(), $field->getProperty()));
-            $field->setFormattedValue(is_url($this->sanitize($formattedValue)) ? "<a href='".$this->sanitize($formattedValue)."'>".$formattedValue."</a>" : $formattedValue);
+            $field->setFormattedValue(is_url(sanitize_url($formattedValue)) ? "<a href='".sanitize_url($formattedValue)."'>".$formattedValue."</a>" : $formattedValue);
 
         } else {
 
@@ -87,17 +84,6 @@ class ArrayConfigurator implements FieldConfiguratorInterface
         return rtrim(preg_match('/\{[0-9]*\}/', $url) ? null : $url, "/");
     }
 
-    public function sanitize(?string $url): ?string
-    {
-        if(!$url) return null;
-
-        $parseUrl = parse_url($url);
-        $parseUrl["scheme"] = $parseUrl["scheme"] ?? $this->getSettingBag()->scheme();
-        $parseUrl["domain"] = $parseUrl["domain"] ?? $this->getSettingBag()->domain();
-        $parseUrl["path"]   = $this->getService()->getAsset($parseUrl["path"] ?? "");
-
-        return $parseUrl["scheme"] . "://" . $parseUrl["domain"] . $parseUrl["path"];
-    }
     private function formatCollection(FieldDto $field, AdminContext $context)
     {
         return $this->countNumElements($field->getValue());

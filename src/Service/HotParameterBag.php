@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-class HotParameterBag extends ParameterBag implements ParameterBagInterface
+class HotParameterBag extends ParameterBag implements HotParameterBagInterface
 {
     protected $hotBag = [];
     public function add(array $parameters)

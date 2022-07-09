@@ -158,6 +158,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         if($persistentCollection === null) return false;
 
         $dirtyCollection = [
+            "\x00*\x00initialized" => false,
             "\x00Doctrine\ORM\PersistentCollection\x00snapshot" => [],
             "\x00Doctrine\ORM\PersistentCollection\x00owner" => null,
             "\x00Doctrine\ORM\PersistentCollection\x00association" => null,
@@ -165,7 +166,6 @@ class IntegritySubscriber implements EventSubscriberInterface
             "\x00Doctrine\ORM\PersistentCollection\x00backRefFieldName" => null,
             "\x00Doctrine\ORM\PersistentCollection\x00typeClass" => null,
             "\x00Doctrine\ORM\PersistentCollection\x00isDirty" => false,
-            "\x00*\x00initialized" => false
         ];
 
         return array_intersect_key($persistentCollection, $dirtyCollection) !== $dirtyCollection;

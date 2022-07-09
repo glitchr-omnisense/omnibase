@@ -1,36 +1,17 @@
 {% extends 'layout1.html.twig' %}
 
 {% block content %}
-    <div class="container text-center">
-        <h2>{{ '@controllers.maintenance.title' | trans }}</h2><br/>
-        <p>
-            {{ '@controllers.maintenance.description' | trans({
-                downtime,
-                0:downtime|datetime("EEEE dd MMMM YYYY"),
-                1:downtime|datetime("hh:mm:ss")
-                })
-            }}
-
-            {% if remainingTime > 0 %} <br/> {% endif %}
-            {{ '@controllers.maintenance.estimate' | trans({
-                    uptime,
-                    0: '@controllers.maintenance.days'|trans([remainingTime|date("d")]),
-                    1: '@controllers.maintenance.hours'|trans([remainingTime|date("H")]),
-                    2: '@controllers.maintenance.minutes'|trans([remainingTime|date("i")])
-                })
-            }}
-
-        </p>
-
+<div class="container text-center">
+        <h1>{{ '@controllers.security_maintenance.title' | trans }}</h1><br/>
+        <p>{{ '@controllers.security_maintenance.description'|trans }}</p>
         {% if percentage >= 0 %}
-        <br />
-        <div class="progress"style="height: 25px;">
+        <br/><hr>
+        <br/><div class="progress"style="height: 25px;">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
                 style="width:{{percentage}}%;">
             </div>
         </div><br/>
-        <h4>{{ '@controllers.maintenance.progress' | trans([percentage]) }}</h4>
+        <h4>{{ '@controllers.security_maintenance.progress' | trans([percentage]) }}</h4>
         {% endif %}
-    </div>
-
+</div>
 {% endblock %}

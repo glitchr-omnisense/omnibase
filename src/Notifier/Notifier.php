@@ -11,6 +11,7 @@ use Base\Service\BaseService;
 use Base\Service\SettingBag;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
+use Doctrine\DBAL\Exception\DriverException;
 use Doctrine\DBAL\Exception\InvalidFieldNameException;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Doctrine\ORM\EntityManager;
@@ -78,27 +79,30 @@ class Notifier implements NotifierInterface
         $item = $this->cache->getItem("base.notifier.admin_users[".$this->adminRole."]");
         if($item->get() !== null) return $item->get();
 
-        $userRepository = $this->entityManager->getRepository(User::class);
-        try { $adminUsers = $userRepository->findByRoles($this->adminRole); }
-        catch(InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
+        try {
 
-        $this->cache->save($item->set($adminUsers));
+            $userRepository = $this->entityManager->getRepository(User::class);
+            $adminUsers = $userRepository->findByRoles($this->adminRole);
+	    if(!is_cli()) $this->cache->save($item->set($adminUsers));
+
+        } catch(DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
+
         return $adminUsers;
     }
 
     /**
      * @var Recipient
      */
-    protected Recipient $technicalRecipient;
+    protected ?Recipient $technicalRecipient;
 
-    public function getTechnicalRecipient(): Recipient { return $this->technicalRecipient; }
+    public function getTechnicalRecipient(): ?Recipient { return $this->technicalRecipient; }
     protected function getTechnicalSupport(): ?string
     {
-        $mail = $this->settingBag->mail();
-        if(!$mail) $mail = $this->technicalRecipient->getEmail();
+        $mail = $this->settingBag->getScalar("base.settings.mail");
+        if(!$mail && $this->technicalRecipient) $mail = $this->technicalRecipient->getEmail();
         if(!$mail) return null;
 
-        $mailName = $this->settingBag->mail_name() ?? mb_ucfirst(explode("@", $mail)[0]);
+        $mailName = $this->settingBag->getScalar("base.settings.mail.name") ?? mb_ucfirst(explode("@", $mail)[0]);
         return $mailName." <".$mail.">";
     }
 
@@ -138,10 +142,10 @@ class Notifier implements NotifierInterface
         $this->cache         = $cache;
 
         $this->adminRole          = $parameterBag->get("base.notifier.admin_role");
-        $this->options            = $parameterBag->get("base.notifier.options");
+        $this->options            = $parameterBag->get("base.notifier.options") ?? [];
 
         $this->testRecipients     = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
-        $this->technicalRecipient = new Recipient($parameterBag->get("base.notifier.technical_support"));
+        $this->technicalRecipient = $parameterBag->get("base.notifier.technical_support") ? new Recipient($parameterBag->get("base.notifier.technical_support")) : null;
 
         $this->entityManager  = $entityManager;
         $this->settingBag     = $settingBag;
@@ -150,7 +154,7 @@ class Notifier implements NotifierInterface
 
         // Address support only once..
         $adminRecipients = [];
-        $adminRecipients[] = $this->technicalRecipient;
+        if($this->technicalRecipient) $adminRecipients[] = $this->technicalRecipient;
         foreach ($this->getAdminUsers() as $adminUser)
             $adminRecipients[] = $adminUser->getRecipient();
 
