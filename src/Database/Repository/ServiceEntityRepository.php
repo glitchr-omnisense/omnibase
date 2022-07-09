@@ -39,9 +39,10 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
     public function find     ($id, $lockMode = null, $lockVersion = null):?object { return $this->findOneById($id, $lockMode, $lockVersion); }
     public function findAll  (                                                                      ):array { return $this->__call(__METHOD__, [])->getResult(); }
-    public function findBy   (array $criteria, ?array $orderBy = null, $limit = null, $offset = null):array { return $this->__call(__METHOD__, [[], $criteria, $orderBy, $limit, $offset])->getResult(); }
+    public function findBy   (array $criteria, ?array $orderBy = null, $limit = null, $offset = null):array { return $this->__call(__METHOD__, [[], $criteria, $orderBy, [], $limit, $offset])->getResult(); }
     public function findOneBy(array $criteria, ?array $orderBy = null):?object { return $this->__call(__METHOD__, [[], $criteria, $orderBy]); }
     public function count    (array $criteria):int { return $this->__call(__METHOD__, [[], $criteria]); }
+    public function countAll ():int { return $this->__call(__METHOD__, []); }
 
     public function flush($entity = null)
     {

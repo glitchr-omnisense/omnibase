@@ -5,13 +5,9 @@ namespace Base\Field;
 use Base\Enum\ThreadState;
 use Base\Field\Type\StateType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
-use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
-use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 
-class StateField extends SelectField implements FieldInterface
+class StateField extends SelectField
 {
-    use FieldTrait;
-
     public const OPTION_CLASS = 'class';
 
     public static function new(string $propertyName, ?string $label = null): self

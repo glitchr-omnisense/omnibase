@@ -6,14 +6,14 @@ use App\Entity\User;
 use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
-use App\Entity\Thread\Taxon;
+use Base\Database\Annotation\ColumnAlias;
+use Base\Entity\Thread\Taxon;
 
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 use Base\Validator\Constraints as AssertBase;
-use Symfony\Component\Validator\Constraints as Assert;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\GenerateUuid;
@@ -275,12 +275,17 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
         return $this;
     }
-
     public function removeTaxon($taxon): self
     {
         $this->taxa->removeElement($taxon);
         return $this;
     }
+
+    /**
+     * @ColumnAlias(column="taxa")
+     */
+    protected $taxons;
+    public function getTaxons(): Collection { return $this->taxons; }
 
     /**
      * @ORM\OneToMany(targetEntity=Mention::class, mappedBy="thread", orphanRemoval=true, cascade={"persist"})

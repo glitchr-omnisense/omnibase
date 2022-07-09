@@ -114,10 +114,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     public function getRecipient(): Recipient
     {
-        $email = $this->getUserIdentifier() . " <".$this->getEmail().">";
+        $email  = $this->getUserIdentifier() . " <".$this->getEmail().">";
+        $phone  = $this->getPhone() ?? '';
         $locale = $this->getLocale();
 
-        return new Recipient($email, '', $locale);
+        return new Recipient($email, $phone, $locale);
     }
 
     public static function getCookie(string $key = null)
@@ -190,6 +191,17 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     {
         $this->email = $email;
 
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=15, nullable=true)
+     */
+    protected $phone;
+    public function getPhone(): ?string { return $this->phone; }
+    public function setPhone(?string $phone): self
+    {
+        $this->phone = $phone;
         return $this;
     }
 

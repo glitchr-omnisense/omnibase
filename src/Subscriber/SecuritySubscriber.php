@@ -79,8 +79,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class    => [
-                ['onAccessRequest', 6], 
-                ['onReferrerRequest', 5], ['onKernelRequest', 5], 
+                ['onAccessRequest', 6],
+                ['onReferrerRequest', 5], ['onKernelRequest', 5],
             ],
 
             ResponseEvent::class   => ['onKernelResponse'],
@@ -149,7 +149,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-        
+
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 

@@ -321,6 +321,18 @@ namespace {
         return $data;
     }
 
+    function make_pair(array|string $values): array|false {
+
+        if(count($values)%2 != 0) return false;
+
+        $pairs = [];
+        for($i = 0, $N = count($values)/2; $i < $N; $i++)
+            $pairs[$values[$i]] = $values[$i+1];
+
+        return $pairs;
+    }
+
+    function at(array $array, int $index) { return $array[$index] ?? null; }
     function is_tmpfile(string $fname):bool { return belongs_to($fname, sys_get_temp_dir()); }
     function unlink_tmpfile(string $fname):bool { return is_tmpfile($fname) && file_exists($fname) ? unlink($fname) : false; }
     function belongs_to(string $fname, string $base):bool
