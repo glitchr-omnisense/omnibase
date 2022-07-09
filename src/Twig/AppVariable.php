@@ -2,12 +2,8 @@
 
 namespace Base\Twig;
 
-use Base\Routing\RouterInterface;
-use Base\Service\BaseService;
 use Base\Service\ReferrerInterface;
 use Base\Service\LocaleProvider;
-use Base\Service\MaintenanceProviderInterface;
-use Base\Service\MaternityServiceInterface;
 use Base\Service\SettingBag;
 use Base\Service\ParameterBagInterface;
 use Base\Traits\ProxyTrait;
@@ -15,8 +11,6 @@ use Base\Twig\Variable\BackofficeVariable;
 use Base\Twig\Variable\EasyAdminVariable;
 use Base\Twig\Variable\RandomVariable;
 use Base\Twig\Variable\SiteVariable;
-use DateTime;
-use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Twig\Environment;
 
 class AppVariable
@@ -46,7 +40,7 @@ class AppVariable
 
     public function __construct(
         \Symfony\Bridge\Twig\AppVariable $appVariable, EasyAdminVariable $ea, RandomVariable $random, SiteVariable $site, BackofficeVariable $backoffice,
-        SettingBag $settingBag, ParameterBagInterface $parameterBag, 
+        SettingBag $settingBag, ParameterBagInterface $parameterBag,
         ReferrerInterface $referrer, Environment $twig, LocaleProvider $localeProvider)
     {
         $this->settingBag     = $settingBag;
@@ -54,12 +48,12 @@ class AppVariable
         $this->twig           = $twig;
         $this->parameterBag   = $parameterBag;
         $this->localeProvider = $localeProvider;
-        
-        $this->backoffice = $backoffice; 
+
+        $this->backoffice = $backoffice;
         $this->random     = $random;
-        $this->site       = $site; 
-        $this->ea         = $ea; 
-    
+        $this->site       = $site;
+        $this->ea         = $ea;
+
         $this->setProxy($appVariable);
     }
 
@@ -77,7 +71,8 @@ class AppVariable
 
     public function locale()  {
         return [
-            "lang" => $this->localeProvider->getLang(),
+            "_self"  => $this->localeProvider->getLocale(),
+            "lang"    => $this->localeProvider->getLang(),
             "country" => $this->localeProvider->getCountry()
         ];
     }
