@@ -23,7 +23,6 @@ class SiteVariable
     }
 
     public function homepage() { return $this->baseService->getHomepage(); }
-
     public function meta     (array $meta = [], ?string $locale = null) : array
     {
         $locale ??= $this->localeProvider->getLocale();
@@ -47,5 +46,4 @@ class SiteVariable
     public function age(?string $locale = null) : string { return $this->maternityService->getAge($locale); }
 
     public function execution_time() { return $this->baseService->getExecutionTime(); }
-
 }

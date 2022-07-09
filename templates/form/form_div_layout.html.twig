@@ -39,6 +39,7 @@
             <a href="{{form.vars.href|urldecode|replace({'{0}': form.vars.value.id})}}" target='_blank'>
                 <i class="fas fa-external-link-square-alt"></i>
             </a>{% endif %}
+
             {{- form_help(form) -}}
         {% else %}
             <label>&nbsp;</label>
