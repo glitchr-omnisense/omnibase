@@ -96,7 +96,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // To be implemented if necessary... (currently relying on autocomplete..)
             //'query_builder'   => null,
-
+            "disable" => false,
             'choices'          => null,
             'choice_loader'    => null,
             'choice_filter'    => false,
@@ -662,6 +662,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $view->vars["select2"]          = json_encode($selectOpts);
             $view->vars["select2-href"]     = $href;
             $view->vars["tabulation"]       = $options["tabulation"];
+            $view->vars["disabled"]       = $options["disable"];
 
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
