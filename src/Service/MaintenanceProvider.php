@@ -27,7 +27,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->parameterBag = $parameterBag;
     }
 
-    protected string $lockPath;
+    protected ?string $lockPath = null;
     protected bool $ready = false;
     protected function parseLockPath(): self
     {
