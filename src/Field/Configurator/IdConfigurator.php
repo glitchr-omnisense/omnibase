@@ -40,7 +40,7 @@ class IdConfigurator implements FieldConfiguratorInterface
         // Check access rights and context to impersonate
         $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
         $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
-        
+
         $field->setCustomOption(IdField::OPTION_IMPERSONATE, $switchParameter);
         if(!$entityDto->getInstance() instanceof User || !$switchRole || !$this->authorizationChecker->isGranted($switchRole))
             $field->setCustomOption(IdField::OPTION_IMPERSONATE, false);

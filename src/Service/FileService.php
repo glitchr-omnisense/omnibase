@@ -208,12 +208,14 @@ class FileService implements FileServiceInterface
 
             if($attachment === true) {
 
-                if($mimeType && str_starts_with($mimeType, "image/")) $attachment = "image";
+                if($mimeType && str_starts_with($mimeType, "image/")) $attachment = "image".$extension;
                 else $attachment = "unnamed";
             }
 
             if($extension && !in_array($extension, $extensions))
-                $attachment = pathinfo_extension($attachment, $extensions[0]);
+                $extensions[] = $extension;
+
+            $attachment = pathinfo_extension($attachment, first($extensions));
 
             $response->headers->set('Content-Disposition', 'attachment; filename="'.basename($attachment).'"');
         }
