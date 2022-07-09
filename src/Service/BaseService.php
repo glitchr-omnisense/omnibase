@@ -152,6 +152,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setUserIdentifier($this->getParameterBag()->get("base.user.identifier"));
         $this->setTokenStorage($tokenStorage);
         $this->setNotifier($notifier);
+        $this->getBackoffice();
 
         // EA provider
         $this->adminContextProvider = new AdminContextProvider($requestStack);
@@ -167,7 +168,7 @@ class BaseService implements RuntimeExtensionInterface
         ];
     }
     public function getBackoffice() 
-    { 
+    {
         return [
             "title"  => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
             "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.backoffice"),

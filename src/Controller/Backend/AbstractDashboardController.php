@@ -260,7 +260,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->settingBag->getRawScalar($fields, false)
+                $this->settingBag->getRawScalar($fields)
             );
 
             foreach(array_diff_key($data, $settings) as $name => $setting)
@@ -276,7 +276,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             return $this->router->reloadRequest();
         }
 
-        $this->settingBag->clearAll();
         return $this->render('backoffice/settings.html.twig', [
             "form" => $form->createView()
         ]);

@@ -141,7 +141,7 @@ class SettingBag implements SettingBagInterface
         return array_filter($settings);
     }
 
-    public function getRaw(null|string|array $path = null, ?bool $useCache = true)
+    public function getRaw(null|string|array $path = null, bool $useCache = true)
     {
         if(is_array($paths = $path)) {
 
@@ -155,14 +155,16 @@ class SettingBag implements SettingBagInterface
         if(!$this->settingRepository) throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
         try {
 
-            $fn = $path ? (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
-                          (BaseBundle::CACHE && $useCache && !is_cli() ? "cacheAll" : "findAll");
+            $useCache &= BaseBundle::CACHE && !is_cli();
+            $fn = $path ? ($useCache ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
+                          ($useCache ? "cacheAll" : "findAll");
 
             $settings = $this->settingRepository->$fn($path);
             if ($settings instanceof Query)
                 $settings = $settings->getResult();
             
-        } catch(TableNotFoundException|EntityNotFoundException $e) { throw $e; }
+        } catch(TableNotFoundException  $e) { throw $e; }
+          catch(EntityNotFoundException $e) { return $useCache ? $this->getRaw($path, false) : []; } // Cache fallback
 
         $values = $this->normalize($path, $settings);
         $values = $this->read($path, $values); // get formatted values
@@ -170,7 +172,7 @@ class SettingBag implements SettingBagInterface
         return $values;
     }
 
-    public function generateRaw(string $path, ?string $locale = null, ?bool $useCache = false): Setting
+    public function generateRaw(string $path, ?string $locale = null, bool $useCache = false): Setting
     {
         $locale = $this->localeProvider->getLocale($locale);
         $setting = $this->getRawScalar($path, $useCache);
@@ -184,7 +186,7 @@ class SettingBag implements SettingBagInterface
         return $setting;
     }
 
-    public function getRawScalar(null|string|array $path = null, ?bool $useCache = true)
+    public function getRawScalar(null|string|array $path = null, bool $useCache = true)
     {
         if(is_array($paths = $path)) {
 
