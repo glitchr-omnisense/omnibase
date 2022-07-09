@@ -110,6 +110,28 @@ class Address implements IconizeInterface
     }
 
     /**
+     * @ORM\Column(type="string", length=15, nullable=true)
+     */
+    protected $phone;
+    public function getPhone(): ?string { return $this->phone; }
+    public function setPhone(?string $phone): self
+    {
+        $this->phone = $phone;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="string", length=15, nullable=true)
+     */
+    protected $fax;
+    public function getFax(): ?string { return $this->fax; }
+    public function setFax(?string $fax): self
+    {
+        $this->fax = $fax;
+        return $this;
+    }
+
+    /**
      * @ORM\Column(type="text", nullable=true)
      */
     private $additional;

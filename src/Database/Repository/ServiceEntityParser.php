@@ -5,7 +5,6 @@ namespace Base\Database\Repository;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\Layout\Setting;
 use Base\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
@@ -165,7 +164,6 @@ class ServiceEntityParser
 
     protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                array $selectAs = [])      { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
     protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, array $selectAs = [])      { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
-
     protected function __distinctCountBy (array $criteria = [],                                               ?array $groupBy = null,                                array $selectAs = []): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
     protected function __countBy         (array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null,                                array $selectAs = [])
     {
@@ -852,7 +850,6 @@ class ServiceEntityParser
 
     protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
     {
-
         $fieldID   = str_replace(".", "_", implode("_", $field));
         $fieldName = $this->getAlias($field[0]);
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
@@ -1056,28 +1053,57 @@ class ServiceEntityParser
 
                 $fieldID = self::ALIAS_ENTITY."_".$fieldID;
 
+                if($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
+
+                    // Cast to array
+                    $qb = $this->innerJoin($qb, $fieldHead);
+                    if (!is_array($fieldValue)) $fieldValue = ($fieldValue !== null)? [$fieldValue] : [];
+                    foreach ($fieldValue as $subFieldID => $subFieldValue)
+                        $qb->setParameter($fieldID."_".$subFieldID, $subFieldValue);
+
+                } else {
+
+                    if(!is_array($fieldValue)) {
+
+                        $qb = $this->innerJoin($qb, $fieldHead);
+                        $qb->setParameter($fieldID, $fieldValue);
+
+                    } else {
+
+                        $fieldValue = array_filter($fieldValue);
+                        if($fieldValue) {
+
+                            $qb = $this->innerJoin($qb, $fieldHead);
+                            $qb->setParameter($fieldID, $fieldValue);
+                        }
+                    }
+                }
+
+            } else if(!is_array($fieldValue)) {
+
                 $qb = $this->innerJoin($qb, $fieldHead);
                 $qb->setParameter($fieldID, $fieldValue);
 
             } else {
 
-                $qb->setParameter($fieldID, $fieldValue);
+                $fieldValue = array_filter($fieldValue);
+                if($fieldValue) {
+                    $qb = $this->innerJoin($qb, $fieldHead);
+                    $qb->setParameter($fieldID, $fieldValue);
+                }
             }
 
             if ($isInsensitive) $tableColumn = "LOWER(" . $tableColumn . ")";
-            if ($isPartial) {
+            if ($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
 
                 if($tableOperator != self::OPTION_EQUAL && $tableOperator != self::OPTION_NOT_EQUAL)
                     throw new Exception("Invalid operator for association field \"$fieldName\": ".$tableOperator);
 
-                // Cast to array
-                if (!is_array($fieldValue)) $fieldValue = $fieldValue !== null ? [$fieldValue] : [];
-
                 $expr = [];
-                foreach ($fieldValue as $_ => $_) {
+                foreach ($fieldValue as $subFieldID => $_) {
 
                     $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
-                    $expr[] = $qb->expr()->$fnExpr($tableColumn, ":$fieldID");
+                    $expr[] = $qb->expr()->$fnExpr($fieldID, ":${fieldID}_${subFieldID}");
                 }
 
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "orX" : "andX");
@@ -1089,7 +1115,7 @@ class ServiceEntityParser
                 else if($tableOperator == self::OPTION_NOT_EQUAL) $tableOperator = "NOT IN";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return "${tableColumn} ${tableOperator} (:${fieldID})";
+                return !empty($fieldValue) ? "${tableColumn} ${tableOperator} (:${fieldID})" : null;
 
             } else if($regexRequested) {
 
@@ -1106,7 +1132,7 @@ class ServiceEntityParser
 
             } else {
 
-                    if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
+                     if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
                 else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
                 else if($tableOperator == self::OPTION_GREATER)       $tableOperator = ">";
                 else if($tableOperator == self::OPTION_GREATER_EQUAL) $tableOperator = ">=";
@@ -1162,6 +1188,7 @@ class ServiceEntityParser
                     array_unshift($newField, $entryID);
 
                     $queryExpr = $this->buildQueryExpr($qb, $newField, $entryValue);
+                    if($queryExpr == null) continue;
 
                     // In case of association field, compare value directly
                     if ($this->classMetadata->hasAssociation($entryID)) $qb->andWhere($queryExpr);
@@ -1175,6 +1202,7 @@ class ServiceEntityParser
 
                 // Default query builder
                 $expr = $this->buildQueryExpr($qb, $field, $fieldValue);
+                if($expr == null) continue;
 
                 // Custom process in case of closest/farest
                 $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
@@ -1252,14 +1280,10 @@ class ServiceEntityParser
             $e_column = self::ALIAS_ENTITY.".".$column;
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, null, null, $groupBy);
-        if($this->classMetadata->hasAssociation($column)) 
+        if($this->classMetadata->hasAssociation($column))
             $this->innerJoin($qb, $column);
 
         $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
-
-        $this->selectAs($qb, $selectAs);
-        $this->orderBy ($qb, $orderBy);
-        $this->groupBy ($qb, $groupBy);
 
         return $qb->getQuery();
     }
@@ -1276,10 +1300,6 @@ class ServiceEntityParser
         $this->innerJoin($qb, $column);
 
         $qb->select("LENGTH(".self::ALIAS_ENTITY.".".$column.") as length");
-
-        $this->selectAs($qb, $selectAs);
-        $this->orderBy ($qb, $orderBy);
-        $this->groupBy ($qb, $groupBy);
 
         return $qb->getQuery();
     }

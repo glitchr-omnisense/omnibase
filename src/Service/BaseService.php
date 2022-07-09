@@ -115,7 +115,7 @@ class BaseService implements RuntimeExtensionInterface
         IconProvider $iconProvider,
 
         TranslatorInterface $translator,
-        RouterInterface $router, 
+        RouterInterface $router,
 
         EntityHydratorInterface $entityHydrator,
         ClassMetadataManipulator $classMetadataManipulator)
@@ -152,33 +152,32 @@ class BaseService implements RuntimeExtensionInterface
         $this->setUserIdentifier($this->getParameterBag()->get("base.user.identifier"));
         $this->setTokenStorage($tokenStorage);
         $this->setNotifier($notifier);
-        $this->getBackoffice();
 
         // EA provider
         $this->adminContextProvider = new AdminContextProvider($requestStack);
     }
 
     public function getHomepage()  { return $this->getParameterBag()->get("base.site.homepage") ?? $this->getRouter()->getRoute("/"); }
-    public function getSite() 
-    { 
+    public function getSite()
+    {
         return [
             "title"  => $this->getSettingBag()->getScalar("base.settings.title"),
             "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan"),
             "logo"   => $this->getSettingBag()->getScalar("base.settings.logo")
         ];
     }
-    public function getBackoffice() 
+    public function getBackoffice()
     {
         return [
             "title"  => $this->getSettingBag()->getScalar("base.settings.title.backoffice"),
             "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.backoffice"),
             "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
-        ]; 
+        ];
     }
-    
-    public function getMeta(?string $locale = null): array 
-    { 
-        return $this->getSettingBag()->get("base.settings.meta", $locale) ?? []; 
+
+    public function getMeta(?string $locale = null): array
+    {
+        return $this->getSettingBag()->get("base.settings.meta", $locale) ?? [];
     }
 
 

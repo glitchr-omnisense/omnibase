@@ -500,6 +500,7 @@
             <tag name="twig.runtime" />
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.service.maintenance" />
             <argument type="service" id="base.service.maternity" />
@@ -510,7 +511,7 @@
             <tag name="twig.variable" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
-        
+
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />

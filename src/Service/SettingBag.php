@@ -162,7 +162,7 @@ class SettingBag implements SettingBagInterface
             $settings = $this->settingRepository->$fn($path);
             if ($settings instanceof Query)
                 $settings = $settings->getResult();
-            
+
         } catch(TableNotFoundException  $e) { throw $e; }
           catch(EntityNotFoundException $e) { return $useCache ? $this->getRaw($path, false) : []; } // Cache fallback
 
@@ -243,7 +243,7 @@ class SettingBag implements SettingBagInterface
     public function clear(null|string|array $path, ?string $locale = null)
     {
         if(is_array($paths = $path)) {
-        
+
             foreach($paths as $path)
                 $this->clear($path, $locale);
 

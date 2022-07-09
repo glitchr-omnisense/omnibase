@@ -93,8 +93,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class    => [
-                ['onMaintenanceRequest', 6], ['onBirthRequest', 6], ['onAccessRequest', 6], 
-                ['onReferrerRequest', 5], ['onKernelRequest', 5], 
+                ['onMaintenanceRequest', 6], ['onBirthRequest', 6], ['onAccessRequest', 6],
+                ['onReferrerRequest', 5], ['onKernelRequest', 5],
             ],
 
             ResponseEvent::class   => ['onKernelResponse'],

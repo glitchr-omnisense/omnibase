@@ -348,9 +348,8 @@ class Translator implements TranslatorInterface
         $property = $property ? ".".$property : "";
 
         return $this->transPermExists($entityOrClassName.camel2snake($property), $options, self::DOMAIN_ENTITY);
-
     }
-    
+
     public function time(int $time): string
     {
         if($time > 0) {

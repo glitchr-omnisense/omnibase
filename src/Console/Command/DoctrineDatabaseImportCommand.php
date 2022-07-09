@@ -157,7 +157,6 @@ class DoctrineDatabaseImportCommand extends Command
         $this->addOption('entries',     null, InputOption::VALUE_OPTIONAL, 'Only read N-rows', null);
         $this->addOption('skip',        null, InputOption::VALUE_OPTIONAL, 'Skip i-entries', 0);
         $this->addOption('batch',       null, InputOption::VALUE_OPTIONAL, 'Persist by batch of X entries.', 25);
-        $this->addOption('show',        null, InputOption::VALUE_NONE, 'Show all details');
         $this->addOption('notify',      null, InputOption::VALUE_NONE, 'Send notification if needed');
         $this->addOption('force',       null, InputOption::VALUE_NONE, 'Import without asking confirmation.');
         $this->addOption('on-the-fly',      null, InputOption::VALUE_NONE, 'Import right after each single entity got hydrated');
@@ -172,7 +171,6 @@ class DoctrineDatabaseImportCommand extends Command
         $notify       = $input->getOption("notify");
         if(!$notify) $this->notifier->disable();
 
-        $show         = $input->getOption("show");
         $force        = $input->getOption("force");
         $extension    = $input->getOption("extension");
         $batch        = $input->getOption("batch");
@@ -415,13 +413,28 @@ class DoctrineDatabaseImportCommand extends Command
                                             else {
 
                                                 $vBak = $v;
-                                                if($isToOneSide) $v = $targetRepository->findOneBy($vBak);
-                                                else $v = array_filter(array_map(function($e) use ($targetName, $targetRepository, $iEntry) {
+                                                if($isToOneSide) {
+
+                                                    $v = $targetRepository->findBy($vBak);
+                                                    if(count($v) > 1)
+                                                        throw new Exception("Failed to parse \"".$targetName."\";\nduplicate entity returned with \"".$fieldName."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+
+                                                    $v = first($v);
+
+                                                } else $v = array_filter(array_map(function($e) use ($fieldName, $targetName, $targetRepository, $iEntry) {
 
                                                     if(!is_array($e))
-                                                        throw new Exception("Failed to find parse \"".$targetName."\" unexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ?)");
+                                                        throw new Exception("Failed to parse \"".$targetName."\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
 
-                                                    return $targetRepository->findOneBy($e);
+                                                    $e = array_filter($e);
+                                                    if(empty($e))
+                                                        throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\nunexpected value \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+
+                                                    $findBy = $targetRepository->findBy($e);
+                                                    if(empty($findBy))
+                                                        throw new Exception("Failed to find entity for \"".$targetName."::$fieldName\";\ninput was \"".serialize($e)."\" for entry #".($iEntry+self::OFFSET_TOP+1)."\n(did you forgot to explode the input string ? double check case ?)");
+
+                                                    return first($findBy);
 
                                                 }, $vBak));
 
@@ -580,40 +593,37 @@ class DoctrineDatabaseImportCommand extends Command
 
         }, array_keys(array_filter($entityData)))));
 
-        if($show) {
+        foreach($entityData as $spreadsheet => $___) {
+            foreach($___ as $baseName => $__) {
 
-            foreach($entityData as $spreadsheet => $___) {
-                foreach($___ as $baseName => $__) {
+                $baseNameStr = $this->translator->entity($baseName);
 
-                    $baseNameStr = $this->translator->entity($baseName);
+                $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName", OutputInterface::VERBOSITY_VERBOSE);
 
-                    $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName");
+                $totalEntries = count($entities[$spreadsheet][$baseName]);
+                foreach($entities[$spreadsheet][$baseName] ?? [] as $i => $entity) {
 
-                    $totalEntries = count($entities[$spreadsheet][$baseName]);
-                    foreach($entities[$spreadsheet][$baseName] ?? [] as $i => $entity) {
+                    $state = $entityStates[$spreadsheet][$baseName][$i] ?? self::UNKNOWN_STATE;
+                    $spacer = str_blankspace(strlen($totalEntries) - strlen($i+1));
+                    $entityStr = $this->translator->entity($entity);
 
-                        $state = $entityStates[$spreadsheet][$baseName][$i] ?? self::UNKNOWN_STATE;
-                        $spacer = str_blankspace(strlen($totalEntries) - strlen($i+1));
-                        $entityStr = $this->translator->entity($entity);
+                    switch($state) {
 
-                        switch($state) {
+                        case self::VALID_ENTITY :
+                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onTheFly ? " just got imported on the fly" : "is ready for import")." !", OutputInterface::VERBOSITY_VERBOSE);
+                            break;
 
-                            case self::VALID_ENTITY :
-                                $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <ln>".$entityStr.": </ln><info>\"". $entity."\"</info> ".($onTheFly ? " just got imported on the fly" : "is ready for import")." !");
-                                break;
+                        case self::ALREADY_IN_DATABASE:
+                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <warning>".$entityStr.": </warning> \"". $entity."\" already exists in database", OutputInterface::VERBOSITY_VERBOSE);
+                            break;
 
-                            case self::ALREADY_IN_DATABASE:
-                                $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <warning>".$entityStr.": </warning> \"". $entity."\" already exists in database");
-                                break;
+                        default :
 
-                            default :
+                            if($state == self::FIELD_REQUIRED) $msg = "required field missing";
+                            else if($state == self::PARENT_NOT_FOUND) $msg = "parent not found";
+                            else $msg = "unknown reason";
 
-                                if($state == self::FIELD_REQUIRED) $msg = "required field missing";
-                                else if($state == self::PARENT_NOT_FOUND) $msg = "parent not found";
-                                else $msg = "unknown reason";
-
-                                $output->writeln("\t".$baseNameStr." #".($i+1).$spacer." / <red>".$entityStr.": </red>\"". $entity."\" is invalid  <warning>(hint:\"".$msg."\")</warning> and cannot be imported");
-                        }
+                            $output->writeln("\t".$baseNameStr." #".($i+$skip+1).$spacer." / <red>".$entityStr.": </red>\"". $entity."\" is invalid  <warning>(hint:\"".$msg."\")</warning> and cannot be imported");
                     }
                 }
             }
@@ -643,7 +653,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $output->writeln(' <info>Do you want to import these entries into the database ? (yes/no)</info> [<warning>no</warning>]: ');
                 $apply = $helper->ask($input, $output, $question);
 
-                if(strtolower($apply) != "y" && strtolower($apply) != "yes")
+                if($apply === null || (strtolower($apply) != "y" && strtolower($apply) != "yes"))
                     return Command::FAILURE;
             }
 
