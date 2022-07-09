@@ -384,7 +384,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach($values as $role)  {
 
-                    $label = mb_ucfirst($this->translator->enum($role, $class, Translator::NOUN_PLURAL));
+                    $label = mb_ucfirst($this->translator->enum($class, $role, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
                     $url = $this->adminUrlGenerator
