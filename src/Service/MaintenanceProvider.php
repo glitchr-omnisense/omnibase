@@ -34,8 +34,6 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         if($this->lockPath) return $this;
         $this->lockPath = $this->parameterBag->get("base.maintenance.lockpath");
 
-        $this->parseLockPath();
-
         if ( $this->lockPath && ($f = @fopen($this->lockPath, "r")) ) {
 
             $downtime = trim(fgets($f, 4096));
