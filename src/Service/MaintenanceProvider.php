@@ -27,14 +27,12 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->parameterBag = $parameterBag;
     }
 
-    protected string $lockPath;
+    protected ?string $lockPath = null;
     protected bool $ready = false;
     protected function parseLockPath(): self
     {
         if($this->lockPath) return $this;
         $this->lockPath = $this->parameterBag->get("base.maintenance.lockpath");
-
-        $this->parseLockPath();
 
         if ( $this->lockPath && ($f = @fopen($this->lockPath, "r")) ) {
 

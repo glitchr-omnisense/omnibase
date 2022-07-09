@@ -34,7 +34,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         if(!BaseBundle::hasDoctrine()) return [];
-        return [ KernelEvents::REQUEST  => [['onUserRequest', 1], ['onGoogleAnalyticsRequest']] ];
+        return [ KernelEvents::REQUEST  => [['onUserRequest', 8], ['onGoogleAnalyticsRequest', 7]] ];
     }
 
     public function onUserRequest(RequestEvent $event)
@@ -51,18 +51,18 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
-        $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
+        $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),
         ]));
 
         if(count($onlineUsers)) {
 
-            $this->twig->addGlobal("app.user_manager", [
+            $this->twig->addGlobal("base.user_manager", [
                 "online" => $onlineUsers,
                 "active" => $activeUsers,
             ]);
 
-            $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
+            $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
                 "default" => [
                     "active" => [
                         "label" => $this->translator->trans("@messages.user_analytics.active_users", [count($activeUsers)]),
@@ -119,7 +119,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
                 ]
             ]);
 
-            $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
+            $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
                 "google" => $entries
             ]));
         }

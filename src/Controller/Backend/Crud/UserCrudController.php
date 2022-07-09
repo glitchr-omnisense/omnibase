@@ -2,6 +2,7 @@
 
 namespace Base\Controller\Backend\Crud;
 
+use App\Entity\User;
 use Base\Backend\Config\Extension;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\AvatarField;
@@ -12,15 +13,13 @@ use Base\Field\BooleanField;
 
 use Base\Field\EmailField;
 use Base\Service\Translator;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Actions;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
-use EasyCorp\Bundle\EasyAdminBundle\Dto\BatchActionDto;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FormField;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
-class UserCrudController extends AbstractCrudController
+class UserCrudController extends UserActionCrudController
 {
     public static function getPreferredIcon(): ?string { return null; }
 
@@ -38,9 +37,16 @@ class UserCrudController extends AbstractCrudController
             $entityLabel   = $entityLabel ? mb_ucwords($entityLabel) : "";
 
             $impersonate = null;
-            if($this->isGranted("ROLE_EDITOR") && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
-                $impersonate = $entity->getUserIdentifier();
-                $impersonate = '<a class="impersonate" href="'.$this->getContext()->getRequest()->getRequestUri().'&_switch_user='.$impersonate.'"><i class="fa fa-fw fa-user-secret"></i></a>';
+
+            $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
+            $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
+
+            $impersonate = null;
+            if($switchRole && $this->isGranted($switchRole) && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+
+                $propertyAccessor =  PropertyAccess::createPropertyAccessor();
+                if($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__))
+                    $impersonate = '<a class="impersonate" href="?'.$switchParameter.'='.$propertyAccessor->getValue($entity, User::__DEFAULT_IDENTIFIER__).'"><i class="fa fa-fw fa-user-secret"></i></a>';
             }
 
             if($this->getCrud()->getAsDto()->getCurrentAction() == "new") $extension->setTitle($entityLabel);
@@ -54,6 +60,7 @@ class UserCrudController extends AbstractCrudController
     }
 
     public function configureFilters(Filters $filters): Filters { return $filters->add('roles'); }
+
     public function configureFields(string $pageName, ...$args): iterable
     {
         return parent::configureFields($pageName, function() {
@@ -76,27 +83,4 @@ class UserCrudController extends AbstractCrudController
         }, $args);
     }
 
-    public function configureActions(Actions $actions): Actions
-    {
-        $approveUser = Action::new('approve', 'Approve', 'fa fa-user-check')
-            ->linkToCrudAction('approveUsers')
-            ->addCssClass('btn btn-primary');
-
-        return parent::configureActions($actions)
-
-            ->addBatchAction($approveUser)
-            ->setPermission($approveUser, 'ROLE_EDITOR');
-    }
-
-    public function approveUsers(BatchActionDto $batchActionDto)
-    {
-        foreach ($batchActionDto->getEntityIds() as $id) {
-            $user = $this->entityManager->find($batchActionDto->getEntityFqcn(), $id);
-            $user->approve();
-
-            $this->entityManager->flush($user);
-        }
-
-        return $this->redirect($batchActionDto->getReferrerUrl());
-    }
 }

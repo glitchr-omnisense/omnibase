@@ -16,7 +16,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 use Base\Controller\Backend\AbstractCrudController;
+use Base\Entity\User\Notification;
 use Base\Routing\RouterInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Event\AfterEntityUpdatedEvent;
 
 class EasyAdminSubscriber implements EventSubscriberInterface
 {
@@ -32,8 +34,15 @@ class EasyAdminSubscriber implements EventSubscriberInterface
     {
         return [
             KernelEvents::REQUEST  => [['onKernelRequest']],
-            KernelEvents::EXCEPTION => ['onKernelException']
+            KernelEvents::EXCEPTION => ['onKernelException'],
+            AfterEntityUpdatedEvent::class => ['postEntityUpdate']
         ];
+    }
+
+    public function postEntityUpdate($entity)
+    {
+        $notification = new Notification("backoffice.update");
+        $notification->send("success");
     }
 
     protected function getUrl(Request $request)

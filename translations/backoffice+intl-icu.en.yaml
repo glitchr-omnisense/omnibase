@@ -18,6 +18,10 @@ crud:
       placeholder: "{0} or /go/to/route"
 
 action:
+  batch_approve: "Approve"
+  batch_publish: "Publish"
+  batch_delete: "Delete"
+
   goto_next: "Next"
   goto_prev: "Previous"
 
