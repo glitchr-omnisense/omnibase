@@ -356,8 +356,9 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapDataToForms($viewData, Traversable $forms) { /* done in buildView due to select2 extend */ }
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
-
         $choiceType = current(iterator_to_array($forms));
+        if(!$this->formFactory->isOwningField($choiceType->getParent())) return;
+
         $options = $choiceType->getParent()->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessClass($choiceType->getParent());
 
@@ -452,7 +453,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $data = null;
         }
 
-        if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && (!$data instanceof Collection)) {
+        if ($this->classMetadataManipulator->isEntity($options["class"]) && (!$data instanceof Collection)) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {
@@ -467,12 +468,12 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $data = $classRepository->findOneById($data);
             }
 
-            $form->setData($data);
+            if(!$form->isSubmitted()) $form->setData($data);
         }
 
         if($options["select2"] !== null) {
 
-            // Double-check "multiple" option
+            // Double-check for "multiple" option
             // * If database can accept multiples, it can also accept single elements
             // * But database with single entry cannot accept multiple elements.. So I arbitrarily keep only the first element..
             $multipleExpected = $data instanceof Collection || is_array($data);

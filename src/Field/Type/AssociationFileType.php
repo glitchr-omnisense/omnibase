@@ -65,7 +65,6 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             'form_type' => FileType::class,
 
             'entity_file'    => null,
-            'entity_inheritance' => false,
             'entity_data'    => [],
 
             "multiple"     => null,
@@ -193,7 +192,10 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
+        if(!$this->formFactory->isOwningField($parentForm)) return;
+
         $parentEntity = $parentForm->getParent() ? $parentForm->getParent()->getData() : null;
+
         $options = $parentForm->getConfig()->getOptions();
         $options["data_class"] = $options["data_class"] ?? $this->formFactory->guessClass($parentForm, $options);
         $options["multiple"]   = $options["multiple"]   ?? $this->formFactory->guessMultiple($parentForm, $options);
@@ -219,8 +221,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                     $entity = null;
                     if($file instanceof File) {
 
-                        $entityInheritance = $options["entity_inheritance"] ? $parentEntity : null;
-                        $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
+                        $entity = $this->entityHydrator->hydrate($options["data_class"], [], ["uuid", "translations"], EntityHydrator::CONSTRUCT);
 
                     } else if( ($pos = array_search($file, $viewDataFileIndexes)) !== false ){
 
@@ -233,7 +234,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
                         if($options["entity_data"] ?? false) {
 
                             if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);
-                            else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::DEEPCOPY);
+                            else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::CONSTRUCT);
 
                         } else {
 
@@ -248,14 +249,11 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
             } else if(($file = $form->getData())) {
 
                 $entity = $viewData;
-                if(!$entity) {
-
-                    $entityInheritance = $options["entity_inheritance"] ? $parentEntity : null;
-                    $entity = $this->entityHydrator->hydrate($options["data_class"], $entityInheritance ?? [], ["uuid", "translations"], EntityHydrator::DEEPCOPY);
-                }
+                if(!$entity)
+                    $entity = $this->entityHydrator->hydrate($options["data_class"], [], ["uuid", "translations"], EntityHydrator::CONSTRUCT);
 
                 if(is_callable($options["entity_data"])) $entity = $options["entity_data"]($entity, $parentEntity, $file);
-                else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::DEEPCOPY);
+                else $entity = $this->entityHydrator->hydrate($entity, array_merge($options["entity_data"] ?? [], [$fieldName => $file]), [], EntityHydrator::CONSTRUCT);
 
                 $newData[] = $entity;
             }

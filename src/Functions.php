@@ -906,7 +906,7 @@ namespace {
     }
 
     function mb_ucfirst (string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); }
-    function mb_ucwords (string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): string
+    function mb_ucwords (string $str, ?string $encoding = null, string $separators = " ',;:\"-()[]\t\r\n\f\v"): string
     {
         $separators = str_split($separators);
         foreach($separators as $separator)

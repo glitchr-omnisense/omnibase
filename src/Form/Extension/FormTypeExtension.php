@@ -167,5 +167,6 @@ class FormTypeExtension extends AbstractTypeExtension
 
         if($this->formFactory->guessSortable($form, $options)) $view->vars["is_sortable"] = true;
         if($this->formFactory->guessMultiple($form, $options)) $view->vars["is_multiple"] = true;
+        if(!$this->formFactory->isOwningField($form)) $view->vars["is_inherited"] = true;
     }
 }

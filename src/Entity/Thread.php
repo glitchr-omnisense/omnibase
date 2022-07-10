@@ -380,15 +380,16 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function getKeywords(?string $locale = null, int $depth = 0): array
     {
         $keywords = $this->translate($locale)->getKeywords();
-        if($depth > 0) $keywords ??= ($this->getParent() ? $this->getParent()->getKeywords($locale, --$depth) : null);
+        if(!$keywords && $depth > 0)
+            $keywords = ($this->getParent() ? $this->getParent()->getKeywords($locale, --$depth) : null);
 
         return $keywords;
     }
 
-    public function setKeywords(?string $keywords, ?string $locale = null, int $depth = 0)
+    public function setKeywords(array $keywords, ?string $locale = null, int $depth = 0)
     {
         if($depth > 0)
-            return $this->translate($locale)->setKeywords(empty($keywords) || $keywords === $this->getParent()->getKeywords($locale, --$depth) ? null : $keywords);
+            return $this->translate($locale)->setKeywords(empty($keywords) || $keywords === $this->getParent()->getKeywords($locale, --$depth) ? [] : $keywords);
 
         return $this->translate($locale)->setKeywords($keywords);
     }
