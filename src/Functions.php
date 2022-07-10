@@ -40,6 +40,24 @@ namespace {
         return compose_url($scheme, null, null, null, null, $domain, $port, $request_uri == "/" ? null : $request_uri);
     }
 
+    function delete_directory(string $dir)
+    {
+        if (!file_exists($dir))
+            return true;
+
+        if (!is_dir($dir))
+            return unlink($dir);
+
+        foreach (scandir($dir) as $item) {
+
+            if ($item == '.' || $item == '..') continue;
+            if (!delete_directory($dir . DIRECTORY_SEPARATOR . $item))
+                return false;
+        }
+
+        return rmdir($dir);
+    }
+
     define("SANITIZE_URL_STANDARD", 0);
     define("SANITIZE_URL_NOMACHINE", 1);
     define("SANITIZE_URL_NOSUBDOMAIN", 2);

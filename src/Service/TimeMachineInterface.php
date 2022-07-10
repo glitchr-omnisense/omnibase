@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-interface BackupManagerInterface
+interface TimeMachineInterface
 {
 
 }
