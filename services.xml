@@ -217,7 +217,7 @@
         <service id="Base\Service\TimeMachine" parent="BackupManager\Manager" public="true">
             <argument type="service" id="flysystem.adapter.lazy.factory" />
             <argument type="service" id="doctrine" />
-            <bind key="$projectDir">%kernel.project_dir%</bind>
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Console\Command\TimeMachineDoctrineCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>

@@ -25,27 +25,27 @@ use BackupManager\Manager as BackupManager;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
 use League\Flysystem\Filesystem as Flysystem;
+use League\Flysystem\FilesystemOperator;
+use League\FlysystemBundle\Lazy\LazyFactory;
 use Phar;
 use PharData;
 use UnexpectedValueException;
 
 class TimeMachine extends BackupManager implements TimeMachineInterface
 {
+    /** @var CompressorProvider */
+    protected $compressors;
     /** @var FilesystemProvider */
     protected $filesystems;
     /** @var DatabaseProvider */
+    protected $filesystemConfigs;
+    /** @var DatabaseProvider */
     protected $databases;
-    /** @var CompressorProvider */
-    protected $compressors;
+    /** @var DatabaseProvider */
+    protected $databaseConfigs;
 
-    public function getProjectDir()
-    {
-        if(!file_exists($this->projectDir))
-            throw new Exception();
 
-        return $this->projectDir;
-    }
-
+    public function getProjectDir() { return $this->parameterBag->get("kernel.project_dir"); }
     public function preventAbort()
     {
         ignore_user_abort(true);
@@ -59,18 +59,31 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
     }
 
-    protected $doctrine;
-    public function __construct(Registry $doctrine, Flysystem $flysystem, string $projectDir, ?int $snapshotLimit = 99, ?string $compression = "gzip")
+    public function __construct(LazyFactory $lazyFactory, Registry $doctrine, ParameterBagInterface $parameterBag)
     {
-        dump($this->flysystem);
-        $this->flysystem = $flysystem;
-        $this->fsConfig = new Config([]);
+        //
+        // Prepare fs configuration
+        synopsis($lazyFactory);
 
-        $this->doctrine = $doctrine;
-        dump($this->doctrine);
-        $this->dbConfig = new Config([]);
 
-        exit(1);
+
+        //
+        // Prepare db configuration
+        foreach($doctrine->getConnectionNames() as $connectionName => $_) {
+
+            $params = $doctrine->getConnection($connectionName)->getParams();
+            $this->databaseConfigs[] = [
+                "type" => $params["driver"],
+                "host" => $params["host"],
+                "port" => $params["port"],
+                "user" => $params["user"],
+                "pass" => $params["password"],
+                "database" => $params["dbname"] ?? null,
+                "extraParams" => $params["driverOptions"],
+            ];
+        }
+
+        //
         // Build providers
         $filesystems = new FilesystemProvider($fsConfig);
         $filesystems->add(new Awss3Filesystem);
@@ -143,13 +156,17 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     }
 
     public function getDatabase(string $name): Database { return $this->databases->get($name); }
-    public function getFilesystem(string $name): Filesystem { return $this->filesystems->get($name); }
+    public function getDatabaseConfiguration(string $name): Database { return $this->databases->get($name); }
+    public function getDatabaseList(string $name): Database { return $this->databases->get($name); }
+    public function getStorage(string $name): Flysystem { return $this->filesystems->get($name); }
     public function getStorageList(): array { return [] /*$this->filesystems->get($name)*/; }
 
-    public function getLastSnapshot(int|array $ids): array { end($this->getSnapshots()); }
-    public function getSnapshots(int|array $ids): array
+    public function getLastSnapshot(int|array $ids): array { $snapshot = $this->getSnapshots(); return end($snapshot); }
+    public function getSnapshots(int|array $ids = []): array
     {
         $destinations = $this->getDestinations($ids);
+        dump($destinations);
+        exit(1);
         // Flysystem
         // $filesystem->listContents($path, );
         return [];
