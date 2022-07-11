@@ -41,7 +41,7 @@ use Base\Repository\ThreadRepository;
  *     @DiscriminatorEntry( value = "common" )
  *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- * 
+ *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
@@ -171,7 +171,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\Column(type="thread_state")
-     * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $workflow;
     public function getWorkflow() { return $this->workflow; }
@@ -212,7 +211,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=User::class, inversedBy="threads")
-     * @AssertBase\NotBlank(groups={"new", "edit"})
      * @OrderColumn
      */
     protected $owners;

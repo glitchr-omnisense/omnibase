@@ -21,7 +21,7 @@ use Symfony\Component\Finder\Finder;
 
 class BaseBundle extends Bundle
 {
-    public const CACHE   = true;
+    public const CACHE   = false;
     public const VERSION = '1.0.0';
 
     protected static bool $boot = false;
@@ -44,7 +44,6 @@ class BaseBundle extends Bundle
     {
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
         $entityManager->getConfiguration()->setNamingStrategy(new \Base\Database\NamingStrategy());
-        // $entityManager->getConfiguration()->set
 
         /**
          * Testing doctrine connection

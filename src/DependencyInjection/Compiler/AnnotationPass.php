@@ -18,7 +18,6 @@ class AnnotationPass implements CompilerPassInterface
 
         $definition     = $container->findDefinition(AnnotationReader::class);
         $taggedServices = $container->findTaggedServiceIds('base.annotation');
-
         foreach ($taggedServices as $id => $tags)
             $definition->addMethodCall('addAnnotation', [new Reference($id)]);
     }

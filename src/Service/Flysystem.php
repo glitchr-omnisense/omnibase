@@ -40,10 +40,10 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir  = self::$projectDir."/public";
 
-        if(!$this->hasStorage("default.storage"))
-            throw new InvalidArgumentException("\"default.storage\" storage not found in your Flysystem configuration.");
+        if(!$this->hasStorage("local.storage"))
+            throw new InvalidArgumentException("\"local.storage\" storage not found in your Flysystem configuration.");
 
-        $this->setDefaultStorage("default.storage");
+        $this->setDefaultStorage("local.storage");
     }
 
     public function hasStorage(string $storage):bool { return array_key_exists($storage, $this->storages->getProvidedServices()); }
@@ -60,8 +60,13 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         if (class_implements_interface($operator, FilesystemOperator::class))
             return $operator;
 
-        if (is_string($operator))
+        if (is_string($operator)) {
+
+            if(!$this->hasStorage($operator))
+                throw new InvalidArgumentException("\"".$operator."\" storage not found in your Flysystem configuration.");
+
             return $this->createStorage($operator, $operator);
+        }
 
         return $this->operator;
     }

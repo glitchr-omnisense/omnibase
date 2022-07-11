@@ -511,7 +511,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return $metadata->getAssociationTargetClass($fieldName);
     }
 
@@ -520,7 +520,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return $metadata->hasAssociation($fieldName);
     }
 
@@ -529,7 +529,7 @@ class ClassMetadataManipulator
         $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return $metadata->getFieldMapping($fieldName) ?? null;
     }
 
@@ -538,7 +538,7 @@ class ClassMetadataManipulator
         $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName) ?? null;
     }
 
@@ -598,7 +598,7 @@ class ClassMetadataManipulator
         $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return !$metadata->isAssociationInverseSide($fieldName);
     }
 
@@ -608,7 +608,7 @@ class ClassMetadataManipulator
         $metadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return $metadata->isAssociationInverseSide($fieldName);
     }
 
@@ -627,7 +627,7 @@ class ClassMetadataManipulator
 
         if(!$this->hasAssociation($metadata, $fieldName)) return false;
 
-        $fieldName = $metadata->getFieldName($fieldName) ?? $fieldName;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? $fieldName;
         return $metadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 

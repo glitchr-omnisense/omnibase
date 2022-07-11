@@ -10,7 +10,7 @@ use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\Format\WebpFilter;
 use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\FileService;
-use Base\Service\Filesystem;
+use Base\Service\Flysystem;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,9 +35,9 @@ class FileController extends AbstractController
     protected $fileService;
 
     /**
-     * @var Filesystem
+     * @var Flysystem
      */
-    protected $filesystem;
+    protected $flysystem;
 
     /**
      * @var ImageCropRepository
@@ -49,14 +49,14 @@ class FileController extends AbstractController
      */
     protected $localCache;
 
-    public function __construct(Filesystem $filesystem, ImageService $imageService, EntityManagerInterface $entityManager, ?bool $localCache = null)
+    public function __construct(Flysystem $flysystem, ImageService $imageService, EntityManagerInterface $entityManager, ?bool $localCache = null)
     {
         if(BaseBundle::hasDoctrine())
             $this->imageCropRepository = $entityManager->getRepository(ImageCrop::class);
 
         $this->imageService = $imageService;
         $this->fileService  = cast($imageService, FileService::class);
-        $this->filesystem   = $filesystem;
+        $this->flysystem   = $flysystem;
 
         $this->localCache = $localCache;
     }
@@ -71,7 +71,7 @@ class FileController extends AbstractController
 
         $path     = $args["path"];
 
-        $contents = $this->filesystem->read($path, $args["storage"] ?? null);
+        $contents = $this->flysystem->read($path, $args["storage"] ?? null);
         if($contents === null) throw $this->createNotFoundException();
 
         $options = $args["options"];

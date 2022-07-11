@@ -151,10 +151,10 @@ class SettingBag implements SettingBagInterface
             return $settings;
         }
 
+        $useCache &= BaseBundle::CACHE && !is_cli();
         if(!$this->settingRepository) throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
         try {
 
-            $useCache &= BaseBundle::CACHE && !is_cli();
             $fn = $path ? ($useCache ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
                           ($useCache ? "cacheAll" : "findAll");
 
@@ -214,7 +214,7 @@ class SettingBag implements SettingBagInterface
     }
 
     protected array $settingBag;
-    public function get(null|string|array $path = null, ?string $locale = null): array
+    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true): array
     {
         if(is_array($paths = $path)) {
 
@@ -229,11 +229,11 @@ class SettingBag implements SettingBagInterface
         if(array_key_exists($path.":".$locale, $this->settingBag))
             return $this->settingBag[$path.":".$locale];
 
-        try { $values = $this->getRaw($path) ?? []; }
+        try { $values = $this->getRaw($path, $useCache) ?? []; }
         catch (Exception $e) { throw $e; return []; }
 
         $this->settingBag[$path.":".$locale] = $this->settingBag[$path.":".$locale] ?? array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
-        if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        if($useCache && BaseBundle::CACHE && !is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
         return $this->settingBag[$path.":".$locale];
     }

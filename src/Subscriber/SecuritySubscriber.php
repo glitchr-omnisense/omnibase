@@ -192,7 +192,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             // In case of restriction: profiler is disabled
             if($this->profiler) $this->profiler->disable();
-            
+
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
             if($isSecurityRoute) return true;
@@ -213,7 +213,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $currentRouteName = $this->router->getRouteName();
             $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
             if(is_array($routeRestriction)) {
-            
+
                 $routeRestrictionWithLocale = array_filter($routeRestriction, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
                 if(!empty($routeRestrictionWithLocale))
                     $routeRestriction = $routeRestrictionWithLocale;
@@ -225,7 +225,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
-    
+
                 if($event) $event->setResponse($response);
                 if($event) $event->stopPropagation();
                 return false;
@@ -250,7 +250,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         if ($token instanceof SwitchUserToken) {
 
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? false;
-            
+
             $notification = new Notification("impersonator", [$user, $switchParameter]);
             $notification->send("warning");
         }

@@ -8,6 +8,7 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Controller\Backend\AbstractDashboardController;
 use Base\Service\ReferrerInterface;
 use Base\Form\Type\Security\LoginType;
+use Base\Service\ImageServiceInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,11 +22,12 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 /* "abstract" (remove because of routes) */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
-    public function __construct(RouterInterface $router, SettingBagInterface $settingBag, Environment $twig)
+    public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig)
     {
         $this->router = $router;
         $this->settingBag = $settingBag;
         $this->twig = $twig;
+        $this->imageService = $imageService;
     }
 
     public function configureDashboard(): Dashboard
@@ -67,7 +69,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
         $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
         $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
-        
+
         return $this->render('@EasyAdmin/page/login.html.twig', [
             'last_username' => $lastUsername,
             'translation_domain' => 'forms',

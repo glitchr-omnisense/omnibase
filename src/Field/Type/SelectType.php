@@ -452,7 +452,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $data = null;
         }
 
-        if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && (!$data instanceof Collection)) {
+        if (!$form->isSubmitted() && $this->classMetadataManipulator->isEntity($options["class"]) && ($data && !$data instanceof Collection)) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
             if($options["multiple"]) {

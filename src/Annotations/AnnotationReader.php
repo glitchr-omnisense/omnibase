@@ -41,7 +41,6 @@ class AnnotationReader
         self::TARGET_PROPERTY
     ];
 
-    public const CACHE   = true;
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
         EntityManager $entityManager,
@@ -103,7 +102,7 @@ class AnnotationReader
         if (!file_exists($path)) return $this;
             //throw new Exception("Path not found: \"".$path."\"");
 
-        foreach (BaseBundle::getAllClasses("", $path) as $annotation)
+        foreach (BaseBundle::getAllClasses($path) as $annotation)
             $this->addAnnotationName($annotation);
 
         return $this;
@@ -314,7 +313,7 @@ class AnnotationReader
     {
         $ancestor = $this->getAncestor($className) ?? $className;
 
-        $annotations = $this->cachePool['familyAnnotations']->get() ?? [];
+        $annotations = !is_cli() && BaseBundle::CACHE ? ($this->cachePool['familyAnnotations']->get() ?? []) : [];
         if (array_key_exists($ancestor, $annotations))
             return $annotations[$ancestor];
 
@@ -323,7 +322,7 @@ class AnnotationReader
             $this->getChildrenAnnotations($ancestor, $annotationNames, $targets)
         );
 
-        if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['familyAnnotations']->set($annotations));
+        if(!is_cli() && BaseBundle::CACHE) $this->cache->save($this->cachePool['familyAnnotations']->set($annotations));
         return $annotations[$ancestor] ?? [];
     }
 
@@ -374,7 +373,7 @@ class AnnotationReader
 
         // If annotation already computed
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        $annotations = $this->cachePool['classAnnotations']->get() ?? [];
+        $annotations = !is_cli() && BaseBundle::CACHE ? ($this->cachePool['classAnnotations']->get() ?? []) : [];
 
         // Compute the class annotations
         $annotations[$reflClass->name] = [];
@@ -394,7 +393,7 @@ class AnnotationReader
                 $annotations[$reflClass->name][] = $annotation;
             }
 
-            if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
+            if(!is_cli() && BaseBundle::CACHE) $this->cache->save($this->cachePool['classAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
@@ -463,7 +462,7 @@ class AnnotationReader
 
         // If annotation already computed
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        $annotations = $this->cachePool['methodAnnotations']->get() ?? [];
+        $annotations = !is_cli() && BaseBundle::CACHE ? ($this->cachePool['methodAnnotations']->get() ?? []) : [];
         if (!array_key_exists($reflClass->name, $annotations)) {
 
             // Compute the class annotations
@@ -485,7 +484,7 @@ class AnnotationReader
                 }
             }
 
-            if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['methodAnnotations']->set($annotations));
+            if(!is_cli() && BaseBundle::CACHE) $this->cache->save($this->cachePool['methodAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
@@ -556,8 +555,7 @@ class AnnotationReader
 
         // If annotation already computed
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
-        $annotations = $this->cachePool['propertyAnnotations']->get() ?? [];
-
+        $annotations = !is_cli() && BaseBundle::CACHE ? ($this->cachePool['propertyAnnotations']->get() ?? []) : [];
         if (!array_key_exists($reflClass->name, $annotations)) {
 
             // Force to get all known annotations when buffering
@@ -570,7 +568,6 @@ class AnnotationReader
 
                         if (!is_serializable($annotation))
                             throw new Exception("Annotation \"".get_class($annotation)."\" failed to serialize. Please implement __serialize/__unserialize, or double-check properties.");
-
                         if (!is_subclass_of($annotation, AbstractAnnotation::class))
                             continue;
 
@@ -579,7 +576,7 @@ class AnnotationReader
                 }
             }
 
-            if(!is_cli() && self::CACHE) $this->cache->save($this->cachePool['propertyAnnotations']->set($annotations));
+            if(!is_cli() && BaseBundle::CACHE) $this->cache->save($this->cachePool['propertyAnnotations']->set($annotations));
         }
 
         // Return the full set of annotations for a given class
