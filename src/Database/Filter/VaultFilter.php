@@ -23,7 +23,7 @@ class VaultFilter extends SQLFilter
         if($this->environment)
             throw new InvalidArgumentException("No environment defined in ".self::class);
 
-        $vaultAnnotation = AnnotationReader::getAnnotationReader()->getClassAnnotations($targetEntity->getName(), Vault::class);
+        $vaultAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Vault::class);
         if(count($vaultAnnotation) < 1) return "";
 
         $vaultFieldName = end($vaultAnnotation)->vault;

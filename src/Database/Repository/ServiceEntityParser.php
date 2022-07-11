@@ -193,8 +193,7 @@ class ServiceEntityParser
 
     protected function getAlias($alias)
     {
-        $this->classMetadata->fieldNames[$alias] ?? $alias;
-        return $this->classMetadata->fieldNames[$alias] ?? $alias;
+        return $this->classMetadata->aliasNames[$alias] ?? $this->classMetadata->fieldNames[$alias] ??$alias;
     }
 
     protected function addCriteria(?string $by, $value)

@@ -2,7 +2,6 @@
 
 namespace Base\Controller\Backend\Crud\Layout\Attribute\Abstract;
 
-use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class HyperpatternAttributeCrudController extends AbstractAttributeCrudController

@@ -14,6 +14,7 @@ use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use Base\Twig\Environment;
 use Base\Twig\Extension\BaseTwigExtension;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -68,6 +69,14 @@ trait BaseCommonTrait {
         self::$entityManager = $entityManager;
     }
 
+    /**
+     * @var ManagerRegistry
+     */
+    protected static $doctrine = null;
+    public static function setDoctrine(ManagerRegistry $doctrine) {
+        self::$doctrine = $doctrine;
+    }
+    
     /**
      * @var EntityHydratorInterface
      */

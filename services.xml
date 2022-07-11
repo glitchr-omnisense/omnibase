@@ -105,7 +105,7 @@
         <service id="Base\Service\SettingBagInterface" alias="Base\Service\SettingBag"/>
         <service id="Base\Service\SettingBag" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
@@ -137,7 +137,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="twig.extension.base" />
             <argument type="service" id="slugger" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="doctrine" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -448,6 +448,7 @@
         </service>
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
+            <argument type="service" id="doctrine" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
@@ -560,10 +561,7 @@
         <service id="Base\Validator\Constraints\HexcodeValidator"          parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\NotBlankValidator"         parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
 
-        <service id="Base\Validator\ConstraintEntityValidator" parent="Base\Validator\ConstraintValidator">
-            <tag name="validator.constraint_validator" />
-            <argument type="service" id="doctrine" />
-        </service>
+        <service id="Base\Validator\ConstraintEntityValidator" parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\UniqueEntityValidator"     parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\StringCaseEntityValidator" parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
 

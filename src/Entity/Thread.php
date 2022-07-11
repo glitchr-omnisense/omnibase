@@ -27,6 +27,7 @@ use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\Traits\TrasheableTrait;
+use Base\Enum\WorkflowState;
 use Base\Model\IconizeInterface;
 use Base\Model\GraphInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -71,6 +72,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->setTitle($title);
 
         $this->setState(ThreadState::DRAFT);
+        $this->setWorkflow([WorkflowState::PENDING]);
 
         $this->slug = $slug;
 
@@ -164,6 +166,18 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+        return $this;
+    }
+
+    /**
+     * @ORM\Column(type="thread_state")
+     * @AssertBase\NotBlank(groups={"new", "edit"})
+     */
+    protected $workflow;
+    public function getWorkflow() { return $this->workflow; }
+    public function setWorkflow(array $workflow): self
+    {
+        $this->workflow = $workflow;
         return $this;
     }
 

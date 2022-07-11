@@ -19,6 +19,7 @@ use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
+use Doctrine\Persistence\ManagerRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use Exception;
 use InvalidArgumentException;
@@ -99,7 +100,7 @@ class BaseService implements RuntimeExtensionInterface
         BaseTwigExtension $baseTwigExtension,
 
         SluggerInterface $slugger,
-        EntityManagerInterface $entityManager,
+        ManagerRegistry $doctrine,
 
         AuthorizationCheckerInterface $authorizationChecker,
         TokenStorageInterface $tokenStorage,
@@ -146,7 +147,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->setParameterBag($parameterBag);
         $this->setTranslator($translator);
         $this->setSlugger($slugger);
-        $this->setEntityManager($entityManager);
+        $this->setDoctrine($doctrine);
         $this->setEntityHydrator($entityHydrator);
         $this->setRequestStack($requestStack);
         $this->setUserIdentifier($this->getParameterBag()->get("base.user.identifier"));
@@ -440,20 +441,6 @@ class BaseService implements RuntimeExtensionInterface
      * Doctrine related methods
      *
      */
-    // public function getEntityManager(bool $reopen = false): ?EntityManagerInterface
-    // {
-    //     if (!$this->entityManager) return null;
-    //     if (!$this->entityManager->isOpen()) {
-
-    //         if(!$reopen) return null;
-    //         $this->entityManager = $this->entityManager->create(
-    //             $this->entityManager->getConnection(),
-    //             $this->entityManager->getConfiguration()
-    //         );
-    //     }
-
-    //     return $this->entityManager;
-    // }
 
     public function inDoctrine($entity): bool
     {
@@ -473,7 +460,7 @@ class BaseService implements RuntimeExtensionInterface
     public function getOriginalEntityData($eventOrEntity, bool $inDoctrineStack = false, bool $reopen = false)
     {
         $entity = $eventOrEntity->getObject();
-        $originalEntityData = $this->getEntityManager()->getUnitOfWork()->getOriginalEntityData($entity);
+        $originalEntityData = $this->getEntityManager($reopen)->getUnitOfWork()->getOriginalEntityData($entity);
 
         if($eventOrEntity instanceof PreUpdateEventArgs) {
 
@@ -481,7 +468,7 @@ class BaseService implements RuntimeExtensionInterface
             foreach($event->getEntityChangeSet() as $field => $data)
                 $originalEntityData[$field] = $data[0];
 
-        } else if($inDoctrineStack && $this->inDoctrineStack()) {
+        } else if($inDoctrineStack === true && $this->inDoctrineStack()) {
 
             throw new \Exception("Achtung ! You are trying to access data object within a Doctrine method..".
                                 "Original entity might have already been updated.");
