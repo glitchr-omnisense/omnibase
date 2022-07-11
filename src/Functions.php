@@ -963,7 +963,12 @@ namespace {
         return $str;
     }
 
+<<<<<<< HEAD
+    function mb_ucfirst (string $str, ?string $encoding = null): string { return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding); }
+    function mb_ucwords (string $str, ?string $encoding = null, string $separators = " ',;:\"-()[]\t\r\n\f\v"): string
+=======
     function mb_ucfirst (array|string $str, ?string $encoding = null): array|string
+>>>>>>> 15fe92af3b6fedb116ba0833194c5572fc010d60
     {
         if(is_array($str)) {
 

@@ -543,9 +543,13 @@
         <service id="Base\Twig\Extension\ShareTwigExtension"       ><tag name="twig.extension" /><argument type="service" id="base.service.sharer" /></service>
 
         <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Form\Extension\FormTypeBootstrapExtension"><tag name="form.type_extension" /><argument type="service" id="base.service" /></service>
         <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
         <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+        <service id="Base\Form\Extension\FormTypeCollectionExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />

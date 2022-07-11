@@ -237,6 +237,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
     {
         $form = current(iterator_to_array($forms));
         $formParent  = $form->getParent();
+        if(!$this->formFactory->isOwningField($formParent)) return;
 
         $options     = $formParent->getConfig()->getOptions();
         $options["class"]    = $options["class"] ?? $this->formFactory->guessClass($formParent, $options);

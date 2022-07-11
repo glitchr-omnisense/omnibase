@@ -18,7 +18,7 @@
     {% endblock head_metas %}
 
     {% set page_title_block_output %}{% block page_title %}{{ _content_title }}{% endblock %}{% endset %}
-    <title>{{ [app.backoffice.title ?? null, block('page_title_block_output') ?? _content_title|striptags|raw]|uniq|join_if_exists(" - ") }}</title>
+    <title>{{ [(block('page_title_block_output') ?? _content_title|striptags|raw), base.settings.get("base.settings.title.backoffice")["_self"] ?? null]|uniq|join_if_exists(" - ") }}</title>
 
     {% block configured_stylesheets %}
         {{ include('@EasyAdmin/includes/_css_assets.html.twig', { assets: ea.assets.cssAssets ?? [] }, with_context = false) }}

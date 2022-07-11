@@ -23,10 +23,11 @@
 {%- block form2_label  -%}
 
     {% set badges = "" %}
-    {% set badges = badges ~ (app.debug and form.vars.is_dbcolumn is defined ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn"|trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_multiple is defined ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple"|trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_alias    is defined ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"   |trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_sortable is defined ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable"|trans)}) : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_dbcolumn  is defined ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)}) : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_multiple  is defined ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)}) : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_alias     is defined ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)}) : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_sortable  is defined ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)}) : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_inherited is defined ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)}) : "") %}
 
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
@@ -134,6 +135,7 @@
     }) %}
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
+    {%- set attr = attr|merge({'disabled': form.vars.disabled} ) -%}
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 
     {% if form.vars.tokenSeparators is defined %}

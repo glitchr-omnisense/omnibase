@@ -5,6 +5,7 @@ namespace Base\Form;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Annotation\OrderColumn;
 use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\TranslationInterface;
 use Base\Field\Type\TranslationType;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
@@ -229,6 +230,22 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $options["multiple"] ?? false;
     }
 
+    public function isOwningField(FormInterface $form) {
+
+        $parentData = $form->getParent() ? $form->getParent()->getData() : null;
+
+        $collection = $form->getData();
+        if($collection instanceof PersistentCollection) {
+
+            $isTranslatable = class_implements_interface($collection->getOwner(), TranslationInterface::class);
+            if($isTranslatable && $parentData == $collection->getOwner()->getTranslatable()) return true;
+
+            if($parentData === null) return false;
+            if($parentData != $collection->getOwner()) return false;
+        }
+
+        return true;
+    }
     public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent)
