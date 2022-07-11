@@ -173,7 +173,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     return Command::FAILURE;
                 }
 
-                $publicDir  = $annotation->getFilesystem()->getPublic("", $annotation->storage());
+                $publicDir  = $annotation->getFlysystem()->getPublic("", $annotation->storage());
 
                 $file = $image->getSource();
                 if($file === null) {

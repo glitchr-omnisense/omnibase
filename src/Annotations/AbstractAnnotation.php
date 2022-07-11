@@ -5,9 +5,8 @@ namespace Base\Annotations;
 use App\Entity\User;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
-use Base\Service\Filesystem;
+use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Event\LifecycleEventArgs;
@@ -37,7 +36,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getClassMetadata($objectOrClass): ?ClassMetadata { return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);     }
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator { return AnnotationReader::getInstance()->getClassMetadataManipulator();  }
 
-    public static function getFilesystem(): Filesystem { return AnnotationReader::getInstance()->getFilesystem();   }
+    public static function getFlysystem(): FlysystemInterface { return AnnotationReader::getInstance()->getFlysystem();   }
     public static function getImpersonator():?User     { return AnnotationReader::getInstance()->getImpersonator(); }
     public static function getUser():?User             { return AnnotationReader::getInstance()->getUser();         }
 

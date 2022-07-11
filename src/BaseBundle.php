@@ -11,7 +11,7 @@ use Base\DependencyInjection\Compiler\IconProviderPass;
 use Base\DependencyInjection\Compiler\SharerPass;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Query;
-use Exception;
+
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
@@ -69,7 +69,7 @@ class BaseBundle extends Bundle
 
             $entityManager->getConnection()->getDatabasePlatform()->registerDoctrineTypeMapping($className::getStaticName()."_db", $className::getStaticName());
         }
-        
+
         /**
          * Doctrine filters
          */
@@ -77,7 +77,7 @@ class BaseBundle extends Bundle
         $entityManager->getFilters()->enable("trash_filter");
         $entityManager->getConfiguration()->addFilter("vault_filter", VaultFilter::class);
         $entityManager->getFilters()->enable("vault_filter");
-        
+
         /**
          * Doctrine walkers
          */
@@ -175,7 +175,7 @@ class BaseBundle extends Bundle
     {
         $classes = [];
 
-        $filenames = self::getFilenames($path);
+        $filenames = self::getFilePaths($path);
         foreach ($filenames as $filename) {
 
             if(filesize($filename) == 0) continue;
@@ -191,7 +191,7 @@ class BaseBundle extends Bundle
     {
         $namespaces = [];
 
-        $filenames = self::getFilenames($path);
+        $filenames = self::getFilePaths($path);
         foreach ($filenames as $filename) {
 
             if(filesize($filename) == 0) continue;
@@ -205,7 +205,7 @@ class BaseBundle extends Bundle
     {
         $namespacesAndClasses = [];
 
-        $filenames = self::getFilenames($path);
+        $filenames = self::getFilePaths($path);
         foreach ($filenames as $filename) {
 
             if(filesize($filename) == 0) continue;
@@ -246,7 +246,7 @@ class BaseBundle extends Bundle
         return "";
     }
 
-    public static function getFilenames($path)
+    public static function getFilePaths($path)
     {
         if(!file_exists($path)) return [];
 

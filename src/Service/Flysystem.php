@@ -5,6 +5,7 @@ namespace Base\Service;
 use Base\Exception\NotDeletableException;
 use Base\Exception\NotReadableException;
 use Base\Exception\NotWritableException;
+
 use League\Flysystem\CorruptedPathDetected;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\FilesystemOperator;
@@ -15,20 +16,16 @@ use League\Flysystem\UnableToReadFile;
 use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToWriteFile;
 use League\FlysystemBundle\Lazy\LazyFactory;
-use ReflectionException;
 use Symfony\Component\Finder\Finder;
+use InvalidArgumentException;
+use ReflectionException;
 
-class Filesystem extends LazyFactory
+class Flysystem extends LazyFactory implements FlysystemInterface
 {
     /**
      * @var FilesystemOperator
      */
     protected FilesystemOperator $operator;
-
-    /**
-     * @var LazyFactory
-     */
-    protected LazyFactory $lazyFactory;
 
     protected static $projectDir;
     public static function getProjectDir() { return self::$projectDir; }
@@ -36,18 +33,23 @@ class Filesystem extends LazyFactory
     protected static $publicDir;
     public static function getPublicDir() { return self::$publicDir; }
 
-    public function __construct(LazyFactory $lazyFactory)
+    public function __construct(...$args)
     {
-        $this->lazyFactory = $lazyFactory;
+        parent::__construct(...$args);
 
         self::$projectDir = dirname(__FILE__, 6);
         self::$publicDir  = self::$projectDir."/public";
 
-        $this->setDefault("local.storage");
+        if(!$this->hasStorage("default.storage"))
+            throw new InvalidArgumentException("\"default.storage\" storage not found in your Flysystem configuration.");
+
+        $this->setDefaultStorage("default.storage");
     }
 
-    public function getDefault() { return $this->getOperator(); }
-    public function setDefault(FilesystemOperator|string $operator): self
+    public function hasStorage(string $storage):bool { return array_key_exists($storage, $this->storages->getProvidedServices()); }
+    public function getStorageNames():array { return array_keys($this->storages->getProvidedServices()); }
+    public function getDefaultStorage():FilesystemOperator { return $this->getOperator(); }
+    public function setDefaultStorage(FilesystemOperator|string $operator)
     {
         $this->operator = $this->getOperator($operator);
         return $this;
@@ -59,7 +61,7 @@ class Filesystem extends LazyFactory
             return $operator;
 
         if (is_string($operator))
-            return $this->lazyFactory->createStorage($operator, $operator);
+            return $this->createStorage($operator, $operator);
 
         return $this->operator;
     }
@@ -177,6 +179,17 @@ class Filesystem extends LazyFactory
         return null;
     }
 
+    protected function getPublicRealpath(?string $path = null, int $depth = 1): array {
+
+        $publicPath = realpath($this->getPublicDir()."/".str_lstrip($path, [$this->getPublicDir(), "/"]));
+
+        $endpoints = [$publicPath => realpath($publicPath)];
+        foreach(Finder::create()->followLinks()->directories()->in($publicPath)->depth("< ".$depth) as $path)
+            $endpoints[$path->getPathname()] = realpath($path->getPathname());
+
+        return $endpoints;
+    }
+
     public function getPublic(mixed $path, FilesystemOperator|string|null $operator = null)
     {
         if($path === null) return null;
@@ -213,14 +226,4 @@ class Filesystem extends LazyFactory
         return null;
     }
 
-    protected function getPublicRealpath(?string $path = null, int $depth = 1): array {
-
-        $publicPath = realpath($this->getPublicDir()."/".str_lstrip($path, [$this->getPublicDir(), "/"]));
-
-        $endpoints = [$publicPath => realpath($publicPath)];
-        foreach(Finder::create()->followLinks()->directories()->in($publicPath)->depth("< ".$depth) as $path)
-            $endpoints[$path->getPathname()] = realpath($path->getPathname());
-
-        return $endpoints;
-    }
 }

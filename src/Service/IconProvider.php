@@ -73,11 +73,13 @@ class IconProvider
         return $this;
     }
 
-    public function iconify(null|string|array|IconizeInterface $icon, array $attributes = []) : null|string|array
+    public function iconify(null|string|array|IconizeInterface $icon, array $attributes = []) : ?array
     {
         if(!$icon) return $icon;
+        $icon = $icon instanceof IconizeInterface
+              ? ($icon->__iconize() ?? $icon->__iconizeStatic())
+              : ($this->getRouteIcons($icon) ?? $icon);
 
-        $icon = $icon instanceof IconizeInterface ? ($icon->__iconize() ?? $icon->__iconizeStatic()) : $this->getRouteIcons($icon) ?? $icon;
         if(is_array($icon))
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 
@@ -87,6 +89,6 @@ class IconProvider
                 return $provider->iconify($icon, $attributes);
         }
 
-        return $icon;
+        return null;
     }
 }

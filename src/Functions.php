@@ -744,12 +744,12 @@ namespace {
     }
 
     function begin(object|array &$array) { return array_values(array_slice($array, 0, 1))[0] ?? null; }
-    function first(object|array &$array) { return begin($array) ?? null; }
-    function second(object|array $array) { return $array[1] ?? null; }
     function head(object|array &$array):mixed { return begin($array); }
-
     function last(object|array &$array)  { return end($array)   ?? null; }
     function tail(object|array &$array, int $length = -1, bool $preserve_keys = false):array  { return array_slice($array, -min(count($array)-1, $length), null, $preserve_keys); }
+
+    function first(object|array|null $array)  { return $array ? begin($array) : null; }
+    function second(object|array|null $array) { return $array ? ($array[1] ?? null) : null; }
 
     function distance(array $arr1, array $arr2)
     {

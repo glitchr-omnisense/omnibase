@@ -2,7 +2,6 @@
 
 namespace Base\Service;
 
-use Exception;
 use InvalidArgumentException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,7 +23,7 @@ class FileService implements FileServiceInterface
     /**
      * @var Filesystem
      */
-    protected $filesystem;
+    protected $flysystem;
 
     /**
      * @var AssetExtension
@@ -35,17 +34,16 @@ class FileService implements FileServiceInterface
      */
     protected $router;
 
-    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, Filesystem $filesystem)
+    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, FlysystemInterface $flysystem)
     {
         $this->router         = $router;
         $this->obfuscator     = $obfuscator;
         $this->assetExtension = $assetExtension;
-        $this->filesystem     = $filesystem;
+        $this->flysystem     = $flysystem;
 
         $this->mimeTypes = new MimeTypes();
     }
 
-    public function getFilesystem() { return $this->filesystem; }
     public function getExtensions(null|string|array $fileOrMimetypeOrArray): array
     {
         if(!$fileOrMimetypeOrArray) return [];
@@ -69,7 +67,7 @@ class FileService implements FileServiceInterface
         if(is_array($fileOrContentsOrArray)) return array_map(fn($f) => $this->getMimeType($f), $fileOrContentsOrArray);
 
         // Attempt to read from flysystem
-        $mimeType = $this->filesystem->mimeType($fileOrContentsOrArray);
+        $mimeType = $this->flysystem->mimeType($fileOrContentsOrArray);
         if($mimeType && $mimeType !== "application/x-empty") return $mimeType;
 
         // Attempt to read based on custom mime_content_content method
@@ -95,7 +93,7 @@ class FileService implements FileServiceInterface
         return $this->generate("ux_serve", [], $path, array_merge($config, ["attachment" => $attachment]));
     }
 
-    public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->getFilesystem()->read($path, $storage); }
+    public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->flysystem->getPublic($path, $storage); }
 
     public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
     public function isImage(?string $file) { return preg_match("/image\/.*/", $this->getMimeType($file)); }

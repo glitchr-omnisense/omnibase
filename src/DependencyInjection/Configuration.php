@@ -289,7 +289,7 @@ class Configuration implements ConfigurationInterface
                             ->end()
                     ->end()
                 ->end()
-                ->arrayNode('backup')->addDefaultsIfNotSet()
+                ->arrayNode('time_machine')->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('snapshot_limit')
                             ->info('Maximum number of snapshot in a configuration')

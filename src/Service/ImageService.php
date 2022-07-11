@@ -15,6 +15,7 @@ use Imagine\Image\ImageInterface;
 use Imagine\Image\ImagineInterface;
 use Imagine\Image\Palette\CMYK;
 use Imagine\Image\Palette\RGB;
+use InvalidArgumentException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -28,9 +29,9 @@ class ImageService extends FileService implements ImageServiceInterface
      */
     protected $imagine;
 
-    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, Filesystem $filesystem, ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg)
+    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg)
     {
-        parent::__construct($router, $obfuscator, $assetExtension, $filesystem);
+        parent::__construct($router, $obfuscator, $assetExtension, $flysystem);
 
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
@@ -191,7 +192,7 @@ class ImageService extends FileService implements ImageServiceInterface
                 throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
 
-        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $storage);
+        $pathRelative = $this->flysystem->stripPrefix(realpath($path), $storage);
         $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
         $pathCache    = path_suffix($pathRelative, $pathSuffixes);
 
@@ -201,8 +202,10 @@ class ImageService extends FileService implements ImageServiceInterface
 
             $localCache = array_pop_key("local_cache", $config);
             if(!is_string($localCache)) $localCache = $this->localCache;
+            if(!$this->flysystem->hasStorage($this->localCache))
+                throw new InvalidArgumentException("\"".$this->localCache."\" storage not found in your Flysystem configuration.");
 
-            return $this->filesystem->fileExists($pathCache, $localCache);
+            return $this->flysystem->fileExists($pathCache, $localCache);
         }
 
         return false;
@@ -250,7 +253,7 @@ class ImageService extends FileService implements ImageServiceInterface
                 throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
 
-        $pathRelative = $this->filesystem->stripPrefix(realpath($path), $storage);
+        $pathRelative = $this->flysystem->stripPrefix(realpath($path), $storage);
 	if(!$pathRelative) {
 
             if(!$this->fallback)
@@ -268,8 +271,10 @@ class ImageService extends FileService implements ImageServiceInterface
 
             $localCache = array_pop_key("local_cache", $config);
             if(!is_string($localCache)) $localCache = $this->localCache;
+            if(!$this->flysystem->hasStorage($this->localCache))
+                throw new InvalidArgumentException("\"".$this->localCache."\" storage not found in your Flysystem configuration.");
 
-            if(!$this->filesystem->fileExists($pathCache, $localCache)) {
+            if(!$this->flysystem->fileExists($pathCache, $localCache)) {
 
                 set_time_limit($this->timeout);
 
@@ -282,15 +287,15 @@ class ImageService extends FileService implements ImageServiceInterface
                     return $this->noImage;
                 }
 
-                $this->filesystem->mkdir(dirname($pathCache), $localCache);
-                $this->filesystem->write($pathCache, file_get_contents($filteredPath), $localCache);
+                $this->flysystem->mkdir(dirname($pathCache), $localCache);
+                $this->flysystem->write($pathCache, file_get_contents($filteredPath), $localCache);
 
                 set_time_limit(30);
 
                 if($formatter->getPath() === null) unlink_tmpfile($filteredPath);
             }
 
-            return $this->filesystem->prefixPath($pathCache, $localCache);
+            return $this->flysystem->prefixPath($pathCache, $localCache);
         }
 
         //

@@ -118,7 +118,7 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
                 }
 
                 $file = $fileList[$i];
-                $publicDir = $annotation->getFilesystem()->getPublic("", $annotation->storage());
+                $publicDir = $annotation->getFlysystem()->getPublic("", $annotation->storage());
 
                 $formatStr = implode(", ", array_map(fn($f) => implode("x", $f), $formats));
                 $formatStr = $formatStr ? "Formats: ".$formatStr : "";

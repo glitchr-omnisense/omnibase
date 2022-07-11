@@ -8,10 +8,12 @@ use Doctrine\ORM\EntityManager;
 use Base\Annotations\AbstractAnnotation;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
-use Base\Service\Filesystem;
 use Exception;
 
 use App\Entity\User;
+use Base\BaseBundle;
+use Base\Database\Factory\EntityHydratorInterface;
+use Base\Service\FlysystemInterface;
 use Base\Traits\BaseTrait;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -19,7 +21,6 @@ use ReflectionClass;
 
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Finder\Finder;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
@@ -40,15 +41,13 @@ class AnnotationReader
         self::TARGET_PROPERTY
     ];
 
-    protected $parameterBag;
-
     public const CACHE   = true;
     public function __construct(
         EventDispatcherInterface $eventDispatcher,
         EntityManager $entityManager,
         ParameterBagInterface $parameterBag,
         CacheInterface $cache,
-        Filesystem $filesystem,
+        FlysystemInterface $flysystem,
         RequestStack $requestStack,
         TokenStorageInterface $tokenStorage,
         EntityHydrator $entityHydrator,
@@ -86,7 +85,7 @@ class AnnotationReader
         $this->entityHydrator  = $entityHydrator;
         $this->requestStack    = $requestStack;
         $this->tokenStorage    = $tokenStorage;
-        $this->filesystem      = $filesystem;
+        $this->flysystem       = $flysystem;
         $this->eventDispatcher = $eventDispatcher;
 
         $this->classMetadataManipulator = $classMetadataManipulator;
@@ -104,7 +103,7 @@ class AnnotationReader
         if (!file_exists($path)) return $this;
             //throw new Exception("Path not found: \"".$path."\"");
 
-        foreach ($this->getAllClasses("", $path) as $annotation)
+        foreach (BaseBundle::getAllClasses("", $path) as $annotation)
             $this->addAnnotationName($annotation);
 
         return $this;
@@ -147,83 +146,37 @@ class AnnotationReader
      * @var EntityHydrator
      */
     protected $entityHydrator = null;
-    public function getEntityHydrator() { return $this->entityHydrator; }
+    public function getEntityHydrator(): EntityHydratorInterface { return $this->entityHydrator; }
 
     /**
      * @var ClassMetadataManipulator
      */
     protected $classMetadataManipulator = null;
-    public function getClassMetadataManipulator() { return $this->classMetadataManipulator; }
+    public function getClassMetadataManipulator(): ClassMetadataManipulator { return $this->classMetadataManipulator; }
 
     /**
-     * @var Filesystem
+     * @var FlysystemInterface
      */
-    protected $filesystem = null;
-    public function getFilesystem(): Filesystem { return $this->filesystem; }
+    protected $flysystem = null;
+    public function getFlysystem(): FlysystemInterface { return $this->flysystem; }
 
-    public function getParameterBag() { return $this->parameterBag; }
+    /**
+     * @var ParameterBagInterface
+     */
+    protected $parameterBag;
+    public function getParameterBag(): ParameterBagInterface { return $this->parameterBag; }
 
     /**
      * @var DoctrineAnnotationReader
      */
     protected $defaultReader = null;
-    public function getDefaultReader() { return $this->defaultReader; }
+    public function getDefaultReader(): DoctrineAnnotationReader { return $this->defaultReader; }
 
     /**
      * @var bool
      */
     protected bool $enabled;
     public function isEnabled(): bool { return $this->enabled; }
-
-    public static function getAllClasses($prefix, $path): array
-    {
-        $namespaces = [];
-
-        $filenames = self::getFilenames($path);
-        foreach ($filenames as $filename)
-            $namespaces[] = self::getFullNamespace($filename, $prefix) . self::getClassname($filename);
-
-        return $namespaces;
-    }
-
-    public static function getClassname($filename)
-    {
-        $directoriesAndFilename = explode('/', $filename);
-        $filename = array_pop($directoriesAndFilename);
-
-        $nameAndExtension = explode('.', $filename);
-        $className = array_shift($nameAndExtension);
-
-        return $className;
-    }
-
-    public static function getFullNamespace($filename, $prefix = "")
-    {
-        $lines = file($filename);
-        $array = preg_grep('/^namespace /', $lines);
-        $namespace = array_shift($array);
-
-        $match = [];
-        if (preg_match('/^namespace (\\\\?)' . addslashes($prefix) . '(\\\\?)(.*);$/', $namespace, $match)) {
-
-            $array = array_pop($match);
-            if (!empty($array)) return $array . "\\";
-        }
-
-        return "";
-    }
-
-    public static function getFilenames($path)
-    {
-        $filenames = [];
-
-        $finderFiles = Finder::create()->files()->in($path)->name('*.php');
-        foreach ($finderFiles as $finderFile)
-            $filenames[] = $finderFile->getRealpath();
-
-        return $filenames;
-    }
-
 
     protected array $annotationNames = [];
     public function getAnnotationNames(): array { return $this->annotationNames; }

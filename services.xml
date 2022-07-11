@@ -43,7 +43,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="base.filesystem" />
+            <argument type="service" id="flysystem" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
@@ -213,19 +213,17 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Service\TimeMachineInterface" alias="Base\Service\TimeMachine"/>
         <service id="Base\Service\TimeMachine" parent="BackupManager\Manager" public="true">
-            <argument type="service" id="flysystem.adapter.lazy.factory" />
+            <argument type="service" id="flysystem" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Console\Command\TimeMachineDoctrineCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
-        <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
-        <service id="Base\Console\Command\TimeMachineRollbackCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
-        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
+        <service id="Base\Console\Command\TimeMachineDoctrineCommand"         parent="Base\Console\Command"                          ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>
 
         <service id="Base\Console\Command\BaseMappingCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\ThreadPublishableCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
@@ -379,7 +377,7 @@
             <argument type="service" id="router" />
             <argument type="service" id="obfuscator" />
             <argument type="service" id="twig.extension.assets" />
-            <argument type="service" id="base.filesystem" />
+            <argument type="service" id="flysystem" />
         </service>
 
         <service id="Base\Service\ImageService" public="true" parent="Base\Service\FileService">
@@ -389,10 +387,7 @@
             <argument type="service" id="imagine.svg" />
         </service>
 
-        <service id="Base\Service\Filesystem" public="true">
-            <argument type="service" id="flysystem.adapter.lazy.factory" />
-            <argument type="service" id="parameter_bag" />
-        </service>
+        <service id="Base\Service\Flysystem" parent="flysystem.adapter.lazy.factory" public="true" />
 
         <!-- ImagineInterface instance use imagick by default (NB: GD do not support CMYK) -->
         <service id="imagine.bitmap" alias="imagine.adapter.imagick" />
@@ -461,7 +456,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="cache.adapter" />
-            <argument type="service" id="base.filesystem" />
+            <argument type="service" id="flysystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="base.database.entity_hydrator" />

@@ -135,13 +135,13 @@ class Uploader extends AbstractAnnotation
                 $uuidOrFile = is_string($uuidOrFile) && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
                 if($uuidOrFile instanceof File) {
 
-                    $pathList[] = $that->getFilesystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
+                    $pathList[] = $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
                     continue;
                 }
 
                 $path = $that->getPath($entity, $fieldName, $uuidOrFile);
 
-                $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
+                $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
                 if($pathPublic) $pathList[] = $pathPublic;
                 elseif($that->getMissable()) $pathList[] = $uuidOrFile;
             }
@@ -153,13 +153,13 @@ class Uploader extends AbstractAnnotation
 
             $uuidOrFile = is_string($field) && is_file($field) ? new File($field) : $field;
             if($uuidOrFile instanceof File)
-                return $that->getFilesystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
+                return $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
 
             if(!is_stringeable($uuidOrFile))
                 return null;
 
             $path = $that->getPath($entity, $fieldName, $uuidOrFile);
-            $pathPublic = $that->getFilesystem()->getPublic($path, $that->getStorage());
+            $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
             if($pathPublic) return $pathPublic;
 
             return $that->getMissable() ? $uuidOrFile : null;
@@ -201,8 +201,8 @@ class Uploader extends AbstractAnnotation
         $that       = self::getAnnotation($entity, $fieldName, self::class);
         if(!$that) return null;
 
-        $operator = $that->getFilesystem()->getOperator($that->storage);
-        $adapter  = $that->getFilesystem()->getAdapter($operator);
+        $operator = $that->getFlysystem()->getOperator($that->storage);
+        $adapter  = $that->getFlysystem()->getAdapter($operator);
 
         $fieldValue = self::getFieldValue($entity, $fieldName);
         if (!$fieldValue) return null;
@@ -227,7 +227,7 @@ class Uploader extends AbstractAnnotation
             if($adapter instanceof LocalFilesystemAdapter) {
 
                 if ($operator->fileExists($path))
-                    $fileList[] = new File($that->getFilesystem()->prefixPath($path));
+                    $fileList[] = new File($that->getFlysystem()->prefixPath($path));
 
                 continue;
             }
@@ -237,7 +237,7 @@ class Uploader extends AbstractAnnotation
             if (!array_key_exists($index, self::$tmpHashTable))
                 self::$tmpHashTable[$index] = tmpfile();
 
-            fwrite(self::$tmpHashTable[$index], $that->getFilesystem()->read($path, $that->getStorage()));
+            fwrite(self::$tmpHashTable[$index], $that->getFlysystem()->read($path, $that->getStorage()));
             $fileList[] = new File(stream_get_meta_data(self::$tmpHashTable[$index])['uri']);
         }
 
@@ -331,7 +331,7 @@ class Uploader extends AbstractAnnotation
             $path     = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
 
-            if ($this->getFilesystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
+            if ($this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
                 $fileList[] = basename($path);
         }
 
@@ -368,7 +368,7 @@ class Uploader extends AbstractAnnotation
             if($file instanceof File) $path = $file->getRealPath();
             else $path = $this->getPath($entity ?? $oldEntity ?? null, $fieldName, $file);
 
-            if($path) $this->getFilesystem()->delete($path, $this->getStorage());
+            if($path) $this->getFlysystem()->delete($path, $this->getStorage());
         }
     }
 

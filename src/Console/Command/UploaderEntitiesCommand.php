@@ -79,7 +79,7 @@ class UploaderEntitiesCommand extends Command
 
                 $this->preProcess($class, $field, $annotation);
 
-                $publicPath = $annotation->getFilesystem()->getPublic("", $annotation->getStorage());
+                $publicPath = $annotation->getFlysystem()->getPublic("", $annotation->getStorage());
                 $fileList = $this->getFileList($class, $field, $annotation);
                 $nTotalFiles += count($fileList);
                 $noPropertyFound = false;
@@ -164,7 +164,7 @@ class UploaderEntitiesCommand extends Command
     protected function getFileList(string $class, string $field, Uploader $annotation)
     {
         $classPath  = dirname($annotation->getPath($class, $field));
-        $filesystem = Uploader::getFilesystem($annotation->getStorage());
+        $filesystem = Uploader::getFlysystem($annotation->getStorage());
 
         $propertyFqcn = $class."::".$field;
         if(!array_key_exists($propertyFqcn, $this->fileList)) {
@@ -172,7 +172,7 @@ class UploaderEntitiesCommand extends Command
             $this->fileList[$propertyFqcn] = array_values(array_filter(array_map(function($f) use ($annotation) {
 
                 if(!$f instanceof FileAttributes) return null;
-                return $annotation->getFilesystem()->getPublic($f->path(), $annotation->getStorage());
+                return $annotation->getFlysystem()->getPublic($f->path(), $annotation->getStorage());
 
             }, $filesystem->getOperator()->listContents($classPath)->toArray())));
         }
@@ -201,8 +201,8 @@ class UploaderEntitiesCommand extends Command
 
     public function deleteOrphanFiles(Uploader $annotation, array $fileList)
     {
-        $publicPath = $annotation->getFilesystem()->getPublic("", $annotation->getStorage());
-        $filesystem = Uploader::getFilesystem($annotation->getStorage());
+        $publicPath = $annotation->getFlysystem()->getPublic("", $annotation->getStorage());
+        $filesystem = Uploader::getFlysystem($annotation->getStorage());
         foreach ($fileList as $file)
             $filesystem->delete(str_lstrip($file, $publicPath));
 

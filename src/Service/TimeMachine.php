@@ -24,28 +24,28 @@ use BackupManager\Manager as BackupManager;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Exception;
-use League\Flysystem\Filesystem as Flysystem;
-use League\Flysystem\FilesystemOperator;
-use League\FlysystemBundle\Lazy\LazyFactory;
+use League\Flysystem\Filesystem;
 use Phar;
 use PharData;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use UnexpectedValueException;
 
 class TimeMachine extends BackupManager implements TimeMachineInterface
 {
     /** @var CompressorProvider */
     protected $compressors;
+
     /** @var FilesystemProvider */
     protected $filesystems;
-    /** @var DatabaseProvider */
+    /** @var array */
     protected $filesystemConfigs;
+
     /** @var DatabaseProvider */
     protected $databases;
-    /** @var DatabaseProvider */
+    /** @var array */
     protected $databaseConfigs;
 
-
-    public function getProjectDir() { return $this->parameterBag->get("kernel.project_dir"); }
+    public function getCacheDir() { return $this->cacheDir."/timemachine"; }
     public function preventAbort()
     {
         ignore_user_abort(true);
@@ -59,16 +59,21 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         }
     }
 
-    public function __construct(LazyFactory $lazyFactory, Registry $doctrine, ParameterBagInterface $parameterBag)
+    public function __construct(Flysystem $flysystem, Registry $doctrine, ParameterBagInterface $parameterBag)
     {
         //
-        // Prepare fs configuration
-        synopsis($lazyFactory);
-
-
+        // Common variables
+        $this->cacheDir      = $parameterBag->get("kernel.cache_dir");
+        $this->compression   = $parameterBag->get("base.time_machine.compression");
+        $this->snapshotLimit = $parameterBag->get("base.time_machine.snapshot_limit");
 
         //
-        // Prepare db configuration
+        // Prepare filesystem configuration
+        foreach($flysystem->getStorageNames() as $storageName)
+            $this->filesystemConfigs[] = ['type' => 'local', 'name' => $storageName];
+
+        //
+        // Prepare database configuration
         foreach($doctrine->getConnectionNames() as $connectionName => $_) {
 
             $params = $doctrine->getConnection($connectionName)->getParams();
@@ -85,7 +90,8 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
 
         //
         // Build providers
-        $filesystems = new FilesystemProvider($fsConfig);
+        $filesystems = new FilesystemProvider(new Config(["type" => "Local", "root" => $this->getCacheDir()]));
+
         $filesystems->add(new Awss3Filesystem);
         $filesystems->add(new GcsFilesystem);
         $filesystems->add(new DropboxFilesystem);
@@ -95,7 +101,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $filesystems->add(new SftpFilesystem);
         $filesystems->add(new WebdavFilesystem);
 
-        $databases = new DatabaseProvider($dbConfig);
+        $databases = new DatabaseProvider(new Config($this->databaseConfigs));
         $databases->add(new MysqlDatabase);
         $databases->add(new PostgresqlDatabase);
 
@@ -107,34 +113,19 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         $this->filesystems = $filesystems;
         $this->databases   = $databases;
         $this->compressors = $compressors;
-
-        // Common variables
-        $this->snapshotLimit = intval($snapshotLimit);
-        $this->compression = $compression;
-        $this->projectDir  = $projectDir;
     }
 
     //
     //
-    protected string $compression;
-    public function getCompression() { return $this->compression; }
-    public function setCompression(string $compression)
+    protected ?string $compression;
+    public function getCompression(): ?string { return $this->compression; }
+    public function setCompression(?string $compression)
     {
         $this->compression = $compression;
         return $this;
     }
 
-    public static function getPharCompression(string $compression)
-    {
-        switch($compression) {
-
-            case 'gz' : return Phar::GZ;
-            case 'bz2': return Phar::BZ2;
-            default   : return Phar::None;
-        }
-    }
-
-    protected array $destinations;
+    protected array $destinations = [];
     public function getDestinations(int|array $ids): array
     {
         if(!is_array($ids)) $ids = [$ids];
@@ -158,7 +149,7 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
     public function getDatabase(string $name): Database { return $this->databases->get($name); }
     public function getDatabaseConfiguration(string $name): Database { return $this->databases->get($name); }
     public function getDatabaseList(string $name): Database { return $this->databases->get($name); }
-    public function getStorage(string $name): Flysystem { return $this->filesystems->get($name); }
+    public function getStorage(string $name): Filesystem { return $this->filesystems->get($name); }
     public function getStorageList(): array { return [] /*$this->filesystems->get($name)*/; }
 
     public function getLastSnapshot(int|array $ids): array { $snapshot = $this->getSnapshots(); return end($snapshot); }
@@ -200,11 +191,5 @@ class TimeMachine extends BackupManager implements TimeMachineInterface
         } catch (Exception $e) { throw $e; }
 
         // return $this->makeRestore()->run($fs, , $this->databaseName, $this->compression);
-    }
-
-    public function rollback()
-    {
-        if(!file_exists(".timemachine"))
-            throw new UnexpectedValueException("No time machine state found in ".$this->getProjectDir()."/.timemachine. ");
     }
 }

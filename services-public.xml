@@ -18,8 +18,8 @@
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
 
-        <service id="base.service.timemachine" alias="Base\Service\TimeMachine" />
-        <service id="Base\Service\TimeMachineInterface" alias="base.service.timemachine"/>
+        <service id="time_machine" alias="Base\Service\TimeMachine" />
+        <service id="Base\Service\TimeMachineInterface" alias="time_machine"/>
 
         <service id="base.service.file" alias="Base\Service\FileService" />
         <service id="Base\Service\FileServiceInterface" alias="base.service.file"/>
@@ -33,8 +33,8 @@
         <service id="base.service.maternity" alias="Base\Service\MaternityService" />
         <service id="Base\Service\MaternityServiceInterface" alias="base.service.maternity"/>
 
-        <service id="base.filesystem" alias="Base\Service\Filesystem" />
-        <service id="setting_bag" alias="Base\Service\Settings" />
+        <service id="flysystem" alias="Base\Service\Flysystem" />
+        <service id="Base\Service\FlysystemInterface" alias="flysystem"/>
 
         <service id="setting_bag" alias="Base\Service\SettingBag" />
         <service id="Base\Service\SettingBagInterface" alias="setting_bag"/>
