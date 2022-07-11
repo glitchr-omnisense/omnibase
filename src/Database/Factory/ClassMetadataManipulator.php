@@ -360,7 +360,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldPath] ?? null;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldName] ?? null;
         return ($fieldName != null);
     }
 
