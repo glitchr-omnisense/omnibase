@@ -71,6 +71,9 @@ thread_state:
   state_publish_password:
     _singular: "protégé"
     _plural: "protégés"
+  state_delete:
+    _singular: "supprimé"
+    _plural: "supprimés"
 
 thread_workflow:
   workflow_approved:
@@ -85,9 +88,6 @@ thread_workflow:
   workflow_suspended:
     _singular: "suspendu"
     _plural: "suspendus"
-  workflow_deleted:
-    _singular: "supprimé"
-    _plural: "supprimés"
 
 spam_score:
   _singular: "score"

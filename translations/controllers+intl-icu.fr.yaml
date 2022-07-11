@@ -8,20 +8,20 @@ thread_search:
   excerpt: "Rechercher dans l'extrait"
   title: "Rechercher dans le titre"
 
+security_birthdate:
+  title: "À vos agendas, rendez-vous pris"
+
+app_index:
+  title: Retour au site
+  
 security_login:
   title: "Se Connecter"
 security_logout:
   title: "Se Déconnecter"
 security_maintenance:
   title: "Maintenance en cours !"
-  description: "{downtime, plural,
-          =0 {}
-          other {Nous sommes actuellement en maintenance depuis le {0} à {1}. De retour très bientôt !}
-        }"
-  estimate: "{uptime, plural,
-                =0 {Il n'y a pas encore d'estimation. Merci de revenir plus tard.}
-                other {Le temps de maintenance restant est estimé à {0} {1} {2}.}
-              }"
+  description: "Nous sommes actuellement en maintenance. Nous serons de retour en ligne très bientôt !"
+
   days: "{0, plural,
             =0 {}
             =1 {# jour}

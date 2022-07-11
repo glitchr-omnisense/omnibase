@@ -4,13 +4,11 @@ namespace Base\Controller\UX;
 
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Model\Autocomplete;
-use Base\Service\Obfuscator;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
-use Hashids\Hashids;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;

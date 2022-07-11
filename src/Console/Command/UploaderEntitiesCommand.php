@@ -71,10 +71,10 @@ class UploaderEntitiesCommand extends Command
 
 
                 if($annotation->getMissable()) {
-                    $output->section()->writeln("              $class::$field <warning> is missable.. cannot have orphan..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
+                    $output->section()->writeln("             $class::$field <warning> is missable.. cannot have orphan..</warning>", OutputInterface::VERBOSITY_VERY_VERBOSE);
                     continue;
                 } else {
-                    $output->section()->writeln("              Processing <info>$class::$field</info>..");
+                    $output->section()->writeln("             Processing <info>$class::$field</info>..");
                 }
 
                 $this->preProcess($class, $field, $annotation);
@@ -84,8 +84,8 @@ class UploaderEntitiesCommand extends Command
                 $nTotalFiles += count($fileList);
                 $noPropertyFound = false;
 
-                if($this->uuid) $output->section()->writeln("\t           $class::$field <ln>UUID \"$this->uuid\" found.</ln>", OutputInterface::VERBOSITY_VERBOSE);
-                else $output->section()->writeln("\t           $class::$field <ln>".count($fileList)." file(s) found.</ln>", OutputInterface::VERBOSITY_VERBOSE);
+                if($this->uuid) $output->section()->writeln("\t     $class::$field <ln>UUID \"$this->uuid\" found.</ln>", OutputInterface::VERBOSITY_VERBOSE);
+                else $output->section()->writeln("\t     $class::$field <ln>".count($fileList)." file(s) found.</ln>", OutputInterface::VERBOSITY_VERBOSE);
 
                 foreach($fileList as $file)
                     $output->section()->writeln("\t           <ln>* ./".str_lstrip($file,$publicPath)."</ln>", OutputInterface::VERBOSITY_DEBUG);

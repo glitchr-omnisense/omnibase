@@ -2,6 +2,8 @@
 
 namespace Base\Controller\UX;
 
+use Base\BaseBundle;
+use Base\Entity\Layout\ImageCrop;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
@@ -15,6 +17,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
+use Doctrine\ORM\EntityManagerInterface;
 
 /** @Route("", name="ux_") */
 class FileController extends AbstractController
@@ -41,18 +44,22 @@ class FileController extends AbstractController
      */
     protected $imageCropRepository;
 
-    public function __construct(Filesystem $filesystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?bool $localCache = null)
+    /**
+     * @var ?bool
+     */
+    protected $localCache;
+
+    public function __construct(Filesystem $filesystem, ImageService $imageService, EntityManagerInterface $entityManager, ?bool $localCache = null)
     {
-        $this->imageCropRepository = $imageCropRepository;
+        if(BaseBundle::hasDoctrine())
+            $this->imageCropRepository = $entityManager->getRepository(ImageCrop::class);
+
         $this->imageService = $imageService;
         $this->fileService  = cast($imageService, FileService::class);
         $this->filesystem   = $filesystem;
 
         $this->localCache = $localCache;
     }
-
-    protected $localCache;
-
 
     /**
      * @Route("/contents/{hashid}", name="serve")

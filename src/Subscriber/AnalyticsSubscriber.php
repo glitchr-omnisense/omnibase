@@ -2,10 +2,12 @@
 
 namespace Base\Subscriber;
 
+use Base\BaseBundle;
+
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -15,23 +17,24 @@ use Twig\Environment;
 
 class AnalyticsSubscriber implements EventSubscriberInterface
 {
-    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router, TranslatorInterface $translator, Environment $twig, UserRepository $userRepository, ?GaService $googleAnalyticsService = null)
+    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router, TranslatorInterface $translator, Environment $twig, EntityManagerInterface $entityManager, ?GaService $googleAnalyticsService = null)
     {
         $this->tokenStorage = $tokenStorage;
         $this->router = $router;
 
         $this->twig = $twig;
         $this->translator = $translator;
-        $this->userRepository = $userRepository;
+
+        if(BaseBundle::hasDoctrine())
+            $this->userRepository = $entityManager->getRepository(User::class);
 
         $this->gaService = $googleAnalyticsService;
     }
 
     public static function getSubscribedEvents(): array
     {
-        return [
-            KernelEvents::REQUEST  => [['onUserRequest', 1], ['onGoogleAnalyticsRequest']]
-        ];
+        if(!BaseBundle::hasDoctrine()) return [];
+        return [ KernelEvents::REQUEST  => [['onUserRequest', 8], ['onGoogleAnalyticsRequest', 7]] ];
     }
 
     public function onUserRequest(RequestEvent $event)
@@ -48,18 +51,18 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
-        $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
+        $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),
         ]));
 
         if(count($onlineUsers)) {
 
-            $this->twig->addGlobal("app.user_manager", [
+            $this->twig->addGlobal("base.user_manager", [
                 "online" => $onlineUsers,
                 "active" => $activeUsers,
             ]);
 
-            $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
+            $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
                 "default" => [
                     "active" => [
                         "label" => $this->translator->trans("@messages.user_analytics.active_users", [count($activeUsers)]),
@@ -116,7 +119,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
                 ]
             ]);
 
-            $this->twig->addGlobal("app.user_analytics", array_merge($this->twig->getGlobals()["app.user_analytics"] ?? [], [
+            $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
                 "google" => $entries
             ]));
         }

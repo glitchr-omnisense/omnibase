@@ -1,4 +1,8 @@
-# MENU controller
+backoffice:
+  title: "Backoffice"
+  subtitle: "Administre ton site internet d'ici !"
+
+
 Home: Accueil
 Back to website: Retour au site
 Valid: Valider
@@ -30,7 +34,12 @@ crud:
       placeholder: "{0} ou /vers/page/local"
 
 # ACTION buttons
+
 action:
+  batch_approve: "Approuver"
+  batch_publish: "Publier"
+  batch_delete: "Supprimer"
+
   index: "Index"
   create_and_continue: 'Créer et continuer'
   save: 'Enregistrer'

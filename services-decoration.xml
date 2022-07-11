@@ -22,12 +22,16 @@
         <service id="Base\Twig\AppVariable" decorates="twig.app_variable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id=".inner"/>
+            <argument type="service" id="twig.ea_variable" />
+            <argument type="service" id="twig.random_variable" />
+            <argument type="service" id="twig.site_variable" />
+            <argument type="service" id="twig.backoffice_variable" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
             <argument type="service" id="locale_provider" />
-            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+
         </service>
 
         <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
@@ -35,17 +39,20 @@
             <argument type="service" id=".inner" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="setting_bag" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="cache.adapter" />
             <bind key="$debug">%kernel.debug%</bind>
+            <bind key="$environment">%kernel.environment%</bind>
         </service>
 
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
-            <argument type="service" id="setting_bag" />
+            <argument type="service" id="router" />
         </service>
 
+        <service id="Base\Backend\Factory\MenuFactory"         parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory">
+            <argument type="service" id="router" />
+        </service>
         <service id="Base\Backend\Factory\AdminContextFactory" parent="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory" decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\AdminContextFactory">
             <argument type="service" id="ea_extension" />
         </service>

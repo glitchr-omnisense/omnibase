@@ -27,6 +27,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="base.service" />
+            <argument type="service" id="setting_bag" />
         </service>
 
         <service id="Base\Controller\LocaleController">
@@ -44,24 +45,23 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="base.filesystem" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="App\Repository\Layout\ImageCropRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Controller\Client\Layout\WidgetController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
-            <argument type="service" id="App\Repository\Layout\Widget\PageRepository" />
-            <argument type="service" id="App\Repository\Layout\Widget\AttachmentRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+
         <service id="Base\Controller\Client\Layout\ShortController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="setting_bag" />
-            <argument type="service" id="App\Repository\Layout\ShortRepository" />
+            <argument type="service" id="router" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Subscriber\RouterSubscriber">
@@ -79,7 +79,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="router" />
         </service>
-        <service id="Base\Subscriber\ParameterBagSubscriber">
+        <service id="Base\Subscriber\HotParameterBagSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
@@ -98,14 +98,14 @@
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
         <service id="Base\Service\SettingBagInterface" alias="Base\Service\SettingBag"/>
         <service id="Base\Service\SettingBag" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="assets.packages" />
             <argument type="service" id="cache.adapter" />
@@ -118,7 +118,7 @@
             <argument type="service" id="notifier.channel_policy" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="cache.adapter" />
-            <argument type="service" id="parameter_bag.hot" />
+            <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="setting_bag" />
@@ -137,7 +137,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="twig.extension.base" />
             <argument type="service" id="slugger" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="doctrine" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="security.csrf.token_manager" />
@@ -148,6 +148,8 @@
             <argument type="service" id="setting_bag" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="base.service.icon" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="router" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
@@ -156,6 +158,23 @@
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Service\MaintenanceProvider" public="true">
+            <argument type="service" id="router" />
+            <argument type="service" id="setting_bag" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="locale_provider" />
+            <argument type="service" id="security.token_storage" />
+        </service>
+
+        <service id="Base\Service\MaternityService" public="true">
+            <argument type="service" id="router" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="setting_bag" />
+            <argument type="service" id="security.authorization_checker" />
+            <argument type="service" id="security.token_storage" />
         </service>
 
         <service id="Base\Service\Paginator" public="true">
@@ -171,8 +190,7 @@
 
         <service id="Base\Service\WidgetProvider" public="true">
             <tag name="twig.runtime" />
-            <argument type="service" id="App\Repository\Layout\WidgetRepository" />
-            <argument type="service" id="App\Repository\Layout\Widget\SlotRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Form\Extension\FormTypeFlowExtension" >
@@ -193,8 +211,21 @@
             <argument type="service" id="translator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
-
         </service>
+
+        <service id="Base\Service\TimeMachineInterface" alias="Base\Service\TimeMachine"/>
+        <service id="Base\Service\TimeMachine" parent="BackupManager\Manager" public="true">
+            <argument type="service" id="flysystem.adapter.lazy.factory" />
+            <argument type="service" id="doctrine" />
+            <argument type="service" id="parameter_bag" />
+        </service>
+
+        <service id="Base\Console\Command\TimeMachineDoctrineCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
+        <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
+        <service id="Base\Console\Command\TimeMachineRollbackCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
+        <service id="Base\Console\Command\TimeMachineSnapshotRestoreCommand" parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="base.service.timemachine" /></service>
 
         <service id="Base\Console\Command\BaseMappingCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
         <service id="Base\Console\Command\ThreadPublishableCommand" parent="Base\Console\Command"><tag name="console.command" /></service>
@@ -270,6 +301,7 @@
 
             <argument type="service" id="router" />
             <argument type="service" id="setting_bag" />
+            <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Controller\SecurityController">
@@ -278,10 +310,9 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="App\Repository\UserRepository" />
-            <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="base.service" />
             <argument type="service" id="security.token_storage" />
+            <argument type="service" id="translator" />
         </service>
 
         <!-- Type declaration -->
@@ -297,11 +328,6 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
-        </service>
-
-        <service id="Base\Subscriber\MaintenanceSubscriber">
-            <tag name="kernel.event_subscriber" />
-            <argument type="service" id="base.service" />
         </service>
 
         <service id="Base\Subscriber\EagerSubscriber">
@@ -321,7 +347,7 @@
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority="256" />
+            <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
@@ -367,7 +393,6 @@
             <argument type="service" id="flysystem.adapter.lazy.factory" />
             <argument type="service" id="parameter_bag" />
         </service>
-
 
         <!-- ImagineInterface instance use imagick by default (NB: GD do not support CMYK) -->
         <service id="imagine.bitmap" alias="imagine.adapter.imagick" />
@@ -428,6 +453,7 @@
         </service>
 
         <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
+            <argument type="service" id="doctrine" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
@@ -455,12 +481,16 @@
             <argument type="service" id="setting_bag" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="security.firewall.map" />
+            <argument type="service" id="locale_provider" />
+            <argument type="service" id="base.service.maintenance" />
+            <argument type="service" id="base.service.maternity" />
         </service>
 
          <service id="Base\Security\Voter\RouteVoter">
             <tag name="security.voter" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
+            <argument type="service" id="locale_provider" />
         </service>
 
         <service id="Base\Database\Factory\EntityExtension" public="true" />
@@ -478,8 +508,23 @@
             <argument type="service" id="base.service" />
         </service>
 
-        <service id="Base\Twig\Variable\RandomVariable"    public="true"><tag name="twig.runtime" /></service>
-        <service id="Base\Twig\Variable\EasyAdminVariable" public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Twig\Variable\BackofficeVariable" parent="Base\Twig\Variable\SiteVariable" public="true"><tag name="twig.runtime" /></service>
+        <service id="Base\Twig\Variable\SiteVariable" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="router" />
+            <argument type="service" id="translator" />
+            <argument type="service" id="locale_provider" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.service.maintenance" />
+            <argument type="service" id="base.service.maternity" />
+        </service>
+
+        <service id="Base\Twig\Variable\RandomVariable"     public="true"><tag name="twig.variable" /></service>
+        <service id="Base\Twig\Variable\EasyAdminVariable"  public="true">
+            <tag name="twig.variable" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+        </service>
+
         <service id="Base\Twig\Extension\BaseTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
@@ -525,10 +570,7 @@
         <service id="Base\Validator\Constraints\HexcodeValidator"          parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\NotBlankValidator"         parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
 
-        <service id="Base\Validator\ConstraintEntityValidator" parent="Base\Validator\ConstraintValidator">
-            <tag name="validator.constraint_validator" />
-            <argument type="service" id="doctrine" />
-        </service>
+        <service id="Base\Validator\ConstraintEntityValidator" parent="Base\Validator\ConstraintValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\UniqueEntityValidator"     parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
         <service id="Base\Validator\Constraints\StringCaseEntityValidator" parent="Base\Validator\ConstraintEntityValidator"><tag name="validator.constraint_validator" /></service>
 
@@ -552,7 +594,7 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
         <service id="Base\Controller\Client\Thread\SearchController">
             <tag name="controller.service_arguments" />
@@ -566,15 +608,16 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+
         <service id="Base\Controller\Client\User\SettingsController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="base.service" />
-            <argument type="service" id="App\Repository\UserRepository" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
         <service id="Base\Security\UserChecker"           >
@@ -602,6 +645,9 @@
             <argument type="service" id="locale_provider" />
             <argument type="service" id="referrer" />
             <argument type="service" id="router" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="base.service.maintenance" />
+            <argument type="service" id="base.service.maternity" />
             <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
@@ -647,6 +693,7 @@
         <service id="Base\Form\Type\Layout\SettingListType">
             <tag name="form.type" />
             <argument type="service" id="setting_bag" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         <service id="Base\Form\Type\Layout\WidgetListType">
@@ -812,6 +859,7 @@
             <tag name="ea.field_configurator" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
+            <argument type="service" id="router" />
         </service>
 
         <service id="Base\Field\Configurator\NumberConfigurator">

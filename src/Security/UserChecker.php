@@ -40,6 +40,8 @@ class UserChecker implements UserCheckerInterface
     public function checkPostAuth(UserInterface $user)
     {
         if (!$user instanceof User) return;
+        if (class_implements_interface($user, LoginRestrictionInterface::class))
+            throw new CustomUserMessageAccountStatusException("@notifications.login.restricted", ["importance" => "danger"]);
 
         if ($user->isDisabled()) {
 

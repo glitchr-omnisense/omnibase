@@ -26,6 +26,7 @@ locale:
 
 backoffice:
     title: "Administration"
+    update: "Les mises à jour ont bien été prises en compte"
 
 profile:
     title: "Voir mon profil"
@@ -40,36 +41,38 @@ login:
 base:
     return: "Page précédente"
     returnUrl: "<a href=\"{0}\">Page précédente</a>"
+    datetime: "le {0} à {1}"
+    countdown: "dans {0}"
 
     csrfToken: "Jeton CSRF invalide. Merci de recommencer."
     years: "{0, plural,
                 =0 { }
-                =1 {# an }
-                other {# ans }
+                =1 {an }
+                other {ans }
             }"
     months: "{0, plural,
                 =0 { }
-                other {#  }
+                other {mois }
             }"
     days: "{0, plural,
                 =0 { }
-                =1 {# jour }
-                other {# jours }
+                =1 {jour }
+                other {jours }
             }"
     hours: "{0, plural,
                 =0 { }
-                =1 {# heure }
-                other {# heures }
+                =1 {heure }
+                other {heures }
             }"
     minutes: "{0, plural,
                 =0 { }
-                =1 {# minute }
-                other {# minutes }
+                =1 {minute }
+                other {minutes }
                 }"
     seconds: "{0, plural,
                 =0 { }
-                =1 {# seconde }
-                other {# secondes }
+                =1 {seconde }
+                other {secondes }
                 }"
 
 user_analytics:

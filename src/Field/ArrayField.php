@@ -31,7 +31,6 @@ class ArrayField extends CollectionField implements FieldInterface
             ->setCustomOption(self::OPTION_ALLOW_DELETE, true)
             ->setCustomOption(self::OPTION_ENTRY_IS_COMPLEX, null)
             ->setCustomOption(self::OPTION_ENTRY_TYPE, null)
-            ->setCustomOption(self::OPTION_SHOW_ENTRY_LABEL, false)
             ->setCustomOption(self::OPTION_RENDER_EXPANDED, false)
             ->setFormTypeOption(self::OPTION_PLACEHOLDER, null);
     }

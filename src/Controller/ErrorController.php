@@ -52,7 +52,7 @@ class ErrorController extends AbstractController
 
     public function Rescue(\Throwable $exception): Response
     {
-        $this->profiler->disable();
+        if($this->profiler) $this->profiler->disable();
 
         $flattenException = $this->htmlErrorRenderer->render($exception);
 

@@ -91,8 +91,6 @@ class DoctrineDatabaseImportCommand extends Command
                     $entry = array_map(fn($v) => $v ? trim($v) : ($v === "" ? null : $v), explode($entrySeparator, str_rstrip(trim($entry), $entrySeparator)));
             }
 
-            if($propertyPath == "translations.fr-FR.keywords:explode(,)") exit(1);
-
             $propertyName = preg_replace("/\:[^\.]*/", "", $propertyPath);
             if(substr_count($propertyName, "[") > 1)
                 throw new Exception("Backets \"[]\" are expected to appear only once at the end.. \"".$propertyName."\"");
@@ -591,7 +589,7 @@ class DoctrineDatabaseImportCommand extends Command
             $count  = $countData > 0 ? $countNewData."/".$countData : "0";
             $plural = ($countNewData > 1);
 
-            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], null, $plural ? Translator::TRANSLATION_PLURAL : Translator::TRANSLATION_SINGULAR)) .'</ln>';
+            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], null, $plural ? Translator::NOUN_PLURAL : Translator::NOUN_SINGULAR)) .'</ln>';
 
         }, array_keys(array_filter($entityData)))));
 

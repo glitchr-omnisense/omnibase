@@ -3,7 +3,7 @@
 
 {% set _content_title = block('content_title') ?? null %}
 {% if _content_title is empty %}
-    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? null)|default(page_title is defined ? page_title|raw : (ea is defined ? ea.dashboardTitle|raw : '')) %}
+    {% set _content_title = ea_extra.title(ea.crud.getCurrentPage() ?? page_title ?? ea.dashboardTitle) %}
 {% endif %}
 
 <!DOCTYPE html>
@@ -18,7 +18,6 @@
     {% endblock head_metas %}
 
     {% set page_title_block_output %}{% block page_title %}{{ _content_title }}{% endblock %}{% endset %}
-
     <title>{{ [(block('page_title_block_output') ?? _content_title|striptags|raw), base.settings.get("base.settings.title.backoffice")["_self"] ?? null]|uniq|join_if_exists(" - ") }}</title>
 
     {% block configured_stylesheets %}
@@ -156,7 +155,9 @@
                                         <div id="header-logo">
                                             {% block header_logo %}
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
-                                                    <div class="logo-custom">{{ ea.dashboardTitle|raw }}</div>
+                                                    <div class="logo-custom">
+                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(800,800) }}" />
+                                                    </div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>
                                                 </a>
                                             {% endblock header_logo %}
@@ -216,9 +217,9 @@
 
                                 {% block header_online_users %}
                                 <ul class="online-user-wrapper" id="online-users">
-                                    {% for online_user in app.user_manager.online ?? [] %}
+                                    {% for online_user in base.user_manager.online ?? [] %}
                                     {% if online_user != app.user %}
-                                    <li class="{{ online_user in app.user_manager.active ? 'active' : ''}} user-details">
+                                    <li class="{{ online_user in base.user_manager.active ? 'active' : ''}} user-details">
                                     <div class=" img-fluid">
                                         {% if null == online_user.avatarFile %}
                                         <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
@@ -234,22 +235,22 @@
                                 <div class="online-user-dropdown navbar-custom-menu">
                                     <div class="dropdown user-menu-wrapper">
                                         <a class="dropdown-appearance-button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
-                                            <i class="{{ (app.user_manager.online ?? [])|length ? 'fas fa-cloud' : 'fas fa-cloud-moon'}}"></i>
+                                            <i class="{{ (base.user_manager.online ?? [])|length ? 'fas fa-cloud' : 'fas fa-cloud-moon'}}"></i>
                                         </a>
 
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            {% if app.user_analytics.label is defined %}
-                                                <li class="dropdown-appearance-label"><span>{{ app.user_analytics.label|mb_ucfirst }}</span></li>
-                                                {% for entry in app.user_analytics.default ?? [] %}
+                                            {% if base.user_analytics.label is defined %}
+                                                <li class="dropdown-appearance-label"><span>{{ base.user_analytics.label|mb_ucfirst }}</span></li>
+                                                {% for entry in base.user_analytics.default ?? [] %}
                                                 <li><a href="#" class="dropdown-item">{{ entry.icon|iconify }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
                                                 {% endfor %}
 
-                                                {% if app.user_analytics.google is defined and app.user_analytics.google is not empty %}
+                                                {% if base.user_analytics.google is defined and base.user_analytics.google is not empty %}
                                                 <li><hr class="dropdown-divider"></li>
                                                 {% endif %}
                                             {% endif %}
 
-                                            {% for entry in app.user_analytics.google ?? [] %}
+                                            {% for entry in base.user_analytics.google ?? [] %}
                                                 <li><a href="#" class="dropdown-item">{{ entry.icon|iconify }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
                                             {% endfor %}
                                         </ul>

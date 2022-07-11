@@ -40,7 +40,7 @@ class RouterSubscriber implements EventSubscriberInterface
         // Redirect IP if restriction enabled
         if($route && !$this->authorizationChecker->isGranted("VALIDATE_IP", $route)) {
 
-            $event->setResponse(new RedirectResponse(get_url(null, $this->settingBag->host())));
+            $event->setResponse(new RedirectResponse(get_url(null, $this->router->getHost())));
             return $event->stopPropagation();
         }
 

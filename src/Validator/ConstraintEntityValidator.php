@@ -9,43 +9,12 @@ use Symfony\Component\Validator\Violation\ConstraintViolationBuilderInterface;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Contracts\Translation\TranslatorInterface;
-
 /**
  * @Annotation
  */
 abstract class ConstraintEntityValidator extends ConstraintValidator
 {
-    protected $doctrine;
     protected $em;
-
-    public function __construct(TranslatorInterface $translator, ManagerRegistry $doctrine)
-    {
-        $this->doctrine = $doctrine;
-        parent::__construct($translator);
-    }
-
-    public function getDoctrine()
-    {
-        return $this->doctrine;
-    }
-
-    public function getEntityManager($entityName)
-    {
-        if (is_object($entityName)) $class = get_class($entityName);
-        else $class = $entityName;
-
-        return $this->getDoctrine()->getManagerForClass($class);
-    }
-
-    public function getRepository($entityName)
-    {
-        if (is_object($entityName)) $class = get_class($entityName);
-        else $class = $entityName;
-
-        return $this->getEntityManager($class)->getRepository($class);
-    }
 
     public function getOriginalEntity($entity)
     {
@@ -53,7 +22,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $originalEntity = new $class();
 
         // Hydrate class
-        $attributes = $this->getEntityManager($class)->getUnitOfWork()->getOriginalEntityData($entity);
+        $attributes = $this->em->getUnitOfWork()->getOriginalEntityData($entity);
         foreach ($attributes as $key => $value) {
 
             // One gets the setter's name matching the attribute.
@@ -73,8 +42,8 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
     {
         $classMetadata = $this->getClassMetadata($entity);
 
-        $uow = $this->getEntityManager($classMetadata->getName())->getUnitOfWork();
-        $uow->recomputeSingleChangeSet($classMetadata->getName(), $entity);
+        $uow = $this->em->getUnitOfWork();
+        $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
 
         return $uow->getEntityChangeSet($entity);
     }
@@ -84,7 +53,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         if (is_object($entityName)) $class = get_class($entityName);
         else $class = $entityName;
 
-        return $this->getEntityManager($class)->getClassMetadata($class);
+        return $this->em->getClassMetadata($class);
     }
 
     public function buildViolation(Constraint $constraint, $value = null): ConstraintViolationBuilderInterface

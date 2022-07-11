@@ -2,6 +2,7 @@
 
 namespace Base\Traits;
 
+use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
@@ -18,7 +19,12 @@ use Symfony\Component\Security\Http\FirewallMapInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Base\Twig\Environment;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectRepository;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 trait BaseTrait
 {
@@ -26,8 +32,34 @@ trait BaseTrait
     public static function getService()          : ?BaseService          { return (self::class === BaseService::class) ? BaseService::$instance : BaseService::getService(); }
     public static function getSettingBag()       : ?SettingBag           { return (self::class === BaseService::class) ? BaseService::$settings : BaseService::getSettingBag(); }
 
-    public static function isEntity(mixed $entity)     : bool { return BaseService::getClassMetadataManipulator()->isEntity($entity); }
+    public static function getDoctrine()                   : ?ManagerRegistry { return (self::class === BaseService::class) ? BaseService::$doctrine : BaseService::getDoctrine(); }
+    public static function getObjectManager(mixed $entity) : ?ObjectManager   { return (self::class === BaseService::class) ? BaseService::$doctrine->getManagerForClass(is_object($entity) ? get_class($entity) : $entity)   : BaseService::getObjectManager($entity); }
+    public static function getEntityManager(bool $reopen = false): ?EntityManagerInterface
+    {
+        if(self::class !== BaseService::class)
+            return BaseService::getEntityManager();
 
+        /**
+         * @var EntityManager
+         */
+        $entityManager = BaseService::$doctrine->getManager(BaseService::$doctrine->getDefaultManagerName());
+
+        if (!$entityManager) return null;
+        if (!$entityManager->isOpen()) {
+
+            if(!$reopen) return null;
+            $entityManager = $entityManager->create(
+                $entityManager->getConnection(),
+                $entityManager->getConfiguration()
+            );
+        }
+
+        return $entityManager;
+    }
+
+    public static function getRepository(mixed $object) : ?ObjectRepository  { return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object); }
+    public static function isEntity(mixed $entity)         : bool            { return BaseService::getClassMetadataManipulator()->isEntity($entity); }
+    
     public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }
     public static function getEnvironment()   : string { return (self::class === BaseService::class) ? BaseService::$environment   : BaseService::getEnvironment(); }
     public static function getPublicDir()     : string { return BaseService::getProjectDir() . "/public"; }
@@ -38,9 +70,9 @@ trait BaseTrait
     public static function getDataDir()       : string { return BaseService::getProjectDir() . "/data"; }
 
     public static function getClassMetadataManipulator()  : ?ClassMetadataManipulator { return (self::class === BaseService::class) ? BaseService::$classMetadataManipulator   : BaseService::getClassMetadataManipulator(); }
-    public static function getRequestStack()  : ?RequestStack            { return (self::class === BaseService::class) ? BaseService::$requestStack : BaseService::getRequestStack(); }
+    public static function getTokenStorage()  : ?TokenStorageInterface   { return (self::class === BaseService::class) ? BaseService::$tokenStorage   : BaseService::getTokenStorage(); }
+    public static function getRequestStack()  : ?RequestStack            { return (self::class === BaseService::class) ? BaseService::$requestStack   : BaseService::getRequestStack(); }
     public static function getEntityHydrator(): ?EntityHydrator          { return (self::class === BaseService::class) ? BaseService::$entityHydrator : BaseService::getEntityHydrator(); }
-    public static function getEntityManager() : ?EntityManagerInterface  { return (self::class === BaseService::class) ? BaseService::$entityManager  : BaseService::getEntityManager(); }
     public static function getImageService()  : ?ImageService            { return (self::class === BaseService::class) ? BaseService::$imageService   : BaseService::getImageService(); }
     public static function getIconProvider()  : ?IconProvider            { return (self::class === BaseService::class) ? BaseService::$iconProvider   : BaseService::getIconProvider(); }
     public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
