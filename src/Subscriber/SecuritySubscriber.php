@@ -402,15 +402,19 @@ class SecuritySubscriber implements EventSubscriberInterface
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maintenanceProvider->redirectOnDeny($event, $this->localeProvider->getLocale()))
+        if($this->maintenanceProvider->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+            if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
+        }
     }
 
     public function onBirthRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
 
-        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale()))
+        if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+            if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
+        }
     }
 }

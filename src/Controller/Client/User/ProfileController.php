@@ -2,6 +2,7 @@
 
 namespace Base\Controller\Client\User;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
 
 use Base\Annotations\Annotation\Iconize;
