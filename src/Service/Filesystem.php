@@ -18,7 +18,7 @@ use League\FlysystemBundle\Lazy\LazyFactory;
 use ReflectionException;
 use Symfony\Component\Finder\Finder;
 
-class Filesystem
+class Filesystem extends LazyFactory
 {
     /**
      * @var FilesystemOperator

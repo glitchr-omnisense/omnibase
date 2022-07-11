@@ -105,17 +105,17 @@ class Configuration implements ConfigurationInterface
                             ->info('Access to public visitors')
                             ->defaultValue(false)
                         ->end()
-                        
+
                         ->booleanNode('user_access')
                             ->info('Access to users')
                             ->defaultValue(false)
                         ->end()
-                        
+
                         ->booleanNode('admin_access')
                             ->info('Access to administrators')
                             ->defaultValue(false)
                         ->end()
-                        
+
                         ->arrayNode('firewalls')
                             ->addDefaultChildrenIfNoneSet()
                                 ->prototype('scalar')
@@ -134,14 +134,14 @@ class Configuration implements ConfigurationInterface
                                     ->end()
                                     ->scalarNode('regex')
                                         ->info('Regex ')
-                                        ->defaultValue('^%env(SUBDOMAIN)%$')
+                                        ->defaultValue('^%env(HTTP_SUBDOMAIN)%$')
                                     ->end()
                                 ->end()
                             ->end()
                         ->end()
                     ->end()
                 ->end()
-                    
+
                 ->arrayNode('site')->addDefaultsIfNotSet()
                     ->children()
                         ->scalarNode('homepage')
@@ -233,7 +233,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
-                        
+
                         ->arrayNode('permitted_subdomains')
                             ->arrayPrototype()->addDefaultsIfNotSet()
                                 ->children()
@@ -250,7 +250,7 @@ class Configuration implements ConfigurationInterface
                                 ->end()
                             ->end()
                         ->end()
-                        
+
                     ->end()
                 ->end()
 
@@ -259,7 +259,7 @@ class Configuration implements ConfigurationInterface
                     ->children()
                         ->scalarNode('technical_support')
                             ->info('Hardcoded technical support')
-                            ->defaultValue('postmaster@%env(DOMAIN)%')
+                            ->defaultValue('postmaster@%env(HTTP_DOMAIN)%')
                         ->end()
                         ->scalarNode('admin_role')
                             ->info('Administrators receiving notifications')
@@ -286,6 +286,18 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('akismet')
                             ->info('AKISMET API Key')
                             ->defaultValue("")
+                            ->end()
+                    ->end()
+                ->end()
+                ->arrayNode('backup')->addDefaultsIfNotSet()
+                    ->children()
+                        ->scalarNode('snapshot_limit')
+                            ->info('Maximum number of snapshot in a configuration')
+                            ->defaultValue(9)
+                            ->end()
+                        ->scalarNode('compression')
+                            ->info('Default compression algorithm')
+                            ->defaultValue("gzip")
                             ->end()
                     ->end()
                 ->end()

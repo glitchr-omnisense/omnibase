@@ -83,7 +83,7 @@ class Notifier implements NotifierInterface
 
             $userRepository = $this->entityManager->getRepository(User::class);
             $adminUsers = $userRepository->findByRoles($this->adminRole);
-	    if(!is_cli()) $this->cache->save($item->set($adminUsers));
+            if(!is_cli()) $this->cache->save($item->set($adminUsers));
 
         } catch(DriverException|InvalidFieldNameException|TableNotFoundException $e) { $adminUsers = []; }
 

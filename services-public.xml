@@ -18,6 +18,9 @@
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
 
+        <service id="base.service.timemachine" alias="Base\Service\TimeMachine" />
+        <service id="Base\Service\TimeMachineInterface" alias="base.service.timemachine"/>
+
         <service id="base.service.file" alias="Base\Service\FileService" />
         <service id="Base\Service\FileServiceInterface" alias="base.service.file"/>
 

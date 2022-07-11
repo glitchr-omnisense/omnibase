@@ -64,5 +64,10 @@
             <argument type="service" id="request_stack" />
         </service>
 
+        <service id="BackupManager\Manager"    public="true" />
+        <service id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider"    public="true">
+            <argument type="service" id="request_stack" />
+        </service>
+
     </services>
 </container>

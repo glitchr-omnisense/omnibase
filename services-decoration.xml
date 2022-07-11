@@ -31,7 +31,7 @@
             <argument type="service" id="referrer" />
             <argument type="service" id="twig" />
             <argument type="service" id="locale_provider" />
-            
+
         </service>
 
         <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
