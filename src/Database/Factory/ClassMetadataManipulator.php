@@ -5,7 +5,6 @@ namespace Base\Database\Factory;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
-use Base\Field\Type\ArrayType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\AssociationType;
 use Base\Field\Type\SelectType;
@@ -15,7 +14,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
 use InvalidArgumentException;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -27,24 +28,23 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 class ClassMetadataManipulator
 {
     /**
-     * @var EntityManagerInterface
+     * @var ManagerRegistry
      * */
-    protected $entityManager;
+    protected $doctrine;
 
     /**
      * @var array
      */
     protected array $globalExcludedFields;
 
-    public function __construct(EntityManagerInterface $entityManager, array $globalExcludedFields = ['id', 'translatable', 'locale'])
+    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
+        $this->doctrine = $doctrine;
         $this->entityManager = $entityManager;
         $this->globalExcludedFields = $globalExcludedFields;
     }
 
-    public function getEntityManager()        : EntityManagerInterface { return $this->entityManager; }
-    public function getRepository($className) : ObjectRepository       { return $this->entityManager->getRepository($className); }
-
+    public function getEntityManager() : EntityManagerInterface { return $this->entityManager; }
     public function isEntity($entityOrClassOrMetadata) : bool
     {
         if (is_object($entityOrClassOrMetadata))
@@ -52,7 +52,7 @@ class ClassMetadataManipulator
 
         if(!is_string($entityOrClassOrMetadata) || !class_exists($entityOrClassOrMetadata)) return false;
 
-        return !$this->entityManager->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
+        return !$this->getEntityManager()->getMetadataFactory()->isTransient($entityOrClassOrMetadata);
     }
 
     public function isEnumType($entityOrClassOrMetadata) : bool
@@ -114,14 +114,14 @@ class ClassMetadataManipulator
     public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : []; }
     public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null; }
 
-    public function getClassMetadata($entityOrClassOrMetadata)
+    public function getClassMetadata(mixed $entityOrClassOrMetadata)
     {
         if($entityOrClassOrMetadata === null) return null;
         if($entityOrClassOrMetadata instanceof ClassMetadataInfo)
             return $entityOrClassOrMetadata;
 
         $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
-        $metadata  = class_exists($entityOrClassOrMetadataName) ? $this->entityManager->getClassMetadata($entityOrClassOrMetadataName) : null;
+        $metadata  = class_exists($entityOrClassOrMetadataName) ? $this->doctrine->getManagerForClass($entityOrClassOrMetadataName)->getClassMetadata($entityOrClassOrMetadataName) : null;
         if (!$metadata)
             throw new InvalidArgumentException("Entity expected, '" . $entityOrClassOrMetadataName . "' is not an entity.");
 
@@ -202,7 +202,7 @@ class ClassMetadataManipulator
         }
 
         $aliasNames = [];
-        foreach($metadata->fieldNames as $aliasName => $fieldName)
+        foreach(($metadata->aliasNames ?? $metadata->fieldNames) as $aliasName => $fieldName)
             if($aliasName != $fieldName) $aliasNames[$aliasName] = $fieldName;
 
         $fields = $validFields + $unmappedFields;
@@ -351,7 +351,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entity);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->getFieldName($fieldPath) ?? $fieldPath;
+        $fieldName = $metadata->aliasNames[$fieldPath] ?? $metadata->fieldNames[$fieldPath] ?? $fieldPath;
         return $metadata->setFieldValue($entity, $fieldName, $value);
     }
 
@@ -360,7 +360,7 @@ class ClassMetadataManipulator
         $metadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$metadata) return false;
 
-        $fieldName = $metadata->fieldNames[$fieldName] ?? null;
+        $fieldName = $metadata->aliasNames[$fieldName] ?? $metadata->fieldNames[$fieldPath] ?? null;
         return ($fieldName != null);
     }
 
@@ -401,7 +401,7 @@ class ClassMetadataManipulator
         if( ($dot = strpos($property, ".")) > 0 ) {
 
             $field    = trim(substr($property, 0, $dot));
-            $field = $metadata->getFieldName($field) ?? $field;
+            $field = $metadata->aliasNames[$field] ?? $metadata->fieldNames[$field] ?? $field;
 
             $property = trim(substr($property,    $dot+1));
 
@@ -428,7 +428,7 @@ class ClassMetadataManipulator
         if( ($dot = strpos($property, ".")) > 0 ) {
 
             $field    = trim(substr($property, 0, $dot));
-            $field = $metadata->getFieldName($field) ?? $field;
+            $field = $metadata->aliasNames[$field] ?? $metadata->fieldNames[$field] ?? $field;
 
             $property = trim(substr($property,    $dot+1));
 
@@ -452,7 +452,7 @@ class ClassMetadataManipulator
     {
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
         $fieldName = head($fieldPath);
-        $classMetadata = $this->entityManager->getClassMetadata($entityName);
+        $classMetadata = $this->doctrine->getManagerForClass($entityName)->getClassMetadata($entityName);
 
         if ($classMetadata->hasAssociation($classMetadata->getFieldName($fieldName)))
             $entityMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($fieldName)];
@@ -483,7 +483,7 @@ class ClassMetadataManipulator
 
         $classMetadata = $this->getClassMetadata($entityName);
         $associationFields = array_keys($classMetadata->associationMappings);
-        $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->fieldNames);
+        $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->aliasNames ?? $classMetadata->fieldNames);
 
         while(!array_key_exists($fieldName, $columnNames)) {
 
@@ -491,7 +491,7 @@ class ClassMetadataManipulator
 
             $classMetadata = $this->getClassMetadata(get_parent_class($classMetadata->getName()));
             $associationFields = array_keys($classMetadata->associationMappings);
-            $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->fieldNames);
+            $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->aliasNames ?? $classMetadata->fieldNames);
         }
 
         $fieldName = $columnNames[$fieldName] ?? $fieldName;
@@ -551,7 +551,7 @@ class ClassMetadataManipulator
 
         do {
 
-            foreach($metadata->fieldNames as $fieldName)
+            foreach(($metadata->aliasNames ?? $metadata->fieldNames) as $fieldName)
                 if($this->getMapping($entityOrClassOrMetadata, $fieldName)["unique"] ?? false) $uniqueKeys[] = $fieldName;
 
             $parentName = get_parent_class($metadata->getName());

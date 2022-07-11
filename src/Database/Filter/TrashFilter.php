@@ -12,7 +12,7 @@ class TrashFilter extends SQLFilter
 {
     public function addFilterConstraint(ClassMetadata $targetEntity, $alias): string
     {
-        $trasheableAnnotation = AnnotationReader::getAnnotationReader()->getClassAnnotations($targetEntity->getName(), Trasheable::class);
+        $trasheableAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Trasheable::class);
         if(count($trasheableAnnotation) < 1) return "";
 
         $fieldName = end($trasheableAnnotation)->deletedAt;

@@ -47,7 +47,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
     public static function getAnnotations($entityOrClassNameOrMetadataOrRefl, string $mapping, ?string $annotationClass = null): array
     {
         if(!$entityOrClassNameOrMetadataOrRefl) return [];
-        if (AnnotationReader::getInstance()->getClassMetadataManipulator()->isEntity($entityOrClassNameOrMetadataOrRefl))
+        if (AnnotationReader::getInstance()->isEntity($entityOrClassNameOrMetadataOrRefl))
             $entityOrClassNameOrMetadataOrRefl = is_object($entityOrClassNameOrMetadataOrRefl) ? get_class($entityOrClassNameOrMetadataOrRefl) : $entityOrClassNameOrMetadataOrRefl;
 
         $annotations = AnnotationReader::getInstance()->getPropertyAnnotations($entityOrClassNameOrMetadataOrRefl);

@@ -2,6 +2,7 @@
 
 namespace Base\Validator;
 
+use Base\Traits\BaseTrait;
 use Exception;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
@@ -14,11 +15,13 @@ use UnexpectedValueException;
  */
 abstract class ConstraintValidator extends \Symfony\Component\Validator\ConstraintValidator
 {
+    use BaseTrait;
+    
     public string $constraintClass;
 
-    public function __construct(TranslatorInterface $translator)
+    public function __construct()
     {
-        $this->translator = $translator;
+        $this->translator = $this->getTranslator();
         $this->constraintClass = preg_replace('/Validator$/', '', get_called_class());
     }
 

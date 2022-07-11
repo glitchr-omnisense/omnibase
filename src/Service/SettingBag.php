@@ -9,6 +9,7 @@ use Base\Database\Factory\ClassMetadataManipulator;
 use Symfony\Component\Asset\Packages;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 use Exception;
@@ -27,13 +28,11 @@ class SettingBag implements SettingBagInterface
      */
     protected $settingRepository = null;
 
-    public function __construct(ClassMetadataManipulator $classMetadataManipulator, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
+    public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
     {
-        $this->classMetadataManipulator = $classMetadataManipulator;
-        if(BaseBundle::hasDoctrine()) {
-            $this->entityManager            = $classMetadataManipulator->getEntityManager();
-            $this->settingRepository        = $classMetadataManipulator->getRepository(Setting::class);
-        }
+        $this->entityManager            = $entityManager;
+        if(BaseBundle::hasDoctrine())
+            $this->settingRepository        = $entityManager->getRepository(Setting::class);
 
         $this->cache           = $cache;
         $this->cacheName       = "setting_bag." . hash('md5', self::class);

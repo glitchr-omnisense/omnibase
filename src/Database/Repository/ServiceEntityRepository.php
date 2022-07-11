@@ -24,12 +24,12 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
     }
 
     protected $serviceParser;
-    public function __construct(ManagerRegistry $registry, ?string $entityName = null)
+    public function __construct(ManagerRegistry $doctrine, ?string $entityName = null)
     {
-        parent::__construct($registry, $entityName ?? $this->getFqcnEntityName());
+        parent::__construct($doctrine, $entityName ?? $this->getFqcnEntityName());
 
         $entityManager = $this->getEntityManager();
-        $classMetadataManipulator = new ClassMetadataManipulator($this->getEntityManager());
+        $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
 
         $this->serviceParser = new ServiceEntityParser($this, $entityManager, $entityHydrator);

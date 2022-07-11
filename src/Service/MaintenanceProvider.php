@@ -73,7 +73,7 @@ class MaintenanceProvider implements MaintenanceProviderInterface
         $this->parseLockPath();
 
         if(filter_var($this->settingBag->getScalar("base.settings.maintenance", $this->localeProvider->getLocale()))) return true;
-        if(file_exists($this->lockPath)) return true;
+        if($this->lockPath && file_exists($this->lockPath)) return true;
 
         return false;
     }
