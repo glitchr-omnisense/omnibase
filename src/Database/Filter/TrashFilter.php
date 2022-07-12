@@ -4,7 +4,6 @@ namespace Base\Database\Filter;
 
 use Base\Annotations\AnnotationReader;
 use Base\Database\Annotation\Trasheable;
-use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping\ClassMetaData;
 use Doctrine\ORM\Query\Filter\SQLFilter;
 

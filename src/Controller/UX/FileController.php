@@ -223,7 +223,7 @@ class FileController extends AbstractController
         if($naturalHeight == 0) throw $this->createNotFoundException();
 
         // Providing "label" information
-        $imageCrop = $this->imageCropRepository->findOneBySlug($identifier, [], ["image.source" => $uuid]);
+        $imageCrop = $this->imageCropRepository->findOneBySlug($identifier, ["image.source" => $uuid]);
 
         // Providing just a "ratio" number
         if ($imageCrop === null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
@@ -231,7 +231,7 @@ class FileController extends AbstractController
             $ratio = floatval($matches[1]);
             $ratio0 = $ratio/($naturalWidth/$naturalHeight);
 
-            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestTo($ratio0, ["ratio0" => "e.width0/e.height0"], ["image.source" => $uuid])[0] ?? null;
+            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestTo($ratio0, ["image.source" => $uuid], null, null, ["ratio0" => "e.width0/e.height0"])[0] ?? null;
         }
 
         // Providing a "width:height" information
@@ -246,7 +246,7 @@ class FileController extends AbstractController
             $ratio0  = $width0/$height0;
             if($ratio0 == 0) throw $this->createNotFoundException();
 
-            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["ratio0" => "e.width0/e.height0"], ["image.source" => $uuid])[0] ?? null;
+            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], null, null, ["ratio0" => "e.width0/e.height0"])[0] ?? null;
         }
 
         //

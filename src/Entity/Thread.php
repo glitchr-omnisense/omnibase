@@ -7,7 +7,6 @@ use App\Entity\Thread\Tag;
 use App\Entity\Thread\Like;
 use App\Entity\Thread\Mention;
 use Base\Database\Annotation\ColumnAlias;
-use Base\Entity\Thread\Taxon;
 
 use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -32,6 +31,7 @@ use Base\Model\IconizeInterface;
 use Base\Model\GraphInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
+use Base\Entity\Thread\Taxon;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)

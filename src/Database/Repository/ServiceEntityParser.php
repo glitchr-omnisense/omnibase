@@ -2,9 +2,12 @@
 
 namespace Base\Database\Repository;
 
+use App\Entity\User;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
+use Base\Entity\Extension\Ordering;
+use Base\Entity\Thread;
 use Base\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
@@ -1246,7 +1249,6 @@ class ServiceEntityParser
     {
         $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
         $query = $qb->getQuery();
-
         if($query->isCacheable()) {
 
             $entityName  = $this->classMetadata->getName();
@@ -1258,6 +1260,7 @@ class ServiceEntityParser
             }
 
             $query = $qb->getQuery();
+            $query->useQueryCache(true);
             $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
         }
 
@@ -1390,10 +1393,8 @@ class ServiceEntityParser
             $orderBy   = $first ? "orderBy" : "addOrderBy";
 
             if($isRandom) $qb->orderBy('RAND()');
-            else if(is_array($value))
-                $qb->add($orderBy, "FIELD(".$formattedName.",".implode(",",$value).")");
-            else
-                $qb->$orderBy($formattedName, $value);
+            else if(is_array($value)) $qb->add($orderBy, "FIELD(".$formattedName.",".implode(",",$value).")");
+            else $qb->$orderBy($formattedName, $value);
 
             $first = false;
         }

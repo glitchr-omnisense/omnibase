@@ -2,11 +2,6 @@
 
 namespace Base\Controller\UX;
 
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Model\Autocomplete;
-
-use Base\Service\Paginator;
-use Base\Service\PaginatorInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Hashids\Hashids;
@@ -16,7 +11,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 // e.g. Validate field while typing (todo..)
