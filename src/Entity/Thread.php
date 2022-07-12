@@ -42,7 +42,6 @@ use Base\Entity\Thread\Taxon;
  *
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  *
- * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
  */
@@ -193,8 +192,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function isPublished(): bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
     public function isPublishable(): bool
     {
-        if($this->state == ThreadState::FUTURE && !$this->publishedAt) return false;
-        return time() - $this->publishedAt->getTimestamp() >= 0;
+        if(!$this->publishedAt) return false;
+        return $this->state == ThreadState::FUTURE && (time() - $this->publishedAt->getTimestamp()) >= 0;
     }
 
     /**
@@ -430,7 +429,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     public function setTitle(?string $title, ?string $locale = null, int $depth = 0)
     {
-        dump($title, $locale, $depth);
         if($depth > 0) {
             return $this->translate($locale)->setTitle(empty($title) || $title === $this->getParent()->getTitle($locale, --$depth) ? null : $title);
         }

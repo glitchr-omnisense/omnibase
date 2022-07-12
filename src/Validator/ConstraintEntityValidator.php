@@ -63,9 +63,6 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $entity = $constraint->entity;
         if(!$entity) return $buildViolation;
 
-        $entityExploded = explode("\\", \get_class($entity));
-        $entityName = mb_strtolower(array_pop($entityExploded));
-
         if ($constraint->em) {
             $em = $this->getDoctrine()->getManager($constraint->em);
 
@@ -83,9 +80,10 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $class = $em->getClassMetadata(\get_class($entity));
         $value = $this->formatWithIdentifiers($em, $class, $value);
 
-        $this->setParameter("entity", $this->translator->entity($entityName));
+        $this->setParameter("entity", $this->translator->entity($entity));
 
-        return $buildViolation->addViolation();
+        // $buildViolation->addViolation();
+        return $buildViolation;
     }
 
     public function validate($entity, Constraint $constraint)
