@@ -61,9 +61,11 @@ trait TranslatableTrait
     }
 
     public function removeTranslation(TranslationInterface $translation): void {
-        $this->getTranslations()->removeElement($translation);
 
+        if ($this->getTranslations()->contains($translation))
+            $this->getTranslations()->removeElement($translation);
     }
+
     public function addTranslation(TranslationInterface $translation)
     {
         if($translation !== null) {

@@ -2,6 +2,9 @@
 
 namespace Base\Field\Type;
 
+use App\Entity\User;
+use App\Entity\User\Artist;
+use App\Entity\User\Merchant;
 use App\Enum\UserRole;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
@@ -228,9 +231,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                 if($this->classMetadataManipulator->isEntity($options["class"])) {
 
                     $classRepository = $this->entityManager->getRepository($options["class"]);
-                    $dataset = $classRepository->findById($dataset)->getResult();
+                    if ($dataset)
+                        $dataset = $classRepository->findById($dataset)->getResult();
                 }
-
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options) : Generator {
 
                     if($choices === null) return null;
@@ -267,7 +270,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                             "format" => $entryFormat
                         ]);
 
-                    if($entry === null) return null;
+                        if($entry === null) return null;
 
                         if(!$options["class"]) $entry["text"] = $key;
                         yield $entry["id"] => $entry["text"];
@@ -349,6 +352,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                 'choices'  => $choices,
                 'multiple' => $options["multiple"]
             ];
+
             $form->remove('choice')->add('choice', ChoiceType::class, $formOptions);
         });
     }
@@ -377,7 +381,10 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $orderBy = array_flip($choicesData);
                 $default = count($orderBy);
 
-                $entities = $classRepository->findById($choicesData, [])->getResult();
+                $entities = [];
+                if($choicesData)
+                    $entities = $classRepository->findById($choicesData, [])->getResult();
+
                 foreach($choicesData as $pos => $id) {
 
                     foreach($entities as $entity)
@@ -460,7 +467,11 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 $orderBy = array_flip($data ?? []);
                 $default = count($orderBy);
-                $viewData = $classRepository->findById($data, [])->getResult();
+
+                $viewData = [];
+                if($data)
+                    $viewData = $classRepository->findById($data, [])->getResult();
+
                 usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
 
             } else {

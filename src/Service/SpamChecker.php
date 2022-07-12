@@ -116,8 +116,8 @@ class SpamChecker
 
                     $score = ($content === "true" ? $enum[SpamScore::MAYBE_SPAM] : $enum[SpamScore::NOT_SPAM]);
                 }
-        }
 
-        return $score;
+                return $score;
+        }
     }
 }

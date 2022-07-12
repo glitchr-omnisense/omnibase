@@ -27,7 +27,7 @@ use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\Traits\TrasheableTrait;
-use Base\Enum\WorkflowState;
+
 use Base\Model\IconizeInterface;
 use Base\Model\GraphInterface;
 use Doctrine\ORM\Mapping as ORM;
@@ -72,7 +72,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->setTitle($title);
 
         $this->setState(ThreadState::DRAFT);
-        $this->setWorkflow([WorkflowState::PENDING]);
 
         $this->slug = $slug;
 
@@ -171,17 +170,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\Column(type="thread_state")
-     */
-    protected $workflow;
-    public function getWorkflow() { return $this->workflow; }
-    public function setWorkflow(array $workflow): self
-    {
-        $this->workflow = $workflow;
-        return $this;
-    }
-
-    /**
-     * @ORM\Column(type="thread_state")
      * @AssertBase\NotBlank(groups={"new", "edit"})
      */
     protected $state;
@@ -214,7 +202,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      * @OrderColumn
      */
     protected $owners;
-    public function getOwner(): ?User { return $this->owners[0] ?? null; }
+    public function getOwner (int $i = 0)  { return $this->getOwners()->containsKey($i) ? $this->getOwners()->get($i) : null; }
     public function getOwners(): Collection { return $this->owners; }
     public function addOwner(?User $owner): self
     {
@@ -418,7 +406,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function getHeadline(?string $locale = null, int $depth = 0): ?string
     {
         $headline = $this->translate($locale)->getHeadline();
-        if($depth > 0) $headline ??= ($this->getParent() ? $this->getParent()->getHeadline($locale, --$depth) : null);
+        if($depth > 0)
+            $headline ??= ($this->getParent() ? $this->getParent()->getHeadline($locale, --$depth) : null);
 
         return $headline;
     }
@@ -441,9 +430,10 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     public function setTitle(?string $title, ?string $locale = null, int $depth = 0)
     {
-        if($depth > 0)
+        dump($title, $locale, $depth);
+        if($depth > 0) {
             return $this->translate($locale)->setTitle(empty($title) || $title === $this->getParent()->getTitle($locale, --$depth) ? null : $title);
-
+        }
         return $this->translate($locale)->setTitle($title);
     }
 
@@ -466,7 +456,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public function getContent(?string $locale = null, int $depth = 0): ?string
     {
         $content = $this->translate($locale)->getContent();
-        if($depth > 0) $content ??= ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
+        if($depth > 0)
+            $content ??= ($this->getParent() ? $this->getParent()->getContent($locale, --$depth) : null);
 
         return $content;
     }

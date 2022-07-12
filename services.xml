@@ -346,7 +346,7 @@
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority="2048" />
+            <tag name="doctrine.event_subscriber" priority = "-1024" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
@@ -668,18 +668,26 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" priority="-1" />
-        </service>
         <service id="Base\EntityDispatcher\Event\UserEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" priority="-1" />
+            <tag name="doctrine.event_subscriber" />
+        </service>
+        <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
+            <tag name="doctrine.event_subscriber" />
+        </service>
+        <service id="Base\EntityDispatcher\Event\ThreadTranslationEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
+            <tag name="doctrine.event_subscriber" />
         </service>
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\EntitySubscriber\ThreadSubscriber"><tag name="kernel.event_subscriber" /></service>
+        <service id="Base\EntitySubscriber\ThreadSubscriber">
+            <tag name="kernel.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.entity_hydrator" />
+        </service>
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="security.token_storage" />

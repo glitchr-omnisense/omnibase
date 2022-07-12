@@ -2,6 +2,7 @@
 
 namespace Base\EntityDispatcher;
 
+use Base\Database\Factory\EntityHydrator;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
@@ -11,10 +12,11 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDi
 abstract class AbstractEventDispatcher implements EventDispatcherInterface
 {
     protected array $events;
-    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityManagerInterface $entityManager)
+    public function __construct(SymfonyEventDispatcherInterface $dispatcher, EntityHydrator $entityHydrator, EntityManagerInterface $entityManager)
     {
         $this->dispatcher    = $dispatcher;
         $this->entityManager = $entityManager;
+        $this->entityHydrator = $entityHydrator;
 
         $this->events        = [];
     }
@@ -22,8 +24,8 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public const __DISPATCHER_SUFFIX__ = "Dispatcher";
     public function getSubscribedEvents() : array
     {
-        return [
-
+        return
+        [
             Events::preUpdate,
             Events::postUpdate,
 
@@ -64,14 +66,21 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
         $id = spl_object_id($subject);
         if (!array_key_exists($id, $this->events)) return;
 
+        $reflush = false;
+
         $eventClass = $this->getEventClass();
-        foreach ($this->events[$id] as $event => &$trigger) {
+        foreach ($this->events[$id] as &$trigger) {
 
-            if(!$trigger) // Dispatch only once
-                $this->dispatcher->dispatch(new $eventClass($event->getObject()), $event);
+            if($trigger !== false) { // Dispatch only once
 
-            $trigger = true;
+                $this->dispatcher->dispatch(new $eventClass($event->getObject()), $trigger);
+                $reflush = true;
+            }
+
+            $trigger = false;
         }
+
+        if($reflush) $this->entityManager->flush();
     }
 
     public function getEntityManager() { return $this->entityManager; }
@@ -79,7 +88,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function prePersist(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null || !$this->supports($event, $subject)) return;
+        if ($subject == null || !$this->supports($subject)) return;
 
         $this->onPersist($event);
     }
@@ -87,7 +96,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function preUpdate(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null || !$this->supports($event, $subject)) return;
+        if ($subject == null || !$this->supports($subject)) return;
 
         $this->onUpdate($event);
     }
@@ -95,7 +104,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
     public function preRemove(LifecycleEventArgs $event)
     {
         $subject = $event->getObject();
-        if ($subject == null || !$this->supports($event, $subject)) return;
+        if ($subject == null || !$this->supports($subject)) return;
 
         $this->onRemove($event);
     }

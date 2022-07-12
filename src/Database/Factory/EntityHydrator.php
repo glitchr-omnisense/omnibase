@@ -120,16 +120,16 @@ class EntityHydrator implements EntityHydratorInterface
         return $entity;
     }
 
-    public function dehydrate(mixed $entity, array $fieldExceptions = []) {
-
+    public function dehydrate(mixed $entity, array $fieldExceptions = []): ?array
+    {
         if($entity === null) return null;
 
         $data = $entity ?? [];
         $data = $data instanceof Collection ? $data->toArray() : $data;
-        if(is_object($data)) $data = array_filter(array_transforms(
+        if(is_object($data)) $data = array_transforms(
             fn($k, $e):array => [str_lstrip($k, "\x00*\x00"), $e instanceof ArrayCollection && $e->isEmpty() ? null : $e],
             (array) $data
-        ));
+        );
 
         return array_key_removes($data, ...$fieldExceptions);
     }

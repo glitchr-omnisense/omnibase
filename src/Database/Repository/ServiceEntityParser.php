@@ -1154,7 +1154,6 @@ class ServiceEntityParser
 
     protected function getQueryBuilder(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?QueryBuilder
     {
-        $this->cacheable = false;
         /**
          * @QueryBuilder
          */

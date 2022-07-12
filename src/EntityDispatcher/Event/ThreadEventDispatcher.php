@@ -20,10 +20,9 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
 
         if ($thread->isScheduled())
             $this->events[spl_object_id($thread)][] = ThreadEvent::SCHEDULED;
-
         if ($thread->isPublished())
             $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISHED;
-        else if ($thread->isPublishable())
+        if ($thread->isPublishable())
             $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISHABLE;
     }
 

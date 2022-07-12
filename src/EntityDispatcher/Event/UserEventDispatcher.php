@@ -22,7 +22,7 @@ class UserEventDispatcher extends AbstractEventDispatcher
     public function onUpdate(LifecycleEventArgs $event)
     {
         $user = $event->getObject();
-        $oldUser = $this->classMetadataManipulator->getOriginalEntity($event);
+        $oldUser = $this->entityHydrator->getOriginalEntity($event);
 
         if($user->isApproved() && !$oldUser->isApproved())
             $this->addEvent(UserEvent::APPROVAL, $user);

@@ -7,13 +7,14 @@ use Base\Twig\Environment;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Traversable;
 
-class QuillType extends AbstractType implements DataMapperInterface
+class QuillType extends AbstractType
 {
     /** @var Environment */
     protected $twig;
@@ -114,7 +115,4 @@ class QuillType extends AbstractType implements DataMapperInterface
         // Default quill initialializer
         $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-quill.js");
     }
-
-    public function mapDataToForms($viewData, Traversable $forms) { }
-    public function mapFormsToData(Traversable $forms, &$viewData) { }
 }

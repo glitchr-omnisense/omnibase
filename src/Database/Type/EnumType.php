@@ -169,7 +169,7 @@ abstract class EnumType extends Type implements SelectInterface
     public function convertToDatabaseValue($value, AbstractPlatform $platform) : mixed
     {
         if ($value !== null && !in_array($value, $this->getPermittedValues()))
-            throw new \InvalidArgumentException("Invalid '".$this->name."' value.");
+            throw new \InvalidArgumentException("Invalid '".(is_array($value) ? implode(", ", $value) : $value)."' value.");
 
         return $value;
     }

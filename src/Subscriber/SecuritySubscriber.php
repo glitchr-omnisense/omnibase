@@ -267,17 +267,6 @@ class SecuritySubscriber implements EventSubscriberInterface
             return $event->stopPropagation();
         }
 
-        if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
-
-            $user->approve();
-            $this->userRepository->flush($user);
-
-        } else if($this->parameterBag->get("base.user.autoapprove")) {
-
-            $user->approve();
-            $this->userRepository->flush($user);
-        }
-
         //
         // Check if user is verified
         // (NB:exception in debut mode for user matching test_recipient emails)
@@ -304,14 +293,26 @@ class SecuritySubscriber implements EventSubscriberInterface
                 else $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
         }
 
-        if (! $user->isApproved()) {
+        if(!$user->isApproved()) {
 
-            $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
+            if ($this->authorizationChecker->isGranted(UserRole::ADMIN)) {
 
-                $notification = new Notification("login.pending");
-                $notification->send("warning");
-            }]);
+                $user->approve();
+                $this->userRepository->flush($user);
 
+            } else if($this->parameterBag->get("base.user.autoapprove")) {
+
+                $user->approve();
+                $this->userRepository->flush($user);
+
+            } else {
+
+                $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => function() {
+
+                    $notification = new Notification("login.pending");
+                    $notification->send("warning");
+                }]);
+            }
         }
     }
 

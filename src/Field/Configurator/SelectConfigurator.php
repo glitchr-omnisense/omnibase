@@ -84,7 +84,6 @@ class SelectConfigurator implements FieldConfiguratorInterface
             $dataClass = $dataClass ?? $defaultClass;
 
             $dataClassCrudController = AbstractCrudController::getCrudControllerFqcn($dataClass);
-
             $formattedValues = $this->autocomplete->resolve($field->getValue(), $dataClass);
             if ($formattedValues && $dataClassCrudController)
                 $formattedValues["url"] = $this->adminUrlGenerator->setController($dataClassCrudController)->setEntityId($value->getId())->setAction(Action::DETAIL)->generateUrl();

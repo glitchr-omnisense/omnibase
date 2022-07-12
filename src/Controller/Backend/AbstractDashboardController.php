@@ -455,7 +455,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->add(Crud::PAGE_EDIT, Action::DELETE, 'fas fa-fw fa-trash-alt', fn(EaAction $a) => $a->setLabel(""))
             ->add(Crud::PAGE_EDIT, Action::SEPARATOR)
             ->add(Crud::PAGE_EDIT, Action::GOTO_NEXT, 'fas fa-fw fa-angle-right')
-            ->add(Crud::PAGE_EDIT, Action::SAVE_AND_RETURN, 'fas fa-fw fa-save')
             ->add(Crud::PAGE_EDIT, Action::SAVE_AND_CONTINUE, 'fas fa-fw fa-edit')
             ->add(Crud::PAGE_EDIT, Action::GOTO_PREV, 'fas fa-fw fa-angle-left')
 

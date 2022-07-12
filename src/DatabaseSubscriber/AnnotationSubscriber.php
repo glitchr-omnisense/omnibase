@@ -46,8 +46,8 @@ class AnnotationSubscriber implements EventSubscriberInterface {
     }
 
     protected array $subscriberHistory = [];
-    public function loadClassMetadata( LoadClassMetadataEventArgs $event ) {
-
+    public function loadClassMetadata( LoadClassMetadataEventArgs $event )
+    {
         if(!BaseBundle::isBooted()) return; // Base bundle needs to be booted to be aware of custom doctrine types.
 
         $className     = $event->getClassMetadata()->name;

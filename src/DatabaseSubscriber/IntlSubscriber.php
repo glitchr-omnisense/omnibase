@@ -7,11 +7,11 @@ use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\Persistence\Event\LifecycleEventArgs;
 use InvalidArgumentException;
 
 class IntlSubscriber implements EventSubscriberInterface
@@ -26,7 +26,7 @@ class IntlSubscriber implements EventSubscriberInterface
      */
     public function getSubscribedEvents(): array
     {
-        return [Events::loadClassMetadata, Events::onFlush];
+        return [Events::loadClassMetadata, Events::postLoad, Events::onFlush];
     }
 
     public function getLocaleProvider() { return $this->localeProvider; }
@@ -37,10 +37,21 @@ class IntlSubscriber implements EventSubscriberInterface
         $this->localeProvider = $localeProvider;
     }
 
+    public function postLoad(LifecycleEventArgs $args)
+    {
+        $uow = $this->entityManager->getUnitOfWork();
+
+        $translation = $args->getObject();
+        if (is_subclass_of($translation, TranslationInterface::class, true)) {
+
+            if ($translation->isEmpty())
+                $uow->scheduleOrphanRemoval($translation);
+        }
+    }
+
     public function onFlush(OnFlushEventArgs $args)
     {
-        $em = $args->getEntityManager();
-        $uow = $em->getUnitOfWork();
+        $uow = $this->entityManager->getUnitOfWork();
 
         $scheduledEntities = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
@@ -50,46 +61,41 @@ class IntlSubscriber implements EventSubscriberInterface
         foreach ($uow->getScheduledCollectionUpdates() as $entity)
             $scheduledEntities[] = $entity->getOwner();
 
+        // Retrieve translatable objects
         $scheduledEntities = array_filter(array_unique_object($scheduledEntities));
         foreach(array_unique_object($scheduledEntities) as $entity) {
 
-            if (is_subclass_of($entity, TranslatableInterface::class, true))
-                $this->normalize($entity);
-
             if (is_subclass_of($entity, TranslationInterface::class, true))
-                $this->removeIfEmpty($entity);
+                $scheduledEntities[] = $entity->getTranslatable();
         }
+
+        // Keep unique translatable only
+        $scheduledTranslatables = array_filter(
+            array_unique_object($scheduledEntities),
+            fn($e) => is_subclass_of($e, TranslatableInterface::class, true)
+        );
+
+        // Normalize and turn orphan Translation entities if empty
+        foreach($scheduledTranslatables as $translatable)
+            $this->normalize($translatable);
     }
 
     protected function normalize(TranslatableInterface $translatable)
     {
+        $uow = $this->entityManager->getUnitOfWork();
+
         foreach($translatable->getTranslations() as $locale => $translation) {
 
-            $this->removeIfEmpty($translation);
-            if($translation->getTranslatable() !== $translatable) {
-
-                if(!$translation->getTranslatable())
-                    $translation->setTranslatable($translatable);
-
-                continue;
-            }
-
+            if($translation->getLocale() === null) $translation->setLocale($locale);
             if($translation->getLocale() !== null && $translation->getLocale() !== $locale)
                 throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
 
-            if($translation->getLocale() === null) $translation->setLocale($locale);
-        }
-    }
+            if(!$translation->getTranslatable())
+                $translation->setTranslatable($translatable);
 
-    protected function removeIfEmpty(TranslationInterface $translation)
-    {
-        $translatable = $translation->getTranslatable();
-
-        if ($translatable && $translation->isEmpty()) {
-
-            $translatable->removeTranslation($translation);
-            if ($this->entityManager->contains($translation))
-                $this->entityManager->remove($translation);
+            $translatable = $translation->getTranslatable();
+            if ($translatable && !$translation->isEmpty())
+                $uow->cancelOrphanRemoval($translation);
         }
     }
 

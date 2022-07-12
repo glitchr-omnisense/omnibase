@@ -492,7 +492,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                                 $targetValue = array_flatten('.', array_map(function($e) use ($fieldName) {
 
-                                    $e = $this->entityHydrator->dehydrate($e)[$fieldName] ?? null;
+                                    $e = array_filter($this->entityHydrator->dehydrate($e))[$fieldName] ?? null;
                                     if($e instanceof Collection) $e = $e->toArray();
 
                                     return $e;

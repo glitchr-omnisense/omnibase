@@ -262,17 +262,19 @@ class Uploader extends AbstractAnnotation
         $oldList = is_array($old) ? $old : [$old];
         $oldListStringable = array_filter(array_map(fn($e) => is_stringeable($e), $oldList));
 
-        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
-        if($potentialMemoryLeak)
-            throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName."\n Did you called unit of work change set ? Please process file manually");
-
         // This list contains non is_stringeable element. (e.g. in case of a generic use)
         // This means that these elements are not meant to be uploaded
         if(count($oldList) != count($oldListStringable))
             return false;
 
         // No change in the list.. (NB: Not good approach in case of UOW manipulation)
-        if($newList === $oldList) return true;
+        $potentialMemoryLeak = array_filter($oldList, fn($f) => $f instanceof File);
+        if($potentialMemoryLeak && $newList !== $oldList)
+            throw new Exception(File::class." instance found the old list of ".get_class($entity)."::".$fieldName."\n Did you called unit of work change set ? Please process file manually");
+        else if(!$potentialMemoryLeak && $newList === $oldList)
+            return true;
+
+        $oldList = array_filter($oldList, fn($f) => !$f instanceof File);
 
         // Nothing to upload, empty field..
         if ($newList === null) {
