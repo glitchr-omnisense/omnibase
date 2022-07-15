@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\OrderColumn;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
@@ -32,6 +33,7 @@ class Linkset extends Widget implements IconizeInterface, SetInterface
     /**
      * @ORM\ManyToMany(targetEntity=Hyperlink::class, orphanRemoval=true, cascade={"persist"})
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+     * @OrderColumn
      */
     protected $hyperlinks;
     public function getHyperlinks(): Collection { return $this->hyperlinks; }

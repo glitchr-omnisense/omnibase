@@ -15,8 +15,6 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use Base\Traits\BaseCommonTrait;
-use Base\Twig\Extension\BaseTwigExtension;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ManagerRegistry;
@@ -97,7 +95,6 @@ class BaseService implements RuntimeExtensionInterface
         FirewallMapInterface $firewallMap,
 
         Environment $twig,
-        BaseTwigExtension $baseTwigExtension,
 
         SluggerInterface $slugger,
         ManagerRegistry $doctrine,
@@ -141,7 +138,6 @@ class BaseService implements RuntimeExtensionInterface
         $this->setSettingBag($settingBag);
         $this->setLocaleProvider($localeProvider);
         $this->setTwig($twig);
-        $this->setTwigExtension($baseTwigExtension->setBase($this));
         $this->setRouter($router);
         $this->setFirewallMap($firewallMap);
         $this->setParameterBag($parameterBag);

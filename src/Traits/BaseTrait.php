@@ -78,7 +78,6 @@ trait BaseTrait
     public static function getLocaleProvider(): ?LocaleProviderInterface { return (self::class === BaseService::class) ? BaseService::$localeProvider : BaseService::getLocaleProvider(); }
     public static function getRouter()        : ?RouterInterface         { return (self::class === BaseService::class) ? BaseService::$router         : BaseService::getRouter(); }
     public static function getFirewallMap()   : ?FirewallMapInterface    { return (self::class === BaseService::class) ? BaseService::$firewallMap    : BaseService::getFirewallMap(); }
-    public static function getTwigExtension() : ?BaseTwigExtension       { return (self::class === BaseService::class) ? BaseService::$twigExtension  : BaseService::getTwigExtension(); }
     public static function getTwig()          : ?Environment             { return (self::class === BaseService::class) ? BaseService::$twig           : BaseService::getTwig(); }
     public static function getNotifier()      : ?NotifierInterface       { return (self::class === BaseService::class) ? BaseService::$notifier       : BaseService::getNotifier(); }
     public static function getTranslator()    : ?TranslatorInterface     { return (self::class === BaseService::class) ? BaseService::$translator     : BaseService::getTranslator(); }

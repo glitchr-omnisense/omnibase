@@ -17,6 +17,7 @@ use Base\Repository\Layout\WidgetRepository;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * @ORM\Entity(repositoryClass=WidgetRepository::class)
@@ -36,6 +37,12 @@ class Widget implements TranslatableInterface, IconizeInterface
     public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
     public function __toString() { return $this->getTitle(); }
+    public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
+    {
+        $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
+
+        return $this->getRouter()->generate("widget_app", $routeParameters, $referenceType);
+    }
 
     public function __construct(?string $title = null, ?string $excerpt = null, ?string $content = null)
     {

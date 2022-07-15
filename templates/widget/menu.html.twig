@@ -3,11 +3,11 @@
     <ul class="items">
         {% for item in widget.items %}
             {% set url = item.__toLink() %}
-            {% if url is not empty %} 
+            {% if url is not empty %}
                 <li>{{ urlify(url, item|raw, {"class": class|default(null)}) }}</li>
             {% endif %}
         {% endfor %}
-        
+
         {% if tail is defined %}
             {% for item in tail %}<li>{{ item }}</li>{% endfor %}
         {% endif %}

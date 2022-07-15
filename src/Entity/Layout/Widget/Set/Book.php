@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\OrderColumn;
 use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Page;
@@ -33,6 +34,7 @@ class Book extends Widget implements IconizeInterface, SetInterface
     /**
      * @ORM\ManyToMany(targetEntity=Page::class, orphanRemoval=true, cascade={"persist"})
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+     * @OrderColumn
      */
     protected $pages;
     public function getPages(): Collection { return $this->pages; }

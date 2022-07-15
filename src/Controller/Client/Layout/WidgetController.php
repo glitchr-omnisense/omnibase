@@ -3,6 +3,8 @@
 namespace Base\Controller\Client\Layout;
 
 use Base\BaseBundle;
+use Base\Entity\Layout\Widget\Attachment;
+use Base\Entity\Layout\Widget\Page;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;

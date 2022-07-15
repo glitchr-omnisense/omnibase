@@ -31,7 +31,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     {
         $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
 
-        return $this->getTwigExtension()->getRoutingExtension()->getPath("widget_page", $routeParameters, $referenceType);
+        return $this->getRouter()->generate("widget_page", $routeParameters, $referenceType);
     }
 
     public function __toString() { return $this->getTitle(); }

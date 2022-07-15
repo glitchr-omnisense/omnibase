@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\OrderColumn;
 use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Route;
@@ -33,6 +34,7 @@ class Network extends Widget implements IconizeInterface, SetInterface
     /**
      * @ORM\ManyToMany(targetEntity=Route::class, orphanRemoval=true, cascade={"persist"})
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+     * @OrderColumn
      */
     protected $routes;
     public function getRoutes(): Collection { return $this->routes; }

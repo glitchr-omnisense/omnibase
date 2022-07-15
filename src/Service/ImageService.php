@@ -8,6 +8,7 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
+use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Imagine\Filter\FilterInterface;
@@ -29,9 +30,9 @@ class ImageService extends FileService implements ImageServiceInterface
      */
     protected $imagine;
 
-    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg)
+    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg)
     {
-        parent::__construct($router, $obfuscator, $assetExtension, $flysystem);
+        parent::__construct($router, $obfuscator, $flysystem);
 
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
@@ -61,12 +62,32 @@ class ImageService extends FileService implements ImageServiceInterface
     public function imagify(null|array|string $path, array $attributes = []): ?string
     {
         if(!$path) return $path;
-        if(is_array($path)) return array_map(fn($p) => $this->imagify($p), $path);
+        if(is_array($path)) return array_map(fn($s) => $this->imagify($s, $attributes), $path);
 
-        if($attributes["src"] ?? false)
-        unset($attributes["src"]);
+        $attributes["src"] = $this->imagine($path);
+        return "<img ".html_attributes($attributes)." />";
+    }
 
-        return "<img ".html_attributes($attributes)." src='".$this->imagine($path)."' />";
+    public function lightbox(null|array|string $path, array $attributes = [], array|string $lightboxId = null, array|string $lightboxTitle = null, array $lightboxAttributes = []): ?string
+    {
+        $lightboxPathType = gettype($path);
+        $lightboxIdType = gettype($lightboxId);
+        $lightboxTitleType = gettype($lightboxTitle);
+        if($lightboxPathType !== $lightboxIdType && $lightboxIdType !== gettype(NULL))
+            throw new Exception("Unexpected `lightboxId` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
+        if($lightboxPathType !== $lightboxTitleType && $lightboxTitleType !== gettype(NULL))
+            throw new Exception("Unexpected `lightboxTitle` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
+
+        if(!$path) return $path;
+        if(is_array($path)) return array_map(fn($k) => $this->lightbox($path[$k], $attributes, $lightboxId[$k], $lightboxTitle[$k], $lightboxAttributes), array_keys($path));
+
+        $path = $this->imagine($path);
+        $lightboxAttributes["loading"] ??= "lazy";
+        $lightboxAttributes["data-lightbox"] = $lightboxId ?? "lightbox";
+        if ($lightboxTitle !== null)
+            $lightboxAttributes["data-title"] = $lightboxTitle;
+
+        return "<a href='".$path."' ".html_attributes($lightboxAttributes)."><img src='".$path."' ".html_attributes($attributes)." /></a>";
     }
 
     public function crop(array|string|null $path, int $x = 0, int $y = 0, ?int $width = null, ?int $height = null, string $position = "leftop", array $filters = [], array $config = []): array|string|null
@@ -100,7 +121,7 @@ class ImageService extends FileService implements ImageServiceInterface
     public function obfuscate(string|null $path, array $config = [], array $filters = []): ?string
     {
         if($path === null ) return null;
-        $path = "/".str_strip($path, $this->assetExtension->getAssetUrl(""));
+        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
 
         $config["path"] = $path;
         $config["options"] = array_merge(["quality" => $this->getMaximumQuality()], $config["options"] ?? []);

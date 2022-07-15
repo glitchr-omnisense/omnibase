@@ -3,40 +3,23 @@
 namespace Base\Twig\Extension;
 
 use Base\Model\Color\Intl\Colors;
-use Base\Service\BaseService;
-use Base\Service\FileService;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
-use Base\Service\LocaleProvider;
-use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use DateInterval;
 use DateTime;
-use Exception;
 use ReflectionFunction;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
-use Symfony\Bridge\Twig\Extension\RoutingExtension;
-use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-use Twig\Extra\Intl\IntlExtension;
 use Symfony\Component\Mime\MimeTypes;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Symfony\Component\PropertyAccess\PropertyAccessor;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
-use Twig\Error\LoaderError;
+use Twig\Extra\Intl\IntlExtension;
 use Twig\TwigFunction;
 
-final class BaseTwigExtension extends AbstractExtension
+final class FunctionTwigExtension extends AbstractExtension
 {
-    /**
-     * @var RoutingExtension
-     */
-    protected $routingExtension;
-
     /**
      * @var TranslatorInterface
      */
@@ -53,43 +36,31 @@ final class BaseTwigExtension extends AbstractExtension
     protected $iconProvider;
 
     /**
+     * @var IntlExtension
+     */
+    protected $intlExtension;
+
+    /**
      * @var string
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator, RequestStack $requestStack, RoutingExtension $routingExtension, AssetExtension $assetExtension, IconProvider $iconProvider, ImageService $imageService) {
+    public function __construct(TranslatorInterface $translator) {
 
         $this->translator       = $translator;
-        $this->routingExtension = $routingExtension;
-        $this->assetExtension   = $assetExtension;
-        $this->requestStack     = $requestStack;
-        $this->intlExtension    = new IntlExtension();
         $this->mimeTypes        = new MimeTypes();
-
-        $this->iconProvider     = $iconProvider;
-        $this->imageService     = $imageService;
+        $this->intlExtension    = new IntlExtension();
     }
-
-    public function setBase(BaseService $baseService)
-    {
-        $this->baseService = $baseService;
-        $this->projectDir  = $baseService->getProjectDir();
-
-        return $this;
-    }
-
-    public function getIntlExtension()   :IntlExtension    { return $this->intlExtension;    }
-    public function getRoutingExtension():RoutingExtension { return $this->routingExtension; }
 
     public function getFunctions(): array
     {
         return [
+
             new TwigFunction('exit',  'exit'),
 
             new TwigFunction('synopsis', 'synopsis'),
             new TwigFunction('title',                        [$this, 'title'  ], ['is_safe' => ['all']]),
             new TwigFunction('excerpt',                      [$this, 'excerpt'  ], ['is_safe' => ['all']]),
-            new TwigFunction('image',                        [$this, 'image'], ['needs_environment' => true, 'needs_context' => true]),
             new TwigFunction('get_class',                    [$this, 'get_class']),
             new TwigFunction('is_countable',                 [$this, 'is_countable']),
             new TwigFunction('is_callable',                  [$this, 'is_callable']),
@@ -104,16 +75,13 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFunction('str_ends_with'  , "str_ends_with"  ),
             new TwigFunction('empty',           "empty"),
             new TwigFunction('property_accessor',            [$this, "property_accessor"]),
-
-            new TwigFunction('urlify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
-            new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-            new TwigFunction('asset',   [$this,               'asset']),
         ];
     }
 
     public function getFilters() : array
     {
-        return [
+        return
+        [
             new TwigFilter('str_shorten', 'str_shorten'),
             new TwigFilter('intval',      'intval'),
             new TwigFilter('strval',      'strval'),
@@ -127,18 +95,17 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('uniq',        'array_unique'),
             new TwigFilter('at',          'at'),
 
+            new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
+            new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
+            new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
+
             new TwigFilter('preg_split',     [$this,'preg_split']),
             new TwigFilter('nargs',          [$this, 'nargs']),
             new TwigFilter('instanceof',     [$this, 'instanceof']),
-            new TwigFilter('url',            [$this, 'url']),
             new TwigFilter('join_if_exists', [$this, 'joinIfExists']),
             new TwigFilter('stringify',      [$this, 'stringify']),
             new TwigFilter('highlight',      [$this, 'highlight']),
             new TwigFilter('array_flatten',  [$this, 'array_flatten']),
-            new TwigFilter('filesize',       [$this, 'filesize']),
-            new TwigFilter('datetime',       [$this, 'datetime'],   ['needs_environment' => true]),
-            new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
-            new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
             new TwigFilter('less_than',      [$this, 'less_than']),
             new TwigFilter('greater_than',   [$this, 'greater_than']),
             new TwigFilter('filter',         [$this, 'filter'], ['needs_environment' => true]),
@@ -148,39 +115,6 @@ final class BaseTwigExtension extends AbstractExtension
             new TwigFilter('mb_ucwords',     'mb_ucwords'),
             new TwigFilter('second',         "second"),
             new TwigFilter('empty',          "empty"),
-
-            new TwigFilter('trans',          [Translator::class, 'trans']),
-            new TwigFilter('trans_quiet',    [Translator::class, 'transQuiet']),
-            new TwigFilter('trans_exists',   [Translator::class, 'transExists']),
-            new TwigFilter('time',           [Translator::class, 'time']),
-            new TwigFilter('enum',           [Translator::class, 'enum']),
-            new TwigFilter('entity',         [Translator::class, 'entity']),
-
-            new TwigFilter('lang',           [LocaleProvider::class, 'getLang']),
-            new TwigFilter('lang_name',      [LocaleProvider::class, 'getLangName']),
-            new TwigFilter('country',        [LocaleProvider::class, 'getCountry']),
-            new TwigFilter('country_name',   [LocaleProvider::class, 'getCountryName']),
-
-            new TwigFilter('urlify',         [$this,               'urlify' ], ["is_safe" => ['all']]),
-            new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
-            new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
-
-            new TwigFilter('public',         [FileService::class, 'public']),
-            new TwigFilter('downloadable',   [FileService::class, 'downloadable']),
-            new TwigFilter('mimetype',       [FileService::class, 'getMimeType']),
-            new TwigFilter('extensions',     [FileService::class, 'getExtensions']),
-
-            new TwigFilter('obfuscate',      [FileService::class, 'obfuscate']),
-            new TwigFilter('imagine',        [ImageService::class, 'imagine']),
-            new TwigFilter('webp',           [ImageService::class, 'webp']),
-            new TwigFilter('crop',           [ImageService::class, 'crop']),
-            new TwigFilter('image',          [ImageService::class, 'image']),
-
-            new TwigFilter('thumbnail',          [ImageService::class, 'thumbnail']),
-            new TwigFilter('thumbnail_inset   ', [ImageService::class, 'thumbnail_inset   ']),
-            new TwigFilter('thumbnail_outbound', [ImageService::class, 'thumbnail_outbound']),
-            new TwigFilter('thumbnail_noclone ', [ImageService::class, 'thumbnail_noclone ']),
-            new TwigFilter('thumbnail_upscale ', [ImageService::class, 'thumbnail_upscale ']),
         ];
     }
 
@@ -209,24 +143,16 @@ final class BaseTwigExtension extends AbstractExtension
         return $class::$$propertyName;
     }
 
-
-
     public function property_accessor($entity, $propertyName, $enableMagicCall = false)
     {
         $propertyAccessorBuilder = PropertyAccess::createPropertyAccessorBuilder();
         if($enableMagicCall) $propertyAccessorBuilder->enableMagicCall();
-        
+
         $propertyAccessor =  $propertyAccessorBuilder->getPropertyAccessor();
         if(!$propertyAccessor->isReadable($entity, $propertyName))
             return null;
 
         return $propertyAccessor->getValue($entity, $propertyName);
-    }
-
-    public function asset($path, ?string $packageName = null) {
-
-        if($path === false || $path === null) return null;
-        return $this->assetExtension->getAssetUrl($path, $packageName);
     }
 
     public function color_name(string $hex) {
@@ -256,29 +182,7 @@ final class BaseTwigExtension extends AbstractExtension
         return implode($separator, array_filter($array));
     }
 
-    public function image(Environment $env, array $context, $src)
-    {
-        if(!$src) return $src;
-        if(is_array($src)) return array_map(fn($s) => $this->image($s, $context, $env), $src);
-
-        $email = $context["email"] ?? null;
-        if( $email instanceof WrappedTemplatedEmail )
-            return $email->image($src);
-
-        // Context and public path
-        if(str_starts_with($src, "/")) $src = "@Public".$src;
-        try { $src = $env->getLoader()->getSourceContext($src)->getPath(); }
-        catch(LoaderError $e) { throw new NotFoundResourceException("Image \"$src\" not found."); }
-
-        if (substr($src, 0, strlen($this->projectDir)) == $this->projectDir)
-            $src = substr($src, strlen($this->projectDir));
-
-        return $src;
-    }
-
-    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string { return byte2str($size, $unitPrefix); }
-
-    function static_call($class, $method, ...$args) {
+    public function static_call($class, $method, ...$args) {
 
         if(is_object($class)) $class = get_class($class);
         if (!class_exists($class))
@@ -303,7 +207,7 @@ final class BaseTwigExtension extends AbstractExtension
         $now = time();
         if($datetime instanceof DateTime) $datetime = $datetime->getTimestamp();
         else if($datetime instanceof DateInterval) $datetime = $now + (int) $datetime->format("s");
-        
+
         if(is_string($datetime)) return $datetime;
         return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
@@ -314,7 +218,7 @@ final class BaseTwigExtension extends AbstractExtension
         if($datetime instanceof DateTime) $timestamp = $datetime->getTimestamp();
         else if($datetime instanceof DateInterval) $timestamp = $now + (int) $datetime->format("s");
         else $timestamp = $datetime;
-        
+
         return $env->render("@Base/progress/countdown.html.twig", array_merge($parameters, [
             "id" => rand(),
             "datetime"  => $datetime,
@@ -326,39 +230,12 @@ final class BaseTwigExtension extends AbstractExtension
     public function progress(Environment $env, DateTime $start, DateTime $end, array $parameters = []): string
     {
         return $env->render("@Base/progress/progressbar.html.twig", array_merge($parameters, [
-            "id" => rand(), 
-            "progress-start" => $start->getTimestamp(), 
+            "id" => rand(),
+            "progress-start" => $start->getTimestamp(),
             "progress-end" => $end->getTimestamp()
         ]));
     }
 
-    public function url(?string $url): ?string
-    {
-        $url = trim($url);
-        $parseUrl = parse_url($url);
-
-        if(!array_key_exists("schema", $parseUrl)) {
-
-            $path = $url;
-
-            $https      = $_SERVER['HTTPS']       ?? $this->baseService->getSettingBag()->scheme();
-            $serverName = $_SERVER['SERVER_NAME'] ?? $this->baseService->getSettingBag()->domain();
-            $baseDir    = $_SERVER['BASE']        ?? $_SERVER["CONTEXT_PREFIX"] ?? $this->baseService->getSettingBag()->base_dir();
-            $baseDir    = "/".trim($baseDir, "/");
-
-            if(str_starts_with($path, "http://") || str_starts_with($path, "https://")) $domain = "";
-            else $domain = ($https ? "https://" : "http://") . $serverName;
-
-            if (!empty($domain)) $join = str_starts_with($path, "/") ? "" : $baseDir;
-            else $join = "";
-
-            $url = $domain . $join . $path;
-        }
-
-        return $url;
-    }
-
-    public function urlify(string $url, ?string $label = null, array $attributes = []) { return "<a href='".$url."' ".html_attributes($attributes).">".($label ?? $url)."</a>"; }
     public function title(string $name, array $parameters = array(), ?string $domain = "controllers", ?string $locale = null): string
     {
         $ret = $this->translator->trans($name.".title", $parameters, $domain, $locale);

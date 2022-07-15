@@ -76,7 +76,7 @@ trait BaseCommonTrait {
     public static function setDoctrine(ManagerRegistry $doctrine) {
         self::$doctrine = $doctrine;
     }
-    
+
     /**
      * @var EntityHydratorInterface
      */

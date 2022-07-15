@@ -64,7 +64,6 @@
 
         <service id="base.entity_extension" alias="Base\Database\Factory\EntityExtension" />
 
-        <service id="twig.extension.base"      alias="Base\Twig\Extension\BaseTwigExtension" />
         <service id="twig.loader.filesystem"   alias="Base\Twig\Loader\FilesystemLoader" />
         <service id="twig.random_variable"     alias="Base\Twig\Variable\RandomVariable" />
         <service id="twig.site_variable"       alias="Base\Twig\Variable\SiteVariable" />

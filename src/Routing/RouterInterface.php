@@ -28,11 +28,14 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function getDomain(?string $locale = null, ?string $environment = null): string;
     public function getPort(?string $locale = null, ?string $environment = null): ?int;
 
+    public function getUrl(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string;
+    public function getAssetUrl(string $name, ?string $packageName = null): string;
+
     public function getRequest(): ?Request;
     public function getEnvironment(): string;
     public function getLocale (?string $locale = null): string;
     public function getLang(?string $lang = null): string;
-    
+
     public function getContext(): RequestContext;
     public function setContext(RequestContext $context);
 

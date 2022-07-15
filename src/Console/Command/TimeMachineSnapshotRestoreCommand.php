@@ -15,11 +15,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name:'timemachine:rollback', aliases:[], description:'')]
+#[AsCommand(name:'timemachine:snapshot:restore', aliases:[], description:'')]
 class TimeMachineSnapshotRestoreCommand extends Command
 {
-    protected static $defaultName = 'timemachine:snapshot:restore';
-
     /**
      * @var TimeMachine
      */

@@ -26,19 +26,14 @@ class FileService implements FileServiceInterface
     protected $flysystem;
 
     /**
-     * @var AssetExtension
-     */
-    protected $assetExtension;
-    /**
      * @var RouterInterface
      */
     protected $router;
 
-    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, AssetExtension $assetExtension, FlysystemInterface $flysystem)
+    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
         $this->router         = $router;
         $this->obfuscator     = $obfuscator;
-        $this->assetExtension = $assetExtension;
         $this->flysystem     = $flysystem;
 
         $this->mimeTypes = new MimeTypes();
@@ -104,7 +99,7 @@ class FileService implements FileServiceInterface
         if($path === null ) return null;
 
         $path = realpath($path);
-        $path = "/".str_strip($path, $this->assetExtension->getAssetUrl(""));
+        $path = "/".str_strip($path, $this->router->getAssetUrl(""));
 
         $config["path"] = $path;
         $config["options"] = $config["options"] ?? [];

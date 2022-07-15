@@ -40,6 +40,7 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="locale_provider" />
+            <argument type="service" id="twig.extension.assets" />
             <argument type="service" id="cache.adapter" />
             <bind key="$debug">%kernel.debug%</bind>
             <bind key="$environment">%kernel.environment%</bind>

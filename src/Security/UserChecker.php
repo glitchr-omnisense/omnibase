@@ -5,22 +5,16 @@ namespace Base\Security;
 use App\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
-use Base\Service\BaseService;
-use Base\Twig\Extension\BaseTwigExtension;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
-use Symfony\Component\Security\Core\Exception\AccountExpiredException;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAccountStatusException;
-use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class UserChecker implements UserCheckerInterface
 {
-    public function __construct(EntityManagerInterface $entityManager, BaseTwigExtension $baseTwigExtension)
+    public function __construct(EntityManagerInterface $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->baseTwigExtension = $baseTwigExtension;
     }
 
     public function checkPreAuth(UserInterface $user)

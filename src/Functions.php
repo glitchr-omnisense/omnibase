@@ -7,6 +7,7 @@ namespace {
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
 
+    function typeof(mixed $input): string { return gettype($input); }
     function interpret_link($input)
     {
         return preg_replace_callback(

@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\OrderColumn;
 use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Model\IconizeInterface;
@@ -33,6 +34,7 @@ class Menu extends Widget implements IconizeInterface, SetInterface
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class, cascade={"persist"})
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+     * @OrderColumn
      */
     protected $items;
     public function getItems(): Collection { return $this->items; }

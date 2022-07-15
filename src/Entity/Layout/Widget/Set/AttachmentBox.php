@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Widget\Set;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Database\Annotation\OrderColumn;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Attachment;
 use Base\Model\IconizeInterface;
@@ -32,6 +33,7 @@ class AttachmentBox extends Widget implements IconizeInterface
     /**
      * @ORM\ManyToMany(targetEntity=Attachment::class, orphanRemoval=true, cascade={"persist"})
      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+     * @OrderColumn
      */
     protected $attachments;
     public function getAttachments(): Collection { return $this->attachments; }
