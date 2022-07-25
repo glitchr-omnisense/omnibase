@@ -527,6 +527,8 @@
         <service id="Base\Twig\Extension\FunctionTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="translator" />
+            <argument type="service" id="twig.extension.assets" />
+            <bind key="$projectDir">%kernel.project_dir%</bind>
        </service>
 
         <service id="Base\Twig\Extension\MathTwigExtension"        ><tag name="twig.extension" /></service>

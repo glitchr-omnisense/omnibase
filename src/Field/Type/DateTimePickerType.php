@@ -52,7 +52,7 @@ class DateTimePickerType extends AbstractType
         // Import datetimepicker
         $this->twig->addHtmlContent("javascripts:head", $options["moment-js"]);
         $this->twig->addHtmlContent("javascripts:head", $options["datetimepicker-js"]);
-        $this->twig->addHtmlContent("stylesheets:head", $options["datetimepicker-css"]);
+        $this->twig->addHtmlContent("stylesheets:before", $options["datetimepicker-css"]);
 
         //
         // Datetime picker Options

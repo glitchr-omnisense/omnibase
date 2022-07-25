@@ -26,7 +26,14 @@ class BaseBundle extends Bundle
 
     protected static bool $boot = false;
     protected static bool $doctrineStartup = false;
+    protected static bool $brokenCache = true; // Turn off in subscriber if everything fine.
     public static function isBooted() { return self::$boot; }
+
+    public static function isBroken() { return self::$brokenCache; }
+    public static function markCacheAsValid()
+    {
+        self::$brokenCache = false;
+    }
 
     public function getProjectDir()
     {

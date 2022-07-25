@@ -7,7 +7,7 @@ use Base\Entity\User;
 use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
-
+use Base\BaseBundle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Doctrine\ORM\PersistentCollection;
@@ -77,6 +77,9 @@ class IntegritySubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
+        if(BaseBundle::isBroken() && $event->isMainRequest())
+            throw new \RuntimeException("Application integrity compromised, cache needs to be refreshed.");
+
         $token = $this->tokenStorage->getToken();
         if(!$token) return;
 

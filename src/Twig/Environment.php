@@ -19,6 +19,27 @@ class Environment extends TwigEnvironment
         parent::__construct($loader, $options);
     }
 
+    public function render($name, array $context = []): string
+    {
+        if(str_ends_with($name, ".html.twig")) {
+
+            $stylesheet = str_rstrip($name, ".html.twig").".css.twig";
+            if($this->getLoader()->exists($stylesheet)) {
+                $stylesheet = $this->load($stylesheet)->render($context);
+                if($stylesheet) $this->addHtmlContent("stylesheets:after", "<style>".$stylesheet."</style>");
+            }
+
+            $javascript = str_rstrip($name, ".html.twig").".js.twig";
+            if($this->getLoader()->exists($javascript)) {
+
+                $javascript = $this->load($javascript)->render($context);
+                if($javascript) $this->addHtmlContent("javascripts:body", "<script>".$javascript."</script>");
+            }
+        }
+
+        return $this->load($name)->render($context);
+    }
+
     public function getAsset(string $url): string
     {
         $url = trim($url);
@@ -117,11 +138,8 @@ class Environment extends TwigEnvironment
         }
 
         $relationship = pathinfo_relationship($contentOrArrayOrFile);
-        if(!$relationship) {
-
-            $content = $contentOrArrayOrFile;
-
-        } else {
+        if(!$relationship) $content = $contentOrArrayOrFile;
+        else {
 
             // Compute options
             $relationship = $options["rel"] ?? $relationship;

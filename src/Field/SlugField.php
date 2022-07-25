@@ -7,9 +7,6 @@ use Base\Field\Type\SlugType;
 
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;
 
-/**
- * @author Jonathan Scheiber <contact@jmsche.fr>
- */
 final class SlugField implements FieldInterface
 {
     use FieldTrait;

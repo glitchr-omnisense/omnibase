@@ -189,13 +189,11 @@
         {% if translations_empty is defined and translations_empty == false %}
 
                 <ul class="nav nav-tabs" role="tablist" id="{{ form.vars['id'] }}_nav">
-
                 {% for form_locale, form_child in form.children %}
                     {% if form_locale in form.vars.available_locales %}
                     <li class="nav-item" role="presentation">
-
                         {% set country = form_locale|country %}
-                        <button class="nav-link {% if locale == form_locale %}active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~form_locale}}" type="button" role="tab" aria-controls="{{form_locale}}" aria-selected="true">
+                        <button class="nav-link {% if compatible_locale(locale, form_locale, form.vars.available_locales) %}active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~form_locale}}" type="button" role="tab" aria-controls="{{form_locale}}" aria-selected="true">
                             <label {% if form_locale == default_locale or form_locale in required_locales %}class="required"{% endif %}>
                                 <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                             </label>
@@ -208,7 +206,7 @@
                 <div class="tab-content" id="{{ form.vars['id'] }}_tab">
                 {% for form_locale, formChild in form.children %}
                     {% if form_locale in form.vars.available_locales %}
-                        <div class="tab-pane fade {% if locale == form_locale %}show active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}" role="tabpanel" aria-labelledby="{{ form.vars['id']~"_"~form_locale}}-tab">
+                        <div class="tab-pane fade {% if compatible_locale(locale, form_locale, form.vars.available_locales) %}show active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}" role="tabpanel" aria-labelledby="{{ form.vars['id']~"_"~form_locale}}-tab">
                             {% for row in formChild %}
                                 {{ form_row(row) }}
                             {% endfor %}

@@ -14,7 +14,6 @@ class EagerSubscriber implements EventSubscriberInterface
     public function __construct(BaseService $baseService)
     {
         $this->baseService = $baseService;
-        
     }
 
     public static function getSubscribedEvents(): array
@@ -28,6 +27,8 @@ class EagerSubscriber implements EventSubscriberInterface
     public function onCommand() { }
     public function onKernelRequest(KernelEvent $e) {
 
+        BaseBundle::markCacheAsValid();
+
         if($e->getRequest()->getPathInfo() == "/") return;
         if(!$this->baseService->getCurrentRouteName()) return;
         if(str_starts_with($this->baseService->getCurrentRouteName(), "_")) return;
@@ -37,5 +38,5 @@ class EagerSubscriber implements EventSubscriberInterface
             $e->setResponse($this->baseService->redirect($this->baseService->getRouteName("/")));
             $e->stopPropagation();
         }
-    } 
+    }
 }

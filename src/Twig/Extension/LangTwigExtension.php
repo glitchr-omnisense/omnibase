@@ -38,7 +38,26 @@ final class LangTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction('render_locale', [$this, 'renderLocale'], ["needs_environment" => true, 'is_safe' => ['all']]),
+            new TwigFunction('compatible_locale', [$this, 'compatibleLocale'], ['is_safe' => ['all']]),
         ];
+    }
+
+    public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): ?string
+    {
+        if($locale == $preferredLocale) return true;
+        if(in_array($locale, $availableLocales)) return false;
+
+        if(in_array($preferredLocale, $availableLocales ?? $this->localeProvider->getAvailableLocales()) &&
+           $this->localeProvider->__toLang($locale) == $this->localeProvider->__toLang($preferredLocale)) {
+
+            $availableLangs = array_map(fn($l) => $this->localeProvider->__toLang($l), $availableLocales ?? $this->localeProvider->getAvailableLocales());
+            $defaultLangKey = array_search($this->localeProvider->__toLang($preferredLocale), $availableLangs);
+            $defaultLocaleKey = array_search($preferredLocale, $availableLocales);
+
+            return $defaultLangKey == $defaultLocaleKey;
+        }
+
+        return false;
     }
 
     public function renderLocale(Environment $twig, string $switchRoute, array $options = [], string $template = "@Base/locale/dropdown.html.twig"): ?string

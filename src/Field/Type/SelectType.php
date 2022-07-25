@@ -651,7 +651,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $themeCssFile = $themeArray[0];
                 }
 
-                $this->twig->addHtmlContent("stylesheets:head", $themeCssFile);
+                $this->twig->addHtmlContent("stylesheets:before", $themeCssFile);
             }
 
             //
@@ -680,7 +680,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             $view->vars["select2-sortable"] = $options["sortable"] && $options["multivalue"] == false;
 
             // Import select2
-            $this->twig->addHtmlContent("stylesheets:head", $options["select2-css"]);
+            $this->twig->addHtmlContent("stylesheets:before", $options["select2-css"]);
             $this->twig->addHtmlContent("javascripts:head", $options["select2-js"]);
             $this->twig->addHtmlContent("javascripts:head", $options["select2-i18n"]."/".$selectOpts["language"].".js");
             $this->twig->addHtmlContent("javascripts:body", "bundles/base/form-type-select2.js");

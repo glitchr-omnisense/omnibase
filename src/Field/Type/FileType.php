@@ -275,7 +275,7 @@ class FileType extends AbstractType implements DataMapperInterface
         if(is_array($options["dropzone"]) && $options["multiple"]) {
 
             if($options["dropzone-js"] ) $this->twig->addHtmlContent("javascripts:head", $options["dropzone-js"]);
-            if($options["dropzone-css"]) $this->twig->addHtmlContent("stylesheets:head", $options["dropzone-css"]);
+            if($options["dropzone-css"]) $this->twig->addHtmlContent("stylesheets:before", $options["dropzone-css"]);
 
             $action = (!empty($options["action"]) ? $options["action"] : ".");
             $view->vars["attr"]["class"] = "dropzone";

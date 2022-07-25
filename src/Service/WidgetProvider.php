@@ -11,6 +11,9 @@ use Doctrine\ORM\EntityManagerInterface;
 
 class WidgetProvider implements WidgetProviderInterface
 {
+    protected $widgetRepository;
+    protected $widgetSlotRepository;
+
     public function __construct(EntityManagerInterface $entityManager)
     {
         if(BaseBundle::hasDoctrine()) {
@@ -24,13 +27,13 @@ class WidgetProvider implements WidgetProviderInterface
     public function getWidget(string $uuid, bool $useCache = BaseBundle::CACHE): ?Widget
     {
         $fn = $useCache && !is_cli() ? "cacheOneByPath" : "findOneByPath";
-        return $this->widgetRepository->$fn($uuid);
+        return $this->widgetRepository ? $this->widgetRepository->$fn($uuid) : null;
     }
 
     public function all(bool $useCache = BaseBundle::CACHE): array
     {
         $fn = $useCache && !is_cli() ? "cacheAll" : "findAll";
-        return $this->widgetRepository->$fn()->getResult();
+        return $this->widgetRepository ? $this->widgetRepository->$fn()->getResult() : [];
     }
     public function allSlots(bool $useCache = BaseBundle::CACHE): array
     {
@@ -42,8 +45,6 @@ class WidgetProvider implements WidgetProviderInterface
     public function getWidgetSlot(string $path, bool $useCache = BaseBundle::CACHE): ?Slot
     {
         $fn = $useCache && !is_cli() ? "cacheOneByPath" : "findOneByPath";
-        $ret = $this->widgetSlotRepository->$fn($path);
-
-        return $ret;
+        return $this->widgetSlotRepository ? $this->widgetSlotRepository->$fn($path) : null;
     }
 }

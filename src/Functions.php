@@ -1251,6 +1251,8 @@ namespace {
         return preg_replace(array_keys($utf8), array_values($utf8), $text);
     }
 
+    function is_multiligne(string $str):bool { return strstr($str, PHP_EOL); }
+
     function pathinfo_extension(string $path, ?string $extension = null)
     {
         $info = pathinfo($path);
@@ -1260,8 +1262,10 @@ namespace {
         return $dirname . $info['filename'] . '.' . $extension;
     }
 
-    function pathinfo_relationship(string $path)
+    function pathinfo_relationship(string $path):?string
     {
+        if(is_multiligne($path)) return null;
+
         $extension = pathinfo(parse_url($path, PHP_URL_PATH), PATHINFO_EXTENSION);
         if(empty($extension)) return null;
 

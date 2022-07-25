@@ -135,7 +135,7 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         $view->vars["required"]     = $options["required"] ?? (!$isNullable && !$this->classMetadataManipulator->isToManySide($dataClass, $form->getName()));
 
         $data = $form->getData();
-        $view->vars["entityId"] = json_encode(array_transforms(function($k, $e) use ($options):array {
+        $view->vars["entityId"] = json_encode(array_transforms(function($k, $e) use ($options, $form):array {
 
             $path = PropertyAccess::createPropertyAccessor()->getValue($e, $options["entity_file"]);
             if($path instanceof Collection) $path = $path->toArray();

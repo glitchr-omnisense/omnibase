@@ -62,7 +62,7 @@ class ImageType extends FileType
             $view->vars["ajax"]     = $this->twig->getAsset("ux/dropzone/" . $token);
 
             $this->twig->addHtmlContent("javascripts:head", $options["cropper-js"]);
-            $this->twig->addHtmlContent("stylesheets:head", $options["cropper-css"]);
+            $this->twig->addHtmlContent("stylesheets:before", $options["cropper-css"]);
 
             if(!array_key_exists('viewMode',     $options["cropper"])) $options["cropper"]['viewMode']         = 2;
             if(!array_key_exists('autoCropArea', $options["cropper"])) $options["cropper"]['autoCropArea'] = true;

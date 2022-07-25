@@ -51,7 +51,7 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('webp',           [ImageService::class, 'webp']),
             new TwigFilter('crop',           [ImageService::class, 'crop']),
             new TwigFilter('image',          [ImageService::class, 'image']),
-            new TwigFilter('lightbox',       [ImageService::class, 'lightbox']),
+            new TwigFilter('lightbox',       [ImageService::class, 'lightbox'], ["is_safe" => ['all']]),
             new TwigFilter('url',            [$this, 'url']),
             new TwigFilter('filesize',       [$this, 'filesize']),
 

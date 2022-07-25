@@ -51,7 +51,7 @@ class TwigSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        $this->twig->addHtmlContent("stylesheets:head", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery-ui.stylesheet")));
+        $this->twig->addHtmlContent("stylesheets:before", $this->twig->getAsset($this->parameterBag->get("base.vendor.jquery-ui.stylesheet")));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.lightbox.stylesheet")));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.clipboardjs.stylesheet")));
         $this->twig->addHtmlContent("stylesheets", $this->twig->getAsset($this->parameterBag->get("base.vendor.fontawesome.stylesheet")));
@@ -78,18 +78,17 @@ class TwigSubscriber implements EventSubscriberInterface
             $noscripts   = $this->twig->getHtmlContent("noscripts");
             $content = preg_replace('/<body\b[^>]*>/', "$0".$noscripts, $content, 1);
 
-            $stylesheetsHead = $this->twig->getHtmlContent("stylesheets:head");
+            $stylesheetsHead = $this->twig->getHtmlContent("stylesheets:before");
             $content = preg_replace('/(head\b[^>]*>)(.*?)(<link|<style)/s', "$1$2".$stylesheetsHead."$3", $content, 1);
-
             $stylesheets = $this->twig->getHtmlContent("stylesheets");
+            $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets."$0", $content, 1);
+            $stylesheets = $this->twig->getHtmlContent("stylesheets:after");
             $content = preg_replace('/<\/head\b[^>]*>/', $stylesheets."$0", $content, 1);
 
             $javascriptsHead = $this->twig->getHtmlContent("javascripts:head");
             $content = preg_replace('/(head\b[^>]*>)(.*?)(<script)/s', "$1$2".$javascriptsHead."$3", $content, 1);
-
             $javascripts = $this->twig->getHtmlContent("javascripts");
             $content = preg_replace('/<\/head\b[^>]*>/', $javascripts."$0", $content, 1);
-
             $javascriptsBody = $this->twig->getHtmlContent("javascripts:body");
             $content = preg_replace('/<\/body\b[^>]*>/', "$0".$javascriptsBody, $content, 1);
 

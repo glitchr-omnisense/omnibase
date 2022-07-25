@@ -9,6 +9,7 @@ use Base\Service\TranslatorInterface;
 use DateInterval;
 use DateTime;
 use ReflectionFunction;
+use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -45,11 +46,13 @@ final class FunctionTwigExtension extends AbstractExtension
      */
     protected string $projectDir;
 
-    public function __construct(TranslatorInterface $translator) {
+    public function __construct(TranslatorInterface $translator, AssetExtension $assetExtension, string $projectDir) {
 
-        $this->translator       = $translator;
-        $this->mimeTypes        = new MimeTypes();
-        $this->intlExtension    = new IntlExtension();
+        $this->translator     = $translator;
+        $this->assetExtension = $assetExtension;
+        $this->projectDir     = $projectDir;
+        $this->mimeTypes      = new MimeTypes();
+        $this->intlExtension  = new IntlExtension();
     }
 
     public function getFunctions(): array
@@ -69,7 +72,9 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('static_call',                  [$this, 'static_call'  ]),
             new TwigFunction('static_property',              [$this, 'static_property'  ]),
 
-            new TwigFunction('html_attributes', 'html_attributes', ["is_safe" => ['all']]),
+            new TwigFunction('html_attributes'  , 'html_attributes', ["is_safe" => ['all']]),
+            new TwigFunction('render_stylesheet', [$this, 'render_stylesheet'],  ["is_safe" => ["all"]]),
+            new TwigFunction('render_javascript', [$this, 'render_javascript'],  ["is_safe" => ["all"]]),
 
             new TwigFunction('str_starts_with', "str_starts_with"),
             new TwigFunction('str_ends_with'  , "str_ends_with"  ),
@@ -99,6 +104,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('countdown',      [$this, 'countdown'],  ['needs_environment' => true, "is_safe" => ["all"]]),
             new TwigFilter('progress',       [$this, 'progress'],   ['needs_environment' => true, "is_safe" => ["all"]]),
 
+            new TwigFilter('pickup',         [$this,'pickup']),
             new TwigFilter('preg_split',     [$this,'preg_split']),
             new TwigFilter('nargs',          [$this, 'nargs']),
             new TwigFilter('instanceof',     [$this, 'instanceof']),
@@ -193,6 +199,31 @@ final class FunctionTwigExtension extends AbstractExtension
         return forward_static_call_array([$class, $method], $args);
     }
 
+    public function render_stylesheet(string $href, array $attributes = [], bool $keepIfNotFound = true): string
+    {
+        $attributes["rel"]  = 'stylesheet';
+        $attributes["type"] = 'text/css';
+
+        $href = $this->assetExtension->getAssetUrl($href);
+        $isUrl = filter_var($this->projectDir."/public".$href, FILTER_VALIDATE_URL) === true;
+        $isEmpty = !file_exists($this->projectDir."/public".$href) || filesize($this->projectDir."/public".$href);
+        if(!$isUrl && $isEmpty && !$keepIfNotFound)
+            return "";
+
+        return "<link href='".$href."' ".html_attributes($attributes).">";
+    }
+
+    public function render_javascript(string $src, array $attributes = [], bool $keepIfNotFound = true): string
+    {
+        $src = $this->assetExtension->getAssetUrl($src);
+        $isUrl = filter_var($this->projectDir."/public".$src, FILTER_VALIDATE_URL) === true;
+        $isEmpty = !file_exists($this->projectDir."/public".$src) || filesize($this->projectDir."/public".$src);
+        if(!$isUrl && $isEmpty && !$keepIfNotFound)
+            return "";
+
+        return "<script src='".$src."' ".html_attributes($attributes)."></script>";
+    }
+
     public function datetime(Environment $env, DateTime|DateInterval|int|string $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
         if(is_array($pattern)) {
@@ -210,6 +241,14 @@ final class FunctionTwigExtension extends AbstractExtension
 
         if(is_string($datetime)) return $datetime;
         return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    public function pickup(array $array, int $i)
+    {
+        $keys = array_rand($array, min(count($array),$i)) ?? [];
+        if(!is_array($keys)) $keys = [$keys];
+
+        return array_filter($array, fn($k) => in_array($k, $keys), ARRAY_FILTER_USE_KEY);
     }
 
     public function countdown(Environment $env, DateTime|DateInterval|int|string $datetime, array $parameters = []): string

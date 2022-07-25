@@ -84,7 +84,7 @@ class QuillType extends AbstractType
     {
         // Import highlight
         $this->twig->addHtmlContent("javascripts:head", $options["highlight-js"]);
-        $this->twig->addHtmlContent("stylesheets:head", $options["highlight-css"]);
+        $this->twig->addHtmlContent("stylesheets:before", $options["highlight-css"]);
 
         // Import quill
         $this->twig->addHtmlContent("javascripts:head", $options["quill-js"]);
@@ -100,7 +100,7 @@ class QuillType extends AbstractType
             $themeCssFile = $themeArray[0];
         }
 
-        $this->twig->addHtmlContent("stylesheets:head", $themeCssFile);
+        $this->twig->addHtmlContent("stylesheets:before", $themeCssFile);
         $modules = $options["modules"] ?? [];
 
         $quillOpts = [];
