@@ -35,6 +35,7 @@ class LocaleController extends AbstractController
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
         $referrerName = $this->router->getRouteName(strval($referrer));
+        $referrerParameters = array_filter($this->router->match(strval($referrer)), fn($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
         $referrer->setUrl(null);
 
         if($referrerName !== "locale_changeto") {
@@ -42,8 +43,8 @@ class LocaleController extends AbstractController
             $referrer->setUrl(null);
             $lang = $_locale ? ".".$this->localeProvider->getLang($_locale) : "";
 
-            try { return $this->redirect($this->router->generate($referrerName.$lang)); }
-            catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName)); }
+            try { return $this->redirect($this->router->generate($referrerName.$lang, $referrerParameters)); }
+            catch (RouteNotFoundException $e) { return $this->redirect($this->router->generate($referrerName, $referrerParameters)); }
         }
 
         return $this->redirect($request->getBasePath());

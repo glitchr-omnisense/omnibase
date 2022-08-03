@@ -49,6 +49,7 @@
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Backend\Factory\MenuFactory"         parent="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory"         decorates="EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory">

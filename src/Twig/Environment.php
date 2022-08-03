@@ -3,6 +3,7 @@
 namespace Base\Twig;
 
 use Base\Routing\RouterInterface;
+use Base\Service\ParameterBagInterface;
 use Base\Service\SettingBagInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -11,10 +12,11 @@ use Twig\Loader\LoaderInterface;
 
 class Environment extends TwigEnvironment
 {
-    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, RouterInterface $router)
+    public function __construct(LoaderInterface $loader, array $options, RequestStack $requestStack, RouterInterface $router, ParameterBagInterface $parameterBag)
     {
         $this->requestStack = $requestStack;
         $this->router   = $router;
+        $this->parameterBag = $parameterBag;
 
         parent::__construct($loader, $options);
     }
@@ -27,6 +29,20 @@ class Environment extends TwigEnvironment
             if($this->getLoader()->exists($stylesheet)) {
                 $stylesheet = $this->load($stylesheet)->render($context);
                 if($stylesheet) $this->addHtmlContent("stylesheets:after", "<style>".$stylesheet."</style>");
+            }
+
+            $formats = [];
+            $breakpoints = $this->parameterBag->get("base.twig.breakpoints");
+            foreach($breakpoints as $breakpoint)
+                $formats[$breakpoint["name"]] = $breakpoint["media"];
+
+            foreach($formats as $format => $media) {
+
+                $stylesheet = str_rstrip($name, ".html.twig").".".$format.".css.twig";
+                if($this->getLoader()->exists($stylesheet)) {
+                    $stylesheet = $this->load($stylesheet)->render($context);
+                    if($stylesheet) $this->addHtmlContent("stylesheets:after", "<style media='".$media."'>".$stylesheet."</style>");
+                }
             }
 
             $javascript = str_rstrip($name, ".html.twig").".js.twig";

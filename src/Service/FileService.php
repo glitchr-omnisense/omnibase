@@ -117,6 +117,24 @@ class FileService implements FileServiceInterface
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
     {
+        $routeMatch = $this->router->getRouteMatch($path) ?? [];
+        if(array_key_exists("_route", $routeMatch) && $routeMatch["_route"] == $proxyRoute) {
+
+            $hashid = $routeMatch["hashid"];
+            $config["options"] = $config["options"] ?? [];
+            $config["local_cache"] = $config["local_cache"] ?? null;
+
+            if ( ($pathConfig = $this->obfuscator->decode($hashid)) ) {
+
+                $config["path"] = $path = $pathConfig["path"] ?? $path;
+                $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
+                $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
+                $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
+            }
+
+            $path = array_pop_key("path", $config);
+        }
+
         $hashid = $this->obfuscate($path, $config);
         if(!$hashid) return null;
 
@@ -137,11 +155,12 @@ class FileService implements FileServiceInterface
         return $this->router->generate(...$variadic);
     }
 
-    public function resolve(string $hashid)
+    public function resolve(string $hashid): ?array
     {
         $path = null;
         $args = [];
 
+        $hashidBak = $hashid;
         do {
 
             // Path fallback
@@ -167,6 +186,7 @@ class FileService implements FileServiceInterface
 
         } while(is_array($args0));
 
+        if($hashidBak == $path) return [];
         $args["path"]    = $path;
         $args["options"] = $args["options"] ?? [];
 

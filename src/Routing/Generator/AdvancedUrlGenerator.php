@@ -85,7 +85,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             $baseDir   = array_pop_key("_base_dir", $routeParameters) ?? $this->getRouter()->getBaseDir();
             $parse     = parse_url2(get_url($scheme, $host, $baseDir), -1, $baseDir);
             $parse["base_dir"] = $baseDir;
-            
+
             if($parse && array_key_exists("host", $parse))
                 $this->getContext()->setHost($parse["host"]);
             if($parse && array_key_exists("base_dir", $parse))
@@ -165,7 +165,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $parse = parse_url2($url);
 
         $allowedSubdomain = false;
-        
+
         $permittedSubdomains   = array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getLocale());
         $permittedSubdomains ??= array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getLang());
         $permittedSubdomains ??= array_search_by($this->getParameterBag()->get("base.router.permitted_subdomains"), "locale", $this->getLocaleProvider()->getDefaultLocale());

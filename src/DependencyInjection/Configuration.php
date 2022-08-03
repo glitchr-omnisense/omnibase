@@ -26,7 +26,6 @@ class Configuration implements ConfigurationInterface
         return $this->treeBuilder;
     }
 
-
     private function addGlobalOptionsSection(ArrayNodeDefinition $rootNode)
     {
         $rootNode
@@ -406,6 +405,15 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->arrayNode('twig')->addDefaultsIfNotSet()
                     ->children()
+                        ->arrayNode('breakpoints')
+                            ->arrayPrototype()
+                                ->children()
+                                    ->scalarNode("name")->end()
+                                    ->scalarNode("media")->end()
+                                ->end()
+                            ->end()
+                        ->end()
+
                         ->booleanNode('use_custom_loader')
                             ->info('Use base filesystem loader')
                             ->defaultValue(True)
@@ -436,6 +444,7 @@ class Configuration implements ConfigurationInterface
                                 ->defaultValue('./form/form_div_layout.html.twig')
                                 ->end()
                         ->end()
+
                         ->arrayNode('paths')
                             ->arrayPrototype()
                                 ->children()

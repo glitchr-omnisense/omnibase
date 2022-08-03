@@ -149,11 +149,10 @@ class ImageService extends FileService implements ImageServiceInterface
         return parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
     }
 
-    public function resolve(string $hashid, array $filters = [])
+    public function resolve(string $hashid, array $filters = []): ?array
     {
-        $args = parent::resolve($hashid);
+        $args = parent::resolve($hashid) ?? [];
         $args["filters"]  = array_merge($args["filters"] ?? [], $filters);
-
         return $args;
     }
 
@@ -240,7 +239,7 @@ class ImageService extends FileService implements ImageServiceInterface
         // Resolve nested paths
         $args    = $this->resolve($path, $filters);
         $path    = $args["path"] ?? $path; // Cache directory location
-        $filters = $args["filters"];
+        $filters = $args["filters"] ?? [];
         $storage = $args["storage"] ?? $config["storage"] ?? null;
 
         //
@@ -252,7 +251,7 @@ class ImageService extends FileService implements ImageServiceInterface
         // Extract last filter
         $filters = array_filter($filters, fn($f) => class_implements_interface($f, FilterInterface::class));
         $formatter = end($filters);
-        if($formatter === null)
+        if($formatter === false)
             throw new NotFoundHttpException("Last filter is missing.");
 
         //
@@ -275,7 +274,7 @@ class ImageService extends FileService implements ImageServiceInterface
         }
 
         $pathRelative = $this->flysystem->stripPrefix(realpath($path), $storage);
-	if(!$pathRelative) {
+	    if(!$pathRelative) {
 
             if(!$this->fallback)
                 throw new NotFoundHttpException($path ? "Image not found behind system path \"$path\"." : "Empty path provided.");

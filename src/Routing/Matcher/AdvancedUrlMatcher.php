@@ -82,7 +82,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
     public function security(string $pathinfo): bool
     {
         $request = Request::create($pathinfo, "GET", [], $_COOKIE, $_FILES, $_SERVER);
-        return $this->getFirewallMap()->getFirewallConfig($request) == true;
+        return $this->getFirewallMap()->getFirewallConfig($request)?->isSecurityEnabled();
     }
 
     public function firewall(string $pathinfo): ?FirewallConfig
@@ -110,7 +110,7 @@ class AdvancedUrlMatcher extends CompiledUrlMatcher implements RedirectableUrlMa
         $parse = array_merge($parse, $parsePathinfo);
         $this->getContext()->setHost($parse["host"] ?? "");
         $this->getContext()->setBaseUrl($parse["base_dir"] ?? "");
-        
+
         try { return parent::match(str_lstrip($parse["path"] ?? $pathinfo, $this->getContext()->getBaseUrl())); }
         catch(Exception $e) { throw $e; }
     }

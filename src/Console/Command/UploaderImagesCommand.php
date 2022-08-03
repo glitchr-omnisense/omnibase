@@ -69,8 +69,8 @@ class UploaderImagesCommand extends UploaderEntitiesCommand
         $args = $this->imageService->resolve($hashid);
         if(!$args) return false;
 
-        $options = $args["options"];
-        $filters = $args["filters"];
+        $options = $args["options"] ?? [];
+        $filters = $args["filters"] ?? [];
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;

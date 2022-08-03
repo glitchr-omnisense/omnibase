@@ -81,7 +81,10 @@ class IntegritySubscriber implements EventSubscriberInterface
             throw new \RuntimeException("Application integrity compromised, cache needs to be refreshed.");
 
         $token = $this->tokenStorage->getToken();
-        if(!$token) return;
+
+        if(!$this->router->isRouteSecure()) return;
+        if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE)
+            return;
 
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();
@@ -89,9 +92,11 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         if(!$integrity) {
 
-            $user = $token->getUser();
-            $notification = new Notification("integrity", [$user]);
-            $notification->send("danger");
+            if($token) {
+                $user = $token->getUser();
+                $notification = new Notification("integrity", [$user]);
+                $notification->send("danger");
+            }
 
             $this->tokenStorage->setToken(NULL);
             $session = $this->requestStack->getSession();

@@ -15,9 +15,11 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
 
+use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /** @Route("", name="ux_") */
 class FileController extends AbstractController
@@ -145,6 +147,16 @@ class FileController extends AbstractController
     }
 
     /**
+     * @Route("/images/debug/{hashid}", name="debug_image")
+     * @Route("/images/debug/{hashid}/image.{extension}", name="debug_imageExtension")
+     * @IsGranted("ROLE_EDITOR")
+     */
+    public function ImageDebug($hashid, string $extension = null): Response
+    {
+        return $this->Image($hashid, $extension, true);
+    }
+
+    /**
      * @Route("/images/cacheless/{hashid}", name="image_cacheless")
      * @Route("/images/cacheless/{hashid}/image.{extension}", name="imageExtension_cacheless")
      */
@@ -158,7 +170,7 @@ class FileController extends AbstractController
      * @Route("/images/{hashid}", name="image")
      * @Route("/images/{hashid}/image.{extension}", name="imageExtension")
      */
-    public function Image($hashid, string $extension = null): Response
+    public function Image($hashid, string $extension = null, bool $debug = false): Response
     {
         //
         // Extract parameters
@@ -178,6 +190,13 @@ class FileController extends AbstractController
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
 
         $path = $this->imageService->filter($args["path"], new BitmapFilter(null, $filters, $options), ["local_cache" => $localCache]);
+
+        if($debug) {
+
+            dump($hashid, $args, $path);
+            exit(1);
+        }
+
         return  $this->imageService->serve($path, 200, ["http_cache" => $path !== null]);
     }
 
@@ -235,6 +254,8 @@ class FileController extends AbstractController
         }
 
         // Providing a "width:height" information
+        $width  = null;
+        $height = null;
         if($imageCrop === null && preg_match("/([0-9]*)[:x]([0-9]*)/", $identifier, $matches)) {
 
             $width   = $matches[1];
@@ -259,6 +280,12 @@ class FileController extends AbstractController
                 $imageCrop->getX0(), $imageCrop->getY0(),
                 $imageCrop->getWidth0(), $imageCrop->getHeight0()
             ));
+
+            if($width && $height) {
+                array_prepend($filters, new ThumbnailFilter(
+                    $height, $width
+                ));
+            }
         }
 
         $localCache = array_pop_key("local_cache", $options);

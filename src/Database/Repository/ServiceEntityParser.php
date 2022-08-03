@@ -1102,10 +1102,13 @@ class ServiceEntityParser
                     throw new Exception("Invalid operator for association field \"$fieldName\": ".$tableOperator);
 
                 $expr = [];
-                foreach ($fieldValue as $subFieldID => $_) {
+                $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
 
-                    $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "like" : "notLike");
-                    $expr[] = $qb->expr()->$fnExpr($fieldID, ":${fieldID}_${subFieldID}");
+                if(!is_array($fieldValue)) $expr[] = $qb->expr()->$fnExpr($tableColumn, ":${fieldID}");
+                else {
+
+                    foreach ($fieldValue as $subFieldID => $_)
+                        $expr[] = $qb->expr()->$fnExpr($fieldID, ":${fieldID}_${subFieldID}");
                 }
 
                 $fnExpr = ($tableOperator == self::OPTION_EQUAL ? "orX" : "andX");

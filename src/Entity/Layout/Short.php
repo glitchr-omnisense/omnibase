@@ -29,7 +29,10 @@ class Short implements TranslatableInterface, IconizeInterface, LinkableInterfac
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);
+        $slug = $this->getSlug();
+        if(!$slug) return null;
+
+        $routeParameters = array_merge($routeParameters, ["slug" => $slug]);
 
         return $this->getRouter()->generate("short_redirect", $routeParameters, $referenceType);
     }
