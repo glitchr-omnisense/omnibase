@@ -7,11 +7,9 @@ use Base\Model\IconProvider\AbstractIconAdapter;
 
 class IconifyAdapter extends AbstractIconAdapter
 {
-    public function __construct(string $metadata, string $javascript, string $stylesheet)
+    public function __construct(string $metadata)
     {
         $this->metadata   = $metadata;
-        $this->javascript = $javascript;
-        $this->stylesheet = $stylesheet;
         $this->getVersion();
     }
 
