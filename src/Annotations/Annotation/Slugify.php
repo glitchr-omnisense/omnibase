@@ -140,7 +140,6 @@ class Slugify extends AbstractAnnotation
 
     public function onFlush(OnFlushEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
         $propertyDeclarer  = property_declarer($entity , $property);
         $classMetadata = $this->getClassMetadata($propertyDeclarer);
         $invalidSlugs = $this->getInvalidSlugs($event, $entity, $property);
@@ -171,6 +170,8 @@ class Slugify extends AbstractAnnotation
         }
 
         $this->setFieldValue($entity, $property, $slug);
-        $uow->recomputeSingleEntityChangeSet($classMetadata, $entity);
+
+        if ($this->getUnitOfWork()->getEntityChangeSet($entity))
+            $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
     }
 }

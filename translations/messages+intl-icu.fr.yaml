@@ -13,8 +13,8 @@ words:
     by: par
     and: et
     see_also: "à voir également: {0}"
-    see_more: voir plus
-    read_more: lire plus
+    see_more: en voir plus
+    read_more: en lire plus
 
 locale:
     lang:

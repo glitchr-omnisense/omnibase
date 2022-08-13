@@ -1,6 +1,6 @@
 <div class="widget-menu">
     {% if label != false %}<span class="label">{{ label }}</span>{% endif %}
-    <ul class="items">
+    <ul class="items {{ row_attr['class'] ?? "" }}">
         {% for item in widget.items %}
             {% set url = item.__toLink() %}
             {% if url is not empty %}

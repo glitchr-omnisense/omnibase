@@ -17,7 +17,6 @@ use Imagine\Image\ImagineInterface;
 use Imagine\Image\Palette\CMYK;
 use Imagine\Image\Palette\RGB;
 use InvalidArgumentException;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 use Symfony\Component\HttpFoundation\Response;
@@ -73,9 +72,10 @@ class ImageService extends FileService implements ImageServiceInterface
         $lightboxPathType = gettype($path);
         $lightboxIdType = gettype($lightboxId);
         $lightboxTitleType = gettype($lightboxTitle);
-        if($lightboxPathType !== $lightboxIdType && $lightboxIdType !== gettype(NULL))
+
+        if($path != NULL && $lightboxPathType !== $lightboxIdType && $lightboxIdType !== gettype(NULL))
             throw new Exception("Unexpected `lightboxId` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
-        if($lightboxPathType !== $lightboxTitleType && $lightboxTitleType !== gettype(NULL))
+        if($path != NULL && $lightboxPathType !== $lightboxTitleType && $lightboxTitleType !== gettype(NULL))
             throw new Exception("Unexpected `lightboxTitle` type parameter received: ".$lightboxIdType." (expected:".$lightboxPathType.")");
 
         if(!$path) return $path;
@@ -83,6 +83,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
         $path = $this->imagine($path);
         $lightboxAttributes["loading"] ??= "lazy";
+        $lightboxAttributes["class"] = trim(($lightboxAttributes["class"] ?? "")." lightbox-wrapper");
         $lightboxAttributes["data-lightbox"] = $lightboxId ?? "lightbox";
         if ($lightboxTitle !== null)
             $lightboxAttributes["data-title"] = $lightboxTitle;

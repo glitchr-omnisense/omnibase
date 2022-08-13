@@ -23,7 +23,7 @@ use Base\Repository\Layout\Widget\Set\NetworkRepository;
 class Network extends Widget implements IconizeInterface, SetInterface
 {
     public        function __iconize()       : ?array { return null; }
-    public static function __iconizeStatic() : ?array { return ["fas fa-chart-network"]; }
+    public static function __iconizeStatic() : ?array { return ["fas fa-network-wired"]; }
 
     public function __construct(string $title, array $routes = [])
     {

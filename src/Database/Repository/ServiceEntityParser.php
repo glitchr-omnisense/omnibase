@@ -2,12 +2,9 @@
 
 namespace Base\Database\Repository;
 
-use App\Entity\User;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\Extension\Ordering;
-use Base\Entity\Thread;
 use Base\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
@@ -49,6 +46,16 @@ class ServiceEntityParser
         return [self::SPECIAL_ALL , self::SPECIAL_ONE, self::SPECIAL_ATMOST, self::SPECIAL_LAST, self::SPECIAL_LASTONE,
                 self::SPECIAL_RAND, self::SPECIAL_PREVONE, self::SPECIAL_NEXTONE, self::SPECIAL_PREV, self::SPECIAL_NEXT];
     }
+
+    // Default options without argument
+    public const OPTION_EMPTY         = "Empty";
+    public const OPTION_NOT_EMPTY     = "NotEmpty";
+    public const OPTION_TRUE          = "True";
+    public const OPTION_NOT_TRUE      = "NotTrue";
+    public const OPTION_FALSE         = "False";
+    public const OPTION_NOT_FALSE     = "NotFalse";
+    public const OPTION_NULL          = "Null";
+    public const OPTION_NOT_NULL      = "NotNull";
 
     // Default options
     public const OPTION_EQUAL         = "EqualTo";
@@ -317,6 +324,14 @@ class ServiceEntityParser
 
                 str_contains($field, self::OPTION_EQUAL)             ||
                 str_contains($field, self::OPTION_NOT_EQUAL)         ||
+                str_contains($field, self::OPTION_NULL)              ||
+                str_contains($field, self::OPTION_NOT_NULL)          ||
+                str_contains($field, self::OPTION_EMPTY)             ||
+                str_contains($field, self::OPTION_NOT_EMPTY)         ||
+                str_contains($field, self::OPTION_TRUE)              ||
+                str_contains($field, self::OPTION_NOT_TRUE)          ||
+                str_contains($field, self::OPTION_FALSE)             ||
+                str_contains($field, self::OPTION_NOT_FALSE)         ||
 
                 str_contains($field, self::SEPARATOR_AND      )      ||
                 str_contains($field, self::SEPARATOR_OR       )      ||
@@ -553,6 +568,22 @@ class ServiceEntityParser
                     $option = self::OPTION_NOT_EQUAL;
                 else if ( str_ends_with($by, self::OPTION_EQUAL) )
                     $option = self::OPTION_EQUAL;
+                else if ( str_ends_with($by, self::OPTION_NOT_NULL) )
+                    $option = self::OPTION_NOT_NULL;
+                else if ( str_ends_with($by, self::OPTION_NULL) )
+                    $option = self::OPTION_NULL;
+                else if ( str_ends_with($by, self::OPTION_NOT_EMPTY) )
+                    $option = self::OPTION_NOT_EMPTY;
+                else if ( str_ends_with($by, self::OPTION_EMPTY) )
+                    $option = self::OPTION_EMPTY;
+                else if ( str_ends_with($by, self::OPTION_NOT_TRUE) )
+                    $option = self::OPTION_NOT_TRUE;
+                else if ( str_ends_with($by, self::OPTION_TRUE) )
+                    $option = self::OPTION_TRUE;
+                else if ( str_ends_with($by, self::OPTION_NOT_FALSE) )
+                    $option = self::OPTION_NOT_FALSE;
+                else if ( str_ends_with($by, self::OPTION_FALSE) )
+                    $option = self::OPTION_FALSE;
 
                 switch($option) {
 
@@ -636,6 +667,14 @@ class ServiceEntityParser
                     case self::OPTION_GREATER_EQUAL:
                     case self::OPTION_EQUAL:
                     case self::OPTION_NOT_EQUAL:
+                    case self::OPTION_EMPTY:
+                    case self::OPTION_NOT_EMPTY:
+                    case self::OPTION_TRUE:
+                    case self::OPTION_NOT_TRUE:
+                    case self::OPTION_FALSE:
+                    case self::OPTION_NOT_FALSE:
+                    case self::OPTION_NULL:
+                    case self::OPTION_NOT_NULL:
                         $operator = $option;
                         list($method, $by) = $this->stripByEnd($method, $by, $option);
                         break;
@@ -803,17 +842,25 @@ class ServiceEntityParser
 
                 $by = lcfirst($by);
 
-                $fieldExpected = ($operator == self::OPTION_OVER || $operator == self::OPTION_NOT_OVER);
-                $fieldValue = ($fieldExpected ? "CURDATE()" : array_shift($arguments));
+                $fieldDate  = ($operator == self::OPTION_OVER  || $operator == self::OPTION_NOT_OVER );
+                $fieldNull  = ($operator == self::OPTION_NULL  || $operator == self::OPTION_NOT_NULL );
+                $fieldEmpty = ($operator == self::OPTION_EMPTY || $operator == self::OPTION_NOT_EMPTY);
+                $fieldBool  = ($operator == self::OPTION_TRUE  || $operator == self::OPTION_NOT_TRUE ||
+                               $operator == self::OPTION_FALSE || $operator == self::OPTION_NOT_FALSE);
+
+                     if ($fieldEmpty) $fieldValue = "";
+                else if ($fieldNull ) $fieldValue = NULL;
+                else if ($fieldBool ) $fieldValue = true;
+                else if ($fieldDate ) $fieldValue = "CURDATE()";
+                else $fieldValue = array_shift($arguments);
 
                 $id = $this->addCriteria($by, $fieldValue);
-                if ($isPartial) $this->addCustomOption($id, self::OPTION_PARTIAL);
+
+                if ($isPartial    ) $this->addCustomOption($id, self::OPTION_PARTIAL);
                 if ($isInsensitive) $this->addCustomOption($id, self::OPTION_INSENSITIVE);
-
-                if ($closestTo) $this->addCustomOption($id, self::OPTION_CLOSESTTO);
-                if ($farestTo) $this->addCustomOption($id, self::OPTION_FARESTTO);
-
-                if ($operator) $this->addCustomOption($id, $operator);
+                if ($closestTo    ) $this->addCustomOption($id, self::OPTION_CLOSESTTO);
+                if ($farestTo     ) $this->addCustomOption($id, self::OPTION_FARESTTO);
+                if ($operator     ) $this->addCustomOption($id, $operator);
             }
         }
 
@@ -857,6 +904,15 @@ class ServiceEntityParser
         $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
         $fieldHead = explode(".", $fieldName)[0];
 
+        $isNull          = $this->findCustomOption($fieldRoot, self::OPTION_NULL);
+        $isNotNull       = $this->findCustomOption($fieldRoot, self::OPTION_NOT_NULL);
+        $isEmpty         = $this->findCustomOption($fieldRoot, self::OPTION_EMPTY);
+        $isNotEmpty      = $this->findCustomOption($fieldRoot, self::OPTION_NOT_EMPTY);
+        $isBool          = $this->findCustomOption($fieldRoot, self::OPTION_TRUE)     ||
+                           $this->findCustomOption($fieldRoot, self::OPTION_NOT_TRUE) ||
+                           $this->findCustomOption($fieldRoot, self::OPTION_FALSE)    ||
+                           $this->findCustomOption($fieldRoot, self::OPTION_NOT_FALSE);
+
         $isPartial       = $this->findCustomOption($fieldRoot, self::OPTION_PARTIAL);
         $isInsensitive   = $this->findCustomOption($fieldRoot, self::OPTION_INSENSITIVE);
         $closestTo       = $this->findCustomOption($fieldRoot, self::OPTION_CLOSESTTO);
@@ -887,8 +943,8 @@ class ServiceEntityParser
             ($this->findCustomOption ($fieldRoot, self::OPTION_YOUNGER_EQUAL) ? self::OPTION_YOUNGER_EQUAL :
 
             // String related options
-            ($this->findCustomOption ($fieldRoot, self::OPTION_STARTING_WITH)     ? self::OPTION_STARTING_WITH :
-            ($this->findCustomOption ($fieldRoot, self::OPTION_ENDING_WITH)       ? self::OPTION_ENDING_WITH   :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_STARTING_WITH)     ? self::OPTION_STARTING_WITH     :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_ENDING_WITH)       ? self::OPTION_ENDING_WITH       :
             ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_STARTING_WITH) ? self::OPTION_NOT_STARTING_WITH :
             ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_ENDING_WITH)   ? self::OPTION_NOT_ENDING_WITH   :
 
@@ -897,8 +953,16 @@ class ServiceEntityParser
             ($this->findCustomOption ($fieldRoot, self::OPTION_GREATER_EQUAL) ? self::OPTION_GREATER_EQUAL :
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER)         ? self::OPTION_LOWER         :
             ($this->findCustomOption ($fieldRoot, self::OPTION_LOWER_EQUAL)   ? self::OPTION_LOWER_EQUAL   :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NULL)          ? self::OPTION_NULL          :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_NULL)      ? self::OPTION_NOT_NULL      :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_EMPTY)         ? self::OPTION_EMPTY         :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EMPTY)     ? self::OPTION_NOT_EMPTY     :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_TRUE)          ? self::OPTION_TRUE          :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_TRUE)      ? self::OPTION_NOT_TRUE      :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_FALSE)         ? self::OPTION_FALSE         :
+            ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_FALSE)     ? self::OPTION_NOT_FALSE     :
             ($this->findCustomOption ($fieldRoot, self::OPTION_NOT_EQUAL)     ? self::OPTION_NOT_EQUAL     : self::OPTION_EQUAL
-        )))))))))))))))))))));
+        )))))))))))))))))))))))))))));
 
         if(is_array($tableOperator))
             throw new Exception("Too many operator requested for \"$fieldName\": ".implode(",", $tableOperator));
@@ -1084,7 +1148,8 @@ class ServiceEntityParser
             } else if(!is_array($fieldValue)) {
 
                 $qb = $this->innerJoin($qb, $fieldHead);
-                $qb->setParameter($fieldID, $fieldValue);
+                if(!$isEmpty && !$isNotEmpty && !$isBool)
+                    $qb->setParameter($fieldID, $fieldValue);
 
             } else {
 
@@ -1116,7 +1181,7 @@ class ServiceEntityParser
 
             } else if (is_array($fieldValue)) {
 
-                    if($tableOperator == self::OPTION_EQUAL)     $tableOperator = "IN";
+                     if($tableOperator == self::OPTION_EQUAL)     $tableOperator = "IN";
                 else if($tableOperator == self::OPTION_NOT_EQUAL) $tableOperator = "NOT IN";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
@@ -1134,6 +1199,30 @@ class ServiceEntityParser
             } else if($closestTo || $farestTo) {
 
                 return "ABS(".$tableColumn." - :".$fieldID.")";
+
+            } else if($isNull || $isNotNull) {
+
+                     if($tableOperator == self::OPTION_NULL)          $tableOperator = ["IS", "="];
+                else if($tableOperator == self::OPTION_NOT_NULL)      $tableOperator = ["IS NOT", "!="];
+                else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+
+                return "${tableColumn} ".$tableOperator[0]." NULL OR ${tableColumn} ".$tableOperator[1]." ''";
+
+            } else if($isEmpty || $isNotEmpty) {
+
+                     if($tableOperator == self::OPTION_EMPTY)          $tableOperator = "=";
+                else if($tableOperator == self::OPTION_NOT_EMPTY)      $tableOperator = "!=";
+                else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+
+                return "${tableColumn} ".$tableOperator." ''";
+
+            } else if($isBool) {
+
+                     if($tableOperator == self::OPTION_TRUE  || $tableOperator == self::OPTION_NOT_FALSE) $tableOperator =  "=";
+                else if($tableOperator == self::OPTION_FALSE || $tableOperator == self::OPTION_NOT_TRUE)  $tableOperator = "!=";
+                else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+
+                return "${tableColumn} ".$tableOperator." true";
 
             } else {
 
