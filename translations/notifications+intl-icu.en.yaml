@@ -5,7 +5,7 @@ login:
         normal: "Hi {0}! You just logged in."
         alien :  "Welcome, visitor from the outside! Please consider signing up!"
         day:
-            first: "Hello day, {0} !"
+            first: "Hello, {0} !"
             back: "Hello again, {0} !"
         morning:
             first: "Good morning, {0} !"
@@ -45,7 +45,7 @@ maintenance:
     banner: This website is currently <b>under maintenance</b>.
 maternity:
     banner: "This website is <b>not yet</b> visible. Release date on {0} at {1}"
-    
+
 resetPassword:
     title: "Reset your password"
     csrfToken: "Invalid CSRF token detected. You can't reset your password"

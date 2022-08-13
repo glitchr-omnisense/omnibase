@@ -42,6 +42,12 @@ final class SlugField implements FieldInterface
         return $this;
     }
 
+    public function keep(string $keep): self
+    {
+        $this->setFormTypeOption("keep", $keep);
+        return $this;
+    }
+
     public function setUnlockConfirmationMessage(string $message): self
     {
         $this->setCustomOption(self::OPTION_UNLOCK_CONFIRMATION_MESSAGE, $message);

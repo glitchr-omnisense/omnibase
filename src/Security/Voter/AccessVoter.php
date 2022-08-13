@@ -50,26 +50,26 @@ class AccessVoter extends Voter
         switch($attribute) {
 
             case self::ADMIN_ACCESS:
-                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access", $this->localeProvider->getLocale()), FILTER_VALIDATE_BOOLEAN);
+                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_SUPERADMIN");
                 return $access;
 
             case self::USER_ACCESS:
-                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access", $this->localeProvider->getLocale()), FILTER_VALIDATE_BOOLEAN);
-                $access &= filter_var($this->settingBag->getScalar("base.settings.access_restriction.user_access", $this->localeProvider->getLocale()), FILTER_VALIDATE_BOOLEAN);
+                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $access &= filter_var($this->settingBag->getScalar("base.settings.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_ADMIN");
                 return $access;
 
             case self::ANONYMOUS_ACCESS:
-                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access", $this->localeProvider->getLocale()), FILTER_VALIDATE_BOOLEAN);
-                $access &= filter_var($this->settingBag->getScalar("base.settings.access_restriction.user_access", $this->localeProvider->getLocale()), FILTER_VALIDATE_BOOLEAN);
-                $access &= filter_var($this->settingBag->getScalar("base.settings.access_restriction.anonymous_access", $this->localeProvider->getLocale()), FILTER_VALIDATE_BOOLEAN);
+                $access  = filter_var($this->settingBag->getScalar("base.settings.access_restriction.admin_access"), FILTER_VALIDATE_BOOLEAN);
+                $access &= filter_var($this->settingBag->getScalar("base.settings.access_restriction.user_access"), FILTER_VALIDATE_BOOLEAN);
+                $access &= filter_var($this->settingBag->getScalar("base.settings.access_restriction.anonymous_access"), FILTER_VALIDATE_BOOLEAN);
                 $access |= $user && $user->isGranted("ROLE_USER");
                 return $access;
 
             case self::MAINTENANCE_ACCESS:
                 return !$this->maintenanceProvider->isUnderMaintenance() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
-                    
+
             case self::BIRTH_ACCESS:
                 return $this->maternityService->isBorn() || $this->voteOnAttribute(self::EXCEPTION_ACCESS, $subject, $token);
 

@@ -322,7 +322,7 @@
                                         {% else %}
                                             {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
                                             {% if image is not null %}
-                                                <img class="ea-extra-image" src="{{ asset(image)|thumbnail(200,200) }}">
+                                                {{ asset(image)|thumbnail(800,800)|lightbox({class:"ea-extra-image"}, null, null, {class:"ea-extra"}) }}
                                             {% else %}
                                                 {% if url is not empty %}<a href="{{url}}">{% endif %}
                                                 <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>

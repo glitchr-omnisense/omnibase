@@ -54,7 +54,7 @@ class IntegritySubscriber implements EventSubscriberInterface
     {
         return
         [
-            RequestEvent::class      => [['onKernelRequest', 8]],
+            RequestEvent::class      => [['onKernelRequest', 5]],
             LoginSuccessEvent::class => ['onLoginSuccess', 1],
         ];
     }
@@ -83,8 +83,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
 
         if(!$this->router->isRouteSecure()) return;
-        if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE)
-            return;
+        if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE) return;
 
         $integrity  = $this->checkUserIntegrity();
         $integrity &= $this->checkSecretIntegrity();

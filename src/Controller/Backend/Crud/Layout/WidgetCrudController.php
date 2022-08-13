@@ -22,6 +22,7 @@ class WidgetCrudController extends AbstractCrudController
             yield DiscriminatorField::new("type")->setTextAlign(TextAlign::RIGHT);
             yield TranslationField::new('title')->setFields([
                 "title"   => TextType::class,
+                "headline"   => TextType::class,
                 "excerpt" => TextareaType::class,
                 "content" => QuillType::class,
             ]);

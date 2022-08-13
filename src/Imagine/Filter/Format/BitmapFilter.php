@@ -4,6 +4,7 @@ namespace Base\Imagine\Filter\Format;
 
 use Base\Imagine\FilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
+use Imagine\Filter\Basic\Autorotate;
 use Imagine\Image\ImageInterface;
 use Symfony\Component\Mime\MimeTypes;
 use Imagine\Image\Palette\RGB;
@@ -32,6 +33,9 @@ class BitmapFilter implements BitmapFilterInterface
 
         if(array_key_exists("quality", $options))
             $options["quality"] /= $options["quality"] <= 1 ? 100 : 1;
+
+        if($options["autorotate"] ?? true)
+            array_append($this->filters, new Autorotate());
 
         $this->mimeTypes = new MimeTypes();
         $this->palette = new RGB();

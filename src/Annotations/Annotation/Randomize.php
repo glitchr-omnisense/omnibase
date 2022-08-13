@@ -39,7 +39,12 @@ class Randomize extends AbstractAnnotation
 
     public function onFlush(OnFlushEventArgs $args, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        if ($this->getFieldValue($entity, $property) === null)
+        if ($this->getFieldValue($entity, $property) === null) {
+
             $this->setFieldValue($entity, $property, random_str($this->length, $this->chars));
+
+            if ($this->getUnitOfWork()->getEntityChangeSet($entity))
+                $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);
+        }
     }
 }

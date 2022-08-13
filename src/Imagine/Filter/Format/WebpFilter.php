@@ -4,6 +4,7 @@ namespace Base\Imagine\Filter\Format;
 
 use Base\Imagine\FilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilterInterface;
+use Imagine\Filter\Basic\Autorotate;
 use Imagine\Filter\Basic\WebOptimization;
 use Imagine\Image\ImageInterface;
 
@@ -34,6 +35,9 @@ class WebpFilter extends WebOptimization implements BitmapFilterInterface
 
         if(array_key_exists("quality", $options))
             $options["quality"] *= $options["quality"] < 1 ? 100 : 1;
+
+        if($options["autorotate"] ?? true)
+            array_append($this->filters, new Autorotate());
 
         parent::__construct($this->path, $options);
     }

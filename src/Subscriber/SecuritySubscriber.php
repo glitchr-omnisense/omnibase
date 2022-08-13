@@ -93,8 +93,8 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */
             RequestEvent::class    => [
-                ['onMaintenanceRequest', 6], ['onBirthRequest', 6], ['onAccessRequest', 6],
-                ['onReferrerRequest', 5], ['onKernelRequest', 5],
+                ['onMaintenanceRequest', 4], ['onBirthRequest', 4], ['onAccessRequest', 6],
+                ['onReferrerRequest', 3], ['onKernelRequest', 3],
             ],
 
             ResponseEvent::class   => ['onKernelResponse'],
@@ -174,8 +174,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
-
-            if($user && $specialGrant) {
+            if($user &&  $specialGrant) {
 
                      if(!$adminAccess) $msg = "admin_restriction";
                 else if(!$userAccess)  $msg = "user_restriction";
@@ -203,7 +202,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 throw new NotFoundHttpException();
 
             if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND"))
-                if(!$isSecurityRoute) throw new NotFoundHttpException();
+            if(!$isSecurityRoute) throw new NotFoundHttpException();
 
             // Nonetheless exception access is always possible
             if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))

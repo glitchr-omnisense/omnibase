@@ -61,6 +61,8 @@ use Base\Field\Type\SelectType;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
 use Base\Backend\Config\Action;
 use Base\Backend\Config\Actions;
+use Base\Controller\Backend\Crud\Layout\Widget\SlotCrudController;
+use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
 use Base\Field\Type\BooleanType;
 use Base\Routing\RouterInterface;
 use Base\Service\IconProvider;
@@ -491,7 +493,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
                 WidgetItem::linkToCrud(Setting::class),
-                WidgetItem::linkToCrud(Slot::class),
+                WidgetItem::linkToUrl(Slot::class, Slot::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
+                    ->setController(SlotCrudController::class)
+                    ->setAction(Action::INDEX)
+                    ->set("filters[class][comparison]", "=")
+                    ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
                 WidgetItem::linkToCrud(Attachment::class),
                 WidgetItem::linkToCrud(Link::class),
             ]);
@@ -501,7 +507,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             WidgetItem::linkToCrud(Short::class),
             WidgetItem::linkToCrud(Menu::class),
             WidgetItem::linkToCrud(Page::class),
-            WidgetItem::linkToCrud(Widget::class),
+            WidgetItem::linkToUrl(Widget::class, Widget::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()
+            ->setController(WidgetCrudController::class)
+            ->setAction(Action::INDEX)
+            ->set("filters[class][comparison]", "!=")
+            ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
             WidgetItem::linkToCrud(Image::class),
             WidgetItem::linkToCrud(AbstractAttribute::class),
         ]);
