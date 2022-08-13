@@ -1,6 +1,7 @@
 <?php
 
 namespace Base\Entity\Thread;
+
 use App\Entity\Thread;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Uploader;
