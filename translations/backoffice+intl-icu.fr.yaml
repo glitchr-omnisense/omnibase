@@ -32,6 +32,9 @@ crud:
   short:
     url:
       placeholder: "{0} ou /vers/page/local"
+  semantic:
+    url:
+      placeholder: "{0} ou /vers/page/local"
 
 # ACTION buttons
 

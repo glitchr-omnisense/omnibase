@@ -27,6 +27,9 @@
         <service id="obfuscator" alias="Base\Service\Obfuscator" />
         <service id="Base\Service\ObfuscatorInterface" alias="obfuscator"/>
 
+        <service id="semantic_enhancer" alias="Base\Service\SemanticEnhancer" />
+        <service id="Base\Service\SemanticEnhancerInterface" alias="semantic_enhancer"/>
+
         <service id="base.service.maintenance" alias="Base\Service\MaintenanceProvider" />
         <service id="Base\Service\MaintenanceProviderInterface" alias="base.service.maintenance"/>
 

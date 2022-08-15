@@ -59,6 +59,9 @@ layout:
   short:
     _singular: "short"
     _plural: "shorts"
+  semantic:
+    _singular: "semantic"
+    _plural: "semantics"
   widget:
     _singular: "widget"
     _plural: "widgets"
@@ -108,7 +111,7 @@ layout:
       _singular: attribute
       _plural: attributes
 
-      abstract_attribute:  
+      abstract_attribute:
         _singular: attribute
         _plural: attributes
       color_attribute:
@@ -138,7 +141,7 @@ layout:
       image_attribute:
         _singular: "image"
         _plural: "images"
-      scalar_attribute:  
+      scalar_attribute:
         _singular: scalar
         _plural: scalars
 

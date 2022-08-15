@@ -76,7 +76,12 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->linkToUrl(function (mixed $entity) {
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
-                    $prevEntity = $entityRepository->findPreviousOneByClassOf($entity->getId(), get_class($entity));
+                    if(get_parent_class($entity) !== false) {
+                        $prevEntity = $entityRepository->findPreviousOneByClassOf($entity->getId(), get_class($entity));
+                    } else {
+                        $prevEntity = $entityRepository->findPreviousOne($entity->getId());
+                    }
+
                     return $prevEntity ? $this->adminUrlGenerator->setEntityId($prevEntity->getId())->generateUrl() : "";
                 });
         }
@@ -90,7 +95,12 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->linkToUrl(function (mixed $entity) {
 
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
-                    $nextEntity = $entityRepository->findNextOneByClassOf($entity->getId(), get_class($entity));
+                    if(get_parent_class($entity) !== false) {
+                        $nextEntity = $entityRepository->findNextOneByClassOf($entity->getId(), get_class($entity));
+                    } else {
+                        $nextEntity = $entityRepository->findNextOneBy($entity->getId());
+                    }
+
                     return $nextEntity ? $this->adminUrlGenerator->setEntityId($nextEntity->getId())->generateUrl() : "";
                 });
 

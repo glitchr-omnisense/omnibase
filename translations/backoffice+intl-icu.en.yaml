@@ -16,6 +16,9 @@ crud:
   short:
     url:
       placeholder: "{0} or /go/to/route"
+  semantic:
+    url:
+      placeholder: "{0} or /go/to/route"
 
 action:
   batch_approve: "Approve"
