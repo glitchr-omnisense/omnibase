@@ -4,8 +4,8 @@ namespace Base\Twig;
 
 use Base\Routing\RouterInterface;
 use Base\Service\ParameterBagInterface;
-use Base\Service\SettingBagInterface;
 use Exception;
+
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment as TwigEnvironment;
 use Twig\Loader\LoaderInterface;
@@ -32,7 +32,7 @@ class Environment extends TwigEnvironment
             }
 
             $formats = [];
-            $breakpoints = $this->parameterBag->get("base.twig.breakpoints");
+            $breakpoints = $this->parameterBag->get("base.twig.breakpoints") ?? [];
             foreach($breakpoints as $breakpoint)
                 $formats[$breakpoint["name"]] = $breakpoint["media"];
 
