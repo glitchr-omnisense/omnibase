@@ -42,6 +42,7 @@ class ImageService extends FileService implements ImageServiceInterface
         $this->maxQuality    = $parameterBag->get("base.images.max_quality");
         $this->enableWebp    = $parameterBag->get("base.images.enable_webp");
         $this->noImage       = $parameterBag->get("base.images.no_image");
+        $this->debug         = $parameterBag->get("base.images.debug");
 
         // Local cache directory for filtered images
         $this->localCache = "local.cache";
@@ -234,6 +235,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function filter(?string $path, FilterInterface|array $filters = [], array $config = []): ?string
     {
+        if($this->debug) return $this->noImage;
         if(!is_array($filters)) $filters = [$filters];
 
         //

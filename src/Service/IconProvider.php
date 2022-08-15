@@ -6,13 +6,16 @@ use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
 use Base\Model\IconizeInterface;
 use Base\Model\IconProvider\IconAdapterInterface;
-use Symfony\Component\Routing\RouterInterface;
+use Base\Routing\RouterInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class IconProvider
 {
     protected $routeIcons = [];
-    public function getRouteIcons(string $route) { return $this->routeIcons[$route] ?? null; }
+    public function getRouteIcons(string $route)
+    {
+        return $this->routeIcons[$route] ?? null;
+    }
 
     public function __construct(AnnotationReader $annotationReader, ImageService $imageService, CacheInterface $cache, RouterInterface $router)
     {

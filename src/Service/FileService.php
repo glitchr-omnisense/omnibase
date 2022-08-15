@@ -32,8 +32,8 @@ class FileService implements FileServiceInterface
 
     public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
-        $this->router         = $router;
-        $this->obfuscator     = $obfuscator;
+        $this->router        = $router;
+        $this->obfuscator    = $obfuscator;
         $this->flysystem     = $flysystem;
 
         $this->mimeTypes = new MimeTypes();
