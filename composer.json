@@ -29,7 +29,6 @@
         "symfony/config": "^6.0",
 
         "sensio/framework-extra-bundle": "^6.0",
-        "symfony/http-client": "^6.0",
         "symfony/security-bundle": "^6.0",
         "symfony/form": "^6.0",
         "symfony/validator": "^6.0",
