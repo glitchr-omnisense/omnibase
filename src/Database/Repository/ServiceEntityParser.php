@@ -31,6 +31,8 @@ class ServiceEntityParser
     public const REQUEST_DISTINCT     = "distinctCount";
     public const REQUEST_LENGTH       = "lengthOf";
 
+    public const LOAD_EAGERLY = "Eagerly";
+
     public const SPECIAL_ALL     = "All";
     public const SPECIAL_ONE     = "One";
     public const SPECIAL_RAND    = "Randomly";
@@ -111,6 +113,7 @@ class ServiceEntityParser
     protected $operator = null;
     protected $column = null;
     protected bool $cacheable = false;
+    protected bool $eagerly   = false;
     protected array $criteria = [];
     protected array $options  = [];
 
@@ -199,6 +202,7 @@ class ServiceEntityParser
         $this->options   = [];
         $this->operator  = null;
         $this->cacheable = false;
+        $this->eagerly = false;
 
         return $ret;
     }
@@ -391,6 +395,7 @@ class ServiceEntityParser
         $lengthRequest = self::REQUEST_LENGTH;
         $specials = implode("|", self::getSpecials());
 
+        $eagerly = self::LOAD_EAGERLY;
         $by = self::SEPARATOR_BY;
         $for = self::SEPARATOR_FOR;
 
@@ -399,8 +404,9 @@ class ServiceEntityParser
         $magicFn = null;
         $byNames = [];
 
-        if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
+        if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<eagerly>'.$eagerly.')?(?P<special>'.$specials.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
 
+            $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
             $byNames = array_pop_key("names", $magicExtra);
             $special = array_pop_key("special", $magicExtra);
             $special = $special ? only_alphachars(ucfirst($special)) : null;
@@ -408,8 +414,9 @@ class ServiceEntityParser
             $magicFn = only_alphachars(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
-        } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?)(?P<names>.*)/', $method, $magicExtra)) {
+        } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<eagerly>'.$eagerly.')?(?P<special>'.$specials.')?)(?P<names>.*)/', $method, $magicExtra)) {
 
+            $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
             $byNames = array_pop_key("names", $magicExtra);
             $special = array_pop_key("special", $magicExtra);
             $special = $special ? only_alphachars(ucfirst($special)) : null;
@@ -424,7 +431,6 @@ class ServiceEntityParser
 
             $magicFn = only_alphanumerics(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
-
 
         } else if (preg_match('/^(?P<fn>'.$countRequest.')(?:'.$for.'(?P<column>[^'.$by.']*))?(?P<names>.*)/', $method, $magicExtra)) {
 
@@ -878,6 +884,9 @@ class ServiceEntityParser
             $magicFn = self::REQUEST_FIND.substr($magicFn, strlen(self::REQUEST_CACHE));
             $this->cacheable = true;
         }
+
+        if($this->eagerly)
+            $magicFn = str_replace(self::LOAD_EAGERLY, "", $magicFn);
 
         if(str_starts_with($magicFn, self::REQUEST_FIND.self::SPECIAL_ALL)) {
 
@@ -1342,21 +1351,38 @@ class ServiceEntityParser
     protected function getQuery(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query
     {
         $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
-        $query = $qb->getQuery();
-        if($query->isCacheable()) {
+        if ($this->cacheable) {
 
-            $query = $this->getEagerQueryBuilder($qb)->getQuery();
-            $query->setHydrationMode("CacheHydrator");
+            //
+            // Eagerly load translations
+            $entityName  = $this->classMetadata->getName();
+            if(class_implements_interface($entityName, TranslatableInterface::class)) {
 
-            $query->useQueryCache(true);
+                $qb->leftJoin(self::ALIAS_ENTITY.".translations", self::ALIAS_TRANSLATIONS);
+                $qb->addSelect(self::ALIAS_TRANSLATIONS);
+            }
+
+            //
+            // Eager load feature
+            if(!$this->eagerly) $query = $qb->getQuery();
+            else {
+
+                $query = $this->getEagerQueryBuilder($qb)->getQuery();
+                $query->useQueryCache(true);
+            }
+
+            //
+            // Apply custom output walker to translatable entity
             if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))
                 $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
-        }
+
+        } else if($this->eagerly) $query = $this->getEagerQueryBuilder($qb)->getQuery();
+          else $query = $qb->getQuery();
 
         return $query;
     }
 
-    protected function getEagerQueryBuilder(QueryBuilder $qb)
+    protected function getEagerQueryBuilder(QueryBuilder $qb, bool $allAssociationsRequired = false)
     {
         foreach($this->classMetadata->getAssociationMappings() as $associationMapping) {
 
@@ -1384,8 +1410,20 @@ class ServiceEntityParser
 
             if($continue) continue;
 
-            $qb->leftJoin($pathExpr, $aliasIdentificationVariable);
-            $qb->addSelect($aliasIdentificationVariable);
+            $sourceEntity = $associationMapping["sourceEntity"];
+            $targetEntity = $associationMapping["targetEntity"];
+            $targetEntityCacheable = $this->entityManager->getClassMetadata($targetEntity)->cache != null;
+            while($targetEntityCacheable && $targetEntity = get_parent_class($targetEntity))
+                  $targetEntityCacheable &= $this->entityManager->getClassMetadata($targetEntity)->cache != null;
+
+            if($allAssociationsRequired && !$targetEntityCacheable)
+                throw new Exception($sourceEntity . " cannot be cached eagerly because of non cacheable associations");
+
+            if($targetEntityCacheable) {
+
+                $qb->leftJoin($pathExpr, $aliasIdentificationVariable);
+                $qb->addSelect($aliasIdentificationVariable);
+            }
         }
 
         return $qb;
