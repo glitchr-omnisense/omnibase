@@ -69,6 +69,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
         $first = true;
 
         $path = null;
+
         while($path !== "") {
 
             $path = rtrim($path === null ? $request->getPathInfo() : dirname($path), "/");
@@ -117,14 +118,23 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
                 $first = false;
             }
 
-            if($pageTitle !== null || !$route) continue;
+            if($pageTitle !== null || !$label || !$route) continue;
+
             $this->prependItem($label, $routeName, $routeParameters ?? []);
             $icons[] = $this->getOption("icons") !== false ? $icon : null;
-
         }
 
-        $this->computed = true;
+        // Remove leading paths if offset requested
+        $offset = $this->getOption("offset");
+        while($offset-- > 0) {
+            array_shift($this->items);
+            array_shift($icons);
+        }
+
+        // Save icons
         $this->addOption("icons", array_unique_end($icons));
+
+        $this->computed = true; // Flag as computed..
         return $this;
     }
 
