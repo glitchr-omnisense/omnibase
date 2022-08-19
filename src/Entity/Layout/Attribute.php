@@ -30,7 +30,6 @@ class Attribute extends BaseAttribute implements TranslatableInterface
 
     public function __toString()
     {
-
         $value = $this->resolve();
         $value = (is_array($value) ? implode(", ",$value) : $value);
         return parent::__toString(). ($value ? " : ".$value : "");

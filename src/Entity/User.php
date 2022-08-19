@@ -50,6 +50,8 @@ use App\Repository\UserRepository;
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  *
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *

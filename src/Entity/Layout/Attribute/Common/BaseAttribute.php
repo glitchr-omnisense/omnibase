@@ -3,14 +3,11 @@
 namespace Base\Entity\Layout\Attribute\Common;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Database\TranslatableInterface;
-use Base\Database\Traits\TranslatableTrait;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
-use Base\Entity\Layout\AttributeInterface;
 use Base\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
-use Base\Repository\Layout\Attribute\Common\AttributeRepository;
+use Base\Repository\Layout\Attribute\Common\BaseAttributeRepository;
 
 /**
  * @ORM\Entity(repositoryClass=BaseAttributeRepository::class)
@@ -21,7 +18,7 @@ use Base\Repository\Layout\Attribute\Common\AttributeRepository;
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
  *     @DiscriminatorEntry(value="attribute_base")
  */
-abstract class BaseAttribute implements IconizeInterface, AttributeInterface
+abstract class BaseAttribute implements IconizeInterface, BaseAttributeInterface
 {
     public        function __iconize()       : ?array { return $this->adapter ? $this->adapter->__iconizeStatic() : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }

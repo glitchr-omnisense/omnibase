@@ -4,9 +4,11 @@ namespace Base\Database\Repository;
 
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
+
 use Base\Database\Walker\TranslatableWalker;
 use Base\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
@@ -21,7 +23,7 @@ class ServiceEntityParser
     protected $args;
 
     public const ALIAS_ENTITY = 'e';
-    public const ALIAS_TRANSLATIONS = 't';
+    public const ALIAS_TRANSLATIONS = 'e_translations';
 
     public const REQUEST_FIND         = "find";
     public const REQUEST_CACHE        = "cache";
@@ -1343,20 +1345,50 @@ class ServiceEntityParser
         $query = $qb->getQuery();
         if($query->isCacheable()) {
 
-            $entityName  = $this->classMetadata->getName();
+            $query = $this->getEagerQueryBuilder($qb)->getQuery();
+            $query->setHydrationMode("CacheHydrator");
 
-            if(class_implements_interface($entityName, TranslatableInterface::class)) {
-
-                $qb->leftJoin(self::ALIAS_ENTITY.".translations", self::ALIAS_TRANSLATIONS);
-                $qb->addSelect(self::ALIAS_TRANSLATIONS);
-            }
-
-            $query = $qb->getQuery();
             $query->useQueryCache(true);
-            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+            if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))
+                $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
         }
 
         return $query;
+    }
+
+    protected function getEagerQueryBuilder(QueryBuilder $qb)
+    {
+        foreach($this->classMetadata->getAssociationMappings() as $associationMapping) {
+
+            if($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) continue;
+            if(!$associationMapping["isOwningSide"]) continue;
+
+            $pathExpr = self::ALIAS_ENTITY.".".$associationMapping["fieldName"];
+            $aliasIdentificationVariable = self::ALIAS_ENTITY."_".$associationMapping["fieldName"];
+
+            $continue = false;
+            $expressions = $qb->getDQLParts()["select"];
+            foreach($expressions as $expr) {
+
+                $continue = in_array($aliasIdentificationVariable, $expr->getParts());
+                if($continue) break;
+            }
+
+            if($continue) continue;
+
+            $expressions = $qb->getDQLParts()["join"][self::ALIAS_ENTITY] ?? [];
+            foreach($expressions as $expr) {
+                $continue = $expr->getAlias() == $aliasIdentificationVariable;
+                if($continue) break;
+            }
+
+            if($continue) continue;
+
+            $qb->leftJoin($pathExpr, $aliasIdentificationVariable);
+            $qb->addSelect($aliasIdentificationVariable);
+        }
+
+        return $qb;
     }
 
     protected function getQueryWithCount(array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, ?array $groupBy = null, array $selectAs = [])

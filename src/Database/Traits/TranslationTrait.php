@@ -2,6 +2,7 @@
 
 namespace Base\Database\Traits;
 
+use Base\Database\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;
@@ -25,7 +26,7 @@ trait TranslationTrait
     public static function getTranslatableEntityClass(): string
     {
         // By default, the translatable class has the same name but without the suffix
-        return substr(static::class, 0, -strlen(__TRANSLATION_SUFFIX__));
+        return substr(static::class, 0, -strlen(NamingStrategy::TRANSLATION_SUFFIX));
     }
 
     /**

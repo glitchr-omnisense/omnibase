@@ -21,6 +21,9 @@ use Base\Repository\Thread\TaxonRepository;
 /**
  * @ORM\Entity(repositoryClass=TaxonRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * 
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */

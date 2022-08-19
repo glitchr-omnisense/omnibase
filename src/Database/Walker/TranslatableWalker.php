@@ -2,9 +2,11 @@
 
 namespace Base\Database\Walker;
 
+use Base\Database\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
+use Doctrine\ORM\Query;
 use Base\Service\LocaleProvider;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
@@ -31,23 +33,23 @@ class TranslatableWalker extends SqlWalker
         return new SingleSelectExecutor($AST, $this);
     }
 
-
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
 
-        $explodeLeftJoin = explode(" LEFT JOIN ", $sql);
-        $fromClause = array_shift($explodeLeftJoin);
+        $statements = explodeByArray(["LEFT JOIN", "INNER JOIN"], $sql, true);
+        usort_startsWith($statements, [" FROM", "INNER JOIN", "LEFT JOIN"]);
 
-        $explodeLeftJoin = array_reverse($explodeLeftJoin);
+        $statements = array_reverseByMask($statements, array_map(fn($s) => str_starts_with($s, "LEFT JOIN") && str_contains($s, NamingStrategy::TABLE_I18N_SUFFIX." "), $statements));
+        $sql = implode(" ", $statements);
 
-        array_unshift($explodeLeftJoin, $fromClause);
-        return implode(" LEFT JOIN ", $explodeLeftJoin);
+        return $sql;
     }
 
     protected function getLocaleProvider(): LocaleProvider
     {
         foreach ($this->getEntityManager()->getEventManager()->getListeners() as $event => $listeners) {
+
             foreach ($listeners as $listener) {
 
                 if ($listener instanceof IntlSubscriber)
@@ -78,6 +80,7 @@ class TranslatableWalker extends SqlWalker
         if(!class_implements_interface($targetClass->getName(), TranslationInterface::class))
             return $sql;
 
+        //
         // Check whether target class is the root translation entity or not
         $assoc = ! $relation['isOwningSide'] ? $targetClass->associationMappings[$relation['mappedBy']] : $relation;
         if(!array_key_exists("inherited", $assoc))
@@ -88,23 +91,42 @@ class TranslatableWalker extends SqlWalker
         if(!class_implements_interface($rootTargetClass->getName(), TranslationInterface::class))
             return $sql;
 
+        // Get source alias and its intl alias
         $sourceTableAlias = $this->getSQLTableAlias($sourceClass->getTableName(), $dqlAlias);
-        $targetTableAlias = $this->getSQLTableAlias($targetClass->getTableName(), $joinedDqlAlias);
-        $rootTargetTableAlias = $this->getSQLTableAlias($rootTargetClass->getTableName(), $joinedDqlAlias);
+        $sourceIntlTableAlias = $this->getSQLTableAlias($targetClass->getTableName(), $joinedDqlAlias);
 
+        //
+        // Use `translatable_id` from root translation entity.
+        $rootIntlTableAlias = $this->getSQLTableAlias($rootTargetClass->getTableName(), $joinedDqlAlias);
         $sql = str_replace(
-            $targetTableAlias.".id = ".$rootTargetTableAlias.".id",
-            $rootTargetTableAlias.".translatable_id = ".$sourceTableAlias.".id", $sql
+            $sourceIntlTableAlias.".id = ".$rootIntlTableAlias.".id",
+            $rootIntlTableAlias.".translatable_id = ".$sourceTableAlias.".id", $sql
         );
 
-        $sql = str_replace(
-                $sourceTableAlias.".id = ".$targetTableAlias.".translatable_id",
-                $targetTableAlias.".id = ".$rootTargetTableAlias.".id", $sql
-            );
+        //
+        // Replace target family clause accordingly to root translation entity ID.
+        $intlFamilyClass = array_map(fn($c) => $this->getEntityManager()->getClassMetadata($c), get_family_class($targetClass->getName()));
+        foreach($intlFamilyClass as $currentClass) {
 
-        /*
-        * IMPLEMENT JOIN FOR INHERITING TRANSLATIONS
-        */
+            $intlTableAlias = $this->getSQLTableAlias($currentClass->getTableName(), $joinedDqlAlias);
+
+            if($intlTableAlias == $rootIntlTableAlias) continue;
+            if($intlTableAlias == $sourceIntlTableAlias) {
+
+                $sql = str_replace(
+                    $sourceTableAlias.".id = ".$sourceIntlTableAlias.".translatable_id",
+                    $sourceIntlTableAlias.".id = ".$rootIntlTableAlias.".id", $sql
+                );
+
+            } else {
+
+                $sql = str_replace(
+                    $sourceIntlTableAlias.".id = ".$intlTableAlias.".id",
+                    $intlTableAlias.".id = ".$rootIntlTableAlias.".id", $sql
+                );
+            }
+        }
+
         return $sql;
     }
 }
