@@ -15,6 +15,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
+    protected bool $computed = false;
     protected array $items   = [];
     protected array $options = [];
     protected $request = null;
@@ -58,14 +59,15 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
     public function compute(?Request $request = null)
     {
+        if($this->computed) return $this;
+
         $request = $request ?? $this->getRequest();
-        if($request === null) return;
+        if($request === null) return $this;
         else $this->setRequest($request);
 
-        $this->clear();
         $icons = [];
-
         $first = true;
+
         $path = null;
         while($path !== "") {
 
@@ -77,6 +79,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             list($class, $method) = explode("::", $controller);
             if(!class_exists($class)) continue;
 
+            // Get icon from controller annotation
             $reflClass   = $this->annotationReader->getReflClass($class);
             $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? [];
 
@@ -84,7 +87,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             $iconize  = $position !== false ? $annotations[$position] : null;
             $icon     = $iconize ? $iconize->getIcons()[0] ?? null : null;
 
+            // Get route name from controller annotation
             $position = array_class_last(Route::class, $annotations);
+
             $route  = $position !== false ? $annotations[$position] : null;
             $routeName          = $route ? $this->getRouteName($path) : null;
             $routeParameters    = $route ? array_filter($this->getRouteParameters($path, rtrim($route->getPath(), "/")) ?? []) : [];
@@ -118,6 +123,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
         }
 
+        $this->computed = true;
         $this->addOption("icons", array_unique_end($icons));
         return $this;
     }

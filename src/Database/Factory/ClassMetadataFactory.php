@@ -179,6 +179,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
 
         if ($parent) {
+
             if ($parent->isInheritanceTypeSingleTable()) {
                 $class->setPrimaryTable($parent->table);
             }
