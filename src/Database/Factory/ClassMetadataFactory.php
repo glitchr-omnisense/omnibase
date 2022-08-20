@@ -2,6 +2,7 @@
 
 namespace Base\Database\Factory;
 
+use Base\Database\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\Exception\MissingDiscriminatorMapException;
@@ -34,8 +35,6 @@ use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Doctrine\Persistence\Mapping\ReflectionService;
 use ReflectionClass;
 use ReflectionException;
-
-use const Base\Database\Traits\__TRANSLATION_SUFFIX__;
 
 /**
  *
@@ -180,6 +179,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         }
 
         if ($parent) {
+
             if ($parent->isInheritanceTypeSingleTable()) {
                 $class->setPrimaryTable($parent->table);
             }
@@ -789,7 +789,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
         if (is_subclass_of($classMetadata->getName(), TranslationInterface::class, true)) {
 
-            if(!str_ends_with($classMetadata->getName(), __TRANSLATION_SUFFIX__))
+            if(!str_ends_with($classMetadata->getName(), NamingStrategy::TRANSLATION_SUFFIX))
                 throw new \Exception("Invalid class name for \"".$classMetadata->getName()."\"");
 
             $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();

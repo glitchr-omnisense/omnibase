@@ -47,7 +47,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
 
-        //$onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
+        // $onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
         $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 

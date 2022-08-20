@@ -332,19 +332,19 @@ class AnnotationReader
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
         $annotations = $this->getDefaultReader()->getClassAnnotations($reflClass);
-        $annotationNames = array_unique(
+        $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
         );
 
-        return array_filter($annotations, fn($a) => in_array(get_class($a), $annotationNames));
+        return array_filter($annotations, fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames));
     }
 
     public function getClassAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $targets = []): array
     {
         // Browsed classTypes (annotationNames)
-         $annotationNames = array_unique(
+         $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
@@ -416,7 +416,7 @@ class AnnotationReader
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
         $annotations = [];
-        $annotationNames = array_unique(
+        $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
@@ -426,7 +426,7 @@ class AnnotationReader
 
             $annotations[$reflMethod->getName()] = array_filter(
                 $this->getDefaultReader()->getMethodAnnotations($reflMethod),
-                fn($a) => in_array(get_class($a), $annotationNames)
+                fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
             );
         }
 
@@ -436,7 +436,7 @@ class AnnotationReader
     public function getMethodAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $targets = []): array
     {
         // Browsed classTypes (annotationNames)
-         $annotationNames = array_unique(
+         $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
@@ -509,7 +509,7 @@ class AnnotationReader
         $reflClass = $this->getReflClass($classNameOrMetadataOrRefl);
 
         $annotations = [];
-        $annotationNames = array_unique(
+        $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
@@ -519,7 +519,7 @@ class AnnotationReader
 
             $annotations[$reflProperty->getName()] = array_filter(
                 $this->getDefaultReader()->getPropertyAnnotations($reflProperty),
-                fn($a) => in_array(get_class($a), $annotationNames)
+                fn($a) => $annotationNames === null || in_array(get_class($a), $annotationNames)
             );
         }
 
@@ -529,7 +529,7 @@ class AnnotationReader
     public function getPropertyAnnotations($classNameOrMetadataOrRefl, $annotationNames = null, array $targets = []): array
     {
         // Browsed classTypes (annotationNames)
-         $annotationNames = array_unique(
+         $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
@@ -612,7 +612,7 @@ class AnnotationReader
         if ($classNameOrMetadataOrRefl == null) return [];
 
         // Browsed classTypes (annotationNames)
-         $annotationNames = array_unique(
+         $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))
@@ -672,7 +672,7 @@ class AnnotationReader
         ];
 
         // Browsed classTypes (annotationNames)
-         $annotationNames = array_unique(
+         $annotationNames = $annotationNames === null ? null : array_unique(
             (is_array($annotationNames) ? $annotationNames :
             (is_object($annotationNames) ? [get_class($annotationNames)] :
             (is_string($annotationNames) ? [$annotationNames] : [])))

@@ -3,6 +3,7 @@
 namespace {
 
     use Base\BaseBundle;
+    use PhpParser\Node\Expr\Array_;
 
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
@@ -559,6 +560,15 @@ namespace {
         return get_depth_class(get_parent_class($object_or_class)) + 1;
     }
 
+    function get_family_class($object_or_class): array
+    {
+        $family = [is_object($object_or_class) ? get_class($object_or_class) : $object_or_class];
+        while($object_or_class = get_parent_class($object_or_class))
+            $family[] = is_object($object_or_class) ? get_class($object_or_class) : $object_or_class;
+
+        return $family;
+    }
+
     function property_declarer($object_or_class, string $property): ?string
     {
         $class = is_object($object_or_class) ? get_class($object_or_class): $object_or_class;
@@ -657,13 +667,16 @@ namespace {
         return $path["dirname"].$prefix.$path["filename"].$path["extension"];
     }
 
-    function explodeByArray(array|string $separator, string $str, int $limit = PHP_INT_MAX)
+    function explodeByArray(array|string $separator, string $str, $keepDelimiters = false, int $limit = PHP_INT_MAX)
     {
         if($limit == 0) return [$str];
         if(is_string($separator)) $separator = [$separator];
 
-        if (preg_match('/(.*)(?:'.implode("|", array_map("preg_quote", $separator)).')(.*)/', $str, $matches))
-            return array_merge(explodeByArray($separator, $matches[1], --$limit), [$matches[2]]);
+        if (preg_match('/(.*)('.implode("|", array_map("preg_quote", $separator)).')(.*)/', $str, $matches)) {
+
+            $delimiter = $keepDelimiters ? $matches[2] : "";
+            return array_merge(explodeByArray($separator, $matches[1], --$limit), [$delimiter. $matches[3]]);
+        }
 
         return [$str];
     }
@@ -1763,7 +1776,7 @@ namespace {
 
     function array_key_keeps(array $array, string ...$keys  ): array
     {
-        $keys =array_diff(array_keys($array), $keys);
+        $keys = array_diff(array_keys($array), $keys);
         foreach($keys as $key)
             unset($array[$key]);
 
@@ -1947,6 +1960,68 @@ namespace {
     function str_blankspace(int $length) { return $length < 1 ? "" : str_repeat(" ", $length); }
     function usort_column(array &$array, string $column, callable $fn):bool { return usort($array, fn($a1, $a2) => $fn($a1[$column] ?? null, $a2[$column] ?? null)); }
     function usort_key(array $array, array $ordering = []) { return array_replace(array_flip($ordering), $array); }
+    function usort_startsWith(array &$array, string|array $startingWith)
+    {
+        if(!is_array($startingWith)) $startingWith = [$startingWith];
+
+        return usort($array, function($a1, $a2) use ($startingWith) {
+
+            foreach($startingWith as $needle) {
+
+                if (str_starts_with($a1, $needle) == true  && str_starts_with($a2, $needle) == true ) return  0;
+                if (str_starts_with($a1, $needle) == false && str_starts_with($a2, $needle) == true ) return  1;
+                if (str_starts_with($a1, $needle) == true  && str_starts_with($a2, $needle) == false) return -1;
+            }
+
+            return 0;
+        });
+    }
+
+    function usort_endsWith(array $array, string|array $startingWith)
+    {
+        if(!is_array($startingWith)) $startingWith = [$startingWith];
+
+        return usort($array, function($a1, $a2) use ($startingWith) {
+
+            foreach($startingWith as $needle) {
+
+                if (str_ends_with($a1, $needle) == true  && str_ends_with($a2, $needle) == true ) return  0;
+                if (str_ends_with($a1, $needle) == true  && str_ends_with($a2, $needle) == false) return  1;
+                if (str_ends_with($a1, $needle) == false && str_ends_with($a2, $needle) == true ) return -1;
+            }
+
+            return 0;
+        });
+    }
+
+    function array_swap(array &$array, $a, $b)
+    {
+        if(array_key_exists($a, $array) && array_key_exists($b, $array))
+            [$array[$a], $array[$b]] = [$array[$b], $array[$a]];
+    }
+
+    function array_reverseByMask(array $array, array $mask)
+    {
+        if(count($array) != count($mask))
+            throw new Exception("Wrong mask size (".count($mask).") compared to array (".count($array).").");
+
+        $keys = [];
+        foreach($mask as $key => $b)
+            if($b) $keys[] = $key;
+
+        return array_reverseByKey($array, $keys);
+    }
+
+    function array_reverseByKey(array $array, array $keys)
+    {
+        if(count($keys) == 1) return $array;
+
+        $N = ceil(count($keys)/2);
+        for($i = 0; $i < $N; $i++)
+            array_swap($array, $keys[$i], $keys[count($keys)-$i-1]);
+
+        return $array;
+    }
 
     function hsl2hex(array $hsl) :string { return rgb2hex(hsl2rgb($hsl)); }
     function rgb2hsl(array $rgb): array

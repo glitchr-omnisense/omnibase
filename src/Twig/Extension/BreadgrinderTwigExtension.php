@@ -3,6 +3,7 @@
 namespace Base\Twig\Extension;
 
 use Base\Service\Breadgrinder;
+use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
@@ -19,10 +20,10 @@ final class BreadgrinderTwigExtension extends AbstractExtension
         ];
     }
 
-    public function renderBreadcrumb(Environment $twig, string $name, array $options = []): ?string
+    public function renderBreadcrumb(Environment $twig, string $name, Request $request, array $options = []): ?string
     {
         $breadcrumb = $this->breadgrinder->grind($name, $options);
-        $breadcrumb->compute();
+        $breadcrumb->compute($request);
 
         if($breadcrumb === null)
             throw new \Exception("Breadcrumb \"$name\" not found in the grinder machine.");

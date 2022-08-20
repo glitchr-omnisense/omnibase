@@ -15,6 +15,7 @@ use Symfony\Component\Routing\RouterInterface;
 
 class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAccess
 {
+    protected bool $computed = false;
     protected array $items   = [];
     protected array $options = [];
     protected $request = null;
@@ -58,15 +59,17 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
     public function compute(?Request $request = null)
     {
+        if($this->computed) return $this;
+
         $request = $request ?? $this->getRequest();
-        if($request === null) return;
+        if($request === null) return $this;
         else $this->setRequest($request);
 
-        $this->clear();
         $icons = [];
-
         $first = true;
+
         $path = null;
+
         while($path !== "") {
 
             $path = rtrim($path === null ? $request->getPathInfo() : dirname($path), "/");
@@ -77,6 +80,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             list($class, $method) = explode("::", $controller);
             if(!class_exists($class)) continue;
 
+            // Get icon from controller annotation
             $reflClass   = $this->annotationReader->getReflClass($class);
             $annotations = $this->annotationReader->getDefaultMethodAnnotations($reflClass)[$method] ?? [];
 
@@ -84,7 +88,9 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
             $iconize  = $position !== false ? $annotations[$position] : null;
             $icon     = $iconize ? $iconize->getIcons()[0] ?? null : null;
 
+            // Get route name from controller annotation
             $position = array_class_last(Route::class, $annotations);
+
             $route  = $position !== false ? $annotations[$position] : null;
             $routeName          = $route ? $this->getRouteName($path) : null;
             $routeParameters    = $route ? array_filter($this->getRouteParameters($path, rtrim($route->getPath(), "/")) ?? []) : [];
@@ -112,13 +118,23 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
                 $first = false;
             }
 
-            if($pageTitle !== null || !$route) continue;
+            if($pageTitle !== null || !$label || !$route) continue;
+
             $this->prependItem($label, $routeName, $routeParameters ?? []);
             $icons[] = $this->getOption("icons") !== false ? $icon : null;
-
         }
 
+        // Remove leading paths if offset requested
+        $offset = $this->getOption("offset");
+        while($offset-- > 0) {
+            array_shift($this->items);
+            array_shift($icons);
+        }
+
+        // Save icons
         $this->addOption("icons", array_unique_end($icons));
+
+        $this->computed = true; // Flag as computed..
         return $this;
     }
 

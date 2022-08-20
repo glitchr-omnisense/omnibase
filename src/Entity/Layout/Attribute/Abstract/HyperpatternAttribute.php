@@ -3,6 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Abstract;
 
 use Base\Database\Annotation\DiscriminatorEntry;
+use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Field\Type\ArrayType;
 use Base\Model\IconizeInterface;
 

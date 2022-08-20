@@ -2,6 +2,7 @@
 
 namespace Base\Twig\Extension;
 
+use Base\Model\LinkableInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\FileService;
 use Base\Service\IconProvider;
@@ -28,6 +29,7 @@ final class FileTwigExtension extends AbstractExtension
         return [
             new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFunction('urlify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
+            new TwigFunction('linkify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
             new TwigFunction('asset',   [$this,               'asset']),
             new TwigFunction('image',   [$this, 'image'], ['needs_environment' => true, 'needs_context' => true])
         ];
@@ -40,6 +42,7 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
             new TwigFilter('urlify',         [$this, 'urlify' ], ["is_safe" => ['all']]),
+            new TwigFilter('linkify',        [$this, 'urlify' ], ["is_safe" => ['all']]),
 
             new TwigFilter('public',         [FileService::class, 'public']),
             new TwigFilter('downloadable',   [FileService::class, 'downloadable']),
@@ -63,8 +66,11 @@ final class FileTwigExtension extends AbstractExtension
         ];
     }
 
-    public function urlify(string $urlOrPath, ?string $label = null, array $attributes = [])
+    public function urlify(LinkableInterface|string $urlOrPath, ?string $label = null, array $attributes = [])
     {
+        if($urlOrPath instanceof LinkableInterface)
+            $urlOrPath = $urlOrPath->__toLink();
+
         if($this->router->getUrl() == $this->router->getAssetUrl($urlOrPath))
             $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
 

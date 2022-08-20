@@ -60,10 +60,13 @@ layout:
   short:
     _singular: "raccourci"
     _plural: "raccourcis"
+  semantic:
+    _singular: "champ lexical"
+    _plural: "champs lexicaux"
   widget:
     _singular: "personnalisation"
     _plural: "personnalisations"
-    
+
     page:
       _singular: "page"
       _plural: "pages"
@@ -139,7 +142,7 @@ layout:
       image_attribute:
         _singular: "image"
         _plural: "images"
-      scalar_attribute:  
+      scalar_attribute:
         _singular: scalaire
         _plural: scalaires
 

@@ -63,6 +63,7 @@ use Base\Backend\Config\Action;
 use Base\Backend\Config\Actions;
 use Base\Controller\Backend\Crud\Layout\Widget\SlotCrudController;
 use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
+use Base\Entity\Layout\Semantic;
 use Base\Field\Type\BooleanType;
 use Base\Routing\RouterInterface;
 use Base\Service\IconProvider;
@@ -501,11 +502,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
                 WidgetItem::linkToCrud(Attachment::class),
                 WidgetItem::linkToCrud(Link::class),
+                WidgetItem::linkToCrud(Short::class),
+                WidgetItem::linkToCrud(Semantic::class),
             ]);
         }
 
         $widgets = $this->addWidgetItem($widgets, "LAYOUT", [
-            WidgetItem::linkToCrud(Short::class),
             WidgetItem::linkToCrud(Menu::class),
             WidgetItem::linkToCrud(Page::class),
             WidgetItem::linkToUrl(Widget::class, Widget::__iconizeStatic()[0], $this->adminUrlGenerator->unsetAll()

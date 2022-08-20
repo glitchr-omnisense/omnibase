@@ -2,6 +2,7 @@
 
 namespace Base\Database\Traits;
 
+use Base\Database\NamingStrategy;
 use Base\Database\TranslationInterface;
 use Base\Exception\MissingLocaleException;
 use Base\Service\BaseService;
@@ -11,7 +12,6 @@ use Exception;
 use InvalidArgumentException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
-const __TRANSLATION_SUFFIX__ = 'Translation';
 trait TranslatableTrait
 {
     private static $translationClass;
@@ -28,19 +28,19 @@ trait TranslatableTrait
 
         if($withInheritance) {
 
-            self::$translationClass = $class . __TRANSLATION_SUFFIX__;
+            self::$translationClass = $class . NamingStrategy::TRANSLATION_SUFFIX;
             while(!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
 
                 if(!get_parent_class($class)) throw new Exception("No translation entity found for ".$class);
 
                 $class = get_parent_class($class);
-                self::$translationClass = $class . __TRANSLATION_SUFFIX__;
+                self::$translationClass = $class . NamingStrategy::TRANSLATION_SUFFIX;
             }
 
             return self::$translationClass;
         }
 
-        $translationClass = $class . __TRANSLATION_SUFFIX__;
+        $translationClass = $class . NamingStrategy::TRANSLATION_SUFFIX;
         if(!class_exists($translationClass) || !is_subclass_of($translationClass, TranslationInterface::class))
             return null;
 

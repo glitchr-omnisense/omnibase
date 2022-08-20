@@ -126,8 +126,8 @@ class IntlSubscriber implements EventSubscriberInterface
             return $fetchMode;
 
         switch($fetchMode) {
-            case 'EAGER':
-                return ClassMetadata::FETCH_EAGER;
+            case 'LAZY':
+                return ClassMetadata::FETCH_LAZY;
 
             case 'EXTRA_LAZY':
                 return ClassMetadata::FETCH_EXTRA_LAZY;
@@ -202,7 +202,8 @@ class IntlSubscriber implements EventSubscriberInterface
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
         $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
-    if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
+
+        if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
             $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
 
         if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))

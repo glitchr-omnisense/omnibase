@@ -6,13 +6,15 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Slugify;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Entity\Layout\Attribute\Common\BaseAttribute;
 use Base\Model\AutocompleteInterface;
 use Base\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Base\Entity\Layout\AttributeInterface;
+
+use Base\Entity\Layout\Attribute\Common\BaseAttribute;
+use Base\Entity\Layout\Attribute\Common\BaseAttributeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\AbstractAttributeRepository;
 
@@ -61,7 +63,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
      */
     protected $attributes;
     public function getAttributes(): Collection { return $this->attributes; }
-    public function addAttribute(AttributeInterface $attribute): self
+    public function addAttribute(BaseAttributeInterface $attribute): self
     {
         if (!$this->attributes->contains($attribute)) {
             $this->attributes[] = $attribute;
@@ -71,7 +73,7 @@ abstract class AbstractAttribute implements AbstractAttributeInterface, Autocomp
         return $this;
     }
 
-    public function removeAttribute(AttributeInterface $attribute): self
+    public function removeAttribute(BaseAttributeInterface $attribute): self
     {
         if ($this->attributes->removeElement($attribute)) {
             // set the owning side to null (unless already changed)

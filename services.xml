@@ -367,6 +367,11 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Service\SemanticEnhancer"   public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
+        </service>
+
         <service id="Base\Service\Obfuscator"   public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="parameter_bag" />
@@ -1031,6 +1036,7 @@
         <service id="Base\Controller\Backend\Crud\Layout\WidgetCrudController"    parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\Layout\ImageCrudController"     parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\Layout\ShortCrudController"     parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
+        <service id="Base\Controller\Backend\Crud\Layout\SemanticCrudController"  parent="Base\Controller\Backend\AbstractCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
 
         <service id="Base\Controller\Backend\Crud\Layout\Widget\SlotCrudController"       parent="Base\Controller\Backend\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>
         <service id="Base\Controller\Backend\Crud\Layout\Widget\AttachmentCrudController" parent="Base\Controller\Backend\Crud\Layout\WidgetCrudController"><tag name="ea.crud_controller" /><tag name="container.service_subscriber" /></service>

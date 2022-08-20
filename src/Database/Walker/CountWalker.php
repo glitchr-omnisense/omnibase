@@ -20,7 +20,7 @@ class CountWalker extends TreeWalkerAdapter
         $parent = null;
         $parentName = null;
 
-        foreach ($this->_getQueryComponents() AS $dqlAlias => $qComp) {
+        foreach ($this->getQueryComponents() AS $dqlAlias => $qComp) {
 
             // skip mixed data in query
             if (isset($qComp['resultVariable'])) {
