@@ -410,9 +410,11 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onBirthRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;
+        if(!$event->isMainRequest()) return;    
+        if(!$this->parameterBag->get("base.settings.birthdate.redirect_on_deny")) return ;
 
         if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale())) {
+
             if($this->profiler) $this->profiler->disable();
             $event->stopPropagation();
         }

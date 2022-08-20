@@ -234,6 +234,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             "base.settings.meta.keywords"                       => ["form_type" => SelectType::class, "required" => false, "tags" => true, 'tokenSeparators' => [',', ';'], "multiple" => true, "translatable" => true],
             "base.settings.slogan"                              => ["translatable" => true, "required" => false],
             "base.settings.birthdate"                           => ["form_type" => DateTimePickerType::class],
+            "base.settings.birthdate.redirect_on_deny"          => ["form_type" => BooleanType::class],
             "base.settings.access_restriction.redirect_on_deny" => ["roles" => "ROLE_EDITOR", "form_type" => RouteType::class, "required" => false],
             "base.settings.access_restriction.anonymous_access" => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],
             "base.settings.access_restriction.user_access"      => ["roles" => "ROLE_SUPERADMIN" , "form_type" => BooleanType::class],

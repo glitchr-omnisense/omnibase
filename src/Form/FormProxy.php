@@ -51,7 +51,7 @@ class FormProxy implements FormProxyInterface
         if(array_key_exists($name, $this->forms))
             return $this->forms[$name];
 
-        throw new Exception("No form \"$name\" found.");
+        return null;
     }
 
     public function hasForm(string $name):bool

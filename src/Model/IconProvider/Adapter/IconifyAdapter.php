@@ -30,7 +30,7 @@ class IconifyAdapter extends AbstractIconAdapter
             $icon = first($icon);
         }
 
-        return preg_match('s/\w+:\w+/g', $icon);
+        return preg_match('/\w+:\w+/', $icon);
     }
 
     public function getClass(string $style)

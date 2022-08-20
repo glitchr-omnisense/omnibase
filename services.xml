@@ -415,6 +415,7 @@
             <argument type="service" id="base.annotation_reader" />
             <argument type="service" id="base.service.image" />
             <argument type="service" id="cache.adapter" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
         </service>
 
