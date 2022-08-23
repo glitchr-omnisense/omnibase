@@ -437,10 +437,6 @@
             <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
         </service>
-        <service id="Base\Service\Model\IconProvider\Adapter\IconifyAdapter">
-            <tag name="base.service.icon" />
-            <bind key="$metadata">%base.vendor.iconify.metadata%</bind>
-        </service>
 
         <service id="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
         <service id="Base\Service\Model\CurrencyApi\Fixer"            parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
