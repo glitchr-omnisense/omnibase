@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Model\Pagination;
+use Base\Service\Model\Pagination;
 use Doctrine\ORM\Query;
 use InvalidArgumentException;
 use Symfony\Component\Routing\RouterInterface;

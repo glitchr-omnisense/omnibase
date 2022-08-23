@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Model\AutovalidateInterface;
+use Base\Service\Model\AutovalidateInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;

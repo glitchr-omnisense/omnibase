@@ -30,12 +30,17 @@ backoffice:
 
 profile:
     title: "See my profile"
+    registered: "Registered on {0} at {1}"
+    edit: "Edit my profile"
 
 logout:
     title: "Log out"
 
 login:
     title: "Sign In"
+
+thread:
+    found: "{0} found in \"{1}\""
 
 base:
     return: "Previous page"

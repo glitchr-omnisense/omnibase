@@ -2,7 +2,7 @@
 
 namespace Base\Enum\SystemOfUnits;
 
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 class StandardUnits extends StandardBaseUnits implements IconizeInterface
 {

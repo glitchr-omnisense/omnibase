@@ -3,7 +3,7 @@
 namespace Base\Controller\UX;
 
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Model\Autocomplete;
+use Base\Service\Model\Autocomplete;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\Paginator;
 use Base\Service\PaginatorInterface;

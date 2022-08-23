@@ -3,7 +3,7 @@
 namespace Base\Enum;
 
 use Base\Database\Type\EnumType;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 class ThreadState extends EnumType implements IconizeInterface
 {

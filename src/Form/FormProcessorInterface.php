@@ -2,10 +2,6 @@
 
 namespace Base\Form;
 
-use Base\Entity\User\Notification;
-use Base\Form\Traits\FormFlowTrait;
-
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Form\Form;
@@ -19,7 +15,6 @@ interface FormProcessorInterface
     public function getForm();
     public function handleRequest(Request $request);
 
-    public function createForm($type, $data = null, array $options = []);
     public function set(Form $form);
     public function setForm(Form $form);
 

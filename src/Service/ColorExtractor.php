@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Model\Color\Palette;
+use Base\Service\Model\Color\Palette;
 
 class ColorExtractor
 {

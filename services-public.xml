@@ -73,8 +73,9 @@
         <service id="twig.backoffice_variable" alias="Base\Twig\Variable\BackofficeVariable" />
         <service id="twig.ea_variable"         alias="Base\Twig\Variable\EasyAdminVariable" />
 
-        <service id="base.form.proxy"   alias="Base\Form\FormProxyInterface" />
-        <service id="base.form.factory" alias="Base\Form\FormFactoryInterface" />
+        <service id="base.form.proxy"     alias="Base\Form\FormProxyInterface" />
+        <service id="base.form.factory"   alias="Base\Form\FormFactoryInterface" />
+        <service id="base.form.processor" alias="Base\Form\FormProcessorInterface" />
 
         <service id="ea_extension" alias="Base\Backend\Config\Extension" />
 

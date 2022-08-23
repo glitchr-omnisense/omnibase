@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Model\PaginationInterface;
+use Base\Service\Model\PaginationInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;

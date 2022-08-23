@@ -57,7 +57,12 @@ trait BaseTrait
         return $entityManager;
     }
 
-    public static function getRepository(mixed $object) : ?ObjectRepository  { return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object); }
+    public static function getRepository(mixed $object = null) : ?ObjectRepository  
+    {
+        $object ??= static::class;
+        return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object);
+    }
+
     public static function isEntity(mixed $entity)         : bool            { return BaseService::getClassMetadataManipulator()->isEntity($entity); }
     
     public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }

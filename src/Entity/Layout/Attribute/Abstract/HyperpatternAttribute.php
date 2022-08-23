@@ -5,7 +5,7 @@ namespace Base\Entity\Layout\Attribute\Abstract;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Field\Type\ArrayType;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Abstract\HyperpatternAttributeRepository;

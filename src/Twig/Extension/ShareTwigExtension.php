@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Model\LinkableInterface;
+use Base\Service\Model\LinkableInterface;
 use Base\Service\Sharer;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;

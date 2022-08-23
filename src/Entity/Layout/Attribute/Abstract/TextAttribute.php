@@ -3,7 +3,7 @@
 namespace Base\Entity\Layout\Attribute\Abstract;
 
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Doctrine\ORM\Mapping as ORM;

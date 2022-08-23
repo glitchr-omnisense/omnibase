@@ -7,14 +7,23 @@
 
         <defaults public="false" />
 
-        <!-- Base features -->
         <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
-        <service id="Base\Form\FormProxy" public="true" />
+        <service id="Base\Form\FormProxy" public="true">
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.form.processor" />
+        </service>
 
         <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>
         <service id="Base\Form\FormFactory" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
+        </service>
+
+        <service id="Base\Form\FormProcessorInterface" alias="Base\Form\FormProcessor"/>
+        <service id="Base\Form\FormProcessor">
+            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="security.csrf.token_manager" />
+            <argument type="service" id="request_stack" />
         </service>
 
         <service id="Base\Service\Referrer" public="true">
@@ -313,13 +322,6 @@
             <argument type="service" id="translator" />
         </service>
 
-        <!-- Type declaration -->
-        <service id="Base\Form\FormProcessor">
-            <argument type="service" id="base.form.factory" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="request_stack" />
-        </service>
-
         <!-- Subscriber -->
         <service id="Base\Subscriber\LocaleSubscriber">
             <tag name="kernel.event_subscriber" />
@@ -405,13 +407,13 @@
 
         <service id="Base\Service\Sharer" public="true"><tag name="twig.runtime" /></service>
 
-        <service id="Base\Model\Sharer\Adapter\FacebookAdapter"   parent="Base\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
-        <service id="Base\Model\Sharer\Adapter\LinkedInAdapter"   parent="Base\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
-        <service id="Base\Model\Sharer\Adapter\GooglePlusAdapter" parent="Base\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
-        <service id="Base\Model\Sharer\Adapter\TumblrAdapter"     parent="Base\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
-        <service id="Base\Model\Sharer\Adapter\TwitterAdapter"    parent="Base\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
-        <service id="Base\Model\Sharer\Adapter\PinterestAdapter"  parent="Base\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
-        <service id="Base\Model\Sharer\AbstractSharerAdapter">
+        <service id="Base\Service\Model\Sharer\Adapter\FacebookAdapter"   parent="Base\Service\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
+        <service id="Base\Service\Model\Sharer\Adapter\LinkedInAdapter"   parent="Base\Service\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
+        <service id="Base\Service\Model\Sharer\Adapter\GooglePlusAdapter" parent="Base\Service\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
+        <service id="Base\Service\Model\Sharer\Adapter\TumblrAdapter"     parent="Base\Service\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
+        <service id="Base\Service\Model\Sharer\Adapter\TwitterAdapter"    parent="Base\Service\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
+        <service id="Base\Service\Model\Sharer\Adapter\PinterestAdapter"  parent="Base\Service\Model\Sharer\AbstractSharerAdapter"><tag name="base.service.sharer" /></service>
+        <service id="Base\Service\Model\Sharer\AbstractSharerAdapter">
             <argument type="service" id="twig" />
         </service>
 
@@ -424,27 +426,27 @@
             <argument type="service" id="router" />
         </service>
 
-        <service id="Base\Model\IconProvider\Adapter\FontAwesomeAdapter">
+        <service id="Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter">
             <tag name="base.service.icon" />
             <bind key="$metadata">%base.vendor.fontawesome.metadata%</bind>
             <bind key="$javascript">%base.vendor.fontawesome.javascript%</bind>
             <bind key="$stylesheet">%base.vendor.fontawesome.stylesheet%</bind>
         </service>
-        <service id="Base\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
+        <service id="Base\Service\Model\IconProvider\Adapter\BootstrapTwitterAdapter">
             <tag name="base.service.icon" />
             <bind key="$metadata">%base.vendor.bootstrap_twitter.metadata%</bind>
             <bind key="$stylesheet">%base.vendor.bootstrap_twitter.stylesheet%</bind>
         </service>
-        <service id="Base\Model\IconProvider\Adapter\IconifyAdapter">
+        <service id="Base\Service\Model\IconProvider\Adapter\IconifyAdapter">
             <tag name="base.service.icon" />
             <bind key="$metadata">%base.vendor.iconify.metadata%</bind>
         </service>
 
-        <service id="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
-        <service id="Base\Model\CurrencyApi\Fixer"            parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Model\CurrencyApi\AbstractApi"      parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Model\CurrencyApi\ExchangeRatesApi" parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
-        <service id="Base\Model\CurrencyApi\CurrencyLayer"    parent="Base\Model\CurrencyApi\Abstract\AbstractCurrencyApi">
+        <service id="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><argument type="service" id="setting_bag" /></service>
+        <service id="Base\Service\Model\CurrencyApi\Fixer"            parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
+        <service id="Base\Service\Model\CurrencyApi\AbstractApi"      parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
+        <service id="Base\Service\Model\CurrencyApi\ExchangeRatesApi" parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi"><tag name="base.currency_api" /></service>
+        <service id="Base\Service\Model\CurrencyApi\CurrencyLayer"    parent="Base\Service\Model\CurrencyApi\Abstract\AbstractCurrencyApi">
             <tag name="base.currency_api" />
             <!-- <bind key="$metadata">%base.currency_api.currency_layer%</bind> -->
         </service>
@@ -595,20 +597,22 @@
         <!--
             USER SECTION
         -->
-        <service id="Base\Controller\Client\User\SearchController">
-            <tag name="controller.service_arguments" />
-            <tag name="container.service_subscriber" />
-            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
-            <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
         <service id="Base\Controller\Client\Thread\SearchController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
+            <argument type="service" id="base.form.proxy" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
+
+        <service id="Base\Controller\Client\User\SearchController">
+            <tag name="controller.service_arguments" />
+            <tag name="container.service_subscriber" />
+            <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
+            <argument type="service" id="base.form.proxy" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
+        </service>
+
         <service id="Base\Controller\Client\User\ProfileController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
@@ -683,7 +687,7 @@
         <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
             <tag name="doctrine.event_subscriber" />
         </service>
-        <service id="Base\EntityDispatcher\Event\ThreadTranslationEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
+        <service id="Base\EntityDispatcher\Event\ThreadIntlEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
             <tag name="doctrine.event_subscriber" />
         </service>
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">

@@ -2,9 +2,10 @@
 
 namespace Base\Controller\Client\Thread;
 
-use Base\Entity\Thread;
+use Base\Entity\ThreadIntl;
 use Base\Enum\ThreadState;
 use Base\Form\Data\Thread\SearchData;
+use Base\Form\FormProxyInterface;
 use Base\Form\Type\Thread\SearchbarType;
 use Base\Form\Type\Thread\SearchType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,10 +18,11 @@ class SearchController extends AbstractController
 {
     protected $threadRepository;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(FormProxyInterface $formProxy, EntityManagerInterface $entityManager)
     {
+        $this->formProxy        = $formProxy;
         $this->entityManager    = $entityManager;
-        $this->threadRepository = $entityManager->getRepository(Thread::class);
+        $this->threadIntlRepository = $entityManager->getRepository(ThreadIntl::class);
     }
 
     /**
@@ -28,9 +30,9 @@ class SearchController extends AbstractController
      */
     public function Main(Request $request, ?FormInterface $formSearch = null, ?FormInterface $formSearchbar = null)
     {
-        $formSearch = $formSearch ?? $this->formProxy->getForm("thread:search") ?? $this->createForm(SearchType::class, new SearchData());
+        $formSearch = $formSearch ?? $this->formProxy->get("thread:search") ?? $this->createForm(SearchType::class, new SearchData());
         $formSearch->handleRequest($request);
-        $formSearchbar = $formSearchbar ?? $this->formProxy->getForm("thread:searchbar") ?? $this->createForm(SearchbarType::class, new SearchData());
+        $formSearchbar = $formSearchbar ?? $this->formProxy->get("thread:searchbar") ?? $this->createForm(SearchbarType::class, new SearchData());
         $formSearchbar->handleRequest($request);
 
         $formattedData = null;
@@ -53,19 +55,19 @@ class SearchController extends AbstractController
 
         if($formattedData) {
 
-            $data = new SearchData();
-            $data->content = "%" . ($formattedData->content ?? $formattedData->generic) . "%";
-            $data->title   = "%" . ($formattedData->title   ?? $formattedData->generic ?? $formattedData->content) . "%";
-            $data->excerpt = "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%";
-            $data->generic = null;
-
             $entityManager = $this->entityManager;
-            $threads = $this->threadRepository->findByStateAndInsensitivePartialModel(ThreadState::PUBLISH, $data)->getResult();
+
+            $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->findByInsensitivePartialModel([
+                "content" => "%" . ($formattedData->content ?? $formattedData->generic) . "%",
+                "title"   => "%" . ($formattedData->title   ?? $formattedData->generic ?? $formattedData->content) . "%",
+                "excerpt" => "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%"
+            ],["translatable.state" => ThreadState::PUBLISH])->getResult());
+
             usort($threads, function ($a, $b) use ($entityManager) {
                 return $entityManager->getRepository(get_class($a))->getHierarchy() < $entityManager->getRepository(get_class($b))->getHierarchy() ? -1 : 1;
             });
         }
-
+        
         return $this->render('@Base/client/thread/search.html.twig', [
             "form" => $formSearch->createView(),
             "form_data" => $formattedData ?? new SearchData(),

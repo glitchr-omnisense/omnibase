@@ -9,6 +9,6 @@ class TranslationAmbiguityException extends \Exception
      */
     public function getMessageKey()
     {
-        return 'Translation ambiguity exception.';
+        return 'Intl ambiguity exception.';
     }
 }

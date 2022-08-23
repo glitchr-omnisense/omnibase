@@ -8,7 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use Base\Field\SlugField;
-use Base\Model\LinkableInterface;
+use Base\Service\Model\LinkableInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;

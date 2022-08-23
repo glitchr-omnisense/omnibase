@@ -7,7 +7,7 @@ use Base\Imagine\Filter\Basic\Definition\UltraHighDefinitionFilter;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
-use Base\Model\IconProvider\Adapter\FontAwesomeAdapter;
+use Base\Service\Model\IconProvider\Adapter\FontAwesomeAdapter;
 class Configuration implements ConfigurationInterface
 {
     private $treeBuilder;

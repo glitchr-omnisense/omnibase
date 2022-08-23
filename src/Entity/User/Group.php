@@ -5,7 +5,7 @@ namespace Base\Entity\User;
 use App\Entity\User;
 use App\Entity\User\Penalty;
 use App\Entity\User\Permission;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 

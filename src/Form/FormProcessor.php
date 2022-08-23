@@ -63,19 +63,6 @@ class FormProcessor implements FormProcessorInterface
         return $this;
     }
 
-    /**
-     * @var Type
-     * */
-    protected $formType = null;
-    public function createForm($type, $data = null, array $options = []): self
-    {
-        $this->form = $this->formFactory->createForm($type, $data, $options);
-        $this->formType = $type;
-
-        $this->data     = $data;
-        return $this;
-    }
-
     public function set(Form $form) { $this->setForm($form); }
     public function setForm(Form $form) { $this->form = $form; }
 

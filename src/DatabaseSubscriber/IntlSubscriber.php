@@ -75,9 +75,10 @@ class IntlSubscriber implements EventSubscriberInterface
             fn($e) => is_subclass_of($e, TranslatableInterface::class, true)
         );
 
-        // Normalize and turn orphan Translation entities if empty
+        // Normalize and turn orphan Intl entities if empty
         foreach($scheduledTranslatables as $translatable)
             $this->normalize($translatable);
+            
     }
 
     protected function normalize(TranslatableInterface $translatable)

@@ -365,7 +365,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if(!is_array($values)) $values = ["_self" => $values];
             $role = array_pop_key("_self", $values);
 
-            $label = $this->translator->enum($class, $role, Translator::NOUN_PLURAL);
+            $label = $this->translator->transEnum($class, $role, Translator::NOUN_PLURAL);
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
@@ -386,7 +386,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach($values as $role)  {
 
-                    $label = mb_ucfirst($this->translator->enum($class, $role, Translator::NOUN_PLURAL));
+                    $label = mb_ucfirst($this->translator->transEnum($class, $role, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
                     $url = $this->adminUrlGenerator

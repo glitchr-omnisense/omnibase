@@ -4,8 +4,8 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
-use Base\Model\IconizeInterface;
-use Base\Model\IconProvider\IconAdapterInterface;
+use Base\Service\Model\IconizeInterface;
+use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 

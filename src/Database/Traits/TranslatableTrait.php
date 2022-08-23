@@ -28,19 +28,19 @@ trait TranslatableTrait
 
         if($withInheritance) {
 
-            self::$translationClass = $class . NamingStrategy::TRANSLATION_SUFFIX;
+            self::$translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
             while(!class_exists(self::$translationClass) || !is_subclass_of(self::$translationClass, TranslationInterface::class)) {
 
                 if(!get_parent_class($class)) throw new Exception("No translation entity found for ".$class);
 
                 $class = get_parent_class($class);
-                self::$translationClass = $class . NamingStrategy::TRANSLATION_SUFFIX;
+                self::$translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
             }
 
             return self::$translationClass;
         }
 
-        $translationClass = $class . NamingStrategy::TRANSLATION_SUFFIX;
+        $translationClass = $class . NamingStrategy::TABLE_I18N_SUFFIX;
         if(!class_exists($translationClass) || !is_subclass_of($translationClass, TranslationInterface::class))
             return null;
 
@@ -86,21 +86,40 @@ trait TranslatableTrait
 
         $locale = intval($locale) < 0 ? $defaultLocale : $locale;
         $normLocale = $localeProvider->getLocale($locale); // Locale normalizer
-
         $translationClass = self::getTranslationEntityClass(true, false);
         $translations = $this->getTranslations();
 
         $translation = $translations[$normLocale] ?? null;
-        if(!$translation && $normLocale != $defaultLocale) {
+        if($translation && $translation->isEmpty()) $translation = null;
 
-            // No locale requested, then get the first entry you can find among the available locales
-            if($locale === null) {
+        if(!$translation && $locale === null) {
 
-                // First entry is default locale
-                foreach($availableLocales as $availableLocale) {
+            // First entry is default locale
+            $locales = array_filter($translations->getKeys(), fn($l) => in_array($l, $availableLocales));
+            foreach($locales as $locale) {
 
-                    $translation = $translations[$availableLocale] ?? null;
-                    if($translation) break;
+                $translation = $translations[$locale] ?? null;
+                if($translation && $translation->isEmpty()) $translation = null;
+                if($translation) break;
+            }
+
+            // Search for compatible lang
+            if($translation == null) {
+
+                $locales = array_filter($translations->getKeys(), fn($l) => !in_array($l, $availableLocales));
+                $fallbackLocales = array_map(fn($l) => $localeProvider->getLocale($localeProvider->getLang($l)), $locales);
+
+                foreach(array_keys($fallbackLocales, $normLocale) as $normKey) {
+
+                    $translation = $translations[$locales[$normKey]] ?? null;
+                    if($translation && $translation->isEmpty()) $translation = null;
+                }
+
+                foreach($locales as $locale) {
+
+                        $translation = $translations[$locale] ?? null;
+                        if($translation && $translation->isEmpty()) $translation = null;
+                        if($translation) break;
                 }
             }
         }
@@ -198,7 +217,6 @@ trait TranslatableTrait
     public function __set($property, $value)
     {
         $accessor = PropertyAccess::createPropertyAccessor();
-        $translationClassName = $this->getTranslationEntityClass();
         $property = snake2camel($property);
         $entity = $this;
 
@@ -217,15 +235,15 @@ trait TranslatableTrait
 
         //
         // Proxy setter method for current locale
-        $entityTranslation = $this->translate();
-        if (method_exists($entityTranslation, "set".mb_ucfirst($property))) {
-            return $entityTranslation->{"set".mb_ucfirst($property)}($value);
-        } else if(property_exists($entityTranslation, $property)) {
+        $entityIntl = $this->translate();
+        if (method_exists($entityIntl, "set".mb_ucfirst($property))) {
+            return $entityIntl->{"set".mb_ucfirst($property)}($value);
+        } else if(property_exists($entityIntl, $property)) {
 
-            if (!$accessor->isWritable($entityTranslation, $property))
-                throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityTranslation));
+            if (!$accessor->isWritable($entityIntl, $property))
+                throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityIntl));
 
-            $accessor->setValue($entityTranslation, $property, $value);
+            $accessor->setValue($entityIntl, $property, $value);
             return $this;
 
         }
@@ -254,15 +272,15 @@ trait TranslatableTrait
         //
         // Proxy getter method for current locale
         $defaultLocale = BaseService::getLocaleProvider()->getDefaultLocale();
-        $entityTranslation = $this->translate();
+        $entityIntl = $this->translate();
 
         $value = null;
-        if(method_exists($entityTranslation, $property))
-            $value = $entityTranslation->{$property}();
-        else if (method_exists($entityTranslation, "get".mb_ucfirst($property)))
-            $value = $entityTranslation->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property))
-            $value = $accessor->getValue($entityTranslation, $property);
+        if(method_exists($entityIntl, $property))
+            $value = $entityIntl->{$property}();
+        else if (method_exists($entityIntl, "get".mb_ucfirst($property)))
+            $value = $entityIntl->{"get".mb_ucfirst($property)}();
+        else if (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property))
+            $value = $accessor->getValue($entityIntl, $property);
 
         // If current locale is empty.. then try to access value from default locale
         // (unless is was already the default locale)
@@ -270,16 +288,16 @@ trait TranslatableTrait
 
         //
         // Proxy getter method for default locale
-        if ($entityTranslation->getLocale() == $defaultLocale)
+        if ($entityIntl->getLocale() == $defaultLocale)
             return $value;
 
-        $entityTranslation = $this->translate($defaultLocale);
-        if(method_exists($entityTranslation, $property))
-            return $entityTranslation->{$property}();
-        else if(method_exists($entityTranslation, "get".mb_ucfirst($property)))
-            return $entityTranslation->{"get".mb_ucfirst($property)}();
-        else if (property_exists($entityTranslation, $property) && $accessor->isReadable($entityTranslation, $property))
-            return $accessor->getValue($entityTranslation, $property);
+        $entityIntl = $this->translate($defaultLocale);
+        if(method_exists($entityIntl, $property))
+            return $entityIntl->{$property}();
+        else if(method_exists($entityIntl, "get".mb_ucfirst($property)))
+            return $entityIntl->{"get".mb_ucfirst($property)}();
+        else if (property_exists($entityIntl, $property) && $accessor->isReadable($entityIntl, $property))
+            return $accessor->getValue($entityIntl, $property);
 
         // Exception for EA variables (cf. EA's FormField)
         if(!str_starts_with($property, "ea_"))

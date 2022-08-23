@@ -6,7 +6,7 @@ use App\Entity\Thread;
 use Base\Entity\User\Notification;
 use Base\Enum\SpamApi;
 use Base\Enum\SpamScore;
-use Base\Model\SpamProtectionInterface;
+use Base\Service\Model\SpamProtectionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -42,7 +42,7 @@ class SpamChecker
         );
     }
 
-    public function getKey($api): string
+    public function getKey($api): ?string
     {
         switch($api) {
 
@@ -54,12 +54,15 @@ class SpamChecker
         }
     }
 
-    public function getEndpoint($api): string
+    public function getEndpoint($api): ?string
     {
+        $key = $this->getKey($api);
+        if(!$key) return null;
+
         switch($api) {
 
             case SpamApi::AKISMET:
-                return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $this->getKey($api));
+                return sprintf('https://%s.rest.akismet.com/1.1/comment-check', $key);
 
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");
@@ -104,7 +107,11 @@ class SpamChecker
                     ])
                 ];
 
-                $response = $this->client->request('POST', $this->getEndpoint($api), $options);
+                $endpoint = $this->getEndpoint($api);
+                if(!$endpoint)
+                    return $enum[SpamScore::NOT_SPAM];
+
+                $response = $this->client->request('POST', $endpoint, $options);
 
                 $headers = $response->getHeaders();
                 if ('discard' === ($headers['x-akismet-pro-tip'][0] ?? '')) $score = $enum[SpamScore::BLATANT_SPAM];

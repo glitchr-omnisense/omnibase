@@ -11,7 +11,7 @@ use Base\Backend\Config\Menu\SectionWidgetItem;
 use Base\Backend\Config\Menu\SeparatorWidgetItem;
 use Base\Controller\Backend\AbstractCrudController;
 
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;

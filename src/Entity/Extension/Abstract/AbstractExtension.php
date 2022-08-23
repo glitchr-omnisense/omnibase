@@ -6,7 +6,7 @@ use Base\Annotations\Annotation\Blameable;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\User;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
 

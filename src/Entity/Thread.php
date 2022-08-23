@@ -27,11 +27,12 @@ use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\Traits\TrasheableTrait;
 
-use Base\Model\IconizeInterface;
-use Base\Model\GraphInterface;
+use Base\Service\Model\IconizeInterface;
+use Base\Service\Model\GraphInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
 use Base\Entity\Thread\Taxon;
+use Base\Enum\WorkflowState;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -54,7 +55,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     public        function __iconize()       : ?array { return $this->getPrimaryTag() && $this->getPrimaryTag()->getIcon() ? [$this->getPrimaryTag()->getIcon()] : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-box"]; }
 
-    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->entity(self::class); }
+    public function __toString() { return $this->getTitle() ?? $this->getSlug() ?? $this->getTranslator()->transEntity(self::class); }
     public function __construct(?User $owner = null, ?Thread $parent = null, ?string $title = null, ?string $slug = null)
     {
         $this->tags      = new ArrayCollection();
@@ -71,6 +72,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         $this->setTitle($title);
 
         $this->setState(ThreadState::DRAFT);
+        $this->setWorkflow(WorkflowState::SUBMITTED);
 
         $this->slug = $slug;
 
@@ -188,12 +190,25 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
+    public function isDeleted(): bool { return str_starts_with($this->state, ThreadState::DELETE); }
     public function isScheduled(): bool { return $this->publishedAt && !$this->isPublished(); }
     public function isPublished(): bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
     public function isPublishable(): bool
     {
         if(!$this->publishedAt) return false;
         return $this->state == ThreadState::FUTURE && (time() - $this->publishedAt->getTimestamp()) >= 0;
+    }
+
+    /**
+     * @ORM\Column(type="workflow_state")
+     * @AssertBase\NotBlank(groups={"new", "edit"})
+     */
+    protected $workflow;
+    public function getWorkflow() { return $this->workflow; }
+    public function setWorkflow($workflow): self
+    {
+        $this->workflow = $workflow;
+        return $this;
     }
 
     /**

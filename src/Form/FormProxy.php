@@ -4,33 +4,27 @@ namespace Base\Form;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\FormInterface;
-
-use Base\Traits\SingletonTrait;
+use Symfony\Component\Form\FormTypeInterface;
 
 class FormProxy implements FormProxyInterface
 {
-    use SingletonTrait;
-
-    public function __construct()
+    public function __construct(FormFactoryInterface $formFactory, FormProcessorInterface $formProcessor)
     {
-        self::$_instance = $this;
+        $this->formFactory   = $formFactory;
+        $this->formProcessor = $formProcessor;
     }
 
     protected array $forms = [];
-    public function getForms()
-    {
-        return $this->forms;
-    }
-
-    public function addForm(string $name, ?FormInterface $form): self
+    public function all() { return $this->forms; }
+    public function has(string $name):bool { return array_key_exists($name, $this->forms); }
+    public function add(string $name, ?FormInterface $form): static
     {
         if (!$form) return $this;
 
         if (array_key_exists($name, $this->forms))
             throw new Exception("Form identifier \"$name\" already exists.");
 
-        // Create dummy view to avoid error during twig rendering..
-        $form->createView();
+        $form->createView(); // Create dummy view to avoid error during twig rendering..
 
         if (!in_array($form, $this->forms))
             $this->forms[$name] = $form;
@@ -38,7 +32,7 @@ class FormProxy implements FormProxyInterface
         return $this;
     }
 
-    public function removeForm(string $name): self
+    public function remove(string $name): static
     {
         if (array_key_exists($name, $this->forms))
             unset($this->forms[$name]);
@@ -46,7 +40,17 @@ class FormProxy implements FormProxyInterface
         return $this;
     }
 
-    public function getForm(string $name)
+    public function create(string $name, string $type = FormType::class, mixed $data = null, array $options = []): static 
+    { 
+        return $this->add($name, $this->formFactory->create($type, $options));
+    }
+    
+    public function submit(string $name, string|array|null $submittedData, bool $clearMissing = true): ?FormInterface
+    {
+        return $this->get($name)?->submit($submittedData, $clearMissing);
+    }
+    
+    public function get(string $name): ?FormInterface
     {
         if(array_key_exists($name, $this->forms))
             return $this->forms[$name];
@@ -54,8 +58,11 @@ class FormProxy implements FormProxyInterface
         return null;
     }
 
-    public function hasForm(string $name):bool
+    public function getData(string $name): mixed
     {
-        return array_key_exists($name, $this->forms);
+        if(array_key_exists($name, $this->forms))
+            return $this->forms[$name]->getData();
+
+        return null;
     }
 }

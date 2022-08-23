@@ -2,8 +2,8 @@
 
 namespace Base\Service;
 
-use Base\Model\LinkableInterface;
-use Base\Model\Sharer\SharerAdapterInterface;
+use Base\Service\Model\LinkableInterface;
+use Base\Service\Model\Sharer\SharerAdapterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class Sharer

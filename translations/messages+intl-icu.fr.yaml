@@ -30,6 +30,11 @@ backoffice:
 
 profile:
     title: "Voir mon profil"
+    registered: "Inscrit depuis le {0} à {1}"
+    edit: "Editer mon profil"
+
+thread:
+    found: "{0} dans \"{1}\""
 
 logout:
     title: "Se déconnecter"

@@ -6,7 +6,7 @@ use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
-use Base\Model\IntlDateTime;
+use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
@@ -990,6 +990,7 @@ class ServiceEntityParser
                 break;
 
             default:
+
                 if($this->classMetadata->hasAssociation($fieldHead))
                     $tableColumn = self::ALIAS_ENTITY."_".$fieldName;
                 else if($this->classMetadata->hasField($fieldHead))
@@ -1133,7 +1134,7 @@ class ServiceEntityParser
                 if($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
 
                     // Cast to array
-                    $qb = $this->innerJoin($qb, $fieldHead);
+                    $qb = $this->leftJoin($qb, $fieldHead);
                     if (!is_array($fieldValue)) $fieldValue = ($fieldValue !== null)? [$fieldValue] : [];
                     foreach ($fieldValue as $subFieldID => $subFieldValue)
                         $qb->setParameter($fieldID."_".$subFieldID, $subFieldValue);
@@ -1142,7 +1143,7 @@ class ServiceEntityParser
 
                     if(!is_array($fieldValue)) {
 
-                        $qb = $this->innerJoin($qb, $fieldHead);
+                        $qb = $this->leftJoin($qb, $fieldHead);
                         $qb->setParameter($fieldID, $fieldValue);
 
                     } else {
@@ -1150,7 +1151,7 @@ class ServiceEntityParser
                         $fieldValue = array_filter($fieldValue);
                         if($fieldValue) {
 
-                            $qb = $this->innerJoin($qb, $fieldHead);
+                            $qb = $this->leftJoin($qb, $fieldHead);
                             $qb->setParameter($fieldID, $fieldValue);
                         }
                     }
@@ -1158,7 +1159,7 @@ class ServiceEntityParser
 
             } else if(!is_array($fieldValue)) {
 
-                $qb = $this->innerJoin($qb, $fieldHead);
+                $qb = $this->leftJoin($qb, $fieldHead);
                 if(!$isEmpty && !$isNotEmpty && !$isBool)
                     $qb->setParameter($fieldID, $fieldValue);
 
@@ -1166,7 +1167,7 @@ class ServiceEntityParser
 
                 $fieldValue = array_filter($fieldValue);
                 if($fieldValue) {
-                    $qb = $this->innerJoin($qb, $fieldHead);
+                    $qb = $this->leftJoin($qb, $fieldHead);
                     $qb->setParameter($fieldID, $fieldValue);
                 }
             }
@@ -1269,7 +1270,7 @@ class ServiceEntityParser
             ->setFirstResult($offset ?? null)
             ->setCacheable($this->cacheable);
 
-        $this->innerJoinList[spl_object_hash($qb)] = [];
+        $this->leftJoinList[spl_object_hash($qb)] = [];
 
         // Prepare criteria variable
         foreach ($criteria as $field => $fieldValue) {
@@ -1445,7 +1446,7 @@ class ServiceEntityParser
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, null, null, $groupBy);
         if($this->classMetadata->hasAssociation($column))
-            $this->innerJoin($qb, $column);
+            $this->leftJoin($qb, $column);
 
         $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
 
@@ -1461,7 +1462,7 @@ class ServiceEntityParser
             $column = self::ALIAS_ENTITY.".".$column;
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy);
-        $this->innerJoin($qb, $column);
+        $this->leftJoin($qb, $column);
 
         $qb->select("LENGTH(".self::ALIAS_ENTITY.".".$column.") as length");
 
@@ -1503,7 +1504,7 @@ class ServiceEntityParser
             if($groupBy[$name] == self::ALIAS_ENTITY.".".$alias) $qb->addSelect($groupBy[$name]);
             else $qb->addSelect("(".$groupBy[$name].") AS ".$alias);
 
-            $qb = $this->innerJoin($qb, $alias);
+            $qb = $this->leftJoin($qb, $alias);
         }
 
         return $qb->groupBy(implode(",", $groupBy));
@@ -1512,11 +1513,24 @@ class ServiceEntityParser
     protected $innerJoinList = [];
     protected function innerJoin(QueryBuilder $qb, $innerJoin)
     {
-        if(in_array($innerJoin, $this->innerJoinList[spl_object_hash($qb)])) return $qb;
+        if(in_array($innerJoin, $this->innerJoinList[spl_object_hash($qb)] ?? [])) return $qb;
         if ($this->classMetadata->hasAssociation($innerJoin)) {
 
-            $qb->innerJoin(self::ALIAS_ENTITY.".".$innerJoin, self::ALIAS_ENTITY."_".$innerJoin);
-            $this->innerJoinList[spl_object_hash($qb)][] = $innerJoin;
+            $qb->leftJoin(self::ALIAS_ENTITY.".".$innerJoin, self::ALIAS_ENTITY."_".$innerJoin);
+            $this->leftJoinList[spl_object_hash($qb)][] = $innerJoin;
+        }
+
+        return $qb;
+    }
+
+    protected $leftJoinList = [];
+    protected function leftJoin(QueryBuilder $qb, $join)
+    {
+        if(in_array($join, $this->leftJoinList[spl_object_hash($qb)] ?? [])) return $qb;
+        if ($this->classMetadata->hasAssociation($join)) {
+
+            $qb->join(self::ALIAS_ENTITY.".".$join, self::ALIAS_ENTITY."_".$join);
+            $this->leftJoinList[spl_object_hash($qb)][] = $join;
         }
 
         return $qb;
@@ -1549,7 +1563,7 @@ class ServiceEntityParser
                 else
                     $formattedName = $name;
 
-                $qb = $this->innerJoin($qb, $entity);
+                $qb = $this->leftJoin($qb, $entity);
             }
 
             $orderBy   = $first ? "orderBy" : "addOrderBy";

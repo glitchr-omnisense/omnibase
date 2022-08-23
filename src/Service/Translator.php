@@ -186,7 +186,7 @@ class Translator implements TranslatorInterface
             $domain ??= $id->getDomain();
             $id       = $id->getMessage();
         }
-
+        
         $id = trim($id);
         $array  = explode(".", $id);
         if(str_starts_with($id, "@")) {
@@ -194,7 +194,7 @@ class Translator implements TranslatorInterface
             $id     = implode(".", $array);
         }
 
-        $domain    = $domain && str_starts_with($domain, "@") ? substr($domain, 1) : ($domain ?? null);
+        $domain = $domain && str_starts_with($domain, "@") ? substr($domain, 1) : ($domain ?? null);
         return $catalogue->has($id, $domain ?? self::DOMAIN_DEFAULT);
     }
 
@@ -276,19 +276,19 @@ class Translator implements TranslatorInterface
         return false;
     }
 
-    public function route(string $routeName, string $domain = null): ?string
+    public function transRoute(string $routeName, string $domain = null): ?string
     {
         $domain = $domain ? $domain."." : "@controllers.";
         return $this->trans($domain.$routeName.".title");
     }
 
-    public function routeExists(string $routeName, string $domain = null) : bool
+    public function transRouteExists(string $routeName, string $domain = null) : bool
     {
         $domain = $domain ? $domain."." : "@controllers.";
         return $this->transExists($domain.$routeName.".title");
     }
 
-    public function enum(string $class, ?string $value = null, null|string|array $options = self::NOUN_SINGULAR): ?string
+    public function transEnum(string $class, ?string $value = null, null|string|array $options = self::NOUN_SINGULAR): ?string
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
@@ -308,7 +308,7 @@ class Translator implements TranslatorInterface
         return $class ? $this->transPerms($class.$value, $options, [], self::DOMAIN_ENUM) : null;
     }
 
-    public function enumExists(string $class, ?string $value = null, string|array $options = self::NOUN_SINGULAR): bool
+    public function transEnumExists(string $class, ?string $value = null, string|array $options = self::NOUN_SINGULAR): bool
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
@@ -328,7 +328,7 @@ class Translator implements TranslatorInterface
         return $class ? $this->transPermExists($class.$value, $options, self::DOMAIN_ENUM) : null;
     }
 
-    public function entity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
+    public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): ?string
     {
         if(!is_array($options)) $options = [$options];
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
@@ -339,7 +339,7 @@ class Translator implements TranslatorInterface
         return $entityOrClassName ? $this->transPerms($entityOrClassName.camel2snake($property), $options, [], self::DOMAIN_ENTITY) : null;
     }
 
-    public function entityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): bool
+    public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = self::NOUN_SINGULAR): bool
     {
         if(!is_array($options)) $options = [$options];
         if(is_object($entityOrClassName)) $entityOrClassName = get_class($entityOrClassName);
@@ -350,7 +350,7 @@ class Translator implements TranslatorInterface
         return $this->transPermExists($entityOrClassName.camel2snake($property), $options, self::DOMAIN_ENTITY);
     }
 
-    public function time(int $time): string
+    public function transTime(int $time): string
     {
         if($time > 0) {
 

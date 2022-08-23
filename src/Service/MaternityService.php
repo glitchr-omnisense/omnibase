@@ -5,7 +5,7 @@ namespace Base\Service;
 use Base\Entity\User\Notification;
 use Base\Routing\RouterInterface;
 use DateTime;
-use Base\Model\IntlDateTime;
+use Base\Service\Model\IntlDateTime;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;

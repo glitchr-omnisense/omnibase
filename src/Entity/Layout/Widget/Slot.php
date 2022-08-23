@@ -6,7 +6,7 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\TranslatableInterface;
 
 use Base\Entity\Layout\Widget;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Base\Annotations\Annotation\Slugify;
 

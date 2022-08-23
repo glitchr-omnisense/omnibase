@@ -4,10 +4,10 @@ namespace Base\Entity\Layout;
 
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Base\Annotations\Annotation\Slugify;
-use Base\Model\LinkableInterface;
+use Base\Service\Model\LinkableInterface;
 
 use Base\Annotations\Annotation\Randomize;
 

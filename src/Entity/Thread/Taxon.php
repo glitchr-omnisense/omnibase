@@ -11,8 +11,8 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Traits\TranslatableTrait;
 
 use Base\Database\TranslatableInterface;
-use Base\Model\IconizeInterface;
-use Base\Model\GraphInterface;
+use Base\Service\Model\IconizeInterface;
+use Base\Service\Model\GraphInterface;
 use Doctrine\Common\Collections\Collection;
 
 use Doctrine\ORM\Mapping as ORM;

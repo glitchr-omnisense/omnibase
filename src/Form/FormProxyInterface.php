@@ -6,9 +6,13 @@ use Symfony\Component\Form\FormInterface;
 
 interface FormProxyInterface
 {
-    public function getForms();
-    public function addForm(string $name, ?FormInterface $form): self;
-    public function removeForm(string $name): self;
-    public function getForm(string $name);
-    public function hasForm(string $name):bool;
+    public function all();
+    public function add(string $name, ?FormInterface $form): static;
+    public function remove(string $name): static;
+    public function has(string $name):bool;
+
+    public function get(string $name);
+    public function getData(string $name): mixed;
+
+    public function submit(string $name, string|array|null $submittedData, bool $clearMissing = true): ?FormInterface;
 }

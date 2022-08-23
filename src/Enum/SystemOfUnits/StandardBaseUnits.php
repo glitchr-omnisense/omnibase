@@ -3,8 +3,8 @@
 namespace Base\Enum\SystemOfUnits;
 
 use Base\Database\Type\EnumType;
-use Base\Model\ColorizeInterface;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\ColorizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 class StandardBaseUnits extends EnumType implements IconizeInterface, ColorizeInterface
 {

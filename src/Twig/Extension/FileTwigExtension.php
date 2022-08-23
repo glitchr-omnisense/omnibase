@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Model\LinkableInterface;
+use Base\Service\Model\LinkableInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\FileService;
 use Base\Service\IconProvider;
@@ -68,13 +68,17 @@ final class FileTwigExtension extends AbstractExtension
 
     public function urlify(LinkableInterface|string $urlOrPath, ?string $label = null, array $attributes = [])
     {
-        if($urlOrPath instanceof LinkableInterface)
-            $urlOrPath = $urlOrPath->__toLink();
+        $url   = $urlOrPath;
+        $label = $label ?? $urlOrPath;
+        if($urlOrPath instanceof LinkableInterface) {
+            $url   = $urlOrPath->__toLink();
+            $label = $label ?? $urlOrPath->__toString();
+        }
 
         if($this->router->getUrl() == $this->router->getAssetUrl($urlOrPath))
             $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
 
-        return "<a href='".$urlOrPath."' ".html_attributes($attributes).">".($label ?? $urlOrPath)."</a>";
+        return "<a href='".$url."' ".html_attributes($attributes).">".$label."</a>";
     }
 
     public function asset($path, ?string $packageName = null) {

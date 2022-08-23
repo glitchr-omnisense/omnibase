@@ -15,11 +15,17 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
+use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 
 class FormFactory extends \Symfony\Component\Form\FormFactory
 {
+    public const GUESS_FROM_FORM     = "GUESS_FROM_FORM";
+    public const GUESS_FROM_PHPDOC   = "GUESS_FROM_PHPDOC";
+    public const GUESS_FROM_DATA     = "GUESS_FROM_DATA";
+    public const GUESS_FROM_VIEW     = "GUESS_FROM_VIEW";
+
     /**
      * @var EntityManager
      */
@@ -36,7 +42,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function create(string $type = 'Symfony\Component\Form\Extension\Core\Type\FormType', $data = null, array $options = []) : FormInterface
+    public function create(string $type = FormType::class, $data = null, array $options = []) : FormInterface
     {
         // I recommend not using entity data..
         // NB: https://blog.martinhujer.cz/symfony-forms-with-request-objects/
@@ -45,11 +51,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
 
         return parent::create($type, $data, $options);
     }
-
-    public const GUESS_FROM_FORM     = "GUESS_FROM_FORM";
-    public const GUESS_FROM_PHPDOC   = "GUESS_FROM_PHPDOC";
-    public const GUESS_FROM_DATA     = "GUESS_FROM_DATA";
-    public const GUESS_FROM_VIEW     = "GUESS_FROM_VIEW";
 
     public function guessClass(FormInterface|FormEvent $form, ?array $options = null) :?string {
 
@@ -157,27 +158,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $class ?? $options["class"] ?? null;
     }
 
-    public function followPropertyPath(FormInterface $form, array &$propertyPath): ?FormInterface
-    {
-        foreach($propertyPath as $path) {
-
-            if(!$form->has($path)) break;
-            $form = $form->get($path);
-
-            $formType = $form->getConfig()->getType()->getInnerType();
-            if($formType instanceof TranslationType) {
-
-                $availableLocales = array_keys($form->all());
-                $locale = count($availableLocales) > 1 ? $formType->getDefaultLocale() : $availableLocales[0];
-                $form = $form->get($locale);
-            }
-
-            array_shift($propertyPath);
-        }
-
-        return $form;
-    }
-
     public function guessMultiple(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent)
@@ -230,22 +210,6 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         return $options["multiple"] ?? false;
     }
 
-    public function isOwningField(FormInterface $form) {
-
-        $parentData = $form->getParent() ? $form->getParent()->getData() : null;
-
-        $collection = $form->getData();
-        if($collection instanceof PersistentCollection) {
-
-            $isTranslatable = class_implements_interface($collection->getOwner(), TranslationInterface::class);
-            if($isTranslatable && $parentData == $collection->getOwner()->getTranslatable()) return true;
-
-            if($parentData === null) return false;
-            if($parentData != $collection->getOwner()) return false;
-        }
-
-        return true;
-    }
     public function guessSortable(FormInterface|FormEvent|FormBuilderInterface $form, ?array $options = null)
     {
         if ($form instanceof FormEvent)
@@ -352,5 +316,43 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
         }
 
         return $options["choice_filter"] ?? [];
+    }
+
+    public function followPropertyPath(FormInterface $form, array &$propertyPath): ?FormInterface
+    {
+        foreach($propertyPath as $path) {
+
+            if(!$form->has($path)) break;
+            $form = $form->get($path);
+
+            $formType = $form->getConfig()->getType()->getInnerType();
+            if($formType instanceof TranslationType) {
+
+                $availableLocales = array_keys($form->all());
+                $locale = count($availableLocales) > 1 ? $formType->getDefaultLocale() : $availableLocales[0];
+                $form = $form->get($locale);
+            }
+
+            array_shift($propertyPath);
+        }
+
+        return $form;
+    }
+
+    public function isOwningField(FormInterface $form) {
+
+        $parentData = $form->getParent() ? $form->getParent()->getData() : null;
+
+        $collection = $form->getData();
+        if($collection instanceof PersistentCollection) {
+
+            $isTranslatable = class_implements_interface($collection->getOwner(), TranslationInterface::class);
+            if($isTranslatable && $parentData == $collection->getOwner()->getTranslatable()) return true;
+
+            if($parentData === null) return false;
+            if($parentData != $collection->getOwner()) return false;
+        }
+
+        return true;
     }
 }

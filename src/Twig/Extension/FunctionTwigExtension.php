@@ -2,7 +2,7 @@
 
 namespace Base\Twig\Extension;
 
-use Base\Model\Color\Intl\Colors;
+use Base\Service\Model\Color\Intl\Colors;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\TranslatorInterface;
@@ -224,7 +224,7 @@ final class FunctionTwigExtension extends AbstractExtension
         return "<script src='".$src."' ".html_attributes($attributes)."></script>";
     }
 
-    public function datetime(Environment $env, DateTime|DateInterval|int|string $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
+    public function datetime(Environment $env, DateTime|DateInterval|int|string|null $datetime, array|string $pattern = "YYYY-MM-dd HH:mm:ss", ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', $timezone = null, string $calendar = 'gregorian', string $locale = null): array|string
     {
         if(is_array($pattern)) {
 
@@ -236,10 +236,11 @@ final class FunctionTwigExtension extends AbstractExtension
         }
 
         $now = time();
+        if($datetime == null) return $pattern;
         if($datetime instanceof DateTime) $datetime = $datetime->getTimestamp();
-        else if($datetime instanceof DateInterval) $datetime = $now + (int) $datetime->format("s");
-
+        if($datetime instanceof DateInterval) $datetime = $now + (int) $datetime->format("s");
         if(is_string($datetime)) return $datetime;
+
         return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
@@ -407,11 +408,11 @@ final class FunctionTwigExtension extends AbstractExtension
                 return (string) $value;
 
             if (method_exists($value, 'getId'))
-                return sprintf('%s #%s', $this->translator->entity(get_class($value)), $value->getId());
+                return sprintf('%s #%s', $this->translator->transEntity(get_class($value)), $value->getId());
             else if (method_exists($value, 'getUuid'))
-                return sprintf('%s #%s', $this->translator->entity(get_class($value)), $value->getUuid());
+                return sprintf('%s #%s', $this->translator->transEntity(get_class($value)), $value->getUuid());
 
-            return sprintf('%s #%s', $this->translator->entity(get_class($value)), substr(md5(spl_object_hash($value)), 0, 7));
+            return sprintf('%s #%s', $this->translator->transEntity(get_class($value)), substr(md5(spl_object_hash($value)), 0, 7));
         }
 
         return '';

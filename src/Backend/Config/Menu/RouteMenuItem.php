@@ -22,7 +22,7 @@ class RouteMenuItem extends EaRouteMenuItem
 
         $this->dto = new MenuItemDto();
         $this->dto->setLinkUrl(MenuItem::$router->generate($routeName, $routeParameters));
-        $this->dto->setLabel($label ?? MenuItem::$translator->route($routeName));
+        $this->dto->setLabel($label ?? MenuItem::$translator->transRoute($routeName));
         $this->dto->setType(MenuItemDto::TYPE_URL);
         $this->dto->setIcon($icon);
 

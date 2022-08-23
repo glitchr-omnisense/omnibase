@@ -5,7 +5,7 @@ namespace Base\Entity\User;
 use App\Entity\User;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Timestamp;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Hashids\Hashids;
 

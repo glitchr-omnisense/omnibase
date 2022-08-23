@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Model\Breadcrumb;
+use Base\Service\Model\Breadcrumb;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 

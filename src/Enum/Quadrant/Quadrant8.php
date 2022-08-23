@@ -2,7 +2,7 @@
 
 namespace Base\Enum\Quadrant;
 
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 class Quadrant8 extends Quadrant
 {
