@@ -8,9 +8,7 @@ use Base\Service\FileService;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Twig\Environment;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use Symfony\Component\Routing\Generator\UrlGenerator;
 use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
@@ -29,7 +27,7 @@ final class FileTwigExtension extends AbstractExtension
         return [
             new TwigFunction('iconify', [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFunction('urlify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
-            new TwigFunction('linkify',  [$this,               'urlify' ], ["is_safe" => ['all']]),
+            new TwigFunction('linkify',  [$this,              'linkify' ], ["is_safe" => ['all']]),
             new TwigFunction('asset',   [$this,               'asset']),
             new TwigFunction('image',   [$this, 'image'], ['needs_environment' => true, 'needs_context' => true])
         ];
@@ -42,7 +40,7 @@ final class FileTwigExtension extends AbstractExtension
             new TwigFilter('iconify',        [IconProvider::class, 'iconify'], ["is_safe" => ['all']]),
             new TwigFilter('imagify',        [ImageService::class, 'imagify'], ["is_safe" => ['all']]),
             new TwigFilter('urlify',         [$this, 'urlify' ], ["is_safe" => ['all']]),
-            new TwigFilter('linkify',        [$this, 'urlify' ], ["is_safe" => ['all']]),
+            new TwigFilter('linkify',        [$this, 'linkify' ], ["is_safe" => ['all']]),
 
             new TwigFilter('public',         [FileService::class, 'public']),
             new TwigFilter('downloadable',   [FileService::class, 'downloadable']),
@@ -79,6 +77,15 @@ final class FileTwigExtension extends AbstractExtension
             $attributes["class"] = trim(($attributes["class"] ?? "")." highlight");
 
         return "<a href='".$url."' ".html_attributes($attributes).">".$label."</a>";
+    }
+
+    public function linkify(LinkableInterface|string $urlOrPath)
+    {
+        $url   = $urlOrPath;
+        if($urlOrPath instanceof LinkableInterface)
+            $url   = $urlOrPath->__toLink();
+
+        return $url;
     }
 
     public function asset($path, ?string $packageName = null) {
