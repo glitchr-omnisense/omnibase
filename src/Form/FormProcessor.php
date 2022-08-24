@@ -2,6 +2,7 @@
 
 namespace Base\Form;
 
+use Base\Database\Factory\EntityHydratorInterface;
 use Base\Entity\User\Notification;
 use Base\Form\Traits\FormFlowTrait;
 
@@ -22,11 +23,12 @@ class FormProcessor implements FormProcessorInterface
     public CsrfTokenManagerInterface $csrfTokenManager;
     public RequestStack $requestStack;
 
-    public function __construct(FormFactoryInterface $formFactory, CsrfTokenManagerInterface $csrfTokenManager, RequestStack $requestStack)
+    public function __construct(FormFactoryInterface $formFactory, EntityHydratorInterface $entityHydrator, CsrfTokenManagerInterface $csrfTokenManager, RequestStack $requestStack)
     {
-        $this->formFactory = $formFactory;
+        $this->formFactory      = $formFactory;
+        $this->entityHydrator   = $entityHydrator;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->requestStack = $requestStack;
+        $this->requestStack     = $requestStack;
     }
 
     protected $onDefaultCallback = [];
@@ -53,29 +55,11 @@ class FormProcessor implements FormProcessorInterface
         return $this->form;
     }
 
-    /**
-     * @var Request
-     */
-    protected $request = null;
-    public function handleRequest(Request $request): self
-    {
-        $this->request = $request;
-        return $this;
-    }
-
     public function set(Form $form) { $this->setForm($form); }
     public function setForm(Form $form) { $this->form = $form; }
 
-    public function getFormType()
-    {
-        return $this->formType;
-    }
-
-    public function getData()
-    {
-        return $this->data;
-    }
-
+    public function getData() { return $this->data; }
+    public function getFormType() { return $this->formType; }
     public function getOptions()
     {
         if (!$this->form)
@@ -84,26 +68,16 @@ class FormProcessor implements FormProcessorInterface
         return $this->form->getConfig()->getType()->getOptionsResolver()->resolve();
     }
 
-    public function getSession()
-    {
-        return $this->formType::getSession($this->getOptions());
-    }
+    public function getSession() { return $this->formType::getSession($this->getOptions()); }
 
-    public function getPost()
-    {
-        if ($session = $this->getSession())
-            return $session["POST"] ?? [];
+    public function getPost()    { return $this->getSession()["POST"] ?? []; }
+    public function appendPost()  { return $this->formType::appendSessionFiles($this->getOptions()); }
 
-        return [];
-    }
+    public function getFiles()   { return $this->getSession()["FILES"] ?? []; }
+    public function appendFiles() { return $this->formType::appendSessionPost($this->getOptions()); }
 
-    public function getFiles()
-    {
-        if ($session = $this->getSession())
-            return $session["FILES"] ?? [];
-
-        return [];
-    }
+    public function getExtras()  { return $this->getSession()["EXTRAS"] ?? []; }
+    public function appendExtras($extras) { return $this->formType::appendSessionExtras($this->getOptions(), $extras); }
 
     public function getUploadedFiles()
     {
@@ -122,35 +96,10 @@ class FormProcessor implements FormProcessorInterface
         return $uploadedFiles;
     }
 
-    public function getExtras()
-    {
-        if ($session = $this->getSession())
-            return $session["EXTRAS"] ?? [];
-
-        return [];
-    }
-
-    public function appendPost()
-    {
-        return $this->formType::appendSessionFiles($this->getOptions());
-    }
-    public function appendFiles()
-    {
-        return $this->formType::appendSessionPost($this->getOptions());
-    }
-    public function appendExtras($extras)
-    {
-        return $this->formType::appendSessionExtras($this->getOptions(), $extras);
-    }
-
-    public function Process($request = null): Response
+    public function process(Request $request): Response
     {
         if(!$this->form)
             throw new Exception("No form provided in FormProcessor");
-
-        // Handle form request
-        if($request) $this->request = $request;
-        if (!$this->request) throw new Exception("No request information provided.. Call FormProcessor::handleRequest or pass as argument");
 
         $this->form->handleRequest($this->request);
 
@@ -186,14 +135,14 @@ class FormProcessor implements FormProcessorInterface
             $formType::setStep($options, $step = 0);
             $formType::removeAllSteps($options);
 
-            $this->form = $this->formFactory->createForm($formType, $data, $options);
+            $this->form = $this->formFactory->create($formType, $data, $options);
 
             // Determine if able to go to next step
         } else if($this->form->isSubmitted() && $this->form->isValid()) {
 
             $submittedToken = $this->request->request->get('_csrf_token');
             $tokenName      = array_key_exists("csrf_token_id", $options) ? $options["csrf_token_id"] : "";
-            $isTokenValid   = !empty($tokenName) ? $this->csrfTokenManager->isCsrfTokenValid($tokenName, $submittedToken) : true;
+            $isTokenValid   = !empty($tokenName) ? $this->csrfTokenManager->isTokenValid($tokenName, $submittedToken) : true;
 
             if ($isTokenValid) $nextStep = true;
             else {
@@ -212,7 +161,7 @@ class FormProcessor implements FormProcessorInterface
             $formType::removeAllSteps($options);
 
             // Create new form if required
-            $this->form = $this->formFactory->createForm($formType, $data, $options);
+            $this->form = $this->formFactory->create($formType, $data, $options);
             $this->appendFiles();
             $this->appendPost();
         }

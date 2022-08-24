@@ -9,6 +9,8 @@ use Base\Validator\Constraints as AssertBase;
  */
 class ThreadSearchModel
 {
+    public $parent_id;
+    
     /**
      * @var string
      */

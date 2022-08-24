@@ -13,7 +13,6 @@ interface FormProcessorInterface
 
     public function get();
     public function getForm();
-    public function handleRequest(Request $request);
 
     public function set(Form $form);
     public function setForm(Form $form);
@@ -33,5 +32,5 @@ interface FormProcessorInterface
     public function appendFiles();
     public function appendExtras($extras);
 
-    public function Process($request = null): Response;
+    public function process(Request $request): Response;
 }

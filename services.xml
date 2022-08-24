@@ -7,21 +7,19 @@
 
         <defaults public="false" />
 
-        <service id="Base\Form\FormProxyInterface" alias="Base\Form\FormProxy"/>
         <service id="Base\Form\FormProxy" public="true">
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.form.processor" />
         </service>
 
-        <service id="Base\Form\FormFactoryInterface" alias="Base\Form\FormFactory"/>
-        <service id="Base\Form\FormFactory" public="true">
+        <service id="Base\Form\FormFactory" public="true" parent="Symfony\Component\Form\FormFactoryInterface">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Form\FormProcessorInterface" alias="Base\Form\FormProcessor"/>
         <service id="Base\Form\FormProcessor">
             <argument type="service" id="base.form.factory" />
+            <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="request_stack" />
         </service>
@@ -227,7 +225,7 @@
             <argument type="service" id="parameter_bag" />
         </service>
 
-        <service id="Base\Console\Command\TimeMachineDoctrineCommand"         parent="Base\Console\Command"                          ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
+        <service id="Base\Console\Command\TimeMachineDoctrineCommand"        parent="Base\Console\Command"                          ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
         <service id="Base\Console\Command\TimeMachineStorageCommand"         parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
         <service id="Base\Console\Command\TimeMachineSnapshotCommand"        parent="Base\Console\Command"                           ><tag name="console.command" /><argument type="service" id="time_machine" /></service>
         <service id="Base\Console\Command\TimeMachineSnapshotBackupCommand"  parent="Base\Console\Command\TimeMachineSnapshotCommand"><tag name="console.command" /><argument type="service" id="time_machine" /></service>

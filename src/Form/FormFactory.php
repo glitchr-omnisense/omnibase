@@ -18,8 +18,9 @@ use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormRegistryInterface;
 
-class FormFactory extends \Symfony\Component\Form\FormFactory
+class FormFactory extends \Symfony\Component\Form\FormFactory implements FormFactoryInterface
 {
     public const GUESS_FROM_FORM     = "GUESS_FROM_FORM";
     public const GUESS_FROM_PHPDOC   = "GUESS_FROM_PHPDOC";
@@ -36,13 +37,14 @@ class FormFactory extends \Symfony\Component\Form\FormFactory
      */
     protected $classMetadataManipulator;
 
-    public function __construct(EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator)
+    public function __construct(FormRegistryInterface $registry, EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
+        parent::__construct($registry);
         $this->entityManager = $entityManager;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function create(string $type = FormType::class, $data = null, array $options = []) : FormInterface
+    public function create(string $type = FormType::class, mixed $data = null, array $options = []) : FormInterface
     {
         // I recommend not using entity data..
         // NB: https://blog.martinhujer.cz/symfony-forms-with-request-objects/
