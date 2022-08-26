@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Enum\Quadrant\Quadrant;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;

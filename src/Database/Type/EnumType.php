@@ -3,8 +3,8 @@
 namespace Base\Database\Type;
 
 use ArrayAccess;
-use Base\Model\IconizeInterface;
-use Base\Model\SelectInterface;
+use Base\Service\Model\IconizeInterface;
+use Base\Service\Model\SelectInterface;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Doctrine\DBAL\Types\Type;
@@ -44,7 +44,7 @@ abstract class EnumType extends Type implements SelectInterface
     }
 
     public static function getIcon(string $id, int $index = -1): ?string { return array_map( fn($values) => ($index < 0 || !is_array($values)) ? $values : closest($values, $index), self::getIcons() )[$id] ?? null; }
-    public static function getText(string $id, ?TranslatorInterface $translator = null): ?string { return $translator ? $translator->enum(get_called_class(), $id, Translator::NOUN_SINGULAR) : $id; }
+    public static function getText(string $id, ?TranslatorInterface $translator = null): ?string { return $translator ? $translator->transEnum(get_called_class(), $id, Translator::NOUN_SINGULAR) : $id; }
     public static function getHtml(string $id): ?string { return null; }
     public static function getData(string $id): ?array { return null; }
 

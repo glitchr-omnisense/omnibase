@@ -3,7 +3,7 @@
 namespace Base\Enum\Quadrant;
 
 use Base\Database\Type\EnumType;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 class Quadrant extends EnumType implements IconizeInterface
 {

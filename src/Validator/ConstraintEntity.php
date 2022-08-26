@@ -60,7 +60,7 @@ abstract class ConstraintEntity extends Constraint
             $this->message = $translator->transQuiet($id);
             if ($this->message !== null) {
                 $this->message = $id;
-                break; // Translation found
+                break; // Intl found
             }
 
             $class = get_parent_class($class);

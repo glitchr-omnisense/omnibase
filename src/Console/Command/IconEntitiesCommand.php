@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use Base\Console\Command;
 use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;

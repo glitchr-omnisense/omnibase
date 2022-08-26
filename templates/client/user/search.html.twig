@@ -1,12 +1,113 @@
 {% extends 'layout1.html.twig' %}
 
 {% block title %}Search for a user{% endblock %}
-{% block content %}
+{% block main %}
+    <article class="wrapper">
 
-    {% if user is defined %}
-        <div class="mb-3">
-            You are logged in as {{ user }}, <a href="{{ path('security_logout') }}">Logout</a>
+        {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
+
+            <div class="d-flex justify-content-center flex-row flex-wrap">
+                <h1 class="me-3">{{ '@messages.search.title'|trans }}</h1>
+                <div class="input-group w-auto me-3">
+                    <div class="form-outline">
+                        {{ form_widget(form.generic, {'attr': {'placeholder': '@messages.search.placeholder'|trans}, value: form.vars.value.generic }) }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+        {{ form_end(form) }}
+
+    </article>
+
+    {% if threads|length < 1 %}
+
+    <article class="wrapper">
+        <div class="header">
+            Aucune ressource trouvée.
         </div>
+    </article>
+    {% else %}
+
+        {% set lastSection = null %}
+        {% for thread in threads %}
+
+            {% set depth = thread.getRepository().getHierarchyDepth() %}
+
+            {% if lastSection != thread.getRepository().getHierarchy() %}
+                <article class="wrapper hierarchy">
+                <h1 class="title">
+                    {% for section in thread.getRepository().getHierarchyTree() %}
+                    > {{ section|capitalize }}
+                    {% endfor %}
+                </h1>
+                </article>
+                {% set lastSection = thread.getRepository().getHierarchy() %}
+            {% endif %}
+
+            <article class="wrapper">
+                <div class="header">
+
+                    <ul class="field-avatar">
+                        {% for owner in thread.owners|reverse %}
+                        <li>{{ owner.getFormattedAvatar()|raw }}</li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="text">
+
+                        <h1 class="title">
+                            {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
+                            {% if depth > 1 and thread.parent() != null %}
+                                {{ '@messages.thread.found'|trans([thread|trans_entity, thread|urlify]) | raw }}
+                            {% else %}
+                                {{ threadTitle |raw }}
+                            {% endif %}
+                        </h1>
+
+                        <div class="info">
+
+                            {{ '@messages.base.datetime'|trans([
+                                thread.updatedAt()|datetime("dd MMMM YYYY"),
+                                thread.updatedAt()|datetime("HH:mm")
+                            ])|raw }}&nbsp
+
+                            {% if thread.owners|length > 2 %}
+                            <br/>
+                            {% endif %}
+
+                            {{ '@messages.words.by'|trans }}
+                            {% for owner in thread.owners %}
+                                    {% if not loop.first %}
+                                    {% if loop.last %} {{ '@messages.words.and'|trans }} {% else %}, {% endif %}
+                                    {% endif %}
+                                    <a href="/profile/{{ owner.username|lower }}">{{ owner.username }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if thread.excerpt %}
+                <hr>
+                <p>{{ thread.excerpt | highlight(form_data.excerpt, -1) |default(thread.excerpt) | raw }}</p>
+                {% endif %}
+
+                {% if thread.content %}
+                <hr>
+                <p>{{ thread.content | highlight(form_data.content, 5) | raw }}</p>
+                {% endif %}
+
+                {# <p>
+                <div class="d-flex justify-content-end">
+                    <a href="{{ thread.getPath() }}" class="btn btn-primary">
+                        {{ ('@entities.'~get_short_class(thread)~'.see') | trans }}
+                    </a>
+                </div>
+                </p> #}
+            </article>
+        {% endfor %}
     {% endif %}
 
 {% endblock %}

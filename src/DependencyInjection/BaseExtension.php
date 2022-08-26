@@ -4,7 +4,7 @@ namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
 use Base\Database\Factory\EntityExtensionInterface;
-use Base\Model\IconProvider\IconAdapterInterface;
+use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;

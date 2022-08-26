@@ -19,9 +19,37 @@ class LocaleProvider implements LocaleProviderInterface
     protected $translator = null;
 
     public const SEPARATOR = "-";
-    public static function __toLocale (string $locale, ?string $separator = self::SEPARATOR): string { return substr($locale,0,2).$separator.substr($locale,3,2); }
-    public static function __toLang (string $locale): string { return substr($locale,0,2); }
-    public static function __toCountry (string $locale): string { return substr($locale,3,2); }
+    public static function __toLocale (string $locale, ?string $separator = self::SEPARATOR): string 
+    {
+        $lang    = self::__toLang($locale);
+        $country = self::__toCountry($locale);
+        
+        return $lang.$separator.$country;
+    }
+
+    public static function __toLang (string $locale): string 
+    { 
+        $lang = $locale ? substr($locale,0,2) : null;
+        if ($lang === null || !array_key_exists($lang, self::getLocales()))
+            $lang = substr(self::getDefaultLocale(),0,2);
+
+        return $lang;
+    }
+
+    public static function __toCountry (string $locale): string 
+    { 
+        $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : null;
+        $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [substr($l,0,2), [substr($l,3,2)]] : null, self::getAvailableLocales());
+
+        $lang           = self::__toLang($locale);
+        $langCountries  = $availableCountries[$lang] ?? self::getLocales()[$lang] ?? [];
+
+        $country = substr($locale,3,2);
+        $country = $country ? $country : null;
+        $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
+
+        return $country;
+    }
 
     private static ?array $locales = null;
     public static function getLocales()
@@ -106,46 +134,30 @@ class LocaleProvider implements LocaleProviderInterface
         return array_filter(array_unique(array_merge([self::$defaultLocale], self::$fallbackLocales ?? [])));
     }
     public static function getDefaultLang(): ?string { return self::$defaultLocale ? substr(self::$defaultLocale,0,2) : null; }
-    public static function getFallbackLangs(): array { return array_map(fn($l) => self::getLang($l), self::$fallbackLocales); }
+    public static function getFallbackLangs(): array { return array_map(fn($l) => self::__toLang($l), self::$fallbackLocales); }
     public static function getAvailableLangs(): array
     {
         return array_unique(array_merge([self::getDefaultLang()], self::getFallbackLangs() ?? []));
     }
     public static function getDefaultCountry(): ?string  { return self::$defaultLocale ? substr(self::$defaultLocale,3,2) : null; }
-    public static function getFallbackCountries(): array { return array_map(fn($l) => self::getCountry($l), self::$fallbackLocales); }
+    public static function getFallbackCountries(): array { return array_map(fn($l) => self::__toCountry($l), self::$fallbackLocales); }
     public static function getAvailableCountries(): array
     {
         return array_unique(array_merge([self::getDefaultCountry()], self::getFallbackCountries() ?? []));
     }
 
-    public function getLangName(?string $locale = null): ?string { return Languages::getName(self::getLang($locale)); }
+    public function getLangName(?string $locale = null): ?string { return Languages::getName($this->getLang($locale)); }
     public function getLang(?string $locale = null): string
     {
         if($locale === null) $locale = $this->getLocale();
-
-        $lang = $locale ? substr($locale,0,2) : null;
-        if ($lang === null || !array_key_exists($lang, self::getLocales()))
-            $lang = substr(self::getDefaultLocale(),0,2);
-
-        return $lang;
+        return self::__toLang($locale);
     }
 
     public function getCountryName(?string $locale = null): string { return Countries::getName($this->getCountry($locale)); }
     public function getCountry(?string $locale = null): string
     {
         if($locale === null) $locale = $this->getLocale();
-
-        $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : null;
-        $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [substr($l,0,2), [substr($l,3,2)]] : null, self::getAvailableLocales());
-
-        $lang           = $this->getLang($locale);
-        $langCountries  = $availableCountries[$lang] ?? $this->getLocales()[$lang] ?? [];
-
-        $country = substr($locale,3,2);
-        $country = $country ? $country : null;
-        $country = $country !== null && in_array($country, $langCountries) ? $country : ($langCountries[0] ?? $defaultCountry);
-
-        return $country;
+        return self::__toCountry($locale);
     }
 
     public static function normalize(string|array $locale, string $separator = self::SEPARATOR): string|array

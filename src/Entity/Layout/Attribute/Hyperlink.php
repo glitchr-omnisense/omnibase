@@ -10,7 +10,7 @@ use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
 use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;
 use Base\Entity\Layout\Attribute\Common\BaseAttribute;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\HyperlinkRepository;

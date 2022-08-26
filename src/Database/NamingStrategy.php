@@ -8,9 +8,7 @@ use Doctrine\ORM\Mapping\Table;
 class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 {
     public const TABLE_NAME_SIZE    = 64;
-
     public const TABLE_I18N_SUFFIX  = "Intl";
-    public const TRANSLATION_SUFFIX = 'Translation';
 
     /**
      * {@inheritdoc}
@@ -62,7 +60,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
 
             $tableName = snake2camel(implode("_", $tableName));
             $tableName = lcfirst($tableName);
-            $tableName = preg_replace('/'.self::TRANSLATION_SUFFIX.'$/', self::TABLE_I18N_SUFFIX, $tableName);
+            $tableName = preg_replace('/'.self::TABLE_I18N_SUFFIX.'$/', self::TABLE_I18N_SUFFIX, $tableName);
         }
 
         //

@@ -92,7 +92,7 @@ class TranslationType extends AbstractType implements DataMapperInterface
             $data = $event->getData();
 
             $options = $form->getConfig()->getOptions();
-            $locales = ($options["single_locale"] ? [$options["single_locale"]] : $options['available_locales']);
+            $locales = ($options["single_locale"] ? [$options["default_locale"]] : $options['available_locales']);
             $dataLocale = $data instanceof Collection ? $data->getKeys() : [$options["locale"]];
 
             $translationClass = $this->getTranslationClass($form);

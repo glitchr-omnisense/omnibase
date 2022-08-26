@@ -5,7 +5,7 @@ namespace Base\Field\Configurator;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\SelectField;
-use Base\Model\Autocomplete;
+use Base\Service\Model\Autocomplete;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;

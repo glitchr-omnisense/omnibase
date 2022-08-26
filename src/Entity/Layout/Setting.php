@@ -4,7 +4,7 @@ namespace Base\Entity\Layout;
 
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Validator\Constraints as AssertBase;
 use Base\Annotations\Annotation\Slugify;
 

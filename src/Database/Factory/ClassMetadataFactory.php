@@ -789,7 +789,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
         if (is_subclass_of($classMetadata->getName(), TranslationInterface::class, true)) {
 
-            if(!str_ends_with($classMetadata->getName(), NamingStrategy::TRANSLATION_SUFFIX))
+            if(!str_ends_with($classMetadata->getName(), NamingStrategy::TABLE_I18N_SUFFIX))
                 throw new \Exception("Invalid class name for \"".$classMetadata->getName()."\"");
 
             $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();

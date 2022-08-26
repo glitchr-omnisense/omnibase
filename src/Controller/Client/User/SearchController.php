@@ -2,39 +2,56 @@
 
 namespace Base\Controller\Client\User;
 
-use App\Repository\UserRepository;
-use Base\BaseBundle\BaseBundle;
-use Base\Entity\Thread;
-use Base\Form\Type\Thread\SearchType;
+use App\Entity\User;
+use Base\Enum\UserState;
+use Base\Form\Data\User\SearchData;
+use Base\Form\FormProxyInterface;
+use Base\Form\Type\User\SearchType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormInterface;
 
 class SearchController extends AbstractController
 {
-    public function __construct(EntityManagerInterface $entityManager)
+    protected $userRepository;
+
+    public function __construct(FormProxyInterface $formProxy, EntityManagerInterface $entityManager)
     {
-        if(BaseBundle::hasDoctrine())
-            $this->userRepository = $entityManager->getRepository(User::class);
+        $this->formProxy      = $formProxy;
+        $this->entityManager  = $entityManager;
+        $this->userRepository = $entityManager->getRepository(User::class);
     }
 
     /**
-     * @Route("/profile/search", name="user_search")
+     * @Route("/search/user", name="user_search")
      */
-    public function Index(Request $request)
+    public function Main(Request $request, ?FormInterface $formSearch = null)
     {
-        $thread = new Thread();
+        $formSearch = $formSearch ?? $this->formProxy->getForm("user:search") ?? $this->createForm(SearchType::class, new SearchData());
+        $formSearch->handleRequest($request);
 
-        $form = $this->createForm(SearchType::class, $thread);
-        $form->handleRequest($request);
+        $formattedData = null;
+        if ($formSearch->isSubmitted() && $formSearch->isValid()) {
 
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            //TODO
-            dump($form);
+            $formattedData = clone $formSearch->getData();
+            $formattedData->username = $formattedData->username;
         }
 
-        return $this->render('@Base/client/user/search.html.twig');
+        $users = [];
+        if($formattedData) {
+
+            $users = array_map(fn($t) => $t->getTranslatable(), $this->userRepository->findByInsensitivePartialModel(
+                ["username" => "%" . ($formattedData->username) . "%",],
+                ["translatable.state" => UserState::VERIFIED])->getResult()
+            );
+        }
+        
+        return $this->render('@Base/client/user/search.html.twig', [
+            "form" => $formSearch->createView(),
+            "form_data" => $formattedData ?? new SearchData(),
+            "users" => $users
+        ]);
     }
 }

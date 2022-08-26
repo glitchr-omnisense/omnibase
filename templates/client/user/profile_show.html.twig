@@ -1,21 +1,32 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Member #{{ user.id }}: {{ user }}{% endblock %}
+{% block title %}{{ user }}{% endblock %}
 {% block content %}
 
     {% if user is defined %}
     <article class="wrapper extended">
-
         <div class="header">
 
             <ul class="field-avatar">
-                {% for owner in thread.owners|reverse %}
-                <li>{{ owner.getFormattedAvatar()|raw }}</li>
-                {% endfor %}
+                <li>{{ user.getFormattedAvatar()|raw }}</li>
             </ul>
-        </div>
 
-        <h1>Member #{{ user.id }}: {{ user }}</h1>
+            <div class="text">
+
+                <h1>Member #{{ user.id }}: {{ user }}</h1>
+
+                <div class="info">
+                    {{ '@messages.profile.registered'|trans([
+                        user.createdAt()|datetime("dd MMMM YYYY"),
+                        user.createdAt()|datetime("HH:mm")
+                    ])|raw }}&nbsp
+
+                    - {% if app.user == user or is_granted("ROLE_ADMIN") %}
+                        <a href="{{path('user_profileEdit', {'id':user.id})}}">Editer le profil</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
     </article>
     {% endif %}

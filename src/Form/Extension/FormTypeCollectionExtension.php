@@ -2,15 +2,10 @@
 
 namespace Base\Form\Extension;
 
-use App\Enum\UserRole;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\AbstractTypeExtension;
 

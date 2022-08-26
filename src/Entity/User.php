@@ -36,7 +36,7 @@ use App\Enum\UserRole;
 use Base\Service\LocaleProvider;
 use Base\Notifier\Recipient\Recipient;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;

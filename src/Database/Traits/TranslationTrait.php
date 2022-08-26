@@ -26,7 +26,7 @@ trait TranslationTrait
     public static function getTranslatableEntityClass(): string
     {
         // By default, the translatable class has the same name but without the suffix
-        return substr(static::class, 0, -strlen(NamingStrategy::TRANSLATION_SUFFIX));
+        return substr(static::class, 0, -strlen(NamingStrategy::TABLE_I18N_SUFFIX));
     }
 
     /**

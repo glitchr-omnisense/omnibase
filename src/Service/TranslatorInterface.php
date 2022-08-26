@@ -12,14 +12,14 @@ interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorI
     public function transQuiet (TranslatableMessage|string $id, array $parameters = [], ?string $domain = null, ?string $locale = null, bool $recursive = true):?string;
     public function transExists(TranslatableMessage|string $id,                         ?string $domain = null, ?string $locale = null):bool;
 
-    public function time(int $time): string;
+    public function transTime(int $time): string;
 
-    public function enum(string $class, ?string $value = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
-    public function enumExists(string $class, ?string $value = null, string|array $options = Translator::NOUN_SINGULAR): bool;
+    public function transEnum(string $class, ?string $value = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
+    public function transEnumExists(string $class, ?string $value = null, string|array $options = Translator::NOUN_SINGULAR): bool;
 
-    public function entity(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
-    public function entityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): bool;
+    public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
+    public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): bool;
 
-    public function route(string $routeName, ?string $domain = null): ?string;
-    public function routeExists(string $routeName, ?string $domain = null): bool;
+    public function transRoute(string $routeName, ?string $domain = null): ?string;
+    public function transRouteExists(string $routeName, ?string $domain = null): bool;
 }

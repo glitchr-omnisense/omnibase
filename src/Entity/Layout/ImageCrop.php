@@ -4,7 +4,7 @@ namespace Base\Entity\Layout;
 
 use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Layout\Image;
-use Base\Model\LinkableInterface;
+use Base\Service\Model\LinkableInterface;
 use Base\Repository\Layout\ImageCropRepository;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;

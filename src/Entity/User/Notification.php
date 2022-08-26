@@ -3,7 +3,7 @@
 namespace Base\Entity\User;
 
 use App\Entity\User;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Base\Service\BaseService;

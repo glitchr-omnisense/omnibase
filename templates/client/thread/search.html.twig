@@ -43,7 +43,14 @@
 
     </article>
 
-    {% if threads|length %}
+    {% if threads|length < 1 %}
+
+    <article class="wrapper">
+        <div class="header">
+            Aucune ressource trouvée.
+        </div>
+    </article>
+    {% else %}
 
         {% set lastSection = null %}
         {% for thread in threads %}
@@ -51,12 +58,12 @@
             {% set depth = thread.getRepository().getHierarchyDepth() %}
 
             {% if lastSection != thread.getRepository().getHierarchy() %}
-                <article>
-                <div class="headline">
+                <article class="wrapper hierarchy">
+                <h1 class="title">
                     {% for section in thread.getRepository().getHierarchyTree() %}
                     > {{ section|capitalize }}
                     {% endfor %}
-                </div>
+                </h1>
                 </article>
                 {% set lastSection = thread.getRepository().getHierarchy() %}
             {% endif %}
@@ -75,7 +82,7 @@
                         <h1 class="title">
                             {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
                             {% if depth > 1 and thread.parent() != null %}
-                                {{ '@entities.thread.in'|trans([threadTitle, thread.parent().title]) | raw }}
+                                {{ '@messages.thread.found'|trans([thread|trans_entity, thread.parent()|linkify]) | raw }}
                             {% else %}
                                 {{ threadTitle |raw }}
                             {% endif %}
@@ -83,19 +90,19 @@
 
                         <div class="info">
 
-                            {{ '@messages.blog.article.date'|trans([
-                                thread.publishedAt()|datetime("dd MMMM YYYY"),
-                                thread.publishedAt()|datetime("HH:mm")
+                            {{ '@messages.base.datetime'|trans([
+                                thread.updatedAt()|datetime("dd MMMM YYYY"),
+                                thread.updatedAt()|datetime("HH:mm")
                             ])|raw }}&nbsp
 
                             {% if thread.owners|length > 2 %}
                             <br/>
                             {% endif %}
 
-                            {{ '@messages.blog.article.by'|trans }}
+                            {{ '@messages.words.by'|trans }}
                             {% for owner in thread.owners %}
                                     {% if not loop.first %}
-                                    {% if loop.last %} {{ '@messages.blog.article.and'|trans }} {% else %}, {% endif %}
+                                    {% if loop.last %} {{ '@messages.words.and'|trans }} {% else %}, {% endif %}
                                     {% endif %}
                                     <a href="/profile/{{ owner.username|lower }}">{{ owner.username }}</a>
                             {% endfor %}

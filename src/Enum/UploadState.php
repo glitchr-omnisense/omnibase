@@ -3,7 +3,7 @@
 namespace Base\Enum;
 
 use Base\Database\Type\SetType;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 class UploadState extends SetType implements IconizeInterface
 {

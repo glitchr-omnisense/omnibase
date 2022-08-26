@@ -4,9 +4,9 @@ namespace Base\EntitySubscriber;
 
 use App\Entity\Marketplace\Product\Extra\Wallpaper\VariantTranslation;
 use Base\Database\Factory\EntityHydratorInterface;
-use Base\Entity\ThreadTranslation;
+use Base\Entity\ThreadIntl;
 use Base\EntityDispatcher\Event\ThreadEvent;
-use Base\EntityDispatcher\Event\ThreadTranslationEvent;
+use Base\EntityDispatcher\Event\ThreadIntlEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
@@ -33,13 +33,13 @@ class ThreadSubscriber implements EventSubscriberInterface
             ThreadEvent::PUBLISHABLE => ['onPublishable'],
             ThreadEvent::PUBLISHED   => ['onPublished'],
 
-            ThreadTranslationEvent::CLEANUP   => ['onCleanup'],
+            ThreadIntlEvent::CLEANUP   => ['onCleanup'],
         ];
     }
 
-    public function onCleanup(ThreadTranslationEvent $event)
+    public function onCleanup(ThreadIntlEvent $event)
     {
-        $translation = $event->getThreadTranslation();
+        $translation = $event->getThreadIntl();
         $locale = $translation->getLocale();
 
         $translationParent = $translation->getTranslatable()?->getParent()?->translate($locale);

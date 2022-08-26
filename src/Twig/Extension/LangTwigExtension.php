@@ -22,9 +22,12 @@ final class LangTwigExtension extends AbstractExtension
             new TwigFilter('trans',        [Translator::class, 'trans']),
             new TwigFilter('trans_quiet',  [Translator::class, 'transQuiet']),
             new TwigFilter('trans_exists', [Translator::class, 'transExists']),
-            new TwigFilter('time',         [Translator::class, 'time']),
-            new TwigFilter('enum',         [Translator::class, 'enum']),
-            new TwigFilter('entity',       [Translator::class, 'entity']),
+
+            new TwigFilter('trans_time',         [Translator::class, 'transTime']),
+            new TwigFilter('trans_enum',         [Translator::class, 'transEnum']),
+            new TwigFilter('trans_enumExists',         [Translator::class, 'transEnumExists']),
+            new TwigFilter('trans_entity',       [Translator::class, 'transEntity']),
+            new TwigFilter('trans_entityExists',       [Translator::class, 'transEntityExists']),
 
             new TwigFilter('lang',         [LocaleProvider::class, 'getLang']),
             new TwigFilter('lang_name',    [LocaleProvider::class, 'getLangName']),

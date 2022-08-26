@@ -80,7 +80,7 @@ abstract class ConstraintEntityValidator extends ConstraintValidator
         $class = $em->getClassMetadata(\get_class($entity));
         $value = $this->formatWithIdentifiers($em, $class, $value);
 
-        $this->setParameter("entity", $this->translator->entity($entity));
+        $this->setParameter("entity", $this->translator->transEntity($entity));
 
         // $buildViolation->addViolation();
         return $buildViolation;

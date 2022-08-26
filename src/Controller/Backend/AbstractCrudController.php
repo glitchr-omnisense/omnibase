@@ -5,7 +5,7 @@ namespace Base\Controller\Backend;
 use Base\Backend\Config\Extension;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Field\IdField;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\SettingBagInterface;
 use Base\Service\Translator;
@@ -284,7 +284,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $entity = $this->getEntity();
         if(!$entity) return $extension;
 
-        $entityLabel = mb_ucfirst($this->translator->entity($entity, null, AbstractDashboardController::TRANSLATION_ENTITY));
+        $entityLabel = mb_ucfirst($this->translator->transEntity($entity, null, AbstractDashboardController::TRANSLATION_ENTITY));
         if($entityLabel) $extension->setTitle($entityLabel);
 
         $entityLabel ??= $this->getEntityLabelInSingular();

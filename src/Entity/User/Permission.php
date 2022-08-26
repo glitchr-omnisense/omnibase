@@ -4,7 +4,7 @@ namespace Base\Entity\User;
 
 use App\Entity\User;
 use App\Entity\User\Group;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 

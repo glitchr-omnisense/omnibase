@@ -81,8 +81,8 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
     protected function robotizeString(EntityDto $entityDto, string $property): ?string
     {
         if(!isset($entityDto)) return null;
-        if(!$this->translator->entityExists($entityDto->getFqcn(), $property)) return null;
+        if(!$this->translator->transEntityExists($entityDto->getFqcn(), $property)) return null;
 
-        return $this->translator->entity($entityDto->getFqcn(), $property);
+        return $this->translator->transEntity($entityDto->getFqcn(), $property);
     }
 }

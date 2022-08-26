@@ -2,7 +2,7 @@
 
 namespace Base\Service;
 
-use Base\Model\Breadcrumb;
+use Base\Service\Model\Breadcrumb;
 
 interface BreadgrinderInterface
 {

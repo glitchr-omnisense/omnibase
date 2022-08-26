@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 
 use Base\Annotations\Annotation\Iconize;
 use Doctrine\ORM\EntityManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -18,27 +19,34 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @Route("/profile/edit", name="user_profileEdit")
+     * @Route("/profile/{id}/edit", name="user_profileEdit")
      */
-    public function Edit()
-    {
-        if (!($user = $this->getUser()) || !$user->isPersistent())
-            return $this->redirectToRoute('security_login');
-
-        return $this->render('@Base/client/user/profile_edit.html.twig', ['user' => $user]);
-    }
-
-    /**
-     * @Route("/profile", name="user_profile")
-     * @Route("/profile/{id}", name="user_profileId")
-     * @Iconize("fas fa-fw fa-id-card")
-     */
-    public function Show($id = -1)
+    public function Edit(int $id = -1)
     {
         if($id > 0) {
 
             if ( !($user = $this->userRepository->find($id)) )
-                throw $this->createNotFoundException('Tag not found.');
+                throw $this->createNotFoundException('User not found.');
+
+        } else {
+
+            if (!($user = $this->getUser()) || !$user->isPersistent())
+                return $this->redirectToRoute('user_search');
+        }
+        
+        return $this->render('@Base/client/user/profile_edit.html.twig', ['user' => $user]);
+    }
+
+    /**
+     * @Route("/profile/{id}", name="user_profile")
+     * @Iconize("fas fa-fw fa-id-card")
+     */
+    public function Show(int $id = -1)
+    {
+        if($id > 0) {
+
+            if ( !($user = $this->userRepository->find($id)) )
+                throw $this->createNotFoundException('User not found.');
 
         } else {
 

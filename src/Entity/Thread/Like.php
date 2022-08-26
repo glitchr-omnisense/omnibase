@@ -9,7 +9,7 @@ use App\Repository\Thread\LikeRepository;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\DiscriminatorEntry;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 /**
  * @ORM\Entity(repositoryClass=LikeRepository::class)

@@ -5,7 +5,7 @@ namespace Base\Console\Command;
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
 use Base\Console\Command;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

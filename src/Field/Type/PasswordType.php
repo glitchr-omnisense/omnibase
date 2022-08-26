@@ -3,7 +3,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Model\AutovalidateInterface;
+use Base\Service\Model\AutovalidateInterface;
 
 use Base\Twig\Environment;
 use Base\Validator\Constraints\Password;

@@ -4,22 +4,27 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Annotations\AnnotationReader;
-use Base\Model\IconizeInterface;
-use Base\Model\IconProvider\IconAdapterInterface;
+use Base\Service\Model\IconizeInterface;
+use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Base\Routing\RouterInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class IconProvider
 {
     protected $routeIcons = [];
+
     public function getRouteIcons(string $route)
     {
-        return $this->routeIcons[$route] ?? null;
+        return $this->routeIcons[$route.".".$this->localeProvider->getLang()] 
+            ?? $this->routeIcons[$route]
+            ?? $this->routeIcons[$route.".".$this->localeProvider->getDefaultLang()]
+            ?? null;
     }
 
-    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, CacheInterface $cache, RouterInterface $router)
+    public function __construct(AnnotationReader $annotationReader, ImageService $imageService, CacheInterface $cache, LocaleProviderInterface $localeProvider, RouterInterface $router)
     {
         $this->imageService = $imageService;
+        $this->localeProvider = $localeProvider;
 
         // Turn icon annotation into cache
         $cacheName = "base.icon_service." . hash('md5', self::class);
@@ -80,7 +85,12 @@ class IconProvider
     {
         if(!$icon) return $icon;
 
-        $icon = $icon instanceof IconizeInterface ? ($icon->__iconize() ?? $icon->__iconizeStatic()) : $this->getRouteIcons($icon) ?? $icon;
+        if($icon instanceof IconizeInterface)
+            $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
+        else if(($routeIcons = $this->getRouteIcons($icon)))
+            $icon = $routeIcons;
+        
+        
         if(is_array($icon))
             return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
 

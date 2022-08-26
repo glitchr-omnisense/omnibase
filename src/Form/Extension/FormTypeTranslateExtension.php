@@ -2,13 +2,8 @@
 
 namespace Base\Form\Extension;
 
-use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\FormBuilderInterface;
-
-use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 
 use Symfony\Component\Form\AbstractTypeExtension;
 

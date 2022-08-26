@@ -3,7 +3,7 @@
 namespace Base\Field;
 
 use Base\Field\Type\IconType;
-use Base\Model\IconProvider\IconAdapterInterface;
+use Base\Service\Model\IconProvider\IconAdapterInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Field\FieldTrait;

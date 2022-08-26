@@ -7,7 +7,7 @@ use Base\Database\Annotation\OrderColumn;
 use Base\Entity\Layout\Widget\Set\SetInterface;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Page;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\ArrayCollection;

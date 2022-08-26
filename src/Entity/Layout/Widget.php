@@ -10,7 +10,7 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Database\Annotation\OrderColumn;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Model\IconizeInterface;
+use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 use Base\Repository\Layout\WidgetRepository;

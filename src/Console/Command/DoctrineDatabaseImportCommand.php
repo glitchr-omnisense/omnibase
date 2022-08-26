@@ -10,7 +10,7 @@ use Base\Database\Factory\EntityHydrator;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Entity\Thread;
-use Base\Model\GraphInterface;
+use Base\Service\Model\GraphInterface;
 use Base\Notifier\Notifier;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
@@ -542,7 +542,7 @@ class DoctrineDatabaseImportCommand extends Command
                                 $counter++;
 
                             } catch (\Exception $e) {
-                                $msg = " Failed to write ".$this->translator->entity($entity)."(".$entity.") for entry #".($iEntry+self::OFFSET_TOP+1);
+                                $msg = " Failed to write ".$this->translator->transEntity($entity)."(".$entity.") for entry #".($iEntry+self::OFFSET_TOP+1);
                                 $output->writeln('');
                                 $output->writeln('');
                                 $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));
@@ -589,14 +589,14 @@ class DoctrineDatabaseImportCommand extends Command
             $count  = $countData > 0 ? $countNewData."/".$countData : "0";
             $plural = ($countNewData > 1);
 
-            return $count." <ln>".lcfirst($this->translator->entity($baseClass[$spreadsheet], null, $plural ? Translator::NOUN_PLURAL : Translator::NOUN_SINGULAR)) .'</ln>';
+            return $count." <ln>".lcfirst($this->translator->transEntity($baseClass[$spreadsheet], null, $plural ? Translator::NOUN_PLURAL : Translator::NOUN_SINGULAR)) .'</ln>';
 
         }, array_keys(array_filter($entityData)))));
 
         foreach($entityData as $spreadsheet => $___) {
             foreach($___ as $baseName => $__) {
 
-                $baseNameStr = $this->translator->entity($baseName);
+                $baseNameStr = $this->translator->transEntity($baseName);
 
                 $output->writeln("\n * <info>Spreadsheet \"".$spreadsheet."\"</info>: $baseName", OutputInterface::VERBOSITY_VERBOSE);
 
@@ -605,7 +605,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                     $state = $entityStates[$spreadsheet][$baseName][$i] ?? self::UNKNOWN_STATE;
                     $spacer = str_blankspace(strlen($totalEntries) - strlen($i+1));
-                    $entityStr = $this->translator->entity($entity);
+                    $entityStr = $this->translator->transEntity($entity);
 
                     switch($state) {
 
@@ -679,7 +679,7 @@ class DoctrineDatabaseImportCommand extends Command
 
                         } catch (\Exception $e) {
 
-                            $msg = " Failed to write ".$this->translator->entity($entity)."(".$entity.")  ";
+                            $msg = " Failed to write ".$this->translator->transEntity($entity)."(".$entity.")  ";
                             $output->writeln('');
                             $output->writeln('');
                             $output->writeln('<red,bkg>'.str_blankspace(strlen($msg)));

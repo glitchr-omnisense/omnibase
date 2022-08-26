@@ -11,31 +11,17 @@
 
 namespace Base\Form\Extension;
 
-use Base\Entity\Thread;
-use Base\Entity\User\Notification;
 use Base\Enum\SpamScore;
-use Base\Model\SpamProtectionInterface;
+use Base\Service\Model\SpamProtectionInterface;
 use Base\Service\BaseService;
 use Base\Service\SpamChecker;
-use Base\Validator\Constraints\Spam;
-use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use Symfony\Component\Form\AbstractTypeExtension;
-use Symfony\Component\Form\Event\PreSubmitEvent;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Csrf\EventListener\CsrfValidationListener;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Form\FormInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\Form\Util\ServerParams;
-use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Contracts\Translation\TranslatorInterface;
 
 class FormTypeSpamExtension extends AbstractTypeExtension
 {

@@ -66,13 +66,6 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         $user = $token->getUser();
         if($user === null) return true;
-
-        $session = $this->requestStack->getSession();
-
-        if(!$session->get("_integrity/doctrine"))
-            $session->set("_integrity/doctrine", $this->getDoctrineChecksum());
-        if(!$session->get("_integrity/secret"))
-            $session->set("_integrity/secret", $this->getSecret());
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -81,6 +74,12 @@ class IntegritySubscriber implements EventSubscriberInterface
             throw new \RuntimeException("Application integrity compromised, cache needs to be refreshed.");
 
         $token = $this->tokenStorage->getToken();
+
+        $session = $this->requestStack->getSession();
+        if(!$session->get("_integrity/doctrine"))
+            $session->set("_integrity/doctrine", $this->getDoctrineChecksum());
+        if(!$session->get("_integrity/secret"))
+            $session->set("_integrity/secret", $this->getSecret());
 
         if(!$this->router->isRouteSecure()) return;
         if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE) return;
