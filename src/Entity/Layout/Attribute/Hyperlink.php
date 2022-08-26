@@ -32,14 +32,14 @@ class Hyperlink extends BaseAttribute implements TranslatableInterface, IconizeI
         $this->setValue($value);
     }
 
-    public        function __iconize()       : ?array { return $this->getHyperpattern() ? [$this->getHyperpattern()->getIcon()] : null; }
+    public        function __iconize()       : ?array { return $this->adapter ? [$this->adapter->getIcon()] : null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-link"]; }
 
     public function __toString()
     {
         $value = implode(", ", $this->getValue());
         $value = $value ? ": ".$value: "";
-        return "<b>".($this->getHyperpattern() ?? "Hyperlink")." #".$this->getId()."</b> ".$value;
+        return "<b>".($this->adapter ?? "Hyperlink")." #".$this->getId()."</b> ".$value;
     }
 
     /**
@@ -54,8 +54,8 @@ class Hyperlink extends BaseAttribute implements TranslatableInterface, IconizeI
         return $this;
     }
 
-    public function generate(?string $locale = null) { return $this->getHyperpattern()->generate(...$this->translate($locale)->getValue()); }
-    public function getLabel(): string { return $this->getHyperpattern()->getLabel(); }
+    public function generate(?string $locale = null) { return $this->adapter->generate(...$this->translate($locale)->getValue()); }
+    public function getLabel(): string { return $this->adapter->getLabel(); }
 
     public function get(?string $locale = null): mixed { return $this->getValue($locale); }
     public function set(...$args): self { return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this; }

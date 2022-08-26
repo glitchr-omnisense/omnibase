@@ -80,6 +80,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFunction('str_ends_with'  , "str_ends_with"  ),
             new TwigFunction('empty',           "empty"),
             new TwigFunction('property_accessor',            [$this, "property_accessor"]),
+            new TwigFunction('cast',          "cast"),
         ];
     }
 
@@ -206,7 +207,7 @@ final class FunctionTwigExtension extends AbstractExtension
 
         $href = $this->assetExtension->getAssetUrl($href);
         $isUrl = filter_var($this->projectDir."/public".$href, FILTER_VALIDATE_URL) === true;
-        $isEmpty = !file_exists($this->projectDir."/public".$href) || filesize($this->projectDir."/public".$href);
+        $isEmpty = !file_exists($this->projectDir."/public".$href) || filesize($this->projectDir."/public".$href) == 0;
         if(!$isUrl && $isEmpty && !$keepIfNotFound)
             return "";
 
@@ -217,7 +218,7 @@ final class FunctionTwigExtension extends AbstractExtension
     {
         $src = $this->assetExtension->getAssetUrl($src);
         $isUrl = filter_var($this->projectDir."/public".$src, FILTER_VALIDATE_URL) === true;
-        $isEmpty = !file_exists($this->projectDir."/public".$src) || filesize($this->projectDir."/public".$src);
+        $isEmpty = !file_exists($this->projectDir."/public".$src) || filesize($this->projectDir."/public".$src) == 0;
         if(!$isUrl && $isEmpty && !$keepIfNotFound)
             return "";
 

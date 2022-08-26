@@ -21,7 +21,7 @@ class HyperpatternAttribute extends AbstractAttribute implements IconizeInterfac
     public static function __iconizeStatic() : ?array { return ["fas fa-share-alt"]; }
 
     public static function getType(): string { return ArrayType::class; }
-    public function resolve(mixed $value): mixed { return unserialize($value); }
+    public function resolve(mixed $value): mixed { return !is_array($value) ? unserialize($value) : $value; }
     public function getOptions(): array { return [
         "pattern" => $this->getPattern(),
         "placeholder" => $this->getPlaceholder() ?? []

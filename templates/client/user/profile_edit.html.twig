@@ -7,7 +7,7 @@
     <h1>Edit your profile</h1>
     {{ form_start(form) }}
 
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+        <h1>Member #{{ user.id }}: {{ user }}</h1>
 
         {{ form_row(form.email) }}
         {{ form_row(form.plainPassword, {label: 'Password'}) }}
@@ -22,9 +22,7 @@
         <br/>
         {{ form_row(form.agreeTerms) }}
 
-        <button class="btn btn-lg btn-primary" type="submit">Sign in</button>
-    {{ form_end(form) }}
-
-        <button type="submit" class="btn">Register</button>
+        <button class="btn btn-lg btn-primary" type="submit">Modify</button>
+        {{ form_end(form) }}
 
 {% endblock %}

@@ -1890,6 +1890,8 @@ namespace {
     function cast_empty(string $newClass) { return unserialize(str_replace('O:8:"stdClass"','O:'.strlen($newClass).':"'.$newClass.'"', serialize((object) []) )); }
     function cast($object, $newClass, ...$args)
     {
+        if($object == null) return null;
+
         $reflClass      = new ReflectionClass($object);
         $reflProperties = $reflClass->getProperties();
 
