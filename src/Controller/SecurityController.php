@@ -9,8 +9,8 @@ use Base\Entity\User\Notification;
 use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
 
-use App\Form\Type\Security\RegistrationType;
-use App\Form\Type\Security\LoginType;
+use App\Form\Type\SecurityRegistrationType;
+use App\Form\Type\SecurityLoginType;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -26,11 +26,11 @@ use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Component\Notifier\NotifierInterface;
 
 use Base\Entity\User\Token;
-use Base\Form\Type\Security\ResetPasswordType;
+use Base\Form\Type\SecurityResetPasswordType;
 use App\Repository\UserRepository;
 use Base\Annotations\Annotation\Iconize;
 use Base\Service\ReferrerInterface;
-use Base\Form\Type\Security\ResetPasswordConfirmType;
+use Base\Form\Type\SecurityResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\MaintenanceProviderInterface;
@@ -73,7 +73,7 @@ class SecurityController extends AbstractController
         // Redirect to the right page when access denied
         if ( ($user = $this->getUser()) ) {
 
-            if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
+            if($this->isGranted('IS_AUTHENTICATED_FULLY'))
                 return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));
 
             $notification = new Notification("login.partial");
@@ -82,7 +82,7 @@ class SecurityController extends AbstractController
 
         // Generate form
         $user = new User();
-        $form = $this->createForm(LoginType::class, $user, ["identifier" => $lastUsername]);
+        $form = $this->createForm(SecurityLoginType::class, $user, ["identifier" => $lastUsername]);
         $form->handleRequest($request);
 
         // Remove expired tokens
@@ -155,7 +155,7 @@ class SecurityController extends AbstractController
 
         // Prepare registration form
         $newUser = new User();
-        $form = $this->createForm(RegistrationType::class, $newUser, ['validation_groups' => ['new']]);
+        $form = $this->createForm(SecurityRegistrationType::class, $newUser, ['validation_groups' => ['new']]);
 
         // An account might require to be verified by an admin
         $adminApprovalRequired = $parameterBag->get("security.user.adminApproval") ?? false;
@@ -373,7 +373,7 @@ class SecurityController extends AbstractController
         if (($user = $this->getUser()) && $user->isPersistent())
             return $this->redirectToRoute('user_profile');
 
-        $form = $this->createForm(ResetPasswordType::class);
+        $form = $this->createForm(SecurityResetPasswordType::class);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -427,7 +427,7 @@ class SecurityController extends AbstractController
             $user = $resetPasswordToken->getUser();
 
             // The token is valid; allow the user to change their password.
-            $form = $this->createForm(ResetPasswordConfirmType::class);
+            $form = $this->createForm(SecurityResetPasswordConfirmType::class);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
@@ -473,7 +473,7 @@ class SecurityController extends AbstractController
     {
         $birthdate = $maternityService->getBirthdate();
         if($birthdate == null) return $this->redirectToRoute($this->baseService->getHomepage());
-        
+
         return $this->render('@Base/security/birthdate.html.twig', [
             'birthdate'  => $birthdate
         ]);

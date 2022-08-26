@@ -29,9 +29,9 @@ class CommonPreConfigurator extends \EasyCorp\Bundle\EasyAdminBundle\Field\Confi
         $label = $this->buildLabelOption($field, $translationDomain, $context->getCrud()->getCurrentPage(), $entityDto);
         $field->setLabel($label);
 
-        parent::configure($field, $entityDto, $context);
+        if($this->propertyAccessor->isReadable($entityDto->getInstance(), $field->getProperty()))
+            parent::configure($field, $entityDto, $context);
     }
-
 
     /**
      * @return TranslatableInterface|string|false|null

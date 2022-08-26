@@ -5,7 +5,7 @@ namespace Base\Form\Type;
 use Base\Annotations\Annotation\Uploader;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
-use Base\Entity\Layout\SettingTranslation;
+use Base\Entity\Layout\SettingIntl;
 use Base\Field\Type\AvatarType;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\FileType;
@@ -121,8 +121,8 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 }
 
                 if ($fieldOptions["form_type"] == FileType::class || $fieldOptions["form_type"] == ImageType::class || $fieldOptions["form_type"] == AvatarType::class) {
-                    $fieldOptions["max_size"] = $fieldOptions["max_size"] ?? Uploader::getMaxFilesize(SettingTranslation::class, "value");
-                    $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingTranslation::class, "value");
+                    $fieldOptions["max_size"] = $fieldOptions["max_size"] ?? Uploader::getMaxFilesize(SettingIntl::class, "value");
+                    $fieldOptions["mime_types"]   = $fieldOptions["mime_types"]   ?? Uploader::getMimeTypes(SettingIntl::class, "value");
                     $fieldOptions["empty_data"]   = $settingValue ?? "";
                 }
 
@@ -158,8 +158,8 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 }
 
                 if ($isTranslatable) $intlData[$formattedField] = $translations;
-                else { 
-                    
+                else {
+
                     $unvData[$formattedField] = $translations;
                 }
             }
@@ -172,7 +172,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     "autoload" => false,
                     "multiple" => true,
                     "required_locales" => [$this->localeProvider->getDefaultLocale()],
-                    "translation_class" => SettingTranslation::class,
+                    "translation_class" => SettingIntl::class,
                 ]);
 
                 $form->get("intl")->setData($intlData);
@@ -186,7 +186,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                     "multiple" => true,
                     "locale" => $this->localeProvider->getDefaultLocale(),
                     "single_locale" => true,
-                    "translation_class" => SettingTranslation::class,
+                    "translation_class" => SettingIntl::class,
                 ]);
 
                 $form->get("unv")->setData($unvData);

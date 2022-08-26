@@ -2,7 +2,6 @@
 
 namespace Base\Traits;
 
-use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
@@ -14,12 +13,10 @@ use Base\Service\SettingBag;
 use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Service\LocaleProviderInterface;
-use Base\Twig\Extension\BaseTwigExtension;
+use Base\Service\TranslatorInterface;
 use Symfony\Component\Security\Http\FirewallMapInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Base\Twig\Environment;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Persistence\ObjectRepository;
@@ -57,14 +54,14 @@ trait BaseTrait
         return $entityManager;
     }
 
-    public static function getRepository(mixed $object = null) : ?ObjectRepository  
+    public static function getRepository(mixed $object = null) : ?ObjectRepository
     {
         $object ??= static::class;
         return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object);
     }
 
     public static function isEntity(mixed $entity)         : bool            { return BaseService::getClassMetadataManipulator()->isEntity($entity); }
-    
+
     public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }
     public static function getEnvironment()   : string { return (self::class === BaseService::class) ? BaseService::$environment   : BaseService::getEnvironment(); }
     public static function getPublicDir()     : string { return BaseService::getProjectDir() . "/public"; }

@@ -4,6 +4,7 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
+use Base\Database\NamingStrategy;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Symfony\Component\Console\Input\InputInterface;
@@ -38,7 +39,7 @@ class TranslationEntitiesCommand extends Command
         if(!$entityRestriction) {
             foreach($entities as $entity) {
                 if(in_array($entity, ["App\Entity","Base\Entity"])) continue;
-                if(str_ends_with($entity, "Translation")) continue;
+                if(str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) continue;
 
                 $maxLength[class_namespace($entity)] = max(strlen($entity), $maxLength[class_namespace($entity)] ?? 0);
             }
@@ -56,7 +57,7 @@ class TranslationEntitiesCommand extends Command
 
             if($entity == "App\Entity") continue;
             if($entity == "Base\Entity") continue;
-            if(str_ends_with($entity, "Translation")) continue;
+            if(str_ends_with($entity, NamingStrategy::TABLE_I18N_SUFFIX)) continue;
             if(!str_starts_with($entity, $entityRestriction)) continue;
 
             $isClass = class_exists($entity) ? " <info>& class</info>" : "";

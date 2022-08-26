@@ -243,9 +243,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity(       $class, null, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($class, $text, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($class, $text, Translator::NOUN_PLURAL);
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null, Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
 
                         $text = empty($text) ? $key : $text;
                         $self = array_pop_key("_self", $choices);
@@ -295,9 +295,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity(       $class, null, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($class, $text, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($class, $text, Translator::NOUN_PLURAL);
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null, Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
 
                         $text = empty($text) ? $key : $text;
                         $self = array_pop_key("_self", $choices);
@@ -587,9 +587,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity(       $class, null, Translator::NOUN_PLURAL);
-                    else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->enum  ($class, $text, Translator::NOUN_PLURAL);
-                    else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->enum  ($class, $text, Translator::NOUN_PLURAL);
+                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null, Translator::NOUN_PLURAL);
+                    else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
+                    else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
                     else $text = is_string($key) ? $key : $text;
 
                     $self = array_pop_key("_self", $choices);

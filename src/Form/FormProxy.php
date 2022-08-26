@@ -28,38 +28,38 @@ class FormProxy implements FormProxyInterface
         // TBC..
         // Create dummy view to avoid error during twig rendering..
         $this->forms[$name] = $form;
-        $this->forms[$name]->createView(); 
+        $this->forms[$name]->createView();
 
         return $this;
     }
-    
+
     public function remove(string $name): static
     {
-        if ($this->has($name)) 
+        if ($this->has($name))
             unset($this->forms[$name]);
 
         return $this;
     }
 
-    public function create(string $name, string $type = FormType::class, mixed $data = null, array $options = []): ?FormInterface  
-    { 
+    public function create(string $name, string $type = FormType::class, mixed $data = null, array $options = []): ?FormInterface
+    {
         return $this->get($name, $this->formFactory->create($type, $data, $options));
     }
 
-    public function submit(string $name, string|array|null $submittedData, bool $clearMissing = true): ?FormInterface 
-    { 
+    public function submit(string $name, string|array|null $submittedData, bool $clearMissing = true): ?FormInterface
+    {
         return $this->get($name)?->submit($submittedData, $clearMissing);
     }
 
-    public function process(string $name, Request $request): ?FormInterface 
-    { 
-        return $this->has($name) ? $this->formProcessor->process($this->get($name), $request) : null; 
+    public function process(string $name, Request $request): ?FormInterface
+    {
+        return $this->has($name) ? $this->formProcessor->process($this->get($name), $request) : null;
     }
 
     public function hydrate(string $name, object $entity): mixed
-    { 
+    {
         if($this->has($name))
-            $this->formProcessor->hydrate($this->getData($name), $entity); 
+            $this->formProcessor->hydrate($this->getData($name), $entity);
 
         return $entity;
     }

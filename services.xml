@@ -634,7 +634,6 @@
             <argument type="service" id="referrer" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="router" />
-            <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="security.authorization_checker" />
         </service>
 
@@ -701,13 +700,13 @@
             <argument type="service" id="router" />
         </service>
 
-        <service id="Base\Form\Type\Layout\SettingListType">
+        <service id="Base\Form\Type\LayoutSettingListType">
             <tag name="form.type" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
-        <service id="Base\Form\Type\Layout\WidgetListType">
+        <service id="Base\Form\Type\LayoutWidgetListType">
             <tag name="form.type" />
             <argument type="service" id="base.widget_provider" />
         </service>

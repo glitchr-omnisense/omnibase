@@ -365,7 +365,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             } else if($user->isVerified()) {
 
                 $isAuthenticated = $this->authorizationChecker->isGranted('IS_AUTHENTICATED_FULLY') || $this->authorizationChecker->isGranted('IS_AUTHENTICATED_REMEMBERED');
-                if($isAuthenticated) {
+                if(!$isAuthenticated) $title = "@notifications.login.success.alien";
+                else {
 
                     $active = daydiff($user->getActiveAt()) < 0 ? "first" : "back";
 
@@ -375,10 +376,6 @@ class SecuritySubscriber implements EventSubscriberInterface
                     else $period = "day";
 
                     $title = "@notifications.login.success.$period.$active";
-
-                } else {
-
-                    $title = "@notifications.login.success.alien";
                 }
 
                 $notification = new Notification($title, [$user]);
@@ -410,7 +407,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function onBirthRequest(RequestEvent $event)
     {
-        if(!$event->isMainRequest()) return;    
+        if(!$event->isMainRequest()) return;
         if(!$this->parameterBag->get("base.settings.birthdate.redirect_on_deny")) return ;
 
         if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale())) {

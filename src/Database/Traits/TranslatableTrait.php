@@ -4,13 +4,13 @@ namespace Base\Database\Traits;
 
 use Base\Database\NamingStrategy;
 use Base\Database\TranslationInterface;
-use Base\Exception\MissingLocaleException;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\Exception\AccessException;
 
 trait TranslatableTrait
 {
@@ -149,10 +149,10 @@ trait TranslatableTrait
             $property = lcfirst(substr($method, 3));
 
             if (empty($arguments))
-                throw new \BadMethodCallException("Missing argument for setter property \"$property\" in ". $className);
+                throw new AccessException("Missing argument for setter property \"$property\" in ". $className);
 
             try { return $this->__set($property, ...$arguments); }
-            catch (\BadMethodCallException $e) {
+            catch (AccessException $e) {
 
                 // Parent fallback setter
                 if($parentClass && method_exists($parentClass, "__set"))
@@ -181,26 +181,16 @@ trait TranslatableTrait
         if($property) {
 
             try { return $this->__get($property); }
-            catch (\BadMethodCallException $e)
+            catch (AccessException $e)
             {
                 // Parent fallback getter
-                if($parentClass && method_exists($className, "__get")) {
-
-                    try { return parent::__get($property); }
-                    catch (\BadMethodCallException $e)
-                    {
-                        throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
-                    }
-                }
+                if($parentClass && method_exists($className, "__get"))
+                    return parent::__get($property);
             }
 
         } else if($translationClassName && method_exists($translationClassName, $method)) {
 
-            try { return $this->translate()->$method(...$arguments); }
-            catch (\BadMethodCallException $e)
-            {
-                throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
-            }
+            return $this->translate()->$method(...$arguments);
         }
 
         //
@@ -209,7 +199,7 @@ trait TranslatableTrait
             return parent::__call($method, $arguments);
 
         if(!method_exists($className,$method))
-            throw new \BadMethodCallException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+            throw new AccessException("Method \"$method\" not found in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
 
         return null;
     }
@@ -227,7 +217,7 @@ trait TranslatableTrait
         } else if(property_exists($this, $property)) {
 
             if (!$accessor->isWritable($this, $property))
-                throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($this));
+                throw new AccessException("Property \"$property\" not writable in ". get_class($this));
 
             $accessor->setValue($this, $property, $value);
             return $this;
@@ -241,17 +231,17 @@ trait TranslatableTrait
         } else if(property_exists($entityIntl, $property)) {
 
             if (!$accessor->isWritable($entityIntl, $property))
-                throw new \BadMethodCallException("Property \"$property\" not writable in ". get_class($entityIntl));
+                throw new AccessException("Property \"$property\" not writable in ". get_class($entityIntl));
 
             $accessor->setValue($entityIntl, $property, $value);
             return $this;
 
         }
 
-        if(!str_starts_with($property, "ea_"))// Prevent "ea_" property exception conflict.. Damn'it.. ! >()
-            throw new \BadMethodCallException("Can't get a way to write property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        // Prevent "ea_" property exception conflict.. Damn'it.. ! >()
+        if(str_starts_with($property, "ea_")) return $this;
 
-        return $this;
+        throw new AccessException("Can't get a way to write property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 
     public function __get($property)
@@ -300,9 +290,8 @@ trait TranslatableTrait
             return $accessor->getValue($entityIntl, $property);
 
         // Exception for EA variables (cf. EA's FormField)
-        if(!str_starts_with($property, "ea_"))
-            throw new \BadMethodCallException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
+        if(str_starts_with($property, "ea_")) return null;
 
-        return null;
+        throw new AccessException("Can't get a way to read property \"$property\" in class \"".get_class($this)."\" or its corresponding translation class \"".$this->getTranslationEntityClass()."\".");
     }
 }

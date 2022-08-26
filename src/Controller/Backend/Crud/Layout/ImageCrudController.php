@@ -64,7 +64,7 @@ class ImageCrudController extends AbstractCrudController
 
                         $id = " #".(((int) $i) + 1);
 
-                        return $this->getTranslator()->entity($e).$id;
+                        return $this->getTranslator()->transEntity($e).$id;
                     })
 
                     ->setEntryType(CropperType::class)

@@ -11,13 +11,13 @@ use Symfony\Contracts\EventDispatcher\Event;
  */
 class ThreadIntlEvent extends Event
 {
-    public const CLEANUP     = 'thread_translation.cleanup';
+    public const CLEANUP     = 'thread_intl.cleanup';
 
-    public function __construct(ThreadIntl $threadTranslation)
+    public function __construct(ThreadIntl $threadIntl)
     {
-        $this->threadIntl = $threadTranslation;
+        $this->threadIntl = $threadIntl;
     }
 
-    protected $threadTranslation;
-    public function getThreadIntl(): ThreadIntl { return $this->threadTranslation; }
+    protected $threadIntl;
+    public function getThreadIntl(): ThreadIntl { return $this->threadIntl; }
 }

@@ -7,7 +7,7 @@ use App\Entity\User as User;
 use Base\Annotations\Annotation\Iconize;
 use Base\Controller\Backend\AbstractDashboardController;
 use Base\Service\ReferrerInterface;
-use Base\Form\Type\Security\LoginType;
+use Base\Form\Type\SecurityLoginType;
 use Base\Service\ImageServiceInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -62,7 +62,7 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
 
         // Generate form
         $user = new User();
-        $form = $this->createForm(LoginType::class, $user, ["identifier" => $lastUsername]);
+        $form = $this->createForm(SecurityLoginType::class, $user, ["identifier" => $lastUsername]);
         $form->handleRequest($request);
 
         $lastUsername = $authenticationUtils->getLastUsername();

@@ -30,8 +30,8 @@ use App\Enum\UserRole;
 use Base\Annotations\Annotation\Iconize;
 use Base\Field\Type\DateTimePickerType;
 use Base\Field\Type\ImageType;
-use Base\Form\Type\Layout\SettingListType;
-use Base\Form\Type\Layout\WidgetListType;
+use Base\Form\Type\LayoutSettingListType;
+use Base\Form\Type\LayoutWidgetListType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -175,7 +175,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
         }
 
-        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
+        $form = $this->createForm(LayoutSettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
@@ -253,7 +253,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             if($roles && !$this->getUser()->isGranted($roles)) unset($fields[$name]);
         }
 
-        $form = $this->createForm(SettingListType::class, null, ["fields" => $fields]);
+        $form = $this->createForm(LayoutSettingListType::class, null, ["fields" => $fields]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){
@@ -293,7 +293,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $data = $this->widgetRepository->findAll();
 
-        $form = $this->createForm(WidgetListType::class, $data, ["widgets" => $widgetSlots]);
+        $form = $this->createForm(LayoutWidgetListType::class, $data, ["widgets" => $widgetSlots]);
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid()){

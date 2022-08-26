@@ -33,7 +33,7 @@ class ImageCrop implements LinkableInterface
 
     public function __toString() {
 
-        return $this->getLabel() ?? $this->getTranslator()->entity($this).($this->getId() ? " #".$this->getId() : null);
+        return $this->getLabel() ?? $this->getTranslator()->transEntity($this).($this->getId() ? " #".$this->getId() : null);
     }
 
     public function getRatio() { return $this->getWidth0()/$this->getHeight0(); }

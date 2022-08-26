@@ -19,16 +19,16 @@ class LocaleProvider implements LocaleProviderInterface
     protected $translator = null;
 
     public const SEPARATOR = "-";
-    public static function __toLocale (string $locale, ?string $separator = self::SEPARATOR): string 
+    public static function __toLocale (string $locale, ?string $separator = self::SEPARATOR): string
     {
         $lang    = self::__toLang($locale);
         $country = self::__toCountry($locale);
-        
+
         return $lang.$separator.$country;
     }
 
-    public static function __toLang (string $locale): string 
-    { 
+    public static function __toLang (string $locale): string
+    {
         $lang = $locale ? substr($locale,0,2) : null;
         if ($lang === null || !array_key_exists($lang, self::getLocales()))
             $lang = substr(self::getDefaultLocale(),0,2);
@@ -36,8 +36,8 @@ class LocaleProvider implements LocaleProviderInterface
         return $lang;
     }
 
-    public static function __toCountry (string $locale): string 
-    { 
+    public static function __toCountry (string $locale): string
+    {
         $defaultCountry     = self::getDefaultLocale() ? substr(self::getDefaultLocale(),3,2) : null;
         $availableCountries = array_transforms(fn($k, $l):array => $l !== null ? [substr($l,0,2), [substr($l,3,2)]] : null, self::getAvailableLocales());
 

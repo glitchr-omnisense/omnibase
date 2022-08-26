@@ -63,7 +63,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'href'      => null,
 
             'entry_collapsed' => true,
-            'entry_label' => function($i, $e) { return $i === "__prototype__" ? false : $this->getTranslator()->entity($e). " #".(((int)$i)+1); },
+            'entry_label' => function($i, $e) { return $i === "__prototype__" ? false : $this->getTranslator()->transEntity($e). " #".(((int)$i)+1); },
             'entry_required' => true,
 
             'fields' => [],

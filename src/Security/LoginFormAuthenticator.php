@@ -38,18 +38,16 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     public const LOGOUT_REQUEST_ROUTE = 'security_logoutRequest';
 
     protected $entityManager;
-    protected $csrfTokenManager;
     protected $authorizationChecker;
     protected $router;
 
-    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, AuthorizationCheckerInterface $authorizationChecker)
+    public function __construct(ReferrerInterface $referrer, EntityManagerInterface $entityManager, RouterInterface $router, AuthorizationCheckerInterface $authorizationChecker)
     {
         $this->referrer       = $referrer;
         $this->entityManager  = $entityManager;
         $this->authorizationChecker  = $authorizationChecker;
         $this->userRepository = $entityManager->getRepository(User::class);
 
-        $this->csrfTokenManager = $csrfTokenManager;
         $this->router           = $router;
     }
 
@@ -65,7 +63,7 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
         $this->referrer->setUrl($request->getUri());
-        
+
         $route = $this->authorizationChecker->isGranted("EXCEPTION_ACCESS") ? RescueFormAuthenticator::LOGIN_ROUTE : static::LOGIN_ROUTE;
         return new RedirectResponse($this->router->generate($route));
     }
@@ -77,22 +75,20 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): Passport
     {
-        $identifier = $request->get('login')["identifier"] ?? $request->get("identifier") ?? "";
-        $password   = $request->get('login')["password"] ?? $request->get("password") ?? "";
+        $identifier = $request->get('security_login')["identifier"] ?? $request->get("identifier") ?? "";
+        $password   = $request->get('security_login')["password"] ?? $request->get("password") ?? "";
         $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 
         $badges   = [];
-        if( array_key_exists("_remember_me", $request->get('login') ?? []) ) {
+        if( array_key_exists("_remember_me", $request->get('security_login') ?? []) ) {
             $badges[] = new RememberMeBadge();
-            if($request->get('login')["_remember_me"]) end($badges)->enable();
+            if($request->get('security_login')["_remember_me"]) end($badges)->enable();
         }
 
-        if( array_key_exists("_csrf_token", $request->get('login') ?? []) )
-            $badges[] = new CsrfTokenBadge("login", $request->get('login')["_csrf_token"]);
-        if( array_key_exists("password", $request->get('login') ?? []) )
+        if( array_key_exists("password", $request->get('security_login') ?? []) )
             $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
-        if( array_key_exists("_captcha", $request->get('login') ?? []) && class_exists(CaptchaBadge::class) )
-            $badges[] = new CaptchaBadge("_captcha", $request->get('login')["_captcha"]);
+        if( array_key_exists("_captcha", $request->get('security_login') ?? []) && class_exists(CaptchaBadge::class) )
+            $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"]);
 
         return new Passport(
             new UserBadge($identifier),

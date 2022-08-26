@@ -2,7 +2,7 @@
 
 namespace Base\EntitySubscriber;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper\VariantTranslation;
+use App\Entity\Marketplace\Product\Extra\Wallpaper\VariantIntl;
 use Base\Database\Factory\EntityHydratorInterface;
 use Base\Entity\ThreadIntl;
 use Base\EntityDispatcher\Event\ThreadEvent;

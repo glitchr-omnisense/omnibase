@@ -35,6 +35,10 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         $this->entityManager  = $entityManager;
         $this->localeProvider = $localeProvider;
+
+        dump($this->localeProvider->getLocale("en_US"));
+        dump($this->localeProvider->normalize("en_US"));
+        exit(1);
     }
 
     public function postLoad(LifecycleEventArgs $args)
@@ -78,7 +82,7 @@ class IntlSubscriber implements EventSubscriberInterface
         // Normalize and turn orphan Intl entities if empty
         foreach($scheduledTranslatables as $translatable)
             $this->normalize($translatable);
-            
+
     }
 
     protected function normalize(TranslatableInterface $translatable)

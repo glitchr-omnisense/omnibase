@@ -4,7 +4,6 @@ namespace Base\Service;
 
 use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
-use Base\Database\Factory\ClassMetadataManipulator;
 
 use Symfony\Component\Asset\Packages;
 
@@ -214,18 +213,18 @@ class SettingBag implements SettingBagInterface
     }
 
     protected array $settingBag;
-    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true): array
+    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = false): array
     {
         if(is_array($paths = $path)) {
 
             $settings = [];
             foreach($paths as $path)
-                $settings[$path] = $this->get($path, $locale);
+                $settings[$path] = $this->get($path, $locale, $useCache);
 
             return $settings;
         }
 
-        $this->settingBag ??= $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
+        $this->settingBag ??= $useCache && $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
         if(array_key_exists($path.":".$locale, $this->settingBag))
             return $this->settingBag[$path.":".$locale];
 

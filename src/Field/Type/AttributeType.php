@@ -17,7 +17,7 @@ use Base\Database\TranslatableInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Doctrine\Common\Collections\Collection;
-use Base\Entity\Layout\AttributeTranslation;
+use Base\Entity\Layout\AttributeIntl;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\Form\DataMapperInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -191,7 +191,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
                         "multiple" => true,
                         "autoload" => false,
                         "fields"   => ["value" => $intlFields],
-                        "translation_class" => AttributeTranslation::class,
+                        "translation_class" => AttributeIntl::class,
                     ]);
 
                     $form->get("intl")->setData($intlData);
