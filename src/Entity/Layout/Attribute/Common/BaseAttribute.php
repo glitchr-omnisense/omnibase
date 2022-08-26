@@ -33,11 +33,6 @@ abstract class BaseAttribute implements IconizeInterface, BaseAttributeInterface
         $this->setAdapter($adapter);
     }
 
-    public function __call(string $name , array $arguments)
-    {
-        return $this->adapter->{$name}(...$arguments);
-    }
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
