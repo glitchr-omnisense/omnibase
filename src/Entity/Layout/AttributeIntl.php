@@ -18,21 +18,21 @@ class AttributeIntl implements TranslationInterface
 {
     use TranslationTrait;
 
-    public function isEmpty(): bool
-    {
-        foreach (get_object_vars($this) as $var => $value) {
+    // public function isEmpty(): bool
+    // {
+    //     foreach (get_object_vars($this) as $var => $value) {
 
-            if (in_array($var, ['id', 'translatable', 'locale'], true))
-                continue;
+    //         if (in_array($var, ['id', 'translatable', 'locale'], true))
+    //             continue;
 
-            if(is_array($value))
-                $value = array_filter($value);
+    //         if(is_array($value))
+    //             $value = array_filter($value);
 
-            if (!empty($value)) return false;
-        }
+    //         if (!empty($value)) return false;
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
     /**
      * @ORM\Column(type="array")

@@ -59,20 +59,20 @@ class TranslationType extends AbstractType implements DataMapperInterface
             'locale'            => $this->localeProvider->getLocale(),
             'locale_options'    => [],
 
-
             'single_locale'     => false,
             'default_locale'    => $this->localeProvider->getDefaultLocale(),
             'required_locales'  =>  [],
             'available_locales' => $this->localeProvider->getAvailableLocales(),
 
             'by_reference' => false,
-            'empty_data' => fn(FormInterface $form) => new ArrayCollection,
+            'empty_data'   => fn(FormInterface $form) => new ArrayCollection,
 
             'autoload' => true,
-            'fields' => [],
+            'fields'   => [],
             'excluded_fields' => [],
 
-            'translation_class' => null,
+            'translation_class'  => null,
+            'translatable_class' => null,
             'multiple' => false
         ]);
 
@@ -289,6 +289,11 @@ class TranslationType extends AbstractType implements DataMapperInterface
 
     private function getTranslatableClass(FormInterface $form)
     {
+        // Looking at translatable interface using data_class
+        $translatableClass = $form->getConfig()->getOption("translatable_class");
+        if(is_subclass_of($translatableClass, TranslatableInterface::class))
+            return $translatableClass;
+
         // Looking at translatable interface using data_class
         $translatableClass = $form->getConfig()->getDataClass();
         if(is_subclass_of($translatableClass, TranslatableInterface::class))

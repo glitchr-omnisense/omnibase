@@ -188,10 +188,10 @@ class AttributeType extends AbstractType implements DataMapperInterface
                     $intlData = array_transforms(fn($k, $v): ?array => class_implements_interface($v, TranslatableInterface::class) ? [$v->getAdapter()->getCode()."-".$v->getId(), $v->getTranslations()] : null, $data);
 
                     $form->add("intl", TranslationType::class, [
+                        "translatable_class"   => $options["class"],
                         "multiple" => true,
                         "autoload" => false,
-                        "fields"   => ["value" => $intlFields],
-                        "translation_class" => AttributeIntl::class,
+                        "fields"   => ["value" => $intlFields]
                     ]);
 
                     $form->get("intl")->setData($intlData);
