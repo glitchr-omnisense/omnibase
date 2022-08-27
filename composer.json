@@ -69,7 +69,7 @@
         "hashids/hashids": "^4.1",
 
         "doctrine/doctrine-bundle": "^2.6",
-        "xkzl/base-plugin": "1.0*-dev",
+        "xkzl/base-plugin": "1.0.*-dev",
 
     	"backup-manager/backup-manager": "^3.1"
     },
