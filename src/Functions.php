@@ -1012,7 +1012,7 @@ namespace {
     function html_attributes(array ...$attributes)
     {
         $attributes = array_merge(...$attributes);
-        return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k])."\"", array_keys($attributes))));
+        return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k] ?? "")."\"", array_keys($attributes))));
     }
 
     function browser_name()    : ?string { return get_browser2()["name"] ?? null; }

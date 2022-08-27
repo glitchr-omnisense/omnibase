@@ -79,6 +79,8 @@ clipboard:
     copy: Copied!
     paste: Paste!
 
+quill:
+  soft_linebreak: "Use Maj+Enter to make a soft breakline"
 
 cropper:
   no_image: "No image to load."

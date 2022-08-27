@@ -2,15 +2,15 @@
 
 namespace Base\Database\Traits;
 
-use App\Entity\Marketplace\Product\Extra\Wallpaper\Sample;
+use App\Entity\Marketplace\Store;
 use Base\Database\NamingStrategy;
 use Base\Database\TranslationInterface;
-use Base\Entity\Layout\Setting;
+
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Exception;
-use InvalidArgumentException;
+
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\Exception\AccessException;
 
@@ -53,7 +53,6 @@ trait TranslatableTrait
      * @var TranslationInterface[]|Collection
      */
     protected $translations;
-
     public function getTranslations()
     {
         if ($this->translations === null)
@@ -62,11 +61,15 @@ trait TranslatableTrait
         return $this->translations;
     }
 
-    public function removeTranslation(TranslationInterface $translation): void {
+    public function removeTranslation(TranslationInterface $translation) {
 
-        if ($this->getTranslations()->contains($translation))
+        if ($this->getTranslations()->contains($translation)) {
             $this->getTranslations()->removeElement($translation);
+        }
+
+        return $this;
     }
+
 
     public function addTranslation(TranslationInterface $translation)
     {
@@ -99,7 +102,6 @@ trait TranslatableTrait
             foreach($locales as $locale) {
 
                 $translation = $translations[$locale] ?? null;
-                if($translation && $translation->isEmpty()) $translation = null;
                 if($translation) break;
             }
 
@@ -109,16 +111,12 @@ trait TranslatableTrait
                 $locales = array_filter($translations->getKeys(), fn($l) => !in_array($l, $availableLocales));
                 $fallbackLocales = array_map(fn($l) => $localeProvider->getLocale($localeProvider->getLang($l)), $locales);
 
-                foreach(array_keys($fallbackLocales, $normLocale) as $normKey) {
-
+                foreach(array_keys($fallbackLocales, $normLocale) as $normKey)
                     $translation = $translations[$locales[$normKey]] ?? null;
-                    if($translation && $translation->isEmpty()) $translation = null;
-                }
 
                 foreach($locales as $locale) {
 
                         $translation = $translations[$locale] ?? null;
-                        if($translation && $translation->isEmpty()) $translation = null;
                         if($translation) break;
                 }
             }

@@ -3,10 +3,12 @@
 namespace Base\EntityDispatcher;
 
 use Base\Database\Factory\EntityHydrator;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use Exception;
+use PDOException;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface as SymfonyEventDispatcherInterface;
 
 abstract class AbstractEventDispatcher implements EventDispatcherInterface

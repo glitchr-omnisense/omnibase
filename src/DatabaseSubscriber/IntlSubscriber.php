@@ -2,6 +2,7 @@
 
 namespace Base\DatabaseSubscriber;
 
+use Base\Database\Factory\EntityHydratorInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
@@ -9,8 +10,10 @@ use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use InvalidArgumentException;
 
@@ -62,41 +65,41 @@ class IntlSubscriber implements EventSubscriberInterface
             $scheduledEntities[] = $entity->getOwner();
 
         // Retrieve translatable objects
-        $scheduledEntities = array_filter(array_unique_object($scheduledEntities));
-        foreach(array_unique_object($scheduledEntities) as $entity) {
-
-            if (is_subclass_of($entity, TranslationInterface::class, true))
-                $scheduledEntities[] = $entity->getTranslatable();
-        }
-
-        // Keep unique translatable only
-        $scheduledTranslatables = array_filter(
+        $scheduledEntities = array_filter(
             array_unique_object($scheduledEntities),
-            fn($e) => is_subclass_of($e, TranslatableInterface::class, true)
+            fn($e) => $e instanceof TranslationInterface || $e instanceof TranslatableInterface
         );
 
-        // Normalize and turn orphan Intl entities if empty
-        foreach($scheduledTranslatables as $translatable)
-            $this->normalize($translatable);
+        // Normalize and turn into orphan intl entities if empty
+        foreach(array_unique_object($scheduledEntities) as $entity)
+            $this->normalize($entity);
     }
 
-    protected function normalize(TranslatableInterface $translatable)
+    protected function normalize(TranslationInterface|TranslatableInterface $entity)
     {
         $uow = $this->entityManager->getUnitOfWork();
 
-        foreach($translatable->getTranslations() as $locale => $translation) {
+        if($entity instanceof TranslatableInterface) {
 
-            if($translation->getLocale() === null) $translation->setLocale($locale);
-            if($translation->getLocale() !== null && $translation->getLocale() !== $locale)
-                throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
+            foreach($entity->getTranslations() as $locale => $translation) {
 
-            if(!$translation->getTranslatable())
-                $translation->setTranslatable($translatable);
+                if($translation->getLocale() === null) $translation->setLocale($locale);
+                if($translation->getLocale() !== null && $translation->getLocale() !== $locale)
+                    throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
 
-            $translatable = $translation->getTranslatable();
-            if ($translatable && !$translation->isEmpty())
-                $uow->cancelOrphanRemoval($translation);
+                if(!$translation->getTranslatable())
+                    $translation->setTranslatable($entity);
+            }
         }
+
+        if($entity instanceof TranslationInterface) {
+
+            $translatable = $entity->getTranslatable();
+            if ($translatable && !$entity->isEmpty())
+                $uow->cancelOrphanRemoval($entity);
+        }
+
+        return $this;
     }
 
     /**
