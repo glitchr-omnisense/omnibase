@@ -35,10 +35,6 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         $this->entityManager  = $entityManager;
         $this->localeProvider = $localeProvider;
-
-        dump($this->localeProvider->getLocale("en_US"));
-        dump($this->localeProvider->normalize("en_US"));
-        exit(1);
     }
 
     public function postLoad(LifecycleEventArgs $args)
@@ -48,7 +44,7 @@ class IntlSubscriber implements EventSubscriberInterface
         $translation = $args->getObject();
         if (is_subclass_of($translation, TranslationInterface::class, true)) {
 
-            if ($translation->isEmpty())
+            if ($translation->isEmpty()) // Mark as removal for mispersistent translations..
                 $uow->scheduleOrphanRemoval($translation);
         }
     }
@@ -131,8 +127,8 @@ class IntlSubscriber implements EventSubscriberInterface
             return $fetchMode;
 
         switch($fetchMode) {
-            case 'LAZY':
-                return ClassMetadata::FETCH_LAZY;
+            case 'EAGER':
+                return ClassMetadata::FETCH_EAGER;
 
             case 'EXTRA_LAZY':
                 return ClassMetadata::FETCH_EXTRA_LAZY;

@@ -104,8 +104,10 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
 
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
-        $plainPasswordType = iterator_to_array($forms)["plain"];
-        $plainPasswordRepeaterType = iterator_to_array($forms)["plain_repeater"];
+        $plainPasswordType = iterator_to_array($forms)["plain"] ?? null;
+        if($plainPasswordType == null) throw new TransformationFailedException("Missing password field.");
+
+        $plainPasswordRepeaterType = iterator_to_array($forms)["plain_repeater"] ?? null;
         $options = $plainPasswordType->getConfig()->getOptions();
 
         if($viewData == []) $viewData = "";

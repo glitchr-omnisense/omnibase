@@ -2,6 +2,7 @@
 
 namespace Base\Database\Traits;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper\Sample;
 use Base\Database\NamingStrategy;
 use Base\Database\TranslationInterface;
 use Base\Service\BaseService;
@@ -90,8 +91,6 @@ trait TranslatableTrait
         $translations = $this->getTranslations();
 
         $translation = $translations[$normLocale] ?? null;
-        if($translation && $translation->isEmpty()) $translation = null;
-
         if(!$translation && $locale === null) {
 
             // First entry is default locale
