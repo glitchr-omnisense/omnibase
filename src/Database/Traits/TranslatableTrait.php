@@ -5,6 +5,7 @@ namespace Base\Database\Traits;
 use App\Entity\Marketplace\Product\Extra\Wallpaper\Sample;
 use Base\Database\NamingStrategy;
 use Base\Database\TranslationInterface;
+use Base\Entity\Layout\Setting;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

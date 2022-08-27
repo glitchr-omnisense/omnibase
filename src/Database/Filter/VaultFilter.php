@@ -20,11 +20,11 @@ class VaultFilter extends SQLFilter
 
     public function addFilterConstraint(ClassMetadata $targetEntity, $alias): string
     {
-        if($this->environment)
-            throw new InvalidArgumentException("No environment defined in ".self::class);
-
         $vaultAnnotation = AnnotationReader::getInstance()->getClassAnnotations($targetEntity->getName(), Vault::class);
         if(count($vaultAnnotation) < 1) return "";
+
+        if(!$this->environment)
+            throw new InvalidArgumentException("No environment defined in \"".self::class."\" while setting up ".$targetEntity->getName());
 
         $vaultFieldName = end($vaultAnnotation)->vault;
         if ($targetEntity->hasField($vaultFieldName))

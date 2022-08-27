@@ -35,10 +35,8 @@ class BaseBundle extends Bundle
         self::$brokenCache = false;
     }
 
-    public function getProjectDir()
-    {
-        return $this->container->get('kernel')->getProjectDir()."/src/";
-    }
+    public function getProjectDir() { return $this->container->get('kernel')->getProjectDir()."/src/"; }
+    public function getEnvironment() { return $this->container->get('kernel')->getEnvironment(); }
 
     public function boot()
     {
@@ -82,7 +80,8 @@ class BaseBundle extends Bundle
         $entityManager->getConfiguration()->addFilter("trash_filter", TrashFilter::class);
         $entityManager->getFilters()->enable("trash_filter");
         $entityManager->getConfiguration()->addFilter("vault_filter", VaultFilter::class);
-        $entityManager->getFilters()->enable("vault_filter");
+        $filter = $entityManager->getFilters()->enable("vault_filter");
+        $filter->setEnvironment($this->getEnvironment());
 
         /**
          * Doctrine walkers

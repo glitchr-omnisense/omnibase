@@ -78,7 +78,6 @@ class IntlSubscriber implements EventSubscriberInterface
         // Normalize and turn orphan Intl entities if empty
         foreach($scheduledTranslatables as $translatable)
             $this->normalize($translatable);
-
     }
 
     protected function normalize(TranslatableInterface $translatable)
