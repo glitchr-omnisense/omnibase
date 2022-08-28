@@ -5,8 +5,8 @@ namespace Base\Entity\Layout;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
-use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
-use Base\Entity\Layout\Attribute\Common\BaseAttribute;
+use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\AttributeRepository;
@@ -18,11 +18,11 @@ use Base\Repository\Layout\AttributeRepository;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
-class Attribute extends BaseAttribute implements TranslatableInterface
+class Attribute extends AbstractAttribute implements TranslatableInterface
 {
     use TranslatableTrait;
 
-    public function __construct(AbstractAttribute $adapter, mixed $value = null)
+    public function __construct(AbstractAdapter $adapter, mixed $value = null)
     {
         parent::__construct($adapter);
         $this->setValue($value);

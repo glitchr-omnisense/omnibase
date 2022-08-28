@@ -26,9 +26,9 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Base\Database\Factory\ClassMetadataManipulator;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Base\Entity\Layout\Attribute\Common\BaseAttribute;
+use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
+use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
 use Base\Twig\Environment;
 
 class AttributeType extends AbstractType implements DataMapperInterface
@@ -78,8 +78,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             if($value !== null && !class_exists($value))
                 throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't exists");
-            if($value !== null && !class_exists($value, BaseAttribute::class))
-                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't inherit from \"".BaseAttribute::class."\"");
+            if($value !== null && !class_exists($value, AbstractAttribute::class))
+                throw new InvalidArgumentException("\"class\" option is \"".$value."\", but the class itself doesn't inherit from \"".AbstractAttribute::class."\"");
 
             return $value;
         });
@@ -88,8 +88,8 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             if($value !== null && !class_exists($value))
                 throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but the class itself doesn't exists");
-            if($value !== null && !is_instanceof($value, AbstractAttribute::class))
-                throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but doesn't inherit from \"".AbstractAttribute::class."\"");
+            if($value !== null && !is_instanceof($value, AbstractAdapter::class))
+                throw new InvalidArgumentException("\"abstract_class\" option is \"".$value."\", but doesn't inherit from \"".AbstractAdapter::class."\"");
 
             return $value;
         });
@@ -116,7 +116,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
             $options["class"]  = $options["class"] ?? Attribute::class;
-            $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAttribute::class;
+            $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAdapter::class;
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
@@ -238,7 +238,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
     {
         $form = iterator_to_array($forms)["choice"]->getParent();
         $options = $form->getConfig()->getOptions();
-        $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessClass($form, $options) ?? BaseAttribute::class;
+        $options["class"]    = $attributeClass = $options["class"] ?? $this->formFactory->guessClass($form, $options) ?? AbstractAttribute::class;
         $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($form, $options);
 
         $choiceForm     = iterator_to_array($forms)["choice"];
@@ -262,7 +262,7 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
             foreach($choiceData as $choice) {
 
-                if(( $attribute = $bakData->filter(fn(BaseAttribute $e) => $e->getAdapter() === $choice)->first() )) {
+                if(( $attribute = $bakData->filter(fn(AbstractAttribute $e) => $e->getAdapter() === $choice)->first() )) {
 
                     $key = array_search_user(iterator_to_array($forms), fn(string $k, $_) => str_starts_with($k, $attribute->getAdapter()->getCode()));
                     if(( $attributeForm = iterator_to_array($forms)[$key] ?? null )) {
@@ -274,11 +274,11 @@ class AttributeType extends AbstractType implements DataMapperInterface
                     $viewData->add($attribute);
                     $bakData->removeElement($attribute);
 
-                } else if($choice instanceof AbstractAttribute) {
+                } else if($choice instanceof AbstractAdapter) {
 
                     $viewData->add(new ($attributeClass)($choice));
 
-                } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAttribute::class);
+                } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAdapter::class);
             }
 
             if($viewData instanceof PersistentCollection) {

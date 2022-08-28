@@ -5,8 +5,6 @@ namespace Base\Service;
 use Base\BaseBundle;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
-use Base\Repository\Layout\Widget\SlotRepository as WidgetSlotRepository;
-use Base\Repository\Layout\WidgetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class WidgetProvider implements WidgetProviderInterface

@@ -7,9 +7,9 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\TranslatableInterface;
 use Base\Entity\Layout\Attribute;
-use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
-use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;
-use Base\Entity\Layout\Attribute\Common\BaseAttribute;
+use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
+use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
+use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
 use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -22,11 +22,10 @@ use Base\Repository\Layout\Attribute\HyperlinkRepository;
  * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
-class Hyperlink extends BaseAttribute implements TranslatableInterface, IconizeInterface
+class Hyperlink extends AbstractAttribute implements TranslatableInterface, IconizeInterface
 {
     use TranslatableTrait;
-
-    public function __construct(AbstractAttribute $adapter, mixed $value = null)
+    public function __construct(AbstractAdapter $adapter, mixed $value = null)
     {
         parent::__construct($adapter);
         $this->setValue($value);
@@ -47,20 +46,20 @@ class Hyperlink extends BaseAttribute implements TranslatableInterface, IconizeI
       * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
       */
     protected $hyperpattern;
-    public function getHyperpattern(): HyperpatternAttribute { return $this->hyperpattern; }
-    public function setHyperpattern(HyperpatternAttribute $hyperpattern): self
+    public function getHyperpattern(): HyperpatternAdapter { return $this->hyperpattern; }
+    public function setHyperpattern(HyperpatternAdapter $hyperpattern): self
     {
         $this->hyperpattern = $hyperpattern;
         return $this;
     }
 
-    public function generate(?string $locale = null) { return $this->adapter->generate(...$this->translate($locale)->getValue()); }
+    public function generate(?string $locale = null) { return $this->adapter->generate(...$this->getValue($locale)); }
     public function getLabel(): string { return $this->adapter->getLabel(); }
 
     public function get(?string $locale = null): mixed { return $this->getValue($locale); }
     public function set(...$args): self { return array_key_exists("value", $args) ? $this->setValue($args["value"]) : $this; }
     public function resolve(?string $locale = null): mixed
     {
-        return $this->adapter ? $this->adapter->resolve($this->translate($locale)->getValue()) : null;
+        return $this->adapter ? $this->adapter->resolve($this->getValue($locale)) : null;
     }
 }

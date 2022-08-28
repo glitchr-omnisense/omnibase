@@ -3,7 +3,7 @@
 namespace Base\Controller\Backend\Crud\Layout\Attribute;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;
+use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
 use Base\Field\ArrayField;
 
 use Base\Field\SelectField;
@@ -21,7 +21,7 @@ class HyperlinkCrudController extends AbstractCrudController
 
             yield TextField::new('label');
             yield SelectField::new('hyperpattern')->setTextAlign(TextAlign::RIGHT)
-                                                  ->setFilter(HyperpatternAttribute::class);
+                                                  ->setFilter(HyperpatternAdapter::class);
 
             yield ArrayField::new('value')->setPatternFieldName("hyperpattern.pattern")->onlyOnForms();
             yield UrlField::new('generate');

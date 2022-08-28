@@ -5,9 +5,10 @@ namespace Base\Entity;
 use Base\Database\Annotation\OrderColumn;
 use Base\Database\TranslationInterface;
 use Base\Database\Traits\TranslationTrait;
-use Base\Repository\ThreadIntlRepository;
 use Base\Traits\BaseTrait;
+
 use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\ThreadIntlRepository;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadIntlRepository::class)

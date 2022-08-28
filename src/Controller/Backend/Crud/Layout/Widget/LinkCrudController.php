@@ -5,7 +5,7 @@ namespace Base\Controller\Backend\Crud\Layout\Widget;
 use Base\Field\TranslationField;
 
 use Base\Controller\Backend\Crud\Layout\WidgetCrudController;
-use Base\Entity\Layout\Attribute\Abstract\HyperpatternAttribute;
+use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
 use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Field\AttributeField;
 use Base\Field\Type\QuillType;
@@ -19,7 +19,7 @@ class LinkCrudController extends WidgetCrudController
     {
         return parent::configureFields($pageName, ["id" => function () {
 
-            yield AttributeField::new('hyperlink')->setClass(Hyperlink::class)->setFilter(HyperpatternAttribute::class);
+            yield AttributeField::new('hyperlink')->setClass(Hyperlink::class)->setFilter(HyperpatternAdapter::class);
             yield TranslationField::new('title')->setFields([
                 "title" => [],
                 "excerpt" => ["form_type" => TextareaType::class],

@@ -39,7 +39,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\UserMenu;
 use Base\Backend\Config\Extension;
-use Base\Entity\Layout\Attribute\Abstract\AbstractAttribute;
+use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
 use Base\Entity\Layout\Widget\Link;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Translator;
@@ -516,7 +516,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             ->set("filters[class][comparison]", "!=")
             ->set("filters[class][value]", "layoutWidget_slot")->generateUrl()),
             WidgetItem::linkToCrud(Image::class),
-            WidgetItem::linkToCrud(AbstractAttribute::class),
+            WidgetItem::linkToCrud(AbstractAdapter::class),
         ]);
 
         if ($this->isGranted('ROLE_EDITOR')) {
