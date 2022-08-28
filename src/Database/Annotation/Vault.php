@@ -96,7 +96,6 @@ class Vault extends AbstractAnnotation
         $vault = $entity->getVault();
         $marshaller = $this->getMarshaller($vault);
 
-
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach($this->fields as $field) {
 

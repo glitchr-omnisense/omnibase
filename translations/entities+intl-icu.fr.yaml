@@ -108,7 +108,7 @@ layout:
       _singular: "lien hypertexte"
       _plural: "liens hypertextes"
 
-    abstract:
+    adapter:
       _singular: attribut
       _plural: attributs
 
