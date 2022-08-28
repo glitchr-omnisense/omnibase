@@ -108,41 +108,47 @@ layout:
       _singular: "lien hypertexte"
       _plural: "liens hypertextes"
 
-    abstract:
+    adapter:
       _singular: attribut
       _plural: attributs
 
-      abstract_attribute:
+      abstract_adapter:
         _singular: attribut
         _plural: attributs
-      hyperpattern_attribute:
+      hyperpattern_adapter:
         _singular: "modèle de liens"
         _plural: "modèles de liens"
-      color_attribute:
+      color_adapter:
         _singular: "couleur"
         _plural: "couleur"
-      number_attribute:
+      number_adapter:
         _singular: "nombre"
         _plural: "nombres"
-      text_attribute:
+      text_adapter:
         _singular: "ligne de texte"
         _plural: "lignes de texte"
-      textarea_attribute:
+      textarea_adapter:
         _singular: "zone de texte"
         _plural: "zones de texte"
-      datetime_attribute:
+      datetime_adapter:
         _singular: "dateheure"
         _plural: "dateheures"
-      percent_attribute:
+      percent_adapter:
         _singular: "pourcentage"
         _plural: "pourcentages"
-      array_attribute:
+      array_adapter:
         _singular: "groupe"
         _plural: "groupes"
-      image_attribute:
+      image_adapter:
         _singular: "image"
         _plural: "images"
-      scalar_attribute:
+      country_adapter:
+        _singular: "pays"
+        _plural: "pays"
+      money_adapter:
+        _singular: "monnaie"
+        _plural: "monnaies"
+      scalar_adapter:
         _singular: scalaire
         _plural: scalaires
 
