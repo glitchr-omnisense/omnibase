@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Entity\Attribute\Scope;
+namespace Base\Entity\Layout\Attribute\Scope;
 
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
