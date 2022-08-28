@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Form\FormFactory;
-use Base\Service\BaseService;
+
 use InvalidArgumentException;
 use Base\Field\Type\SelectType;
 use Base\Entity\Layout\Attribute;
@@ -17,7 +17,7 @@ use Base\Database\TranslatableInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Doctrine\Common\Collections\Collection;
-use Base\Entity\Layout\AttributeIntl;
+
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\Form\DataMapperInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -115,8 +115,13 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
-            $options["class"]  = $options["class"] ?? Attribute::class;
+            $options["class"]  = $options["class"] ?? $this->formFactory->guessClass($event, $options);
+            if(!is_instanceof($options["class"], AbstractAttribute::class))
+                $options["class"] = Attribute::class;
+
+
             $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAdapter::class;
+
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 

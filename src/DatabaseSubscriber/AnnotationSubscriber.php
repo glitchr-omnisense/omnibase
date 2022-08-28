@@ -2,13 +2,10 @@
 
 namespace Base\DatabaseSubscriber;
 
-use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
-use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Events;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;

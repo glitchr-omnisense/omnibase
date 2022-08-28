@@ -36,7 +36,7 @@ class Widget implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-cube"]; }
 
-    public function __toString() { return $this->getTitle(); }
+    public function __toString() { return $this->getTitle() ?? $this->getTranslator()->transEntity(self::class)." #".$this->getId(); }
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
         $routeParameters = array_merge($routeParameters, ["slug" => $this->getSlug()]);

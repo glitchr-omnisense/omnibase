@@ -436,14 +436,9 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     public function getTitle(?string $locale = null, int $depth = 0): ?string
     {
-        try {
-            dump($this);
         $title = $this->translate($locale)->getTitle();
         if($depth > 0) $title ??= ($this->getParent() ? $this->getParent()->getTitle($locale, --$depth) : null);
-        } catch(\Error $e) {
-            dump($e);
-            exit(1);
-        }
+
         return $title;
     }
 

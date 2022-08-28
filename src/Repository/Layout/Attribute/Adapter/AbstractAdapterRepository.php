@@ -13,7 +13,7 @@ use Base\Database\Repository\ServiceEntityRepository;
  * @method AbstractAdapter[]    findBy(array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
  */
 
-abstract class AbstractAdapterRepository extends ServiceEntityRepository
+class AbstractAdapterRepository extends ServiceEntityRepository
 {
 
 }
