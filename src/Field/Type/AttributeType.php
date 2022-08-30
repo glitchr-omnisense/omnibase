@@ -115,8 +115,13 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use (&$options) {
 
-            $options["class"]  = $options["class"] ?? Attribute::class;
+            $options["class"]  = $options["class"] ?? $this->formFactory->guessClass($event, $options);
+            if(!is_instanceof($options["class"], AbstractAttribute::class))
+                $options["class"] = Attribute::class;
+
+
             $options["abstract_class"]  = $options["abstract_class"] ?? AbstractAdapter::class;
+
             $options["multiple"] = $this->formFactory->guessMultiple($event, $options);
             $options["sortable"] = $this->formFactory->guessSortable($event, $options);
 
