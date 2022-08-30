@@ -224,7 +224,7 @@ class EntityHydrator implements EntityHydratorInterface
     protected function bindAliases(object $entity): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach (($classMetadata->aliasNames ?? $classMetadata->fieldNames) as $alias => $column) {
+        foreach (($this->classMetadataManipulator->getCompletor($entity)->aliasNames ?? $classMetadata->fieldNames) as $alias => $column) {
 
             $fn = function() use ($alias, $column) {
 

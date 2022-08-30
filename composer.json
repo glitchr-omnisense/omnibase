@@ -68,7 +68,7 @@
         "nelmio/cors-bundle": "^2.2",
         "hashids/hashids": "^4.1",
 
-        "doctrine/doctrine-bundle": "^2.6",
+        "doctrine/doctrine-bundle": "^2.0",
         "xkzl/base-plugin": "1.0.*-dev",
 
     	"backup-manager/backup-manager": "^3.1"

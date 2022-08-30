@@ -945,6 +945,12 @@
         <service id="Base\Field\Configurator\SelectConfigurator">
             <tag name="ea.field_configurator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+            <bind key="$environment">%kernel.environment%</bind>
+        </service>
+
+        <service id="Base\Field\Configurator\SelectConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="translator" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>

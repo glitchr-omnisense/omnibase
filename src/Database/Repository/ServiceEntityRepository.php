@@ -33,7 +33,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
 
-        $this->serviceParser = new ServiceEntityParser($this, $entityManager, $entityHydrator);
+        $this->serviceParser = new ServiceEntityParser($this, $entityManager, $classMetadataManipulator, $entityHydrator);
     }
 
     public function __call   ($method, $arguments) : mixed { return $this->serviceParser->parse($method, $arguments); }

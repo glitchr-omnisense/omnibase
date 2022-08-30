@@ -2,6 +2,7 @@
 
 namespace Base\Database\Repository;
 
+use Base\Database\Factory\ClassMetadataManipulator;
 use Base\Database\Factory\EntityHydrator;
 use Base\Database\TranslatableInterface;
 
@@ -118,12 +119,15 @@ class ServiceEntityParser
     protected array $options  = [];
 
     protected $classMetadata = null;
+    protected $classMetadataManipulator = null;
 
-    public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager,  EntityHydrator $entityHydrator)
+    public function __construct(ServiceEntityRepository $serviceEntity, EntityManager $entityManager, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
     {
         $this->serviceEntity  = $serviceEntity;
         $this->entityHydrator = $entityHydrator;
         $this->entityManager  = $entityManager;
+        $this->classMetadataManipulator = $classMetadataManipulator;
+
         $this->classMetadata  = $entityManager->getClassMetadata($serviceEntity->getFqcnEntityName());
 
         $this->criteria = [];
@@ -207,10 +211,7 @@ class ServiceEntityParser
         return $ret;
     }
 
-    protected function getAlias($alias)
-    {
-        return $this->classMetadata->aliasNames[$alias] ?? $this->classMetadata->fieldNames[$alias] ??$alias;
-    }
+    protected function getAlias($alias) { return $this->classMetadataManipulator->getAliasName($this->classMetadata->name, $alias) ?? $alias; }
 
     protected function addCriteria(?string $by, $value)
     {

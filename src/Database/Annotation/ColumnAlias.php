@@ -48,8 +48,8 @@ class ColumnAlias extends AbstractAnnotation
         else if($classMetadata->hasField($alias))
             throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
 
-        $classMetadata->aliasNames ??= $classMetadata->fieldNames;
-        $classMetadata->aliasNames[$alias] = $this->column;
+        $this->getClassMetadataCompletor($classMetadata)->aliasNames ??= [];
+        $this->getClassMetadataCompletor($classMetadata)->aliasNames[$alias] = $this->column;
     }
 
     public function bind($entity, $column, $alias)
