@@ -558,23 +558,22 @@ class EntityHydrator implements EntityHydratorInterface
 
         $data = $this->getOriginalEntityData($eventOrEntity);
 
-        if(!$eventOrEntity instanceof LifecycleEventArgs) $oldEntity = $eventOrEntity;
-        else $oldEntity = $eventOrEntity->getObject();
+        if(!$eventOrEntity instanceof LifecycleEventArgs) $className = get_class($eventOrEntity);
+        else $className = get_class($eventOrEntity->getObject());
 
-        return $this->hydrate($oldEntity, $data);
+        return $this->hydrate($className, $data);
     }
 
     public function getOriginalEntityData($eventOrEntity)
     {
         $entity = $this->classMetadataManipulator->isEntity($eventOrEntity) ? $eventOrEntity : $eventOrEntity->getObject();
-        $originalEntityData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
 
+        $originalEntityData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
         if($eventOrEntity instanceof PreUpdateEventArgs) {
 
             $event = $eventOrEntity;
             foreach($event->getEntityChangeSet() as $field => $data)
                 $originalEntityData[$field] = $data[0];
-
         }
 
         return $originalEntityData;

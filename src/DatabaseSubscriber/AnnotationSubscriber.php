@@ -2,8 +2,10 @@
 
 namespace Base\DatabaseSubscriber;
 
+use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
+use Base\Database\Mapping\ClassMetadataCompletor;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManagerInterface;
@@ -23,9 +25,10 @@ class AnnotationSubscriber implements EventSubscriberInterface {
      */
     protected $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, AnnotationReader $annotationReader)
+    public function __construct(EntityManagerInterface $entityManager, AnnotationReader $annotationReader, ClassMetadataCompletor $classMetadataCompletor)
     {
         $this->entityManager    = $entityManager;
+        $this->classMetadataCompletor = $classMetadataCompletor;
         $this->annotationReader = $annotationReader;
     }
 
@@ -45,7 +48,8 @@ class AnnotationSubscriber implements EventSubscriberInterface {
     protected array $subscriberHistory = [];
     public function loadClassMetadata( LoadClassMetadataEventArgs $event )
     {
-        if(!BaseBundle::isBooted()) return; // Base bundle needs to be booted to be aware of custom doctrine types.
+        // needs to be booted to be aware of custom doctrine types.
+        if(!BaseBundle::isBooted()) return;
 
         $className     = $event->getClassMetadata()->name;
         $classMetadata = $event->getClassMetadata();
@@ -96,6 +100,9 @@ class AnnotationSubscriber implements EventSubscriberInterface {
                 $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
             }
         }
+
+        if ($this->classMetadataCompletor->getCache())
+            $this->classMetadataCompletor->getCache()->commit();
     }
 
     public function onFlush(OnFlushEventArgs $event)
@@ -159,6 +166,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
         $className      = get_class($entity);
         $classMetadata  = $this->entityManager->getClassMetadata($className);
+
         if (in_array($className, $this->subscriberHistory)) return;
         $this->subscriberHistory[] = $className . "::" . __FUNCTION__;
 

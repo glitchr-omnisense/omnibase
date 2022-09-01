@@ -2,7 +2,7 @@
 
 namespace Base\Database\Mapping;
 
-class ClassMetadataCompletor
+class ClassMetadataEnhanced
 {
     protected array $payload = [];
     protected string $className;
@@ -21,5 +21,4 @@ class ClassMetadataCompletor
         $this->payload[$name] = $value;
         return $this;
     }
-
 }

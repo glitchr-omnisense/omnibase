@@ -342,6 +342,7 @@
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" priority="1024" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.metadata_completor" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
@@ -458,6 +459,11 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
+        <service id="Base\Database\Mapping\ClassMetadataCompletor" public="true">
+            <argument type="service" id="doctrine.orm.entity_manager" />
+            <bind key="$phpArrayFile">%kernel.cache_dir%/static_metadata.php</bind>
+        </service>
+
         <service id="Base\Annotations\AnnotationReader" public="true">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="doctrine.orm.entity_manager" />
@@ -476,6 +482,12 @@
             <tag name="kernel.cache_warmer" />
             <argument type="service" id="base.annotation_reader" />
             <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
+        </service>
+
+        <service id="Base\Cache\DoctrineMetadataEnhancedWarmer"      public="true">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="base.database.metadata_completor" />
+            <bind key="$phpArrayFile">%kernel.cache_dir%/static_metadata.php</bind>
         </service>
 
          <service id="Base\Security\Voter\BackendVoter">

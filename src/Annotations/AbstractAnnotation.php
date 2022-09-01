@@ -5,6 +5,7 @@ namespace Base\Annotations;
 use App\Entity\User;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
+use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\Common\Collections\Collection;
@@ -35,12 +36,11 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function getClassMetadata($objectOrClass): ?ClassMetadata { return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);     }
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator { return AnnotationReader::getInstance()->getClassMetadataManipulator();  }
-    public static function getClassMetadataCompletor(mixed $objectOrClass): ?ClassMetadataCompletor { return AnnotationReader::getInstance()->getClassMetadataManipulator()->getCompletor($objectOrClass);  }
+    public static function getClassMetadataEnhanced(mixed $objectOrClass): ?ClassMetadataEnhanced { return AnnotationReader::getInstance()->getClassMetadataManipulator()->getClassMetadataEnhanced($objectOrClass);  }
 
     public static function getFlysystem(): FlysystemInterface { return AnnotationReader::getInstance()->getFlysystem();   }
     public static function getImpersonator():?User     { return AnnotationReader::getInstance()->getImpersonator(); }
     public static function getUser():?User             { return AnnotationReader::getInstance()->getUser();         }
-
     public static function getRepository($className)                    { return AnnotationReader::getInstance()->getRepository($className); }
     public static function getAsset($url)                               { return AnnotationReader::getInstance()->getAsset($url);            }
 
