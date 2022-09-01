@@ -3,7 +3,7 @@
 namespace Base\Field\Type;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Base\Service\FileService;

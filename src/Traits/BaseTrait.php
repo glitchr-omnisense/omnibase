@@ -3,8 +3,8 @@
 namespace Base\Traits;
 
 use Base\Annotations\AnnotationReader;
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Entity\EntityHydrator;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Notifier\NotifierInterface;
 use Base\Routing\RouterInterface;

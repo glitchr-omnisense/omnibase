@@ -58,7 +58,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {
 
-            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($entry)))
                 continue;
 
             if (!$entry->supports(AnnotationReader::TARGET_CLASS, $className, $classMetadata))
@@ -72,7 +72,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
             foreach ($array as $entry) {
 
-                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getTargets($entry)))
+                if (!in_array(AnnotationReader::TARGET_METHOD, $this->annotationReader->getAnnotationTargets($entry)))
                     continue;
 
                 if (!$entry->supports(AnnotationReader::TARGET_METHOD, $method, $classMetadata))
@@ -87,7 +87,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
             foreach ($array as $entry) {
 
-                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($entry)))
                     continue;
 
                 if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $classMetadata))
@@ -123,7 +123,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
             $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
             foreach ($classAnnotations as $entry) {
 
-                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
+                if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($entry)))
                     continue;
 
                 if (!$entry->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
@@ -141,7 +141,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
                 foreach ($array as $entry) {
 
-                    if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
+                    if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($entry)))
                         continue;
 
                     if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))
@@ -167,7 +167,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
         foreach ($classAnnotations as $entry) {
 
-            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getTargets($entry)))
+            if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($entry)))
                 continue;
 
             if (!$entry->supports(AnnotationReader::TARGET_CLASS, $className, $entity))
@@ -181,7 +181,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
 
             foreach ($array as $entry) {
 
-                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getTargets($entry)))
+                if (!in_array(AnnotationReader::TARGET_PROPERTY, $this->annotationReader->getAnnotationTargets($entry)))
                     continue;
 
                 if (!$entry->supports(AnnotationReader::TARGET_PROPERTY, $property, $entity))

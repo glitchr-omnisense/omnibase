@@ -2,7 +2,7 @@
 
 namespace Base\DependencyInjection\Compiler;
 
-use Base\Database\Factory\EntityExtension;
+use Base\Database\Entity\EntityExtension;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;

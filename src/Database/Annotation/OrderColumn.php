@@ -5,7 +5,7 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
-use Base\Database\Factory\EntityExtensionInterface;
+use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;

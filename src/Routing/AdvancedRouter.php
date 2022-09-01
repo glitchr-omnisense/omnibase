@@ -90,6 +90,22 @@ class AdvancedRouter implements RouterInterface
         return str_starts_with($route, "_wdt") || str_starts_with($route, "_profiler");
     }
 
+    public function isUX(mixed $request = null)
+    {
+        if(!$request) $request = $this->requestStack->getCurrentRequest();
+        if ($request instanceof KernelEvent)
+            $request = $request->getRequest();
+        else if($request instanceof RequestStack)
+            $request = $request->getCurrentRequest();
+        else if(!$request instanceof Request)
+            return false;
+
+        $route = $this->getRouteName();
+        if(!$route) return false;
+
+        return str_starts_with($route, "ux_");
+    }
+
     public function isWdt(mixed $request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
@@ -300,7 +316,7 @@ class AdvancedRouter implements RouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
-    public function isRouteSecure(?string $routeUrl = null): ?bool
+    public function isRouteSecured(?string $routeUrl = null): ?bool
     {
         if($routeUrl === null) $routeUrl = $this->getRequestUri();
 

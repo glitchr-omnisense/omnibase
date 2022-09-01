@@ -2,8 +2,8 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;

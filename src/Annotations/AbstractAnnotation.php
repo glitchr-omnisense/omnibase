@@ -3,8 +3,8 @@
 namespace Base\Annotations;
 
 use App\Entity\User;
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Entity\EntityHydrator;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\Common\Collections\Collection;

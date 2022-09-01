@@ -3,7 +3,7 @@
 namespace Base\Controller\Backend;
 
 use Base\Backend\Config\Extension;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;

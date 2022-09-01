@@ -5,7 +5,7 @@ namespace Base\Console\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Base\Console\Command;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;

@@ -2,7 +2,7 @@
 
 namespace Base\Database\Traits;
 
-use Base\Database\NamingStrategy;
+use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Service\LocaleProvider;
 use Base\Traits\BaseTrait;

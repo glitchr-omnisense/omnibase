@@ -2,7 +2,7 @@
 
 namespace Base\Field;
 
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\TextAlign;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldInterface;
 

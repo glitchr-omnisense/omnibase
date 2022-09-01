@@ -3,7 +3,7 @@
 namespace Base\Form\Extension;
 
 use App\Enum\UserRole;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Symfony\Component\Form\Extension\Core\Type\FormType;

@@ -1,9 +1,10 @@
 <?php
 
-namespace Base\Database\Factory;
+namespace Base\Database\Entity;
 
-use Base\Database\Factory\AggregateHydrator\PopulableInterface;
-use Base\Database\Factory\AggregateHydrator\SerializableInterface;
+use Base\Database\Entity\AggregateHydrator\PopulableInterface;
+use Base\Database\Entity\AggregateHydrator\SerializableInterface;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslationInterface;
 use Base\Database\Type\SetType;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -224,7 +225,7 @@ class EntityHydrator implements EntityHydratorInterface
     protected function bindAliases(object $entity): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach (($classMetadata->aliasNames ?? $classMetadata->fieldNames) as $alias => $column) {
+        foreach (($classMetadata->fieldNames) as $alias => $column) {
 
             $fn = function() use ($alias, $column) {
 
@@ -540,7 +541,7 @@ class EntityHydrator implements EntityHydratorInterface
     {
         if($data === null) return null;
 
-        $fieldNames = $this->entityManager->getClassMetadata($classname)->aliasNames ?? $this->entityManager->getClassMetadata($classname)->fieldNames;
+        $fieldNames = $this->entityManager->getClassMetadata($classname)->fieldNames;
         $fields  = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 

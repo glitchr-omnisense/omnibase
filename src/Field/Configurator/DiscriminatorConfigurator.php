@@ -3,7 +3,7 @@
 namespace Base\Field\Configurator;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\DiscriminatorField;
 use Base\Field\SelectField;
 use Base\Field\Type\DiscriminatorType;

@@ -7,7 +7,7 @@ use App\Entity\User\Artist;
 use App\Entity\User\Merchant;
 use App\Enum\UserRole;
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
 use Base\Service\BaseService;

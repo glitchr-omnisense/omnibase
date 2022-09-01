@@ -3,10 +3,10 @@
 namespace Base\Console\Command;
 
 use Base\Console\Command;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Serializer\Encoder\ExcelEncoder;
 
-use Base\Database\Factory\EntityHydrator;
+use Base\Database\Entity\EntityHydrator;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
 use Base\Entity\Thread;

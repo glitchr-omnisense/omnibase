@@ -2,7 +2,7 @@
 
 namespace Base\Database\Walker;
 
-use Base\Database\NamingStrategy;
+use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;

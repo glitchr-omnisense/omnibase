@@ -2,7 +2,7 @@
 
 namespace Base\DatabaseSubscriber;
 
-use Base\Database\Factory\EntityHydratorInterface;
+use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;

@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 

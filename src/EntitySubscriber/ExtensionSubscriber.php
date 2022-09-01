@@ -2,7 +2,7 @@
 
 namespace Base\EntitySubscriber;
 
-use Base\Database\Factory\EntityExtension;
+use Base\Database\Entity\EntityExtension;
 
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;

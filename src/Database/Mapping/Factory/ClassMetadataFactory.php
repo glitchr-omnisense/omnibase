@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Database\Factory;
+namespace Base\Database\Mapping\Factory;
 
-use Base\Database\NamingStrategy;
+use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\Exception\MissingDiscriminatorMapException;
@@ -95,6 +95,16 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $this->evm->dispatchEvent(Events::onClassMetadataNotFound, $eventArgs);
 
         return $eventArgs->getFoundMetadata();
+    }
+
+    public function getAllClassNames()
+    {
+        if (! $this->initialized) {
+            $this->initialize();
+        }
+
+        $driver = $this->getDriver();
+        return $driver->getAllClassNames();
     }
 
     /**

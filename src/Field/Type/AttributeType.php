@@ -23,7 +23,7 @@ use Symfony\Component\Form\DataMapperInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Symfony\Component\Form\FormBuilderInterface;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;

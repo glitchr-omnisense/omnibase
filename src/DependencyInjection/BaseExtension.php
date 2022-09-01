@@ -3,7 +3,7 @@
 namespace Base\DependencyInjection;
 
 use Base\Annotations\AnnotationInterface;
-use Base\Database\Factory\EntityExtensionInterface;
+use Base\Database\Entity\EntityExtensionInterface;
 use Base\Service\Model\IconProvider\IconAdapterInterface;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

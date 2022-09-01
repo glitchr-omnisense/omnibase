@@ -284,7 +284,7 @@ class Uploader extends AbstractAnnotation
         }
 
         //
-        // Replace http urls in the list of new elements
+        // Go fetch URL if allowed
         foreach ($newList as $index => $entry) {
 
             if (filter_var($entry, FILTER_VALIDATE_URL)) {
@@ -297,9 +297,11 @@ class Uploader extends AbstractAnnotation
         $entityId = $entity->getId();
         $entityId = $entityId ? "#".$entityId : "";
 
+
         // Field value can be an array or just a single path
-        $fileList = array_values(array_intersect($newList, $oldList));
-        foreach (array_diff($newList, $oldList) as $index => $entry) {
+        $uploadList = array_values(array_intersect($newList, $oldList));
+
+        foreach (array_union($uploadList, array_diff($newList, $oldList)) as $index => $entry) {
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..
@@ -333,8 +335,10 @@ class Uploader extends AbstractAnnotation
             $path     = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
 
-            if ($this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
-                $fileList[] = basename($path);
+            if (!$this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
+                throw new InvalidMimeTypeException("Failed to write \"".$path."\" in ".get_class($entity).".");
+
+            $fileList[] = basename($path);
         }
 
         self::setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
@@ -394,9 +398,7 @@ class Uploader extends AbstractAnnotation
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
     {
         $oldEntity = $this->getOldEntity($entity);
-
         try {
-
             if ($this->uploadFiles($entity, $oldEntity, $fieldName))
                 $this->deleteFiles($entity, $oldEntity, $fieldName);
 

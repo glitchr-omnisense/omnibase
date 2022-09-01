@@ -3,7 +3,7 @@
 namespace Base\Form\Type;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Field\Type\AvatarType;

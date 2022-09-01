@@ -81,7 +81,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         if(!$session->get("_integrity/secret"))
             $session->set("_integrity/secret", $this->getSecret());
 
-        if(!$this->router->isRouteSecure()) return;
+        if(!$this->router->isRouteSecured()) return;
         if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE) return;
 
         $integrity  = $this->checkUserIntegrity();

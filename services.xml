@@ -101,6 +101,7 @@
 
         <service id="Base\Subscriber\AnalyticsSubscriber">
             <tag name="kernel.event_subscriber" />
+            <tag name="twig.runtime" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
@@ -445,14 +446,14 @@
             <!-- <bind key="$metadata">%base.currency_api.currency_layer%</bind> -->
         </service>
 
-        <service id="Base\Database\NamingStrategy"  public="true" />
-        <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
-        <service id="Base\Database\Factory\EntityHydrator"  public="true">
+        <service id="Base\Database\Mapping\NamingStrategy"  public="true" />
+        <service id="Base\Database\Mapping\Factory\ClassMetadataFactory"  public="true"/>
+        <service id="Base\Database\Entity\EntityHydrator"  public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
+        <service id="Base\Database\Mapping\ClassMetadataManipulator" public="true">
             <argument type="service" id="doctrine" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
@@ -461,12 +462,20 @@
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="cache.adapter" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+            <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
+            <bind key="$projectDir">%kernel.project_dir%</bind>
+            <bind key="$environment">%kernel.environment%</bind>
+        </service>
+
+        <service id="Base\Cache\AnnotationWarmer"      public="true">
+            <tag name="kernel.cache_warmer" />
+            <argument type="service" id="base.annotation_reader" />
+            <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
         </service>
 
          <service id="Base\Security\Voter\BackendVoter">
@@ -493,7 +502,7 @@
             <argument type="service" id="locale_provider" />
         </service>
 
-        <service id="Base\Database\Factory\EntityExtension" public="true" />
+        <service id="Base\Database\Entity\EntityExtension" public="true" />
         <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Versionable"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Logging"    ><tag name="base.entity_extension" /></service>
@@ -528,6 +537,7 @@
         <service id="Base\Twig\Extension\FileTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="router" />
+            <bind key="$projectDir">%kernel.project_dir%</bind>
        </service>
 
         <service id="Base\Twig\Extension\FunctionTwigExtension" public="true">
