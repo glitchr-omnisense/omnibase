@@ -86,7 +86,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
-        $property = $classMetadata->aliasNames[$property] ?? $classMetadata->fieldNames[$property] ?? $property;
+        $property = $this->getClassMetadataManipulator()->getAliasName($entity, $property) ?? $property;
         $this->addOrderedColumnIfNotSet($classMetadata, $property);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();

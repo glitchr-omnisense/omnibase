@@ -35,6 +35,7 @@ abstract class AbstractAnnotation implements AnnotationInterface
 
     public static function getClassMetadata($objectOrClass): ?ClassMetadata { return self::getEntityManager()->getClassMetadata(is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass);     }
     public static function getClassMetadataManipulator(): ?ClassMetadataManipulator { return AnnotationReader::getInstance()->getClassMetadataManipulator();  }
+    public static function getClassMetadataCompletor(mixed $objectOrClass): ?ClassMetadataCompletor { return AnnotationReader::getInstance()->getClassMetadataManipulator()->getCompletor($objectOrClass);  }
 
     public static function getFlysystem(): FlysystemInterface { return AnnotationReader::getInstance()->getFlysystem();   }
     public static function getImpersonator():?User     { return AnnotationReader::getInstance()->getImpersonator(); }
