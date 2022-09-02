@@ -199,7 +199,8 @@ class ServiceEntityParser
     {
         // Parse method and call it
         list($method, $arguments) = $this->__parse($method, $arguments);
-        $ret = $this->$method(...$arguments);
+try {        $ret = $this->$method(...$arguments); }
+catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
 
         // Reset internal variables
         $this->criteria  = [];

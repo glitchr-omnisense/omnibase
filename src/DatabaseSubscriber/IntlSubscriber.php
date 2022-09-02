@@ -2,7 +2,6 @@
 
 namespace Base\DatabaseSubscriber;
 
-use Base\Database\Entity\EntityHydratorInterface;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
@@ -10,10 +9,8 @@ use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\UnitOfWork;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use InvalidArgumentException;
 
@@ -23,6 +20,8 @@ class IntlSubscriber implements EventSubscriberInterface
      * @var string
      */
     public const LOCALE = 'locale';
+    public const FOREIGN_KEY = 'translatable_id';
+    public const INTL_SALT = "unique_translation";
 
     /**
      * @return string[]
@@ -189,7 +188,7 @@ class IntlSubscriber implements EventSubscriberInterface
                 'cascade'     => ['persist', 'merge'],
                 'fetch'       => $this->convertFetchString("LAZY"),
                 'joinColumns' => [[
-                    'name' => 'translatable_id',
+                    'name' => self::FOREIGN_KEY,
                     'referencedColumnName' => 'id',
                     'onDelete' => 'CASCADE',
                 ]],
@@ -204,17 +203,18 @@ class IntlSubscriber implements EventSubscriberInterface
             $classMetadata->cache["region"] .= "_translation";
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
-        $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
+        $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' .self::INTL_SALT;
 
-        if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
-            $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
+        if ($classMetadata->getName() == $classMetadata->rootEntityName) {
+
+            $classMetadata->table['uniqueConstraints'][$name] ??= [];
+            $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
+                $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
+                [self::FOREIGN_KEY, self::LOCALE]
+            ));
+        }
 
         if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))
             $classMetadata->mapField(['fieldName' => self::LOCALE, 'type' => 'string', 'length' => 5]);
-    }
-
-    private function hasUniqueTranslationConstraint(ClassMetadata $classMetadata, string $name): bool
-    {
-        return isset($classMetadata->table['uniqueConstraints'][$name]);
     }
 }

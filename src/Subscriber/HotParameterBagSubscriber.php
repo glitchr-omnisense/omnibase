@@ -31,5 +31,7 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
             if($setting->getBag() === null) continue;
             $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
         }
+
+        $this->parameterBag->markAsReady();
     }
 }

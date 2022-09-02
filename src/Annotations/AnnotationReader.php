@@ -13,6 +13,7 @@ use App\Entity\User;
 use Base\BaseBundle;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Entity\Layout\SettingIntl;
 use Base\Service\FlysystemInterface;
 use Base\Traits\SingletonTrait;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -674,6 +675,7 @@ class AnnotationReader
                 $this->getCache()->saveDeferred($item);
             }
         }
+
 
         // Get class annotations
         if (in_array(self::TARGET_CLASS, $annotationTargets)) {

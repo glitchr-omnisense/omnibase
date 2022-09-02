@@ -46,8 +46,10 @@
         <service id="Base\Notifier\NotifierInterface" alias="base.notifier"/>
         <service id="base.translator" alias="Base\Service\Translator" />
         <service id="Base\Service\TranslatorInterface" alias="base.translator"/>
+
         <service id="parameter_bag.hot" alias="Base\Service\ParameterBag" />
         <service id="Base\Service\HotParameterBagInterface" alias="parameter_bag.hot"/>
+
         <service id="base.widget_provider" alias="Base\Service\WidgetProvider" />
         <service id="Base\Service\WidgetProviderInterface" alias="base.widget_provider"/>
         <service id="base.paginator" alias="Base\Service\Paginator" />

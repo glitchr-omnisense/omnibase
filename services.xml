@@ -87,7 +87,7 @@
             <argument type="service" id="router" />
         </service>
         <service id="Base\Subscriber\HotParameterBagSubscriber">
-            <tag name="kernel.event_subscriber" />
+            <tag name="kernel.event_subscriber" priority="1024" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
         </service>
@@ -480,13 +480,13 @@
         </service>
 
         <service id="Base\Cache\AnnotationWarmer"      public="true">
-            <tag name="kernel.cache_warmer" />
+            <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.annotation_reader" />
             <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
         </service>
 
         <service id="Base\Cache\DoctrineMetadataEnhancedWarmer"      public="true">
-            <tag name="kernel.cache_warmer" />
+            <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.database.metadata_completor" />
             <bind key="$phpArrayFile">%kernel.cache_dir%/static_metadata.php</bind>
         </service>

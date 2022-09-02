@@ -5,6 +5,7 @@ namespace Base\DatabaseSubscriber;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
 use Base\Database\Mapping\Factory\ClassMetadataCompletor;
+use Base\Entity\Layout\SettingIntl;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManagerInterface;
@@ -59,6 +60,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
         $annotations = $this->annotationReader->getAnnotations($className);
 
         $classAnnotations = $annotations[AnnotationReader::TARGET_CLASS][$className] ?? [];
+
         foreach ($classAnnotations as $entry) {
 
             if (!in_array(AnnotationReader::TARGET_CLASS, $this->annotationReader->getAnnotationTargets($entry)))

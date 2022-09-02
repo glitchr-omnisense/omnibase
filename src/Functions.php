@@ -177,22 +177,23 @@ namespace {
         return $parse;
     }
 
-    function is_instanceof(mixed $object_or_class, string|array $class): bool
+    function is_instanceof(mixed $object_or_class, string|array $instanceOf): bool
     {
         // At least one class detection
-        if(is_array($class)) {
+        if(is_array($instanceOf)) {
 
-            foreach($class as $_class)
-                if(is_instanceof($object_or_class, $_class)) return true;
+            foreach($instanceOf as $_instanceOf)
+                if(is_instanceof($object_or_class, $_instanceOf)) return true;
 
             return false;
         }
 
         // Default one
-        if(!class_exists($class))
-            throw new Exception("Class \"$class\" doesn't exists.");
+        if(interface_exists($instanceOf)) return class_implements_interface($object_or_class, $instanceOf);
+        if(!class_exists($instanceOf))
+            throw new Exception("Class \"$instanceOf\" doesn't exists.");
 
-        return is_a($object_or_class, $class, !is_object($object_or_class));
+        return is_a($object_or_class, $instanceOf, !is_object($object_or_class));
     }
 
     function is_abstract(mixed $object_or_class) : bool
