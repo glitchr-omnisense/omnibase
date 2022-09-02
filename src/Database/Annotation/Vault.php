@@ -5,8 +5,6 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Event\OnFlushEventArgs;
-use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
 
@@ -20,15 +18,20 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  * @Attributes({
  *   @Attribute("vault", type = "array"),
  *   @Attribute("fields", type = "array"),
+ *   @Attribute("unique", type = "array")
  * })
  */
 class Vault extends AbstractAnnotation
 {
-    public $fields;
+    public string $vault;
+    public array $fields;
+    public ?array $unique;
+
     public function __construct( array $data = [])
     {
         $this->vault  = $data["vault"] ?? "vault";
         $this->fields = $data["fields"] ?? [];
+        $this->unique = $data["unique"] ?? null;
     }
 
     public function supports(string $target, ?string $targetValue = null, $classMetadata = null): bool
@@ -87,6 +90,35 @@ class Vault extends AbstractAnnotation
 
         try { return $marshaller->unmarshall($value); }
         catch (\Exception $e) { return null; }
+    }
+
+    public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
+    {
+        if($this->unique == null)
+            return;
+
+        if ($classMetadata->reflClass === null)
+            return; // Class has not yet been fully built, ignore this event
+
+        if ($classMetadata->isMappedSuperclass) return;
+
+        $namingStrategy = $this->getEntityManager()->getConfiguration()->getNamingStrategy();
+        if(is_instanceof($classMetadata->name, TranslationInterface::class)) {
+
+            $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
+
+            dump("GOOD:", $name);
+            exit(1);
+            if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueConstraint($classMetadata, $name))
+                $classMetadata->table['uniqueConstraints'][$name] = ['columns' => $this->columns];
+
+        } else {
+
+            dump("AIE");
+            exit(1);
+            $name = $namingStrategy->classToTableName($classMetadata->name) . '_unique';
+            $classMetadata->table['uniqueConstraints'][$name] = ['columns' => $this->columns];
+        }
     }
 
     public function preUpdate  (LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null) { $this->preLifecycleEvent($event, $classMetadata, $entity, $property); }

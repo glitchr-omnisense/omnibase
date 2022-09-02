@@ -2,6 +2,7 @@
 
 namespace Base\Database\Mapping;
 
+use Base\Database\Mapping\Factory\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
@@ -39,6 +40,7 @@ class ClassMetadataManipulator
     {
         $this->doctrine = $doctrine;
         $this->entityManager = $entityManager;
+        $this->classMetadataCompletor = new ClassMetadataCompletor($this->entityManager);
         $this->globalExcludedFields = $globalExcludedFields;
     }
 
@@ -112,7 +114,7 @@ class ClassMetadataManipulator
     public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : []; }
     public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null; }
 
-    public function getClassMetadata(mixed $entityOrClassOrMetadata)
+    public function getClassMetadata(null|string|object $entityOrClassOrMetadata)
     {
         if($entityOrClassOrMetadata === null) return null;
         if($entityOrClassOrMetadata instanceof ClassMetadataInfo)
@@ -126,22 +128,10 @@ class ClassMetadataManipulator
         return $classMetadata;
     }
 
-    protected array $classMetadataCompletors = [];
-    public function getCompletor(mixed $entityOrClassOrMetadata) : ?ClassMetadataCompletor
+    public function getClassMetadataEnhanced(null|string|object $entityOrClassOrMetadata) : ?ClassMetadataEnhanced
     {
-        if ($entityOrClassOrMetadata instanceof ClassMetadata) $entity = $entityOrClassOrMetadata->name;
-        else if (is_object($entityOrClassOrMetadata)) $entity = get_class($entityOrClassOrMetadata);
-        else $entity = $entityOrClassOrMetadata;
-
-        if(array_key_exists($entity, $this->classMetadataCompletors))
-            return $this->classMetadataCompletors[$entity];
-
-        $classMetadata = $entityOrClassOrMetadata instanceof ClassMetadata
-            ? $entityOrClassOrMetadata
-            : $this->getClassMetadata($entity);
-
-        $this->classMetadataCompletors[$entity] = new ClassMetadataCompletor($classMetadata);
-        return $this->classMetadataCompletors[$entity];
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        return $this->classMetadataCompletor->getClassMetadataEnhanced($classMetadata);
     }
 
     public function getFields(null|string|object $entityOrClassOrMetadata, array $fields = [], array $excludedFields = []): array
@@ -487,8 +477,8 @@ class ClassMetadataManipulator
     }
 
     public function isAlias(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string { return $this->getAliasName($entityOrClassOrMetadata, $fieldPath) != $fieldPath; }
-    public function getAliasName (null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string { return $this->getCompletor($entityOrClassOrMetadata)?->aliasNames[$fieldPath] ?? null; }
-    public function getAliasNames(null|object|string $entityOrClassOrMetadata): ?array { return $this->getCompletor($entityOrClassOrMetadata)->aliasNames; }
+    public function getAliasName (null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string { return $this->getClassMetadataEnhanced($entityOrClassOrMetadata)?->aliasNames[$fieldPath] ?? null; }
+    public function getAliasNames(null|object|string $entityOrClassOrMetadata): ?array { return $this->getClassMetadataEnhanced($entityOrClassOrMetadata)->aliasNames; }
     public function getFieldName(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string
     {
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);

@@ -33,6 +33,7 @@ final class WidgetTwigExtension extends AbstractExtension
         $widgetSlot = $this->widgetProvider->getSlot($slot);
         if(!$widgetSlot) return "";
 
+        $widgetSlot = $this->widgetProvider->getSlot($slot);
         $widget = $widgetSlot->getWidget();
         if(!$widget) return "";
 

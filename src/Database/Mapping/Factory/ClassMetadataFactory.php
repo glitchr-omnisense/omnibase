@@ -140,6 +140,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
         // Invoke driver
         try {
+dump($class->getName());
             $this->driver->loadMetadataForClass($class->getName(), $class);
         } catch (ReflectionException $e) {
             throw MappingException::reflectionFailure($class->getName(), $e);

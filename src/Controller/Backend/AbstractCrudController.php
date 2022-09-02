@@ -184,8 +184,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function getExtension():Extension { return $this->extension; }
 
     protected $crud = null;
-
-    public function getCrud():Crud { return $this->crud; }
+    public function getCrud():?Crud { return $this->crud; }
 
     protected $entityDto = null;
     public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }

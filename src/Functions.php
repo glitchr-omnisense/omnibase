@@ -2156,6 +2156,21 @@ namespace {
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }
 
+    function check_backtrace(string $str_starts_with = "", string $str_ends_with = "", array $debug_backtrace = null)
+    {
+        $debug_backtrace ??= debug_backtrace();
+        foreach($debug_backtrace as $trace) {
+
+            if(!array_key_exists("class", $trace)) continue;
+            if(($str_ends_with   &&   str_ends_with($trace["class"], $str_ends_with  )) &&
+               ($str_starts_with && str_starts_with($trace["class"], $str_starts_with))) return true;
+        }
+
+        return false;
+    }
+
+
+
     function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
     {
         $datetime  = castdatetime($datetime);

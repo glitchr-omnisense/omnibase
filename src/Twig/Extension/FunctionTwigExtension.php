@@ -245,8 +245,10 @@ final class FunctionTwigExtension extends AbstractExtension
         return $this->intlExtension->formatDateTime($env, $datetime, 'none', $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
-    public function pickup(array $array, int $i)
+    public function pickup(?array $array, int $i)
     {
+        if($array === null) return null;
+
         $keys = array_rand($array, min(count($array),$i)) ?? [];
         if(!is_array($keys)) $keys = [$keys];
 

@@ -8,8 +8,10 @@ use Base\Imagine\Filter\Format\BitmapFilterInterface;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
+use Base\Routing\RouterInterface;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Profiler\Profiler;
 
 use Imagine\Filter\FilterInterface;
 use Imagine\Image\ImageInterface;
@@ -18,9 +20,8 @@ use Imagine\Image\Palette\CMYK;
 use Imagine\Image\Palette\RGB;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\RouterInterface;
 
 class ImageService extends FileService implements ImageServiceInterface
 {
@@ -29,9 +30,13 @@ class ImageService extends FileService implements ImageServiceInterface
      */
     protected $imagine;
 
-    public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem, ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg)
+    public function __construct(
+        RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
+        ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg, Profiler $profiler)
     {
         parent::__construct($router, $obfuscator, $flysystem);
+
+        $this->profiler      = $parameterBag->get("base.images.profiler") ? $profiler : null;
 
         $this->imagineBitmap = $imagineBitmap;
         $this->imagineSvg    = $imagineSvg;
@@ -169,7 +174,21 @@ class ImageService extends FileService implements ImageServiceInterface
             array_pop_key("http_cache", $headers);
         }
 
+        if ($this->profiler !== null)
+            $this->profiler->disable();
+
         return parent::serve($file, $status, $headers);
+    }
+
+    /**
+     * Returns a RedirectResponse to the given route with the given parameters.
+     */
+    public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
+    {
+        if ($this->profiler !== null)
+            $this->profiler->disable();
+
+        return new RedirectResponse($this->router->generate($route, $parameters), $status);
     }
 
     public function isCached(?string $path, FilterInterface|array $filters = [], array $config = []): bool

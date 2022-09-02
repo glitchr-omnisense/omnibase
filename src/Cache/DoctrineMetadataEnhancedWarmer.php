@@ -2,8 +2,7 @@
 
 namespace Base\Cache;
 
-use Base\Annotations\AnnotationReader;
-use Base\Database\Mapping\ClassMetadataCompletor;
+use Base\Database\Mapping\Factory\ClassMetadataCompletor;
 use Symfony\Bundle\FrameworkBundle\CacheWarmer\AbstractPhpFileCacheWarmer;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 

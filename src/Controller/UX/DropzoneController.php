@@ -25,8 +25,8 @@ class DropzoneController extends AbstractController
 
     public function __construct(TranslatorInterface $translator, CacheInterface $cache, string $cacheDir)
     {
-        $this->cache    = $cache;
-        $this->cacheDir = $cacheDir;
+        $this->cache      = $cache;
+        $this->cacheDir   = $cacheDir;
         $this->translator = $translator;
 
         $this->filesystem = new \Symfony\Component\Filesystem\Filesystem();

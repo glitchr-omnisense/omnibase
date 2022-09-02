@@ -405,7 +405,7 @@ class ServiceEntityParser
         $magicFn = null;
         $byNames = [];
 
-        if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<eagerly>'.$eagerly.')?(?P<special>'.$specials.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
+        if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
 
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
             $byNames = array_pop_key("names", $magicExtra);
@@ -415,7 +415,7 @@ class ServiceEntityParser
             $magicFn = only_alphachars(trim_brackets(array_pop_key("fn", $magicExtra)));
             $magicExtra = array_filter(array_key_removes_numerics($magicExtra));
 
-        } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<eagerly>'.$eagerly.')?(?P<special>'.$specials.')?)(?P<names>.*)/', $method, $magicExtra)) {
+        } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?)(?P<names>.*)/', $method, $magicExtra)) {
 
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
             $byNames = array_pop_key("names", $magicExtra);

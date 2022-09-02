@@ -93,7 +93,7 @@ class Breadcrumb implements BreadcrumbInterface, Iterator, Countable, ArrayAcces
 
             $route  = $position !== false ? $annotations[$position] : null;
             $routeName          = $route ? $this->getRouteName($path) : null;
-            $routeParameters    = $route ? array_filter($this->getRouteParameters($path, rtrim($route->getPath(), "/")) ?? []) : [];
+            $routeParameters    = $route ? array_filter($this->getRouteParameters($path, $route->getPath() !== null ? rtrim($route->getPath(), "/") : null) ?? []) : [];
             $routeParameterKeys = array_keys($routeParameters);
 
             $transPath = implode(".", array_merge([$routeName], $routeParameterKeys));

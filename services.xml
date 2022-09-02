@@ -347,7 +347,7 @@
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority = "-1024" />
+            <tag name="doctrine.event_subscriber" priority = "1024" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
@@ -391,6 +391,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="imagine.bitmap" />
             <argument type="service" id="imagine.svg" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Service\Flysystem" parent="flysystem.adapter.lazy.factory" public="true" />
@@ -459,7 +460,7 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Database\Mapping\ClassMetadataCompletor" public="true">
+        <service id="Base\Database\Mapping\Factory\ClassMetadataCompletor" public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <bind key="$phpArrayFile">%kernel.cache_dir%/static_metadata.php</bind>
         </service>

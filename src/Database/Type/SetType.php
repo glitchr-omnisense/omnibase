@@ -14,7 +14,7 @@ abstract class SetType extends EnumType
 
     public function convertToPHPValue($value, AbstractPlatform $platform) : mixed
     {
-        $values = explode(",", $value);
+        $values = $value !== null ?  explode(",", $value) : [];
         return array_filter($values, fn($v) => in_array($v, $this->getPermittedValues()));
     }
 

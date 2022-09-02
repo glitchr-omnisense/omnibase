@@ -11,14 +11,20 @@ use Base\BaseBundle;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\UnitOfWork;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Http\Event\LoginSuccessEvent;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use ErrorException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
+use TypeError;
 
 class IntegritySubscriber implements EventSubscriberInterface
 {
@@ -54,6 +60,7 @@ class IntegritySubscriber implements EventSubscriberInterface
     {
         return
         [
+            KernelEvents::EXCEPTION  => ['onException'],
             RequestEvent::class      => [['onKernelRequest', 5]],
             LoginSuccessEvent::class => ['onLoginSuccess', 1],
         ];
@@ -66,6 +73,15 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         $user = $token->getUser();
         if($user === null) return true;
+    }
+
+    public function onException(ExceptionEvent $event)
+    {
+        $throwable = $event->getThrowable();
+
+        $instanceOf = ($throwable instanceof TypeError || $throwable instanceof ErrorException);
+        if($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace()))
+            throw new \RuntimeException("Application integrity compromised, cache needs to be refreshed.", 0, $throwable);
     }
 
     public function onKernelRequest(RequestEvent $event)

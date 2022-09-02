@@ -21,4 +21,6 @@ class ClassMetadataEnhanced
         $this->payload[$name] = $value;
         return $this;
     }
+
+    public function &getPayload() { return $this->payload; }
 }

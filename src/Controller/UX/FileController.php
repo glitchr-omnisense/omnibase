@@ -100,10 +100,10 @@ class FileController extends AbstractController
         if(!$args) throw $this->createNotFoundException();
 
         $webp = $args["webp"] ?? $this->imageService->isWebpEnabled();
-        if(!$webp) return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if(!$webp) return $this->imageService->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $mimeType = $args["mimetype"] ?? $this->imageService->getMimeType($args["path"]);
-        if($mimeType == "image/svg+xml") return $this->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if($mimeType == "image/svg+xml") return $this->imageService->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $options = $args["options"];
         $filters = $args["filters"];
@@ -136,8 +136,10 @@ class FileController extends AbstractController
         $options = $args["options"];
 
         $mimeType = $args["mimetype"] ?? $this->imageService->getMimeType($args["path"]);
-        if($mimeType != "image/svg+xml")
-            return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if($mimeType != "image/svg+xml") {
+
+            return $this->imageService->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
@@ -183,8 +185,10 @@ class FileController extends AbstractController
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
-        if ($extension == null || !in_array($extension, $extensions))
-            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+        if ($extension == null || !in_array($extension, $extensions)) {
+
+            return $this->imageService->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;

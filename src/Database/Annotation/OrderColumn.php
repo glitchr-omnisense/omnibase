@@ -105,7 +105,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
         catch (Exception $e) { return; }
 
-        $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+        $ordering = $orderingRepository->cacheOneEagerlyByEntityIdAndEntityClass($entity->getId(), $className);
         if($ordering === null) return;
 
         $data = $ordering->getEntityData();
@@ -147,6 +147,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     $value = $propertyAccessor->getValue($entity, $property);
 
+                    // TBD: Implement case for array.. this one might be a bit more complicate.. (periodical cycles)
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
                     else*/
                      if($value instanceof Collection) {
@@ -165,7 +166,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneEagerlyByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 

@@ -6,6 +6,7 @@ use App\Entity\User;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataCompletor;
+use Base\Database\Mapping\ClassMetadataEnhanced;
 use Base\Service\FlysystemInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepositoryInterface;
 use Doctrine\Common\Collections\Collection;

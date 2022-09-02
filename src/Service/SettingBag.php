@@ -4,7 +4,7 @@ namespace Base\Service;
 
 use Base\BaseBundle;
 use Base\Entity\Layout\Setting;
-
+use Base\Repository\Layout\SettingRepository;
 use Symfony\Component\Asset\Packages;
 
 use Doctrine\DBAL\Exception\TableNotFoundException;
@@ -30,8 +30,7 @@ class SettingBag implements SettingBagInterface
     public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
     {
         $this->entityManager            = $entityManager;
-        if(BaseBundle::hasDoctrine())
-            $this->settingRepository        = $entityManager->getRepository(Setting::class);
+        $this->settingRepository        = $entityManager->getRepository(Setting::class);
 
         $this->cache           = $cache;
         $this->cacheName       = "setting_bag." . hash('md5', self::class);
@@ -213,7 +212,7 @@ class SettingBag implements SettingBagInterface
     }
 
     protected array $settingBag;
-    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = false): array
+    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true): array
     {
         if(is_array($paths = $path)) {
 

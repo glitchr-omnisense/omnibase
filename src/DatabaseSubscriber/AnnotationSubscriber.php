@@ -2,10 +2,9 @@
 
 namespace Base\DatabaseSubscriber;
 
-use App\Entity\User;
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
-use Base\Database\Mapping\ClassMetadataCompletor;
+use Base\Database\Mapping\Factory\ClassMetadataCompletor;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,7 +24,7 @@ class AnnotationSubscriber implements EventSubscriberInterface {
      */
     protected $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, AnnotationReader $annotationReader, ClassMetadataCompletor $classMetadataCompletor)
+    public function __construct(EntityManagerInterface $entityManager, ClassMetadataCompletor $classMetadataCompletor, AnnotationReader $annotationReader)
     {
         $this->entityManager    = $entityManager;
         $this->classMetadataCompletor = $classMetadataCompletor;

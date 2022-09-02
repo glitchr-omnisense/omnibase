@@ -203,6 +203,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
+
             $this->settingRepository->flush();
 
             $notification = new Notification("@controllers.backoffice_apikey.success");
@@ -301,9 +302,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data = $form->getData();
             foreach(array_keys($widgetSlots) as $path) {
 
-                $widgetSlot = $this->slotRepository->findOneByPath($path);
+                $widgetSlot = $this->slotRepository->cacheOneEagerlyByPath($path);
 
                 if(!$widgetSlot) {
+
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
                     $this->slotRepository->flush();
@@ -314,10 +316,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $widgetSlot->setWidget($widget);
             }
 
-
             $notification = new Notification("@controllers.backoffice_widgets.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
+
+            $this->slotRepository->flush();
 
             return $this->router->reloadRequest();
         }
