@@ -297,10 +297,8 @@ class Uploader extends AbstractAnnotation
         $entityId = $entity->getId();
         $entityId = $entityId ? "#".$entityId : "";
 
-
-        // Field value can be an array or just a single path
+        $fileList = []; // Field value can be an array or just a single path
         $uploadList = array_values(array_intersect($newList, $oldList));
-
         foreach (array_union($uploadList, array_diff($newList, $oldList)) as $index => $entry) {
 
             //

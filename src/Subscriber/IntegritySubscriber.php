@@ -81,13 +81,13 @@ class IntegritySubscriber implements EventSubscriberInterface
 
         $instanceOf = ($throwable instanceof TypeError || $throwable instanceof ErrorException);
         if($instanceOf && check_backtrace("Doctrine", "UnitOfWork", $throwable->getTrace()))
-            throw new \RuntimeException("Application integrity compromised, cache needs to be refreshed.", 0, $throwable);
+            throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?", 0, $throwable);
     }
 
     public function onKernelRequest(RequestEvent $event)
     {
         if(BaseBundle::isBroken() && $event->isMainRequest())
-            throw new \RuntimeException("Application integrity compromised, cache needs to be refreshed.");
+            throw new \RuntimeException("Application integrity compromised, maybe cache needs to be refreshed ?");
 
         $token = $this->tokenStorage->getToken();
 

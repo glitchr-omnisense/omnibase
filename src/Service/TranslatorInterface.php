@@ -6,6 +6,7 @@ use Symfony\Component\Translation\TranslatableMessage;
 
 interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorInterface
 {
+    public function getFallbackLocales(): array;
     public function setLocale(string $locale);
 
     public function trans      (TranslatableMessage|string $id, array $parameters = [], ?string $domain = null, ?string $locale = null, bool $recursive = true):string;

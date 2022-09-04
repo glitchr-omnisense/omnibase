@@ -64,7 +64,6 @@
         <service id="base.database.metadata_factory"     alias="Base\Database\Mapping\Factory\ClassMetadataFactory" />
         <service id="base.database.entity_hydrator"      alias="Base\Database\Entity\EntityHydrator" />
         <service id="base.database.metadata_manipulator" alias="Base\Database\Mapping\ClassMetadataManipulator" />
-        <service id="base.database.metadata_completor"   alias="Base\Database\Mapping\Factory\ClassMetadataCompletor" />
 
         <service id="base.annotation_reader" alias="Base\Annotations\AnnotationReader" />
         <service id="base.entity_extension" alias="Base\Database\Entity\EntityExtension" />

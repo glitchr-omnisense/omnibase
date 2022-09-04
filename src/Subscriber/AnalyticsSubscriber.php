@@ -7,7 +7,9 @@ use Base\BaseBundle;
 use App\Entity\User;
 use Base\Routing\RouterInterface;
 use Base\Service\TranslatorInterface;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Query;
 use Google\Analytics\Service\GaService;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -47,8 +49,11 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         $token = $this->tokenStorage->getToken();
         $user = $token ? $token->getUser() : null;
 
-        // $onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
-        $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay())->getResult() : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay())->getResult();
+        /**
+         * @var Query
+         */
+        $onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay());
+        $onlineUsers = $onlineUsers->enableResultCache(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
         $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [

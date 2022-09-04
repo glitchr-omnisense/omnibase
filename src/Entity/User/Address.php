@@ -10,6 +10,9 @@ use Base\Repository\User\AddressRepository;
 /**
  * @ORM\Entity(repositoryClass=AddressRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * 
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry
 */

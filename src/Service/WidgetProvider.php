@@ -22,25 +22,25 @@ class WidgetProvider implements WidgetProviderInterface
     public function get(string $uuid, bool $useCache = BaseBundle::CACHE): ?Widget { return $this->getWidget($uuid, $useCache); }
     public function getWidget(string $uuid, bool $useCache = BaseBundle::CACHE): ?Widget
     {
-        $fn = $useCache && !is_cli() ? "cacheOneEagerlyByPath" : "findOneByPath";
+        $fn = $useCache ? "cacheOneEagerlyByPath" : "findOneByPath";
         return $this->widgetRepository ? $this->widgetRepository->$fn($uuid) : null;
     }
 
     public function all(bool $useCache = BaseBundle::CACHE): array
     {
-        $fn = $useCache && !is_cli() ? "cacheAllEagerly" : "findAll";
+        $fn = $useCache ? "cacheAllEagerly" : "findAll";
         return $this->widgetRepository ? $this->widgetRepository->$fn()->getResult() : [];
     }
     public function allSlots(bool $useCache = BaseBundle::CACHE): array
     {
-        $fn = $useCache && !is_cli() ? "cacheAllEagerly" : "findAll";
+        $fn = $useCache ? "cacheAllEagerly" : "findAll";
         return array_transforms(fn($k, $s):array => [$s->getPath(), $s], $this->widgetSlotRepository->$fn()->getResult());
     }
 
     public function getSlot(string $path, bool $useCache = BaseBundle::CACHE): ?Slot { return $this->getWidgetSlot($path, $useCache); }
     public function getWidgetSlot(string $path, bool $useCache = BaseBundle::CACHE): ?Slot
     {
-        $fn = $useCache && !is_cli() ? "cacheOneEagerlyByPath" : "findOneByPath";
+        $fn = $useCache ? "cacheOneEagerlyByPath" : "findOneByPath";
         return $this->widgetSlotRepository ? $this->widgetSlotRepository->$fn($path) : null;
     }
 }

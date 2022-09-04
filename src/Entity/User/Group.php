@@ -14,6 +14,7 @@ use App\Repository\User\GroupRepository;
 
 /**
  * @ORM\Entity(repositoryClass=GroupRepository::class)
+ * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Group implements IconizeInterface
 {

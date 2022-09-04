@@ -225,7 +225,7 @@ class EntityHydrator implements EntityHydratorInterface
     protected function bindAliases(object $entity): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach ($this->classMetadataManipulator->getFieldNames() as $alias => $column) {
+        foreach ($this->classMetadataManipulator->getFieldNames($classMetadata) as $alias => $column) {
 
             $fn = function() use ($alias, $column) {
 
@@ -537,15 +537,15 @@ class EntityHydrator implements EntityHydratorInterface
     }
 
 
-    public function getEntityFromData($classname, $data): ?object
+    public function getEntityFromData($className, $data): ?object
     {
         if($data === null) return null;
 
-        $fieldNames = $this->entityManager->getClassMetadata($classname)->fieldNames;
+        $fieldNames = $this->classMetadataManipulator->getFieldNames($className);
         $fields  = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        $entity = $this->hydrate($classname, array_merge($fields, $associations));
+        $entity = $this->hydrate($className, array_merge($fields, $associations));
         return $entity;
     }
 

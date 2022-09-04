@@ -13,9 +13,10 @@ use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Query;
 use Exception;
 use InvalidArgumentException;
+use Symfony\Component\HttpKernel\CacheWarmer\WarmableInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
-class SettingBag implements SettingBagInterface
+class SettingBag implements SettingBagInterface, WarmableInterface
 {
     /**
      * @var Packages
@@ -27,6 +28,11 @@ class SettingBag implements SettingBagInterface
      */
     protected $settingRepository = null;
 
+    public function warmUp(string $cacheDir)
+    {
+        return $this->all();
+    }
+
     public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
     {
         $this->entityManager            = $entityManager;
@@ -34,7 +40,7 @@ class SettingBag implements SettingBagInterface
 
         $this->cache           = $cache;
         $this->cacheName       = "setting_bag." . hash('md5', self::class);
-        $this->cacheSettingBag = !is_cli() ? $cache->getItem($this->cacheName) : null;
+        $this->cacheSettingBag = $cache->getItem($this->cacheName);
 
         $this->packages       = $packages;
         $this->localeProvider = $localeProvider;
@@ -138,7 +144,7 @@ class SettingBag implements SettingBagInterface
         return array_filter($settings);
     }
 
-    public function getRaw(null|string|array $path = null, bool $useCache = true)
+    public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::CACHE)
     {
         if(is_array($paths = $path)) {
 
@@ -149,7 +155,6 @@ class SettingBag implements SettingBagInterface
             return $settings;
         }
 
-        $useCache &= BaseBundle::CACHE && !is_cli();
         if(!$this->settingRepository) throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
         try {
 
@@ -159,6 +164,7 @@ class SettingBag implements SettingBagInterface
             $settings = $this->settingRepository->$fn($path);
             if ($settings instanceof Query)
                 $settings = $settings->getResult();
+
 
         } catch(TableNotFoundException  $e) { throw $e; }
           catch(EntityNotFoundException $e) { return $useCache ? $this->getRaw($path, false) : []; } // Cache fallback
@@ -183,7 +189,7 @@ class SettingBag implements SettingBagInterface
         return $setting;
     }
 
-    public function getRawScalar(null|string|array $path = null, bool $useCache = true)
+    public function getRawScalar(null|string|array $path = null, bool $useCache = BaseBundle::CACHE)
     {
         if(is_array($paths = $path)) {
 
@@ -212,7 +218,7 @@ class SettingBag implements SettingBagInterface
     }
 
     protected array $settingBag;
-    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = true): array
+    public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::CACHE): array
     {
         if(is_array($paths = $path)) {
 
@@ -231,18 +237,18 @@ class SettingBag implements SettingBagInterface
         catch (Exception $e) { throw $e; return []; }
 
         $this->settingBag[$path.":".$locale] = $this->settingBag[$path.":".$locale] ?? array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
-        if($useCache && BaseBundle::CACHE && !is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
         return $this->settingBag[$path.":".$locale];
     }
 
     public function clearAll() { return $this->clear(null); }
-    public function clear(null|string|array $path, ?string $locale = null)
+    public function clear(null|string|array $path, ?string $locale = null, $useCache = BaseBundle::CACHE)
     {
         if(is_array($paths = $path)) {
 
             foreach($paths as $path)
-                $this->clear($path, $locale);
+                $this->clear($path, $locale, $useCache);
 
             return;
         }
@@ -250,10 +256,10 @@ class SettingBag implements SettingBagInterface
         if($path) array_pop_key($path.":".$locale, $this->settingBag);
         else $this->settingBag = [];
 
-        if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
     }
 
-    public function set(string $path, $value, ?string $locale = null)
+    public function set(string $path, $value, ?string $locale = null, $useCache = BaseBundle::CACHE)
     {
         $setting = $this->generateRaw($path, $locale);
         if($setting->isLocked())
@@ -262,7 +268,7 @@ class SettingBag implements SettingBagInterface
         $setting->translate($locale)->setValue($value);
         unset($this->settingBag[$path.":".$locale]);
 
-        if(!is_cli()) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
+        if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
         $this->entityManager->flush();
         return $this;

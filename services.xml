@@ -132,11 +132,11 @@
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\Cache\BaseWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Cache\IconWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
-        <service id="Base\Cache\ImageWarmer"       public="true"><tag name="kernel.cache_warmer" /></service>
-        <service id="Base\Cache\LocaleWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
-        <service id="Base\Cache\SpreadsheetWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
+        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
+        <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="parameter_bag" /></service>
+        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
+        <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
+        <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
@@ -342,7 +342,7 @@
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
             <tag name="doctrine.event_subscriber" priority="1024" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.database.metadata_completor" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
@@ -458,11 +458,7 @@
         <service id="Base\Database\Mapping\ClassMetadataManipulator" public="true">
             <argument type="service" id="doctrine" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-        </service>
-
-        <service id="Base\Database\Mapping\Factory\ClassMetadataCompletor" public="true">
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <bind key="$phpArrayFile">%kernel.cache_dir%/static_metadata.php</bind>
+            <argument type="service" id="cache.adapter" />
         </service>
 
         <service id="Base\Annotations\AnnotationReader" public="true">
@@ -479,16 +475,10 @@
             <bind key="$environment">%kernel.environment%</bind>
         </service>
 
-        <service id="Base\Cache\AnnotationWarmer"      public="true">
+        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"      public="true">
             <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
             <argument type="service" id="base.annotation_reader" />
             <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
-        </service>
-
-        <service id="Base\Cache\DoctrineMetadataEnhancedWarmer"      public="true">
-            <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
-            <argument type="service" id="base.database.metadata_completor" />
-            <bind key="$phpArrayFile">%kernel.cache_dir%/static_metadata.php</bind>
         </service>
 
          <service id="Base\Security\Voter\BackendVoter">

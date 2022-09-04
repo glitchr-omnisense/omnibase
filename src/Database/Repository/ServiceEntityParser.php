@@ -2,15 +2,18 @@
 
 namespace Base\Database\Repository;
 
+use App\Entity\User;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
+use Base\Entity\Layout\Setting;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
+use Doctrine\ORM\Proxy\Proxy;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
@@ -145,7 +148,7 @@ class ServiceEntityParser
         }
     }
 
-    protected function __findBy         (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->getQuery   ($criteria, $orderBy                                     , $limit, $offset, $groupBy, $selectAs); }
+    protected function __findBy         (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->getQuery   ($criteria, $orderBy                         , $limit, $offset, $groupBy, $selectAs); }
     protected function __findRandomlyBy (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
     protected function __findAll        (                      $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
     protected function __findOneBy      (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
@@ -199,15 +202,17 @@ class ServiceEntityParser
     {
         // Parse method and call it
         list($method, $arguments) = $this->__parse($method, $arguments);
-try {        $ret = $this->$method(...$arguments); }
-catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
 
-        // Reset internal variables
-        $this->criteria  = [];
-        $this->options   = [];
-        $this->operator  = null;
-        $this->cacheable = false;
-        $this->eagerly = false;
+        try { $ret = $this->$method(...$arguments); }
+        finally { // Reset internal variables, even if exception happens.
+                  // (e.g. wrong Query in Controller, but additional queries in Subscriber)
+
+            $this->criteria  = [];
+            $this->options   = [];
+            $this->operator  = null;
+            $this->cacheable = false;
+            $this->eagerly = false;
+        }
 
         return $ret;
     }
@@ -296,7 +301,7 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
         $magicArgs = [];
 
         // TODO: Safety check in dev mode only (maybe..)
-        foreach($this->classMetadata->getFieldNames() as $field) {
+        foreach($this->classMetadataManipulator->getFieldNames($this->classMetadata->name) as $field) {
 
             if (str_contains($field, self::OPTION_WITH_ROUTE )       ||
                 str_contains($field, self::OPTION_BUT        )       ||
@@ -906,9 +911,23 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
         $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []); // Criteria
         $magicArgs[0] = array_merge($magicArgs[0], array_transforms(fn($k,$v) :array => ["special:".$k, $v], $magicExtra));
 
+        // Remove criteria for findAll requests..
+        if(str_starts_with($magicFn, self::REQUEST_FIND.self::SPECIAL_ALL))
+            array_shift($magicArgs);
+
         return [$magicFn, $magicArgs];
     }
 
+    protected function getRealClassName($className): ?string
+    {
+        if(!class_exists($className))
+            return null;
+
+        if(!is_instanceof($className, Proxy::class))
+            return $className;
+
+        return get_parent_class($className);
+    }
 
     protected function buildQueryExpr(QueryBuilder $qb, $field, $fieldValue)
     {
@@ -1005,11 +1024,14 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
 
             if(is_numeric($fieldValue)) $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second";
 
-                    if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
+                   if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
             else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
-            else if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL])) {
+            else {
 
-                $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
+                $subtract = $fieldValue;
+                if(in_array($tableOperator, [self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]))
+                    $subtract = strtr($fieldValue, ["+" => "-", "-" => "+"]);
+
                 $fieldValue = (new \DateTime("now"))->modify($subtract);
             }
         }
@@ -1034,21 +1056,31 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
 
                $instanceOf = [];
             $notInstanceOf = [];
-            foreach ($fieldValue as $value) {
+            if($this->classMetadata->discriminatorColumn !== null) {
 
-                if($isInstanceOf) {
+                foreach ($fieldValue as $value) {
 
-                    if( str_starts_with($value, "^") ) $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^")));
-                    else $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, $value);
+                    $reverseAssert = str_starts_with($value, "^");
+                    if($reverseAssert) $value = ltrim($value, "^");
 
-                } else {
+                    $value = $this->getRealClassName($value);
+                    if($value === null) continue;
 
-                    if( str_starts_with($value, "^") ) $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^"));
-                    else $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value));
+                    if($isInstanceOf) {
+
+                        if( $reverseAssert ) $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^")));
+                        else $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, $value);
+
+                    } else {
+
+                        if( $reverseAssert ) $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^"));
+                        else $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value));
+                    }
                 }
+
+                if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
             }
 
-            if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
             return $qb->expr()->orX(...$instanceOf);
 
         } else if($isClassOf || $isNotClassOf) {
@@ -1058,53 +1090,62 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
 
             $classOf = [];
             $notClassOf = [];
-            foreach ($fieldValue as $value) {
+            if($this->classMetadata->discriminatorColumn !== null) {
 
-                $className = ltrim($value, "^");
-                $classMetadata = $this->entityManager->getClassMetadata($className);
-                $classChildren = array_filter(array_values($classMetadata->discriminatorMap), fn($c) => $c != $className && is_instanceof($c, $className));
+                foreach ($fieldValue as $value) {
 
-                if($isClassOf) {
+                    $reverseAssert = str_starts_with($value, "^");
+                    if($reverseAssert) $value = ltrim($value, "^");
 
-                    if( !str_starts_with($value, "^") ) {
+                    $value = $this->getRealClassName($value);
+                    if($value === null) continue;
 
-                        $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
-                        foreach($classChildren as $child)
-                            $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
+                    $classMetadata = $this->entityManager->getClassMetadata($value);
+                    $classChildren = array_filter(array_values($classMetadata->discriminatorMap), fn($c) => $c != $value && is_instanceof($c, $value));
 
-                        $classOf[] = $qb->expr()->andX(...$subQb);
+                    if($isClassOf) {
 
-                    } else {
+                        if( !$reverseAssert ) {
 
-                        $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
-                        foreach($classChildren as $child)
-                            $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
+                            $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
+                            foreach($classChildren as $child)
+                                $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
 
-                        $classOf[] = $qb->expr()->orX(...$subQb);
-                    }
+                            $classOf[] = $qb->expr()->andX(...$subQb);
 
-                } else {
+                        } else {
 
-                    if( str_starts_with($value, "^") ) {
+                            $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
+                            foreach($classChildren as $child)
+                                $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
 
-                        $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
-                        foreach($classChildren as $child)
-                            $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
-
-                        $classOf[] = $qb->expr()->orX(...$subQb);
+                            $classOf[] = $qb->expr()->orX(...$subQb);
+                        }
 
                     } else {
 
-                        $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
-                        foreach($classChildren as $child)
-                            $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
+                        if( $reverseAssert ) {
 
-                        $classOf[] = $qb->expr()->andX(...$subQb);
+                            $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
+                            foreach($classChildren as $child)
+                                $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
+
+                            $classOf[] = $qb->expr()->orX(...$subQb);
+
+                        } else {
+
+                            $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
+                            foreach($classChildren as $child)
+                                $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
+
+                            $classOf[] = $qb->expr()->andX(...$subQb);
+                        }
                     }
                 }
+
+                if($notClassOf) $classOf[] = $qb->expr()->andX(...$notClassOf);
             }
 
-            if($notClassOf) $classOf[] = $qb->expr()->andX(...$notClassOf);
             return $qb->expr()->orX(...$classOf);
 
         } else if($isMemberOf || $isNotMemberOf) {
@@ -1114,13 +1155,17 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
 
                $memberOf = [];
             $notMemberOf = [];
-            foreach ($fieldValue as $value) {
+            if($this->classMetadata->discriminatorColumn !== null) {
 
-                if($isMemberOf) $memberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
-                else $notMemberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
+                foreach ($fieldValue as $value) {
+
+                    if($isMemberOf) $memberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
+                    else $notMemberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
+                }
+
+                if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
             }
 
-            if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
             return $qb->expr()->orX(...$memberOf);
 
         } else {
@@ -1248,10 +1293,10 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
                 else if($tableOperator == self::OPTION_LOWER_EQUAL)   $tableOperator = "<=";
                 else if($tableOperator == self::OPTION_YOUNGER)       $tableOperator = ">";
                 else if($tableOperator == self::OPTION_YOUNGER_EQUAL) $tableOperator = ">=";
-                else if($tableOperator == self::OPTION_OLDER)         $tableOperator = "<";
-                else if($tableOperator == self::OPTION_OLDER_EQUAL)   $tableOperator = "<=";
                 else if($tableOperator == self::OPTION_OVER)          $tableOperator = "<=";
                 else if($tableOperator == self::OPTION_NOT_OVER)      $tableOperator = ">";
+                else if($tableOperator == self::OPTION_OLDER)         $tableOperator = "<";
+                else if($tableOperator == self::OPTION_OLDER_EQUAL)   $tableOperator = "<=";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
                 return "${tableColumn} ${tableOperator} :{$fieldID}";
@@ -1420,7 +1465,7 @@ catch (\Exception $e) { dump($e); dump($method, $arguments); exit(1); }
                   $targetEntityCacheable &= $this->entityManager->getClassMetadata($targetEntity)->cache != null;
 
             if($allAssociationsRequired && !$targetEntityCacheable)
-                throw new Exception($sourceEntity . " cannot be cached eagerly because of non cacheable associations");
+                throw new Exception("\"".$sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
 
             if($targetEntityCacheable) {
 

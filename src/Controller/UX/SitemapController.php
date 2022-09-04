@@ -8,7 +8,6 @@ use Base\Response\XmlResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
@@ -39,6 +38,8 @@ class SitemapController extends AbstractController
             $annotation = end($annotations);
             if(!$annotation) continue;
 
+            // dump($router);
+            // dump($name, $route->getDefaults(), $router->generate($name, $route->getDefaults()));
             $urls[] = [
                 "loc" => $hostname.$router->generate($name, $route->getDefaults()),
                 "priority" => $annotation->getPriority(),
@@ -46,6 +47,8 @@ class SitemapController extends AbstractController
                 "changefreq" => $annotation->getChangeFreq(),
             ];
         }
+
+        // exit(1);
 
         // return response in XML format
         return new XmlResponse($this->renderView('sitemap.xml.twig', [

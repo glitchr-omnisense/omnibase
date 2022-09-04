@@ -2,7 +2,7 @@
 
 namespace Base\Database\Mapping;
 
-use Base\Database\Mapping\Factory\ClassMetadataCompletor;
+use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
 use Base\Database\Type\SetType;
@@ -18,11 +18,13 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
+use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Contracts\Cache\CacheInterface;
 
 class ClassMetadataManipulator
 {
@@ -36,12 +38,17 @@ class ClassMetadataManipulator
      */
     protected array $globalExcludedFields;
 
-    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, array $globalExcludedFields = ['id', 'translatable', 'locale'])
+    public function __construct(ManagerRegistry $doctrine, EntityManagerInterface $entityManager, ?CacheInterface $cache = null, array $globalExcludedFields = ['id', 'translatable', 'locale'])
     {
         $this->doctrine = $doctrine;
         $this->entityManager = $entityManager;
-        $this->classMetadataCompletor = new ClassMetadataCompletor($this->entityManager);
         $this->globalExcludedFields = $globalExcludedFields;
+
+        if($cache !== null) {
+
+            $this->setCache($cache);
+            $this->warmUp();
+        }
     }
 
     public function getEntityManager() : EntityManagerInterface { return $this->entityManager; }
@@ -126,12 +133,6 @@ class ClassMetadataManipulator
             throw new InvalidArgumentException("Entity expected, '" . $entityOrClassOrMetadataName . "' is not an entity.");
 
         return $classMetadata;
-    }
-
-    public function getClassMetadataEnhanced(null|string|object $entityOrClassOrMetadata) : ?ClassMetadataEnhanced
-    {
-        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
-        return $this->classMetadataCompletor->getClassMetadataEnhanced($classMetadata);
     }
 
     public function getFields(null|string|object $entityOrClassOrMetadata, array $fields = [], array $excludedFields = []): array
@@ -357,7 +358,7 @@ class ClassMetadataManipulator
         $classMetadata = $this->getClassMetadata($entity);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldPath] ?? $fieldPath;
+        $fieldName = $this->getFieldName($entity, $fieldPath) ?? $fieldPath;
         return $classMetadata->setFieldValue($entity, $fieldName, $value);
     }
 
@@ -407,7 +408,7 @@ class ClassMetadataManipulator
         if( ($dot = strpos($property, ".")) > 0 ) {
 
             $field    = trim(substr($property, 0, $dot));
-            $field = $classMetadata->fieldNames[$field] ?? $field;
+            $field = $this->getFieldName($entityOrClassOrMetadata, $field) ?? $field;
 
             $property = trim(substr($property,    $dot+1));
 
@@ -434,7 +435,7 @@ class ClassMetadataManipulator
         if( ($dot = strpos($property, ".")) > 0 ) {
 
             $field    = trim(substr($property, 0, $dot));
-            $field = $classMetadata->fieldNames[$field] ?? $field;
+            $field = $this->getFieldName($entityOrClassOrMetadata, $field) ?? $field;
 
             $property = trim(substr($property,    $dot+1));
 
@@ -477,15 +478,19 @@ class ClassMetadataManipulator
     }
 
     public function isAlias(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string { return $this->getFieldName($entityOrClassOrMetadata, $fieldPath) != $fieldPath; }
-    public function getAliasName (null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string { return $this->getClassMetadataEnhanced($entityOrClassOrMetadata)?->aliasNames[$fieldPath] ?? null; }
+    public function getFieldName(null|object|string $entityOrClassOrMetadata, array|string $fieldName): ?string
+    {
+        return $this->getFieldNames($entityOrClassOrMetadata)[$fieldName] ?? null;
+    }
 
     public function getFieldNames(null|object|string $entityOrClassOrMetadata): ?array
     {
-        $this->getClassMetadata($entityOrClassOrMetadata);
-        return $this->getClassMetadataEnhanced($entityOrClassOrMetadata)->aliasNames;
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        $classMetadataEnhanced = $this->getClassMetadataCompletor($entityOrClassOrMetadata);
+        return array_merge($classMetadataEnhanced->aliasNames ?? [], $classMetadata->fieldNames);
     }
 
-    public function getFieldName(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string
+    public function resolveFieldPath(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string
     {
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
@@ -644,4 +649,68 @@ class ClassMetadataManipulator
         return $classMetadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 
+    public function getAllClassNames() { return $this->entityManager->getMetadataFactory()->getAllClassNames(); }
+
+    /**
+     * Salt used by specific Object Manager implementation.
+     *
+     * @var string
+     */
+    protected $cacheSalt = '__CLASSMETADATA__ENHANCED__';
+
+    protected static $cache;
+    protected static array $loadedMetadata = [];
+
+    public function getCache(): ?CacheInterface { return self::$cache; }
+    public function setCache(CacheInterface $cache)
+    {
+        self::$cache = $cache;
+        return $this;
+    }
+
+    public function warmUp(): bool
+    {
+        if(!$this->getCache()) return false;
+
+        foreach($this->getAllClassNames() as $className)
+            $this->getMetadataFor($className);
+
+        return true;
+    }
+
+    protected function getCacheKey(string $realClassName): string
+    {
+        $cacheName       = "base.database.classmetadata_completor.";
+        return $cacheName . str_replace('\\', '__', $realClassName) . $this->cacheSalt;
+    }
+
+    protected function getMetadataFor(object|string $className)
+    {
+        $className = is_object($className) ? get_class($className) : $className;
+        if ( array_key_exists($this->getCacheKey($className), self::$loadedMetadata) )
+            return self::$loadedMetadata[$this->getCacheKey($className)];
+
+        $classMetadataCompletor = $this->getCache()?->getItem($this->getCacheKey($className))->get();
+        self::$loadedMetadata[$this->getCacheKey($className)] = $classMetadataCompletor instanceof ClassMetadataCompletor
+            ? $classMetadataCompletor
+            : new ClassMetadataCompletor($className, []);
+
+        return self::$loadedMetadata[$this->getCacheKey($className)];
+    }
+
+    public function saveCache(ClassMetadataCompletor $completor)
+    {
+        if($this->getCache()) {
+
+            $item = $this->getCache()->getItem($this->getCacheKey($completor->getName()));
+            $item->set(self::$loadedMetadata[$this->getCacheKey($completor->getName())]);
+
+            $this->getCache()->save($item);
+        }
+    }
+    public function getClassMetadataCompletor(null|string|object $entityOrClassOrMetadata) : ?ClassMetadataCompletor
+    {
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        return $this->getMetadataFor($classMetadata->name);
+    }
 }

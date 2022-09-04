@@ -4,6 +4,7 @@ namespace Base\DatabaseSubscriber;
 
 use Base\Annotations\AnnotationReader;
 use Base\BaseBundle;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Mapping\Factory\ClassMetadataCompletor;
 use Base\Entity\Layout\SettingIntl;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
@@ -25,10 +26,10 @@ class AnnotationSubscriber implements EventSubscriberInterface {
      */
     protected $entityManager;
 
-    public function __construct(EntityManagerInterface $entityManager, ClassMetadataCompletor $classMetadataCompletor, AnnotationReader $annotationReader)
+    public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator, AnnotationReader $annotationReader)
     {
         $this->entityManager    = $entityManager;
-        $this->classMetadataCompletor = $classMetadataCompletor;
+        $this->classMetadataManipulator = $classMetadataManipulator;
         $this->annotationReader = $annotationReader;
     }
 
@@ -101,9 +102,6 @@ class AnnotationSubscriber implements EventSubscriberInterface {
                 $entry->loadClassMetadata($classMetadata, AnnotationReader::TARGET_PROPERTY, $property);
             }
         }
-
-        if ($this->classMetadataCompletor->getCache())
-            $this->classMetadataCompletor->getCache()->commit();
     }
 
     public function onFlush(OnFlushEventArgs $event)

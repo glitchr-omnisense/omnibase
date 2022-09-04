@@ -8,6 +8,7 @@ use Base\Service\LocaleProviderInterface;
 use Base\Service\ParameterBagInterface;
 use InvalidArgumentException;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
+use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -19,7 +20,6 @@ use Symfony\Component\Routing\Matcher\UrlMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
-use Symfony\Component\Routing\Router;
 use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Contracts\Cache\CacheInterface;
 
@@ -27,6 +27,9 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class AdvancedRouter implements RouterInterface
 {
+    /**
+     * @var Router
+     */
     protected $router;
 
     public function getLang   (?string $lang   = null) :string { return $this->localeProvider->getLang($lang);     }
@@ -47,11 +50,11 @@ class AdvancedRouter implements RouterInterface
         $this->localeProvider     = $localeProvider;
         $this->assetTwigExtension = $assetTwigExtension;
 
-        $this->cache             = !is_cli() && $parameterBag->get("base.router.use_cache") ? $cache : null;
+        $this->cache             = $parameterBag->get("base.router.use_cache") ? $cache : null;
         $this->cacheName         = "router." . hash('md5', self::class);
-        $this->cacheRoutes       = $cache ? $cache->getItem($this->cacheName.".routes") : null;
-        $this->cacheRouteMatches = $cache ? $cache->getItem($this->cacheName.".route_matches" ) : null;
-        $this->cacheRouteGroups  = $cache ? $cache->getItem($this->cacheName.".route_groups" ) : null;
+        $this->cacheRoutes       = $this->cache ? $this->cache->getItem($this->cacheName.".routes") : null;
+        $this->cacheRouteMatches = $this->cache ? $this->cache->getItem($this->cacheName.".route_matches" ) : null;
+        $this->cacheRouteGroups  = $this->cache ? $this->cache->getItem($this->cacheName.".route_groups" ) : null;
 
         $this->useAdvancedFeatures = $parameterBag->get("base.router.use_advanced_features");
         $this->keepMachine     = $parameterBag->get("base.router.keep_machine");
@@ -65,10 +68,10 @@ class AdvancedRouter implements RouterInterface
 
     public function warmUp(string $cacheDir): array
     {
-        if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli") echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
-        $this->getRouteCollection()->all(); // Make sure it is once called
+        if(getenv("SHELL_VERBOSITY") > 0 && php_sapi_name() == "cli")
+            echo " // Warming up cache... Advanced router".PHP_EOL.PHP_EOL;
 
-        return method_exists($this->router, "warmUp") ? $this->router->warmUp($cacheDir) : [];
+        return $this->router->warmUp($cacheDir);
     }
 
     public function isCli(): bool { return is_cli(); }
@@ -174,7 +177,11 @@ class AdvancedRouter implements RouterInterface
     public function setContext(RequestContext $context) { $this->router->setContext($context); }
 
     public function getGenerator(): UrlGeneratorInterface { return  $this->router->getGenerator(); }
-    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string { return $this->router->generate($name, $parameters, $referenceType); }
+    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
+    {
+        // dump($this->getRoute($name));
+        return $this->router->generate($name, $parameters, $referenceType);
+    }
     public function format(string $url): string
     {
         if($url === null) $url = get_url();
