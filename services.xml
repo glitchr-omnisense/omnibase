@@ -133,7 +133,6 @@
         </service>
 
         <service id="Base\CacheWarmer\IconCacheWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
-        <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="parameter_bag" /></service>
         <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
         <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
         <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
@@ -340,14 +339,14 @@
 
         <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" priority="1024" />
+            <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority = "1024" />
+            <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>

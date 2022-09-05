@@ -324,6 +324,12 @@ class SecuritySubscriber implements EventSubscriberInterface
          * @var User
          */
         if(!($user = $token->getUser())) return;
+
+        if ( !($user->isActive()) ) {
+
+            $user->poke(new \DateTime("now"));
+            $this->userRepository->flush($user);
+        }
     }
 
     public function onLoginFailure(LoginFailureEvent $event)

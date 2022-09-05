@@ -1589,8 +1589,15 @@ namespace {
     define('ARRAY_FLATTEN_PRESERVE_KEYS', 1);
     define('ARRAY_FLATTEN_PRESERVE_DUPLICATES', 2);
     function array_key_flattens(string $separator, ?array $array, int $limit = PHP_INT_MAX) { return array_flatten($separator, $array, $limit, ARRAY_FLATTEN_PRESERVE_KEYS); }
-    function array_flatten(string $separator, ?array $array, int $limit = PHP_INT_MAX, int $mode = 0)
+    function array_flatten(string $separator, ?array $array, int $limit = PHP_INT_MAX, int $mode = 0, ?callable $fn = null)
     {
+        if ($fn === null)
+            $fn = function($k, $v):bool { return is_array($v); };
+
+        $reflection = new ReflectionFunction($fn);
+        if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['bool']))
+            throw new \Exception('Callable function must use "bool" return type');
+
         $ret = [];
         if (!is_array($array)) $array = func_get_args();
 
@@ -1601,25 +1608,25 @@ namespace {
 
                 default:
                 case ARRAY_FLATTEN_PRESERVE_KEYS:
-                    $flattenValues = is_array($value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode) : $value;
+                    $flattenValues = is_array($value) && $fn($key,$value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode, $fn) : $value;
 
-                    if(!is_array($flattenValues)) $ret[$key] = $value;
-                    else {
+                    if(is_array($value) && $fn($key, $flattenValues)) {
 
                         foreach($flattenValues as $key2 => $flattenValue)
-                            $ret[$key.".".$key2] = $flattenValue;
-                    }
+                            $ret[$key.$separator.$key2] = $flattenValue;
+
+                    } else $ret[$key] = $flattenValues;
 
                     break;
 
                 case ARRAY_FLATTEN_PRESERVE_DUPLICATES:
-                    $flattenValues = is_array($value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit) : [$key => $value];
+                    $flattenValues = $fn($key,$value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode, $fn) : [$key => $value];
                     foreach($flattenValues as $key2 => $flattenValue) {
 
                         if(!array_key_exists($key2, $ret))
-                            $ret[$key.".".$key2] = [];
+                            $ret[$key.$separator.$key2] = [];
 
-                        $ret[$key.".".$key2][] = $flattenValue;
+                        $ret[$key.$separator.$key2][] = $flattenValue;
                     }
                     break;
             }

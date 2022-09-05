@@ -28,7 +28,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
      */
     protected $settingRepository = null;
 
-    public function warmUp(string $cacheDir)
+    public function warmUp(string $cacheDir): array
     {
         return $this->all();
     }

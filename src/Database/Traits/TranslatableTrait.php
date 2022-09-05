@@ -2,7 +2,6 @@
 
 namespace Base\Database\Traits;
 
-use App\Entity\Marketplace\Store;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 

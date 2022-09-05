@@ -36,12 +36,37 @@ class TranslatableWalker extends SqlWalker
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
+        $statements = explodeByArray([" LEFT JOIN", " INNER JOIN", "translatable_id"], $sql, true);
+        $statementsIntls = [];
 
-        $statements = explodeByArray(["LEFT JOIN", "INNER JOIN"], $sql, true);
-        usort_startsWith($statements, [" FROM", "INNER JOIN", "LEFT JOIN"]);
+        $translatableIds = array_keys($statements, "translatable_id");
+        for($i = 0, $N = count($translatableIds); $i < $N; $i++) {
 
-        $statements = array_reverseByMask($statements, array_map(fn($s) => str_starts_with($s, "LEFT JOIN") && str_contains($s, NamingStrategy::TABLE_I18N_SUFFIX." "), $statements));
-        $sql = implode(" ", $statements);
+            $offset = $i > 0 ? $translatableIds[$i-1]+1 : 0;
+            $length = $i > 0 ? $translatableIds[$i]-$translatableIds[$i-1]-1 : $translatableIds[$i];
+
+            $statementsIntl = array_slice($statements, $offset, $length);
+            $statementsIntl[count($statementsIntl) - 1] .= "translatable_id";
+
+            $statementsIntls[] = $statementsIntl;
+        }
+
+        if(empty($statementsIntls)) return $sql;
+        if(count($statements) != end($translatableIds))
+            $statementsIntls[] = array_slice($statements, $translatableIds[$i-1]+1);
+
+        $sql = "";
+        foreach($statementsIntls as $statementsIntl) {
+
+            usort_startsWith($statementsIntl, [" FROM", " INNER JOIN", " LEFT JOIN"]);
+
+            $statementsIntl = array_reverseByMask($statementsIntl,
+                array_map(fn($s) => str_starts_with($s, " LEFT JOIN") && str_contains($s, NamingStrategy::TABLE_I18N_SUFFIX),
+                $statementsIntl)
+            );
+
+            $sql .= implode("", $statementsIntl);
+        }
 
         return $sql;
     }
@@ -63,7 +88,6 @@ class TranslatableWalker extends SqlWalker
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
-
         $dqlAlias       = $joinAssociationDeclaration->joinAssociationPathExpression->identificationVariable;
         $joinedDqlAlias = $joinAssociationDeclaration->aliasIdentificationVariable;
 
@@ -82,7 +106,7 @@ class TranslatableWalker extends SqlWalker
 
         //
         // Check whether target class is the root translation entity or not
-        $assoc = ! $relation['isOwningSide'] ? $targetClass->associationMappings[$relation['mappedBy']] : $relation;
+        $assoc = !$relation['isOwningSide'] ? $targetClass->associationMappings[$relation['mappedBy']] : $relation;
         if(!array_key_exists("inherited", $assoc))
             return $sql;
 
@@ -100,7 +124,7 @@ class TranslatableWalker extends SqlWalker
         $rootIntlTableAlias = $this->getSQLTableAlias($rootTargetClass->getTableName(), $joinedDqlAlias);
         $sql = str_replace(
             $sourceIntlTableAlias.".id = ".$rootIntlTableAlias.".id",
-            $rootIntlTableAlias.".translatable_id = ".$sourceTableAlias.".id", $sql
+            $sourceTableAlias.".id = ".$rootIntlTableAlias.".translatable_id", $sql
         );
 
         //

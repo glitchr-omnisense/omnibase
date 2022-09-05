@@ -14,13 +14,19 @@ trait BagTrait
             if($key == "_self" && $index != count($pathArray)-1)
                 throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
 
-            if(!array_key_exists($key, $bag))
-                throw new \Exception("Failed to read \"$path\": key not found");
+            if(!array_key_exists($key.".", $bag))
+                return null;
 
-            $bag = &$bag[$key];
+            $bag = &$bag[$key."."];
         }
 
-        return $bag;
+        if(array_key_exists("_self", $bag)) return $bag["_self"];
+        return array_transforms(function($k, $v, $c):?array {
+
+            if($k == "_self") return null;
+            return is_array($v) && count($v) == 1 && array_key_exists("_self", $v) ? [rtrim($k,"."), $v["_self"]] : [rtrim($k,"."), array_transforms($c, $v)];
+
+        }, $bag);
     }
 
     public static function write($path, $value, array &$bag = [])
@@ -31,7 +37,7 @@ trait BagTrait
         $bag = $value;
     }
 
-    public static function normalize(?string $path, array $bag) {
+    protected static function normalize(?string $path, array $bag) : array {
 
         $values = [];
 
@@ -52,11 +58,11 @@ trait BagTrait
         }
 
         // Fill it with settings
-        foreach($bag as $entry) {
+        foreach($bag as $keys => $entry) {
 
             $array = &$values;
-            foreach (explode(".", $entry) as $key)
-                $array = &$array[$key];
+            foreach (explode(".", $keys) as $key)
+                $array = &$array[$key."."];
 
             $array["_self"] = $entry;
         }
@@ -64,33 +70,19 @@ trait BagTrait
         return $values;
     }
 
-    public static function denormalize(array $bag, ?string $path = null) {
+    protected static function denormalize(array $bag, ?string $path = null) : array {
 
         if($path) {
 
             foreach(explode(".", $path) as $value)
-                $bag = $bag[$value];
+                $bag = $bag[$value."."];
         }
 
         $bag = array_transforms(
             fn($k, $v):?array => [str_replace(["_self.", "._self", "_self"], "", $k), $v],
-            array_flatten(".", $bag, -1, ARRAY_FLATTEN_PRESERVE_KEYS)
+            array_flatten("", $bag, -1, ARRAY_FLATTEN_PRESERVE_KEYS, fn($k,$v):bool => is_numeric($k) || str_ends_with($k, "."))
         );
 
-        foreach($bag as $key => $entry)
-        {
-            $matches = [];
-            if(preg_match("/(.*)[0-9]+$/", $key, $matches)) {
-
-                $path = $matches[1];
-                if(!array_key_exists($path, $bag))
-                    $bag[$path] = [];
-
-                $bag[$path][] = $entry;
-                unset($bag[$key]);
-            }
-        }
-
-        return array_filter($bag);
+        return $bag;
     }
 }

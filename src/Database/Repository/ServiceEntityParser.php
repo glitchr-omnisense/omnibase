@@ -3,14 +3,18 @@
 namespace Base\Database\Repository;
 
 use App\Entity\User;
+use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
 use Base\Entity\Layout\Setting;
+use Base\Entity\Layout\Widget;
+use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Proxy\Proxy;
@@ -20,6 +24,7 @@ use Exception;
 use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
+use Symfony\Component\OptionsResolver\Options;
 
 class ServiceEntityParser
 {
@@ -27,7 +32,6 @@ class ServiceEntityParser
     protected $args;
 
     public const ALIAS_ENTITY = 'e';
-    public const ALIAS_TRANSLATIONS = 'e_translations';
 
     public const REQUEST_FIND         = "find";
     public const REQUEST_CACHE        = "cache";
@@ -889,7 +893,7 @@ class ServiceEntityParser
         if(str_starts_with($magicFn, self::REQUEST_CACHE)) {
 
             $magicFn = self::REQUEST_FIND.substr($magicFn, strlen(self::REQUEST_CACHE));
-            $this->cacheable = true;
+            $this->cacheable = BaseBundle::CACHE;
         }
 
         if($this->eagerly)
@@ -1181,7 +1185,9 @@ class ServiceEntityParser
                 if($isPartial) { // PARTIAL HAS TO BE CHECKED SINCE THE UPDATE.. NOT TESTED
 
                     // Cast to array
-                    $qb = $this->leftJoin($qb, $fieldHead);
+                    if($this->classMetadata->hasAssociation($fieldHead))
+                        $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
+
                     if (!is_array($fieldValue)) $fieldValue = ($fieldValue !== null)? [$fieldValue] : [];
                     foreach ($fieldValue as $subFieldID => $subFieldValue)
                         $qb->setParameter($fieldID."_".$subFieldID, $subFieldValue);
@@ -1190,7 +1196,9 @@ class ServiceEntityParser
 
                     if(!is_array($fieldValue)) {
 
-                        $qb = $this->leftJoin($qb, $fieldHead);
+                        if($this->classMetadata->hasAssociation($fieldHead))
+                            $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
+
                         $qb->setParameter($fieldID, $fieldValue);
 
                     } else {
@@ -1198,7 +1206,9 @@ class ServiceEntityParser
                         $fieldValue = array_filter($fieldValue);
                         if($fieldValue) {
 
-                            $qb = $this->leftJoin($qb, $fieldHead);
+                            if($this->classMetadata->hasAssociation($fieldHead))
+                                $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
+
                             $qb->setParameter($fieldID, $fieldValue);
                         }
                     }
@@ -1206,7 +1216,8 @@ class ServiceEntityParser
 
             } else if(!is_array($fieldValue)) {
 
-                $qb = $this->leftJoin($qb, $fieldHead);
+                if($this->classMetadata->hasAssociation($fieldHead))
+                    $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
                 if(!$isEmpty && !$isNotEmpty && !$isBool)
                     $qb->setParameter($fieldID, $fieldValue);
 
@@ -1214,7 +1225,10 @@ class ServiceEntityParser
 
                 $fieldValue = array_filter($fieldValue);
                 if($fieldValue) {
-                    $qb = $this->leftJoin($qb, $fieldHead);
+
+                    if($this->classMetadata->hasAssociation($fieldHead))
+                        $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
+
                     $qb->setParameter($fieldID, $fieldValue);
                 }
             }
@@ -1240,66 +1254,66 @@ class ServiceEntityParser
 
             } else if (is_array($fieldValue)) {
 
-                     if($tableOperator == self::OPTION_EQUAL)     $tableOperator = "IN";
-                else if($tableOperator == self::OPTION_NOT_EQUAL) $tableOperator = "NOT IN";
+                     if($tableOperator == self::OPTION_EQUAL)     $fnExpr = "in";
+                else if($tableOperator == self::OPTION_NOT_EQUAL) $fnExpr = "notIn";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return !empty($fieldValue) ? "${tableColumn} ${tableOperator} (:${fieldID})" : null;
+                return !empty($fieldValue) ? $qb->expr()->$fnExpr($tableColumn, ":${fieldID}") : null;
 
             } else if($regexRequested) {
 
-                     if($tableOperator == self::OPTION_STARTING_WITH) $tableOperator = "like";
-                else if($tableOperator == self::OPTION_ENDING_WITH)   $tableOperator = "like";
-                else if($tableOperator == self::OPTION_NOT_STARTING_WITH)  $tableOperator = "notLike";
-                else if($tableOperator == self::OPTION_NOT_ENDING_WITH)    $tableOperator = "notLike";
+                     if($tableOperator == self::OPTION_STARTING_WITH) $fnExpr = "like";
+                else if($tableOperator == self::OPTION_ENDING_WITH)   $fnExpr = "like";
+                else if($tableOperator == self::OPTION_NOT_STARTING_WITH)  $fnExpr = "notLike";
+                else if($tableOperator == self::OPTION_NOT_ENDING_WITH)    $fnExpr = "notLike";
 
-                return $qb->expr()->$tableOperator($tableColumn, ":$fieldID");
+                return $qb->expr()->$fnExpr($tableColumn, ":$fieldID");
 
             } else if($closestTo || $farestTo) {
 
-                return "ABS(".$tableColumn." - :".$fieldID.")";
+                return $qb->expr()->abs($tableColumn." - :".$fieldID);
 
             } else if($isNull || $isNotNull) {
 
-                     if($tableOperator == self::OPTION_NULL)          $tableOperator = ["IS", "="];
-                else if($tableOperator == self::OPTION_NOT_NULL)      $tableOperator = ["IS NOT", "!="];
+                     if($tableOperator == self::OPTION_NULL)     $fnExpr = "isNull";
+                else if($tableOperator == self::OPTION_NOT_NULL) $fnExpr = "isNotNull";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return "${tableColumn} ".$tableOperator[0]." NULL OR ${tableColumn} ".$tableOperator[1]." ''";
+                return $qb->expr()->$fnExpr($tableColumn, ":$fieldID");
 
             } else if($isEmpty || $isNotEmpty) {
 
-                     if($tableOperator == self::OPTION_EMPTY)          $tableOperator = "=";
-                else if($tableOperator == self::OPTION_NOT_EMPTY)      $tableOperator = "!=";
+                     if($tableOperator == self::OPTION_EMPTY)          $fnExpr =  "eq";
+                else if($tableOperator == self::OPTION_NOT_EMPTY)      $fnExpr = "neq";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return "${tableColumn} ".$tableOperator." ''";
+                return $qb->expr()->$fnExpr($tableColumn, "''");
 
             } else if($isBool) {
 
-                     if($tableOperator == self::OPTION_TRUE  || $tableOperator == self::OPTION_NOT_FALSE) $tableOperator =  "=";
-                else if($tableOperator == self::OPTION_FALSE || $tableOperator == self::OPTION_NOT_TRUE)  $tableOperator = "!=";
+                     if($tableOperator == self::OPTION_TRUE  || $tableOperator == self::OPTION_NOT_FALSE) $fnExpr =  "eq";
+                else if($tableOperator == self::OPTION_FALSE || $tableOperator == self::OPTION_NOT_TRUE)  $fnExpr = "neq";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return "${tableColumn} ".$tableOperator." true";
+                return $qb->expr()->$fnExpr($tableColumn, true);
 
             } else {
 
-                     if($tableOperator == self::OPTION_EQUAL)         $tableOperator = "=";
-                else if($tableOperator == self::OPTION_NOT_EQUAL)     $tableOperator = "!=";
-                else if($tableOperator == self::OPTION_GREATER)       $tableOperator = ">";
-                else if($tableOperator == self::OPTION_GREATER_EQUAL) $tableOperator = ">=";
-                else if($tableOperator == self::OPTION_LOWER)         $tableOperator = "<";
-                else if($tableOperator == self::OPTION_LOWER_EQUAL)   $tableOperator = "<=";
-                else if($tableOperator == self::OPTION_YOUNGER)       $tableOperator = ">";
-                else if($tableOperator == self::OPTION_YOUNGER_EQUAL) $tableOperator = ">=";
-                else if($tableOperator == self::OPTION_OVER)          $tableOperator = "<=";
-                else if($tableOperator == self::OPTION_NOT_OVER)      $tableOperator = ">";
-                else if($tableOperator == self::OPTION_OLDER)         $tableOperator = "<";
-                else if($tableOperator == self::OPTION_OLDER_EQUAL)   $tableOperator = "<=";
+                     if($tableOperator == self::OPTION_EQUAL)         $fnExpr = "eq";
+                else if($tableOperator == self::OPTION_NOT_EQUAL)     $fnExpr = "neq";
+                else if($tableOperator == self::OPTION_GREATER)       $fnExpr = "gt";
+                else if($tableOperator == self::OPTION_GREATER_EQUAL) $fnExpr = "ge";
+                else if($tableOperator == self::OPTION_LOWER)         $fnExpr = "lt";
+                else if($tableOperator == self::OPTION_LOWER_EQUAL)   $fnExpr = "le";
+                else if($tableOperator == self::OPTION_YOUNGER)       $fnExpr = "gt";
+                else if($tableOperator == self::OPTION_YOUNGER_EQUAL) $fnExpr = "ge";
+                else if($tableOperator == self::OPTION_OVER)          $fnExpr = "le";
+                else if($tableOperator == self::OPTION_NOT_OVER)      $fnExpr = "gt";
+                else if($tableOperator == self::OPTION_OLDER)         $fnExpr = "lt";
+                else if($tableOperator == self::OPTION_OLDER_EQUAL)   $fnExpr = "le";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return "${tableColumn} ${tableOperator} :{$fieldID}";
+                return $qb->expr()->$fnExpr($tableColumn, ":{$fieldID}");
             }
         }
 
@@ -1317,7 +1331,7 @@ class ServiceEntityParser
             ->setFirstResult($offset ?? null)
             ->setCacheable($this->cacheable);
 
-        $this->leftJoinList[spl_object_hash($qb)] = [];
+        $this->joinList[spl_object_hash($qb)] = [];
 
         // Prepare criteria variable
         foreach ($criteria as $field => $fieldValue) {
@@ -1399,60 +1413,68 @@ class ServiceEntityParser
     protected function getQuery(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query
     {
         $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
-        if ($this->cacheable) {
 
-            //
-            // Eagerly load translations
-            $entityName  = $this->classMetadata->getName();
+        //
+        // Eagerly load translations
+        $entityName  = $this->classMetadata->getName();
+
+        //
+        // Eager load feature
+        if(!$this->eagerly) {
+
             if(class_implements_interface($entityName, TranslatableInterface::class)) {
 
-                $qb->leftJoin(self::ALIAS_ENTITY.".translations", self::ALIAS_TRANSLATIONS);
-                $qb->addSelect(self::ALIAS_TRANSLATIONS);
+                if($this->leftJoin($qb, self::ALIAS_ENTITY.".translations"))
+                    $qb->addSelect(self::ALIAS_ENTITY."_translations");
             }
 
-            //
-            // Eager load feature
-            if(!$this->eagerly) $query = $qb->getQuery();
-            else {
+            $query = $qb->getQuery();
 
-                $query = $this->getEagerQueryBuilder($qb)->getQuery();
-                $query->useQueryCache(true);
-            }
+        } else {
 
-            //
-            // Apply custom output walker to translatable entity
-            if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))
-                $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+            $query = $this->getEagerQueryBuilder($qb)->getQuery();
+            $query->useQueryCache($this->cacheable);
+        }
 
-        } else if($this->eagerly) $query = $this->getEagerQueryBuilder($qb)->getQuery();
-          else $query = $qb->getQuery();
+        //
+        // Apply custom output walker to all entities (some join may relates to translatable entities)
+        if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))
+            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
 
         return $query;
     }
 
-    protected function getEagerQueryBuilder(QueryBuilder $qb, bool $allAssociationsRequired = false)
+    protected function getEagerQueryBuilder(QueryBuilder $qb, array $options = [], ?ClassMetadata $classMetadata = null)
     {
-        foreach($this->classMetadata->getAssociationMappings() as $associationMapping) {
+        $aliasRoot = $options["alias"]    ?? self::ALIAS_ENTITY;
+        $required  = $options["required"] ?? false;
+        $depth     = $options["depth"]    ?? 1;
+        $joinList  = $options["join"]     ?? ["translations"];
+
+        if($depth-- < 1) return $qb;
+
+        if($classMetadata === null) $classMetadata = $this->classMetadata;
+
+        foreach($classMetadata->getAssociationMappings() as $associationMapping) {
 
             if($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) continue;
-            if(!$associationMapping["isOwningSide"]) continue;
 
-            $pathExpr = self::ALIAS_ENTITY.".".$associationMapping["fieldName"];
-            $aliasIdentificationVariable = self::ALIAS_ENTITY."_".$associationMapping["fieldName"];
+            $aliasExpr       = $aliasRoot.".".$associationMapping["fieldName"];
+            $aliasIdentifier = str_replace(".", "_", $aliasExpr);
 
             $continue = false;
             $expressions = $qb->getDQLParts()["select"];
             foreach($expressions as $expr) {
 
-                $continue = in_array($aliasIdentificationVariable, $expr->getParts());
+                $continue = in_array($aliasIdentifier, $expr->getParts());
                 if($continue) break;
             }
 
             if($continue) continue;
 
-            $expressions = $qb->getDQLParts()["join"][self::ALIAS_ENTITY] ?? [];
+            $expressions = $qb->getDQLParts()["join"][$aliasExpr] ?? [];
             foreach($expressions as $expr) {
-                $continue = $expr->getAlias() == $aliasIdentificationVariable;
+                $continue = $expr->getAlias() == $aliasIdentifier;
                 if($continue) break;
             }
 
@@ -1460,17 +1482,37 @@ class ServiceEntityParser
 
             $sourceEntity = $associationMapping["sourceEntity"];
             $targetEntity = $associationMapping["targetEntity"];
-            $targetEntityCacheable = $this->entityManager->getClassMetadata($targetEntity)->cache != null;
-            while($targetEntityCacheable && $targetEntity = get_parent_class($targetEntity))
-                  $targetEntityCacheable &= $this->entityManager->getClassMetadata($targetEntity)->cache != null;
 
-            if($allAssociationsRequired && !$targetEntityCacheable)
+            $targetEntityCacheable = $this->entityManager->getClassMetadata($targetEntity)->cache != null;
+            while($targetEntityCacheable && $targetEntity = get_parent_class($targetEntity)) {
+                if (!$this->classMetadataManipulator->isEntity($targetEntity)) break;
+                $targetEntityCacheable &= $this->entityManager->getClassMetadata($targetEntity)->cache != null;
+            }
+
+            if($required && !$targetEntityCacheable)
                 throw new Exception("\"".$sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
 
+            $targetEntity = $associationMapping["targetEntity"];
             if($targetEntityCacheable) {
 
-                $qb->leftJoin($pathExpr, $aliasIdentificationVariable);
-                $qb->addSelect($aliasIdentificationVariable);
+                $validJoin   = $joinList !== null && in_array($associationMapping["fieldName"], $joinList);
+                $invalidJoin = $joinList !== null && in_array("^".$associationMapping["fieldName"], $joinList);
+
+                if($joinList === null || $validJoin xor $invalidJoin) {
+
+                    if($this->leftJoin($qb, $aliasExpr))
+                        $qb->addSelect($aliasIdentifier);
+
+                    $newOptions = [
+                        "alias" => $aliasIdentifier,
+                        "depth" => $depth,
+                        "required" => $required,
+                        "join" => $joinList
+                    ];
+
+                    $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
+                    $this->getEagerQueryBuilder($qb, array_merge($options, $newOptions), $targetClassMetadata);
+                }
             }
         }
 
@@ -1486,14 +1528,15 @@ class ServiceEntityParser
         $column = $this->getAlias($this->getColumn());
         if(!$column) $column = "id";
 
+        $e_column = $column;
         if($this->classMetadata->hasAssociation($column))
-            $e_column = self::ALIAS_ENTITY."_".$column;
+            $e_column = self::ALIAS_ENTITY."_".$e_column;
         else if($this->classMetadata->hasField($column))
-            $e_column = self::ALIAS_ENTITY.".".$column;
+            $e_column = self::ALIAS_ENTITY.".".$e_column;
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, null, null, $groupBy);
         if($this->classMetadata->hasAssociation($column))
-            $this->leftJoin($qb, $column);
+            $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
 
         $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
 
@@ -1503,15 +1546,19 @@ class ServiceEntityParser
     protected function getQueryWithLength(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = [])
     {
         $column = $this->getAlias($this->getColumn());
+
+        $e_column = $column;
         if($this->classMetadata->hasAssociation($column))
-            $column = self::ALIAS_ENTITY."_".$column;
+            $e_column = self::ALIAS_ENTITY."_".$column;
         else if($this->classMetadata->hasField($column))
-            $column = self::ALIAS_ENTITY.".".$column;
+            $e_column = self::ALIAS_ENTITY.".".$column;
 
         $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy);
-        $this->leftJoin($qb, $column);
 
-        $qb->select("LENGTH(".self::ALIAS_ENTITY.".".$column.") as length");
+        if($this->classMetadata->hasAssociation($column))
+            $this->leftJoin($qb, $column);
+
+        $qb->select("LENGTH(".$e_column.") as length");
 
         return $qb->getQuery();
     }
@@ -1532,55 +1579,53 @@ class ServiceEntityParser
 
         $column = explode("\\", $this->classMetadata->getName());
         $column = lcfirst(end($column));
+        $column = $this->getAlias($column);
 
         if(is_string($groupBy)) $groupBy = [$groupBy];
         if(!is_array($groupBy)) throw new Exception("Unexpected \"groupBy\" argument type provided \"".gettype($groupBy)."\"");
 
         foreach ($groupBy as $name => $column) {
 
-            $alias = str_replace(".", "_", $column);
+            $aliasIdentifier = str_replace(".", "_", $column);
 
             $column = implode(".", array_map(fn ($c) => $this->getAlias($c), explode(".", $column)));
             $columnHead = explode(".", $column)[0] ?? $column;
 
+            $groupBy[$name] = $column;
             if($this->classMetadata->hasAssociation($columnHead))
-                 $groupBy[$name] = self::ALIAS_ENTITY."_".$column;
+                 $groupBy[$name] = self::ALIAS_ENTITY."_".$groupBy[$name];
             else if($this->classMetadata->hasField($columnHead))
-                 $groupBy[$name] = self::ALIAS_ENTITY.".".$column;
+                $groupBy[$name] = self::ALIAS_ENTITY.".".$groupBy[$name];
 
-            if($groupBy[$name] == self::ALIAS_ENTITY.".".$alias) $qb->addSelect($groupBy[$name]);
-            else $qb->addSelect("(".$groupBy[$name].") AS ".$alias);
+            if($groupBy[$name] == self::ALIAS_ENTITY.".".$aliasIdentifier) $qb->addSelect($groupBy[$name]);
+            else $qb->addSelect("(".$groupBy[$name].") AS ".$aliasIdentifier);
 
-            $qb = $this->leftJoin($qb, $alias);
+            if($this->classMetadata->hasAssociation($column))
+                $this->leftJoin($qb, self::ALIAS_ENTITY.".".$aliasIdentifier);
         }
 
         return $qb->groupBy(implode(",", $groupBy));
     }
 
-    protected $innerJoinList = [];
-    protected function innerJoin(QueryBuilder $qb, $innerJoin)
+    protected $joinList = [];
+    protected function innerJoin(QueryBuilder $qb, $join, $alias = null, $conditionType = null, $condition = null, $indexBy = null): bool
     {
-        if(in_array($innerJoin, $this->innerJoinList[spl_object_hash($qb)] ?? [])) return $qb;
-        if ($this->classMetadata->hasAssociation($innerJoin)) {
+        if(in_array($join, $this->joinList[spl_object_hash($qb)] ?? [])) return false;
 
-            $qb->leftJoin(self::ALIAS_ENTITY.".".$innerJoin, self::ALIAS_ENTITY."_".$innerJoin);
-            $this->leftJoinList[spl_object_hash($qb)][] = $innerJoin;
-        }
+        $qb->innerJoin($join, $alias ?? str_replace(".", "_", $join), $conditionType, $condition, $indexBy);
+        $this->joinList[spl_object_hash($qb)][] = $join;
 
-        return $qb;
+        return true;
     }
 
-    protected $leftJoinList = [];
-    protected function leftJoin(QueryBuilder $qb, $join)
+    protected function leftJoin(QueryBuilder $qb, $join, $alias = null, $conditionType = null, $condition = null, $indexBy = null): bool
     {
-        if(in_array($join, $this->leftJoinList[spl_object_hash($qb)] ?? [])) return $qb;
-        if ($this->classMetadata->hasAssociation($join)) {
+        if(in_array($join, $this->joinList[spl_object_hash($qb)] ?? [])) return false;
 
-            $qb->join(self::ALIAS_ENTITY.".".$join, self::ALIAS_ENTITY."_".$join);
-            $this->leftJoinList[spl_object_hash($qb)][] = $join;
-        }
+        $qb->leftJoin($join, $alias ?? str_replace(".", "_", $join), $conditionType, $condition, $indexBy);
+        $this->joinList[spl_object_hash($qb)][] = $join;
 
-        return $qb;
+        return true;
     }
 
     protected function orderBy(QueryBuilder $qb, string|array|null $orderBy)
@@ -1603,14 +1648,14 @@ class ServiceEntityParser
             $isRandom = ($name == "id" && strtolower($value) == "rand");
             if(!$isRandom) {
 
+                $formattedName = $name;
                 if($this->classMetadata->hasField($entity))
                     $formattedName = self::ALIAS_ENTITY.".".$name;
                 else if($this->classMetadata->hasAssociation($entity))
                     $formattedName = self::ALIAS_ENTITY."_".$name;
-                else
-                    $formattedName = $name;
 
-                $qb = $this->leftJoin($qb, $entity);
+                if($this->classMetadata->hasAssociation($entity))
+                    $this->leftJoin($qb, self::ALIAS_ENTITY.".".$entity);
             }
 
             $orderBy   = $first ? "orderBy" : "addOrderBy";
