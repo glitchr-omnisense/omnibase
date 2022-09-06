@@ -7,12 +7,20 @@ use Base\Service\BaseService;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityServiceInterface;
+use Base\Service\SitemapperInterface;
 use Base\Service\TranslatorInterface;
 use DateTime;
 
 class SiteVariable
 {
-    public function __construct(RouterInterface $router, TranslatorInterface $translator, LocaleProviderInterface $localeProvider, BaseService $baseService, MaintenanceProviderInterface $maintenanceProvider,  MaternityServiceInterface $maternityService)
+    public function __construct(
+        RouterInterface $router,
+        SitemapperInterface $sitemapper,
+        TranslatorInterface $translator,
+        LocaleProviderInterface $localeProvider,
+        BaseService $baseService,
+        MaintenanceProviderInterface $maintenanceProvider,
+        MaternityServiceInterface $maternityService)
     {
         $this->router = $router;
         $this->translator = $translator;
@@ -20,6 +28,7 @@ class SiteVariable
         $this->localeProvider = $localeProvider;
         $this->maintenanceProvider = $maintenanceProvider;
         $this->maternityService = $maternityService;
+        $this->sitemapper = $sitemapper;
     }
 
     public function homepage() { return $this->baseService->getHomepage(); }
@@ -28,6 +37,8 @@ class SiteVariable
         $locale ??= $this->localeProvider->getLocale();
         return array_merge($this->baseService->getMeta($locale), $meta);
     }
+
+    public function map()    { return $this->sitemapper->getAlternates(); }
 
     public function title()  { return $this->baseService->getSite()["title"]  ?? null; }
     public function slogan() { return $this->baseService->getSite()["slogan"] ?? null; }

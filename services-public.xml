@@ -56,6 +56,8 @@
         <service id="Base\Service\PaginatorInterface" alias="base.paginator"/>
         <service id="base.breadgrinder" alias="Base\Service\Breadgrinder" />
         <service id="Base\Service\BreadgrinderInterface" alias="base.breadgrinder"/>
+        <service id="sitemap" alias="Base\Service\Sitemapper" />
+        <service id="Base\Service\SitemapperInterface" alias="sitemap"/>
 
         <service id="locale_provider" alias="Base\Service\LocaleProvider" />
         <service id="Base\Service\LocaleProviderInterface" alias="locale_provider"/>

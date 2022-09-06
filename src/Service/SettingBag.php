@@ -165,7 +165,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             if ($settings instanceof Query)
                 $settings = $settings->getResult();
 
-
         } catch(TableNotFoundException  $e) { throw $e; }
           catch(EntityNotFoundException $e) { return $useCache ? $this->getRaw($path, false) : []; } // Cache fallback
 

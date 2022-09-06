@@ -1660,8 +1660,12 @@ namespace {
                         $ret[$head] = array_merge_recursive2($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
                 }
 
-            } else if(is_array($value)) $ret[$head] = array_inflate($separator, $value, $mode, $limit);
-            else $ret[$head] = $value;
+            } else {
+
+                if(is_array($value)) $ret[$head][] = array_inflate($separator, $value, $mode, $limit);
+                else if(!empty($ret[$head])) $ret[$head][] = $value;
+                else $ret[$head] = $value;
+            }
         }
 
         return $ret;
@@ -1804,8 +1808,9 @@ namespace {
         $arrayOut = [];
         foreach($array as $k => $v) {
 
-            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_numerics($v);
-            else if(!is_numeric($k)) $arrayOut[$k] = $v;
+            if(is_numeric($k)) continue;
+            else if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_numerics($v, $recursive);
+            else $arrayOut[$k] = $v;
         }
 
         return $arrayOut;
@@ -1816,8 +1821,9 @@ namespace {
         $arrayOut = [];
         foreach($array as $k => $v) {
 
-            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v);
-            else if(is_numeric($k)) $arrayOut[$k] = $v;
+            if(is_string($k)) continue;
+            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v, $recursive);
+            else $arrayOut[$k] = $v;
         }
 
         return $arrayOut;

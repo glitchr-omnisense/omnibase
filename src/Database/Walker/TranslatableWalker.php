@@ -8,6 +8,7 @@ use Base\Database\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
 use Doctrine\ORM\Query;
 use Base\Service\LocaleProvider;
+use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
 use Doctrine\ORM\Query\AST\SelectStatement;
@@ -85,6 +86,61 @@ class TranslatableWalker extends SqlWalker
         throw new RuntimeException('Locale provider not found.');
     }
 
+    protected function generateClassTableInheritanceJoins(
+        ClassMetadata $class,
+        string $dqlAlias
+    ): string {
+
+        $sql = '';
+
+        $baseTableAlias = $this->getSQLTableAlias($class->getTableName(), $dqlAlias);
+        if($dqlAlias == "e_widget") dump($class, $baseTableAlias);
+
+        // INNER JOIN parent class tables
+        foreach ($class->parentClasses as $parentClassName) {
+            $parentClass = $this->em->getClassMetadata($parentClassName);
+            $tableAlias  = $this->getSQLTableAlias($parentClass->getTableName(), $dqlAlias);
+
+            // If this is a joined association we must use left joins to preserve the correct result.
+            $sql .= isset($this->queryComponents[$dqlAlias]['relation']) ? ' LEFT ' : ' INNER ';
+            $sql .= 'JOIN ' . $this->quoteStrategy->getTableName($parentClass, $this->platform) . ' ' . $tableAlias . ' ON ';
+
+            $sqlParts = [];
+
+            foreach ($this->quoteStrategy->getIdentifierColumnNames($class, $this->platform) as $columnName) {
+                $sqlParts[] = $baseTableAlias . '.' . $columnName . ' = ' . $tableAlias . '.' . $columnName;
+            }
+
+            // Add filters on the root class
+            $sqlParts[] = $this->generateFilterConditionSQL($parentClass, $tableAlias);
+
+            $sql .= implode(' AND ', array_filter($sqlParts));
+        }
+
+        // Ignore subclassing inclusion if partial objects is disallowed
+        if ($this->query->getHint(Query::HINT_FORCE_PARTIAL_LOAD)) {
+            return $sql;
+        }
+
+        // LEFT JOIN child class tables
+        foreach ($class->subClasses as $subClassName) {
+            $subClass   = $this->em->getClassMetadata($subClassName);
+            $tableAlias = $this->getSQLTableAlias($subClass->getTableName(), $dqlAlias);
+
+            $sql .= ' LEFT JOIN ' . $this->quoteStrategy->getTableName($subClass, $this->platform) . ' ' . $tableAlias . ' ON ';
+
+            $sqlParts = [];
+
+            foreach ($this->quoteStrategy->getIdentifierColumnNames($subClass, $this->platform) as $columnName) {
+                $sqlParts[] = $baseTableAlias . '.' . $columnName . ' = ' . $tableAlias . '.' . $columnName;
+            }
+
+            $sql .= implode(' AND ', $sqlParts);
+        }
+
+        return $sql;
+    }
+
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
@@ -94,8 +150,11 @@ class TranslatableWalker extends SqlWalker
         $relation       = $this->getQueryComponent($joinedDqlAlias)['relation'] ?? null;
         if($relation === null) return $sql;
 
+        if($dqlAlias == "e_widget") dump($dqlAlias, $sql, $joinAssociationDeclaration);
+
         // Extract source class information
         $sourceClass      = $this->getEntityManager()->getClassMetadata($relation['sourceEntity']);
+
         if(!class_implements_interface($sourceClass->getName(), TranslatableInterface::class))
             return $sql;
 
@@ -107,11 +166,9 @@ class TranslatableWalker extends SqlWalker
         //
         // Check whether target class is the root translation entity or not
         $assoc = !$relation['isOwningSide'] ? $targetClass->associationMappings[$relation['mappedBy']] : $relation;
-        if(!array_key_exists("inherited", $assoc))
-            return $sql;
 
         // Get root target class to replace target class 'translation_id'
-        $rootTargetClass = $this->getEntityManager()->getClassMetadata($assoc['inherited']);
+        $rootTargetClass = $this->getEntityManager()->getClassMetadata($assoc['inherited'] ?? $relation['targetEntity']);
         if(!class_implements_interface($rootTargetClass->getName(), TranslationInterface::class))
             return $sql;
 

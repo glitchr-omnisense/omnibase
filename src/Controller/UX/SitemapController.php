@@ -2,15 +2,13 @@
 
 namespace Base\Controller\UX;
 
-use Base\Annotations\Annotation\Sitemap;
-use Base\Annotations\AnnotationReader;
 use Base\Response\XmlResponse;
+use Base\Service\SitemapperInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 use Base\Traits\BaseTrait;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\RouterInterface;
 
 class SitemapController extends AbstractController
 {
@@ -19,41 +17,13 @@ class SitemapController extends AbstractController
     /**
      * @Route("/sitemap.xml", name="ux_sitemap")
      */
-    public function Main(Request $request, AnnotationReader $annotationReader, RouterInterface $router): XmlResponse
+    public function Main(Request $request, SitemapperInterface $sitemap): XmlResponse
     {
-        $urls = [];
         $hostname = $request->getSchemeAndHttpHost();
 
-        foreach($router->getRouteCollection() as $name => $route)
-        {
-            $controller = $route->getDefault("_controller");
-            if($controller === null) continue;
-
-            list($class, $method) = explode("::", $controller);
-            if(!class_exists($class)) continue;
-
-            $annotations = $annotationReader->getAnnotations($class, Sitemap::class, [AnnotationReader::TARGET_METHOD]);
-            $annotations = $annotations[AnnotationReader::TARGET_METHOD][$class][$method] ?? [];
-
-            $annotation = end($annotations);
-            if(!$annotation) continue;
-
-            // dump($router);
-            // dump($name, $route->getDefaults(), $router->generate($name, $route->getDefaults()));
-            $urls[] = [
-                "loc" => $hostname.$router->generate($name, $route->getDefaults()),
-                "priority" => $annotation->getPriority(),
-                "lastmod" => $annotation->getLastMod(),
-                "changefreq" => $annotation->getChangeFreq(),
-            ];
-        }
-
-        // exit(1);
-
-        // return response in XML format
-        return new XmlResponse($this->renderView('sitemap.xml.twig', [
-            'urls' => $urls,
-            'hostname' => $hostname
-        ]));
+        return $sitemap
+            ->setHostname($hostname)
+            ->registerAnnotations()
+            ->generate('sitemap.xml.twig');
     }
 }

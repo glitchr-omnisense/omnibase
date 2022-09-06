@@ -6,18 +6,19 @@ trait BagTrait
 {
     public static function read(?string $path, array $bag = [])
     {
-        if($path === null) return $bag;
+        if($path) {
 
-        $pathArray = explode(".", $path);
-        foreach ($pathArray as $index => $key) {
+            $pathArray = explode(".", $path);
+            foreach ($pathArray as $index => $key) {
 
-            if($key == "_self" && $index != count($pathArray)-1)
-                throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
+                if($key == "_self" && $index != count($pathArray)-1)
+                    throw new \Exception("Failed to read \"$path\": _self can only be used as tail parameter");
 
-            if(!array_key_exists($key.".", $bag))
-                return null;
+                if(!array_key_exists($key.".", $bag))
+                    return null;
 
-            $bag = &$bag[$key."."];
+                $bag = &$bag[$key."."];
+            }
         }
 
         if(array_key_exists("_self", $bag)) return $bag["_self"];

@@ -2,14 +2,12 @@
 
 namespace Base\Database\Repository;
 
-use App\Entity\User;
 use Base\BaseBundle;
 use Base\Database\Entity\EntityHydrator;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Model\IntlDateTime;
@@ -24,7 +22,6 @@ use Exception;
 use ReflectionClass;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
-use Symfony\Component\OptionsResolver\Options;
 
 class ServiceEntityParser
 {
@@ -121,7 +118,7 @@ class ServiceEntityParser
     protected $operator = null;
     protected $column = null;
     protected bool $cacheable = false;
-    protected bool $eagerly   = false;
+    protected $eagerly        = false;
     protected array $criteria = [];
     protected array $options  = [];
 
@@ -138,8 +135,9 @@ class ServiceEntityParser
         $this->classMetadata  = $entityManager->getClassMetadata($serviceEntity->getFqcnEntityName());
 
         $this->criteria = [];
-        $this->options = [];
+        $this->options  = [];
         $this->operator = null;
+        $this->eagerly  = false;
 
         foreach(self::getSpecials() as $special) {
 
@@ -152,46 +150,46 @@ class ServiceEntityParser
         }
     }
 
-    protected function __findBy         (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->getQuery   ($criteria, $orderBy                         , $limit, $offset, $groupBy, $selectAs); }
-    protected function __findRandomlyBy (array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
-    protected function __findAll        (                      $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
-    protected function __findOneBy      (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
-    protected function __findLastOneBy  (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = [])         { return $this->__findOneBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']),                  $groupBy, $selectAs) ?? null; }
-    protected function __findLastBy     (array $criteria = [], $orderBy = null                               , ?array $groupBy = null, array $selectAs = []): ?Query
+    protected function __findBy         (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->getQuery   ($criteria, $orderBy                                     , $limit, $offset, $groupBy, $selectAs); }
+    protected function __findRandomlyBy (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
+    protected function __findAll        (                      ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
+    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
+    protected function __findLastOneBy  (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']),                        $groupBy, $selectAs) ?? null; }
+    protected function __findLastBy     (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         $limit = array_unshift($criteria);
         return $this->__findBy($criteria, array_merge($orderBy ?? [], ['id' => 'DESC']), $limit, null, $groupBy, $selectAs) ?? null;
     }
 
-    protected function __findAtMostBy     (array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = []): ?Query
+    protected function __findAtMostBy     (array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         $limit = array_pop_key("special:atMost", $criteria);
         return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
-    protected function __findPreviousBy   (array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = []): ?Query
+    protected function __findPreviousBy   (array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
-        $limit = array_pop_key("special:prev", $criteria);
         $orderBy["id"] = "DESC";
+        $limit = array_pop_key("special:prev", $criteria);
         return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
-    protected function __findNextBy       (array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = []): ?Query
+    protected function __findNextBy       (array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
         $limit = array_pop_key("special:prev", $criteria);
         return $this->__findBy($criteria, $orderBy, $limit, null, $groupBy, $selectAs);
     }
 
-    protected function __findPreviousOneBy(array $criteria = [], $orderBy = null, $groupBy = null, array $selectAs = [])
+    protected function __findPreviousOneBy(array $criteria = [], ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         $orderBy["id"] = "DESC";
         return $this->__findOneBy($criteria, $orderBy, $groupBy, $selectAs);
     }
 
-    protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                array $selectAs = [])      { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
-    protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, array $selectAs = [])      { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
-    protected function __distinctCountBy (array $criteria = [],                                               ?array $groupBy = null,                                array $selectAs = []): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
-    protected function __countBy         (array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null,                                array $selectAs = [])
+    protected function __findNextOneBy   (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)      { return $this->__findOneBy       ($criteria, $orderBy,                  $groupBy, $selectAs); }
+    protected function __lengthOfBy      (array $criteria = [],                       ?array $orderBy = null, ?array $groupBy = null, $limit = null, $offset = null, ?array $selectAs = null)      { return $this->getQueryWithLength($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs)->getResult(); }
+    protected function __distinctCountBy (array $criteria = [],                                            ?array $groupBy = null,                                ?array $selectAs = null): int { return $this->__countBy         ($criteria, self::COUNT_DISTINCT,      $groupBy, $selectAs); }
+    protected function __countBy         (array $criteria = [], ?string $mode = null, ?array $orderBy = null, ?array $groupBy = null,                                ?array $selectAs = null)
     {
         $mode ??= self::COUNT_ALL;
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
@@ -418,6 +416,7 @@ class ServiceEntityParser
         if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?'.$by.')(?P<names>.*)/', $method, $magicExtra)) {
 
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
+
             $byNames = array_pop_key("names", $magicExtra);
             $special = array_pop_key("special", $magicExtra);
             $special = $special ? only_alphachars(ucfirst($special)) : null;
@@ -428,6 +427,7 @@ class ServiceEntityParser
         } else if (preg_match('/^(?P<fn>(?:'.$findRequest.')(?P<special>'.$specials.')?(?P<eagerly>'.$eagerly.')?)(?P<names>.*)/', $method, $magicExtra)) {
 
             $this->eagerly = !empty(array_pop_key("eagerly", $magicExtra));
+
             $byNames = array_pop_key("names", $magicExtra);
             $special = array_pop_key("special", $magicExtra);
             $special = $special ? only_alphachars(ucfirst($special)) : null;
@@ -488,6 +488,12 @@ class ServiceEntityParser
 
             $id = $this->addCriteria("id", array_shift($arguments));
             $this->addCustomOption($id, self::OPTION_LOWER);
+        }
+
+        if($this->eagerly !== false) {
+
+            $magicFn = str_replace(self::LOAD_EAGERLY, "", $magicFn);
+            $this->eagerly = array_shift($arguments);
         }
 
         // Reveal obvious logical ambiguities..
@@ -896,9 +902,6 @@ class ServiceEntityParser
             $this->cacheable = BaseBundle::CACHE;
         }
 
-        if($this->eagerly)
-            $magicFn = str_replace(self::LOAD_EAGERLY, "", $magicFn);
-
         if(str_starts_with($magicFn, self::REQUEST_FIND.self::SPECIAL_ALL)) {
 
             if(str_ends_with($magicFn, self::SEPARATOR_BY))
@@ -911,7 +914,6 @@ class ServiceEntityParser
         }
 
         $magicFn = "__".$magicFn;
-
         $magicArgs[0] = array_merge($magicArgs[0] ?? [], $this->criteria ?? []); // Criteria
         $magicArgs[0] = array_merge($magicArgs[0], array_transforms(fn($k,$v) :array => ["special:".$k, $v], $magicExtra));
 
@@ -1320,7 +1322,7 @@ class ServiceEntityParser
         throw new Exception("Failed to build expression \"".$field."\": ".$fieldValue);
     }
 
-    protected function getQueryBuilder(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?QueryBuilder
+    protected function getQueryBuilder(array $criteria = [], array $orderBy = [], $limit = null, $offset = null, array $groupBy = [], array $selectAs = []): ?QueryBuilder
     {
         /**
          * @QueryBuilder
@@ -1373,10 +1375,10 @@ class ServiceEntityParser
 
                 // Custom process in case of closest/farest
                 $fieldRoot = implode(self::SEPARATOR, array_slice($field, count($field) - 2, 2));
-                $closestTo       = $this->findCustomOption($fieldRoot, self::OPTION_CLOSESTTO);
-                $farestTo        = $this->findCustomOption($fieldRoot, self::OPTION_FARESTTO);
+                $closestTo = $this->findCustomOption($fieldRoot, self::OPTION_CLOSESTTO);
+                $farestTo  = $this->findCustomOption($fieldRoot, self::OPTION_FARESTTO);
                 if ($closestTo || $farestTo) {
-                    $orderBy[$expr] = $closestTo ? "ASC" : "DESC";
+                    $orderBy[(string) $expr] = $closestTo ? "ASC" : "DESC";
                     $expr = null;
                 }
             }
@@ -1410,51 +1412,14 @@ class ServiceEntityParser
         return $qb;
     }
 
-    protected function getQuery(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = []): ?Query
-    {
-        $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy, $selectAs);
-
-        //
-        // Eagerly load translations
-        $entityName  = $this->classMetadata->getName();
-
-        //
-        // Eager load feature
-        if(!$this->eagerly) {
-
-            if(class_implements_interface($entityName, TranslatableInterface::class)) {
-
-                if($this->leftJoin($qb, self::ALIAS_ENTITY.".translations"))
-                    $qb->addSelect(self::ALIAS_ENTITY."_translations");
-            }
-
-            $query = $qb->getQuery();
-
-        } else {
-
-            $query = $this->getEagerQueryBuilder($qb)->getQuery();
-            $query->useQueryCache($this->cacheable);
-        }
-
-        //
-        // Apply custom output walker to all entities (some join may relates to translatable entities)
-        if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))
-            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
-
-        return $query;
-    }
-
-    protected function getEagerQueryBuilder(QueryBuilder $qb, array $options = [], ?ClassMetadata $classMetadata = null)
+    protected function getEagerQuery(QueryBuilder $qb, array $options = [], ?ClassMetadata $classMetadata = null): Query
     {
         $aliasRoot = $options["alias"]    ?? self::ALIAS_ENTITY;
         $required  = $options["required"] ?? false;
-        $depth     = $options["depth"]    ?? 1;
-        $joinList  = $options["join"]     ?? ["translations"];
-
-        if($depth-- < 1) return $qb;
+        $joinList = $options["join"] ?? array_combine($this->eagerly ?? [], array_fill(0, count($this->eagerly ?? []), []));
+        $joinList = array_key_removes_numerics(array_inflate(".", $joinList));
 
         if($classMetadata === null) $classMetadata = $this->classMetadata;
-
         foreach($classMetadata->getAssociationMappings() as $associationMapping) {
 
             if($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) continue;
@@ -1493,33 +1458,61 @@ class ServiceEntityParser
                 throw new Exception("\"".$sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
 
             $targetEntity = $associationMapping["targetEntity"];
-            if($targetEntityCacheable) {
+            if($targetEntityCacheable && array_key_exists($associationMapping["fieldName"], $joinList)) {
 
-                $validJoin   = $joinList !== null && in_array($associationMapping["fieldName"], $joinList);
-                $invalidJoin = $joinList !== null && in_array("^".$associationMapping["fieldName"], $joinList);
+                $this->leftJoin($qb, $aliasExpr);
+                $qb->addSelect($aliasIdentifier);
 
-                if($joinList === null || $validJoin xor $invalidJoin) {
+                $this->leftJoin($qb, $aliasIdentifier.".translations");
+                $qb->addSelect($aliasIdentifier."_translations");
 
-                    if($this->leftJoin($qb, $aliasExpr))
-                        $qb->addSelect($aliasIdentifier);
+                $newOptions = [
+                    "alias" => $aliasIdentifier,
+                    "required" => $required,
+                    "join" => $joinList[$associationMapping["fieldName"]]
+                ];
 
-                    $newOptions = [
-                        "alias" => $aliasIdentifier,
-                        "depth" => $depth,
-                        "required" => $required,
-                        "join" => $joinList
-                    ];
-
-                    $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
-                    $this->getEagerQueryBuilder($qb, array_merge($options, $newOptions), $targetClassMetadata);
-                }
+                // Map associations
+                $targetClassMetadata = $this->entityManager->getClassMetadata($targetEntity);
+                $this->getEagerQuery($qb, array_merge($options, $newOptions), $targetClassMetadata);
             }
         }
 
-        return $qb;
+        return $qb->getQuery();
     }
 
-    protected function getQueryWithCount(array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, ?array $groupBy = null, array $selectAs = [])
+    protected function getQuery(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query
+    {
+        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? [], $selectAs ?? []);
+
+        //
+        // Eagerly load translations
+        $entityName  = $this->classMetadata->getName();
+
+        //
+        // Eager load feature
+        if($this->eagerly === false && class_implements_interface($entityName, TranslatableInterface::class)) {
+
+            $this->leftJoin($qb, self::ALIAS_ENTITY.".translations");
+            $qb->addSelect(self::ALIAS_ENTITY."_translations");
+        }
+
+        $query = $this->eagerly === false ? $qb->getQuery() : $this->getEagerQuery($qb);
+
+        if($entityName == Slot::class || $entityName == Widget::class) {
+            dump(explodeByArray(["SELECT", "LEFT JOIN", "FROM"], $query->getSql(), true));
+        }
+        $query->useQueryCache($this->cacheable);
+
+        //
+        // Apply custom output walker to all entities (some join may relates to translatable entities)
+        if(class_implements_interface($this->classMetadata->getName(), TranslatableInterface::class))
+            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+
+        return $query;
+    }
+
+    protected function getQueryWithCount(array $criteria = [], ?string $mode = self::COUNT_ALL, ?array $orderBy = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         if($mode == self::COUNT_ALL) $mode = "";
         if($mode && $mode != self::COUNT_DISTINCT)
@@ -1534,7 +1527,7 @@ class ServiceEntityParser
         else if($this->classMetadata->hasField($column))
             $e_column = self::ALIAS_ENTITY.".".$e_column;
 
-        $qb = $this->getQueryBuilder($criteria, $orderBy, null, null, $groupBy);
+        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], null, null, $groupBy ?? [], $selectAs ?? []);
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
 
@@ -1543,7 +1536,7 @@ class ServiceEntityParser
         return $qb->getQuery();
     }
 
-    protected function getQueryWithLength(array $criteria = [], $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, array $selectAs = [])
+    protected function getQueryWithLength(array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null)
     {
         $column = $this->getAlias($this->getColumn());
 
@@ -1553,7 +1546,7 @@ class ServiceEntityParser
         else if($this->classMetadata->hasField($column))
             $e_column = self::ALIAS_ENTITY.".".$column;
 
-        $qb = $this->getQueryBuilder($criteria, $orderBy, $limit, $offset, $groupBy);
+        $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], $limit, $offset, $groupBy ?? [], $selectAs ?? []);
 
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, $column);

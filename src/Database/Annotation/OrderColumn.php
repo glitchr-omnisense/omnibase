@@ -105,7 +105,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
         catch (Exception $e) { return; }
 
-        $ordering = $orderingRepository->cacheOneEagerlyByEntityIdAndEntityClass($entity->getId(), $className);
+        $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
         if($ordering === null) return;
 
         $data = $ordering->getEntityData();
@@ -166,7 +166,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneEagerlyByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 

@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
-use Psr\Cache\CacheItemPoolInterface;
+
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -327,7 +327,7 @@ class ClassMetadataManipulator
         $classMetadata = $this->getClassMetadata($entity);
         if(!$classMetadata) return false;
 
-        $entity = $classMetadata->getFieldValue($entity, $classMetadata->getFieldName($fieldName));
+        $entity = $classMetadata->getFieldValue($entity, $this->getFieldName($classMetadata, $fieldName));
         if(class_implements_interface($entity, TranslatableInterface::class))
             $entity = $entity->getTranslations();
 
@@ -367,7 +367,7 @@ class ClassMetadataManipulator
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? null;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? null;
         return ($fieldName != null);
     }
 
@@ -461,10 +461,10 @@ class ClassMetadataManipulator
         $fieldName = head($fieldPath);
         $classMetadata = $this->doctrine->getManagerForClass($entityName)->getClassMetadata($entityName);
 
-        if ($classMetadata->hasAssociation($classMetadata->getFieldName($fieldName)))
-            $entityMapping = $classMetadata->associationMappings[$classMetadata->getFieldName($fieldName)];
-        else if ($classMetadata->hasField($classMetadata->getFieldName($fieldName)))
-            $entityMapping = $classMetadata->fieldMappings[$classMetadata->getFieldName($fieldName)];
+        if ($classMetadata->hasAssociation($this->getFieldName($classMetadata, $fieldName)))
+            $entityMapping = $classMetadata->associationMappings[$this->getFieldName($classMetadata, $fieldName)];
+        else if ($classMetadata->hasField($this->getFieldName($classMetadata, $fieldName)))
+            $entityMapping = $classMetadata->fieldMappings[$this->getFieldName($classMetadata, $fieldName)];
         else return null;
 
         $fieldName = $fieldPath ? head($fieldPath) : $fieldName;
@@ -529,7 +529,7 @@ class ClassMetadataManipulator
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->getAssociationTargetClass($fieldName);
     }
 
@@ -538,7 +538,7 @@ class ClassMetadataManipulator
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->hasAssociation($fieldName);
     }
 
@@ -547,7 +547,7 @@ class ClassMetadataManipulator
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->getFieldMapping($fieldName) ?? null;
     }
 
@@ -556,7 +556,7 @@ class ClassMetadataManipulator
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->getAssociationMapping($fieldName) ?? null;
     }
 
@@ -616,7 +616,7 @@ class ClassMetadataManipulator
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return !$classMetadata->isAssociationInverseSide($fieldName);
     }
 
@@ -626,7 +626,7 @@ class ClassMetadataManipulator
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->isAssociationInverseSide($fieldName);
     }
 
@@ -645,7 +645,7 @@ class ClassMetadataManipulator
 
         if(!$this->hasAssociation($classMetadata, $fieldName)) return false;
 
-        $fieldName = $classMetadata->fieldNames[$fieldName] ?? $fieldName;
+        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->getAssociationMapping($fieldName)['type'] ?? 0;
     }
 

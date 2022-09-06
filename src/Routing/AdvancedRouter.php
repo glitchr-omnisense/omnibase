@@ -177,11 +177,7 @@ class AdvancedRouter implements RouterInterface
     public function setContext(RequestContext $context) { $this->router->setContext($context); }
 
     public function getGenerator(): UrlGeneratorInterface { return  $this->router->getGenerator(); }
-    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
-    {
-        // dump($this->getRoute($name));
-        return $this->router->generate($name, $parameters, $referenceType);
-    }
+    public function generate(string $name, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string { return $this->router->generate($name, $parameters, $referenceType); }
     public function format(string $url): string
     {
         if($url === null) $url = get_url();
@@ -230,7 +226,7 @@ class AdvancedRouter implements RouterInterface
 
             $this->routes[$routeName] = new Route(
                 $args[3],
-                array_intersect_key($args[1], array_flip($args[0])),
+                $args[1],
                 array_merge($locale, $args[2]), [],
                 $args[4], $args[5], $args[6]
             );

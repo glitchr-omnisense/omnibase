@@ -368,6 +368,13 @@
             <argument type="service" id="base.service" />
         </service>
 
+        <service id="Base\Service\Sitemapper" public="true">
+            <argument type="service" id="twig" />
+            <argument type="service" id="base.annotation_reader" />
+            <argument type="service" id="router" />
+            <argument type="service" id="locale_provider" />
+        </service>
+
         <service id="Base\Service\SemanticEnhancer"   public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="Base\Repository\Layout\SemanticRepository" />
@@ -523,6 +530,7 @@
         <service id="Base\Twig\Variable\SiteVariable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="router" />
+            <argument type="service" id="sitemap" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service" />
