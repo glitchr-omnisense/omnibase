@@ -12,7 +12,6 @@ use Base\Traits\BaseTrait;
 
 /**
  * @ORM\Entity()
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class ShortIntl implements TranslationInterface
 {

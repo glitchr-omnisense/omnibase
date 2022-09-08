@@ -65,14 +65,23 @@ trait TranslationTrait
         return $this;
     }
 
-    public function isEmpty(): bool
+    public function isEmpty(array $addIgnoredVars = [], callable $addConditions = null): bool
     {
+        $ignoredVars = array_unique(array_merge(['id', 'translatable', 'locale'], $addIgnoredVars));
+        $ignoredVars = array_intersect(array_keys(get_object_vars($this)), $ignoredVars);
+
         foreach (get_object_vars($this) as $var => $value) {
 
-            if (in_array($var, ['id', 'translatable', 'locale'], true))
+            if (in_array($var, $ignoredVars, true))
+                continue;
+            if ($value === null)
                 continue;
 
-            if (!empty($value))
+            if($addConditions !== null && call_user_func_array($addConditions, [$var, $value]))
+                return false;
+            if (is_string($value) && trim($value) !== "")
+                return false;
+            if (is_array($value) && $value !== [])
                 return false;
         }
 

@@ -9,9 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Attribute\Scope\TagScopeRepository;
 use Base\Entity\Thread\Tag;
 use Base\Field\Type\SelectType;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=TagScopeRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "scope_tag" )
  */
 

@@ -8,7 +8,6 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\Layout\Widget;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
@@ -153,7 +152,7 @@ class ServiceEntityParser
     protected function __findBy         (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->getQuery   ($criteria, $orderBy                                     , $limit, $offset, $groupBy, $selectAs); }
     protected function __findRandomlyBy (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
     protected function __findAll        (                      ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
-    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
+    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findBy   ($criteria, $orderBy                                     , null  , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
     protected function __findLastOneBy  (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']),                        $groupBy, $selectAs) ?? null; }
     protected function __findLastBy     (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
@@ -1285,11 +1284,24 @@ class ServiceEntityParser
 
             } else if($isEmpty || $isNotEmpty) {
 
-                     if($tableOperator == self::OPTION_EMPTY)          $fnExpr =  "eq";
-                else if($tableOperator == self::OPTION_NOT_EMPTY)      $fnExpr = "neq";
-                else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
+                if($tableOperator == self::OPTION_EMPTY){
 
-                return $qb->expr()->$fnExpr($tableColumn, "''");
+                    $expr = [];
+                    $expr[] = $qb->expr()->isNull($tableColumn, ":$fieldID");
+                    $expr[] = $qb->expr()->eq($tableColumn, "''");
+
+                    return $qb->expr()->orX(...$expr);
+
+                } else if($tableOperator == self::OPTION_NOT_EMPTY) {
+
+                    $expr = [];
+                    $expr[] = $qb->expr()->isNotNull($tableColumn, ":$fieldID");
+                    $expr[] = $qb->expr()->neq($tableColumn, "''");
+
+                    return $qb->expr()->andX(...$expr);
+                }
+
+                throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
             } else if($isBool) {
 
@@ -1416,6 +1428,10 @@ class ServiceEntityParser
     {
         $aliasRoot = $options["alias"]    ?? self::ALIAS_ENTITY;
         $required  = $options["required"] ?? false;
+
+        $depth     = $options["depth"]    ?? 2;
+        if($depth-- < 1) return $qb->getQuery();
+
         $joinList = $options["join"] ?? array_combine($this->eagerly ?? [], array_fill(0, count($this->eagerly ?? []), []));
         $joinList = array_key_removes_numerics(array_inflate(".", $joinList));
 
@@ -1423,7 +1439,6 @@ class ServiceEntityParser
         foreach($classMetadata->getAssociationMappings() as $associationMapping) {
 
             if($associationMapping["fetch"] == ClassMetadataInfo::FETCH_EAGER) continue;
-
             $aliasExpr       = $aliasRoot.".".$associationMapping["fieldName"];
             $aliasIdentifier = str_replace(".", "_", $aliasExpr);
 
@@ -1463,13 +1478,11 @@ class ServiceEntityParser
                 $this->leftJoin($qb, $aliasExpr);
                 $qb->addSelect($aliasIdentifier);
 
-                $this->leftJoin($qb, $aliasIdentifier.".translations");
-                $qb->addSelect($aliasIdentifier."_translations");
-
                 $newOptions = [
-                    "alias" => $aliasIdentifier,
+                    "alias"    => $aliasIdentifier,
                     "required" => $required,
-                    "join" => $joinList[$associationMapping["fieldName"]]
+                    "depth"    => $depth,
+                    "join"     => $joinList[$associationMapping["fieldName"]]
                 ];
 
                 // Map associations
@@ -1499,10 +1512,9 @@ class ServiceEntityParser
 
         $query = $this->eagerly === false ? $qb->getQuery() : $this->getEagerQuery($qb);
 
-        if($entityName == Slot::class || $entityName == Widget::class) {
-            dump(explodeByArray(["SELECT", "LEFT JOIN", "FROM"], $query->getSql(), true));
-        }
         $query->useQueryCache($this->cacheable);
+        if($this->cacheable) $query->enableResultCache();
+        else $query->disableResultCache();
 
         //
         // Apply custom output walker to all entities (some join may relates to translatable entities)

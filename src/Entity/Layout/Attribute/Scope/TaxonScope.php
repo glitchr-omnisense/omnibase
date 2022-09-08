@@ -9,9 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Attribute\Scope\TaxonScopeRepository;
 use Base\Entity\Thread\Taxon;
 use Base\Field\Type\SelectType;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=TaxonScopeRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "scope_taxon" )
  */
 

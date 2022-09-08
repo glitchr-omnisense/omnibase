@@ -166,9 +166,12 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
+
+                if($this->ordering[$className][$id]?->getId() !== null)
+                    $this->getEntityManager()->getCache()->evictEntity(Ordering::class, $this->ordering[$className][$id]->getId());
 
                 break;
 

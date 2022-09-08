@@ -6,10 +6,11 @@ use Base\Database\Annotation\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\CountryAdapterRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=CountryAdapterRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "country" )
  */
 

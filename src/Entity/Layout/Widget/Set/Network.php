@@ -15,9 +15,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\Set\NetworkRepository;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=NetworkRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
 class Network extends Widget implements IconizeInterface, SetInterface
@@ -33,7 +35,6 @@ class Network extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Route::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @OrderColumn
      */
     protected $routes;

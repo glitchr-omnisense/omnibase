@@ -8,10 +8,11 @@ use Base\Field\Type\ColorType;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\ColorAdapterRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=ColorAdapterRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "color" )
  */
 

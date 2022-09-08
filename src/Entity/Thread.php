@@ -19,6 +19,7 @@ use Base\Annotations\Annotation\GenerateUuid;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Slugify;
 use Base\Annotations\Annotation\Hierarchify;
+use Base\Database\Annotation\Cache;
 use Base\Database\Annotation\Trasheable;
 use Base\Enum\ThreadState;
 
@@ -26,13 +27,12 @@ use Base\Traits\BaseTrait;
 use Base\Database\TranslatableInterface;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\Traits\TrasheableTrait;
-
+use Base\Entity\Thread\Taxon;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\GraphInterface;
+use Base\Enum\WorkflowState;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
-use Base\Entity\Thread\Taxon;
-use Base\Enum\WorkflowState;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -41,7 +41,7 @@ use Base\Enum\WorkflowState;
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
  *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @Hierarchify(null, separator = "/" )
  * @Trasheable
@@ -97,7 +97,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     /**
      * @ORM\ManyToOne(targetEntity=Thread::class, inversedBy="children")
      * @ORM\JoinColumn(onDelete="SET NULL")
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $parent;
     public function getParent(): ?self { return $this->parent; }
@@ -112,7 +111,6 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
     /**
      * @ORM\OneToMany(targetEntity=Thread::class, mappedBy="parent", cascade={"persist"}))
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $children;
     public function getChildren(): Collection { return $this->children; }
@@ -376,7 +374,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     }
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      * @Timestamp(on="create")
      */
     protected $createdAt;

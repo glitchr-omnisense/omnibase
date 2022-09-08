@@ -94,7 +94,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
                 $field = str_replace("-", ".", $formattedField);
 
-                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field) ?? new Setting($field);
+                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field, false) ?? new Setting($field);
             }
 
             $fields = ["value" => []];

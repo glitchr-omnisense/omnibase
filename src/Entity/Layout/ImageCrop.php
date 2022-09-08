@@ -11,10 +11,11 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ImageCropRepository;
 use Base\Service\Model\SaltInterface;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=ImageCropRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  */
 class ImageCrop implements LinkableInterface, SaltInterface
 {

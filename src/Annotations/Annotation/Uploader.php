@@ -16,6 +16,7 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
+use function is_file;
 
 /**
  * Class Uploader
@@ -132,7 +133,7 @@ class Uploader extends AbstractAnnotation
             $pathList = [];
             foreach($field as $uuidOrFile) {
 
-                $uuidOrFile = is_string($uuidOrFile) && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
+                $uuidOrFile = is_string($uuidOrFile) && !str_contains($uuidOrFile, "://") && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
                 if($uuidOrFile instanceof File) {
 
                     $pathList[] = $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
@@ -151,7 +152,8 @@ class Uploader extends AbstractAnnotation
 
         } else {
 
-            $uuidOrFile = is_string($field) && is_file($field) ? new File($field) : $field;
+
+            $uuidOrFile = is_string($field) && !str_contains($field, "://") && is_file($field) ? new File($field) : $field;
             if($uuidOrFile instanceof File)
                 return $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
 
@@ -303,7 +305,7 @@ class Uploader extends AbstractAnnotation
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..
-            $file = is_string($entry) && is_file($entry) ? new File($entry) : $entry;
+            $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
 
                 if($this->getMissable()) $fileList[] = $entry;

@@ -6,6 +6,7 @@ namespace Base\Serializer;
 
 use Exception;
 use Symfony\Component\CssSelector\Exception\ParseException;
+use function is_file;
 
 class Aco
 {

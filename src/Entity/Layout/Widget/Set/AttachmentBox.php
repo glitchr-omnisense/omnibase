@@ -14,9 +14,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\Set\AttachmentBoxRepository;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=AttachmentBoxRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
 class AttachmentBox extends Widget implements IconizeInterface
@@ -32,7 +34,6 @@ class AttachmentBox extends Widget implements IconizeInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Attachment::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @OrderColumn
      */
     protected $attachments;

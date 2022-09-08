@@ -11,9 +11,13 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Service\Model\IconizeInterface;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=LikeRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */

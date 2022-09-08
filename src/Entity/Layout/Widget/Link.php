@@ -7,14 +7,15 @@ use Base\Entity\Layout\Attribute\Hyperlink;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\LinkRepository;
-use Base\Trait\UrlifyTrait;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=LinkRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
 
@@ -44,7 +45,6 @@ class Link extends Widget implements IconizeInterface, LinkableInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Hyperlink::class, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $hyperlink;

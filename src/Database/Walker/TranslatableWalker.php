@@ -6,48 +6,41 @@ use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\DatabaseSubscriber\IntlSubscriber;
-use Doctrine\ORM\Query;
 use Base\Service\LocaleProvider;
-use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\SqlWalker;
 use Doctrine\ORM\Query\AST;
-use Doctrine\ORM\Query\AST\SelectStatement;
-use Doctrine\ORM\Query\Exec\SingleSelectExecutor;
 use RuntimeException;
 
 class TranslatableWalker extends SqlWalker
 {
+    /**
+     * @var string
+     */
+    public const LOCALE = 'locale';
+    public const FOREIGN_KEY = 'translatable_id';
+    public const SALT = "unique_translation";
+
     public function __construct($query, $parserResult, array $queryComponents)
     {
         parent::__construct($query, $parserResult, $queryComponents);
         $this->localeProvider = $this->getLocaleProvider();
     }
 
-    /**
-     * @return Query\Exec\AbstractSqlExecutor
-     */
-    public function getExecutor($AST)
-    {
-        if (!$AST instanceof SelectStatement)
-            return parent::getExecutor($AST);
-
-        return new SingleSelectExecutor($AST, $this);
-    }
-
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
-        $statements = explodeByArray([" LEFT JOIN", " INNER JOIN", "translatable_id"], $sql, true);
+        return $sql;
+        $statements = explodeByArray([" LEFT JOIN", " INNER JOIN", self::FOREIGN_KEY], $sql, true);
         $statementsIntls = [];
 
-        $translatableIds = array_keys($statements, "translatable_id");
+        $translatableIds = array_keys($statements, self::FOREIGN_KEY);
         for($i = 0, $N = count($translatableIds); $i < $N; $i++) {
 
             $offset = $i > 0 ? $translatableIds[$i-1]+1 : 0;
             $length = $i > 0 ? $translatableIds[$i]-$translatableIds[$i-1]-1 : $translatableIds[$i];
 
             $statementsIntl = array_slice($statements, $offset, $length);
-            $statementsIntl[count($statementsIntl) - 1] .= "translatable_id";
+            $statementsIntl[count($statementsIntl) - 1] .= self::FOREIGN_KEY;
 
             $statementsIntls[] = $statementsIntl;
         }
@@ -57,18 +50,37 @@ class TranslatableWalker extends SqlWalker
             $statementsIntls[] = array_slice($statements, $translatableIds[$i-1]+1);
 
         $sql = "";
-        foreach($statementsIntls as $statementsIntl) {
+        foreach(array_filter($statementsIntls) as $statementsIntl) {
 
             usort_startsWith($statementsIntl, [" FROM", " INNER JOIN", " LEFT JOIN"]);
 
-            $statementsIntl = array_reverseByMask($statementsIntl,
-                array_map(fn($s) => str_starts_with($s, " LEFT JOIN") && str_contains($s, NamingStrategy::TABLE_I18N_SUFFIX),
-                $statementsIntl)
-            );
+            $mask = array_map(fn($s) => str_starts_with($s, " LEFT JOIN") && str_contains($s, NamingStrategy::TABLE_I18N_SUFFIX), $statementsIntl);
+            $offset = 0;
+            $length = 0;
+
+            $lastPos = count($mask)-1;
+
+            $submask = array_fill(0, count($mask), false);
+            foreach($mask as $pos => $bit) {
+
+                $submask[$pos] |= $bit;
+                if($bit && $length < 1) $offset = $pos;
+                if($bit) $length++;
+
+                if(!$bit || $pos == $lastPos) {
+
+                    if($length < 1) continue;
+                    array_splice($submask, 0, $offset, array_fill(0, $offset, 0));
+                    array_splice($submask, $offset, $length, array_fill($offset, $length, 1));
+
+                    $statementsIntl = array_reverseByMask($statementsIntl, $submask, $statementsIntl);
+                    $offset = $pos;
+                    $length = 0;
+                }
+            }
 
             $sql .= implode("", $statementsIntl);
         }
-
         return $sql;
     }
 
@@ -86,71 +98,15 @@ class TranslatableWalker extends SqlWalker
         throw new RuntimeException('Locale provider not found.');
     }
 
-    protected function generateClassTableInheritanceJoins(
-        ClassMetadata $class,
-        string $dqlAlias
-    ): string {
-
-        $sql = '';
-
-        $baseTableAlias = $this->getSQLTableAlias($class->getTableName(), $dqlAlias);
-        if($dqlAlias == "e_widget") dump($class, $baseTableAlias);
-
-        // INNER JOIN parent class tables
-        foreach ($class->parentClasses as $parentClassName) {
-            $parentClass = $this->em->getClassMetadata($parentClassName);
-            $tableAlias  = $this->getSQLTableAlias($parentClass->getTableName(), $dqlAlias);
-
-            // If this is a joined association we must use left joins to preserve the correct result.
-            $sql .= isset($this->queryComponents[$dqlAlias]['relation']) ? ' LEFT ' : ' INNER ';
-            $sql .= 'JOIN ' . $this->quoteStrategy->getTableName($parentClass, $this->platform) . ' ' . $tableAlias . ' ON ';
-
-            $sqlParts = [];
-
-            foreach ($this->quoteStrategy->getIdentifierColumnNames($class, $this->platform) as $columnName) {
-                $sqlParts[] = $baseTableAlias . '.' . $columnName . ' = ' . $tableAlias . '.' . $columnName;
-            }
-
-            // Add filters on the root class
-            $sqlParts[] = $this->generateFilterConditionSQL($parentClass, $tableAlias);
-
-            $sql .= implode(' AND ', array_filter($sqlParts));
-        }
-
-        // Ignore subclassing inclusion if partial objects is disallowed
-        if ($this->query->getHint(Query::HINT_FORCE_PARTIAL_LOAD)) {
-            return $sql;
-        }
-
-        // LEFT JOIN child class tables
-        foreach ($class->subClasses as $subClassName) {
-            $subClass   = $this->em->getClassMetadata($subClassName);
-            $tableAlias = $this->getSQLTableAlias($subClass->getTableName(), $dqlAlias);
-
-            $sql .= ' LEFT JOIN ' . $this->quoteStrategy->getTableName($subClass, $this->platform) . ' ' . $tableAlias . ' ON ';
-
-            $sqlParts = [];
-
-            foreach ($this->quoteStrategy->getIdentifierColumnNames($subClass, $this->platform) as $columnName) {
-                $sqlParts[] = $baseTableAlias . '.' . $columnName . ' = ' . $tableAlias . '.' . $columnName;
-            }
-
-            $sql .= implode(' AND ', $sqlParts);
-        }
-
-        return $sql;
-    }
-
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
+        return $sql;
         $dqlAlias       = $joinAssociationDeclaration->joinAssociationPathExpression->identificationVariable;
         $joinedDqlAlias = $joinAssociationDeclaration->aliasIdentificationVariable;
 
         $relation       = $this->getQueryComponent($joinedDqlAlias)['relation'] ?? null;
         if($relation === null) return $sql;
-
-        if($dqlAlias == "e_widget") dump($dqlAlias, $sql, $joinAssociationDeclaration);
 
         // Extract source class information
         $sourceClass      = $this->getEntityManager()->getClassMetadata($relation['sourceEntity']);
@@ -181,7 +137,7 @@ class TranslatableWalker extends SqlWalker
         $rootIntlTableAlias = $this->getSQLTableAlias($rootTargetClass->getTableName(), $joinedDqlAlias);
         $sql = str_replace(
             $sourceIntlTableAlias.".id = ".$rootIntlTableAlias.".id",
-            $sourceTableAlias.".id = ".$rootIntlTableAlias.".translatable_id", $sql
+            $sourceTableAlias.".id = ".$rootIntlTableAlias.".".self::FOREIGN_KEY, $sql
         );
 
         //
@@ -195,7 +151,7 @@ class TranslatableWalker extends SqlWalker
             if($intlTableAlias == $sourceIntlTableAlias) {
 
                 $sql = str_replace(
-                    $sourceTableAlias.".id = ".$sourceIntlTableAlias.".translatable_id",
+                    $sourceTableAlias.".id = ".$sourceIntlTableAlias.".".self::FOREIGN_KEY,
                     $sourceIntlTableAlias.".id = ".$rootIntlTableAlias.".id", $sql
                 );
 

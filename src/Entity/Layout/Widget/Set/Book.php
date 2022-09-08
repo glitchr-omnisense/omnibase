@@ -14,10 +14,11 @@ use Doctrine\Common\Collections\ArrayCollection;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\Set\BookRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=BookRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
 class Book extends Widget implements IconizeInterface, SetInterface
@@ -33,7 +34,6 @@ class Book extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Page::class, orphanRemoval=true, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @OrderColumn
      */
     protected $pages;

@@ -71,6 +71,7 @@ use Base\Service\ImageService;
 use Base\Service\SettingBagInterface;
 use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Proxy\Proxy;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -150,10 +151,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
     {
         $fields = array_reverse(array_merge(array_reverse([
             "api.spam.akismet" => [],
-            "api.currency.fixer" => [],
-            "api.currency.exchange_rates_api" => ["required" => false],
-            "api.currency.currency_layer" => ["required" => false],
-            "api.currency.abstract_api" => ["required" => false],
+            // "api.currency.fixer" => [],
+            // "api.currency.exchange_rates_api" => ["required" => false],
+            // "api.currency.currency_layer" => ["required" => false],
+            // "api.currency.abstract_api" => ["required" => false],
         ]), array_reverse($fields)));
 
         if(empty($fields))
@@ -193,8 +194,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->settingBag->getRawScalar($fields)
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s],
+                $this->settingBag->getRawScalar($fields, false)
             );
 
             foreach($settings as $setting)
@@ -203,9 +204,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach(array_diff_key($data, $settings) as $name => $setting)
                 $this->settingRepository->persist($setting);
 
-
-            $this->settingRepository->flush();
-
+            try {
+                $this->settingRepository->flush();
+            } catch(\Exception $e) {
+                dump($e);
+                exit(1);
+            }
             $notification = new Notification("@controllers.backoffice_apikey.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
@@ -263,7 +267,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->settingBag->getRawScalar($fields)
+                $this->settingBag->getRawScalar($fields, false)
             );
 
             foreach(array_diff_key($data, $settings) as $name => $setting)

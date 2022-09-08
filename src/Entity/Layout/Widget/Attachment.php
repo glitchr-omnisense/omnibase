@@ -10,15 +10,17 @@ use Base\Annotations\Annotation\Uploader;
 use Base\Entity\Layout\Widget;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\LinkableInterface;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\AttachmentRepository;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=AttachmentRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
  *
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 

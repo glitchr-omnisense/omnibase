@@ -8,12 +8,13 @@ use Base\Service\Model\IconizeInterface;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Common\AbstractAttributeRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=AbstractAttributeRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "context", type = "string" )
  *     @DiscriminatorEntry(value="abstract")
@@ -28,10 +29,7 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
         return $this->getId() ? "<b>".($this->getAdapter() ? $this->getAdapter() : "Attribute")." #".$this->getId()."</b>" : get_class($this);
     }
 
-    public function __construct(AbstractAdapter $adapter)
-    {
-        $this->setAdapter($adapter);
-    }
+    public function __construct(AbstractAdapter $adapter) { $this->setAdapter($adapter); }
 
     /**
      * @ORM\Id
@@ -43,7 +41,6 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=AbstractAdapter::class, inversedBy="attributes")
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @ORM\JoinColumn(nullable=false)
      */
     protected $adapter;
@@ -57,5 +54,4 @@ abstract class AbstractAttribute implements IconizeInterface, AttributeInterface
     public function getCode(): ?string { return $this->getAdapter()->getCode(); }
     public function getType(): ?string { return get_class($this->getAdapter()); }
     public function getOptions(): array { return $this->getAdapter()->getOptions(); }
-
 }

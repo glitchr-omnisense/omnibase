@@ -30,7 +30,11 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function warmUp(string $cacheDir): array
     {
-        return $this->all();
+        $this->all();
+        $this->allRaw();
+        $this->allRaw(true);
+
+        return [ get_class($this) ];
     }
 
     public function __construct(EntityManagerInterface $entityManager, LocaleProviderInterface $localeProvider, Packages $packages, CacheInterface $cache, string $environment)
@@ -47,18 +51,14 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $this->environment    = $environment;
     }
 
-    public function all        (?string $locale = null) : array   { return $this->get(null, $locale); }
+    public function all   (?string $locale = null) : array   { return $this->get(null, $locale); }
+    public function allRaw($useCache = BaseBundle::CACHE, $onlyLinkedBag = false) : array  { return $this->getRaw(null, $useCache, $onlyLinkedBag); }
     public function __call($name, $_) { return $this->get("base.settings.".$name); }
 
     public function getEnvironment(): ?string { return $this->environment; }
     public function getPaths(null|string|array $path = null)
     {
-        return array_flatten(".",
-                    array_map_recursive(
-                        fn($s) => $s instanceof Setting ? $s->getPath() : null,
-                        array_filter($this->getRaw($path)) ?? []
-                    ), -1, ARRAY_FLATTEN_PRESERVE_KEYS
-        );
+        return array_map(fn($s) => $s instanceof Setting ? $s->getPath() : null, array_filter($this->getRaw($path)) ?? []);
     }
 
     protected function read(?string $path, array $bag)
@@ -144,7 +144,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return array_filter($settings);
     }
 
-    public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::CACHE)
+    public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::CACHE, bool $onlyLinkedBag = false)
     {
         if(is_array($paths = $path)) {
 
@@ -156,12 +156,17 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         if(!$this->settingRepository) throw new InvalidArgumentException("Setting repository not found. No doctrine connection established ?");
+
         try {
 
-            $fn = $path ? ($useCache ? "cacheByInsensitivePathStartingWith" : "findByInsensitivePathStartingWith") :
-                          ($useCache ? "cacheAll" : "findAll");
+            $fn  = $useCache ? "cache" : "find";
+            $fn .= $onlyLinkedBag ?
+                    ($path ? "ByInsensitivePathStartingWithAndBagNotEmpty" : "ByBagNotEmpty") :
+                    ($path ? "ByInsensitivePathStartingWith" : "All");
 
-            $settings = $this->settingRepository->$fn($path);
+            $args = $path ? [$path] : [];
+
+            $settings = $this->settingRepository->$fn(...$args);
             if ($settings instanceof Query)
                 $settings = $settings->getResult();
 

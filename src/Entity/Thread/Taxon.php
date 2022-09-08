@@ -14,6 +14,7 @@ use Base\Database\TranslatableInterface;
 use Base\Service\Model\IconizeInterface;
 use Base\Service\Model\GraphInterface;
 use Doctrine\Common\Collections\Collection;
+use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Thread\TaxonRepository;
@@ -21,9 +22,9 @@ use Base\Repository\Thread\TaxonRepository;
 /**
  * @ORM\Entity(repositoryClass=TaxonRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- * 
+ *
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
+ *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )
  */

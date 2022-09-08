@@ -14,13 +14,14 @@ use Base\Database\Traits\VaultTrait;
 
 /**
  * @ORM\Entity()
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @Vault(fields={"value"})
  */
 class SettingIntl implements TranslationInterface
 {
-    use TranslationTrait;
+    use TranslationTrait { isEmpty as _isEmpty; }
     use VaultTrait;
+
+    public function isEmpty(): bool { return $this->_isEmpty(["vault"]); }
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)

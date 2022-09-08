@@ -14,11 +14,12 @@ use Base\Repository\Layout\Widget\PageRepository;
 use Base\Service\BaseService;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @DiscriminatorEntry
- *
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL") *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 
@@ -79,7 +80,6 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
     /**
      * Compute table of content
      */
-
     public function getTableOfContent($max = 6): array
     {
         $headlines = [];

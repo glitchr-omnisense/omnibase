@@ -127,6 +127,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
                                 break;
 
                             case EntityAction::UPDATE:
+
                                 if($this->entityManager->contains($entry))
                                     $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 else {

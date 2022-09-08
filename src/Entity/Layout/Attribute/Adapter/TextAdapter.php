@@ -7,10 +7,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\Adapter\TextAdapterRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=TextAdapterRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "text" )
  */
 

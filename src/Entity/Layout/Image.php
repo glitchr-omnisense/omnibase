@@ -17,6 +17,8 @@ use Base\Traits\BaseTrait;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use Base\Database\Annotation\Cache;
+
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
 use Base\Enum\Quadrant\Quadrant8;
@@ -25,8 +27,8 @@ use Base\Service\Model\SaltInterface;
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry
  */

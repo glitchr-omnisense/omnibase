@@ -19,8 +19,6 @@ class SettingsCacheWarmer implements CacheWarmerInterface
         if($this->shellVerbosity > 0 && php_sapi_name() == "cli")
             echo " // Warming up cache... Setting bag".PHP_EOL.PHP_EOL;
 
-        $this->settingBag->all();
-
-        return [ get_class($this->settingBag)];
+        return $this->settingBag->warmUp($cacheDir);
     }
 }

@@ -9,9 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Attribute\Scope\UserScopeRepository;
 use Base\Entity\User;
 use Base\Field\Type\SelectType;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=UserScopeRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry( value = "scope_user" )
  */
 

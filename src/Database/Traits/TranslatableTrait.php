@@ -2,6 +2,7 @@
 
 namespace Base\Database\Traits;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 
@@ -93,6 +94,8 @@ trait TranslatableTrait
         $translationClass = self::getTranslationEntityClass(true, false);
         $translations = $this->getTranslations();
 
+        if($this instanceof Wallpaper) dump($this, $translations->toArray());
+        if($this instanceof Wallpaper) dump($defaultLocale, $availableLocales, $locale, $normLocale);
         $translation = $translations[$normLocale] ?? null;
         if(!$translation && $locale === null) {
 
@@ -127,6 +130,7 @@ trait TranslatableTrait
             $translation = new $translationClass;
             $translation->setLocale($normLocale);
 
+            if($this instanceof Wallpaper) dump($translations, $translation);
             $this->addTranslation($translation);
         }
 

@@ -31,13 +31,14 @@ class LocaleController extends AbstractController
     public function ChangeTo(Request $request, ReferrerInterface $referrer, ?string $_locale = null)
     {
         if($_locale === null)
-            $request->getSession()->remove('_locale');
+            setcookie('_locale', null);
 
         $referrer->setUrl($_SERVER["HTTP_REFERER"] ?? null);
         $referrerName = $this->router->getRouteName(strval($referrer));
         $referrerParameters = array_filter($this->router->match(strval($referrer)), fn($a) => !str_starts_with($a, "_"), ARRAY_FILTER_USE_KEY);
         $referrer->setUrl(null);
 
+        setcookie('_locale', $_locale);
         if($referrerName !== "locale_changeto") {
 
             $referrer->setUrl(null);

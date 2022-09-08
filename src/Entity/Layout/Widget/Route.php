@@ -10,12 +10,12 @@ use Base\Service\Model\LinkableInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\RouteRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=RouteRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
- *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
 class Route extends Widget implements IconizeInterface, LinkableInterface

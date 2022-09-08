@@ -65,7 +65,7 @@ class AutocompleteController extends AbstractController
                 if(!is_associative($fields)) $fields = array_fill_keys($fields, $term);
                 $fields = array_filter($fields);
 
-                $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
+                $entries = $repository->cacheByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
 
                 do {
 

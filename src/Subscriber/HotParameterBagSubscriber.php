@@ -23,15 +23,18 @@ class HotParameterBagSubscriber implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event)
     {
-        if(!$this->parameterBag instanceof HotParameterBag) return;
+        // if(!$event->isMainRequest()) return;
+        // if(!$this->parameterBag instanceof HotParameterBag) return;
 
-        $settingBag = array_flatten(".", $this->settingBag->getRaw(), -1, ARRAY_FLATTEN_PRESERVE_KEYS);
-        foreach($settingBag as $setting) {
+        // array_map_recursive(function($setting) {
 
-            if($setting->getBag() === null) continue;
-            $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
-        }
+        //     if($setting === null) return;
+        //     if($setting->getBag() === null) return;
 
-        $this->parameterBag->markAsReady();
+        //     $this->parameterBag->add([$setting->getBag() => $setting->getValue()]);
+
+        // }, $this->settingBag->allRaw(true, true));
+
+        // $this->parameterBag->markAsReady();
     }
 }

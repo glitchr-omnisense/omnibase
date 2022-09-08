@@ -34,7 +34,6 @@ use Base\Service\LocaleProvider;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class Notification extends \Symfony\Component\Notifier\Notification\Notification implements SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
 {

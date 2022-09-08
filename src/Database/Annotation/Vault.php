@@ -5,7 +5,7 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\TranslationInterface;
-use Base\DatabaseSubscriber\IntlSubscriber;
+use Base\Database\Walker\TranslatableWalker;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Exception;
@@ -13,6 +13,7 @@ use Exception;
 use Symfony\Component\Cache\Marshaller\MarshallerInterface;
 use Symfony\Component\Cache\Marshaller\SodiumMarshaller;
 use Symfony\Component\PropertyAccess\PropertyAccess;
+use function is_file;
 
 /**
  * @Annotation
@@ -94,12 +95,6 @@ class Vault extends AbstractAnnotation
         catch (\Exception $e) { return null; }
     }
 
-
-    private function hasUniqueTranslationConstraint(ClassMetadata $classMetadata, string $name): bool
-    {
-        return isset($classMetadata->table['uniqueConstraints'][$name]);
-    }
-
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target, ?string $targetValue = null): void
     {
         if ($classMetadata->reflClass === null)
@@ -120,7 +115,7 @@ class Vault extends AbstractAnnotation
 
         if(is_instanceof($classMetadata->name, TranslationInterface::class)) {
 
-            $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' . IntlSubscriber::FOREIGN_KEY;
+            $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' . TranslatableWalker::SALT;
             if ($classMetadata->getName() == $classMetadata->rootEntityName) {
                 $classMetadata->table['uniqueConstraints'][$name] ??= [];
                 $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(

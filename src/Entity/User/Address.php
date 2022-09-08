@@ -6,12 +6,13 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\User\AddressRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=AddressRepository::class)
  * @ORM\InheritanceType( "JOINED" )
- * 
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ *
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry

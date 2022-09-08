@@ -9,8 +9,11 @@ use Base\Entity\Extension\Abstract\AbstractExtension;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\RevisionRepository;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=RevisionRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry(value="revision")
  */
 class Revision extends AbstractExtension

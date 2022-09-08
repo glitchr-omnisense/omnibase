@@ -14,9 +14,11 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\Set\MenuRepository;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=MenuRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
  */
 
@@ -33,7 +35,6 @@ class Menu extends Widget implements IconizeInterface, SetInterface
 
     /**
      * @ORM\ManyToMany(targetEntity=Widget::class, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      * @OrderColumn
      */
     protected $items;
