@@ -253,7 +253,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if(!$classMetadata)
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
 
-
             $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $data);
 
         } else if($viewData instanceof PersistentCollection) {
@@ -286,6 +285,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
                 foreach($childForm as $key => $value)
                     $viewData[$key] = $value->getViewData();
+
             }
 
         } else {

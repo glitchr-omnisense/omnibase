@@ -208,6 +208,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 foreach($form->getData() as $formattedField => $translations) {
 
                     $field = str_replace("-", ".", $formattedField);
+
                     foreach($translations as $locale => $translation) {
 
                         $viewData[$field] = $viewData[$field] ?? new Setting($field);

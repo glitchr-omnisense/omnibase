@@ -36,9 +36,15 @@ impersonator:
     <a class='badge bg-warning badge-warning' href='?_switch_user=_exit'>Retour à ton compte</a>"
 
 access_restricted:
-    public_restriction: "Ce site est en <b>accès limité</b> pour les utilisateurs."
-    user_restriction: "Ce site est en <b>accès limité</b> pour les administrateurs."
-    admin_restriction: "Ce site est en <b>accès limité</b> pour les super-administrateurs."
+    public_restriction:
+        message: "Le site est en <b>accès limité</b> pour les utilisateurs."
+        exception: "Cette page dispose d'une exception, mais le site est en <b>accès limité</b> pour les utilisateurs"
+    user_restriction:
+        message: "Le site est en <b>accès limité</b> pour les administrateurs."
+        exception: "Cette page dispose d'une exception, mais le site est en <b>accès limité</b> pour les administrateurs."
+    admin_restriction:
+        message: "Le site est en <b>accès limité</b> pour les super-administrateurs."
+        exception: "Cette page dispose d'une exception, mais le site est en <b>accès limité</b> pour les super-administrateurs."
 
 maintenance:
     banner: Ce site est en cours de <b>maintenance</b>.

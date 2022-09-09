@@ -17,7 +17,7 @@ class AttributeIntl implements TranslationInterface
 {
     use TranslationTrait { isEmpty as _isEmpty; }
 
-    public function isEmpty(): bool { return $this->_isEmpty([], fn($n,$v) => is_array($v) && array_filter($v) != []); }
+    public function isEmpty(): bool { return $this->_isEmpty([], fn($n,$v) => is_array($v) && array_filter($v) === []); }
 
     /**
      * @ORM\Column(type="array")

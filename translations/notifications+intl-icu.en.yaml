@@ -37,9 +37,15 @@ impersonator:
     <a class='badge bg-warning badge-warning' href='?{1}=_exit'>Exit impersonation</a>"
 
 access_restricted:
-    public_restriction: "This website is currently <b>under restricted access</b> for authenticated users only."
-    user_restriction: "This website is currently <b>under restricted access</b> for administrators only."
-    admin_restriction: "This website is currently <b>under restricted access</b> for super-administrators only."
+    public_restriction:
+        message: "This website is <b>under restricted access</b> for authenticated users only."
+        exception: "This page got a special exception, but this website is <b>under restricted access</b> for authenticated users only."
+    user_restriction:
+        message: "This website is <b>under restricted access</b> for administrators only."
+        exception: "This page got a special exception, but this website is <b>under restricted access</b> for administrators only."
+    admin_restriction:
+        message: "This website is <b>under restricted access</b> for super-administrators only."
+        exception: "This page got a special exception, but this website is <b>under restricted access</b> for super-administrators only."
 
 maintenance:
     banner: This website is currently <b>under maintenance</b>.

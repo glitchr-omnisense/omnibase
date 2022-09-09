@@ -168,28 +168,18 @@ class SecuritySubscriber implements EventSubscriberInterface
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
+                 if(!$adminAccess) $restrictionType = "admin_restriction";
+            else if(!$userAccess)  $restrictionType = "user_restriction";
+            else $restrictionType = "public_restriction";
+
             //
             // Check for user special grants (based on roles)
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
-            if($user &&  $specialGrant) {
-
-                     if(!$adminAccess) $msg = "admin_restriction";
-                else if(!$userAccess)  $msg = "user_restriction";
-                else $msg = "public_restriction";
-
-                if(!$this->localeProvider->hasChanged()) {
-
-                    $notification = new Notification("access_restricted.".$msg);
-                    $notification->send("warning");
-                }
-
-                return true;
-            }
 
             // In case of restriction: profiler is disabled
-            if($this->profiler) $this->profiler->disable();
+            if(!$specialGrant && $this->profiler) $this->profiler->disable();
 
             // Rescue authenticator must always be public
             $isSecurityRoute = RescueFormAuthenticator::isSecurityRoute($event->getRequest());
@@ -203,12 +193,41 @@ class SecuritySubscriber implements EventSubscriberInterface
             if($this->baseService->isEasyAdmin() && !$this->authorizationChecker->isGranted("BACKEND"))
             if(!$isSecurityRoute) throw new NotFoundHttpException();
 
+            //
             // Nonetheless exception access is always possible
-            if($this->authorizationChecker->isGranted("EXCEPTION_ACCESS"))
+            // Let's notify connected user that there is a special access grant for this page
+            if(!$this->baseService->isProfiler() && !$this->baseService->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
+
+                if(!$this->localeProvider->hasChanged()) {
+
+                    if($user && $specialGrant) {
+
+                        $notification = new Notification("access_restricted.".$restrictionType.".exception");
+                        $notification->send("info");
+                    }
+                }
+
                 return true;
 
+            } else {
+
+                // If not let them know that this page is locked for others
+                if(!$this->localeProvider->hasChanged()) {
+
+                    if($user && $specialGrant) {
+
+                        $notification = new Notification("access_restricted.".$restrictionType.".message");
+                        $notification->send("warning");
+
+                        return true;
+                    }
+                }
+            }
+
+            //
             // If not, then user is redirected to a specific route
             $currentRouteName = $this->router->getRouteName();
+
             $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
             if(is_array($routeRestriction)) {
 
@@ -219,7 +238,10 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $routeRestriction = first($routeRestriction);
             }
 
-            if($currentRouteName != str_rstrip($routeRestriction, ".".$this->localeProvider->getLang())) {
+            if($this->localeProvider->getLang() == $this->localeProvider->getDefaultLang())
+                $routeRestriction = str_rstrip($routeRestriction, ".".$this->localeProvider->getDefaultLang());
+
+            if ($currentRouteName != $routeRestriction) {
 
                 $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
