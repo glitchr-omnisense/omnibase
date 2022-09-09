@@ -19,7 +19,8 @@ use Base\Database\Annotation\Cache;
 /**
  * @ORM\Entity(repositoryClass=PageRepository::class)
  * @DiscriminatorEntry
- * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL") *
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
+ *
  * @AssertBase\UniqueEntity(fields={"slug"}, groups={"new", "edit"})
  */
 

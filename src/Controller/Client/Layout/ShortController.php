@@ -19,12 +19,10 @@ class ShortController extends AbstractController
      */
     protected $shortRepository;
 
-    public function __construct(RouterInterface $router, EntityManagerInterface $entityManager)
+    public function __construct(RouterInterface $router, ShortRepository $shortRepository)
     {
         $this->router = $router;
-
-        if(BaseBundle::hasDoctrine())
-            $this->shortRepository = $entityManager->getRepository(User::class);
+        $this->shortRepository = $shortRepository;
     }
 
     /**

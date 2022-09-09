@@ -170,9 +170,6 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 
-                if($this->ordering[$className][$id]?->getId() !== null)
-                    $this->getEntityManager()->getCache()->evictEntity(Ordering::class, $this->ordering[$className][$id]->getId());
-
                 break;
 
             case EntityAction::DELETE:

@@ -2,6 +2,7 @@
 
 namespace Base\EntitySubscriber;
 
+use App\Repository\UserRepository;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Base\Entity\User;
@@ -15,12 +16,10 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Service\ParameterBagInterface;
-use Doctrine\ORM\EntityManagerInterface;
 
 use Symfony\Component\DependencyInjection\Argument\ServiceLocator;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
-use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
@@ -44,25 +43,21 @@ class LogSubscriber implements EventSubscriberInterface
     public function __construct(
         ServiceLocator $dispatcherLocator,
         TokenStorageInterface $tokenStorage,
-        EntityManagerInterface $entityManager,
+        UserRepository $userRepository,
         BaseService $baseService,
         ParameterBagInterface $parameterBag) {
 
         $this->tokenStorage = $tokenStorage;
-        
         $this->baseService = $baseService;
         $this->parameterBag = $parameterBag;
-        
-        if(BaseBundle::hasDoctrine()) {
 
-            $this->userRepository = $entityManager->getRepository(User::class);
-            foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
+        $this->userRepository = $userRepository;
+        foreach($dispatcherLocator->getProvidedServices() as $dispatcherId => $_) {
 
-                $dispatcher = $dispatcherLocator->get($dispatcherId);
-                if (!$dispatcher instanceof TraceableEventDispatcher) continue;
+            $dispatcher = $dispatcherLocator->get($dispatcherId);
+            if (!$dispatcher instanceof TraceableEventDispatcher) continue;
 
-                $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
-            }
+            $this->dispatchers[] = $dispatcherLocator->get($dispatcherId);
         }
     }
 
@@ -81,7 +76,7 @@ class LogSubscriber implements EventSubscriberInterface
     {
         $token = $event->getToken();
         $user = ($token) ? $token->getUser() : null;
-        
+
         // Get back onLogout token information (to be used to store logs)
         $this->loggingOutUser = $user;
     }
@@ -180,7 +175,6 @@ class LogSubscriber implements EventSubscriberInterface
     public function onKernelTerminate(TerminateEvent $event)
     {
         if(!$this->baseService->isDebug()) return;
-        if(!BaseBundle::hasDoctrine()) return;
 
         return $this->storeLog($event);
     }
@@ -189,7 +183,6 @@ class LogSubscriber implements EventSubscriberInterface
     public function onKernelException(ExceptionEvent $event)
     {
         if(!$this->baseService->isDebug()) return;
-        if(!BaseBundle::hasDoctrine()) return;
 
         $exception = $event->getThrowable();
 

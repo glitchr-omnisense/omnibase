@@ -2,6 +2,7 @@
 
 namespace Base\Subscriber;
 
+use App\Repository\UserRepository;
 use Base\Service\ReferrerInterface;
 use Base\Entity\User;
 
@@ -48,6 +49,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public function __construct(
         EntityManagerInterface $entityManager,
+        UserRepository $userRepository,
         AuthorizationChecker $authorizationChecker,
         TokenStorageInterface $tokenStorage,
         TranslatorInterface $translator,
@@ -67,8 +69,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
         $this->localeProvider = $localeProvider;
         $this->entityManager = $entityManager;
-        if(BaseBundle::hasDoctrine())
-            $this->userRepository = $entityManager->getRepository(User::class);
+        $this->userRepository = $userRepository;
 
         $this->maternityService = $maternityService;
         $this->maintenanceProvider = $maintenanceProvider;
@@ -87,8 +88,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents(): array
     {
-        if(!BaseBundle::hasDoctrine()) return [];
-
         return [
 
             /* referer goes first, because kernelrequest then redirects consequently if user not verified */

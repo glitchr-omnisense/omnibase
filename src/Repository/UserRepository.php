@@ -3,7 +3,6 @@
 namespace Base\Repository;
 
 use Base\Entity\User;
-use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
 
 use Base\Database\Repository\ServiceEntityRepository;

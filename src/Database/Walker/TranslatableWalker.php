@@ -18,6 +18,7 @@ class TranslatableWalker extends SqlWalker
      */
     public const LOCALE = 'locale';
     public const FOREIGN_KEY = 'translatable_id';
+    public const COLUMN_NAME = 'translations';
     public const SALT = "unique_translation";
 
     public function __construct($query, $parserResult, array $queryComponents)
@@ -29,7 +30,7 @@ class TranslatableWalker extends SqlWalker
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
-        return $sql;
+
         $statements = explodeByArray([" LEFT JOIN", " INNER JOIN", self::FOREIGN_KEY], $sql, true);
         $statementsIntls = [];
 
@@ -101,7 +102,7 @@ class TranslatableWalker extends SqlWalker
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
-        return $sql;
+
         $dqlAlias       = $joinAssociationDeclaration->joinAssociationPathExpression->identificationVariable;
         $joinedDqlAlias = $joinAssociationDeclaration->aliasIdentificationVariable;
 

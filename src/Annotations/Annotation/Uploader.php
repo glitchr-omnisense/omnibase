@@ -152,7 +152,6 @@ class Uploader extends AbstractAnnotation
 
         } else {
 
-
             $uuidOrFile = is_string($field) && !str_contains($field, "://") && is_file($field) ? new File($field) : $field;
             if($uuidOrFile instanceof File)
                 return $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());

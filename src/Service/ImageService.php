@@ -30,6 +30,11 @@ class ImageService extends FileService implements ImageServiceInterface
      */
     protected $imagine;
 
+    /**
+     * @var FlysystemInterface
+     */
+    protected $flysystem;
+
     public function __construct(
         RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
         ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg, Profiler $profiler)

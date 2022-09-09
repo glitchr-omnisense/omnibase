@@ -5,8 +5,6 @@ namespace Base\Database\Annotation;
 use Attribute;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
-use Base\BaseBundle;
-use Base\Database\Mapping\NamingStrategy;
 use Doctrine\Common\Annotations\Annotation\NamedArgumentConstructor;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
@@ -68,7 +66,7 @@ final class Cache extends AbstractAnnotation
                 $this->associations = ClassMetadataInfo::MANY_TO_MANY;
                 break;
             case self::TO_MANY:
-                $this->associations = ClassMetadataInfo::ONE_TO_MANY+ ClassMetadataInfo::MANY_TO_MANY;
+                $this->associations = ClassMetadataInfo::ONE_TO_MANY + ClassMetadataInfo::MANY_TO_MANY;
                 break;
             case self::TO_ONE:
                 $this->associations = ClassMetadataInfo::ONE_TO_ONE + ClassMetadataInfo::MANY_TO_ONE;
@@ -85,7 +83,7 @@ final class Cache extends AbstractAnnotation
 
     public function supports(string $target, ?string $targetValue = null, $object = null):bool
     {
-        return BaseBundle::CACHE && ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
+        return ($target == AnnotationReader::TARGET_CLASS || $target == AnnotationReader::TARGET_PROPERTY);
     }
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)

@@ -38,7 +38,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
     public function onFlush(OnFlushEventArgs $event)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
+        $uow = $this->entityManager->getUnitOfWork();
 
         $this->scheduledEntityInsertions = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
@@ -102,6 +102,8 @@ class ExtensionSubscriber implements EventSubscriberInterface
                     foreach($match as $columns)
                         $properties[] = explode("::", $columns)[1];
 
+                    // if($entity !== null) // Make sure to invalidate cache
+                    //     $this->entityManager->refresh($entity);
                     $array = $extension->payload($action, $className, $properties, $entity);
 
                     foreach($array as $entry) {

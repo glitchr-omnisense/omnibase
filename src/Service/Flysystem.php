@@ -116,7 +116,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         catch (UnableToReadFile $e) { throw new NotReadableException("Unable to read file \"$path\".. ".$e->getMessage()); }
     }
 
-    public function write(string $path, string $contents, FilesystemOperator|string|null $operator = null, array $config = [])
+    public function write(string $path, string $contents, FilesystemOperator|string|null $operator = null, array $config = []):bool
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
@@ -128,7 +128,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         return true;
     }
 
-    public function delete(string $path, FilesystemOperator|string|null $operator = null)
+    public function delete(string $path, FilesystemOperator|string|null $operator = null): bool
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);
@@ -149,7 +149,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         catch (CorruptedPathDetected $e ) { return false; }
     }
 
-    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = [])
+    public function mkdir(string $path, FilesystemOperator|string|null $operator = null, array $config = []):bool
     {
         $operator = $this->getOperator($operator);
         $path = $this->stripPrefix($path, $operator);

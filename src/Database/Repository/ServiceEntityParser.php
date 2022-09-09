@@ -9,6 +9,7 @@ use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
 use Base\Entity\Layout\Widget\Slot;
+use Base\Service\LocaleProvider;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\ClassMetadata;
@@ -152,7 +153,8 @@ class ServiceEntityParser
     protected function __findBy         (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->getQuery   ($criteria, $orderBy                                     , $limit, $offset, $groupBy, $selectAs); }
     protected function __findRandomlyBy (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
     protected function __findAll        (                      ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
-    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findBy   ($criteria, $orderBy                                     , null  , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
+    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null) { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
+
     protected function __findLastOneBy  (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']),                        $groupBy, $selectAs) ?? null; }
     protected function __findLastBy     (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query
     {
@@ -1472,6 +1474,9 @@ class ServiceEntityParser
             if($required && !$targetEntityCacheable)
                 throw new Exception("\"".$sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
 
+            if(class_implements_interface($sourceEntity, TranslatableInterface::class) && $associationMapping["fieldName"] == TranslatableWalker::COLUMN_NAME)
+                continue; // This is to make sure Translations are not eagerly loaded... see @WARM below.
+
             $targetEntity = $associationMapping["targetEntity"];
             if($targetEntityCacheable && array_key_exists($associationMapping["fieldName"], $joinList)) {
 
@@ -1506,8 +1511,14 @@ class ServiceEntityParser
         // Eager load feature
         if($this->eagerly === false && class_implements_interface($entityName, TranslatableInterface::class)) {
 
-            $this->leftJoin($qb, self::ALIAS_ENTITY.".translations");
-            $qb->addSelect(self::ALIAS_ENTITY."_translations");
+            $this->leftJoin($qb, self::ALIAS_ENTITY.".".TranslatableWalker::COLUMN_NAME);
+            // $qb->addSelect(self::ALIAS_ENTITY."_".TranslatableWalker::COLUMN_NAME);
+            //
+            // @WARN: The above line is commented because of a conflict with __findOneBy..
+            // Joining translations in DQL that way create one entry (Translation) per locale
+            // It would be good to consider loading 3 language max:
+            // - Default one, Lang fallback, and the requested one.
+            // If not make sure (in TranslatableWalker?) every request returns exactly 3 entries (NULL entries if not found?)
         }
 
         $query = $this->eagerly === false ? $qb->getQuery() : $this->getEagerQuery($qb);

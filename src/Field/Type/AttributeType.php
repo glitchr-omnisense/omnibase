@@ -286,6 +286,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
                 } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAdapter::class);
             }
 
+            foreach($bakData as $data)
+                $data->clearTranslations();
+
             if($viewData instanceof PersistentCollection) {
 
                 $mappedBy =  $viewData->getMapping()["mappedBy"];
