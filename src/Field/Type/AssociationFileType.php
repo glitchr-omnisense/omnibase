@@ -211,8 +211,15 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
         if($form) {
 
             $viewDataFileIndexes = [];
-            if($viewData instanceof Collection)
-                $viewDataFileIndexes = $viewData->map(fn($e) => basename($this->propertyAccessor->getValue($e, $fieldName)))->toArray();
+            if($viewData instanceof Collection) {
+
+                $viewDataFileIndexes = $viewData->map(function($e) use ($fieldName) {
+
+                    $value = $this->propertyAccessor->getValue($e, $fieldName);
+                    return basename(is_array($value) ? first($value) : $value);
+
+                })->toArray();
+            }
 
             if($options["multiple"]) {
 
