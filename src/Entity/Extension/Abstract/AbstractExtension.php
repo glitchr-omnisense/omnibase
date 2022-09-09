@@ -9,11 +9,12 @@ use Base\Entity\User;
 use Base\Service\Model\IconizeInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\ORM\Mapping as ORM;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=AbstractExtensionRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @ORM\InheritanceType( "JOINED" )
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "abstract" )

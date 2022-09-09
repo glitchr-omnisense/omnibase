@@ -71,6 +71,7 @@ use Base\Service\ImageService;
 use Base\Service\SettingBagInterface;
 use Base\Twig\Environment;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Proxy\Proxy;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -193,8 +194,8 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
-                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->settingBag->getRawScalar($fields)
+                fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s],
+                $this->settingBag->getRawScalar($fields, false)
             );
 
             foreach($settings as $setting)
@@ -262,7 +263,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $fields   = array_keys($form->getConfig()->getOption("fields"));
             $settings = array_transforms(
                 fn($k,$s): ?array => $s === null ? null : [$s->getPath(), $s] ,
-                $this->settingBag->getRawScalar($fields)
+                $this->settingBag->getRawScalar($fields, false)
             );
 
             foreach(array_diff_key($data, $settings) as $name => $setting)
@@ -301,9 +302,10 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data = $form->getData();
             foreach(array_keys($widgetSlots) as $path) {
 
-                $widgetSlot = $this->slotRepository->findOneByPath($path);
+                $widgetSlot = $this->slotRepository->cacheOneEagerlyByPath($path);
 
                 if(!$widgetSlot) {
+
                     $widgetSlot = new Slot($path);
                     $this->slotRepository->persist($widgetSlot);
                     $this->slotRepository->flush();
@@ -314,10 +316,11 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $widgetSlot->setWidget($widget);
             }
 
-
             $notification = new Notification("@controllers.backoffice_widgets.success");
             $notification->setUser($this->getUser());
             $notification->send("success");
+
+            $this->slotRepository->flush();
 
             return $this->router->reloadRequest();
         }

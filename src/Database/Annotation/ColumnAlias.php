@@ -2,6 +2,7 @@
 
 namespace Base\Database\Annotation;
 
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -48,8 +49,11 @@ class ColumnAlias extends AbstractAnnotation
         else if($classMetadata->hasField($alias))
             throw new Exception("Alias variable \"$alias\" cannot be used, field mapping already found.");
 
-        $classMetadata->aliasNames ??= $classMetadata->fieldNames;
-        $classMetadata->aliasNames[$alias] = $this->column;
+        $classMetadataCompletor = $this->getClassMetadataCompletor($classMetadata);
+        $classMetadataCompletor->aliasNames ??= [];
+        $classMetadataCompletor->aliasNames[$alias] = $this->column;
+
+        $this->getClassMetadataManipulator()->saveCache($classMetadataCompletor);
     }
 
     public function bind($entity, $column, $alias)

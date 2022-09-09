@@ -10,10 +10,11 @@ use Base\Annotations\Annotation\Slugify;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\SettingRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=SettingRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  */
 class Setting implements TranslatableInterface, IconizeInterface
 {

@@ -15,10 +15,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\ShortRepository;
 use Base\Traits\BaseTrait;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=ShortRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  */
 class Short implements TranslatableInterface, IconizeInterface, LinkableInterface
 {

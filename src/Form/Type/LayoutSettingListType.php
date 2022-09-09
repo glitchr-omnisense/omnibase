@@ -3,7 +3,7 @@
 namespace Base\Form\Type;
 
 use Base\Annotations\Annotation\Uploader;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Entity\Layout\Setting;
 use Base\Entity\Layout\SettingIntl;
 use Base\Field\Type\AvatarType;
@@ -94,7 +94,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
 
                 $field = str_replace("-", ".", $formattedField);
 
-                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field) ?? new Setting($field);
+                $settingBag[$formattedField] = $this->settingBag->getRawScalar($field, false) ?? new Setting($field);
             }
 
             $fields = ["value" => []];

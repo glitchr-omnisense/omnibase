@@ -177,22 +177,23 @@ namespace {
         return $parse;
     }
 
-    function is_instanceof(mixed $object_or_class, string|array $class): bool
+    function is_instanceof(mixed $object_or_class, string|array $instanceOf): bool
     {
         // At least one class detection
-        if(is_array($class)) {
+        if(is_array($instanceOf)) {
 
-            foreach($class as $_class)
-                if(is_instanceof($object_or_class, $_class)) return true;
+            foreach($instanceOf as $_instanceOf)
+                if(is_instanceof($object_or_class, $_instanceOf)) return true;
 
             return false;
         }
 
         // Default one
-        if(!class_exists($class))
-            throw new Exception("Class \"$class\" doesn't exists.");
+        if(interface_exists($instanceOf)) return class_implements_interface($object_or_class, $instanceOf);
+        if(!class_exists($instanceOf))
+            throw new Exception("Class \"$instanceOf\" doesn't exists.");
 
-        return is_a($object_or_class, $class, !is_object($object_or_class));
+        return is_a($object_or_class, $instanceOf, !is_object($object_or_class));
     }
 
     function is_abstract(mixed $object_or_class) : bool
@@ -1588,8 +1589,15 @@ namespace {
     define('ARRAY_FLATTEN_PRESERVE_KEYS', 1);
     define('ARRAY_FLATTEN_PRESERVE_DUPLICATES', 2);
     function array_key_flattens(string $separator, ?array $array, int $limit = PHP_INT_MAX) { return array_flatten($separator, $array, $limit, ARRAY_FLATTEN_PRESERVE_KEYS); }
-    function array_flatten(string $separator, ?array $array, int $limit = PHP_INT_MAX, int $mode = 0)
+    function array_flatten(string $separator, ?array $array, int $limit = PHP_INT_MAX, int $mode = 0, ?callable $fn = null)
     {
+        if ($fn === null)
+            $fn = function($k, $v):bool { return is_array($v); };
+
+        $reflection = new ReflectionFunction($fn);
+        if (!$reflection->getReturnType() || !in_array($reflection->getReturnType()->getName(), ['bool']))
+            throw new \Exception('Callable function must use "bool" return type');
+
         $ret = [];
         if (!is_array($array)) $array = func_get_args();
 
@@ -1600,25 +1608,25 @@ namespace {
 
                 default:
                 case ARRAY_FLATTEN_PRESERVE_KEYS:
-                    $flattenValues = is_array($value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode) : $value;
+                    $flattenValues = is_array($value) && $fn($key,$value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode, $fn) : $value;
 
-                    if(!is_array($flattenValues)) $ret[$key] = $value;
-                    else {
+                    if(is_array($value) && $fn($key, $flattenValues)) {
 
                         foreach($flattenValues as $key2 => $flattenValue)
-                            $ret[$key.".".$key2] = $flattenValue;
-                    }
+                            $ret[$key.$separator.$key2] = $flattenValue;
+
+                    } else $ret[$key] = $flattenValues;
 
                     break;
 
                 case ARRAY_FLATTEN_PRESERVE_DUPLICATES:
-                    $flattenValues = is_array($value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit) : [$key => $value];
+                    $flattenValues = $fn($key,$value) ? array_flatten($separator, $value, $limit == PHP_INT_MAX ? PHP_INT_MAX : --$limit, $mode, $fn) : [$key => $value];
                     foreach($flattenValues as $key2 => $flattenValue) {
 
                         if(!array_key_exists($key2, $ret))
-                            $ret[$key.".".$key2] = [];
+                            $ret[$key.$separator.$key2] = [];
 
-                        $ret[$key.".".$key2][] = $flattenValue;
+                        $ret[$key.$separator.$key2][] = $flattenValue;
                     }
                     break;
             }
@@ -1652,8 +1660,12 @@ namespace {
                         $ret[$head] = array_merge_recursive2($ret[$head], array_inflate($separator, [$tail => $value], $mode, $limit));
                 }
 
-            } else if(is_array($value)) $ret[$head] = array_inflate($separator, $value, $mode, $limit);
-            else $ret[$head] = $value;
+            } else {
+
+                if(is_array($value)) $ret[$head][] = array_inflate($separator, $value, $mode, $limit);
+                else if(!empty($ret[$head])) $ret[$head][] = $value;
+                else $ret[$head] = $value;
+            }
         }
 
         return $ret;
@@ -1796,8 +1808,9 @@ namespace {
         $arrayOut = [];
         foreach($array as $k => $v) {
 
-            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_numerics($v);
-            else if(!is_numeric($k)) $arrayOut[$k] = $v;
+            if(is_numeric($k)) continue;
+            else if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_numerics($v, $recursive);
+            else $arrayOut[$k] = $v;
         }
 
         return $arrayOut;
@@ -1808,8 +1821,9 @@ namespace {
         $arrayOut = [];
         foreach($array as $k => $v) {
 
-            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v);
-            else if(is_numeric($k)) $arrayOut[$k] = $v;
+            if(is_string($k)) continue;
+            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v, $recursive);
+            else $arrayOut[$k] = $v;
         }
 
         return $arrayOut;
@@ -2155,6 +2169,21 @@ namespace {
 
         return datetime_is_between($datetime, $datetime1, $datetime2);
     }
+
+    function check_backtrace(string $str_starts_with = "", string $str_ends_with = "", array $debug_backtrace = null)
+    {
+        $debug_backtrace ??= debug_backtrace();
+        foreach($debug_backtrace as $trace) {
+
+            if(!array_key_exists("class", $trace)) continue;
+            if(($str_ends_with   &&   str_ends_with($trace["class"], $str_ends_with  )) &&
+               ($str_starts_with && str_starts_with($trace["class"], $str_starts_with))) return true;
+        }
+
+        return false;
+    }
+
+
 
     function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
     {

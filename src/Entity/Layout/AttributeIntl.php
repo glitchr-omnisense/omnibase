@@ -12,27 +12,12 @@ use Base\Validator\Constraints as AssertBase;
 
 /**
  * @ORM\Entity()
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 class AttributeIntl implements TranslationInterface
 {
-    use TranslationTrait;
+    use TranslationTrait { isEmpty as _isEmpty; }
 
-    public function isEmpty(): bool
-    {
-        foreach (get_object_vars($this) as $var => $value) {
-
-            if (in_array($var, ['id', 'translatable', 'locale'], true))
-                continue;
-
-            if(is_array($value))
-                $value = array_filter($value);
-
-            if (!empty($value)) return false;
-        }
-
-        return true;
-    }
+    public function isEmpty(): bool { return $this->_isEmpty([], fn($n,$v) => is_array($v) && array_filter($v) != []); }
 
     /**
      * @ORM\Column(type="array")

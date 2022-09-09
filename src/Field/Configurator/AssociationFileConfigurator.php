@@ -3,7 +3,7 @@
 namespace Base\Field\Configurator;
 
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 
 use Base\Field\AssociationFileField;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;

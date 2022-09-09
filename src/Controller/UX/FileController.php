@@ -2,8 +2,6 @@
 
 namespace Base\Controller\UX;
 
-use Base\BaseBundle;
-use Base\Entity\Layout\ImageCrop;
 use Base\Imagine\Filter\Basic\CropFilter;
 use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
@@ -18,7 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Base\Imagine\Filter\Basic\ThumbnailFilter;
 use Base\Service\ImageService;
 use Base\Traits\BaseTrait;
-use Doctrine\ORM\EntityManagerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 /** @Route("", name="ux_") */
@@ -51,10 +48,9 @@ class FileController extends AbstractController
      */
     protected $localCache;
 
-    public function __construct(Flysystem $flysystem, ImageService $imageService, EntityManagerInterface $entityManager, ?bool $localCache = null)
+    public function __construct(Flysystem $flysystem, ImageService $imageService, ImageCropRepository $imageCropRepository, ?bool $localCache = null)
     {
-        if(BaseBundle::hasDoctrine())
-            $this->imageCropRepository = $entityManager->getRepository(ImageCrop::class);
+        $this->imageCropRepository = $imageCropRepository;
 
         $this->imageService = $imageService;
         $this->fileService  = cast($imageService, FileService::class);
@@ -100,10 +96,10 @@ class FileController extends AbstractController
         if(!$args) throw $this->createNotFoundException();
 
         $webp = $args["webp"] ?? $this->imageService->isWebpEnabled();
-        if(!$webp) return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if(!$webp) return $this->imageService->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $mimeType = $args["mimetype"] ?? $this->imageService->getMimeType($args["path"]);
-        if($mimeType == "image/svg+xml") return $this->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if($mimeType == "image/svg+xml") return $this->imageService->redirectToRoute("ux_imageSvg", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
 
         $options = $args["options"];
         $filters = $args["filters"];
@@ -136,8 +132,10 @@ class FileController extends AbstractController
         $options = $args["options"];
 
         $mimeType = $args["mimetype"] ?? $this->imageService->getMimeType($args["path"]);
-        if($mimeType != "image/svg+xml")
-            return $this->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        if($mimeType != "image/svg+xml") {
+
+            return $this->imageService->redirectToRoute("ux_image", ["hashid" => $hashid], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
@@ -183,8 +181,10 @@ class FileController extends AbstractController
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
-        if ($extension == null || !in_array($extension, $extensions))
-            return $this->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+        if ($extension == null || !in_array($extension, $extensions)) {
+
+            return $this->imageService->redirectToRoute("ux_imageExtension", ["hashid" => $hashid, "extension" => first($extensions)], Response::HTTP_MOVED_PERMANENTLY);
+        }
 
         $localCache = array_pop_key("local_cache", $options);
         $localCache = $this->localCache ?? $args["local_cache"] ?? $localCache;
@@ -242,7 +242,7 @@ class FileController extends AbstractController
         if($naturalHeight == 0) throw $this->createNotFoundException();
 
         // Providing "label" information
-        $imageCrop = $this->imageCropRepository->findOneBySlug($identifier, ["image.source" => $uuid]);
+        $imageCrop = $this->imageCropRepository->cacheOneBySlug($identifier, ["image.source" => $uuid]);
 
         // Providing just a "ratio" number
         if ($imageCrop === null && preg_match("/^(\d+|\d*\.\d+)$/", $identifier, $matches)) {
@@ -250,7 +250,7 @@ class FileController extends AbstractController
             $ratio = floatval($matches[1]);
             $ratio0 = $ratio/($naturalWidth/$naturalHeight);
 
-            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestTo($ratio0, ["image.source" => $uuid], null, null, ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+            $imageCrop = $this->imageCropRepository->cacheOneByRatio0ClosestTo($ratio0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
         }
 
         // Providing a "width:height" information
@@ -267,7 +267,7 @@ class FileController extends AbstractController
             $ratio0  = $width0/$height0;
             if($ratio0 == 0) throw $this->createNotFoundException();
 
-            $imageCrop = $this->imageCropRepository->findOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], null, null, ["ratio0" => "e.width0/e.height0"])[0] ?? null;
+            $imageCrop = $this->imageCropRepository->cacheOneByRatio0ClosestToAndWidth0ClosestToAndHeight0ClosestTo($ratio0, $width0, $height0, ["image.source" => $uuid], [], [], ["ratio0" => "e.width0/e.height0"])[0] ?? null;
         }
 
         //

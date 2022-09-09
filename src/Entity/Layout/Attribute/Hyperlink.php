@@ -15,11 +15,12 @@ use Base\Service\Model\IconizeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Attribute\HyperlinkRepository;
 
+use Base\Database\Annotation\Cache;
+
 /**
  * @ORM\Entity(repositoryClass=HyperlinkRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
- *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
 class Hyperlink extends AbstractAttribute implements TranslatableInterface, IconizeInterface
@@ -43,7 +44,6 @@ class Hyperlink extends AbstractAttribute implements TranslatableInterface, Icon
 
     /**
       * @ColumnAlias(column = "adapter")
-      * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
       */
     protected $hyperpattern;
     public function getHyperpattern(): HyperpatternAdapter { return $this->hyperpattern; }

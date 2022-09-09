@@ -8,8 +8,8 @@
         <defaults public="false" />
 
         <service id="Base\Service\ParameterBagInterface" alias="Base\Service\ParameterBag"/>
-        <service id="Base\Service\ParameterBag"    parent="parameter_bag"     decorates="parameter_bag" public="true" />
-        <service id="Base\Service\HotParameterBag" parent="parameter_bag.hot" decorates="parameter_bag.hot" public="true" />
+        <service id="Base\Service\ParameterBag"    parent="parameter_bag" decorates="parameter_bag" public="true" />
+        <service id="Base\Service\HotParameterBag" parent="parameter_bag" decorates="parameter_bag" public="true" />
 
         <service id="Base\Service\TranslatorInterface" alias="Base\Service\Translator"/>
         <service id="Base\Service\Translator" decorates="translator" public="true">

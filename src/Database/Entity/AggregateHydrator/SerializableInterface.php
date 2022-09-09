@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database\Factory\AggregateHydrator;
+namespace Base\Database\Entity\AggregateHydrator;
 
 interface SerializableInterface
 {

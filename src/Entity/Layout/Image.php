@@ -17,21 +17,26 @@ use Base\Traits\BaseTrait;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
+use Base\Database\Annotation\Cache;
+
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\Layout\ImageRepository;
 use Base\Enum\Quadrant\Quadrant8;
+use Base\Service\Model\SaltInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ImageRepository::class)
  * @ORM\InheritanceType( "JOINED" )
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  * @ORM\DiscriminatorColumn( name = "type", type = "string" )
  *     @DiscriminatorEntry
  */
-class Image implements IconizeInterface, ImageInterface
+class Image implements IconizeInterface, ImageInterface, SaltInterface
 {
     use BaseTrait;
+
+    public function getSalt(): string { return md5(serialize($this->getQuadrant())); }
 
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
@@ -46,10 +51,13 @@ class Image implements IconizeInterface, ImageInterface
             $identifier ??= implode("x", array_slice($thumbnail, 0, 2)); // Set cropper using thumbnail information if not cropper not defined
         }
 
-        $routeName = $identifier ? "ux_imageCrop" : "ux_image" ;
+        $routeName = $identifier
+            ? (array_key_exists("extension", $routeParameters) ? "ux_imageCropExtension" : "ux_imageCrop")
+            : (array_key_exists("extension", $routeParameters) ? "ux_imageExtension"     : "ux_image");
+
         $routeParameters = array_merge($routeParameters, [
             "identifier" => is_array($identifier) ? implode("x", $identifier) : $identifier,
-            "hashid" => $this->getImageService()->obfuscate($this->getSource(), [], $filters),
+            "hashid" => $this->getImageService()->obfuscate($this->getSource(), ["salt" => $this->getSalt()], $filters),
         ]);
 
         return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);

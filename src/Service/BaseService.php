@@ -3,8 +3,8 @@
 namespace Base\Service;
 
 use App\Entity\User;
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydratorInterface;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\RouterInterface;
 use Base\Traits\BaseTrait;
 

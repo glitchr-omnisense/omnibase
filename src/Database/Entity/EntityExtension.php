@@ -1,8 +1,8 @@
 <?php
 
-namespace Base\Database\Factory;
+namespace Base\Database\Entity;
 
-use Base\Database\Factory\EntityExtensionInterface;
+use Base\Database\Entity\EntityExtensionInterface;
 
 class EntityExtension
 {

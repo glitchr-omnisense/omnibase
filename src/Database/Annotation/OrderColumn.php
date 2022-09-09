@@ -5,7 +5,7 @@ namespace Base\Database\Annotation;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
 use Base\Database\Common\Collections\OrderedArrayCollection;
-use Base\Database\Factory\EntityExtensionInterface;
+use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Type\SetType;
 use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
@@ -86,7 +86,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
     public function postLoad(LifecycleEventArgs $event, ClassMetadata $classMetadata, mixed $entity, ?string $property = null)
     {
-        $property = $classMetadata->aliasNames[$property] ?? $classMetadata->fieldNames[$property] ?? $property;
+        $property = $this->getClassMetadataManipulator()->getFieldName($entity, $property) ?? $property;
         $this->addOrderedColumnIfNotSet($classMetadata, $property);
 
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
@@ -147,6 +147,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     $value = $propertyAccessor->getValue($entity, $property);
 
+                    // TBD: Implement case for array.. this one might be a bit more complicate.. (periodical cycles)
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
                     else*/
                      if($value instanceof Collection) {
@@ -165,7 +166,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 

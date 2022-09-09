@@ -70,7 +70,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             catch (RouteNotFoundException $e) { }
         }
 
-        try { return parent::generate($routeName, $routeParameters, $referenceType); }
+        try { return sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType)); }
         catch (RouteNotFoundException $e) { throw $e; }
 
     }

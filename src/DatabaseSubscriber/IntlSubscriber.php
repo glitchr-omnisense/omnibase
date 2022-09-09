@@ -2,10 +2,13 @@
 
 namespace Base\DatabaseSubscriber;
 
-use Base\Database\Factory\EntityHydratorInterface;
+use Doctrine\ORM\EntityManager;
+
+use Base\BaseBundle;
 use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
+use Base\Database\Walker\TranslatableWalker;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -13,17 +16,12 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PreFlushEventArgs;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\UnitOfWork;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use InvalidArgumentException;
 
 class IntlSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var string
-     */
-    public const LOCALE = 'locale';
-
     /**
      * @return string[]
      */
@@ -94,9 +92,16 @@ class IntlSubscriber implements EventSubscriberInterface
 
         if($entity instanceof TranslationInterface) {
 
-            $translatable = $entity->getTranslatable();
-            if ($translatable && !$entity->isEmpty())
-                $uow->cancelOrphanRemoval($entity);
+            if (!$entity->isEmpty()) $uow->cancelOrphanRemoval($entity);
+            else {
+
+                $translatable = $entity->getTranslatable();
+                if($translatable) $translatable->removeTranslation($entity);
+
+                if($this->entityManager->contains($entity)) {
+                    $this->entityManager->remove($entity);
+                }
+            }
         }
 
         return $this;
@@ -151,14 +156,36 @@ class IntlSubscriber implements EventSubscriberInterface
 
                 $classMetadata->associationMappings["translations"]["targetEntity"] = $targetEntity;
                 $classMetadata->associationMappings["translations"]["sourceEntity"] = $classMetadata->getName();
+
+                $classMetadata->cache = $classMetadata->cache ?? null;
+                $classMetadata->cache = [
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                    "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                ];
+
+                $classMetadata->associationMappings["translations"]["cache"] = $classMetadata->cache ?? null;
+                $classMetadata->associationMappings["translations"]["cache"] = [
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                    "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                ];
             }
 
         } else {
 
+            $classMetadata->cache = $classMetadata->cache ?? null;
+            $classMetadata->cache = [
+                "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+            ];
+
             $classMetadata->mapOneToMany([
                 'fieldName' => 'translations',
                 'mappedBy' => 'translatable',
-                'indexBy' => self::LOCALE,
+                'cache' => [
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName())."__translations",
+                    "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                ],
+                'indexBy' => TranslatableWalker::LOCALE,
                 'cascade' => ['persist', 'merge', 'remove'],
                 'fetch' => $this->convertFetchString("LAZY"),
                 'targetEntity' => $targetEntity,
@@ -179,17 +206,33 @@ class IntlSubscriber implements EventSubscriberInterface
 
                 $classMetadata->associationMappings["translatable"]["targetEntity"] = $targetEntity;
                 $classMetadata->associationMappings["translatable"]["sourceEntity"] = $classMetadata->getName();
+                $classMetadata->cache = $classMetadata->cache ?? null;
+                $classMetadata->cache = [
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                    "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                ];
+
             }
 
         } else {
 
+            $classMetadata->cache = $classMetadata->cache ?? null;
+            $classMetadata->cache = [
+                "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName()),
+                "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+            ];
+
             $classMetadata->mapManyToOne([
                 'fieldName'   => 'translatable',
                 'inversedBy'  => 'translations',
+                'cache' => BaseBundle::CACHE ? [
+                    "region" => $this->entityManager->getConfiguration()->getNamingStrategy()->classToTableName($classMetadata->getName())."__translatable",
+                    "usage" => ClassMetadataInfo::CACHE_USAGE_NONSTRICT_READ_WRITE,
+                ] : null,
                 'cascade'     => ['persist', 'merge'],
                 'fetch'       => $this->convertFetchString("LAZY"),
                 'joinColumns' => [[
-                    'name' => 'translatable_id',
+                    'name' => TranslatableWalker::FOREIGN_KEY,
                     'referencedColumnName' => 'id',
                     'onDelete' => 'CASCADE',
                 ]],
@@ -204,17 +247,18 @@ class IntlSubscriber implements EventSubscriberInterface
             $classMetadata->cache["region"] .= "_translation";
 
         $namingStrategy = $this->entityManager->getConfiguration()->getNamingStrategy();
-        $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_unique_translation';
+        $name = $namingStrategy->classToTableName($classMetadata->rootEntityName) . '_' .TranslatableWalker::SALT;
 
-        if ($classMetadata->getName() == $classMetadata->rootEntityName && !$this->hasUniqueTranslationConstraint($classMetadata, $name))
-            $classMetadata->table['uniqueConstraints'][$name] = ['columns' => ['translatable_id', self::LOCALE]];
+        if ($classMetadata->getName() == $classMetadata->rootEntityName) {
 
-        if(!$classMetadata->hasField(self::LOCALE) && ! $classMetadata->hasAssociation(self::LOCALE))
-            $classMetadata->mapField(['fieldName' => self::LOCALE, 'type' => 'string', 'length' => 5]);
-    }
+            $classMetadata->table['uniqueConstraints'][$name] ??= [];
+            $classMetadata->table['uniqueConstraints'][$name]["columns"] = array_unique(array_merge(
+                $classMetadata->table['uniqueConstraints'][$name]["columns"] ?? [],
+                [TranslatableWalker::FOREIGN_KEY, TranslatableWalker::LOCALE]
+            ));
+        }
 
-    private function hasUniqueTranslationConstraint(ClassMetadata $classMetadata, string $name): bool
-    {
-        return isset($classMetadata->table['uniqueConstraints'][$name]);
+        if(!$classMetadata->hasField(TranslatableWalker::LOCALE) && !$classMetadata->hasAssociation(TranslatableWalker::LOCALE))
+            $classMetadata->mapField(['fieldName' => TranslatableWalker::LOCALE, 'type' => 'string', 'length' => 5]);
     }
 }

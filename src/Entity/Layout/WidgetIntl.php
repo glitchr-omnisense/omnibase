@@ -9,7 +9,6 @@ use Base\Database\Traits\TranslationTrait;
 
 /**
  * @ORM\Entity()
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
  */
 
 class WidgetIntl implements TranslationInterface

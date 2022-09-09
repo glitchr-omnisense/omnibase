@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database;
+namespace Base\Database\Mapping;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\ORM\Mapping\Table;

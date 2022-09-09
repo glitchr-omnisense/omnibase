@@ -11,7 +11,7 @@
 
 namespace Base\Validator\Constraints;
 
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Symfony\Component\Validator\Constraint;
 use Base\Validator\ConstraintEntityValidator;
 use Symfony\Component\Validator\Exception\ConstraintDefinitionException;

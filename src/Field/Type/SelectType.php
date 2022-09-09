@@ -7,7 +7,7 @@ use App\Entity\User\Artist;
 use App\Entity\User\Merchant;
 use App\Enum\UserRole;
 use Base\Controller\Backend\AbstractCrudController;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
 use Base\Service\BaseService;
@@ -23,7 +23,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Generator;
-use Hashids\Hashids;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -391,7 +390,8 @@ class SelectType extends AbstractType implements DataMapperInterface
                         if($entity->getId() == $id) $choicesData[$pos] = $entity;
                 }
 
-                usort($choicesData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
+
+                usort($choicesData, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
             }
         }
 

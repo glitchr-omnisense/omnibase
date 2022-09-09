@@ -2,6 +2,7 @@
 
 namespace Base\Backend\Config;
 
+use Base\Database\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action as EaAction;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
@@ -75,11 +76,15 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
+                    $prevEntity = null;
+
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
-                    if(get_parent_class($entity) !== false) {
-                        $prevEntity = $entityRepository->findPreviousOneByClassOf($entity->getId(), get_class($entity));
-                    } else {
-                        $prevEntity = $entityRepository->findPreviousOne($entity->getId());
+                    if($entityRepository instanceof ServiceEntityRepository) {
+                        if(get_parent_class($entity) !== false) {
+                            $prevEntity = $entityRepository->findPreviousOneByClassOf($entity->getId(), get_class($entity));
+                        } else {
+                            $prevEntity = $entityRepository->findPreviousOne($entity->getId());
+                        }
                     }
 
                     return $prevEntity ? $this->adminUrlGenerator->setEntityId($prevEntity->getId())->generateUrl() : "";
@@ -94,11 +99,15 @@ class Actions extends \EasyCorp\Bundle\EasyAdminBundle\Config\Actions
                 ->renderAsTooltip()
                 ->linkToUrl(function (mixed $entity) {
 
+                    $nextEntity = null;
+
                     $entityRepository = $this->entityManager->getRepository(get_class($entity));
-                    if(get_parent_class($entity) !== false) {
-                        $nextEntity = $entityRepository->findNextOneByClassOf($entity->getId(), get_class($entity));
-                    } else {
-                        $nextEntity = $entityRepository->findNextOneBy($entity->getId());
+                    if($entityRepository instanceof ServiceEntityRepository) {
+                        if(get_parent_class($entity) !== false) {
+                            $nextEntity = $entityRepository->findNextOneByClassOf($entity->getId(), get_class($entity));
+                        } else {
+                            $nextEntity = $entityRepository->findNextOneBy($entity->getId());
+                        }
                     }
 
                     return $nextEntity ? $this->adminUrlGenerator->setEntityId($nextEntity->getId())->generateUrl() : "";

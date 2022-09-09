@@ -12,13 +12,12 @@ use Base\Annotations\Annotation\Slugify;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Layout\Widget\SlotRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=SlotRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry
- *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
- *
  */
 class Slot extends Widget implements TranslatableInterface, IconizeInterface
 {
@@ -50,7 +49,6 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
 
     /**
      * @ORM\ManyToOne(targetEntity=Widget::class, cascade={"persist"})
-     * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
      */
     protected $widget;
     public function getWidget(): ?Widget { return $this->widget; }

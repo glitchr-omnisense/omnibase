@@ -1,9 +1,10 @@
 <?php
 
-namespace Base\Database\Factory;
+namespace Base\Database\Entity;
 
-use Base\Database\Factory\AggregateHydrator\PopulableInterface;
-use Base\Database\Factory\AggregateHydrator\SerializableInterface;
+use Base\Database\Entity\AggregateHydrator\PopulableInterface;
+use Base\Database\Entity\AggregateHydrator\SerializableInterface;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslationInterface;
 use Base\Database\Type\SetType;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -224,7 +225,7 @@ class EntityHydrator implements EntityHydratorInterface
     protected function bindAliases(object $entity): self
     {
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-        foreach (($classMetadata->aliasNames ?? $classMetadata->fieldNames) as $alias => $column) {
+        foreach ($this->classMetadataManipulator->getFieldNames($classMetadata) as $alias => $column) {
 
             $fn = function() use ($alias, $column) {
 
@@ -536,15 +537,15 @@ class EntityHydrator implements EntityHydratorInterface
     }
 
 
-    public function getEntityFromData($classname, $data): ?object
+    public function getEntityFromData($className, $data): ?object
     {
         if($data === null) return null;
 
-        $fieldNames = $this->entityManager->getClassMetadata($classname)->aliasNames ?? $this->entityManager->getClassMetadata($classname)->fieldNames;
+        $fieldNames = $this->classMetadataManipulator->getFieldNames($className);
         $fields  = array_intersect_key($data, array_flip($fieldNames));
         $associations = array_diff_key($data, array_flip($fieldNames));
 
-        $entity = $this->hydrate($classname, array_merge($fields, $associations));
+        $entity = $this->hydrate($className, array_merge($fields, $associations));
         return $entity;
     }
 
@@ -557,23 +558,22 @@ class EntityHydrator implements EntityHydratorInterface
 
         $data = $this->getOriginalEntityData($eventOrEntity);
 
-        if(!$eventOrEntity instanceof LifecycleEventArgs) $oldEntity = $eventOrEntity;
-        else $oldEntity = $eventOrEntity->getObject();
+        if(!$eventOrEntity instanceof LifecycleEventArgs) $className = get_class($eventOrEntity);
+        else $className = get_class($eventOrEntity->getObject());
 
-        return $this->hydrate($oldEntity, $data);
+        return $this->hydrate($className, $data);
     }
 
     public function getOriginalEntityData($eventOrEntity)
     {
         $entity = $this->classMetadataManipulator->isEntity($eventOrEntity) ? $eventOrEntity : $eventOrEntity->getObject();
-        $originalEntityData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
 
+        $originalEntityData = $this->entityManager->getUnitOfWork()->getOriginalEntityData($entity);
         if($eventOrEntity instanceof PreUpdateEventArgs) {
 
             $event = $eventOrEntity;
             foreach($event->getEntityChangeSet() as $field => $data)
                 $originalEntityData[$field] = $data[0];
-
         }
 
         return $originalEntityData;

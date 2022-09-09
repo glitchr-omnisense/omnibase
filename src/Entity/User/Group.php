@@ -8,12 +8,14 @@ use App\Entity\User\Permission;
 use Base\Service\Model\IconizeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\GroupRepository;
 
 /**
  * @ORM\Entity(repositoryClass=GroupRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  */
 class Group implements IconizeInterface
 {

@@ -48,7 +48,7 @@ class BaseBundle extends Bundle
     public function doctrineStartup():bool
     {
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $entityManager->getConfiguration()->setNamingStrategy(new \Base\Database\NamingStrategy());
+        $entityManager->getConfiguration()->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
 
         /**
          * Testing doctrine connection

@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Database\Factory;
+namespace Base\Database\Entity;
 
 interface EntityHydratorInterface {
 

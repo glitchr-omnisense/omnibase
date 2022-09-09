@@ -4,7 +4,7 @@ namespace Base\Form;
 
 use Base\Annotations\AnnotationReader;
 use Base\Database\Annotation\OrderColumn;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslationInterface;
 use Base\Field\Type\TranslationType;
 use Symfony\Component\Config\Definition\Exception\Exception;
@@ -237,7 +237,7 @@ class FormFactory extends \Symfony\Component\Form\FormFactory implements FormFac
                 $target = $options["class"] ?? $options["data_class"] ?? $options["abstract_class"] ?? null;
             }
 
-            $annotations = AnnotationReader::getAnnotationReader()->getAnnotations($target, OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
+            $annotations = AnnotationReader::getInstance()->getAnnotations($target, OrderColumn::class, [AnnotationReader::TARGET_PROPERTY]);
             $options["sortable"] = !empty(array_filter_recursive($annotations["property"][$target][$form->getName()] ?? []));
         }
 

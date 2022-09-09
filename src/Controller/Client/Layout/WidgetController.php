@@ -5,6 +5,8 @@ namespace Base\Controller\Client\Layout;
 use Base\BaseBundle;
 use Base\Entity\Layout\Widget\Attachment;
 use Base\Entity\Layout\Widget\Page;
+use Base\Repository\Layout\Widget\AttachmentRepository;
+use Base\Repository\Layout\Widget\PageRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,12 +19,10 @@ use Symfony\Component\Mime\FileinfoMimeTypeGuesser;
 
 class WidgetController extends AbstractController
 {
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(PageRepository $pageRepository, AttachmentRepository $attachmentRepository)
     {
-        if(BaseBundle::hasDoctrine()) {
-            $this->pageRepository = $entityManager->getRepository(Page::class);
-            $this->attachmentRepository = $entityManager->getRepository(Attachment::class);
-        }
+        $this->pageRepository       = $pageRepository;
+        $this->attachmentRepository = $attachmentRepository;
     }
 
     /**

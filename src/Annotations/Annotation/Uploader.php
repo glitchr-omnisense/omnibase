@@ -16,6 +16,7 @@ use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Uid\Uuid;
+use function is_file;
 
 /**
  * Class Uploader
@@ -132,7 +133,7 @@ class Uploader extends AbstractAnnotation
             $pathList = [];
             foreach($field as $uuidOrFile) {
 
-                $uuidOrFile = is_string($uuidOrFile) && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
+                $uuidOrFile = is_string($uuidOrFile) && !str_contains($uuidOrFile, "://") && is_file($uuidOrFile) ? new File($uuidOrFile) : $uuidOrFile;
                 if($uuidOrFile instanceof File) {
 
                     $pathList[] = $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
@@ -151,7 +152,7 @@ class Uploader extends AbstractAnnotation
 
         } else {
 
-            $uuidOrFile = is_string($field) && is_file($field) ? new File($field) : $field;
+            $uuidOrFile = is_string($field) && !str_contains($field, "://") && is_file($field) ? new File($field) : $field;
             if($uuidOrFile instanceof File)
                 return $that->getFlysystem()->getPublic($uuidOrFile->getPathname(), $that->getStorage());
 
@@ -284,7 +285,7 @@ class Uploader extends AbstractAnnotation
         }
 
         //
-        // Replace http urls in the list of new elements
+        // Go fetch URL if allowed
         foreach ($newList as $index => $entry) {
 
             if (filter_var($entry, FILTER_VALIDATE_URL)) {
@@ -297,13 +298,13 @@ class Uploader extends AbstractAnnotation
         $entityId = $entity->getId();
         $entityId = $entityId ? "#".$entityId : "";
 
-        // Field value can be an array or just a single path
-        $fileList = array_values(array_intersect($newList, $oldList));
-        foreach (array_diff($newList, $oldList) as $index => $entry) {
+        $fileList = []; // Field value can be an array or just a single path
+        $uploadList = array_values(array_intersect($newList, $oldList));
+        foreach (array_union($uploadList, array_diff($newList, $oldList)) as $index => $entry) {
 
             //
             // In case of string casting, and UploadedFile might be returned as a string..
-            $file = is_string($entry) && is_file($entry) ? new File($entry) : $entry;
+            $file = is_string($entry) && !str_contains($entry, "://") && is_file($entry) ? new File($entry) : $entry;
             if (!$file instanceof File) {
 
                 if($this->getMissable()) $fileList[] = $entry;
@@ -333,8 +334,10 @@ class Uploader extends AbstractAnnotation
             $path     = $this->getPath($entity ?? $oldEntity ?? null, $fieldName);
             $contents = ($file ? file_get_contents($file->getPathname()) : "");
 
-            if ($this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
-                $fileList[] = basename($path);
+            if (!$this->getFlysystem()->write($path, $contents, $this->getStorage(), $this->getConfig()))
+                throw new InvalidMimeTypeException("Failed to write \"".$path."\" in ".get_class($entity).".");
+
+            $fileList[] = basename($path);
         }
 
         self::setPropertyValue($entity, $fieldName, !is_array($new) ? $fileList[0] ?? null : $fileList);
@@ -394,9 +397,7 @@ class Uploader extends AbstractAnnotation
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $fieldName = null)
     {
         $oldEntity = $this->getOldEntity($entity);
-
         try {
-
             if ($this->uploadFiles($entity, $oldEntity, $fieldName))
                 $this->deleteFiles($entity, $oldEntity, $fieldName);
 

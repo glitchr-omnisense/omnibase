@@ -59,7 +59,7 @@
         "florianv/swap": "^4.3",
 
         "phpoffice/phpspreadsheet": "^1.23",
-        "easycorp/easyadmin-bundle": "^4.0",
+        "easycorp/easyadmin-bundle": "^4.3",
         "league/flysystem-bundle": "^2.3",
     	"league/flysystem-ftp": "^3.0",
 
@@ -68,7 +68,7 @@
         "nelmio/cors-bundle": "^2.2",
         "hashids/hashids": "^4.1",
 
-        "doctrine/doctrine-bundle": "^2.6",
+        "doctrine/doctrine-bundle": "^2.0",
         "xkzl/base-plugin": "1.0.*-dev",
 
     	"backup-manager/backup-manager": "^3.1"

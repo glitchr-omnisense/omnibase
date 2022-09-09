@@ -27,8 +27,9 @@ class VaultFilter extends SQLFilter
             throw new InvalidArgumentException("No environment defined in \"".self::class."\" while setting up ".$targetEntity->getName());
 
         $vaultFieldName = end($vaultAnnotation)->vault;
+        $operator = str_contains($this->environment, "%") ? "LIKE" : "=";
         if ($targetEntity->hasField($vaultFieldName))
-            return $vaultFieldName." IS NULL OR ". $vaultFieldName." LIKE '".$this->environment."'";
+            return $vaultFieldName." IS NULL OR ". $vaultFieldName." $operator '".$this->environment."'";
 
         return "";
     }

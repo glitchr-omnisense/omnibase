@@ -23,7 +23,7 @@ use Symfony\Component\Form\DataMapperInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
 use Symfony\Component\Form\FormBuilderInterface;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;
@@ -285,6 +285,9 @@ class AttributeType extends AbstractType implements DataMapperInterface
 
                 } else throw new InvalidArgumentException("Invalid argument passed to attribute choice, expected class inheriting form ".AbstractAdapter::class);
             }
+
+            foreach($bakData as $data)
+                $data->clearTranslations();
 
             if($viewData instanceof PersistentCollection) {
 

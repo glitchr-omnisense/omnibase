@@ -2,7 +2,7 @@
 
 namespace Base\EntityDispatcher;
 
-use Base\Database\Factory\EntityHydrator;
+use Base\Database\Entity\EntityHydrator;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;

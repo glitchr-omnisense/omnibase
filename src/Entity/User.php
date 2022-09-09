@@ -42,6 +42,7 @@ use Base\Traits\BaseTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Base\Enum\UserState;
 use Exception;
+use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
@@ -50,7 +51,7 @@ use App\Repository\UserRepository;
  * @ORM\Entity(repositoryClass=UserRepository::class)
  * @ORM\InheritanceType( "JOINED" )
  *
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+* @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  *
  * @ORM\DiscriminatorColumn( name = "class", type = "string" )
  *     @DiscriminatorEntry( value = "common" )
@@ -143,6 +144,11 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
         if(!isset($key) || empty($key)) return $cookie;
 
         return $cookie[$key] ?? null;
+    }
+
+    public static function setCookie(string $key = null, $value, int $lifetime = 0)
+    {
+        setcookie($key, $value, $lifetime > 0 ? time() + $lifetime : 0, "/");
     }
 
     public static function getBrowser(): ?string { return $_SERVER['HTTP_USER_AGENT'] ?? null; }
@@ -721,7 +727,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      * @Timestamp(on="create")
      */
     protected $createdAt;

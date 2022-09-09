@@ -2,8 +2,8 @@
 
 namespace Base\Database\Traits;
 
-use App\Entity\Marketplace\Store;
-use Base\Database\NamingStrategy;
+use App\Entity\Marketplace\Product\Extra\Wallpaper;
+use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslationInterface;
 
 use Base\Service\BaseService;
@@ -65,6 +65,15 @@ trait TranslatableTrait
 
         if ($this->getTranslations()->contains($translation)) {
             $this->getTranslations()->removeElement($translation);
+        }
+
+        return $this;
+    }
+
+    public function clearTranslations() {
+
+        foreach($this->translations as $translation) {
+            $this->translations->removeElement($translation);
         }
 
         return $this;

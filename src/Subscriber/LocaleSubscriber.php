@@ -37,7 +37,7 @@ class LocaleSubscriber implements EventSubscriberInterface
           *
           * CLI: php bin/console debug:event kernel.request
           */
-        return [ 
+        return [
             KernelEvents::REQUEST => ['onKernelRequest', 128],
             SecurityEvents::SWITCH_USER => 'onSwitchUser'
         ];
@@ -45,10 +45,7 @@ class LocaleSubscriber implements EventSubscriberInterface
 
     public function onSwitchUser(SwitchUserEvent $event): void
     {
-        $request = $event->getRequest();
-
-        if ($request->hasSession() && ($session = $request->getSession()))
-            $session->set('_locale', $event->getTargetUser()->getLocale());
+        User::setCookie('_locale', $event->getTargetUser()->getLocale());
     }
 
     public function onKernelRequest(RequestEvent $event)
@@ -59,12 +56,12 @@ class LocaleSubscriber implements EventSubscriberInterface
         $_locale = $_locale ? $this->localeProvider->getLocale($_locale) : null;
         if($_locale !== null) {
 
-            $event->getRequest()->getSession()->set('_locale', $_locale);
+            User::setCookie('_locale', $_locale);
             $this->localeProvider->markAsChanged();
             $locale = $_locale;
         }
 
-        $locale ??= $event->getRequest()->getSession()->get("_locale");
+        $locale ??= $event->getRequest()->cookies->get("_locale");
         $locale ??= User::getCookie("locale");
         $locale ??= $this->localeProvider->getLocale();
 

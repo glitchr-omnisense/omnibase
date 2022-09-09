@@ -52,23 +52,24 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.service.image" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+
+            <argument type="service" id="Base\Repository\Layout\ImageCropRepository" />
         </service>
 
         <service id="Base\Controller\Client\Layout\WidgetController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="Base\Repository\Layout\Widget\PageRepository" />
+            <argument type="service" id="Base\Repository\Layout\Widget\AttachmentRepository" />
         </service>
 
         <service id="Base\Controller\Client\Layout\ShortController">
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-
             <argument type="service" id="router" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="Base\Repository\Layout\ShortRepository" />
         </service>
 
         <service id="Base\Subscriber\RouterSubscriber">
@@ -87,7 +88,7 @@
             <argument type="service" id="router" />
         </service>
         <service id="Base\Subscriber\HotParameterBagSubscriber">
-            <tag name="kernel.event_subscriber" />
+            <tag name="kernel.event_subscriber" priority="1024" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="setting_bag" />
         </service>
@@ -101,11 +102,12 @@
 
         <service id="Base\Subscriber\AnalyticsSubscriber">
             <tag name="kernel.event_subscriber" />
+            <tag name="twig.runtime" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
             <argument type="service" id="twig" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="ga.service" on-invalid="null" />
         </service>
 
@@ -131,11 +133,10 @@
             <argument type="service" id="setting_bag" />
         </service>
 
-        <service id="Base\Cache\BaseWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service" /></service>
-        <service id="Base\Cache\IconWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
-        <service id="Base\Cache\ImageWarmer"       public="true"><tag name="kernel.cache_warmer" /></service>
-        <service id="Base\Cache\LocaleWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
-        <service id="Base\Cache\SpreadsheetWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
+        <service id="Base\CacheWarmer\IconCacheWarmer"        public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="base.service.icon" /></service>
+        <service id="Base\CacheWarmer\LocaleCacheWarmer"      public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="locale_provider" /></service>
+        <service id="Base\CacheWarmer\SettingsCacheWarmer"    public="true"><tag name="kernel.cache_warmer" /><argument type="service" id="setting_bag" /></service>
+        <service id="Base\CacheWarmer\SpreadsheetCacheWarmer" public="true"><tag name="kernel.cache_warmer" /></service>
 
         <service id="Base\Service\BaseService" public="true">
             <argument type="service" id="kernel" />
@@ -315,6 +316,8 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="Base\Repository\User\TokenRepository" />
+            <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="base.service" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
@@ -339,13 +342,14 @@
 
         <service id="Base\DatabaseSubscriber\EnumSubscriber"><tag name="doctrine.event_subscriber" /></service>
         <service id="Base\DatabaseSubscriber\AnnotationSubscriber">
-            <tag name="doctrine.event_subscriber" priority="1024" />
+            <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.annotation_reader" />
         </service>
 
         <service id="Base\DatabaseSubscriber\IntlSubscriber">
-            <tag name="doctrine.event_subscriber" priority = "-1024" />
+            <tag name="doctrine.event_subscriber" priority="2048" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="locale_provider" />
         </service>
@@ -365,6 +369,13 @@
             <argument type="service" id="request_stack" />
             <argument type="service" id="monolog.http_client" />
             <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Service\Sitemapper" public="true">
+            <argument type="service" id="twig" />
+            <argument type="service" id="base.annotation_reader" />
+            <argument type="service" id="router" />
+            <argument type="service" id="locale_provider" />
         </service>
 
         <service id="Base\Service\SemanticEnhancer"   public="true">
@@ -389,6 +400,7 @@
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="imagine.bitmap" />
             <argument type="service" id="imagine.svg" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Service\Flysystem" parent="flysystem.adapter.lazy.factory" public="true" />
@@ -445,28 +457,37 @@
             <!-- <bind key="$metadata">%base.currency_api.currency_layer%</bind> -->
         </service>
 
-        <service id="Base\Database\NamingStrategy"  public="true" />
-        <service id="Base\Database\Factory\ClassMetadataFactory"  public="true"/>
-        <service id="Base\Database\Factory\EntityHydrator"  public="true">
+        <service id="Base\Database\Mapping\NamingStrategy"  public="true" />
+        <service id="Base\Database\Mapping\Factory\ClassMetadataFactory"  public="true"/>
+        <service id="Base\Database\Entity\EntityHydrator"  public="true">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
-        <service id="Base\Database\Factory\ClassMetadataManipulator" public="true">
+        <service id="Base\Database\Mapping\ClassMetadataManipulator" public="true">
             <argument type="service" id="doctrine" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="cache.adapter" />
         </service>
 
         <service id="Base\Annotations\AnnotationReader" public="true">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
-            <argument type="service" id="cache.adapter" />
             <argument type="service" id="flysystem" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+            <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
+            <bind key="$projectDir">%kernel.project_dir%</bind>
+            <bind key="$environment">%kernel.environment%</bind>
+        </service>
+
+        <service id="Base\CacheWarmer\AnnotationsCacheWarmer"      public="true">
+            <tag name="kernel.cache_warmer" priority="1024" /><!-- High priority, must be executed at very early (before Doctrine) -->
+            <argument type="service" id="base.annotation_reader" />
+            <bind key="$phpArrayFile">%kernel.cache_dir%/static_annotation.php</bind>
         </service>
 
          <service id="Base\Security\Voter\BackendVoter">
@@ -493,7 +514,7 @@
             <argument type="service" id="locale_provider" />
         </service>
 
-        <service id="Base\Database\Factory\EntityExtension" public="true" />
+        <service id="Base\Database\Entity\EntityExtension" public="true" />
         <service id="Base\Database\Annotation\OrderColumn"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Versionable"><tag name="base.entity_extension" /></service>
         <service id="Base\Database\Annotation\Logging"    ><tag name="base.entity_extension" /></service>
@@ -512,6 +533,7 @@
         <service id="Base\Twig\Variable\SiteVariable" public="true">
             <tag name="twig.runtime" />
             <argument type="service" id="router" />
+            <argument type="service" id="sitemap" />
             <argument type="service" id="translator" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="base.service" />
@@ -528,6 +550,7 @@
         <service id="Base\Twig\Extension\FileTwigExtension" public="true">
             <tag name="twig.extension" />
             <argument type="service" id="router" />
+            <bind key="$projectDir">%kernel.project_dir%</bind>
        </service>
 
         <service id="Base\Twig\Extension\FunctionTwigExtension" public="true">
@@ -621,7 +644,7 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
 
             <argument type="service" id="base.service" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="App\Repository\UserRepository" />
         </service>
 
         <service id="Base\Security\UserChecker"           >
@@ -640,6 +663,7 @@
         <service id="Base\Subscriber\SecuritySubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="security.authorization_checker" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
@@ -669,7 +693,7 @@
             <tag name="kernel.event_subscriber" />
             <argument type="tagged_locator" tag="event_dispatcher.dispatcher" index-by="name"/>
             <argument type="service" id="security.untracked_token_storage" />
-            <argument type="service" id="doctrine.orm.entity_manager" />
+            <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="base.service" />
             <argument type="service" id="parameter_bag" />
         </service>
@@ -940,6 +964,12 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Factory\EntityFactory" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
             <argument type="service" id="translator" />
+        </service>
+
+        <service id="Base\Field\Configurator\SelectConfigurator">
+            <tag name="ea.field_configurator" />
+            <argument type="service" id="base.database.metadata_manipulator" />
+            <bind key="$environment">%kernel.environment%</bind>
         </service>
 
         <service id="Base\Field\Configurator\SelectConfigurator">

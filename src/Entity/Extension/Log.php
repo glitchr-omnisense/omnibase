@@ -12,9 +12,11 @@ use Symfony\Component\Config\Definition\Exception\Exception;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\LogRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=LogRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry(value="log")
  */
 class Log extends AbstractExtension

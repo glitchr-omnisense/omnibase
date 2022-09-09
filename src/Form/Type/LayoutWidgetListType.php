@@ -72,7 +72,7 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
             foreach($formattedWidgets as $formattedWidget => $widgetOptions) {
 
                 $widgetSlot = str_replace("-", ".", $formattedWidget);
-                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot) ?? new Slot($formattedWidget, "");
+                $widgetSlots[$formattedWidget] = $this->widgetProvider->getSlot($widgetSlot, false) ?? new Slot($formattedWidget, "");
             }
 
             foreach($widgetSlots as $formattedWidget => $slot) {

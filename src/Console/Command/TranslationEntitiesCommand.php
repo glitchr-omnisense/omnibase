@@ -4,7 +4,7 @@ namespace Base\Console\Command;
 
 use Base\BaseBundle;
 use Base\Console\Command;
-use Base\Database\NamingStrategy;
+use Base\Database\Mapping\NamingStrategy;
 use Base\Service\LocaleProvider;
 use Base\Service\Translator;
 use Symfony\Component\Console\Input\InputInterface;

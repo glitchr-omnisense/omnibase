@@ -1,10 +1,12 @@
 <?php
 
-namespace Base\Database\Factory;
+namespace Base\Database\Mapping\Factory;
 
-use Base\Database\NamingStrategy;
+use Base\Database\Mapping\NamingStrategy;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
+use Base\Entity\Layout\Widget;
+use Base\Entity\Layout\WidgetIntl;
 use Base\Exception\MissingDiscriminatorMapException;
 use Base\Exception\MissingDiscriminatorValueException;
 use Doctrine\ORM\Mapping\MappingException;
@@ -95,6 +97,16 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         $this->evm->dispatchEvent(Events::onClassMetadataNotFound, $eventArgs);
 
         return $eventArgs->getFoundMetadata();
+    }
+
+    public function getAllClassNames()
+    {
+        if (! $this->initialized) {
+            $this->initialize();
+        }
+
+        $driver = $this->getDriver();
+        return $driver->getAllClassNames();
     }
 
     /**
@@ -767,10 +779,11 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
     {
         $loadedMetadata = parent::loadMetadata($name);
 
-        foreach($loadedMetadata as $key => $classMetadata)
+        foreach($loadedMetadata as $classMetadata)
             $classMetadataList[] = $this->getMetadataFor($classMetadata);
-        foreach($classMetadataList as $key => $classMetadata)
-            $classMetadata = $this->resolveDiscriminatorValue($classMetadata);
+
+        foreach($classMetadataList as $classMetadata)
+            $this->resolveDiscriminatorValue($classMetadata);
 
         return $loadedMetadata;
     }
@@ -784,7 +797,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
      * @throws MappingException
      */
 
-    private function resolveDiscriminatorValue(ClassMetadata $classMetadata)
+    private function resolveDiscriminatorValue(ClassMetadata $classMetadata): ClassMetadata
     {
         //If translatable object: preprocess inheritanceType, discriminatorMap, discriminatorColumn, discriminatorValue
         if (is_subclass_of($classMetadata->getName(), TranslationInterface::class, true)) {
@@ -795,6 +808,8 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
             $translatableClass = $classMetadata->getName()::getTranslatableEntityClass();
             $translatableMetadata = $this->getMetadataFor($translatableClass);
 
+            //
+            // Handle translation discriminator map
             if(!$classMetadata->discriminatorMap) {
                 $classMetadata->discriminatorMap = array_filter(array_map(function($className) {
 
@@ -805,6 +820,17 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
                 }, $translatableMetadata->discriminatorMap), fn($c) => $c !== null);
             }
 
+            //
+            // Handle translation subclasses
+            $subClasses = [];
+            foreach($translatableMetadata->subClasses as $translatableSubclass){
+
+                $translationClass = $translatableSubclass::getTranslationEntityClass();
+                if($translationClass !== null && $translationClass != $classMetadata->getName()) $subClasses[] = $translationClass;
+            }
+
+            // Apply values..
+            $classMetadata->subClasses = array_unique($subClasses);
             $classMetadata->inheritanceType     = $translatableMetadata->inheritanceType;
             $classMetadata->discriminatorColumn = $translatableMetadata->discriminatorColumn;
             if($classMetadata->discriminatorMap) {
@@ -823,14 +849,14 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
 
         if ($classMetadata->discriminatorValue || ! $classMetadata->discriminatorMap ||
             $classMetadata->isMappedSuperclass || ! $classMetadata->reflClass || $classMetadata->reflClass->isAbstract()) {
-            return;
+            return $classMetadata;
         }
 
         // minor optimization: avoid loading related metadata when not needed
         foreach ($classMetadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
             if ($discriminatorClass === $classMetadata->name) {
                 $classMetadata->discriminatorValue = $discriminatorValue;
-                return;
+                return $classMetadata;
             }
         }
 
@@ -838,7 +864,7 @@ class ClassMetadataFactory extends AbstractClassMetadataFactory
         foreach ($classMetadata->discriminatorMap as $discriminatorValue => $discriminatorClass) {
             if ($classMetadata->name === $this->getMetadataFor($discriminatorClass)->getName()) {
                 $classMetadata->discriminatorValue = $discriminatorValue;
-                return;
+                return $classMetadata;
             }
         }
 

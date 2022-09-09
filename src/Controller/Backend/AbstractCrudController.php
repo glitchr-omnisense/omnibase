@@ -3,7 +3,7 @@
 namespace Base\Controller\Backend;
 
 use Base\Backend\Config\Extension;
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\IdField;
 use Base\Service\Model\IconizeInterface;
 use Base\Routing\RouterInterface;
@@ -184,8 +184,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public function getExtension():Extension { return $this->extension; }
 
     protected $crud = null;
-
-    public function getCrud():Crud { return $this->crud; }
+    public function getCrud():?Crud { return $this->crud; }
 
     protected $entityDto = null;
     public function getEntity() { return $this->entityDto ? $this->entityDto->getInstance() : null; }

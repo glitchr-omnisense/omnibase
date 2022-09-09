@@ -65,8 +65,7 @@ class UserCrudController extends UserActionCrudController
     {
         return parent::configureFields($pageName, function() {
 
-            yield BooleanField::new("isApproved")->withConfirmation()->showInline()->setColumns(3);
-            yield FormField::addRow()->setColumns(9);
+            yield BooleanField::new("isApproved")->withConfirmation()->showInline();
             yield AvatarField::new('avatar')->hideOnDetail()->setCropper();
 
             yield FormField::addRow()->setColumns(2);

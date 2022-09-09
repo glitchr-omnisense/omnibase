@@ -2,11 +2,10 @@
 
 namespace Base\Service;
 
+use Base\Routing\RouterInterface;
 use InvalidArgumentException;
-use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mime\MimeTypes;
-use Symfony\Component\Routing\RouterInterface;
 
 class FileService implements FileServiceInterface
 {

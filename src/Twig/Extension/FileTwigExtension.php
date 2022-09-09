@@ -17,9 +17,10 @@ use Twig\TwigFunction;
 
 final class FileTwigExtension extends AbstractExtension
 {
-    public function __construct(RouterInterface $router)
+    public function __construct(RouterInterface $router, string $projectDir)
     {
         $this->router   = $router;
+        $this->projectDir = $projectDir;
     }
 
     public function getFunctions(): array

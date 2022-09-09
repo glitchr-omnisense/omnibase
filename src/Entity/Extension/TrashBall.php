@@ -7,9 +7,11 @@ use Base\Entity\Extension\Abstract\AbstractExtension;
 
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\Extension\OrderingRepository;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=TrashBallRepository::class)
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  * @DiscriminatorEntry(value="trash_ball")
  */
 class TrashBall extends AbstractExtension

@@ -2,8 +2,8 @@
 
 namespace Base\Traits;
 
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydratorInterface;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Entity\EntityHydratorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Base\Routing\RouterInterface;
 use Base\Service\SettingBag;

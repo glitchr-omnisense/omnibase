@@ -2,7 +2,7 @@
 
 namespace Base\Field\Type;
 
-use Base\Database\Factory\ClassMetadataManipulator;
+use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;

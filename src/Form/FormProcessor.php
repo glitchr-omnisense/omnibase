@@ -2,7 +2,7 @@
 
 namespace Base\Form;
 
-use Base\Database\Factory\EntityHydratorInterface;
+use Base\Database\Entity\EntityHydratorInterface;
 use Base\Entity\User\Notification;
 use Base\Form\Traits\FormFlowTrait;
 

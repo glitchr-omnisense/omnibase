@@ -2,7 +2,7 @@
 
 namespace Base\EntitySubscriber;
 
-use Base\Database\Factory\EntityExtension;
+use Base\Database\Entity\EntityExtension;
 
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
@@ -38,7 +38,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
     public function onFlush(OnFlushEventArgs $event)
     {
-        $uow = $event->getEntityManager()->getUnitOfWork();
+        $uow = $this->entityManager->getUnitOfWork();
 
         $this->scheduledEntityInsertions = [];
         foreach ($uow->getScheduledEntityInsertions() as $entity)
@@ -102,6 +102,8 @@ class ExtensionSubscriber implements EventSubscriberInterface
                     foreach($match as $columns)
                         $properties[] = explode("::", $columns)[1];
 
+                    // if($entity !== null) // Make sure to invalidate cache
+                    //     $this->entityManager->refresh($entity);
                     $array = $extension->payload($action, $className, $properties, $entity);
 
                     foreach($array as $entry) {
@@ -127,6 +129,7 @@ class ExtensionSubscriber implements EventSubscriberInterface
                                 break;
 
                             case EntityAction::UPDATE:
+
                                 if($this->entityManager->contains($entry))
                                     $uow->recomputeSingleEntityChangeSet($this->entityManager->getClassMetadata(get_class($entry)), $entry);
                                 else {

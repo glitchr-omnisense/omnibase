@@ -2,15 +2,14 @@
 
 namespace Base\Database\Repository;
 
-use Base\Database\Factory\ClassMetadataManipulator;
-use Base\Database\Factory\EntityHydrator;
-use Doctrine\ORM\EntityNotFoundException;
+use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Database\Entity\EntityHydrator;
 use Doctrine\Persistence\ManagerRegistry;
 
 
 /**
  * @method Entity[]    findBy*(...array $customs,
- *      array $criteria, array ?array $orderBy = null, $limit = null, $offset = null)
+ *      array $criteria, array ??array $orderBy = null, $limit = null, $offset = null)
  */
 
 class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository
@@ -33,7 +32,7 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
         $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
 
-        $this->serviceParser = new ServiceEntityParser($this, $entityManager, $entityHydrator);
+        $this->serviceParser = new ServiceEntityParser($this, $entityManager, $classMetadataManipulator, $entityHydrator);
     }
 
     public function __call   ($method, $arguments) : mixed { return $this->serviceParser->parse($method, $arguments); }

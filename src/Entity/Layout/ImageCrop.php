@@ -5,30 +5,36 @@ namespace Base\Entity\Layout;
 use Base\Annotations\Annotation\Slugify;
 use Base\Entity\Layout\Image;
 use Base\Service\Model\LinkableInterface;
-use Base\Repository\Layout\ImageCropRepository;
 use Base\Traits\BaseTrait;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+
+use Doctrine\ORM\Mapping as ORM;
+use Base\Repository\Layout\ImageCropRepository;
+use Base\Service\Model\SaltInterface;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=ImageCropRepository::class)
- * @ORM\Cache(usage="NONSTRICT_READ_WRITE")
+ * @Cache(usage="NONSTRICT_READ_WRITE", associations="ALL")
  */
-class ImageCrop implements LinkableInterface
+class ImageCrop implements LinkableInterface, SaltInterface
 {
     use BaseTrait;
 
+    public function getSalt(): string { return $this->getImage()->getSalt()."_".md5(serialize($this->getData())); }
+
     public function __toLink(array $routeParameters = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH): ?string
     {
-        $hashId = $this->getImageService()->obfuscate($this->getImage()->getSource());
+        $hashId = $this->getImageService()->obfuscate($this->getImage()->getSource(), ["salt" => $this->getSalt()]);
         if($hashId === null) return null;
 
+        $routeName = array_key_exists("extension", $routeParameters) ? "ux_imageCropExtension" : "ux_imageCrop";
         $routeParameters = array_filter(array_merge($routeParameters, [
             "identifier" => $this->getSlug() ?? $this->getWidth().":".$this->getHeight(),
             "hashid"     => $hashId
         ]));
 
-        return $this->getRouter()->generate("ux_imageCrop", $routeParameters, $referenceType);
+        return $this->getRouter()->generate($routeName, $routeParameters, $referenceType);
     }
 
     public function __toString() {
