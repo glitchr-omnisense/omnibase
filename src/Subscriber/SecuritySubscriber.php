@@ -226,8 +226,6 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             //
             // If not, then user is redirected to a specific route
-            $currentRouteName = $this->router->getRouteName();
-
             $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
             if(is_array($routeRestriction)) {
 
@@ -241,7 +239,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             if($this->localeProvider->getLang() == $this->localeProvider->getDefaultLang())
                 $routeRestriction = str_rstrip($routeRestriction, ".".$this->localeProvider->getDefaultLang());
 
-            if ($currentRouteName != $routeRestriction) {
+            if ($this->router->getRouteName() != $routeRestriction) {
 
                 $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
