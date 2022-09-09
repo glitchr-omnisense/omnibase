@@ -20,8 +20,8 @@ class SettingCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function () {
 
-            yield SlugField::new('path')->showLeadingHash(false)->setColumns(6)->setSeparator(".")->setTargetFieldName("translations.label");
-            yield SlugField::new('bag')->showLeadingHash(false)->setColumns(6)->setSeparator(".");
+            yield SlugField::new('path')->showLeadingHash(false)->setColumns(6)->keep("_")->setSeparator(".")->setTargetFieldName("translations.label");
+            yield SlugField::new('bag')->showLeadingHash(false)->setColumns(6)->keep("_")->setSeparator(".");
             yield BooleanField::new('locked')->setColumns(6)->withConfirmation();
 
             yield BooleanField::new('secure')->setColumns(6)->renderAsSwitch(false)->onlyOnIndex();
@@ -29,7 +29,12 @@ class SettingCrudController extends AbstractCrudController
 
             yield TranslationField::new("label")->renderAsHtml();
             yield TranslationField::new("help" )->renderAsHtml()->setRequired(false)
-                    ->setFields(["help" => ["form_type" => QuillType::class]])
+                    ->setFields([
+                        "label" => [],
+                        "class" => [],
+                        "vault" => [],
+                        "help" => ["form_type" => QuillType::class]
+                    ])
                     ->setExcludedFields("value");
 
         }, $args);

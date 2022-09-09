@@ -38,13 +38,17 @@ impersonator:
 access_restricted:
     public_restriction:
         message: "Le site est en <b>accès limité</b> pour les utilisateurs."
-        exception: "Cette page dispose d'une exception, mais le site est en <b>accès limité</b> pour les utilisateurs"
+        exception: "Cette page dispose d'une exception, mais le site reste en <b>accès limité</b> pour les utilisateurs"
+        on_deny: "Le site est en <b>accès limité</b> pour les utilisateurs. Cette page est la page de redirection automatique."
+
     user_restriction:
         message: "Le site est en <b>accès limité</b> pour les administrateurs."
-        exception: "Cette page dispose d'une exception, mais le site est en <b>accès limité</b> pour les administrateurs."
+        exception: "Cette page dispose d'une exception, mais le site reste en <b>accès limité</b> pour les administrateurs."
+        on_deny: "Le site est en <b>accès limité</b> pour les administrateurs. Cette page est la page de redirection automatique."
     admin_restriction:
         message: "Le site est en <b>accès limité</b> pour les super-administrateurs."
-        exception: "Cette page dispose d'une exception, mais le site est en <b>accès limité</b> pour les super-administrateurs."
+        exception: "Cette page dispose d'une exception, mais le site reste en <b>accès limité</b> pour les super-administrateurs."
+        on_deny: "Le site est en <b>accès limité</b> pour les super-administrateurs. Cette page est la page de redirection automatique."
 
 maintenance:
     banner: Ce site est en cours de <b>maintenance</b>.

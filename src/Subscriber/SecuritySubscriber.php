@@ -198,30 +198,13 @@ class SecuritySubscriber implements EventSubscriberInterface
             // Let's notify connected user that there is a special access grant for this page
             if(!$this->baseService->isProfiler() && !$this->baseService->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
 
-                if(!$this->localeProvider->hasChanged()) {
+                if($user && $specialGrant && !$this->localeProvider->hasChanged()) {
 
-                    if($user && $specialGrant) {
-
-                        $notification = new Notification("access_restricted.".$restrictionType.".exception");
-                        $notification->send("info");
-                    }
+                    $notification = new Notification("access_restricted.".$restrictionType.".exception");
+                    $notification->send("info");
                 }
 
                 return true;
-
-            } else {
-
-                // If not let them know that this page is locked for others
-                if(!$this->localeProvider->hasChanged()) {
-
-                    if($user && $specialGrant) {
-
-                        $notification = new Notification("access_restricted.".$restrictionType.".message");
-                        $notification->send("warning");
-
-                        return true;
-                    }
-                }
             }
 
             //
@@ -241,12 +224,36 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             if ($this->router->getRouteName() != $routeRestriction) {
 
+                if($user && $specialGrant) {
+
+                    // If not let them know that this page is locked for others
+                    if(!$this->localeProvider->hasChanged()) {
+
+                        $notification = new Notification("access_restricted.".$restrictionType.".message");
+                        $notification->send("warning");
+                    }
+
+                    return true;
+                }
+
                 $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 if($event) $event->setResponse($response);
                 if($event) $event->stopPropagation();
                 return false;
+
+            } else if($user && $specialGrant) {
+
+                // If not let them know that this page is locked for others
+                if(!$this->localeProvider->hasChanged()) {
+
+                    $notification = new Notification("access_restricted.".$restrictionType.".on_deny");
+                    $notification->send("info");
+
+                }
+
+                return true;
             }
         }
 

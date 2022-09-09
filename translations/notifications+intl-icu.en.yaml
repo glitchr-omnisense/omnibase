@@ -40,12 +40,15 @@ access_restricted:
     public_restriction:
         message: "This website is <b>under restricted access</b> for authenticated users only."
         exception: "This page got a special exception, but this website is <b>under restricted access</b> for authenticated users only."
+        on_deny: "This website is <b>under restricted access</b> for authenticated users only. This page is shown on deny."
     user_restriction:
         message: "This website is <b>under restricted access</b> for administrators only."
         exception: "This page got a special exception, but this website is <b>under restricted access</b> for administrators only."
+        on_deny: "This website is <b>under restricted access</b> for administrators only. This page is shown on deny."
     admin_restriction:
         message: "This website is <b>under restricted access</b> for super-administrators only."
         exception: "This page got a special exception, but this website is <b>under restricted access</b> for super-administrators only."
+        on_deny: "This website is <b>under restricted access</b> for super-administrators only. This page is shown on deny."
 
 maintenance:
     banner: This website is currently <b>under maintenance</b>.
