@@ -94,14 +94,44 @@ class AccessVoter extends Voter
 
                 foreach($urlExceptions as $urlException) {
 
+                    $exception = true;
+
                     $environment = $urlException["env"] ?? null;
-                    if($environment !== null && $environment != $this->router->getEnvironment())
-                        continue;
+                    if($environment !== null) {
+                        $exception &= $environment == $this->router->getEnvironment();
+                    }
 
-                    $regex = $urlException["regex"];
-                    if(!$regex) continue;
+                    $locale = $urlException["locale"] ?? null;
+                    if($locale !== null)
+                        $exception &= $locale == $this->localeProvider->getLocale() ;
+                    $country = $urlException["country"] ?? null;
+                    if($country !== null)
+                        $exception &= $country == $this->localeProvider->getCountry() ;
+                    $lang = $urlException["lang"] ?? null;
+                    if($lang !== null)
+                        $exception &= $lang == $this->localeProvider->getLang() ;
 
-                    if(preg_match("/".$regex."/", $url["host"] ?? ""))
+                    $scheme = $urlException["scheme"] ?? null;
+                    if($scheme !== null)
+                        $exception &= array_key_exists("scheme", $url) && preg_match("/".$scheme."/", $url["scheme"]);
+
+                    $host = $urlException["host"] ?? null;
+                    if($host !== null)
+                        $exception &= array_key_exists("host", $url) && preg_match("/".$host."/", $url["host"]);
+
+                    $domain = $urlException["domain"] ?? null;
+                    if($domain !== null)
+                        $exception &= array_key_exists("domain", $url) && preg_match("/".$domain."/", $url["domain"]);
+
+                    $subdomain = $urlException["subdomain"] ?? null;
+                    if($subdomain !== null)
+                        $exception &= array_key_exists("subdomain", $url) && preg_match("/".$subdomain."/", $url["subdomain"]);
+
+                    $path = $urlException["path"] ?? null;
+                    if($path !== null)
+                        $exception &= array_key_exists("path", $url) && preg_match("/".$path."/", $url["path"]);
+
+                    if($exception)
                         return true;
                 }
 

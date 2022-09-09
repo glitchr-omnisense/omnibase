@@ -2,6 +2,7 @@
 
 namespace Base\Routing\Generator;
 
+use Base\BaseBundle;
 use Base\Security\LoginFormAuthenticator;
 use Base\Security\RescueFormAuthenticator;
 use Base\Traits\BaseTrait;
@@ -28,7 +29,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         parent::__construct($compiledRoutes, $context, $logger, $defaultLocale);
 
         $this->compiledRoutes = $compiledRoutes;
-        $this->cachedRoutes   =  $this->getRouter()->getCache()
+        $this->cachedRoutes   = BaseBundle::CACHE && $this->getRouter()->getCache()
             ? $this->getRouter()->getCacheRoutes()->get() ?? []
             : [];
     }
@@ -54,6 +55,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
                     $search  = array_map(fn($k) => "{".$k."}", array_keys($parse));
                     $replace = array_values($parse);
+
                     foreach($routeParameters as $key => &$routeParameter) {
 
                         $routeParameter = $routeParameter ? str_replace($search, $replace, $routeParameter) : $routeParameter;
@@ -64,7 +66,6 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         }
 
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
-
         if(!str_ends_with($routeName, ".".$this->getRouter()->getLang())) {
             try { return parent::generate($routeName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
             catch (RouteNotFoundException $e) { }

@@ -58,7 +58,7 @@ class RouteVoter extends Voter
                 $permittedSubdomains = array_transforms(fn($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $permittedSubdomains);
                 if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
                     $permittedSubdomains[] = "^$"; // Special case if both subdomain and machine are unallowed
-                
+
                 $parse = parse_url2($url);
 
                 $allowedSubdomain = false;

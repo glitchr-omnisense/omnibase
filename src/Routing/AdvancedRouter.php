@@ -268,6 +268,11 @@ class AdvancedRouter implements RouterInterface
 
     public function getHost(?string $locale = null, ?string $environment = null): string
     {
+        return $_SERVER['HTTP_HOST'] ?? $this->getHostFallback();
+    }
+
+    public function getHostFallback(?string $locale = null, ?string $environment = null): string
+    {
         $host = $this->getHostParameters($locale, $environment);
 
         $machine = $host["machine"] ?? null;
@@ -278,7 +283,7 @@ class AdvancedRouter implements RouterInterface
 
         $domain = $host["domain"] ?? null;
 
-        return $_SERVER['HTTP_HOST'] ?? $machine.$subdomain.$domain;
+        return $machine.$subdomain.$domain;
     }
 
     public function getMachine(?string $locale = null, ?string $environment = null): ?string { return $this->getHostParameters($locale, $environment)["machine"] ?? null; }
