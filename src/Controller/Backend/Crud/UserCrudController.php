@@ -4,7 +4,6 @@ namespace Base\Controller\Backend\Crud;
 
 use App\Entity\User;
 use Base\Backend\Config\Extension;
-use Base\Controller\Backend\AbstractCrudController;
 use Base\Field\AvatarField;
 
 use Base\Field\PasswordField;
@@ -12,6 +11,7 @@ use Base\Field\RoleField;
 use Base\Field\BooleanField;
 
 use Base\Field\EmailField;
+use Base\Security\LoginRestrictionInterface;
 use Base\Service\Translator;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Config\KeyValueStore;
@@ -36,13 +36,11 @@ class UserCrudController extends UserActionCrudController
             $entityLabel ??= $this->getCrud()->getAsDto()->getEntityLabelInSingular() ?? "";
             $entityLabel   = $entityLabel ? mb_ucwords($entityLabel) : "";
 
-            $impersonate = null;
-
             $switchRole      = $this->router->getRouteFirewall()->getSwitchUser()["role"] ?? null;
             $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $impersonate = null;
-            if($switchRole && $this->isGranted($switchRole) && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
+            if($switchRole && $this->isGranted($switchRole) && !$this->getEntityFqcn() instanceof LoginRestrictionInterface && $this->getCrud()->getAsDto()->getCurrentAction() != "new") {
 
                 $propertyAccessor =  PropertyAccess::createPropertyAccessor();
                 if($propertyAccessor->isReadable($entity, User::__DEFAULT_IDENTIFIER__))

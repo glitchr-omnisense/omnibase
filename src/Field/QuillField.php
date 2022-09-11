@@ -15,6 +15,8 @@ final class QuillField implements FieldInterface
     public const OPTION_SHORTEN_POSITION  = 'shortenStrPosition';
     public const OPTION_SHORTEN_SEPARATOR = 'shortenStrSeparator';
 
+    public const OPTION_RENDER_AS_BOOLEAN = 'renderAsBoolean';
+
     public static function new(string $propertyName, ?string $label = null): self
     {
         return (new self())
@@ -23,6 +25,13 @@ final class QuillField implements FieldInterface
             ->setTemplateName('crud/field/textarea')
             ->shorten()
             ->setFormType(QuillType::class);
+    }
+
+    public function renderAsBoolean(bool $asBool = true)
+    {
+        $this->setCustomOption(self::OPTION_RENDER_AS_BOOLEAN, $asBool);
+
+        return $this;
     }
 
     public function shorten(int $length = 100, int $position = SHORTEN_BACK, string $separator = " [..] "): self

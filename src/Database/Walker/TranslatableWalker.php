@@ -30,7 +30,6 @@ class TranslatableWalker extends SqlWalker
     public function walkFromClause($fromClause): string
     {
         $sql = parent::walkFromClause($fromClause);
-
         $statements = explodeByArray([" LEFT JOIN", " INNER JOIN", self::FOREIGN_KEY], $sql, true);
         $statementsIntls = [];
 
@@ -82,6 +81,7 @@ class TranslatableWalker extends SqlWalker
 
             $sql .= implode("", $statementsIntl);
         }
+
         return $sql;
     }
 
@@ -102,7 +102,6 @@ class TranslatableWalker extends SqlWalker
     public function walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType = AST\Join::JOIN_TYPE_INNER, $condExpr = null): string
     {
         $sql = parent::walkJoinAssociationDeclaration($joinAssociationDeclaration, $joinType, $condExpr);
-
         $dqlAlias       = $joinAssociationDeclaration->joinAssociationPathExpression->identificationVariable;
         $joinedDqlAlias = $joinAssociationDeclaration->aliasIdentificationVariable;
 

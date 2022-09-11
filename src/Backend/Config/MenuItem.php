@@ -3,6 +3,7 @@
 namespace Base\Backend\Config;
 
 use Base\Backend\Config\Menu\RouteMenuItem;
+use Base\Backend\Config\Menu\SubMenuItem;
 use Base\Service\IconProvider;
 use Base\Service\TranslatorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\CrudMenuItem;
@@ -10,7 +11,6 @@ use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\DashboardMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\ExitImpersonationMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\LogoutMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SectionMenuItem;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\SubMenuItem;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Menu\UrlMenuItem;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -70,8 +70,8 @@ class MenuItem
         return new SectionMenuItem($label, $icon);
     }
 
-    public static function subMenu(string $label, ?string $icon = null): SubMenuItem
+    public static function subMenu(string $label, ?string $icon = null, ?string $url = null): SubMenuItem
     {
-        return new SubMenuItem($label, $icon);
+        return new SubMenuItem($label, $icon, $url);
     }
 }

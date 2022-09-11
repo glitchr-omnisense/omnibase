@@ -66,7 +66,6 @@ class AutocompleteController extends AbstractController
                 $fields = array_filter($fields);
 
                 $entries = $repository->cacheByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
-
                 do {
 
                     $book = $this->paginator->paginate($entries, $page);

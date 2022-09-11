@@ -3,14 +3,15 @@
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
 {# this template is used to display Doctrine entity primary keys #}
 
-{% set switchParameter = field.getCustomOption("impersonate") %}
-{% if switchParameter %}
-    {% set identifier = property_accessor(field.value, constant("Base\\Entity\\User::__DEFAULT_IDENTIFIER__")) %}
-    <a class="field-impersonate" href="?{{ switchParameter }}={{ identifier }}"><i class="fa fa-fw fa-user-secret"></i></a> 
-{% endif %}
-
 {% if field.getProperty() == "id" %}
     {{ field.formattedValue|raw }}
 {% endif %}
+
+{% set switchParameter = field.getCustomOption("impersonate") %}
+{% if switchParameter %}
+    {% set identifier = property_accessor(field.value, constant("Base\\Entity\\User::__DEFAULT_IDENTIFIER__")) %}
+    <a class="field-impersonate" href="?{{ switchParameter }}={{ identifier }}"><i class="fa fa-fw fa-user-secret"></i></a>
+{% endif %}
+
 
 

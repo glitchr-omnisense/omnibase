@@ -12,6 +12,7 @@ use Base\Entity\Layout\Widget\Slot;
 use Base\Service\LocaleProvider;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityNotFoundException;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
@@ -1070,25 +1071,25 @@ class ServiceEntityParser
                     $reverseAssert = str_starts_with($value, "^");
                     if($reverseAssert) $value = ltrim($value, "^");
 
-                    $value = $this->getRealClassName($value);
-                    if($value === null) continue;
+                    $realValue = $this->getRealClassName($value);
+                    if($realValue === null) throw new EntityNotFoundException("Entity \"$value\" doesn't exists");
 
                     if($isInstanceOf) {
 
-                        if( $reverseAssert ) $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^")));
-                        else $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, $value);
+                        if( $reverseAssert ) $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, ltrim($realValue, "^")));
+                        else $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, $realValue);
 
                     } else {
 
-                        if( $reverseAssert ) $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, ltrim($value, "^"));
-                        else $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value));
+                        if( $reverseAssert ) $instanceOf[] = $qb->expr()->isInstanceOf($tableColumn, ltrim($realValue, "^"));
+                        else $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $realValue));
                     }
                 }
 
                 if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
             }
 
-            return $qb->expr()->orX(...$instanceOf);
+            return $instanceOf ? $qb->expr()->orX(...$instanceOf) : "";
 
         } else if($isClassOf || $isNotClassOf) {
 
@@ -1104,17 +1105,17 @@ class ServiceEntityParser
                     $reverseAssert = str_starts_with($value, "^");
                     if($reverseAssert) $value = ltrim($value, "^");
 
-                    $value = $this->getRealClassName($value);
-                    if($value === null) continue;
+                    $realValue = $this->getRealClassName($value);
+                    if($realValue === null) throw new EntityNotFoundException("Entity \"$value\" doesn't exists");
 
-                    $classMetadata = $this->entityManager->getClassMetadata($value);
-                    $classChildren = array_filter(array_values($classMetadata->discriminatorMap), fn($c) => $c != $value && is_instanceof($c, $value));
+                    $classMetadata = $this->entityManager->getClassMetadata($realValue);
+                    $classChildren = array_filter(array_values($classMetadata->discriminatorMap), fn($c) => $c != $realValue && is_instanceof($c, $realValue));
 
                     if($isClassOf) {
 
                         if( !$reverseAssert ) {
 
-                            $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
+                            $subQb = [$qb->expr()->isInstanceOf($tableColumn, $realValue)];
                             foreach($classChildren as $child)
                                 $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
 
@@ -1122,7 +1123,7 @@ class ServiceEntityParser
 
                         } else {
 
-                            $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
+                            $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $realValue))];
                             foreach($classChildren as $child)
                                 $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
 
@@ -1133,7 +1134,7 @@ class ServiceEntityParser
 
                         if( $reverseAssert ) {
 
-                            $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $value))];
+                            $subQb = [$qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $realValue))];
                             foreach($classChildren as $child)
                                 $subQb[] = $qb->expr()->isInstanceOf($tableColumn, $child);
 
@@ -1141,7 +1142,7 @@ class ServiceEntityParser
 
                         } else {
 
-                            $subQb = [$qb->expr()->isInstanceOf($tableColumn, $value)];
+                            $subQb = [$qb->expr()->isInstanceOf($tableColumn, $realValue)];
                             foreach($classChildren as $child)
                                 $subQb[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $child));
 
@@ -1153,7 +1154,7 @@ class ServiceEntityParser
                 if($notClassOf) $classOf[] = $qb->expr()->andX(...$notClassOf);
             }
 
-            return $qb->expr()->orX(...$classOf);
+            return $classOf ? $qb->expr()->orX(...$classOf) : "";
 
         } else if($isMemberOf || $isNotMemberOf) {
 
@@ -1166,14 +1167,17 @@ class ServiceEntityParser
 
                 foreach ($fieldValue as $value) {
 
-                    if($isMemberOf) $memberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
-                    else $notMemberOf[] = $qb->expr()->isMemberOf($tableColumn, $value);
+                    $realValue = $this->getRealClassName($value);
+                    if($realValue === null) throw new EntityNotFoundException("Entity \"$value\" doesn't exists");
+
+                    if($isMemberOf) $memberOf[] = $qb->expr()->isMemberOf($tableColumn, $realValue);
+                    else $notMemberOf[] = $qb->expr()->isMemberOf($tableColumn, $realValue);
                 }
 
                 if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
             }
 
-            return $qb->expr()->orX(...$memberOf);
+            return $memberOf ? $qb->expr()->orX(...$memberOf) : "";
 
         } else {
 

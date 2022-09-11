@@ -24,7 +24,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     public        function __iconize()       : ?array { return null; }
     public static function __iconizeStatic() : ?array { return ["fas fa-th"]; }
 
-    public function __toString() { return $this->getPath(); }
+    public function __toString() { return $this->getLabel() ?? $this->getPath(); }
     public function __construct(string $path, ?string $label = null, ?string $help = null)
     {
         parent::__construct();
@@ -35,7 +35,7 @@ class Slot extends Widget implements TranslatableInterface, IconizeInterface
     }
 
     /**
-     * @ORM\Column(type="string", length=255, unique=true)
+     * @ORM\Column(type="string", length=255, unique=true, nullable=false)
      * @AssertBase\NotBlank(groups={"new", "edit"})
      * @Slugify(reference="translations.title", separator=".", keep={"_"})
      */

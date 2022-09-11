@@ -21,7 +21,6 @@ use App\Entity\Layout\Widget\Attachment;
 use App\Entity\Layout\Widget\Set\Menu;
 use App\Entity\Layout\Widget\Page;
 
-use App\Controller\Backend\Crud\UserCrudController;
 use Base\Entity\Layout\Image;
 use Base\Backend\Config\WidgetItem;
 use Base\Backend\Config\MenuItem;
@@ -207,7 +206,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $this->settingRepository->flush();
 
             $notification = new Notification("@controllers.backoffice_apikey.success");
-            $notification->setUser($this->getUser());
             $notification->send("success");
 
             return $this->router->reloadRequest();
@@ -270,7 +268,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $this->settingRepository->persist($setting);
 
             $notification = new Notification("@controllers.backoffice_settings.success");
-            $notification->setUser($this->getUser());
             $notification->send("success");
 
             $this->settingRepository->flush();
@@ -302,7 +299,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $data = $form->getData();
             foreach(array_keys($widgetSlots) as $path) {
 
-                $widgetSlot = $this->slotRepository->cacheOneEagerlyByPath($path);
+                $widgetSlot = $this->slotRepository->cacheOneByPath($path);
 
                 if(!$widgetSlot) {
 
@@ -317,7 +314,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             }
 
             $notification = new Notification("@controllers.backoffice_widgets.success");
-            $notification->setUser($this->getUser());
             $notification->send("success");
 
             $this->slotRepository->flush();
@@ -367,17 +363,16 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
 
             if(!is_array($values)) $values = ["_self" => $values];
             $role = array_pop_key("_self", $values);
+            $crudController = UserRole::getCrudController($role);
+            if(!$crudController) continue;
 
             $label = $this->translator->transEnum($class, $role, Translator::NOUN_PLURAL);
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
                 ->unsetAll()
-                ->setController(UserCrudController::class)
+                ->setController($crudController)
                 ->setAction(Action::INDEX)
-                ->set("role", $role)
-                ->set("filters[roles][comparison]", "like")
-                ->set("filters[roles][value]", $role)
                 ->set(EA::MENU_INDEX, count($menu))
                 ->generateUrl();
 
@@ -392,13 +387,13 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                     $label = mb_ucfirst($this->translator->transEnum($class, $role, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
+                    $crudController = UserRole::getCrudController($role);
+                    if(!$crudController) continue;
+
                     $url = $this->adminUrlGenerator
                         ->unsetAll()
-                        ->setController(UserCrudController::class)
+                        ->setController($crudController)
                         ->setAction(Action::INDEX)
-                        ->set("role", $role)
-                        ->set("filters[roles][comparison]", "like")
-                        ->set("filters[roles][value]", $role)
                         ->set(EA::MENU_INDEX, count($menu))
                         ->set(EA::SUBMENU_INDEX, count($subItems))
                         ->generateUrl();

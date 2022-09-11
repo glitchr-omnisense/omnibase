@@ -39,7 +39,7 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
     {
         $showColumn = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_COLUMN);
         $showInline = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_INLINE);
-        $showLast   = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_LAST_ONLY);
+        $showLast   = $field->getCustomOption(DiscriminatorField::OPTION_SHOW_LEAF);
 
         $discriminatorAutoload = $field->getCustomOption(DiscriminatorField::OPTION_DISCRIMINATOR_AUTOLOAD);
         if($discriminatorAutoload)

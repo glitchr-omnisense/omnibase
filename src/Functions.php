@@ -960,7 +960,7 @@ namespace {
         return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
     }
 
-    function mb_lcwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
+    function mb_lcwords (array|string $str, ?string $encoding = null, array|string $separators = " \t\r\n\f\v\"',.:;"): array|string
     {
         if(is_array($str)) {
 
@@ -971,11 +971,8 @@ namespace {
             return $array;
         }
 
-        $separators = str_split($separators);
-        foreach($separators as $separator)
-            $str = implode($separator, array_map(fn($s) => mb_lcfirst($s, $encoding), explode($separator, $str)));
-
-        return $str;
+        $separators = is_array($separators) ? $separators : str_split($separators);
+        return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
     }
 
     function mb_ucfirst (array|string $str, ?string $encoding = null): array|string
@@ -992,7 +989,7 @@ namespace {
         return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
     }
 
-    function mb_ucwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
+    function mb_ucwords (array|string $str, ?string $encoding = null, array|string $separators = " \t\r\n\f\v\"',.:;"): array|string
     {
         if(is_array($str)) {
 
@@ -1003,11 +1000,8 @@ namespace {
             return $array;
         }
 
-        $separators = str_split($separators);
-        foreach($separators as $separator)
-            $str = implode($separator, array_map(fn($s) => mb_ucfirst($s, $encoding), explode($separator, $str)));
-
-        return $str;
+        $separators = is_array($separators) ? $separators : str_split($separators);
+        return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
     }
 
     function html_attributes(array ...$attributes)

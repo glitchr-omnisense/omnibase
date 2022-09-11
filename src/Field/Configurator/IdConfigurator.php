@@ -5,6 +5,7 @@ namespace Base\Field\Configurator;
 use Base\Entity\User;
 use Base\Field\IdField;
 use Base\Routing\RouterInterface;
+use Base\Security\LoginRestrictionInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
@@ -42,7 +43,7 @@ class IdConfigurator implements FieldConfiguratorInterface
         $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
         $field->setCustomOption(IdField::OPTION_IMPERSONATE, $switchParameter);
-        if(!$entityDto->getInstance() instanceof User || !$switchRole || !$this->authorizationChecker->isGranted($switchRole))
+        if(!$entityDto->getInstance() instanceof User || $entityDto->getInstance() instanceof LoginRestrictionInterface || !$switchRole || !$this->authorizationChecker->isGranted($switchRole))
             $field->setCustomOption(IdField::OPTION_IMPERSONATE, false);
 
         // Formatted data

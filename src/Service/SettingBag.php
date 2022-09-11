@@ -58,7 +58,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     public function getEnvironment(): ?string { return $this->environment; }
     public function getPaths(null|string|array $path = null)
     {
-        return array_map(fn($s) => $s instanceof Setting ? $s->getPath() : null, array_filter($this->getRaw($path)) ?? []);
+        return array_map(fn($s) => $s instanceof Setting ? $s->getPath() : null, array_filter_recursive($this->getRaw($path)) ?? []);
     }
 
     protected function read(?string $path, array $bag)

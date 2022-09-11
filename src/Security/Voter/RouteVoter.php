@@ -71,6 +71,7 @@ class RouteVoter extends Voter
                 if(RescueFormAuthenticator::isSecurityRoute($routeName))
                     return true;
 
+
                 if(!$allowedSubdomain) return false;
 
                 if(array_key_exists("machine",   $parse) && !$this->router->keepMachine()  ) return false;

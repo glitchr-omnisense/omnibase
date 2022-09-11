@@ -27,6 +27,6 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
             return '?'.$switchParameter.'=_exit';
         }
 
-        return parent::generateMenuItemUrl($menuItemDto, $index, $subIndex);
+        return $menuItemDto->getLinkUrl() ?? parent::generateMenuItemUrl($menuItemDto, $index, $subIndex);
     }
 }

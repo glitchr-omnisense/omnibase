@@ -115,15 +115,16 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         return null;
     }
 
-    protected $allowRootEntity = true;
-    public function disallowRootEntity()
+    protected static array $instantiationMap = [];
+    public static function isInstantiable() { return static::$instantiationMap[static::class] ?? true; }
+    public function allowInstantiation()
     {
-        $this->allowRootEntity = true;
-        return $this->allowRootEntity;
+        self::$instantiationMap[static::class] = true;
+        return $this;
     }
-    public function allowRootEntity()
+    public function disallowInstantiation()
     {
-        $this->allowRootEntity = true;
+        self::$instantiationMap[static::class] = false;
         return $this;
     }
 

@@ -776,6 +776,8 @@
         <service id="Base\Field\Type\IconType" parent="Base\Field\Type\SelectType"><tag name="form.type" /><argument type="service" id="base.service.icon" /></service>
         <service id="Base\Field\Type\CountryType"     parent="Base\Field\Type\SelectType"><tag name="form.type" /></service>
 
+        <service id="Base\Field\Type\TextType"><tag name="form.type" /></service>
+
         <service id="Base\Field\Type\AssociationType">
             <tag name="form.type" />
             <argument type="service" id="base.form.factory" />
@@ -901,6 +903,7 @@
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Intl\IntlFormatter" />
         </service>
 
+        <service id="Base\Field\Configurator\TextConfigurator"><tag name="ea.field_configurator" /></service>
         <service id="Base\Field\Configurator\QuillConfigurator">
             <tag name="ea.field_configurator" />
         </service>

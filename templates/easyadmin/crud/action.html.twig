@@ -132,14 +132,14 @@
         {% endif %}
     {% endfor %}
 
-    {% set isRootEntityAllowed = false %}
+    {% set instantiable = false %}
     {% for group, entities in discriminatorMap %}
-        {% if not isRootEntityAllowed %}
-            {% set isRootEntityAllowed = (rootCrud in entities) %}
+        {% if not instantiable %}
+            {% set instantiable = (crud in entities) and static_call(crud|urldecode, "isInstantiable") %}
         {% endif %}
     {% endfor %}
 
-    {% if isRootEntityAllowed %}
+    {% if instantiable %}
 
         <a class="{{ action.cssClass }}" href="{{ action.linkUrl }}" {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
             {%- if action.icon %}<i class="action-icon {{ action.icon }}"></i>{% endif -%}
@@ -176,16 +176,21 @@
                 {% endif %}
             {% endif %}
 
-            {% for crudEntity in entities %}
+            {% for crudEntity in entities|reverse %}
 
-                {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
-                {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
-                {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
-                <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
-                    {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
-                    {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
-                    {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
-                </a></li>
+                {% set instantiable = static_call(crudEntity|urldecode, "isInstantiable") %}
+                {% if instantiable %}
+
+                    {% set icon    = static_call(crudEntity|urldecode, "getEntityIcon")|default(null) %}
+                    {% set label   = static_call(crudEntity|urldecode, "getEntityLabelInSingular")|trans(domain = ea.getTranslationDomain()) %}
+                    {% set linkUrl = action.linkUrl|replace({(crud): (crudEntity)}) %}
+
+                    <li class="dropdown-item label-item"><a class="dropdown-item-link" href="{{ linkUrl }}"
+                        {% for name, value in actionHtmlAttributes %}{{ name }}="{{ value|e('html_attr') }}" {% endfor %}>
+                        {% if icon is not empty %} <i class="action-icon {{ icon|raw }}"></i>{% endif %}
+                        {{- label !=  static_call(crudEntity|urldecode, "getEntityLabelInSingular") ? label|capitalize : action.label|trans|capitalize -}}
+                    </a></li>
+                {% endif %}
 
             {% endfor %}
         {% endfor %}

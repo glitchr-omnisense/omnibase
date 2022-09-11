@@ -374,7 +374,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
     }
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime")
      * @Timestamp(on="create")
      */
     protected $createdAt;

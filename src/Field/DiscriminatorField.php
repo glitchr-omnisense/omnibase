@@ -12,7 +12,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
     public const OPTION_DISCRIMINATOR_AUTOLOAD = 'discriminatorAutoload';
     public const OPTION_SHOW_COLUMN            = 'discriminatorColumn';
     public const OPTION_SHOW_INLINE            = 'discriminatorInline';
-    public const OPTION_SHOW_LAST_ONLY         = 'discriminatorLastEntry';
+    public const OPTION_SHOW_LEAF              = 'discriminatorLeaf';
 
     public static function new(string $propertyName = "id", ?string $label = null): self
     {
@@ -26,7 +26,7 @@ class DiscriminatorField extends SelectField implements FieldInterface
             ->setCustomOption(self::OPTION_DISCRIMINATOR_AUTOLOAD, false)
             ->setCustomOption(self::OPTION_SHOW_COLUMN, false)
             ->setCustomOption(self::OPTION_SHOW_INLINE, true)
-            ->setCustomOption(self::OPTION_SHOW_LAST_ONLY, false)
+            ->setCustomOption(self::OPTION_SHOW_LEAF, false)
             ->setCustomOption(self::OPTION_RENDER_FORMAT, "text")
             ->setIconAlign(TextAlign::RIGHT)->hideOnForm()
             ->setTextAlign(TextAlign::LEFT)->setColumns(6)
@@ -43,9 +43,9 @@ class DiscriminatorField extends SelectField implements FieldInterface
         $this->setCustomOption(self::OPTION_SHOW_INLINE, $inline);
         return $this;
     }
-    public function showLastEntry(bool $show = true): self
+    public function showLeaf(bool $show = true): self
     {
-        $this->setCustomOption(self::OPTION_SHOW_LAST_ONLY, $show);
+        $this->setCustomOption(self::OPTION_SHOW_LEAF, $show);
         return $this;
     }
 }

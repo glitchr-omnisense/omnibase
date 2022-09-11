@@ -727,7 +727,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\Column(type="datetime_immutable")
+     * @ORM\Column(type="datetime")
      * @Timestamp(on="create")
      */
     protected $createdAt;

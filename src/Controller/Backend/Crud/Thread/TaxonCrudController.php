@@ -17,7 +17,7 @@ class TaxonCrudController extends AbstractCrudController
     {
         return parent::configureFields($pageName, function() {
 
-            yield DiscriminatorField::new('class')->hideOnForm()->showLastEntry();
+            yield DiscriminatorField::new('class')->hideOnForm()->showLeaf();
 
             yield IconField::new('icon')->setTargetColor("color");
             yield SlugField::new('slug')->setTargetFieldName("translations.label");

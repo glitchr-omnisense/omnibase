@@ -64,7 +64,6 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function(FormEvent $event) use ($options) {
 
             $form = $event->getForm();
-            $data = $event->getData();
 
             $widgetSlots = [];
 

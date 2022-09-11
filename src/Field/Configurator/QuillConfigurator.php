@@ -21,6 +21,11 @@ class QuillConfigurator implements FieldConfiguratorInterface
         $position  = $field->getCustomOption(QuillField::OPTION_SHORTEN_POSITION);
         $separator = $field->getCustomOption(QuillField::OPTION_SHORTEN_SEPARATOR);
 
+        $renderAsBoolean = $field->getCustomOption(QuillField::OPTION_RENDER_AS_BOOLEAN);
+        if ($renderAsBoolean) {
+            $field->setValue(!empty($field->getValue()));
+        }
+
         $field->setFormattedValue(str_shorten($field->getFormattedValue(), $length, $position, $separator));
     }
 }

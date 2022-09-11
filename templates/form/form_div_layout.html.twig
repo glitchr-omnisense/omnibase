@@ -84,7 +84,8 @@
 
 {# Custom FormType widgets are below.. #}
 {%- block quill_row -%}
-<div class="form-quill form-group">
+{%- set row_attr = row_attr|merge({'class': 'form-quill' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+<div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
     <span>{{ form_label(form) }}</span>
     {{ form_errors(form) }}
     {{ form_row(form) }}
@@ -592,7 +593,8 @@
 
         {% set attr = attr | filter((v, k) => k != 'class' and v != 'form-control')%}
 
-        <div class="field-association form-group">
+        {%- set row_attr = row_attr|merge({'class': 'field-association' ~ (row_attr.class is defined ? ' ' ~ row_attr.class : '')} ) -%}
+        <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
             {% if row_group %}
                 {%- set attr = attr|merge({'class': 'form-collection form-group-row' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
                 {{ form_label(form)}}
@@ -655,13 +657,12 @@
     {% set group = form.vars.group %}
     {% if group == true %}
         {% if form.children is not empty or allow_add != false %}
-        <div class="form-group">
-            {{ form_label(form)}}
 
+        <div {% with {attr: row_attr} %}{{ block('attributes') }}{% endwith %}>
+            {{ form_label(form)}}
             <div {{ block('widget_attributes') }}>
                 {{ form_widget(form) }}
             </div>
-
         </div>
         {% endif %}
     {% else %}

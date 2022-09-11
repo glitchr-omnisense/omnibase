@@ -13,10 +13,10 @@ user_role:
   _singular: "generic"
   _plural: "generics"
 
-  role_editor: 
+  role_editor:
     _singular: "editor"
     _plural: "editors"
-    
+
   role_superadmin:
     _singular: "super administrator"
     _plural: "super administrators"
@@ -75,7 +75,7 @@ thread_state:
     _singular: "deleted"
     _plural: "deleted"
 
-thread_workflow:
+workflow_state:
   workflow_approved:
     _singular: "approved"
     _plural: "approved"

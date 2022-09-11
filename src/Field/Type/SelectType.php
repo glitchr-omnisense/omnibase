@@ -233,6 +233,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if ($dataset)
                         $dataset = $classRepository->findById($dataset)->getResult();
                 }
+
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options) : Generator {
 
                     if($choices === null) return null;

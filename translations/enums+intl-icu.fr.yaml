@@ -29,7 +29,7 @@ user_role:
     _singular: "réseau social"
     _plural: "réseaux sociaux"
 
-  role_editor: 
+  role_editor:
     _singular: "éditeur"
     _plural: "éditeurs"
 
@@ -75,7 +75,7 @@ thread_state:
     _singular: "supprimé"
     _plural: "supprimés"
 
-thread_workflow:
+workflow_state:
   workflow_approved:
     _singular: "approuvé"
     _plural: "approuvés"
