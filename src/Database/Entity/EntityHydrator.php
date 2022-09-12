@@ -439,7 +439,7 @@ class EntityHydrator implements EntityHydratorInterface
             throw new Exception("Failed to turn \"$values\" into an association in \"".get_class($entity)."\". Did you pass an object?");
 
         // Fetch or hydrate association
-        $association = $values instanceof Collection ? $values : new ArrayCollection($values ?? []);
+        $association = $values instanceof Collection ? $values : new ArrayCollection($values === null ? [] : (is_array($values) ? $values : [$values]));
         foreach ($association as $key => $value) {
 
             if (is_array($value))

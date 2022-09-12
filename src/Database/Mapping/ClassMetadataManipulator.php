@@ -15,6 +15,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Proxy\Proxy;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
 use InvalidArgumentException;
@@ -124,11 +125,16 @@ class ClassMetadataManipulator
     public function getClassMetadata(null|string|object $entityOrClassOrMetadata)
     {
         if($entityOrClassOrMetadata === null) return null;
+        if($entityOrClassOrMetadata instanceof PersistentCollection)
+            return $entityOrClassOrMetadata->getTypeClass();
         if($entityOrClassOrMetadata instanceof ClassMetadataInfo)
             return $entityOrClassOrMetadata;
 
+        if(is_object($entityOrClassOrMetadata) && !$this->isEntity($entityOrClassOrMetadata))
+            return null;
+
         $entityOrClassOrMetadataName = is_object($entityOrClassOrMetadata) ? get_class($entityOrClassOrMetadata) : $entityOrClassOrMetadata;
-        $classMetadata  = class_exists($entityOrClassOrMetadataName) ? $this->doctrine->getManagerForClass($entityOrClassOrMetadataName)->getClassMetadata($entityOrClassOrMetadataName) : null;
+        $classMetadata  = class_exists($entityOrClassOrMetadataName) ? $this->doctrine->getManagerForClass($entityOrClassOrMetadataName)?->getClassMetadata($entityOrClassOrMetadataName) : null;
         if (!$classMetadata)
             throw new InvalidArgumentException("Entity expected, '" . $entityOrClassOrMetadataName . "' is not an entity.");
 
@@ -477,7 +483,17 @@ class ClassMetadataManipulator
         return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
     }
 
-    public function isAlias(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string { return $this->getFieldName($entityOrClassOrMetadata, $fieldPath) != $fieldPath; }
+    public function isAlias(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): bool { return $this->getFieldName($entityOrClassOrMetadata, $fieldPath) != $fieldPath; }
+
+    public function getBackFieldName(null|object|string $entityOrClassOrMetadata, array|string $fieldName): ?string
+    {
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$classMetadata->hasAssociation($fieldName)) return null;
+
+        $fieldName = $this->getFieldName($entityOrClassOrMetadata, $fieldName) ?? $fieldName;
+        return $classMetadata->associationMappings[$fieldName]["inversedBy"] ?? null;
+    }
+
     public function getFieldName(null|object|string $entityOrClassOrMetadata, array|string $fieldName): ?string
     {
         return $this->getFieldNames($entityOrClassOrMetadata)[$fieldName] ?? null;
@@ -486,6 +502,8 @@ class ClassMetadataManipulator
     public function getFieldNames(null|object|string $entityOrClassOrMetadata): ?array
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$classMetadata) return null;
+
         $classMetadataEnhanced = $this->getClassMetadataCompletor($entityOrClassOrMetadata);
         return array_merge($classMetadataEnhanced->aliasNames ?? [], $classMetadata->fieldNames);
     }
@@ -711,6 +729,6 @@ class ClassMetadataManipulator
     public function getClassMetadataCompletor(null|string|object $entityOrClassOrMetadata) : ?ClassMetadataCompletor
     {
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
-        return $this->getMetadataFor($classMetadata->name);
+        return $classMetadata ? $this->getMetadataFor($classMetadata->name) : null;
     }
 }

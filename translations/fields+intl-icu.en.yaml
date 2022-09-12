@@ -56,6 +56,7 @@ select:
 
 collection:
   empty: This collection is empty !
+  entry: Entry
 
 array:
   key: "Key"

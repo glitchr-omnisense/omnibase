@@ -5,6 +5,7 @@ namespace Base\Field\Type;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
+use Base\Service\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -45,11 +46,12 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
     public function getBlockPrefix(): string { return 'association'; }
 
-    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator)
+    public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, TranslatorInterface $translator)
     {
         $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator   = $entityHydrator;
+        $this->translator   = $translator;
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
@@ -63,7 +65,17 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'href'      => null,
 
             'entry_collapsed' => true,
-            'entry_label' => function($i, $e) { return $i === "__prototype__" ? false : $this->getTranslator()->transEntity($e). " #".(((int)$i)+1); },
+            'entry_label' => function($i, $label)
+            {
+                if($i === "__prototype__") return false;
+
+                if(!is_object($label)) return $this->translator->trans("@fields.collection.entry"). " #".(((int)$i)+1);
+
+                $_label = $this->translator->transEntity($label). " #".(((int)$i)+1);
+                if(is_stringeable($label)) $_label .= " : ". ((string) $label);
+                return $_label;
+            },
+
             'entry_required' => true,
 
             'fields' => [],

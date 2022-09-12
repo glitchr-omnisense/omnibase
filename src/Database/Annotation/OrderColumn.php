@@ -105,6 +105,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
         catch (Exception $e) { return; }
 
+        //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
         $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
         if($ordering === null) return;
 
@@ -145,12 +146,19 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $data = [];
                 foreach($properties as $property) {
 
+                    //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
+                    if($this->getEntityManager()->getCache()) {
+
+                        $this->getEntityManager()->getCache()->evictEntity($className, $entity->getId());
+                        if ($this->getClassMetadata($className)->hasAssociation($property))
+                            $this->getEntityManager()->getCache()->evictCollection($className, $property, $entity->getId());
+                    }
+
                     $value = $propertyAccessor->getValue($entity, $property);
 
                     // TBD: Implement case for array.. this one might be a bit more complicate.. (periodical cycles)
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
-                    else*/
-                     if($value instanceof Collection) {
+                    else*/ if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
@@ -169,6 +177,11 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->findOneByEntityIdAndEntityClass($entity->getId(), $className);
                 $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
+
+                $orderingId = $this->ordering[$className][$id]->getId();
+
+                //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
+                if($orderingId) $this->getEntityManager()->getCache()->evictEntity(Ordering::class, $orderingId);
 
                 break;
 

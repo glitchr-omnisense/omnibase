@@ -783,6 +783,7 @@
             <argument type="service" id="base.form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.database.entity_hydrator" />
+            <argument type="service" id="translator" />
         </service>
 
         <service id="Base\Field\Type\AssociationFileType">

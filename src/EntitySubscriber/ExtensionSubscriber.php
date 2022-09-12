@@ -3,12 +3,13 @@
 namespace Base\EntitySubscriber;
 
 use Base\Database\Entity\EntityExtension;
-
+use Base\Entity\Extension\Abstract\AbstractExtension;
 use Base\Enum\EntityAction;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\Common\EventArgs;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
+use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -65,6 +66,11 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
     public function postPersist(EventArgs $args)
     {
+        //NB: Attempt to evict AbstractExtension..doesn't seems to be working.. TBD
+        $newEntity = $args->getObject();
+        if($newEntity)
+            $this->entityManager->getCache()->evictEntity(get_class($newEntity), $newEntity->getId());
+
         $uow = $this->entityManager->getUnitOfWork();
         foreach($this->scheduledEntityInsertions as $entity) {
 

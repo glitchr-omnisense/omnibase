@@ -20,6 +20,7 @@ use Base\Twig\Environment;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\PersistentCollection;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Generator;
@@ -214,6 +215,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
+            $dataParent = $form->getParent()->getData();
 
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"];
@@ -232,6 +234,19 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $classRepository = $this->entityManager->getRepository($options["class"]);
                     if ($dataset)
                         $dataset = $classRepository->findById($dataset)->getResult();
+
+                    if($this->entityManager->getCache()) {
+
+                        foreach($dataset as $entry) {
+
+                            if(is_object($entry) && $this->classMetadataManipulator->isEntity($entry)) {
+
+                                $this->entityManager->getCache()->evictEntity(get_class($entry), $entry->getId());
+                                if( ($backFieldName = $this->classMetadataManipulator->getBackFieldName($dataParent, $form->getName())) )
+                                    $this->entityManager->getCache()->evictCollection(get_class($entry), $backFieldName, $entry->getId());
+                            }
+                        }
+                    }
                 }
 
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options) : Generator {
@@ -283,8 +298,18 @@ class SelectType extends AbstractType implements DataMapperInterface
                 $knownData = array_keys($formattedData);
                 foreach($choicesData as $data) {
 
-                    if(!in_array($data, $knownData))
+                    if(!in_array($data, $knownData)) {
+
+                        $classRepository = $this->entityManager->getRepository($options["class"]);
+                        if ($data) $data = $classRepository->findOneById($data);
+                        if ($data && $this->entityManager->getCache()) {
+                            $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
+                            if( ($backFieldName = $this->classMetadataManipulator->getBackFieldName($dataParent, $form->getName())) )
+                                $this->entityManager->getCache()->evictCollection(get_class($data), $backFieldName, $data->getId());
+                        }
+
                         $missingData[] = $data;
+                    }
                 }
 
                 $innerType = $form->getConfig()->getType()->getInnerType();
@@ -391,7 +416,6 @@ class SelectType extends AbstractType implements DataMapperInterface
                         if($entity->getId() == $id) $choicesData[$pos] = $entity;
                 }
 
-
                 usort($choicesData, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
             }
         }
@@ -399,10 +423,32 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["multiple"] = $multiple !== null ? $multiple : null;
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
-        if($viewData instanceof Collection) {
+        /*if($viewData instanceof PersistentCollection) {
+
+            $mappedBy =  $viewData->getMapping()["mappedBy"];
+            $fieldName = $viewData->getMapping()["fieldName"];
+            $isOwningSide = $viewData->getMapping()["isOwningSide"];
+
+            if ($choicesData->containsKey("_collection"))
+                $data = $choicesData->get("_collection");
+
+            if(!$isOwningSide) {
+
+                foreach($viewData as $entry)
+                    $this->propertyAccessor->setValue($entry, $mappedBy, null);
+            }
 
             $viewData->clear();
+            foreach($data as $n => $entry) {
 
+                $viewData->add($entry);
+                if(!$isOwningSide)
+                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+            }
+
+        } else*/ if($viewData instanceof Collection) {
+
+            $viewData->clear();
             if(!is_iterable($choicesData))
                  $choicesData = $choicesData ? [$choicesData] : [];
 
@@ -659,8 +705,8 @@ class SelectType extends AbstractType implements DataMapperInterface
             // Set controller url
             $crudController = AbstractCrudController::getCrudControllerFqcn($options["class"]);
 
-            $href = null;
-            if($options["href"] === null && $crudController && $this->authorizationChecker->isGranted(UserRole::ADMIN)) {
+            $href = $options["href"];
+            if($href === null && $crudController && $this->authorizationChecker->isGranted(UserRole::ADMIN)) {
 
                 $href = $this->adminUrlGenerator
                         ->unsetAll()
@@ -672,9 +718,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             //
             // Default select2 initialializer
-            $view->vars["select2"]          = json_encode($selectOpts);
-            $view->vars["select2-href"]     = $href;
-            $view->vars["tabulation"]       = $options["tabulation"];
+            $view->vars["select2"]        = json_encode($selectOpts);
+            $view->vars["select2-href"]   = $href;
+            $view->vars["tabulation"]     = $options["tabulation"];
             $view->vars["disabled"]       = $options["disable"];
 
             // NB: Sorting elements is not working at the moment for multivalue SelectType, reason why I disable it here..

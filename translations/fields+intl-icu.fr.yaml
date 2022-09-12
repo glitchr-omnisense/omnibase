@@ -87,6 +87,7 @@ select:
 
 collection:
   empty: Cette collection est vide !
+  entry: Entrée
 
 array:
   key: "Variable"

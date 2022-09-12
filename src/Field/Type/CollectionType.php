@@ -2,13 +2,14 @@
 
 namespace Base\Field\Type;
 
-use Base\Service\BaseService;
+use App\Enum\UserRole;
+use Base\Backend\Config\Action;
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -43,7 +44,16 @@ class CollectionType extends AbstractType
             'row_group' => true,
             'entry_collapsed' => true,
             'entry_type' => TextType::class,
-            'entry_label' => function($i) { return $i === "__prototype__" ? false : " #".(((int)$i)+1); },
+            'entry_label' => function($i, $label)
+            {
+                if($i === "__prototype__") return false;
+
+                if(!is_object($label)) return $this->translator->trans("@fields.collection.entry"). " #".(((int)$i)+1);
+
+                $_label = $this->translator->transEntity($label). " #".(((int)$label->getId())+1);
+                if(is_stringeable($label)) $_label .= " : ". ((string) $label);
+                return $_label;
+            },
             'entry_options' => [],
             'entry_required' => null,
             'delete_empty' => false,
@@ -122,6 +132,8 @@ class CollectionType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        //
+        // Set controller url
         $view->vars['href']            = $options["href"];
         $view->vars['entry_collapsed'] = $options['entry_collapsed'];
         $view->vars['entry_label']     = $options['entry_label'];

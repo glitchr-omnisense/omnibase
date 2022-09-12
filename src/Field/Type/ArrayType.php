@@ -3,9 +3,11 @@
 namespace Base\Field\Type;
 
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Form\FormFactoryInterface;
 use Base\Service\BaseService;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -21,6 +23,7 @@ class ArrayType extends CollectionType
     {
         parent::__construct($twig, $translator);
         $this->classMetadataManipulator = $classMetadataManipulator;
+
     }
 
     public function getBlockPrefix(): string { return 'array'; }

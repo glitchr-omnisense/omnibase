@@ -61,6 +61,7 @@ class SelectField implements FieldInterface
         $this->setFormTypeOption("html", $useHtml);
         return $this;
     }
+
     public function autocomplete(string $endpoint)
     {
         $this->setFormTypeOption("autocomplete_endpoint", $endpoint);
