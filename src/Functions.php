@@ -960,7 +960,7 @@ namespace {
         return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
     }
 
-    function mb_lcwords (array|string $str, ?string $encoding = null, array|string $separators = " \t\r\n\f\v\"',.:;"): array|string
+    function mb_lcwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
     {
         if(is_array($str)) {
 
@@ -971,8 +971,14 @@ namespace {
             return $array;
         }
 
-        $separators = is_array($separators) ? $separators : str_split($separators);
-        return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
+        $separators = str_split($separators);
+        foreach($separators as $separator)
+            $str = implode($separator, array_map(fn($s) => mb_lcfirst($s, $encoding), explode($separator, $str)));
+
+        // $separators = is_array($separators) ? $separators : str_split($separators);
+        // return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
+
+        return $str;
     }
 
     function mb_ucfirst (array|string $str, ?string $encoding = null): array|string
@@ -989,7 +995,7 @@ namespace {
         return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
     }
 
-    function mb_ucwords (array|string $str, ?string $encoding = null, array|string $separators = " \t\r\n\f\v\"',.:;"): array|string
+    function mb_ucwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
     {
         if(is_array($str)) {
 
@@ -1000,15 +1006,36 @@ namespace {
             return $array;
         }
 
-        $separators = is_array($separators) ? $separators : str_split($separators);
-        return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
+        $separators = str_split($separators);
+        foreach($separators as $separator)
+            $str = implode($separator, array_map(fn($s) => mb_ucfirst($s, $encoding), explode($separator, $str)));
+
+        // $separators = is_array($separators) ? $separators : str_split($separators);
+        // return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
+
+        return $str;
     }
 
-    function html_attributes(array ...$attributes)
+    function implode_attributes(string $separator, array ...$attributes)
     {
         $attributes = array_merge(...$attributes);
-        return trim(implode(" ", array_map(fn($k) => trim($k)."=\"".trim($attributes[$k] ?? "")."\"", array_keys($attributes))));
+        return trim(implode($separator, array_map(fn($k) => trim($k)."=\"".trim($attributes[$k] ?? "")."\"", array_keys($attributes))));
     }
+
+    function explode_attributes(string $separator, string $attributes)
+    {
+        $list = [];
+        foreach(explode($separator, $attributes) as $entry) {
+
+            $explode = explode("=", $entry, 2);
+            $key = head($explode);
+            if($key) $list[$key] = $explode[1] ?? "";
+        }
+
+        return $list;
+    }
+
+    function html_attributes(array ...$attributes) { return implode_attributes(" ", ...$attributes); }
 
     function browser_name()    : ?string { return get_browser2()["name"] ?? null; }
     function browser_platform(): ?string { return get_browser2()["platform"] ?? null; }

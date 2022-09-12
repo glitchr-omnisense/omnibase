@@ -3,6 +3,7 @@
 namespace Base\Backend\Factory;
 
 use Base\Routing\RouterInterface;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Option\EA;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\MenuItemDto;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
@@ -20,6 +21,8 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
     protected function generateMenuItemUrl(MenuItemDto $menuItemDto, int $index, int $subIndex): string
     {
         $menuItemType = $menuItemDto->getType();
+        $menuItemDto->setIndex($index);
+        $menuItemDto->setSubIndex($subIndex);
 
         if (MenuItemDto::TYPE_EXIT_IMPERSONATION === $menuItemType) {
 
@@ -27,6 +30,36 @@ class MenuFactory extends \EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory
             return '?'.$switchParameter.'=_exit';
         }
 
-        return $menuItemDto->getLinkUrl() ?? parent::generateMenuItemUrl($menuItemDto, $index, $subIndex);
+        if (MenuItemDto::TYPE_SUBMENU === $menuItemType) {
+
+            $url = $menuItemDto->getLinkUrl();
+            $url = parse_url($url);
+            $url["query"] ??= "";
+            $url["query"] = explode_attributes("&", $url["query"]);
+            $url["query"]["menuIndex"] = $index;
+            $url["query"]["submenuIndex"] = $subIndex;
+            $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
+
+            return compose_url($url["scheme"]  ?? null, $url["user"]      ?? null, $url["password"] ?? null,
+                               $url["machine"] ?? null, $url["subdomain"] ?? null, $url["domain"]   ?? null, $url["port"] ?? null,
+                               $url["path"]    ?? null, $url["query"]     ?? null);
+        }
+
+        if (MenuItemDto::TYPE_URL === $menuItemType) {
+
+            $url = $menuItemDto->getLinkUrl();
+            $url = parse_url($url);
+            $url["query"] ??= "";
+            $url["query"] = explode_attributes("&", $url["query"]);
+            $url["query"]["menuIndex"] = $index;
+            $url["query"]["submenuIndex"] = $subIndex;
+            $url["query"] = str_replace("\"", "", implode_attributes("&", $url["query"]));
+
+            return compose_url($url["scheme"]  ?? null, $url["user"]      ?? null, $url["password"] ?? null,
+                               $url["machine"] ?? null, $url["subdomain"] ?? null, $url["domain"]   ?? null, $url["port"] ?? null,
+                               $url["path"]    ?? null, $url["query"]     ?? null);
+        }
+
+        return parent::generateMenuItemUrl($menuItemDto, $index, $subIndex);
     }
 }
