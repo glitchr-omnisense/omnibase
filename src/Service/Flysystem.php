@@ -46,7 +46,23 @@ class Flysystem extends LazyFactory implements FlysystemInterface
         $this->setDefaultStorage("local.storage");
     }
 
-    public function hasStorage(string $storage):bool { return array_key_exists($storage, $this->storages->getProvidedServices()); }
+    public function createStorage(string $source, ?string $storageName = null)
+    {
+        if($storageName === null) $storageName = $source;
+
+        // NB: Nah.. I never experienced this..
+        // if ($source === $storageName) {
+        //     throw new \InvalidArgumentException('The "lazy" adapter source is referring to itself as "'.$source.'", which would lead to infinite recursion.');
+        // }
+
+        if (!$this->storages->has($source)) {
+            throw new \InvalidArgumentException('You have requested a non-existent source storage "'.$source.'" in lazy storage "'.$storageName.'".');
+        }
+
+        return $this->storages->get($source);
+    }
+
+    public function hasStorage(string $storageName):bool { return array_key_exists($storageName, $this->storages->getProvidedServices()); }
     public function getStorageNames():array { return array_keys($this->storages->getProvidedServices()); }
     public function getDefaultStorage():FilesystemOperator { return $this->getOperator(); }
     public function setDefaultStorage(FilesystemOperator|string $operator)
@@ -65,7 +81,7 @@ class Flysystem extends LazyFactory implements FlysystemInterface
             if(!$this->hasStorage($operator))
                 throw new InvalidArgumentException("\"".$operator."\" storage not found in your Flysystem configuration.");
 
-            return $this->createStorage($operator, $operator);
+            return $this->createStorage($operator);
         }
 
         return $this->operator;
