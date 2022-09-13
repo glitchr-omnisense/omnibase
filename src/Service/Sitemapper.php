@@ -4,9 +4,11 @@ namespace Base\Service;
 
 use Base\Annotations\Annotation\Sitemap;
 use Base\Annotations\AnnotationReader;
+use Base\Exception\SitemapNotFoundException;
 use Base\Response\XmlResponse;
 use Base\Routing\RouterInterface;
 use Base\Service\Model\SitemapEntry;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\Router;
 use Twig\Environment;
@@ -25,25 +27,6 @@ class Sitemapper implements SitemapperInterface
         $this->annotationReader = $annotationReader;
     }
 
-    public function getHostname(): string { return $this->hostname; }
-    public function setHostname(string $hostname): self
-    {
-        $this->hostname = $hostname;
-        return $this;
-    }
-
-    public function register(string $group, array $routeParameters): self
-    {
-        $this->computeFlag = false;
-        return $this;
-    }
-
-    public function registerUrl(string $group, string $url): self
-    {
-        $this->computeFlag = false;
-        return $this;
-    }
-
     public function getSitemap(Route $route): ?Sitemap
     {
         $controller = $route->getDefault("_controller");
@@ -59,6 +42,56 @@ class Sitemapper implements SitemapperInterface
         return $sitemap === false ? null : $sitemap;
     }
 
+    public function getHostname(): string { return $this->hostname; }
+    public function setHostname(string $hostname): self
+    {
+        $this->hostname = $hostname;
+        return $this;
+    }
+
+    public function register(string|Route $routeOrName, array $routeParameters = []): self
+    {
+        if(is_string($routeOrName)) $route = $this->router->getRoute($routeOrName);
+        else $route = $routeOrName;
+
+        $routeMatch    = $this->router->getRouteMatch($route->getPath());
+        if(!$routeMatch) return $this;
+
+        $sitemap = $this->getSitemap($route);
+        if(!$sitemap) throw new SitemapNotFoundException("Sitemap annotation not found for \"".($routeMatch["_controller"] ?? $route->getPath())."\".");
+
+        $routeName     = $sitemap->getGroup() ?? $route->getDefaults()["_canonical_route"] ?? $routeMatch["_route"] ?? null;
+        if(!$routeName) return $this;
+
+        $this->computeFlag = false;
+
+        $routeRequirements = $route->getRequirements();
+        if(array_key_exists("_locale", $routeRequirements) && !str_ends_with(".".$routeRequirements["_locale"], $routeName))
+            $routeName .= ".".$routeRequirements["_locale"];
+
+        $routeParameters = array_filter($routeParameters, fn($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY);
+        $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
+
+        $sitemapEntry = new SitemapEntry($url);
+        $sitemapEntry->setPriority($sitemap->getPriority());
+        $sitemapEntry->setLastMod($sitemap->getLastMod());
+        $sitemapEntry->setChangeFreq($sitemap->getChangeFreq());
+
+        $locale = $this->localeProvider->getLocale($routeParameters["_locale"] ?? $routeRequirements["_locale"] ?? null);
+        $sitemapEntry->setLocale($locale);
+
+        $this->urlset[$routeName.".".md5(serialize($routeParameters))] = $sitemapEntry;
+        return $this;
+    }
+
+    public function registerUrl(string $url): self
+    {
+        $routeParameters = $this->router->getRouteMatch($url);
+        if(!$routeParameters) throw new RouteNotFoundException("Route \"$url\" not found.");
+
+        return $this->register($routeParameters["_route"], $routeParameters);
+    }
+
     public function registerAnnotations(): self
     {
         $this->computeFlag = false;
@@ -67,20 +100,12 @@ class Sitemapper implements SitemapperInterface
             $sitemap = $this->getSitemap($route);
             if(!$sitemap) continue;
 
-            $routeParameters = $route->getDefaults();
+            $routeParameters = $this->router->getRouteMatch($route->getPath());
             $numberOfParameters = count(array_filter($routeParameters, fn($p) => !str_starts_with($p, "_"), ARRAY_FILTER_USE_KEY));
-            if($numberOfParameters == 0) {
+            if($numberOfParameters > 0) continue;
 
-                $url = $this->router->generate($routeName, $routeParameters, Router::ABSOLUTE_URL);
-
-                $sitemapEntry = new SitemapEntry($url);
-                $sitemapEntry->setPriority($sitemap->getPriority());
-                $sitemapEntry->setLastMod($sitemap->getLastMod());
-                $sitemapEntry->setChangeFreq($sitemap->getChangeFreq());
-                $sitemapEntry->setLocale($routeParameters["_locale"] ?? $this->localeProvider->getLocale());
-
-                $this->urlset[$sitemap->getGroup() ?? $routeName] = $sitemapEntry;
-            }
+            try { $this->register($route); }
+            catch(\Base\Exception\SitemapNotFoundException $e) { }
         }
 
         return $this;
@@ -172,11 +197,12 @@ class Sitemapper implements SitemapperInterface
 
             }, $entry);
         }
+
         return $this->urlset;
     }
     public function generate(string $name, array $context = []): XmlResponse
     {
-        $urlset = array_map(fn($s) => $s->toArray($this->hostname), $this->doCompute());
+        $urlset = array_reverse(array_map(fn($s) => $s->toArray($this->hostname), $this->doCompute()));
 
         return new XmlResponse($this->twig->render($name,
             array_merge($context, [

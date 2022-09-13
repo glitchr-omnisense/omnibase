@@ -118,6 +118,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         //
         // Update context
+        if(array_key_exists("_locale", $routeParameters)) {
+
+            $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+            if(!str_ends_with($routeName, ".".$locale))
+                $routeName .= ".".$this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+        }
+
         $routeParameters = $this->resolveParameters($routeParameters, $referenceType);
 
         // Check whether the route is already cached
@@ -130,6 +137,13 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
 
         $routeGroups  = $this->getRouter()->getRouteGroups($routeName);
         $routeDefaultName = first($routeGroups);
+        if(array_key_exists("_locale", $routeParameters)) {
+
+            $locale = $this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+            if(!str_ends_with($routeName, ".".$locale))
+                $routeDefaultName .= ".".$this->getLocaleProvider()->getLang($routeParameters["_locale"]);
+        }
+
         $routes = array_filter(array_transforms(fn($k, $routeName): array => [$routeName, $this->getRouter()->getRoute($routeName)], $routeGroups));
 
         //

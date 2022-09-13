@@ -2,15 +2,11 @@
 
 namespace Base\Field\Type;
 
-use App\Entity\User;
-use App\Entity\User\Artist;
-use App\Entity\User\Merchant;
 use App\Enum\UserRole;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\Model\Autocomplete;
-use Base\Service\BaseService;
 use Base\Service\LocaleProvider;
 use Base\Service\ObfuscatorInterface;
 use Base\Service\ParameterBagInterface;
@@ -36,6 +32,7 @@ use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
@@ -73,6 +70,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         $this->router = $router;
 
         $this->autocomplete = new Autocomplete($this->translator);
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
 
     public function getBlockPrefix(): string { return 'select2'; }
@@ -423,30 +421,21 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options["multiple"] = $multiple !== null ? $multiple : null;
         $options["multiple"] = $this->formFactory->guessMultiple($choiceType->getParent(), $options);
 
-        /*if($viewData instanceof PersistentCollection) {
+        if($viewData instanceof PersistentCollection) {
 
             $mappedBy =  $viewData->getMapping()["mappedBy"];
             $fieldName = $viewData->getMapping()["fieldName"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
 
-            if ($choicesData->containsKey("_collection"))
-                $data = $choicesData->get("_collection");
-
-            if(!$isOwningSide) {
-
-                foreach($viewData as $entry)
-                    $this->propertyAccessor->setValue($entry, $mappedBy, null);
-            }
-
             $viewData->clear();
-            foreach($data as $n => $entry) {
+            foreach($choicesData as $entry) {
 
                 $viewData->add($entry);
                 if(!$isOwningSide)
                     $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
             }
 
-        } else*/ if($viewData instanceof Collection) {
+        } else if($viewData instanceof Collection) {
 
             $viewData->clear();
             if(!is_iterable($choicesData))

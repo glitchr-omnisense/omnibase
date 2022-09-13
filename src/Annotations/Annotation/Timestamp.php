@@ -5,7 +5,7 @@ namespace Base\Annotations\Annotation;
 use Base\Annotations\AbstractAnnotation;
 
 use DateTime;
-
+use DateTimeImmutable;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 
@@ -18,7 +18,8 @@ use Doctrine\ORM\Mapping\ClassMetadata;
  * @Attributes({
  *   @Attribute("on", type = "array"),
  *   @Attribute("fields", type = "array"),
- *   @Attribute("value", type = "datetime")
+ *   @Attribute("value", type = "datetime"),
+ *   @Attribute("immutable", type = "bool")
  * })
  */
 class Timestamp extends AbstractAnnotation
@@ -33,9 +34,10 @@ class Timestamp extends AbstractAnnotation
 
     public function __construct( array $data )
     {
-        $this->context = array_map("mb_strtolower", $data['on']);
-        $this->fields = $data['fields'] ?? [];
-        $this->value = $data['value'] ?? "";
+        $this->context   = array_map("mb_strtolower", $data['on']);
+        $this->immutable = $data['immutable'] ?? false;
+        $this->fields    = $data['fields'] ?? [];
+        $this->value     = $data['value'] ?? "";
     }
 
     public function getContext(): array {
@@ -46,10 +48,14 @@ class Timestamp extends AbstractAnnotation
         return $this->fields;
     }
 
+    public function isImmutable(): bool {
+        return $this->immutable;
+    }
+
     public function getValue(): \DateTime {
 
         if(!$this->value)
-            $this->value = new DateTime("now");
+            $this->value = $this->isImmutable() ? new DateTimeImmutable("now") : new DateTime("now");
 
         return $this->value;
     }

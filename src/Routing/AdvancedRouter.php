@@ -351,7 +351,6 @@ class AdvancedRouter implements RouterInterface
         return $routeNameOrUrl . ";" . serialize($this->getContext()) . ";" . $this->localeProvider->getLang();
     }
 
-
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
     {
         if(filter_var($urlOrRoute, FILTER_VALIDATE_URL) || str_contains($urlOrRoute, "/"))

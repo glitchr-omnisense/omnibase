@@ -78,7 +78,8 @@ namespace {
         if($format & FORMAT_URL_NOMACHINE  ) $parse = array_key_removes($parse, "machine");
         if($format & FORMAT_URL_NOSUBDOMAIN) $parse = array_key_removes($parse, "subdomain");
 
-        $pathEndsWithSlash = str_ends_with($url, "/");
+        $urlButQuery   = explode("?", $url)[0] ?? "";
+        $pathEndsWithSlash = str_ends_with($urlButQuery, "/");
         return compose_url(
             $parse["scheme"] ?? null,
             $parse["user"] ?? null,
@@ -971,14 +972,12 @@ namespace {
             return $array;
         }
 
-        $separators = str_split($separators);
-        foreach($separators as $separator)
-            $str = implode($separator, array_map(fn($s) => mb_lcfirst($s, $encoding), explode($separator, $str)));
+        return implode("", array_map(function($s) use ($encoding, $separators) {
 
-        // $separators = is_array($separators) ? $separators : str_split($separators);
-        // return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
+            $s1 = ltrim($s, $separators);
+            return $s != $s1 ? $s[0].mb_lcfirst($s1, $encoding) : mb_lcfirst($s, $encoding);
 
-        return $str;
+        }, explodeByArray(is_array($separators) ? $separators : str_split($separators), $str, true)));
     }
 
     function mb_ucfirst (array|string $str, ?string $encoding = null): array|string
@@ -1006,14 +1005,12 @@ namespace {
             return $array;
         }
 
-        $separators = str_split($separators);
-        foreach($separators as $separator)
-            $str = implode($separator, array_map(fn($s) => mb_ucfirst($s, $encoding), explode($separator, $str)));
+        return implode("", array_map(function($s) use ($encoding, $separators) {
 
-        // $separators = is_array($separators) ? $separators : str_split($separators);
-        // return implode("", array_map(fn($s) => mb_ucfirst($s, $encoding), explodeByArray($separators, $str, true)));
+            $s1 = ltrim($s, $separators);
+            return $s != $s1 ? $s[0].mb_ucfirst($s1, $encoding) : mb_ucfirst($s, $encoding);
 
-        return $str;
+        }, explodeByArray(is_array($separators) ? $separators : str_split($separators), $str, true)));
     }
 
     function implode_attributes(string $separator, array ...$attributes)

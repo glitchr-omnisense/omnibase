@@ -227,7 +227,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
 
     /**
      * @ORM\Column(type="text", nullable=true)
-     * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/*"}, fetch=true, formats={"400x400", "800x800"})
+     * @Uploader(storage="local.storage", max_size="5MB", mime_types={"image/*"}, fetch=true)
      * @AssertBase\File(max_size="5MB", mime_types={"image/*"})
      */
     protected $avatar;
@@ -727,7 +727,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     }
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\Column(type="datetime_immutable")
      * @Timestamp(on="create")
      */
     protected $createdAt;

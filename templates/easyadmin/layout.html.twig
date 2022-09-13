@@ -156,7 +156,7 @@
                                             {% block header_logo %}
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
                                                     <div class="logo-custom">
-                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(800,800) }}" />
+                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(500,500) }}" />
                                                     </div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>
                                                 </a>
@@ -224,7 +224,7 @@
                                         {% if null == online_user.avatarFile %}
                                         <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
                                         {% else %}
-                                        <img class="user-avatar" src="{{ online_user.avatarFile|thumbnail(200,200) }}" />
+                                        <img class="user-avatar" src="{{ online_user.avatarFile|thumbnail(250,250) }}" />
                                         {% endif %}
                                     </div>
                                     </li>
@@ -322,7 +322,7 @@
                                         {% else %}
                                             {% set image = ea_extra.image(ea.crud.getCurrentPage() ?? null)|default(null) %}
                                             {% if image is not null %}
-                                                {{ asset(image)|thumbnail(800,800)|lightbox({class:"ea-extra-image"}, null, null, {class:"ea-extra"}) }}
+                                                {{ asset(image)|thumbnail(500,500)|lightbox({class:"ea-extra-image"}, null, null, {class:"ea-extra"}) }}
                                             {% else %}
                                                 {% if url is not empty %}<a href="{{url}}">{% endif %}
                                                 <i class="ea-extra-logo fa-fw fa-3x {{ ea_extra.icon(ea.crud.getCurrentPage() ?? null)|default("fas fa-icons") }}"></i>

@@ -364,7 +364,7 @@
     {% if not multiple %}
         <figure>
 
-            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(400,400) | default(thumbnail) }}" />
+            <img id="{{id}}_thumbnail" style="cursor: pointer;" src="{{ form.vars.value | thumbnail(500,500) | default(thumbnail) }}" />
             <figcaption id="{{id}}_figcaption">
                 <div class="figwrapper">
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
@@ -379,7 +379,7 @@
             </figcaption>
 
             {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
-            <a href="{{form.vars.value|thumbnail(800,800)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
+            <a href="{{form.vars.value|thumbnail(1000,1000)}}" data-lightbox='{{id}}_lightbox' id="{{id}}_lightbox" loading='lazy'></a>
             {% endif %}
 
         </figure>

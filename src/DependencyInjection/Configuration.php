@@ -381,6 +381,8 @@ class Configuration implements ConfigurationInterface
                         ->arrayPrototype()
                             ->info("Specific formats")
                             ->children()
+                                ->scalarNode("class")->end()
+                                ->scalarNode("property")->end()
                                 ->scalarNode("width")->end()
                                 ->scalarNode("height")->end()
                                 ->end()

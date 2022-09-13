@@ -471,7 +471,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         // user menu with some menu items already created ("sign out", "exit impersonation", etc.)
         // if you prefer to create the user menu from scratch, use: return UserMenu::new()->...
         $avatar = ($user->getAvatarFile() ? $user->getAvatar() : null);
-        $avatar = $this->imageService->thumbnail($avatar, 200, 200);
+        $avatar = $this->imageService->thumbnail($avatar, 250, 250);
 
         return parent::configureUserMenu($user)
             ->setAvatarUrl($avatar)

@@ -3,8 +3,11 @@
 namespace Base\Service;
 
 use Base\Database\Type\SetType;
-
+use Base\Routing\RouterInterface;
 use Doctrine\DBAL\Types\Type;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Translation\TranslatableMessage;
 
@@ -41,9 +44,9 @@ class Translator implements TranslatorInterface
 
     public function __construct(\Symfony\Contracts\Translation\TranslatorInterface $translator, KernelInterface $kernel, ParameterBagInterface $parameterBag)
     {
-        $this->translator = $translator;
         $this->parameterBag = $parameterBag;
-        $this->isDebug    = $kernel->isDebug();
+        $this->translator   = $translator;
+        $this->isDebug      = $kernel->isDebug();
     }
 
     public function getLocale(): string { return $this->translator->getLocale(); }
@@ -186,7 +189,7 @@ class Translator implements TranslatorInterface
             $domain ??= $id->getDomain();
             $id       = $id->getMessage();
         }
-        
+
         $id = trim($id);
         $array  = explode(".", $id);
         if(str_starts_with($id, "@")) {
@@ -232,11 +235,11 @@ class Translator implements TranslatorInterface
 
         $trans = null;
         foreach($permutations as $permutation) {
- 
+
             $trans = $this->transQuiet(mb_strtolower($id.$permutation), $parameters, $domain, $locale);
             if($trans !== null) break;
         }
-        
+
         return $trans ? mb_ucfirst($trans) : mb_strtolower($id.implode("", $in));
     }
 
@@ -268,7 +271,7 @@ class Translator implements TranslatorInterface
 
         $trans = null;
         foreach($permutations as $permutation) {
- 
+
             $trans = $this->transQuiet(mb_strtolower($id.$permutation), [], $domain, $locale, $localeCountry);
             if($trans !== null) return true;
         }

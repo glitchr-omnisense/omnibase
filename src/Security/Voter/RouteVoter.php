@@ -43,12 +43,15 @@ class RouteVoter extends Voter
 
             case self::VALIDATE_PATH:
 
-                $format = str_ends_with($url, "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
+                $urlButQuery   = explode("?", $url)[0] ?? "";
+                $format = str_ends_with($urlButQuery, "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
+
                 return $url == sanitize_url($url, $format) || $url == sanitize_url($url);
 
             case self::VALIDATE_HOST:
 
-                if($route->getHost()) return true;
+                if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback())
+                    return false;
 
                 $permittedSubdomains   = array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", $this->localeProvider->getLocale());
                 $permittedSubdomains ??= array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", $this->localeProvider->getLang());
@@ -70,7 +73,6 @@ class RouteVoter extends Voter
                     return true;
                 if(RescueFormAuthenticator::isSecurityRoute($routeName))
                     return true;
-
 
                 if(!$allowedSubdomain) return false;
 

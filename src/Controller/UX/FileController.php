@@ -175,9 +175,9 @@ class FileController extends AbstractController
         $args = $this->imageService->resolve($hashid);
         if(!$args) throw $this->createNotFoundException();
 
-        $filters = $args["filters"];
-        $options = $args["options"];
-        $path    = $args["path"];
+        $filters = $args["filters"] ?? [];
+        $options = $args["options"] ?? [];
+        $path    = $args["path"] ?? null;
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);
@@ -281,11 +281,9 @@ class FileController extends AbstractController
                 $imageCrop->getWidth0(), $imageCrop->getHeight0()
             ));
 
-            if($width && $height) {
-                array_prepend($filters, new ThumbnailFilter(
-                    $height, $width
-                ));
-            }
+            // This has been removed, otherwise users might overload the server changing the size.. remember purpose ?
+            // if($width && $height)
+            //     array_prepend($filters, new ThumbnailFilter($height, $width));
         }
 
         $localCache = array_pop_key("local_cache", $options);
