@@ -34,10 +34,8 @@ class CountWalker extends TreeWalkerAdapter
             }
         }
 
-        $pathExpression = new PathExpression(
-                        PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName,
-                        $parent['metadata']->getSingleIdentifierFieldName()
-        );
+        $identifier = $parent['metadata']->getSingleIdentifierFieldName();
+        $pathExpression = new PathExpression(PathExpression::TYPE_STATE_FIELD | PathExpression::TYPE_SINGLE_VALUED_ASSOCIATION, $parentName, $identifier);
         $pathExpression->type = PathExpression::TYPE_STATE_FIELD;
 
         $AST->selectClause->selectExpressions = array(

@@ -961,7 +961,7 @@ namespace {
         return mb_strtolower(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
     }
 
-    function mb_lcwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
+    function mb_lcwords (array|string $str, ?string $encoding = null, string $separators = " '\t\r\n\f\v"): array|string
     {
         if(is_array($str)) {
 
@@ -994,7 +994,7 @@ namespace {
         return mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding).mb_substr($str, 1, null, $encoding);
     }
 
-    function mb_ucwords (array|string $str, ?string $encoding = null, string $separators = " \t\r\n\f\v"): array|string
+    function mb_ucwords (array|string $str, ?string $encoding = null, string $separators = " '\t\r\n\f\v"): array|string
     {
         if(is_array($str)) {
 
@@ -1176,6 +1176,17 @@ namespace {
         if($pos === false) $pos = count($array);
 
         return array_merge(array_slice($array, 0, $pos), $val, array_slice($array, $pos));
+    }
+
+    function array_remove(array $array, ...$values): array
+    {
+        foreach ($values as $val) {
+
+            foreach (array_keys($array, $val) as $key)
+                unset($array[$key]);
+        }
+
+        return $array;
     }
 
     function next_key(array $array, $key): mixed
@@ -1811,6 +1822,12 @@ namespace {
             unset($array[$key]);
 
         return $array;
+    }
+
+    function array_diff_object(array $array, ...$rest) {
+
+        $rest[] = fn($a, $b) => strcmp(spl_object_hash($a), spl_object_hash($b));
+        return array_udiff($array, ...$rest);
     }
 
     function array_key_removes(array $array, string ...$keys  ): array

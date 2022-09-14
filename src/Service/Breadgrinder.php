@@ -11,11 +11,11 @@ class Breadgrinder implements BreadgrinderInterface
     protected $breadcrumbs = [];
 
     protected $router;
-    public function __construct(RouterInterface $router, TranslatorInterface $translator, BaseService $baseService)
+    public function __construct(RouterInterface $router, TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
         $this->router = $router;
         $this->translator = $translator;
-        $this->baseService = $baseService;
+        $this->parameterBag = $parameterBag;
     }
 
     public function has(string $name): bool { return array_key_exists($name, $this->breadcrumbs); }
@@ -24,9 +24,9 @@ class Breadgrinder implements BreadgrinderInterface
         // Some default parameters (if not created yet)
         if(!$this->has($name)) {
 
-            $options["class"]      = $options["class"]      ?? $this->baseService->getParameterBag("base.breadcrumb.class");
-            $options["class_item"] = $options["class_item"] ?? $this->baseService->getParameterBag("base.breadcrumb.class_item");
-            $options["separator"]  = $options["separator"]  ?? $this->baseService->getParameterBag("base.breadcrumb.separator");
+            $options["class"]      = $options["class"]      ?? $this->parameterBag->get("base.breadcrumb.class");
+            $options["class_item"] = $options["class_item"] ?? $this->parameterBag->get("base.breadcrumb.class_item");
+            $options["separator"]  = $options["separator"]  ?? $this->parameterBag->get("base.breadcrumb.separator");
         }
 
         // Prepare object

@@ -66,9 +66,8 @@ class ExtensionSubscriber implements EventSubscriberInterface
 
     public function postPersist(EventArgs $args)
     {
-        //NB: Attempt to evict AbstractExtension..doesn't seems to be working.. TBD
         $newEntity = $args->getObject();
-        if($newEntity)
+        if($newEntity) // @WARN: Attempt to evict AbstractExtension..doesn't seems to be working.. TBD
             $this->entityManager->getCache()->evictEntity(get_class($newEntity), $newEntity->getId());
 
         $uow = $this->entityManager->getUnitOfWork();

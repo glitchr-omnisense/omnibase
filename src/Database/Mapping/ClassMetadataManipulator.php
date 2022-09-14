@@ -494,6 +494,28 @@ class ClassMetadataManipulator
         return $classMetadata->associationMappings[$fieldName]["inversedBy"] ?? null;
     }
 
+    public function getFieldNameMappedBy(null|object|string $entityOrClassOrMetadata, string $mappedBy): ?string
+    {
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$classMetadata) return null;
+
+        foreach($classMetadata->associationMappings as $fieldName => $associationMapping)
+            if(($associationMapping["mappedBy"] ?? null) == $mappedBy) return $fieldName;
+
+        return null;
+    }
+
+    public function getFieldNameInversedBy(null|object|string $entityOrClassOrMetadata, string $inversedBy): ?string
+    {
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        if(!$classMetadata) return null;
+
+        foreach($classMetadata->associationMappings as $fieldName => $associationMapping)
+            if($associationMapping["inversedBy"] ?? null == $inversedBy) return $fieldName;
+
+        return null;
+    }
+
     public function getFieldName(null|object|string $entityOrClassOrMetadata, array|string $fieldName): ?string
     {
         return $this->getFieldNames($entityOrClassOrMetadata)[$fieldName] ?? null;

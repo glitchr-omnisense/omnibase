@@ -132,7 +132,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             "dropdownCssClass"   => null,
             "containerCssClass"  => null,
 
-            'html'               => true,
+            'html'               => false,
             'href'               => null,
 
             // Autocomplete
@@ -213,15 +213,14 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-            $dataParent = $form->getParent()->getData();
 
             // Guess including class_priority
             $options["guess_priority"] = $options["class_priority"];
             $options["class"]          = $this->formFactory->guessClass($event, $options);
 
             $dataChoice = $data["choice"] ?? null;
-            $choicesData = $options["multiple"] ? $dataChoice ?? [] : [];
-            if(!$options["multiple"] && $dataChoice) $choicesData[] = $dataChoice;
+            $dataChoices = $options["multiple"] ? $dataChoice ?? [] : [];
+            if(!$options["multiple"] && $dataChoice) $dataChoices[] = $dataChoice;
 
             if ($options["class"]) {
 
@@ -231,20 +230,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     $classRepository = $this->entityManager->getRepository($options["class"]);
                     if ($dataset)
-                        $dataset = $classRepository->findById($dataset)->getResult();
-
-                    if($this->entityManager->getCache()) {
-
-                        foreach($dataset as $entry) {
-
-                            if(is_object($entry) && $this->classMetadataManipulator->isEntity($entry)) {
-
-                                $this->entityManager->getCache()->evictEntity(get_class($entry), $entry->getId());
-                                if( ($backFieldName = $this->classMetadataManipulator->getBackFieldName($dataParent, $form->getName())) )
-                                    $this->entityManager->getCache()->evictCollection(get_class($entry), $backFieldName, $entry->getId());
-                            }
-                        }
-                    }
+                        $dataset = $classRepository->cacheById($dataset)->getResult();
                 }
 
                 $formattedData = array_transforms(function ($key, $choices, $callback, $i, $d) use ($innerType, &$options) : Generator {
@@ -294,19 +280,12 @@ class SelectType extends AbstractType implements DataMapperInterface
                 // Search missing information
                 $missingData = [];
                 $knownData = array_keys($formattedData);
-                foreach($choicesData as $data) {
+                foreach($dataChoices as $data) {
 
                     if(!in_array($data, $knownData)) {
 
                         $classRepository = $this->entityManager->getRepository($options["class"]);
-                        if ($data) $data = $classRepository->findOneById($data);
-                        if ($data && $this->entityManager->getCache()) {
-                            $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
-                            if( ($backFieldName = $this->classMetadataManipulator->getBackFieldName($dataParent, $form->getName())) )
-                                $this->entityManager->getCache()->evictCollection(get_class($data), $backFieldName, $data->getId());
-                        }
-
-                        $missingData[] = $data;
+                        $missingData[] = $classRepository->cacheOneById($data);
                     }
                 }
 
@@ -361,12 +340,12 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     return [$label, $choices];
 
-                }, $choicesData));
+                }, $dataChoices));
 
 
             } else {
 
-                $choices = $choicesData;
+                $choices = $dataChoices;
             }
 
             //
@@ -389,8 +368,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         $options = $choiceType->getParent()->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessClass($choiceType->getParent());
 
-        if(!$options["multiple"]) $choicesData = $choiceType->getViewData();
-        else $choicesData = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
+        if(!$options["multiple"]) $dataChoices = $choiceType->getViewData();
+        else $dataChoices = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
         $multiple = $options["multiple"];
 
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
@@ -398,23 +377,23 @@ class SelectType extends AbstractType implements DataMapperInterface
             $classRepository = $this->entityManager->getRepository($options["class"]);
 
             $options["multiple"] = $options["multiple"] ?? $this->formFactory->guessMultiple($choiceType->getParent(), $options);
-            if(!$options["multiple"]) $choicesData = $classRepository->findOneById($choicesData);
+            if(!$options["multiple"]) $dataChoices = $classRepository->cacheOneById($dataChoices);
             else {
 
-                $orderBy = array_flip($choicesData);
+                $orderBy = array_flip($dataChoices);
                 $default = count($orderBy);
 
                 $entities = [];
-                if($choicesData)
-                    $entities = $classRepository->findById($choicesData, [])->getResult();
+                if($dataChoices)
+                    $entities = $classRepository->cacheById($dataChoices, [])->getResult();
 
-                foreach($choicesData as $pos => $id) {
+                foreach($dataChoices as $pos => $id) {
 
                     foreach($entities as $entity)
-                        if($entity->getId() == $id) $choicesData[$pos] = $entity;
+                        if($entity->getId() == $id) $dataChoices[$pos] = $entity;
                 }
 
-                usort($choicesData, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
+                usort($dataChoices, fn($a, $b) => (is_object($a) ? ($orderBy[$a->getId()] ?? $default) : $default) <=> (is_object($b) ? ($orderBy[$b->getId()] ?? $default) : $default));
             }
         }
 
@@ -424,33 +403,62 @@ class SelectType extends AbstractType implements DataMapperInterface
         if($viewData instanceof PersistentCollection) {
 
             $mappedBy =  $viewData->getMapping()["mappedBy"];
-            $fieldName = $viewData->getMapping()["fieldName"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
+            $oldData = $viewData->toArray();
+
+            $mapping = $viewData->getMapping(); // Evict caches and collection caches.
+            foreach(array_diff_object($oldData, $dataChoices) as $entry) {
+
+                if(!$isOwningSide && $mappedBy) {
+
+                    $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
+                    if (!$owningSide instanceof Collection) $this->propertyAccessor->setValue($entry, $mappedBy, null);
+                    elseif($owningSide->contains($viewData->getOwner()))
+                            $owningSide->removeElement($viewData->getOwner());
+                }
+            }
+
+            if($this->entityManager->getCache()) {
+
+                $mapping = $viewData->getMapping(); // Evict caches and collection caches.
+                foreach(array_unique_object(array_union($oldData, $dataChoices)) as $data) {
+
+                    $this->entityManager->getCache()->evictEntity(get_class($data), $data->getId());
+                    if($mapping["inversedBy"]) $this->entityManager->getCache()->evictCollection(get_class($data), $mapping["inversedBy"], $data->getId());
+                    if(!$isOwningSide && $mappedBy )
+                        $this->entityManager->getCache()->evictCollection($mapping["targetEntity"], $mappedBy, $viewData->getOwner());
+                }
+            }
 
             $viewData->clear();
-            foreach($choicesData as $entry) {
+            foreach($dataChoices as $entry) {
 
                 $viewData->add($entry);
-                if(!$isOwningSide)
-                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                if(!$isOwningSide && $mappedBy) {
+
+                    $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
+                    if (!$owningSide instanceof Collection) $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                    elseif(!$owningSide->contains($viewData->getOwner()))
+                            $owningSide->add($viewData->getOwner());
+                }
             }
 
         } else if($viewData instanceof Collection) {
 
             $viewData->clear();
-            if(!is_iterable($choicesData))
-                 $choicesData = $choicesData ? [$choicesData] : [];
+            if(!is_iterable($dataChoices))
+                 $dataChoices = $dataChoices ? [$dataChoices] : [];
 
-            foreach($choicesData as $data)
+            foreach($dataChoices as $data)
                 $viewData->add($data);
 
         } else if($options["multiple"]) {
 
             $viewData = [];
-            foreach($choicesData as $data)
+            foreach($dataChoices as $data)
                 $viewData[] = $data;
 
-        } else $viewData = $choicesData;
+        } else $viewData = $dataChoices;
     }
 
     public function buildView(FormView $view, FormInterface $form, array $options)
@@ -506,13 +514,13 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 $viewData = [];
                 if($data)
-                    $viewData = $classRepository->findById($data, [])->getResult();
+                    $viewData = $classRepository->cacheById($data, [])->getResult();
 
                 usort($viewData, fn($a, $b) => ($orderBy[$a->getId()] ?? $default) <=> ($orderBy[$b->getId()] ?? $default));
 
             } else {
 
-                $data = $classRepository->findOneById($data);
+                $data = $classRepository->cacheOneById($data);
             }
 
             if(!$form->isSubmitted()) $form->setData($data);

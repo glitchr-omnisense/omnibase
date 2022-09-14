@@ -36,6 +36,7 @@ class CollectionType extends AbstractType
             'length' => 0,
             'allow_add' => true,
             'allow_delete' => true,
+            'html'      => false,
             'href' => null,
             'prototype' => true,
             'prototype_data' => null,
@@ -135,6 +136,7 @@ class CollectionType extends AbstractType
         //
         // Set controller url
         $view->vars['href']            = $options["href"];
+        $view->vars['html']            = $options["html"];
         $view->vars['entry_collapsed'] = $options['entry_collapsed'];
         $view->vars['entry_label']     = $options['entry_label'];
         $view->vars['entry_options']   = $options['entry_options'];

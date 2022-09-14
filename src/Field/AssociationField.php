@@ -135,6 +135,12 @@ final class AssociationField implements FieldInterface
         return $this;
     }
 
+    public function useHtml(bool $useHtml = true)
+    {
+        $this->setFormTypeOption("html", $useHtml);
+        return $this;
+    }
+
     public function renderAsCount()
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "count");

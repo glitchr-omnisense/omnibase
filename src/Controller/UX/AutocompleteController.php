@@ -65,37 +65,42 @@ class AutocompleteController extends AbstractController
                 if(!is_associative($fields)) $fields = array_fill_keys($fields, $term);
                 $fields = array_filter($fields);
 
-                $entries = $repository->cacheByInstanceOfAndPartialModel($filters, $fields); // If no field, then get them all..
+                $index0 = -1;
+                $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields, [],[],null,null,["id"]); // If no field, then get them all..
+
                 do {
 
                     $book = $this->paginator->paginate($entries, $page);
-                    if($page > $book->getTotalPages())
+                    if($page > $book->getTotalPages()+1)
                         throw $this->createNotFoundException("Page Not Found");
 
                     $bookIsFull = false;
 
-                    $index = 0;
-                    foreach($book as $entry) {
+                    foreach($book as $index => $result) {
 
-                        if($index++ < $bookmark) continue;
-                        $bookmark = $index;
-
+                        $entry = $result["entity"] ?? null;
                         $entry = $this->autocomplete->resolve($entry, $class, ["format" => $format, "html" => $html]);
+
+                        if($entry === null) continue;
+                        if($index0 < 0) $index0 = $index;
+                        if($index - $index0 < $bookmark) continue;
+
                         $search = strtolower(str_strip_accents(strval($entry["search"] ?? $entry["text"])));
                         if(str_contains($search, $term))
                             $results[] = $entry;
 
                         $bookIsFull = count($results) >= $book->getPageSize();
                         if($bookIsFull) break;
+
+                        $bookmark++;
                     }
 
                     $bookmark = $bookmark % $book->getPageSize();
-                    $page++;
 
-                } while($page <= $book->getTotalPages() && !$bookIsFull);
+                } while($page++ < $book->getTotalPages() && !$bookIsFull);
 
                 $pagination = [];
-                $pagination["more"] = $book->getTotalPages() > $book->getPage();
+                $pagination["more"] = $book->getTotalPages() > $book->getPage() || $bookIsFull;
                 if ($pagination["more"]) {
 
                     $page = $book->getPage();

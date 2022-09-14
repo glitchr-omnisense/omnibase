@@ -300,7 +300,6 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             foreach(array_keys($widgetSlots) as $path) {
 
                 $widgetSlot = $this->slotRepository->cacheOneByPath($path);
-
                 if(!$widgetSlot) {
 
                     $widgetSlot = new Slot($path);

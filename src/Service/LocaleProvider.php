@@ -73,6 +73,24 @@ class LocaleProvider implements LocaleProviderInterface
         return self::$locales;
     }
 
+    public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): ?string
+    {
+        if($locale == $preferredLocale) return true;
+        if(in_array($locale, $availableLocales)) return false;
+
+        if(in_array($preferredLocale, $availableLocales ?? $this->getAvailableLocales()) &&
+           $this->__toLang($locale) == $this->__toLang($preferredLocale)) {
+
+            $availableLangs = array_map(fn($l) => $this->__toLang($l), $availableLocales ?? $this->getAvailableLocales());
+            $defaultLangKey = array_search($this->__toLang($preferredLocale), $availableLangs);
+            $defaultLocaleKey = array_search($preferredLocale, $availableLocales);
+
+            return $defaultLangKey == $defaultLocaleKey;
+        }
+
+        return false;
+    }
+
     public function __construct(ParameterBagInterface $parameterBag, TranslatorInterface $translator)
     {
         $this->parameterBag = $parameterBag;

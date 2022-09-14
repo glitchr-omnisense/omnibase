@@ -201,6 +201,22 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $view->vars["default_locale"]    = $options["default_locale"];
         $view->vars["available_locales"] = $options["available_locales"];
         $view->vars["required_locales"]  = $options["required_locales"];
+        $view->vars["nonempty_locales"]  = [];
+
+        foreach(iterator_to_array($form) as $locale => $child) {
+
+            if($child->getViewData() instanceof TranslationInterface && !$child->getViewData()->isEmpty())
+                $view->vars["nonempty_locales"][] = $locale;
+            else if($child->getViewData() instanceof Collection and array_filter($child->getViewData()->toArray()) !== [])
+                $view->vars["nonempty_locales"][] = $locale;
+        }
+
+        $view->vars["compatible_locale"] = $this->localeProvider->getDefaultLocale();
+        foreach($this->localeProvider->getAvailableLocales() as $availableLocale) {
+
+            if($this->localeProvider->compatibleLocale($this->localeProvider->getLocale(), $availableLocale, $view->vars["nonempty_locales"]))
+                $view->vars["compatible_locale"] = $availableLocale;
+        }
 
         $view->vars["translations_empty"] = true;
         foreach($form->all() as $childForm) {

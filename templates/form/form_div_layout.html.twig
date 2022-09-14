@@ -197,9 +197,9 @@
                     {% if form_locale in form.vars.available_locales %}
                     <li class="nav-item" role="presentation">
                         {% set country = form_locale|country %}
-                        <button class="nav-link {% if compatible_locale(locale, form_locale, form.vars.available_locales) %}active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~form_locale}}" type="button" role="tab" aria-controls="{{form_locale}}" aria-selected="true">
+                        <button class="nav-link {% if compatible_locale == form_locale %}active{% endif %} {% if not(form_locale in nonempty_locales) %}muted{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}-tab" data-bs-toggle="tab" data-bs-target="#{{ form.vars['id']~"_"~form_locale}}" type="button" role="tab" aria-controls="{{form_locale}}" aria-selected="true">
                             <label {% if form_locale == default_locale or form_locale in required_locales %}class="required"{% endif %}>
-                                <img class="country-flag {% if default_locale == form_locale %}default{% endif %} " src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
+                                <img class="country-flag {% if default_locale == form_locale %}default{% endif %}" src="{{asset('bundles/base/flags/'~ country~'.png')}}" alt="{{ form_locale }}">
                             </label>
                         </button>
                     </li>
@@ -210,7 +210,7 @@
                 <div class="tab-content" id="{{ form.vars['id'] }}_tab">
                 {% for form_locale, formChild in form.children %}
                     {% if form_locale in form.vars.available_locales %}
-                        <div class="tab-pane fade {% if compatible_locale(locale, form_locale, form.vars.available_locales) %}show active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}" role="tabpanel" aria-labelledby="{{ form.vars['id']~"_"~form_locale}}-tab">
+                        <div class="tab-pane fade {% if compatible_locale == form_locale %}show active{% endif %}" id="{{ form.vars['id']~"_"~form_locale}}" role="tabpanel" aria-labelledby="{{ form.vars['id']~"_"~form_locale}}-tab">
                             {% for row in formChild %}
                                 {{ form_row(row) }}
                             {% endfor %}
@@ -553,11 +553,7 @@
 {% endblock associationfile_label %}
 
 {%- block association_label -%}
-    {% if form.vars.multiple %}
-        {{ form_label(form, null, {'required': false}) }}
-    {% else %}
-        {{ form_label(form, null, {'required': required}) }}
-    {% endif %}
+    {{ form_label(form, null, {'required': form.vars.multiple ? false : required}) }}
 {%- endblock -%}
 
 {%- block association_row -%}
@@ -727,23 +723,30 @@
                     {% set is_empty = empty(form.children|keys|filter((v, k) => not str_starts_with(v, '_') )) %}
                     {% set _href    =  href is iterable and form.vars.value is not null ? href[get_class(form.vars.value)] : href %}
                     {% set linkable = _href is not null and form.vars.value is not null and is_empty %}
-                    {%- if linkable -%}
+
+                    {% set html = form_parent(form).vars.html and form.vars.value is not null and method_exists(form.vars.value, "__autocomplete") %}
+                    {%- if linkable and not html -%}
                     <a class="accordion-button {{ collapsed ? 'collapsed' : ''}}" href="{{_href|urldecode|replace({'{0}': form.vars.value.id})}}">
                     {%- else -%}
-
                     <button class="accordion-button {{ collapsed ? 'collapsed' : ''}}" {{ is_empty ? 'style="cursor:default;"' : '' }}
                             type="button" data-bs-toggle="collapse" data-bs-target="#{{ id }}-contents">
                     {%- endif -%}
 
+                    {%- if linkable and not html -%}
                     <i class="fas fw fa-chevron-right form-collection-item-collapse-marker"></i>
-                    {% set label = form_parent(form).vars.entry_label ?? null %}
-                    {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
-                    {% if  label != false %}{{ label|default(value)|stringify }}{% endif %}
+                    {% endif %}
+                    {% if html %}
+                        {{form.vars.value.__autocomplete|raw }}
+                    {% else %}
+                        {% set label = form_parent(form).vars.entry_label ?? null %}
+                        {% set label = is_callable(label) ? call_user_func_with_defaults(label, form.vars.label ? form.vars.label : form.vars.name|number_format, form.vars.value ?? form_parent(form).vars.entry_options.data_class ?? null) : null %}
+                        {% if  label != false %}{{ label|default(value)|stringify }}{% endif %}
+                    {% endif %}
 
-                    {{ linkable ? "</a>": "</button>" }}
+                    {{ linkable and not form_parent(form).vars.html ? "</a>": "</button>" }}
 
                     <div class="form-collection-buttons">
-                        {% if form.vars.value is not null %}
+                        {% if form.vars.value is not null and not html %}
 
                             {% set url = form.vars.value.__toLink() ?? null %}
                             {% if url is not empty %}
@@ -755,6 +758,7 @@
                             {% endif %}
 
                         {% endif %}
+
                         {% if allows_deleting_items %}
                             {{ delete_item_button }}
                         {% endif %}

@@ -154,7 +154,11 @@ class ServiceEntityParser
     protected function __findBy         (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->getQuery   ($criteria, $orderBy                                     , $limit, $offset, $groupBy, $selectAs); }
     protected function __findRandomlyBy (array $criteria = [], ?array $orderBy = null, $limit = null, $offset = null, ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   ($criteria, array_merge(["id" => "rand"], $orderBy ?? []), $limit, $offset, $groupBy, $selectAs); }
     protected function __findAll        (                      ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query { return $this->__findBy   (       [], $orderBy                                     , null  , null   , $groupBy, $selectAs); }
-    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null) { return $this->__findBy   ($criteria, $orderBy                                     , 1     , null   , $groupBy, $selectAs)->getOneOrNullResult(); }
+    protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)
+    {
+        $results = $this->__findBy   ($criteria, $orderBy                                     , null     , null   , $groupBy, $selectAs)->getResult();
+        return first($results);
+    }
 
     protected function __findLastOneBy  (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']),                        $groupBy, $selectAs) ?? null; }
     protected function __findLastBy     (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null): ?Query
@@ -1085,11 +1089,12 @@ class ServiceEntityParser
                         else $notInstanceOf[] = $qb->expr()->not($qb->expr()->isInstanceOf($tableColumn, $realValue));
                     }
                 }
-
-                if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
             }
 
-            return $instanceOf ? $qb->expr()->orX(...$instanceOf) : "";
+            $instanceOf = $instanceOf ? [$qb->expr()->orX(...$instanceOf)] : [];
+            if($notInstanceOf) $instanceOf[] = $qb->expr()->andX(...$notInstanceOf);
+
+            return $instanceOf ? $qb->expr()->andX(...$instanceOf) : "";
 
         } else if($isClassOf || $isNotClassOf) {
 
@@ -1150,11 +1155,12 @@ class ServiceEntityParser
                         }
                     }
                 }
-
-                if($notClassOf) $classOf[] = $qb->expr()->andX(...$notClassOf);
             }
 
-            return $classOf ? $qb->expr()->orX(...$classOf) : "";
+            $classOf = $classOf ? [$qb->expr()->orX(...$classOf)] : [];
+            if($notClassOf) $classOf[] = $qb->expr()->andX(...$notClassOf);
+
+            return $classOf ? $qb->expr()->andX(...$classOf) : "";
 
         } else if($isMemberOf || $isNotMemberOf) {
 
@@ -1173,11 +1179,12 @@ class ServiceEntityParser
                     if($isMemberOf) $memberOf[] = $qb->expr()->isMemberOf($tableColumn, $realValue);
                     else $notMemberOf[] = $qb->expr()->isMemberOf($tableColumn, $realValue);
                 }
-
-                if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
             }
 
-            return $memberOf ? $qb->expr()->orX(...$memberOf) : "";
+            $memberOf = $memberOf ? [$qb->expr()->orX(...$memberOf)] : [];
+            if($notMemberOf) $memberOf[] = $qb->expr()->andX(...$notMemberOf);
+
+            return $memberOf ? $qb->expr()->andX(...$memberOf) : "";
 
         } else {
 
@@ -1479,13 +1486,13 @@ class ServiceEntityParser
                 throw new Exception("\"".$sourceEntity . "\" cannot be cached eagerly because of target entity is not configured as a second level cache.");
 
             if(class_implements_interface($sourceEntity, TranslatableInterface::class) && $associationMapping["fieldName"] == TranslatableWalker::COLUMN_NAME)
-                continue; // This is to make sure Translations are not eagerly loaded... see @WARM below.
+                continue; // This is to make sure Translations are not eagerly loaded... see @WARN below.
 
             $targetEntity = $associationMapping["targetEntity"];
             if($targetEntityCacheable && array_key_exists($associationMapping["fieldName"], $joinList)) {
 
                 $this->leftJoin($qb, $aliasExpr);
-                $qb->addSelect($aliasIdentifier);
+                // $qb->addSelect($aliasIdentifier);
 
                 $newOptions = [
                     "alias"    => $aliasIdentifier,
@@ -1526,6 +1533,7 @@ class ServiceEntityParser
         }
 
         $query = $this->eagerly === false ? $qb->getQuery() : $this->getEagerQuery($qb);
+        if($groupBy) $query->setCacheable(false);
 
         $query->useQueryCache($this->cacheable);
         if($this->cacheable) $query->enableResultCache();

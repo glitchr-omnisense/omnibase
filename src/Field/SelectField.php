@@ -43,7 +43,6 @@ class SelectField implements FieldInterface
         return (new self())
             ->setProperty($propertyName)
             ->setLabel($label)
-            ->useHtml(false)
             ->setTemplateName('crud/field/text')
             ->setFormType(SelectType::class)
             ->useHtml(false) // Do not use HTML by default in EasyAdmin.. (line height are constrained)

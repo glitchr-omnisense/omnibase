@@ -3,6 +3,8 @@
 namespace Base\Service\Model;
 
 use Base\Database\Walker\CountWalker;
+use Base\Database\Walker\GroupByWalker;
+use Base\Database\Walker\MysqlWalker;
 use Base\Exception\InvalidPageException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
@@ -31,11 +33,13 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
-        if($arrayOrQuery instanceof Query)
-            $arrayOrQuery->setCacheable(false);
+        $query = $this->clone($arrayOrQuery, false);
+        $query->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [GroupByWalker::class]);
+        $query->setHint(GroupByWalker::HINT_GROUP_ARRAY, ["id"]);
 
-        $this->paginator     = ($arrayOrQuery instanceof Query) ? new DoctrinePaginator($this->clone($arrayOrQuery,false)) : $arrayOrQuery;
+        $this->paginator     = ($arrayOrQuery instanceof Query) ? new DoctrinePaginator($query) : $arrayOrQuery;
         $this->totalCount    = ($arrayOrQuery instanceof Query) ? $this->getCountQuery($arrayOrQuery, false)->getSingleScalarResult() : count_leaves($this->paginator);
+
         $this->parameterName = $parameterName;
         $this->build = true;
         $this->router = $router;
@@ -44,6 +48,8 @@ class Pagination implements PaginationInterface, Iterator, Countable
     public function getCountQuery(Query $query, bool $bHint = true): Query
     {
         $clone = $this->clone($query, $bHint);
+
+        $clone->setCacheable(false);
         $clone->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [CountWalker::class]);
         $clone->setFirstResult(null)->setMaxResults(null);
 
@@ -69,14 +75,14 @@ class Pagination implements PaginationInterface, Iterator, Countable
     public function rewind(): void      { $this->pageIter = 0; }
     public function next(): void        { $this->pageIter++; }
 
-    public function count():int         { return $this->totalCount % $this->pageSize; }
-    public function key(): mixed        { return ($this->page-1) * $this->pageSize + $this->pageIter + 1;    }
+    public function count():int         { return $this->pageSize > 0 ? ($this->totalCount % $this->pageSize) + 1 : 0; }
+    public function key(): mixed        { return ($this->page-1) * $this->pageSize + $this->pageIter ;    }
     public function valid(): bool       { return $this->isQuery() ? $this->getTotalPages() >= $this->getPage() && $this->pageIter < count($this->getResult()) : $this->pageIter == 0; }
-    public function current(): mixed    { return $this->isQuery() ? $this->getResult()[$this->pageIter] : $this->getResult(); }
+    public function current(): mixed    { return $this->isQuery() ? $this->getResult()[$this->pageIter] ?? null : $this->getResult(); }
     public function getBookmark():mixed { return $this->pageIter % $this->getPageSize(); }
 
     public function get() { return $this->paginator; }
-    public function getQuery(): ?Query { return $this->isQuery() ? $this->paginator->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults ($this->pageSize) : null; }
+    public function getQuery(): ?Query { return $this->isQuery() ? $this->paginator->getQuery()->setFirstResult($this->pageSize * ($this->page-1))->setMaxResults($this->pageSize) : null; }
     public function isQuery()  { return $this->paginator instanceof DoctrinePaginator; }
 
     public function getTotalCount() { return $this->totalCount; }
@@ -146,6 +152,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     protected array $lastResult = [];
     public function getResult() { return $this->build(); }
+
     protected function build()
     {
         if(!$this->build) return $this->lastResult;

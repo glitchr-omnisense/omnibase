@@ -45,7 +45,6 @@ class RouteVoter extends Voter
 
                 $urlButQuery   = explode("?", $url)[0] ?? "";
                 $format = str_ends_with($urlButQuery, "/") ? SANITIZE_URL_KEEPSLASH : SANITIZE_URL_STANDARD;
-
                 return $url == sanitize_url($url, $format) || $url == sanitize_url($url);
 
             case self::VALIDATE_HOST:

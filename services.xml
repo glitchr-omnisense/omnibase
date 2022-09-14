@@ -186,13 +186,13 @@
 
         <service id="Base\Service\Paginator" public="true">
             <argument type="service" id="router" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Service\Breadgrinder" public="true">
             <argument type="service" id="router" />
             <argument type="service" id="translator" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <service id="Base\Service\WidgetProvider" public="true">

@@ -2,9 +2,11 @@
 
 namespace Base\Field\Type;
 
+use App\Entity\Marketplace\Product\Identifier;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
+use Base\Service\Model\Autocomplete;
 use Base\Service\TranslatorInterface;
 use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -52,6 +54,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->entityHydrator   = $entityHydrator;
         $this->translator   = $translator;
+        $this->autocomplete = new Autocomplete($this->translator);
 
         $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
     }
@@ -63,6 +66,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
             'form_type' => null,
             'autoload'  => true,
             'href'      => null,
+            'html'      => false,
 
             'entry_collapsed' => true,
             'entry_label' => function($i, $label)
@@ -116,6 +120,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
     public function finishView(FormView $view, FormInterface $form, array $options)
     {
         $view->vars['href']         = $options["href"];
+        $view->vars['html']         = $options["html"];
         $view->vars["multiple"]     = $options["multiple"];
         $view->vars["group"]        = $options["group"];
         $view->vars["row_group"]    = $options["row_group"];
@@ -144,6 +149,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 $collectionOptions = [
                     "data_class"       => null,
                     "label"            => $options["label"],
+                    "html"             => $options["html"],
                     'by_reference'     => false,
                     'length'           => $options["group"] ? $options["length"] : max(1, $options["length"]),
                     "group"            => $options["group"],
@@ -255,9 +261,9 @@ class AssociationType extends AbstractType implements DataMapperInterface
         $options["class"]    = $options["class"] ?? $this->formFactory->guessClass($formParent, $options);
         $options["multiple"] = $options["multiple"]   ?? $this->formFactory->guessMultiple($formParent, $options);
 
-        $data = new ArrayCollection();
+        $entries = new ArrayCollection();
         foreach(iterator_to_array($forms) as $fieldName => $childForm)
-            $data[$fieldName] = $childForm->getData();
+            $entries[$fieldName] = $childForm->getData();
 
         if(!$options["multiple"] && $this->classMetadataManipulator->isEntity($options["class"])) {
 
@@ -265,29 +271,54 @@ class AssociationType extends AbstractType implements DataMapperInterface
             if(!$classMetadata)
                 throw new \Exception("Entity \"".$options["class"]."\" not found.");
 
-            $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $data);
+            $viewData = $this->entityHydrator->hydrate(is_object($viewData) ? $viewData : $options["class"], $entries);
 
         } else if($viewData instanceof PersistentCollection) {
 
             $mappedBy =  $viewData->getMapping()["mappedBy"];
+            $isOwningSide = $viewData->getMapping()["isOwningSide"];
+            $oldData = $viewData->toArray();
+
             $fieldName = $viewData->getMapping()["fieldName"];
             $isOwningSide = $viewData->getMapping()["isOwningSide"];
 
-            if ($data->containsKey("_collection"))
-                $data = $data->get("_collection");
+            if ($entries->containsKey("_collection"))
+                $entries = $entries->get("_collection");
 
-            if(!$isOwningSide) {
+            if(!$isOwningSide && $mappedBy) {
 
-                foreach($viewData as $entry)
-                    $this->propertyAccessor->setValue($entry, $mappedBy, null);
+                foreach(array_diff_object($oldData, $entries->toArray()) as $entry) {
+
+                    $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
+                    if (!$owningSide instanceof Collection) $this->propertyAccessor->setValue($entry, $mappedBy, null);
+                    elseif($owningSide->contains($viewData->getOwner()))
+                            $owningSide->removeElement($viewData->getOwner());
+                }
+            }
+
+            if($this->classMetadataManipulator->getEntityManager()->getCache()) {
+
+                $mapping = $viewData->getMapping(); // Evict caches and collection caches.
+                foreach(array_unique_object(array_union($oldData, $entries->toArray())) as $data) {
+
+                    $this->classMetadataManipulator->getEntityManager()->getCache()->evictEntity(get_class($data), $data->getId());
+                    if($mapping["inversedBy"]) $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection(get_class($data), $mapping["inversedBy"], $data->getId());
+                    if(!$isOwningSide && $mappedBy )
+                        $this->classMetadataManipulator->getEntityManager()->getCache()->evictCollection($mapping["targetEntity"], $mappedBy, $viewData->getOwner());
+                }
             }
 
             $viewData->clear();
-            foreach($data as $n => $entry) {
+            foreach($entries as $entry) {
 
                 $viewData->add($entry);
-                if(!$isOwningSide)
-                    $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                if(!$isOwningSide && $mappedBy) {
+
+                    $owningSide = $this->propertyAccessor->getValue($entry, $mappedBy);
+                    if (!$owningSide instanceof Collection) $this->propertyAccessor->setValue($entry, $mappedBy, $viewData->getOwner());
+                    elseif(!$owningSide->contains($viewData->getOwner()))
+                            $owningSide->add($viewData->getOwner());
+                }
             }
 
         } else if($options["multiple"]) {

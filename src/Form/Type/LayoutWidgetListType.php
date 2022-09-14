@@ -3,6 +3,7 @@
 namespace Base\Form\Type;
 
 use Base\Entity\Layout\Widget;
+use Base\Entity\Layout\Widget\Route;
 use Base\Entity\Layout\Widget\Slot;
 use Base\Field\Type\SelectType;
 use Base\Service\WidgetProvider;
@@ -90,7 +91,8 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
                 $widgetOptions["select2"]    = $options["select2"] ?? [];
 
                 $widgetOptions["class"] = Widget::class;
-                $widgetOptions["choice_filter"] =  $options["widgets"][$widget]["choice_filter"] ?? null;
+                $widgetOptions["choice_filter"] = $options["widgets"][$widget]["choice_filter"] ?? null;
+                $widgetOptions["choice_filter"][] = "^".Slot::class;
 
                 // Set default label
                 if(!array_key_exists("label", $widgetOptions)) {
