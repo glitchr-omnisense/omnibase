@@ -2,6 +2,7 @@
 
 {# Overriding the EA form overriding >( #}
 {% block form_start %}
+
     {%- set attr = attr|merge({'class': 'needs-validation' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
     {%- set attr = attr|merge({'novalidate': 'novalidate'}) -%}
     {{ parent(attr) }}
@@ -113,11 +114,9 @@
 <div class="form-control form-attribute">
     {{ form_widget(form.choice) }}
     <div class="form-attribute-items">
-
         {% for fieldName in form.children|keys|filter(k => k != "choice") %}
-            {{ form_widget(form.children[fieldName]) }}
+        {{ form_widget(form.children[fieldName]) }}
         {% endfor %}
-
         <div class="form-text text-muted">{{"@fields.attribute.empty"|trans}}</span></div>
     </div>
 </div>
@@ -623,7 +622,7 @@
             <div class="form-association form-group">
                 {{ form_label(form)}}
                 <div {{ block('widget_attributes') }}>
-                {{ form_widget(form) }}
+                    {{ form_widget(form) }}
                 </div>
             </div>
         {% endif %}
@@ -1125,7 +1124,7 @@
         'data-password-strength-message[2]': '@fields.password.strength.weak.message'|trans|raw,
         'data-password-strength-message[3]': '@fields.password.strength.good.message'|trans|raw,
         'data-password-strength-message[4]': '@fields.password.strength.strong.message'|trans|raw,
-        'data-password-autocomplete': form.vars.autocomplete,
+        'data-password-autocomplete': form.vars.autocomplete ? "on" : "new-password",
         'data-password-match': "@validators.password.not_matching"|trans(),
         'data-password-allow-empty': form.vars.allow_empty ? "true" : "",
         'data-password-minstrength': form.vars.min_strength,

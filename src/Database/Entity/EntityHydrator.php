@@ -62,15 +62,16 @@ class EntityHydrator implements EntityHydratorInterface
     /**
      * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback, but initializing properties
      */
-    const DEFAULT_AGGREGATE  = 0;
-    const CLASS_METHODS      = 1;
-    const OBJECT_PROPERTIES  = 2;
-    const ARRAY_OBJECT       = 4;
-    const DEEPCOPY           = 8;
-    const CONSTRUCT          = 16;
-    const INITIALIZE         = 32;
-    const IGNORE_NULLS       = 64;
-    const AUTOTYPE           = 128;
+    const DEFAULT_AGGREGATE    = 0b000000000;
+    const CLASS_METHODS        = 0b000000001;
+    const OBJECT_PROPERTIES    = 0b000000010;
+    const PREVENT_ASSOCIATIONS = 0b000000100;
+    const ARRAY_OBJECT         = 0b000001000;
+    const DEEPCOPY             = 0b000010000;
+    const CONSTRUCT            = 0b000100000;
+    const INITIALIZE           = 0b001000000;
+    const IGNORE_NULLS         = 0b010000000;
+    const AUTOTYPE             = 0b100000000;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -379,6 +380,8 @@ class EntityHydrator implements EntityHydratorInterface
 
     protected function hydrateAssociations(mixed $entity, array $data, int $aggregateModel): self
     {
+        if($aggregateModel & self::PREVENT_ASSOCIATIONS) return $this;
+
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
         foreach ($data as $propertyName => $value) {
 

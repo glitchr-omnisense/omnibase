@@ -318,7 +318,7 @@ class Uploader extends AbstractAnnotation
                 throw new FileNotFoundException("File got erased \"$fieldName\" in ".get_class($entity).".");
 
             if ($file->getSize() > $this->maxSize)
-                throw new InvalidSizeException("Invalid filesize exception for field \"$fieldName\" in ".get_class($entity)." ".$entityId.". (".$file->getSize()."B > ".$this->maxSize."B)");
+                throw new InvalidSizeException("Invalid filesize \"".$entry."\" exception for field \"$fieldName\" in ".get_class($entity)." ".$entityId." (".$file->getSize()."B > ".$this->maxSize."B)");
 
             //
             // Check mime restriction
@@ -390,7 +390,7 @@ class Uploader extends AbstractAnnotation
             $this->deleteFiles(null, $entity, $fieldName);
             self::setFieldValue($entity, $fieldName, null);
 
-            throw $e;
+    	    throw $e;
         }
     }
 
@@ -407,7 +407,7 @@ class Uploader extends AbstractAnnotation
             $old = self::getFieldValue($oldEntity, $fieldName);
             self::setFieldValue($entity, $fieldName, $old);
 
-            throw $e;
+            //throw $e;
         }
 
         $this->getUnitOfWork()->recomputeSingleEntityChangeSet($classMetadata, $entity);

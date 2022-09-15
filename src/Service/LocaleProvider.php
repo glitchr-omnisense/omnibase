@@ -75,8 +75,8 @@ class LocaleProvider implements LocaleProviderInterface
 
     public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): ?string
     {
-        if($locale == $preferredLocale) return true;
         if(in_array($locale, $availableLocales)) return false;
+        if(in_array($locale, $availableLocales) && $locale == $preferredLocale) return true;
 
         if(in_array($preferredLocale, $availableLocales ?? $this->getAvailableLocales()) &&
            $this->__toLang($locale) == $this->__toLang($preferredLocale)) {

@@ -1691,7 +1691,7 @@ namespace {
 
             } else {
 
-                if(is_array($value)) $ret[$head][] = array_inflate($separator, $value, $mode, $limit);
+                if(is_array($value)) $ret[$head] = array_inflate($separator, $value, $mode, $limit);
                 else if(!empty($ret[$head])) $ret[$head][] = $value;
                 else $ret[$head] = $value;
             }
@@ -1822,6 +1822,19 @@ namespace {
             unset($array[$key]);
 
         return $array;
+    }
+
+    function in_array_object(mixed $needle, array $haystack) {
+
+        if(!is_object($needle)) return false;
+
+        foreach($haystack as $entry) {
+
+            if(is_object($entry) && strcmp(spl_object_hash($entry), spl_object_hash($needle)) === 0)
+                return true;
+        }
+
+        return false;
     }
 
     function array_diff_object(array $array, ...$rest) {

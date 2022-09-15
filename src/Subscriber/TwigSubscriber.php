@@ -28,6 +28,7 @@ class TwigSubscriber implements EventSubscriberInterface
         return [
             KernelEvents::REQUEST => ['onKernelRequest', 128],
             KernelEvents::RESPONSE => ['onKernelResponse'],
+            KernelEvents::EXCEPTION => ['onKernelException'],
         ];
     }
 
@@ -43,10 +44,19 @@ class TwigSubscriber implements EventSubscriberInterface
         if ($this->router->isProfiler())
             return false;
 
+        if($this->exceptionTriggered)
+            return false;
+
         if (!$event->isMainRequest())
             return false;
 
         return true;
+    }
+
+    protected $exceptionTriggered = false;
+    public function onKernelException(RequestEvent $event)
+    {
+        $this->exceptionTriggered = true;
     }
 
     public function onKernelRequest(RequestEvent $event)

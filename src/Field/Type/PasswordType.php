@@ -55,7 +55,7 @@ class PasswordType extends AbstractType implements AutovalidateInterface, DataMa
             'revealer'          => false,
             'repeater'          => true,
             'allow_empty'       => false,
-            'autocomplete'      => "on",
+            'autocomplete'      => false,
             'suggestions'       => true,
             'suggestions'       => false,
             "min_length"        => Password::MIN_LENGTH_FALLBACK,

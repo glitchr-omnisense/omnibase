@@ -32,6 +32,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 
 #[AsCommand(name:'doctrine:database:import', aliases:[], description:'This command allows to import data from an XLS file into the database')]
 class DoctrineDatabaseImportCommand extends Command
@@ -66,6 +67,7 @@ class DoctrineDatabaseImportCommand extends Command
 
         $this->entityHydrator = $entityHydrator;
         $this->notifier       = $notifier;
+        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
 
         $this->classMetadataManipulator = $classMetadataManipulator;
         $this->classMetadataManipulator->setGlobalTrackingPolicy(ClassMetadataInfo::CHANGETRACKING_DEFERRED_EXPLICIT);
@@ -105,7 +107,7 @@ class DoctrineDatabaseImportCommand extends Command
                 $entityMapping = $this->classMetadataManipulator->fetchEntityMapping($entityName, $subFieldName);
                 $classMetadata = $this->entityManager->getClassMetadata($entityName);
 
-                if(!$classMetadata->hasAssociation($classMetadata->getFieldName($subFieldName)))
+                if(!$classMetadata->hasAssociation($this->classMetadataManipulator->getFieldName($classMetadata, $subFieldName)))
                     throw new Exception("Field \"".$subFieldName."\" is expected to be an association.");
 
                 $isToManySide = in_array($entityMapping["type"], [ClassMetadataInfo::ONE_TO_MANY, ClassMetadataInfo::MANY_TO_MANY], true);
@@ -477,7 +479,9 @@ class DoctrineDatabaseImportCommand extends Command
                         foreach($entityRequiredFields[$spreadsheet][$baseName] as $field)
                             if(!array_key_exists($field, $entry)) $state = self::FIELD_REQUIRED;
 
-                        $entity = $this->entityHydrator->hydrate($entityName, $entry, [], EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES);
+                        $hydrationOptions = EntityHydrator::CLASS_METHODS|EntityHydrator::OBJECT_PROPERTIES;
+                        if($state == self::FIELD_REQUIRED) $hydrationOptions |= EntityHydrator::PREVENT_ASSOCIATIONS;
+                        $entity = $this->entityHydrator->hydrate($entityName, $entry, [], );
 
                         //
                         // Check if duplicates found in the processed list
@@ -513,19 +517,17 @@ class DoctrineDatabaseImportCommand extends Command
 
 
                         if($inDatabase) $state = self::ALREADY_IN_DATABASE;
-                        else {
+                        else if($this->classMetadataManipulator->hasRecursiveAssociation($entity, $entityParentColumn)) {
 
-                            if($entity instanceof Thread && $entityParentColumn !== null) {
+                            if($this->propertyAccessor->getValue($entity, $entityParentColumn)) $parentThread = $entity;
+                            else {
 
-                                if($entity->getParent()) $parentThread = $entity;
-                                else {
-
-                                    $entity->setParent($parentThread);
-                                    if (!in_array($parentThread, $entities[$spreadsheet][$baseName]))
-                                        $state = self::PARENT_NOT_FOUND;
-                                }
+                                $this->propertyAccessor->setValue($entity, $entityParentColumn, $parentThread);
+                                if (!in_array_object($parentThread, $entities[$spreadsheet][$baseName]))
+                                    $state = self::PARENT_NOT_FOUND;
                             }
                         }
+
                         $entities[$spreadsheet][$baseName][] = $entity;
                         $entityStates[$spreadsheet][$baseName][] = $state;
 

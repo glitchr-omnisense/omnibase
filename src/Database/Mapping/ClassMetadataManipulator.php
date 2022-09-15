@@ -526,8 +526,9 @@ class ClassMetadataManipulator
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return null;
 
+        $associationFields = array_keys($classMetadata->associationMappings);
         $classMetadataEnhanced = $this->getClassMetadataCompletor($entityOrClassOrMetadata);
-        return array_merge($classMetadataEnhanced->aliasNames ?? [], $classMetadata->fieldNames);
+        return array_merge($classMetadataEnhanced->aliasNames ?? [], $classMetadata->fieldNames, array_combine($associationFields,$associationFields));
     }
 
     public function resolveFieldPath(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): ?string
@@ -540,16 +541,14 @@ class ClassMetadataManipulator
         $fieldName = head($fieldPath);
 
         $classMetadata = $this->getClassMetadata($entityName);
-        $associationFields = array_keys($classMetadata->associationMappings);
-        $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->fieldNames);
+        $columnNames = $this->getFieldNames($classMetadata);
 
         while(!array_key_exists($fieldName, $columnNames)) {
 
             if(!get_parent_class($classMetadata->getName())) break;
 
             $classMetadata = $this->getClassMetadata(get_parent_class($classMetadata->getName()));
-            $associationFields = array_keys($classMetadata->associationMappings);
-            $columnNames = array_merge(array_combine($associationFields,$associationFields), $classMetadata->fieldNames);
+            $columnNames = $this->getFieldNames($classMetadata);
         }
 
         $fieldName = $columnNames[$fieldName] ?? $fieldName;
@@ -573,13 +572,27 @@ class ClassMetadataManipulator
         return $classMetadata->getAssociationTargetClass($fieldName);
     }
 
-    public function hasAssociation(null|string|object $entityOrClassOrMetadata, string $fieldName)
+    public function hasAssociation(null|string|object $entityOrClassOrMetadata, ?string $fieldName)
     {
+        if($fieldName === null) return false;
+
         $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
         $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
         return $classMetadata->hasAssociation($fieldName);
+    }
+
+    public function hasRecursiveAssociation(null|string|object $entityOrClassOrMetadata, ?string $fieldName)
+    {
+        if($fieldName === null) return false;
+        if($this->hasAssociation($entityOrClassOrMetadata, $fieldName)) {
+
+            $associationMapping = $this->getAssociationMapping($entityOrClassOrMetadata, $fieldName);
+            return $associationMapping["targetEntity"] == $associationMapping["sourceEntity"];
+        }
+
+        return false;
     }
 
     public function getFieldMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array

@@ -214,6 +214,9 @@ class TranslationType extends AbstractType implements DataMapperInterface
         $view->vars["compatible_locale"] = $this->localeProvider->getDefaultLocale();
         foreach($this->localeProvider->getAvailableLocales() as $availableLocale) {
 
+            dump($this->localeProvider->getLocale()." ". $availableLocale." "." ".
+                 $this->localeProvider->compatibleLocale($this->localeProvider->getLocale(), $availableLocale, $view->vars["nonempty_locales"]));
+
             if($this->localeProvider->compatibleLocale($this->localeProvider->getLocale(), $availableLocale, $view->vars["nonempty_locales"]))
                 $view->vars["compatible_locale"] = $availableLocale;
         }

@@ -82,7 +82,7 @@ class IntlSubscriber implements EventSubscriberInterface
             foreach($entity->getTranslations() as $locale => $translation) {
 
                 if($translation->getLocale() === null) $translation->setLocale($locale);
-                if($translation->getLocale() !== null && $translation->getLocale() !== $locale)
+                if($translation->getLocale() !== null && $translation->getLocale() !== $translation->getLocale($locale))
                     throw new InvalidArgumentException("Unexpected locale \"".$translation->getLocale()."\" found with respect to collection key \"".$locale."\".");
 
                 if(!$translation->getTranslatable())

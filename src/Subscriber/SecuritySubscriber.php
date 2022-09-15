@@ -219,8 +219,8 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $routeRestriction = first($routeRestriction);
             }
 
-            if($this->localeProvider->getLang() == $this->localeProvider->getDefaultLang())
-                $routeRestriction = str_rstrip($routeRestriction, ".".$this->localeProvider->getDefaultLang());
+            if(str_ends_with($routeRestriction, ".".$this->localeProvider->getLang()))
+                $routeRestriction = str_rstrip($routeRestriction, ".".$this->localeProvider->getLang());
 
             if ($this->router->getRouteName() != $routeRestriction) {
 
@@ -241,6 +241,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
                 if($event) $event->setResponse($response);
                 if($event) $event->stopPropagation();
+
                 return false;
 
             } else if($user && $specialGrant) {
