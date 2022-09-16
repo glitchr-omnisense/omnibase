@@ -198,7 +198,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             // Let's notify connected user that there is a special access grant for this page
             if(!$this->baseService->isProfiler() && !$this->baseService->isEasyAdmin() && $this->authorizationChecker->isGranted("EXCEPTION_ACCESS")) {
 
-                if($user && $specialGrant && !$this->localeProvider->hasChanged()) {
+                if($user && $specialGrant) {
 
                     $notification = new Notification("access_restricted.".$restrictionType.".exception");
                     $notification->send("info");
@@ -227,11 +227,8 @@ class SecuritySubscriber implements EventSubscriberInterface
                 if($user && $specialGrant) {
 
                     // If not let them know that this page is locked for others
-                    if(!$this->localeProvider->hasChanged()) {
-
-                        $notification = new Notification("access_restricted.".$restrictionType.".message");
-                        $notification->send("warning");
-                    }
+                    $notification = new Notification("access_restricted.".$restrictionType.".message");
+                    $notification->send("warning");
 
                     return true;
                 }
@@ -247,12 +244,8 @@ class SecuritySubscriber implements EventSubscriberInterface
             } else if($user && $specialGrant) {
 
                 // If not let them know that this page is locked for others
-                if(!$this->localeProvider->hasChanged()) {
-
-                    $notification = new Notification("access_restricted.".$restrictionType.".on_deny");
-                    $notification->send("info");
-
-                }
+                $notification = new Notification("access_restricted.".$restrictionType.".on_deny");
+                $notification->send("info");
 
                 return true;
             }

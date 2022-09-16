@@ -104,9 +104,11 @@ class AccessVoter extends Voter
                     $locale = $urlException["locale"] ?? null;
                     if($locale !== null)
                         $exception &= $locale == $this->localeProvider->getLocale() ;
+
                     $country = $urlException["country"] ?? null;
                     if($country !== null)
                         $exception &= $country == $this->localeProvider->getCountry() ;
+
                     $lang = $urlException["lang"] ?? null;
                     if($lang !== null)
                         $exception &= $lang == $this->localeProvider->getLang() ;

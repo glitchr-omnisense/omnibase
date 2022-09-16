@@ -1019,7 +1019,7 @@ namespace {
         return trim(implode($separator, array_map(fn($k) => trim($k)."=\"".trim($attributes[$k] ?? "")."\"", array_keys($attributes))));
     }
 
-    function explode_attributes(string $separator, string $attributes)
+    function explode_attributes(string $separator, string $attributes): array
     {
         $list = [];
         foreach(explode($separator, $attributes) as $entry) {
@@ -1870,7 +1870,33 @@ namespace {
         foreach($array as $k => $v) {
 
             if(is_string($k)) continue;
-            if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v, $recursive);
+            else if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_string($v, $recursive);
+            else $arrayOut[$k] = $v;
+        }
+
+        return $arrayOut;
+    }
+
+    function array_key_removes_startsWith(array $array, bool $recursive = true, ...$needles)
+    {
+        $arrayOut = [];
+        foreach($array as $k => $v) {
+
+            if(array_filter($needles, fn($needle) => str_starts_with($needle, $k))) continue;
+            else if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_startsWith($v, $recursive, ...$needles);
+            else $arrayOut[$k] = $v;
+        }
+
+        return $arrayOut;
+    }
+
+    function array_key_removes_endsWith(array $array, bool $recursive = true, ...$needles)
+    {
+        $arrayOut = [];
+        foreach($array as $k => $v) {
+
+            if(array_filter($needles, fn($needle) => str_ends_with($needle, $k))) continue;
+            else if($recursive && is_array($v)) $arrayOut[$k] = array_key_removes_endsWith($v, $recursive, ...$needles);
             else $arrayOut[$k] = $v;
         }
 

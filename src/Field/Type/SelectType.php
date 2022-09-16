@@ -338,10 +338,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                     $id    = $choices;
                     $label = $formattedData[$id] ?? null;
 
-                    return [$label, $choices];
+                    return [$label."/".$key, $choices];
 
                 }, $dataChoices));
-
 
             } else {
 

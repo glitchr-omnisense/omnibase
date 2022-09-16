@@ -55,22 +55,23 @@ class AnalyticsSubscriber implements EventSubscriberInterface
         /**
          * @var Query
          */
-        $onlineUsers = $user ? $this->userRepository->findByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) : $this->userRepository->findByActiveAtYoungerThan(User::getOnlineDelay());
+        $onlineUsers = $user ? $this->userRepository->cacheByIdNotEqualToAndActiveAtYoungerThan($user->getId(), User::getOnlineDelay()) : $this->userRepository->cacheByActiveAtYoungerThan(User::getOnlineDelay());
         $onlineUsers = $onlineUsers->enableResultCache(User::getOnlineDelay())->getResult();
         $activeUsers = array_filter($onlineUsers, fn($u) => $u ? $u->isActive() : false);
 
-        $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
+        $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
             "label" => $this->translator->trans("@messages.user_analytics.label", [count($activeUsers)]),
         ]));
 
+        $this->twig->addGlobal("user_manager", []);
         if(count($onlineUsers)) {
 
-            $this->twig->addGlobal("base.user_manager", [
+            $this->twig->addGlobal("user_manager", [
                 "online" => $onlineUsers,
                 "active" => $activeUsers,
             ]);
 
-            $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
+            $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
                 "default" => [
                     "active" => [
                         "label" => $this->translator->trans("@messages.user_analytics.active_users", [count($activeUsers)]),
@@ -93,12 +94,12 @@ class AnalyticsSubscriber implements EventSubscriberInterface
             $entries = [];
             if($googleAnalytics["users"]) $entries = array_merge($entries, [
                 "users"        => [
-                    "label" => $this->translator->trans("@google_analytics.users", [$googleAnalytics["users"]]),
+                    "label" => $this->translator->trans("@google_users", [$googleAnalytics["users"]]),
                     "icon"  => 'fas fa-user'
             ]]);
             if($googleAnalytics["users_1day"]) $entries = array_merge($entries, [
                 "users_1day"   => [
-                    "label" => $this->translator->trans("@google_analytics.users_1day", [$googleAnalytics["users_1day"]]),
+                    "label" => $this->translator->trans("@google_users_1day", [$googleAnalytics["users_1day"]]),
                     "icon"  => 'fas fa-user-clock'
                 ]
             ]);
@@ -127,7 +128,7 @@ class AnalyticsSubscriber implements EventSubscriberInterface
                 ]
             ]);
 
-            $this->twig->addGlobal("base.user_analytics", array_merge($this->twig->getGlobals()["base.user_analytics"] ?? [], [
+            $this->twig->addGlobal("user_analytics", array_merge($this->twig->getGlobals()["user_analytics"] ?? [], [
                 "google" => $entries
             ]));
         }

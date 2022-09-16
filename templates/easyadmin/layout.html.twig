@@ -51,7 +51,9 @@
 
     {% block head_stylesheets %}
         <link rel="stylesheet" type="text/css" href="{{ asset('app.css', ea.assets.defaultAssetPackageName) }}">
+        {{ base.renderHtmlContent("stylesheets")|raw }}
         <link rel="stylesheet" type="text/css" href="{{ asset('bundles/base/easyadmin.css') }}">
+        {{ base.renderHtmlContent("stylesheets:after")|raw }}
     {% endblock %}
 </head>
 
@@ -217,10 +219,11 @@
 
                                 {% block header_online_users %}
                                 <ul class="online-user-wrapper" id="online-users">
-                                    {% for online_user in base.user_manager.online ?? [] %}
+
+                                    {% for online_user in user_manager.online ?? [] %}
                                     {% if online_user != app.user %}
-                                    <li class="{{ online_user in base.user_manager.active ? 'active' : ''}} user-details">
-                                    <div class=" img-fluid">
+                                    <li class="{{ online_user in user_manager.active ? 'active' : ''}} user-details">
+                                    <div class=" img-fluid" data-toggle="tooltip" title="{{ online_user.fullname }}">
                                         {% if null == online_user.avatarFile %}
                                         <i class="fa fa-3x fa-fw {{ ea.user is not null ? 'fa-user-circle' : 'fa-user-times' }} user-avatar"></i>
                                         {% else %}
@@ -235,22 +238,22 @@
                                 <div class="online-user-dropdown navbar-custom-menu">
                                     <div class="dropdown user-menu-wrapper">
                                         <a class="dropdown-appearance-button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
-                                            <i class="{{ (base.user_manager.online ?? [])|length ? 'fas fa-cloud' : 'fas fa-cloud-moon'}}"></i>
+                                            <i class="{{ (user_manager.online ?? [])|length ? 'fas fa-cloud' : 'fas fa-cloud-moon'}}"></i>
                                         </a>
 
                                         <ul class="dropdown-menu dropdown-menu-end">
-                                            {% if base.user_analytics.label is defined %}
-                                                <li class="dropdown-appearance-label"><span>{{ base.user_analytics.label|mb_ucfirst }}</span></li>
-                                                {% for entry in base.user_analytics.default ?? [] %}
+                                            {% if user_analytics.label is defined %}
+                                                <li class="dropdown-appearance-label"><span>{{ user_analytics.label|mb_ucfirst }}</span></li>
+                                                {% for entry in user_analytics.default ?? [] %}
                                                 <li><a href="#" class="dropdown-item">{{ entry.icon|iconify }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
                                                 {% endfor %}
 
-                                                {% if base.user_analytics.google is defined and base.user_analytics.google is not empty %}
+                                                {% if user_analytics.google is defined and user_analytics.google is not empty %}
                                                 <li><hr class="dropdown-divider"></li>
                                                 {% endif %}
                                             {% endif %}
 
-                                            {% for entry in base.user_analytics.google ?? [] %}
+                                            {% for entry in user_analytics.google ?? [] %}
                                                 <li><a href="#" class="dropdown-item">{{ entry.icon|iconify }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
                                             {% endfor %}
                                         </ul>
@@ -413,7 +416,7 @@
                                                     style="height:90%; padding:0.8em 0.6em 0.6em 0.6em;">
 
                                                 <fieldset>
-                                                    <legend>{{content_widget.getAsDto().getLabel()|trans_quiet(domain = ea.getTranslationDomain()) }}</legend>
+                                                    <legend>{{content_widget.getAsDto().getLabel()|trans_quiet(domain = ea.getTranslationDomain(), nullable = false) }}</legend>
                                                 <hr>
                                                 <ul class="sidebar-menu tree p-md-0 m-md-0" style="columns:{{width}};">
 
