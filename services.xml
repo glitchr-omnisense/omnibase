@@ -1036,7 +1036,7 @@
         <service id="Base\Serializer\Encoder\ExcelEncoder"><tag name="serializer.encoder" /></service>
 
         <service id="Base\Inspector\DataCollector">
-            <tag name="data_collector" id="base" template="inspector/data_collector.html.twig" />
+            <tag name="data_collector" id="base" />
             <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />

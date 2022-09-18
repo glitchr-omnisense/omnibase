@@ -67,9 +67,12 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->prependPath($projectDir . "/assets", "Assets");
         $this->prependPath($projectDir . "/public", "Public");
 
+        $this->prependPath($bundlePath."/inspector", "WebProfiler");
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         $this->prependPath($bundlePath, "Base");
         $this->prependPath($bundlePath);
+        dump($bundlePath."/inspector", "WebProfiler");
+        dump($this);
 
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag("base.twig.paths") ?? [];

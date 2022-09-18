@@ -1,15 +1,18 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {% block toolbar %}
+
         {% set icon %}
-            {{ include('@Base/inspector/icon.svg.twig', { fill_color: '#AAA', height: '20' }) }}
+            {{ include('@Base/inspector/icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}
         {% endset %}
 
         {%- set text -%}
             {% for bundle in collector.data._bundles %}
+            <div class="sf-toolbar-info-group">
             <div class="sf-toolbar-info-piece">
                 <b>{{bundle.name}}</b>
                 <span class="sf-toolbar-status">{{ bundle.version }}</span>
+            </div>
             </div>
             {% endfor %}
         {%- endset -%}
@@ -19,7 +22,7 @@
 
 {% block menu %}
     <span class="label {#{ not collector.isEasyAdminRequest ? 'disabled' }#}">
-        <span class="icon">{{ include('@Base/inspector/icon.svg.twig') }}</span>
+        <span class="icon">{{ include('@Base/inspector/icon.svg.twig', { fill_color: '#AAA', height: '24' }) }}</span>
         <strong>Base</strong>
     </span>
 {% endblock %}

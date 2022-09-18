@@ -37,7 +37,7 @@ class DataCollector extends AbstractDataCollector
 
     public function getName(): string { return 'base'; }
 
-    public static function getTemplate(): ?string { return 'inspector/data_collector.html.twig'; }
+    public static function getTemplate(): ?string { return '@Base/inspector/data_collector.html.twig'; }
 
     public function getData(): array { return $this->data; }
     public function getDataBundle(string $bundle): ?array
@@ -81,9 +81,9 @@ class DataCollector extends AbstractDataCollector
 
         $this->collectDataBundle(BaseBundle::class);
         $this->collectDataBundle(TwigBundle::class);
-        $this->collectDataBundle(EasyAdminBundle::class);
         $this->collectDataBundle(ApiPlatformBundle::class);
         $this->collectDataBundle(DoctrineBundle::class, $dbname);
+        $this->collectDataBundle(EasyAdminBundle::class);
 
         $this->data = array_map_recursive(fn($v) => $this->cloneVar($v), $this->collectData($context));
         $this->data["_bundles"] = $this->dataBundles;
