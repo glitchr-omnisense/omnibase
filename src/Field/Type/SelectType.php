@@ -333,12 +333,12 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 //
                 // Compute in choice list format
+                dump($formattedData);
                 $choices = array_filter(array_transforms(function($key, $choices) use($formattedData) : ?array {
 
                     $id    = $choices;
                     $label = $formattedData[$id] ?? null;
 
-                    dump($formattedData);
                     return [$label." / ".$key, $choices];
 
                 }, $dataChoices));

@@ -318,7 +318,7 @@ class AdvancedRouter implements RouterInterface
     {
         if($routeUrl === null) $routeUrl = $this->getRequestUri();
 
-        try { return $this->match($routeUrl); }
+        try { return $routeUrl ? $this->match($routeUrl) : null; }
         catch (ResourceNotFoundException $e) { return null; }
     }
 

@@ -599,19 +599,12 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                             toolbarInfo.style.left = '';
                             toolbarReset.style.height = "100vh";
 
-                            if(rect.right > pageWidth) {
+                            var rectLeft = rect.left;
+                            if(this.classList.contains("sf-toolbar-block-right"))
+                                rectLeft += rect.width - elementWidth;
 
-                                if(rect.left < 0) toolbarInfo.style.left = "0px";
-                                else toolbarInfo.style.right = "0px";
-
-                            } else {
-
-                                var rectLeft = rect.left;
-                                if(this.classList.contains("sf-toolbar-block-right"))
-                                    rectLeft += rect.width - elementWidth;
-
-                                toolbarInfo.style.left = parseInt(rectLeft) + "px";
-                            }
+                            if(parseInt(rectLeft)+elementWidth > pageWidth) toolbarInfo.style.right = "0px";
+                            else toolbarInfo.style.left = parseInt(rectLeft) + "px";
                         };
 
                         var tagAssistantFirst = true;
@@ -809,6 +802,8 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                             toolbarBlocks[i].onmouseleave = function() {
                                 toolbarReset.style.height = "auto";
                             };
+
+                            toolbarReset.style.height = "auto";
                         }
 
                         renderAjaxRequests();
