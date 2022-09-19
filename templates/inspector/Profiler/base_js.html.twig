@@ -575,9 +575,16 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                         }
 
                         that.initToolbar(newToken);
+                        var toolbarBlockOver = undefined;
                         var toolbarReset = el.querySelectorAll('.sf-toolbarreset')[0];
+                            toolbarReset.onscroll = function() {
+                                if (toolbarBlockOver !== undefined)
+                                    toolbarBlockOver.onmouseover();
+                            };
 
                         var onToolbarBlock = function () {
+
+                            toolbarBlockOver = this;
 
                             var toolbarInfo = this.querySelectorAll('.sf-toolbar-info')[0];
                             var pageWidth = document.body.clientWidth;
@@ -590,16 +597,36 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                             /* Reset right and left value, useful on window resize */
                             toolbarInfo.style.right = '';
                             toolbarInfo.style.left = '';
+                            toolbarReset.style.height = "100vh";
 
-                            var rectLeft = rect.left;
-                            if(this.classList.contains("sf-toolbar-block-right"))
-                                rectLeft += rect.width - elementWidth;
+                            if(rect.right > pageWidth) {
+
+                                if(rect.left < 0) toolbarInfo.style.left = "0px";
+                                else toolbarInfo.style.right = "0px";
+
+                            } else {
+
+                                var rectLeft = rect.left;
+                                if(this.classList.contains("sf-toolbar-block-right"))
+                                    rectLeft += rect.width - elementWidth;
+
                                 toolbarInfo.style.left = parseInt(rectLeft) + "px";
-
+                            }
                         };
 
                         var tagAssistantFirst = true;
-                        var tagAssistantOriginal = undefined;
+                        var tagAssistantBtnNeutral = undefined;
+                        var tagAssistantOriginal   = undefined;
+                        var tagAssistantNeutralBtnClick = function() {
+
+                            var that = this;
+                            tagAssistantBtnNeutral.forEach(function(el) {
+
+                                if (el.getAttribute("data-ng-click") == that.getAttribute("data-ng-click"))
+                                    el.click();
+                            });
+                        };
+
                         function integrateToProfiler(tagAssistantBadge) {
 
                             if (!tagAssistantBadge) return;
@@ -682,7 +709,7 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                                     tagAssistantDescription = tagAssistantDescription.length > 0 ? tagAssistantDescription[0].cloneNode(true) : undefined;
                                 var tagAssistantWarning     = tagAssistant.querySelectorAll(".badge-warning");
                                     tagAssistantWarning     = tagAssistantWarning.length > 0 ? tagAssistantWarning[0].cloneNode(true) : undefined;
-                                var tagAssistantBtnNeutral  = tagAssistant.querySelectorAll(".btn--neutral");
+                                tagAssistantBtnNeutral  = tagAssistant.querySelectorAll(".btn--neutral");
 
                                 /* Update current state */
                                 var tagAssistantState = "normal";
@@ -707,6 +734,11 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                                 if (tagAssistantBlockInfo.length > 0) {
 
                                     tagAssistantBlockInfo  = tagAssistantBlockInfo[0];
+                                    tagAssistantBlockInfo.querySelectorAll(".btn--neutral").forEach(function(el) {
+
+                                        el.removeEventListener("click", tagAssistantNeutralBtnClick, false);
+                                    });
+
                                     var tagAssistantBlockInfoHTML  = '';
 
                                     if(tagAssistantTitle) {
@@ -722,27 +754,29 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
                                     if(tagAssistantDescription) {
                                         tagAssistantBlockInfoHTML += '<div class="sf-toolbar-info-group">';
                                         tagAssistantBlockInfoHTML +=   '<div class="sf-toolbar-info-piece">';
-                                        tagAssistantBlockInfoHTML +=      '<span class="sf-toolbar-block">'+tagAssistantDescription.innerHTML+"</span>";
+                                        tagAssistantBlockInfoHTML +=      '<span class="sf-toolbar-info-block">'+tagAssistantDescription.innerHTML+"</span>";
                                         tagAssistantBlockInfoHTML +=   '</div>';
                                         tagAssistantBlockInfoHTML += '</div>';
                                     }
                                     if(tagAssistantWarning) {
                                         tagAssistantBlockInfoHTML += '<div class="sf-toolbar-info-group">';
                                         tagAssistantBlockInfoHTML +=   '<div class="sf-toolbar-info-piece">';
-                                        tagAssistantBlockInfoHTML +=      '<span class="sf-toolbar-block">'+tagAssistantWarning.innerHTML+"</span>";
+                                        tagAssistantBlockInfoHTML +=      '<span class="sf-toolbar-info-block">'+tagAssistantWarning.innerHTML+"</span>";
                                         tagAssistantBlockInfoHTML +=   '</div>';
                                         tagAssistantBlockInfoHTML += '</div>';
                                     }
 
                                     tagAssistantBlockInfoHTML += '<div class="sf-toolbar-info-group">';
                                     tagAssistantBlockInfoHTML +=   '<div class="sf-toolbar-info-inline">';
-                                    tagAssistantBtnNeutral.forEach(function(el) {
-                                        tagAssistantBlockInfoHTML += el.outerHTML;
-                                    });
+                                    tagAssistantBtnNeutral.forEach(function(el) { tagAssistantBlockInfoHTML += el.outerHTML; });
                                     tagAssistantBlockInfoHTML +=   '</div>';
                                     tagAssistantBlockInfoHTML += '</div>';
 
                                     tagAssistantBlockInfo.innerHTML = tagAssistantBlockInfoHTML;
+                                    tagAssistantBlockInfo.querySelectorAll(".btn--neutral").forEach(function(el) {
+
+                                        el.addEventListener("click", tagAssistantNeutralBtnClick, false);
+                                    });
                                 }
                             }
 
@@ -770,8 +804,12 @@ if (typeof Sfjs === 'undefined' || typeof Sfjs.loadToolbar === 'undefined') {
 
                         /* Handle toolbar-info position */
                         var toolbarBlocks = [].slice.call(el.querySelectorAll('.sf-toolbar-block'));
-                        for (i = 0; i < toolbarBlocks.length; ++i)
+                        for (i = 0; i < toolbarBlocks.length; ++i) {
                             toolbarBlocks[i].onmouseover = onToolbarBlock;
+                            toolbarBlocks[i].onmouseleave = function() {
+                                toolbarReset.style.height = "auto";
+                            };
+                        }
 
                         renderAjaxRequests();
                         addEventListener(document.querySelector('.sf-toolbar-ajax-clear'), 'click', function() {

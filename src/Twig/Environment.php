@@ -8,7 +8,10 @@ use Exception;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment as TwigEnvironment;
+use Twig\Error\LoaderError;
 use Twig\Loader\LoaderInterface;
+use Twig\Template;
+use Twig\TemplateWrapper;
 
 class Environment extends TwigEnvironment
 {

@@ -4,25 +4,46 @@
     overflow-x: scroll;
     width: 100%;
 }
-.sf-toolbar-block:hover .sf-toolbar-info, .sf-toolbar-block.hover .sf-toolbar-info
-{
+.sf-toolbar-block:hover .sf-toolbar-info { position:fixed; }
+.sf-toolbarreset .hide-button {
+  z-index: 20000;
+  border-left: 1px solid #222;
+  top:initial;
   position:fixed;
 }
-.sf-toolbarreset .hide-button {
-    z-index: 20000;
-    border-left: 1px solid #222;
-    top:initial;
-    position:fixed;
+
+.sf-toolbarreset {
+
+  height: 100vh;
+  align-items: flex-end;
+  background-color: transparent;
 }
 
-.sf-toolbar-status-normal svg path, .sf-toolbar-status-normal svg circle,
-.sf-toolbar-status-normal svg .sf-svg-path, .sf-toolbar-status-normal svg .sf-svg-circle,
-.sf-toolbar-status-green svg path, .sf-toolbar-status-green svg circle,
-.sf-toolbar-status-green svg .sf-svg-path, .sf-toolbar-status-green svg .sf-svg-circle,
-.sf-toolbar-status-red svg path, .sf-toolbar-status-red svg circle,
-.sf-toolbar-status-red svg .sf-svg-path, .sf-toolbar-status-red svg .sf-svg-circle,
-.sf-toolbar-status-yellow svg path, .sf-toolbar-status-yellow svg circle,
-.sf-toolbar-status-yellow svg .sf-svg-path, .sf-toolbar-status-yellow svg .sf-svg-circle { fill: #FFF; }
+.sf-toolbar-block { background-color: #222; }
+.sf-toolbar {
+  z-index: 9999999;
+  height: auto;
+  position: fixed;
+  bottom: 0;
+}
+
+.sf-toolbar-block-gtm.sf-toolbar-status-normal svg path,
+.sf-toolbar-block-gtm.sf-toolbar-status-normal svg circle,
+.sf-toolbar-block-gtm.sf-toolbar-status-normal svg .sf-svg-path,
+.sf-toolbar-block-gtm.sf-toolbar-status-normal svg .sf-svg-circle
+{ fill: #AAA; }
+.sf-toolbar-block-gtm.sf-toolbar-status-green svg path,
+.sf-toolbar-block-gtm.sf-toolbar-status-green svg circle,
+.sf-toolbar-block-gtm.sf-toolbar-status-green svg .sf-svg-path,
+.sf-toolbar-block-gtm.sf-toolbar-status-green svg .sf-svg-circle,
+.sf-toolbar-block-gtm.sf-toolbar-status-red svg path,
+.sf-toolbar-block-gtm.sf-toolbar-status-red svg circle,
+.sf-toolbar-block-gtm.sf-toolbar-status-red svg .sf-svg-path,
+.sf-toolbar-block-gtm.sf-toolbar-status-red svg .sf-svg-circle,
+.sf-toolbar-block-gtm.sf-toolbar-status-yellow svg path,
+.sf-toolbar-block-gtm.sf-toolbar-status-yellow svg circle,
+.sf-toolbar-block-gtm.sf-toolbar-status-yellow svg .sf-svg-path,
+.sf-toolbar-block-gtm.sf-toolbar-status-yellow svg .sf-svg-circle { fill: #FFF; }
 
 @keyframes fadeIn {
   0% { opacity: 0; }
@@ -33,7 +54,7 @@
 .__TAG_ASSISTANT_BADGE {
   animation: fadeIn 2s ease;
   transition: width 0.5s 2s ease;
-  }
+}
 
 .sf-toolbar-block-gtm .icon
 {
@@ -72,8 +93,8 @@
   text-decoration: underline;
 }
 
-.sf-toolbar-block-gtm .sf-toolbar-block span { padding:1em; }
-.sf-toolbar-block-gtm .sf-toolbar-block
+.sf-toolbar-block-gtm .sf-toolbar-info-block > * { padding:0 0.5em; }
+.sf-toolbar-block-gtm .sf-toolbar-info-block
 {
   display: flex;
   flex-direction: row;

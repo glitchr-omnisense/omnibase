@@ -521,13 +521,6 @@
         <service id="Base\Database\Annotation\Trasheable" ><tag name="base.entity_extension" /></service>
 
         <!-- Twig declarations -->
-        <service id="Base\Twig\Loader\FilesystemLoader">
-            <tag name="twig.loader" />
-            <argument type="service" id="twig" />
-            <argument type="service" id="twig.app_variable" />
-            <argument type="service" id="twig.random_variable" />
-            <argument type="service" id="base.service" />
-        </service>
 
         <service id="Base\Twig\Variable\BackofficeVariable" parent="Base\Twig\Variable\SiteVariable" public="true"><tag name="twig.runtime" /></service>
         <service id="Base\Twig\Variable\SiteVariable" public="true">

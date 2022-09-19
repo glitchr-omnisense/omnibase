@@ -84,8 +84,6 @@ class AdvancedRouter implements RouterInterface
             $request = $request->getRequest();
         else if($request instanceof RequestStack)
             $request = $request->getCurrentRequest();
-        else if(!$request instanceof Request)
-            return false;
 
         $route = $this->getRouteName();
         if(!$route) return false;

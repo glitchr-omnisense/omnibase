@@ -21,7 +21,7 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
      * @param string|array $paths    A path or an array of paths where to look for templates
      * @param string|null  $bundlePath The root path common to all relative paths (null for getcwd())
      */
-    public function __construct(Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable, BaseService $baseService)
+    public function __construct(\Twig\Loader\FilesystemLoader $defaultLoader, Environment $twig, AppVariable $appVariable, RandomVariable $randomVariable, BaseService $baseService)
     {
         $this->twig = $twig;
 
@@ -42,17 +42,20 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
             $bundlePath = $baseService->getParameterBag("base.twig.default_path");
             parent::__construct([], $bundlePath);
 
-            $mainLoader = $this->twig->getLoader();
-            if(!$mainLoader instanceof ChainLoader) $loaders = [$this];
+            $chainLoader = $this->twig->getLoader();
+            if(!$chainLoader instanceof ChainLoader) $loaders = [$this];
             else {
 
-                $loaders = $mainLoader->getLoaders();
+                $loaders = $chainLoader->getLoaders();
                 $loaders[] = $this;
 
                 // Override EA from default loader.. otherwise @EasyAdmin bundle gets priority
-                if(($defaultLoader = $loaders[0]) )
-                    $defaultLoader->prependPath($bundlePath."/easyadmin", "EasyAdmin");
+                if(($mainLoader = $loaders[0]) )
+                    $mainLoader->prependPath($bundlePath."/easyadmin", "EasyAdmin");
             }
+
+            if($baseService->getRouter()->isProfiler()) array_unshift($loaders, $defaultLoader);
+            else $loaders[] = $defaultLoader;
 
             $chainLoader = new ChainLoader($loaders);
             $twig->setLoader($chainLoader);
@@ -71,8 +74,6 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
         $this->prependPath($bundlePath, "Base");
         $this->prependPath($bundlePath);
-        dump($bundlePath."/inspector", "WebProfiler");
-        dump($this);
 
         // Add additional @Namespace variables
         $paths = $baseService->getParameterBag("base.twig.paths") ?? [];

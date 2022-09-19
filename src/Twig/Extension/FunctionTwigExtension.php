@@ -130,6 +130,7 @@ final class FunctionTwigExtension extends AbstractExtension
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
     public function pad(array $array = [], int $length = 0, mixed $value = null): array { return array_pad($array, $length, $value); }
     public function transforms(array $array = [], $arrow = null) { return $arrow instanceof \Closure ? $arrow($array) : $array; }
+
     public function filter(Environment $env,  $array = [], $arrow = null)
     {
         if($arrow === null) $arrow = function($el) {

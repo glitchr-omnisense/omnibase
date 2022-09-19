@@ -46,6 +46,15 @@
             <bind key="$environment">%kernel.environment%</bind>
         </service>
 
+        <service id="Base\Twig\Loader\FilesystemLoader" decorates="twig.loader.native_filesystem">
+            <tag name="twig.loader" priority="1" />
+            <argument type="service" id=".inner" />
+            <argument type="service" id="twig" />
+            <argument type="service" id="twig.app_variable" />
+            <argument type="service" id="twig.random_variable" />
+            <argument type="service" id="base.service" />
+        </service>
+
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
             <argument type="service" id="router" />
