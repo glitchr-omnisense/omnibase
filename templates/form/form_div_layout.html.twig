@@ -1181,7 +1181,7 @@
                     {{ form_widget(form.plain, {
                         required:form.vars.required and not allow_empty,
                         value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
-                        attr: {'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off"}
+                        attr: {'autocomplete': form.vars.autocomplete ? "autocomplete" : "new-password"}
                     }) }}
                 </div>
 
@@ -1210,7 +1210,6 @@
                 {% endif %}
 
             </div>
-
             {% if form.vars.repeater %}
             <div class="form-group">
                 {{ form_label(form.plain_repeater) }}
@@ -1219,7 +1218,7 @@
                     {{ form_widget(form.plain_repeater, {
                         required:form.vars.required and not allow_empty,
                         value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",
-                        attr:{'autocomplete': form.vars.autocomplete ? form.vars.autocomplete : "off"}
+                        attr:{'autocomplete': form.vars.autocomplete ? "autocomplete" : "new-password"}
                     }) }}
                 </div>
             </div>

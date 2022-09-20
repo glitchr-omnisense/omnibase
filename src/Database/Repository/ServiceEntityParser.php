@@ -8,8 +8,6 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\TranslatableInterface;
 
 use Base\Database\Walker\TranslatableWalker;
-use Base\Entity\Layout\Widget\Slot;
-use Base\Service\LocaleProvider;
 use Base\Service\Model\IntlDateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityNotFoundException;
@@ -1228,23 +1226,13 @@ class ServiceEntityParser
                     }
                 }
 
-            } else if(!is_array($fieldValue)) {
+            } else if(is_array($fieldValue)) {
 
-                if($this->classMetadata->hasAssociation($fieldHead))
-                    $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
-                if(!$isEmpty && !$isNotEmpty && !$isBool)
+                if(!empty($fieldValue))
                     $qb->setParameter($fieldID, $fieldValue);
 
-            } else {
-
-                $fieldValue = array_filter($fieldValue);
-                if($fieldValue) {
-
-                    if($this->classMetadata->hasAssociation($fieldHead))
-                        $this->leftJoin($qb, self::ALIAS_ENTITY.".".$fieldHead);
-
-                    $qb->setParameter($fieldID, $fieldValue);
-                }
+            } else if(!$isEmpty && !$isNotEmpty && !$isBool) {
+                $qb->setParameter($fieldID, $fieldValue);
             }
 
             if ($isInsensitive) $tableColumn = "LOWER(" . $tableColumn . ")";
@@ -1272,7 +1260,10 @@ class ServiceEntityParser
                 else if($tableOperator == self::OPTION_NOT_EQUAL) $fnExpr = "notIn";
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
-                return !empty($fieldValue) ? $qb->expr()->$fnExpr($tableColumn, ":${fieldID}") : null;
+                if(empty($fieldValue))
+                    throw new Exception("Empty list provided for \"$fieldName\" (column:".$tableColumn.")");
+
+                return $qb->expr()->$fnExpr($tableColumn, ":${fieldID}");
 
             } else if($regexRequested) {
 

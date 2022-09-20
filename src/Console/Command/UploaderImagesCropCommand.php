@@ -182,13 +182,13 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                     continue;
                 }
 
-                $hashidWebp = basename(dirname($this->imageService->imagine($file, [], ["webp" => true])));
-                $hashid     = basename(dirname($this->imageService->imagine($file, [], ["webp" => false])));
-
                 $extensions = $this->imageService->getExtensions($file);
                 $extension  = first($extensions);
 
-                if($this->isCached($file)) {
+                $hashidWebp = basename(dirname($this->imageService->imagine($file, [], ["webp" => true])));
+                $hashid     = basename(dirname($this->imageService->imagine($file, [], ["webp" => false, "extension" => $extension])));
+
+                if($this->isCached($hashid)) {
 
                     $this->output->section()->writeln("             <warning>* Already cached main image \"".str_lstrip($file,$publicDir)."\" .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
 
@@ -206,7 +206,7 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
                 foreach($imageCrops as $imageCrop) {
 
                     $identifier = $imageCrop->getSlug() ?? $imageCrop->getWidth()."x".$imageCrop->getHeight();
-                    if($this->isCached($file, $imageCrop)) {
+                    if($this->isCached($hashid, $imageCrop)) {
 
                         $this->output->section()->writeln("             <warning>  Already cached \"".str_lstrip($file,$publicDir)."\" (".$identifier.") .. (".($i+1)."/".$N.")</warning>", OutputInterface::VERBOSITY_VERBOSE);
 
@@ -236,9 +236,10 @@ class UploaderImagesCropCommand extends UploaderImagesCommand
         $args = $this->imageService->resolve($hashid);
         if(!$args) return false;
 
-        $filters = $args["filters"];
-        $options = $args["options"];
-        $path    = $args["path"];
+        $filters = $args["filters"] ?? [];
+        $options = $args["options"] ?? [];
+        $path    = $args["path"] ?? null;
+        if($path == null) return false;
 
         // Dimension information
         $imagesize = getimagesize($path);

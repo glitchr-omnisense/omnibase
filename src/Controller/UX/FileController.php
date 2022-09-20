@@ -221,9 +221,10 @@ class FileController extends AbstractController
         $args = $this->imageService->resolve($hashid);
         if(!$args) throw $this->createNotFoundException();
 
-        $filters = $args["filters"];
-        $options = $args["options"];
-        $path    = $args["path"];
+        $filters = $args["filters"] ?? [];
+        $options = $args["options"] ?? [];
+        $path    = $args["path"] ?? null;
+        if(!$path) throw $this->createNotFoundException();
 
         // Redirect to proper path
         $extensions = $this->imageService->getExtensions($path);

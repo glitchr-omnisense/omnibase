@@ -333,15 +333,19 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                 //
                 // Compute in choice list format
-                dump($formattedData);
-                $choices = array_filter(array_transforms(function($key, $choices) use($formattedData) : ?array {
+                $choices = [];
+                foreach($dataChoices as $id) {
 
-                    $id    = $choices;
                     $label = $formattedData[$id] ?? null;
+                    if(!array_key_exists($label, $choices)) $choices[$label] = $id;
+                    else {
 
-                    return [$label." / ".$key, $choices];
+                        for($i = 2; array_key_exists($label ."/" . $id, $choices); $i++)
+                            continue;
 
-                }, $dataChoices));
+                        $choices[$label ."/" . $id] = $id;
+                    }
+                }
 
             } else {
 
@@ -351,7 +355,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             //
             // Note for later: when disabling select2, it might happend that the label of the label of selected entries are wrong
             $formOptions = [
-                'choices'  => $choices,
+                'choices'  => array_unique($choices),
                 'multiple' => $options["multiple"]
             ];
 
@@ -372,6 +376,8 @@ class SelectType extends AbstractType implements DataMapperInterface
         else $dataChoices = $options["multivalue"] ? array_map(fn($c) => explode("/", $c)[0], $choiceType->getViewData()) : array_unique($choiceType->getViewData());
         $multiple = $options["multiple"];
 
+        //
+        // Retrieve existing entities
         if ($this->classMetadataManipulator->isEntity($options["class"])) {
 
             $classRepository = $this->entityManager->getRepository($options["class"]);
