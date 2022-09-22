@@ -33,12 +33,13 @@ class IconProvider
         $this->routeIcons = $cacheRouteIcons !== null ? $cacheRouteIcons->get() : [];
         if($this->routeIcons === null) {
 
-            $this->routeIcons = array_transforms(function($route, $controller) use ($annotationReader) : ?array {
+            $this->routeIcons = array_transforms(function($route, $controller) use ($annotationReader, $router) : ?array {
 
                 $controller = $controller->getDefault("_controller");
                 if(!$controller) return null;
 
-                list($class, $method) = explode("::", $controller);
+                try { list($class, $method) = explode("::", $controller); }
+                catch(\ErrorException $e) { return null; } 
                 if(!class_exists($class)) return null;
 
                 $iconAnnotations = $annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];

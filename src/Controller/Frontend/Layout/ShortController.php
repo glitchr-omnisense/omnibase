@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Client\Layout;
+namespace Base\Controller\Frontend\Layout;
 
 use Base\BaseBundle;
 use Base\Repository\Layout\ShortRepository;

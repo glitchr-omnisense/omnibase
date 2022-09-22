@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Client\Thread;
+namespace Base\Controller\Frontend\Thread;
 
 use Base\Entity\ThreadIntl;
 use Base\Enum\ThreadState;

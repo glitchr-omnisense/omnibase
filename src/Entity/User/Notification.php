@@ -27,13 +27,17 @@ use Exception;
 use UnexpectedValueException;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Base\Database\Annotation\DiscriminatorEntry;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\NotificationRepository;
-use Base\Service\LocaleProvider;
+use Base\Database\Annotation\Cache;
 
 /**
  * @ORM\Entity(repositoryClass=NotificationRepository::class)
+ * @ORM\InheritanceType( "JOINED" )
+ * @ORM\DiscriminatorColumn( name = "class", type = "string" )
+ *     @DiscriminatorEntry( value = "common" )
  */
 class Notification extends \Symfony\Component\Notifier\Notification\Notification implements SmsNotificationInterface, EmailNotificationInterface, ChatNotificationInterface, IconizeInterface
 {

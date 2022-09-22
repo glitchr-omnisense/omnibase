@@ -14,6 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 use Base\Service\SettingBagInterface;
+use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
 use Symfony\Component\Routing\RouterInterface;
@@ -22,12 +23,13 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 /* "abstract" (remove because of routes) */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
-    public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig)
+    public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator)
     {
         $this->router = $router;
         $this->settingBag = $settingBag;
         $this->twig = $twig;
         $this->imageService = $imageService;
+        $this->translator = $translator;
     }
 
     public function configureDashboard(): Dashboard

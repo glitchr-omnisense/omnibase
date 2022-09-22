@@ -52,20 +52,19 @@ class RouteVoter extends Voter
                 if(!$route->getHost() && $this->router->getHost() != $this->router->getHostFallback())
                     return false;
 
-                $permittedSubdomains   = array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", $this->localeProvider->getLocale());
-                $permittedSubdomains ??= array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", $this->localeProvider->getLang());
-                $permittedSubdomains ??= array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", $this->localeProvider->getDefaultLocale());
-                $permittedSubdomains ??= array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", $this->localeProvider->getDefaultLang());
-                $permittedSubdomains ??= array_search_by($this->parameterBag->get("base.router.permitted_subdomains"), "locale", null) ?? [];
-                $permittedSubdomains = array_transforms(fn($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $permittedSubdomains);
+                $permittedHosts   = array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLocale());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getLang());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLocale());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", $this->localeProvider->getDefaultLang());
+                $permittedHosts ??= array_search_by($this->parameterBag->get("base.router.permitted_hosts"), "locale", null) ?? [];
+                $permittedHosts = array_transforms(fn($k, $a): ?array => $a["env"] == $this->router->getEnvironment() ? [$k, $a["regex"]] : null, $permittedHosts);
                 if(!$this->router->keepMachine() && !$this->router->keepSubdomain())
-                    $permittedSubdomains[] = "^$"; // Special case if both subdomain and machine are unallowed
+                    $permittedHosts[] = "^$"; // Special case if both subdomain and machine are unallowed
 
                 $parse = parse_url2($url);
-
-                $allowedSubdomain = false;
-                foreach($permittedSubdomains as $permittedSubdomain)
-                    $allowedSubdomain |= preg_match("/".$permittedSubdomain."/", $parse["subdomain"] ?? null);
+                $allowedHost = false;
+                foreach($permittedHosts as $permittedHost)
+                    $allowedHost |= preg_match("/".$permittedHost."/", $parse["host"] ?? null);
 
                 $routeName = $this->router->getRouteName();
                 if(LoginFormAuthenticator::isSecurityRoute($routeName))
@@ -73,13 +72,13 @@ class RouteVoter extends Voter
                 if(RescueFormAuthenticator::isSecurityRoute($routeName))
                     return true;
 
-                if(!$allowedSubdomain) return false;
+                if(!$allowedHost) return false;
 
                 if(array_key_exists("machine",   $parse) && !$this->router->keepMachine()  ) return false;
                 if(array_key_exists("subdomain", $parse) && !$this->router->keepSubdomain())
                     return !array_key_exists("machine",   $parse) && $this->router->keepMachine();
 
-                return $allowedSubdomain;
+                return $allowedHost;
 
             default:
                 return false;

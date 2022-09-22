@@ -1,6 +1,6 @@
 <?php
 
-namespace Base\Controller\Client\User;
+namespace Base\Controller\Frontend\User;
 use Base\Service\BaseService;
 
 use App\Entity\User;
