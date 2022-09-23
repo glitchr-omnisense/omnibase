@@ -112,15 +112,6 @@ class FileController extends AbstractController
     }
 
     /**
-     * @Route("/images/{hashid}/image.svg", name="imageSvg_cacheless")
-     */
-    public function ImageSvgCacheless($hashid): Response
-    {
-        $this->localCache = false;
-        return $this->ImageSvg($hashid);
-    }
-
-    /**
      * @Route("/images/{hashid}/image.svg", name="imageSvg")
      */
     public function ImageSvg($hashid): Response

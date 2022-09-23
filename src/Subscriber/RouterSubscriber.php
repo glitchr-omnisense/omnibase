@@ -58,8 +58,6 @@ class RouterSubscriber implements EventSubscriberInterface
                                     $url["path"]    ?? null, $url["query"]     ?? null);
             }
 
-            dump($url,$this->router->format($url));
-            exit(1);
             // Redirect to sanitized url
             $event->setResponse(new RedirectResponse($this->router->format($url)));
             return $event->stopPropagation();

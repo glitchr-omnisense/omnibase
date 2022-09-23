@@ -34,9 +34,14 @@ class FileService implements FileServiceInterface
         $this->router        = $router;
         $this->obfuscator    = $obfuscator;
         $this->flysystem     = $flysystem;
+        $this->projectDir    = $flysystem->getProjectDir();
+        $this->publicDir    = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
     }
+    
+    public function getProjectDir() { return $this->projectDir; }
+    public function getPublicDir() { return $this->publicDir; }
 
     public function getExtensions(null|string|array $fileOrMimetypeOrArray): array
     {

@@ -301,17 +301,17 @@ class ImageService extends FileService implements ImageServiceInterface
         }
 
         $pathRelative = $this->flysystem->stripPrefix(realpath($path), $storage);
-	    if(!$pathRelative) {
+        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        $pathCache    = path_suffix($pathRelative, $pathSuffixes);
+
+        if(!$pathRelative) {
 
             if(!$this->fallback)
                 throw new NotFoundHttpException($path ? "Image not found behind system path \"$path\"." : "Empty path provided.");
 
             return $this->noImage;
         }
-
-        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        $pathCache    = path_suffix($pathRelative, $pathSuffixes);
-
+        
         //
         // Compute a response.. (if cache not found)
         if ($config["local_cache"] ?? true) {

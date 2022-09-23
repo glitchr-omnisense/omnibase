@@ -272,6 +272,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         $setting->translate($locale)->setValue($value);
         unset($this->settingBag[$path.":".$locale]);
 
+        if ($this->entityManager->getCache())
+            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
+
         if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
         $this->entityManager->flush();
@@ -282,6 +285,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setLabel($label);
+        if ($this->entityManager->getCache())
+            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
 
         $this->entityManager->flush();
         return $this;
@@ -291,6 +296,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path, $locale);
         $setting->translate($locale)->setHelp($help);
+        if ($this->entityManager->getCache())
+            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
 
         $this->entityManager->flush();
         return $this;
@@ -300,6 +307,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path);
         $setting->setBag($parameterName);
+        if ($this->entityManager->getCache())
+            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
 
         $this->entityManager->flush();
         return $this;
@@ -341,6 +350,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $setting = $this->generateRaw($path);
         $setting->setVault($flag ? $this->getEnvironment() : null);
+        if ($this->entityManager->getCache())
+            $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
 
         $this->entityManager->flush();
         return $this;

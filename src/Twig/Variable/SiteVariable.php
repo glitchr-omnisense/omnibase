@@ -40,7 +40,7 @@ class SiteVariable
 
     public function map()    { return $this->sitemapper->getAlternates(); }
 
-    public function title()  { return $this->baseService->getSite()["title"]  ?? null; }
+    public function title()  { return $this->baseService->getSite()["title"] ?? null; }
     public function slogan() { return $this->baseService->getSite()["slogan"] ?? null; }
     public function logo()   { return $this->baseService->getSite()["logo"]   ?? null; }
 

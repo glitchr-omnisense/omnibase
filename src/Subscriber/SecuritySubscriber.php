@@ -177,7 +177,7 @@ class SecuritySubscriber implements EventSubscriberInterface
             $specialGrant = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("USER_ACCESS", $user);
             if($user && !$specialGrant) $specialGrant = $this->authorizationChecker->isGranted("ADMIN_ACCESS", $user);
-
+           
             // In case of restriction: profiler is disabled
             if(!$specialGrant && $this->profiler) $this->profiler->disable();
 
@@ -219,7 +219,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                 $routeRestriction = first($routeRestriction);
             }
 
-            if(str_ends_with($routeRestriction, ".".$this->localeProvider->getLang()))
+            if ($routeRestriction !== null && str_ends_with($routeRestriction, ".".$this->localeProvider->getLang()))
                 $routeRestriction = str_rstrip($routeRestriction, ".".$this->localeProvider->getLang());
 
             if ($this->router->getRouteName() != $routeRestriction) {
