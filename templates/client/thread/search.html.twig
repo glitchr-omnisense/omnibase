@@ -2,6 +2,7 @@
 
 {% block title %}Search for a thread{% endblock %}
 {% block main %}
+    <section>
     <article class="wrapper extended">
 
         {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
@@ -130,5 +131,5 @@
             </article>
         {% endfor %}
     {% endif %}
-
+    </section>
 {% endblock %}

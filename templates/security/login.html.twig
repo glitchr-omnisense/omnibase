@@ -1,9 +1,9 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}{{'@forms.login.title'|trans}}{% endblock %}
 
-{% block contentNoWrap %}
-<article class="wrapper">
+{% block content %}
+<article class="login wrapper">
 <div class="card">
     <div class="card-header">
         <h3 class="text-center">{{'@forms.login.title'|trans}}</h3>

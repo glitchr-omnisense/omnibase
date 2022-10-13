@@ -2,6 +2,7 @@
 
 namespace Base\Database\Entity;
 
+use App\Entity\Article\Reply;
 use Base\Database\Entity\AggregateHydrator\PopulableInterface;
 use Base\Database\Entity\AggregateHydrator\SerializableInterface;
 use Base\Database\Mapping\ClassMetadataManipulator;
@@ -62,16 +63,18 @@ class EntityHydrator implements EntityHydratorInterface
     /**
      * Aggregate methods: by default, it is "object properties" by "deep copy" method without fallback, but initializing properties
      */
-    const DEFAULT_AGGREGATE    = 0b000000000;
-    const CLASS_METHODS        = 0b000000001;
-    const OBJECT_PROPERTIES    = 0b000000010;
-    const PREVENT_ASSOCIATIONS = 0b000000100;
-    const ARRAY_OBJECT         = 0b000001000;
-    const DEEPCOPY             = 0b000010000;
-    const CONSTRUCT            = 0b000100000;
-    const INITIALIZE           = 0b001000000;
-    const IGNORE_NULLS         = 0b010000000;
-    const AUTOTYPE             = 0b100000000;
+    const DEFAULT_AGGREGATE    = 0b00000000000;
+    const CLASS_METHODS        = 0b00000000001;
+    const OBJECT_PROPERTIES    = 0b00000000010;
+    const PREVENT_ASSOCIATIONS = 0b00000000100;
+    const ARRAY_OBJECT         = 0b00000001000;
+    const DEEPCOPY             = 0b00000010000;
+    const CONSTRUCT            = 0b00000100000;
+    const INITIALIZE           = 0b00001000000;
+    const IGNORE_NULLS         = 0b00010000000;
+    const AUTOTYPE             = 0b00100000000;
+    const OBJECT_INHERITED     = 0b01000000000;
+    const FETCH_ASSOCIATIONS   = 0b10000000000;
 
     public function __construct(EntityManagerInterface $entityManager, ClassMetadataManipulator $classMetadataManipulator)
     {
@@ -105,7 +108,7 @@ class EntityHydrator implements EntityHydratorInterface
         $this->setDefaults($entity, $aggregateModel);
 
         $entityName = get_class($entity);
-        if (is_object($data) && !$data instanceof Collection && !is_instanceof($entityName, get_class($data)))
+        if (is_object($data) && !$data instanceof Collection && !is_instanceof($entityName, get_class($data)) && ($aggregateModel & self::OBJECT_INHERITED))
             throw new Exception("\"".get_class($data)."\" data passed to ".__CLASS__."::".__FUNCTION__."() must inherit from \"".get_class($entity)."\"");
 
         $data = $this->dehydrate($data, $fieldExceptions);
@@ -270,7 +273,7 @@ class EntityHydrator implements EntityHydratorInterface
                 $this->setPropertyValue($entity, $fieldName, [], $reflEntity);
 
             //
-            // Advanced typing detection to be enabled using autotype
+            // Advanced typing detection (autotype)
             $reflProperty = $reflEntity->hasProperty($fieldName) ? $reflEntity->getProperty($fieldName) : null;
             if ($aggregateModel & self::AUTOTYPE) {
 
@@ -333,7 +336,7 @@ class EntityHydrator implements EntityHydratorInterface
     {
         $reflEntity = new ReflectionObject($entity);
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
-
+        
         foreach ($data as $propertyName => $value) {
 
             if($this->classMetadataManipulator->hasAssociation($entity, $propertyName))
@@ -341,16 +344,25 @@ class EntityHydrator implements EntityHydratorInterface
             if ($value === null && $aggregateModel & self::IGNORE_NULLS)
                 continue;
 
-            $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
+            //
+            // Fetch associations
+            $isId   = str_ends_with($propertyName, "_id");
+            $isUuid = str_ends_with($propertyName, "_uuid");
+            $isSlug = str_ends_with($propertyName, "_slug");
+            if($aggregateModel & self::FETCH_ASSOCIATIONS && ($isId || $isUuid || $isSlug))
+                continue;
 
+            //
+            // Default behavior
             $aggregateFallback = !($aggregateModel & self::CLASS_METHODS);
             if($aggregateModel & self::CLASS_METHODS && $this->propertyAccessor->isWritable($entity, $propertyName)) {
-
+                
                 $this->propertyAccessor->setValue($entity, $propertyName, $value);
                 $this->markAsHydrated($entity, $propertyName);
-
+                
             } else if($aggregateModel & self::OBJECT_PROPERTIES || $aggregateFallback) {
-
+                
+                $reflProperty = $reflEntity->hasProperty($propertyName) ? $reflEntity->getProperty($propertyName) : null;
                 if ($reflProperty !== null) {
 
                     $propertyName = $reflProperty->getName();
@@ -383,6 +395,30 @@ class EntityHydrator implements EntityHydratorInterface
         if($aggregateModel & self::PREVENT_ASSOCIATIONS) return $this;
 
         $classMetadata = $this->entityManager->getClassMetadata(get_class($entity));
+
+        foreach ($data as $propertyName => $value) {
+
+            //
+            // Fetch associations
+            $isId   = str_ends_with($propertyName, "_id");
+            $isUuid = str_ends_with($propertyName, "_uuid");
+            $isSlug = str_ends_with($propertyName, "_slug");
+            if($aggregateModel & self::FETCH_ASSOCIATIONS && ($isId || $isUuid || $isSlug)) {
+
+                $data = array_key_removes($data, $propertyName);
+                $identifier   = $this->classMetadataManipulator->resolveFieldPath($classMetadata->getName(), str_rstrip($propertyName, ["_id", "_uuid"]));
+                $targetEntity = $this->classMetadataManipulator->fetchEntityName($classMetadata->getName(), $identifier);
+
+                $repository   = $this->classMetadataManipulator->getRepository($targetEntity);
+                if($repository != null && !array_key_exists($identifier, $data) && !array_key_exists($propertyName, $data)) {
+
+                    if($isId) $data[$identifier] = $repository->cacheOneById($value);
+                    else if($isUuid) $data[$identifier] = $repository->cacheOneByUuid($value);
+                    else if($isSlug) $data[$identifier] = $repository->cacheOneBySlug($value);
+                }
+            }
+        }
+
         foreach ($data as $propertyName => $value) {
 
             if(!$this->classMetadataManipulator->hasAssociation($entity, $propertyName))

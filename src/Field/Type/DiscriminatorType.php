@@ -84,7 +84,6 @@ class DiscriminatorType extends AbstractType
         $formattedValues = (new Autocomplete($translator))->resolve($entry, $class, ["format" => $format]);
         $formattedValues["icon"] = class_implements_interface($class, IconizeInterface::class) ? $class::__iconizeStatic()[0] ?? null : null;
 
-
         $text = $translator->trans($entry.".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY);
         switch($format) {
 

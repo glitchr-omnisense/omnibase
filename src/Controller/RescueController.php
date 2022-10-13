@@ -6,8 +6,11 @@ use App\Entity\User as User;
 
 use Base\Annotations\Annotation\Iconize;
 use Base\Controller\Backend\AbstractDashboardController;
-use Base\Service\ReferrerInterface;
+use Base\Form\Common\FormModelInterface;
+use Base\Form\FormProcessorInterface;
+use Base\Form\FormProxyInterface;
 use Base\Form\Type\SecurityLoginType;
+use Base\Service\ReferrerInterface;
 use Base\Service\ImageServiceInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -17,19 +20,22 @@ use Base\Service\SettingBagInterface;
 use Base\Service\TranslatorInterface;
 use Base\Twig\Environment;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Dashboard;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /* "abstract" (remove because of routes) */
 class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractDashboardController
 {
-    public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator)
+    public function __construct(RouterInterface $router, ImageServiceInterface $imageService, SettingBagInterface $settingBag, Environment $twig, TranslatorInterface $translator, FormProxyInterface $formProxy)
     {
+        $this->twig = $twig;
         $this->router = $router;
         $this->settingBag = $settingBag;
-        $this->twig = $twig;
+
         $this->imageService = $imageService;
         $this->translator = $translator;
+        $this->formProxy  = $formProxy;
     }
 
     public function configureDashboard(): Dashboard
@@ -63,24 +69,28 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
         }
 
         // Generate form
-        $user = new User();
-        $form = $this->createForm(SecurityLoginType::class, $user, ["identifier" => $lastUsername]);
-        $form->handleRequest($request);
+        $formProcessor = $this->formProxy
+            ->createProcessor("form:login:rescue", SecurityLoginType::class, ["identifier" => $lastUsername])
+            ->onDefault(function(FormProcessorInterface $formProcessor) use ($authenticationUtils) { 
 
-        $lastUsername = $authenticationUtils->getLastUsername();
+                $lastUsername = $authenticationUtils->getLastUsername();
+                $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
+                $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
 
-        $logo = $this->settingBag->get("base.settings.logo.backoffice")["_self"] ?? null;
-        $logo = $logo ?? $this->settingBag->get("base.settings.logo")["_self"] ?? null;
+                return $this->render('@EasyAdmin/page/login.html.twig', [
+                    'last_username' => $lastUsername,
+                    'translation_domain' => 'forms',
+                    'target_path' => $this->router->generate('backoffice'),
+                    'identifier_label' => '@forms.login.identifier',
+                    'password_label' => '@forms.login.password',
+                    'logo' => $logo,
+                    "identifier" => $lastUsername,
+                    "form" => $formProcessor->getForm()->createView()
+                ]);
+            })
+            
+            ->handleRequest($request);
 
-        return $this->render('@EasyAdmin/page/login.html.twig', [
-            'last_username' => $lastUsername,
-            'translation_domain' => 'forms',
-            'target_path' => $this->router->generate('backoffice'),
-            'identifier_label' => '@forms.login.identifier',
-            'password_label' => '@forms.login.password',
-            'logo' => $logo,
-            "identifier" => $lastUsername,
-            "form" => $form->createView()
-        ]);
+        return $formProcessor->getResponse();
     }
 }

@@ -101,7 +101,7 @@ class SpamChecker
 
                         'comment_type' => 'comment',
                         'comment_author' => $candidate->getAuthor(),
-                        'comment_author_email' => $candidate->getAuthor()->getEmail(),
+                        'comment_author_email' => $candidate->getAuthor()?->getEmail(),
                         'comment_content' => $candidate->getSpamText(),
                         'comment_date_gmt' => $candidate->getSpamDate()
                     ])

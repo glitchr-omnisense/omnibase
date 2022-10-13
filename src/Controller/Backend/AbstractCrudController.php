@@ -107,7 +107,7 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
     public static function getTranslationPrefix(?string $prefix = "")
     {
         $entityFqcn = preg_replace('/^(App|Base)\\\Entity\\\/', $prefix ?? "", get_called_class()::getEntityFqcn());
-        return camel2snake(str_replace("\\", ".", $entityFqcn));
+        return camel2snake(implode(".", array_unique(explode("\\", $entityFqcn))));
     }
 
     public function configureDiscriminatorMap(array $discriminatorMap, string $rootEntity, string $entity): ?array
@@ -292,11 +292,8 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
 
         if ($entity) {
 
-            $class = str_replace(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], ["", "", "",], get_class($entity));
-            $class = implode(".", array_map("camel2snake", explode("\\", $class)));
-
-            $entityLabel = mb_ucfirst($this->translator->trans(mb_strtolower(camel2snake($class)).".".Translator::NOUN_SINGULAR, [], AbstractDashboardController::TRANSLATION_ENTITY));
-            $extension->setTitle(mb_ucfirst($this->translator->trans(mb_strtolower(camel2snake($class)).".".Translator::NOUN_PLURAL, [], AbstractDashboardController::TRANSLATION_ENTITY)));
+            $entityLabel = mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_SINGULAR));
+            $extension->setTitle(mb_ucfirst($this->translator->transEntity(get_class($entity), null, Translator::NOUN_PLURAL)));
         }
 
         if($this->getCrud()->getAsDto()->getCurrentAction() != "new") {

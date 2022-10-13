@@ -24,7 +24,7 @@ class ThreadRepository extends ServiceEntityRepository
 
         $nComments = [];
         foreach($nDiscussions as $entry)
-            $nComments[$entry["children"]] = ($nComments[$entry["children"]] ?? 0) + $entry["count"];
+            $nComments[$entry[$thread->getId()]] = ($nComments[$entry[$thread->getId()]] ?? 0) + $entry["count"];
 
         return $nComments;
     }

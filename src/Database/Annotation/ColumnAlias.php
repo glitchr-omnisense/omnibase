@@ -2,6 +2,7 @@
 
 namespace Base\Database\Annotation;
 
+use App\Entity\Blog\Comment;
 use App\Entity\Marketplace\Product\Extra\Wallpaper;
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;

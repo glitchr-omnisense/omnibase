@@ -116,7 +116,7 @@ class SelectType extends AbstractType implements DataMapperInterface
             'placeholder'        => "@fields.select.placeholder",
             'capitalize'         => true,
             'language'           => null,
-            'required'           => true,
+            'required'           => null,
             'multiple'           => null,
             'multivalue'         => false,
 
@@ -150,7 +150,7 @@ class SelectType extends AbstractType implements DataMapperInterface
         ]);
 
         $resolver->setNormalizer('required', function (Options $options, $value) {
-            if($value === null) return $options["tags"] !== false;
+            if($value === null) return $options["tags"] !== true;
             return $value;
         });
 
@@ -367,7 +367,8 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choiceType = current(iterator_to_array($forms));
-        if(!$this->formFactory->isOwningField($choiceType->getParent())) return;
+        if ($choiceType->getParent()?->getData() instanceof Collection && 
+            !$this->classMetadataManipulator->isCollectionOwner($choiceType->getParent(), $choiceType->getParent()?->getData())) return;
 
         $options = $choiceType->getParent()->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessClass($choiceType->getParent());

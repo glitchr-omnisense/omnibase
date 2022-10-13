@@ -747,9 +747,9 @@
                     <div class="form-collection-buttons">
                         {% if form.vars.value is not null and not html %}
 
-                            {% set url = form.vars.value.__toLink() ?? null %}
+                            {% set url = method_exists("__toLink", form.vars.value) ? form.vars.value.__toLink() : null %}
                             {% if url is not empty %}
-                            {{ url ? clipboard("copy", url)|raw : "" }}<a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
+                                {{ url ? clipboard("copy", url)|raw : "" }}<a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
                             {% endif %}
 
                             {% if _href is not null %}

@@ -2,15 +2,14 @@
 
 namespace Base\Form\Type;
 
-use App\Entity\User;
+use Base\Form\Common\AbstractType;
+use Base\Form\Model\SecurityLoginModel;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
-
-use Symfony\Component\Form\AbstractType;
 
 class SecurityLoginType extends AbstractType
 {
@@ -19,7 +18,7 @@ class SecurityLoginType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => User::class,
+            'data_class' => SecurityLoginModel::class,
             'identifier' => null, // to pass variable from controller to Type
             'allow_extra_fields' => true
         ]);
@@ -27,6 +26,18 @@ class SecurityLoginType extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+        // $this->builder->getForm()->addStep($options, function (FormBuilderInterface $builder, array $options) {
+
+        //     $builder->add('excel', FileType::class, [
+        //             'label' => "Fichier Excel",
+        //             'attr'  => [
+        //                 'id' => "inputExcel",  // used in Symfony kernel
+        //             ]
+        //         ]);
+        // });
+
+        // $this->builder->getForm()->addConfirmStep($options);
+
         $builder
             ->add('identifier', TextType::class, [
                 'attr'  => [

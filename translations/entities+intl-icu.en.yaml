@@ -17,6 +17,10 @@ user:
   token:
     _singular: "token"
     _plural: "tokens"
+  address:
+    _singular: "address"
+    _plural: "addresses"
+
 
 extension:
   log:

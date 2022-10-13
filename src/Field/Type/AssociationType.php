@@ -2,7 +2,6 @@
 
 namespace Base\Field\Type;
 
-use App\Entity\Marketplace\Product\Identifier;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydrator;
 use Base\Form\FormFactory;
@@ -12,11 +11,9 @@ use Base\Traits\BaseTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
-use Exception;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
@@ -50,13 +47,13 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
     public function __construct(FormFactory $formFactory, ClassMetadataManipulator $classMetadataManipulator, EntityHydrator $entityHydrator, TranslatorInterface $translator)
     {
-        $this->formFactory = $formFactory;
         $this->classMetadataManipulator = $classMetadataManipulator;
-        $this->entityHydrator   = $entityHydrator;
-        $this->translator   = $translator;
-        $this->autocomplete = new Autocomplete($this->translator);
+        $this->entityHydrator           = $entityHydrator;
+        $this->translator               = $translator;
+        $this->formFactory              = $formFactory;
 
-        $this->propertyAccessor = PropertyAccess::createPropertyAccessor();
+        $this->autocomplete             = new Autocomplete($this->translator);
+        $this->propertyAccessor         = PropertyAccess::createPropertyAccessor();
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -137,7 +134,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
 
             $form = $event->getForm();
             $data = $event->getData();
-
             if($options["multiple"]) {
 
                 $dataClass = $options["class"];
@@ -188,7 +184,7 @@ class AssociationType extends AbstractType implements DataMapperInterface
                 foreach ($fields as $fieldName => $field) {
 
                     if($options["recursive"] && array_key_exists($form->getName(), $field))
-                    $field = $field[$form->getName()];
+                        $field = $field[$form->getName()];
 
                     $fieldType = $field['form_type'] ?? null;
                     unset($field['form_type']);
@@ -216,7 +212,6 @@ class AssociationType extends AbstractType implements DataMapperInterface
         }
 
         $data = $viewData;
-
         if ($data instanceof Collection) {
 
             $form = current(iterator_to_array($forms));
@@ -255,7 +250,8 @@ class AssociationType extends AbstractType implements DataMapperInterface
     {
         $form = current(iterator_to_array($forms));
         $formParent  = $form->getParent();
-        if(!$this->formFactory->isOwningField($formParent)) return;
+        if ($formParent?->getData() instanceof Collection && 
+            !$this->classMetadataManipulator->isCollectionOwner($formParent, $formParent?->getData())) return;
 
         $options     = $formParent->getConfig()->getOptions();
         $options["class"]    = $options["class"] ?? $this->formFactory->guessClass($formParent, $options);

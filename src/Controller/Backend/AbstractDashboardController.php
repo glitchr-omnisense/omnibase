@@ -335,12 +335,12 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
         if(!$logo) $logo = $this->imageService->getPublicDir()."/bundles/base/logo.svg";
 
         $title  = $this->settingBag->getScalar("base.settings.title")  ?? $this->translator->trans("backoffice.title", [], self::TRANSLATION_DASHBOARD);
-        $slogan = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.slogna", [], self::TRANSLATION_DASHBOARD);
+        $subtitle = $this->settingBag->getScalar("base.settings.slogan") ?? $this->translator->trans("backoffice.subtitle", [], self::TRANSLATION_DASHBOARD);
 
         $this->configureExtension($this->extension
             ->setIcon("fas fa-laptop-house")
             ->setTitle($title)
-            ->setText($slogan)
+            ->setText($subtitle)
             ->setLogo($logo)
             ->setWidgets($this->configureWidgetItems())
         );

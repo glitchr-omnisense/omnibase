@@ -2,181 +2,160 @@
 
 namespace Base\Form;
 
-use Base\Database\Entity\EntityHydratorInterface;
+use Base\Database\Entity\EntityHydrator;
 use Base\Entity\User\Notification;
-use Base\Form\Traits\FormFlowTrait;
-
+use Base\Form\Traits\FormProcessorTrait;
+use Base\Traits\BaseTrait;
 use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Form\Form;
-use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\Form\FormInterface;
 
 class FormProcessor implements FormProcessorInterface
 {
-    use FormFlowTrait;
-
-    public FormFactoryInterface $formFactory;
-    public CsrfTokenManagerInterface $csrfTokenManager;
-    public RequestStack $requestStack;
-
-    public function __construct(FormFactoryInterface $formFactory, EntityHydratorInterface $entityHydrator, CsrfTokenManagerInterface $csrfTokenManager, RequestStack $requestStack)
+    use BaseTrait;
+    use FormProcessorTrait;
+    
+    public function __construct(FormInterface $form) 
     {
-        $this->formFactory      = $formFactory;
-        $this->entityHydrator   = $entityHydrator;
-        $this->csrfTokenManager = $csrfTokenManager;
-        $this->requestStack     = $requestStack;
+        $this->form = $form;
+        
+        $this->onDefaultCallback = null;
+        $this->onInvalidCallback = null;
+        $this->onSubmitCallbacks = [];
     }
 
-    protected $onDefaultCallback = [];
-    public function onDefault($callback)
+    public function get        (): FormInterface { return $this->form; }
+    public function getForm    (): FormInterface { return $this->get(); }
+    public function getFormType(): string        { return get_class($this->form); }
+    public function getOption (string $name):mixed { return $this->getOptions()[$name] ?? null; }
+    public function getOptions (): array { return $this->form->getConfig()->getType()->getOptionsResolver()->resolve(); }
+
+    public function getData    (?string $childName = null): mixed {
+
+        $data = null;
+        if ($childName)
+            $data = $this->form->get($childName)?->getData();
+        
+        if ($data == null) 
+            $data = $this->form->getData();
+
+        return $data;
+    }
+
+    public function setData    (mixed $data): self 
+    { 
+        $this->form->setData($data);
+        return $this;
+    }
+
+    public function hydrate(mixed $entity): mixed
+    {
+        if($entity == null) return $entity;
+
+        return $this->getEntityHydrator()->hydrate($entity, $this->form->getData(), [], EntityHydrator::CLASS_METHODS|EntityHydrator::FETCH_ASSOCIATIONS);
+    }
+
+    protected $onDefaultCallback;
+    public function onDefault(callable $callback): static
     {
         $this->onDefaultCallback = $callback;
         return $this;
     }
 
-    protected $onSubmitCallback;
-    public function onSubmit($callback)
+    protected $onInvalidCallback;
+    public function onInvalid(callable $callback): static
     {
-        $this->onSubmitCallback[] = $callback;
+        $this->onInvalidCallback = $callback;
         return $this;
     }
 
-    /**
-     * @var Form
-     * */
-    protected $form = null;
-    public function get() { return $this->getForm(); }
-    public function getForm()
+    protected array $onSubmitCallbacks;
+    public function onSubmit(callable ...$callbacks): static
     {
-        return $this->form;
+        $this->onSubmitCallbacks = $callbacks;
+        return $this;
     }
 
-    public function set(Form $form) { $this->setForm($form); }
-    public function setForm(Form $form) { $this->form = $form; }
-
-    public function getData() { return $this->data; }
-    public function getFormType() { return $this->formType; }
-    public function getOptions()
+    protected $response;
+    public function getResponse(): Response
     {
-        if (!$this->form)
-            throw new Exception("No form provided in FormProcessor");
+        if (!$this->response instanceof Response)
+            throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit()#" . ($step + 1) . ": an instance of Response() is expected");
 
-        return $this->form->getConfig()->getType()->getOptionsResolver()->resolve();
+        return $this->response;
     }
 
-    public function getSession() { return $this->formType::getSession($this->getOptions()); }
-
-    public function getPost()    { return $this->getSession()["POST"] ?? []; }
-    public function appendPost()  { return $this->formType::appendSessionFiles($this->getOptions()); }
-
-    public function getFiles()   { return $this->getSession()["FILES"] ?? []; }
-    public function appendFiles() { return $this->formType::appendSessionPost($this->getOptions()); }
-
-    public function getExtras()  { return $this->getSession()["EXTRAS"] ?? []; }
-    public function appendExtras($extras) { return $this->formType::appendSessionExtras($this->getOptions(), $extras); }
-
-    public function getUploadedFiles()
-    {
-        $uploadedFiles = [];
-
-        if ($session = $this->getSession()) {
-
-            $files = $session["FILES"];
-            foreach($files as $name => $file) {
-
-                $uploadedFiles[$name] = new UploadedFile(
-                    $file["tmp_name"], $file["name"], $file["type"], $file["error"]);
-            }
-        }
-
-        return $uploadedFiles;
-    }
-
-    public function process(Request $request): Response
+    public function handleRequest(Request $request): static
     {
         if(!$this->form)
             throw new Exception("No form provided in FormProcessor");
 
-        $this->form->handleRequest($this->request);
+        $this->form->handleRequest($request);
 
-        // Basic form arguments
-        $options  = $this->getOptions();
-        $formType = $this->getFormType();
-        $data     = $this->getData();
+        $step = 0;
+        $stepMax = 0;
+        if($this->form instanceof FormFlowInterface) {
 
-        // Prepare possible multiple step forms
-        $step        = $formType::getStep($options);
-        $nextStep    = false;
-        $stepMax     = $formType::getStepMax($options);
-        $submitCount = count($this->onSubmitCallback);
-        if($stepMax != $submitCount)
-            throw new Exception("Number of FormProcessor::onSubmit() calls is not matching the number of steps in ".$formType);
+            $step    = $this->form->getStep();
+            $stepMax = $this->form->getStepMax();
 
-        // Bind session to form (retrieve previous step information)
-        $formType::bindSession($options, $this->requestStack->getSession());
-        $formSession = $this->getSession();
+            $formType = $this->getFormType();
+            $session  = $this->getSession();
 
-        // Check if tmp files are still available..
-        $fileExpirationTriggered = false;
-        $formFiles = $formSession["FILES"] ?? [];
-        foreach ($formFiles as $file)
-            if ($fileExpirationTriggered = !file_exists($file["tmp_name"])) break;
+            $nextStep = true; //false;
 
-        // If form expired/session got destroyed
-        if ($step && ($fileExpirationTriggered || !$formType::hasSession($options))) {
+            $submitCount = count($this->onSubmitCallbacks);
+            if($stepMax > 0 && $submitCount > 1 && $stepMax != $submitCount)
+                throw new Exception("Number of FormProcessor::onSubmit() calls is not matching the number of steps in ".$formType);
 
-            $notification = new Notification("Sorry, the form you were filling has expired. Please try again.");
-            $notification->send("danger");
+            // Bind session to form (retrieve previous step information)
+            // $this->bindSession($request->getSession());
+            // $formSession = $this->getSession();
 
-            $formType::setStep($options, $step = 0);
-            $formType::removeAllSteps($options);
+            // Check if tmp files are still available..
+            // $fileExpirationTriggered = false;
+            // $formFiles = $formSession["FILES"] ?? [];
+            // foreach ($formFiles as $file)
+            //     if ($fileExpirationTriggered = !file_exists($file["tmp_name"])) break;
 
-            $this->form = $this->formFactory->create($formType, $data, $options);
+            // // If form expired/session got destroyed
+            // if ($step && ($fileExpirationTriggered || !$session)) {
 
-            // Determine if able to go to next step
-        } else if($this->form->isSubmitted() && $this->form->isValid()) {
+            //     $notification = new Notification("The form you were filling has expired. Please try again.");
+            //     $notification->send("danger");
 
-            $submittedToken = $this->request->request->get('_csrf_token');
-            $tokenName      = array_key_exists("csrf_token_id", $options) ? $options["csrf_token_id"] : "";
-            $isTokenValid   = !empty($tokenName) ? $this->csrfTokenManager->isTokenValid($tokenName, $submittedToken) : true;
+            //     $this->form->reset();
+            // }
 
-            if ($isTokenValid) $nextStep = true;
-            else {
+            // Go to next step
+            // if($nextStep) {
 
-                $notification = new Notification("Invalid CSRF token detected.");
-                $notification->send("danger");
-            }
+            //     // Handle multi-step form
+            //     $step = $this->form->getNextStep();
+            //     $this->form->setStep($step);
+
+            //     // Create new form if required
+            //     $this->appendFiles($request);
+            //     $this->appendPost($request);
+            // }
         }
 
-        // Go to next step
-        if($nextStep) {
+        if($this->form->isSubmitted()) {
 
-            // Handle multi-step form
-            $step = $this->formType::getNextStep($options);
-            $formType::setStep($options, $step);
-            $formType::removeAllSteps($options);
+            // Prepare response either calling onDefault or onSubmit step
+            if($this->form->isValid())
+                $this->response = count($this->onSubmitCallbacks) > $step-1 ? call_user_func($this->onSubmitCallbacks[$step-1], $this, $request) : null;            
+            else
+                $this->response = $this->onInvalidCallback ? call_user_func($this->onInvalidCallback, $this, $request) : null;
 
-            // Create new form if required
-            $this->form = $this->formFactory->create($formType, $data, $options);
-            $this->appendFiles();
-            $this->appendPost();
+            if($step >= $stepMax)
+                $this->killSession($session);
         }
 
-        // Prepare response either calling onDefault or onSubmit step
-        if(!$step) $response = call_user_func($this->onDefaultCallback, $this);
-        else $response    = call_user_func($this->onSubmitCallback[$step-1], $this, $this->request);
+        if(!$this->response)
+            $this->response = $this->onDefaultCallback ? call_user_func($this->onDefaultCallback, $this, $request) : null;
 
-        if (!$response instanceof Response)
-            throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit()#" . ($step + 1) . ": an instance of Response() is expected");
-
-        // If we reached the end, just kill the session..
-        if($step == $stepMax)
-            $formType::killSession($options);
-
-        return $response;
+        return $this;
     }
 }

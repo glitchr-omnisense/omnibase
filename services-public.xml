@@ -79,12 +79,8 @@
         <service id="base.service.image" alias="Base\Service\ImageService" />
         <service id="Base\Service\ImageServiceInterface" alias="base.service.image"/>
 
-        <service id="base.form.proxy"     alias="Base\Form\FormProxy" />
-        <service id="Base\Form\FormProxyInterface" alias="base.form.proxy"/>
-        <service id="base.form.factory"   alias="Base\Form\FormFactory" />
-        <service id="Base\Form\FormFactoryInterface" alias="base.form.factory"/>
-        <service id="base.form.processor" alias="Base\Form\FormProcessor" />
-        <service id="Base\Form\FormProcessorInterface" alias="base.form.processor"/>
+        <service id="form.proxy"     alias="Base\Form\FormProxy" />
+        <service id="Base\Form\FormProxyInterface" alias="form.proxy"/>
 
         <service id="ea_extension" alias="Base\Backend\Config\Extension" />
 

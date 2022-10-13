@@ -5,20 +5,13 @@ namespace Base\Field\Configurator;
 use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Field\DiscriminatorField;
-use Base\Field\SelectField;
 use Base\Field\Type\DiscriminatorType;
-use Base\Field\Type\SelectType;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Action;
-use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext;
 use EasyCorp\Bundle\EasyAdminBundle\Contracts\Field\FieldConfiguratorInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto;
 use EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto;
 use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
-use Exception;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class DiscriminatorConfigurator implements FieldConfiguratorInterface
@@ -72,7 +65,8 @@ class DiscriminatorConfigurator implements FieldConfiguratorInterface
                 $text  = implode(".", array_map("camel2snake", explode("\\", $class)));
             }
 
-            $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);
+            if($class)
+                $formattedValues[] = DiscriminatorType::getFormattedValues($text, $discriminatorMap[$value] ?? $defaultClass, $this->translator);
         }
 
         if($showLast) {

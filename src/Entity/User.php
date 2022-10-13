@@ -31,7 +31,6 @@ use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Annotations\Annotation\Timestamp;
 use Base\Annotations\Annotation\Uploader;
 use Base\Annotations\Annotation\Hashify;
-use App\Enum\UserRole;
 
 use Base\Service\LocaleProvider;
 use Base\Notifier\Recipient\Recipient;
@@ -40,12 +39,13 @@ use Base\Service\Model\IconizeInterface;
 
 use Base\Traits\BaseTrait;
 use Symfony\Component\PropertyAccess\PropertyAccess;
-use Base\Enum\UserState;
 use Exception;
 use Base\Database\Annotation\Cache;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Base\Enum\UserRole;
+use Base\Enum\UserState;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -70,7 +70,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public const __DEFAULT_IDENTIFIER__ = "email";
 
     public function isGranted($role): bool { return $this->getService()->isGranted($role, $this); }
-    public function killSession() { $this->Logout(); }
+    public function killSession() { $this->logout(); }
 
     public static $identifier = self::__DEFAULT_IDENTIFIER__;
     public function getUserIdentifier(): string

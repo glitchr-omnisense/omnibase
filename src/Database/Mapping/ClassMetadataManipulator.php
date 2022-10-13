@@ -18,6 +18,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
+use Exception;
 use InvalidArgumentException;
 
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -25,6 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class ClassMetadataManipulator
@@ -122,6 +124,12 @@ class ClassMetadataManipulator
     public function getDiscriminatorMap($entity): array { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->discriminatorMap : []; }
     public function getRootEntityName($entity): ?string { return $this->getClassMetadata($entity) ? $this->getClassMetadata($entity)->rootEntityName : null; }
 
+    public function getRepository(null|string|object $entityOrClassOrMetadata)
+    {
+        $classMetadata = $this->getClassMetadata($entityOrClassOrMetadata);
+        return $classMetadata ? $this->getEntityManager()->getRepository($classMetadata->name) : null;
+    }
+
     public function getClassMetadata(null|string|object $entityOrClassOrMetadata)
     {
         if($entityOrClassOrMetadata === null) return null;
@@ -160,8 +168,11 @@ class ClassMetadataManipulator
             else if($fieldName == "uuid")
                 $validFields[$fieldName] = ["form_type" => HiddenType::class];
             else if($fieldName == "translations")
-                $validFields[$fieldName] = ["form_type" => TranslationType::class];
-
+                $validFields[$fieldName] = [
+                    "form_type" => TranslationType::class, 
+                    "translatable_class" => $classMetadata->getName(),
+                    "translation_class"  => $classMetadata->getName()::getTranslationEntityClass(),
+                ];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "datetime")
                 $validFields[$fieldName] = ["form_type" => DateTimePickerType::class];
             else if($this->getTypeOfField($entityOrClassOrMetadata, $fieldName) == "array")
@@ -384,6 +395,31 @@ class ClassMetadataManipulator
         return $this->hasAssociation($entityOrClassOrMetadata, $property)
             ? $this->getTypeOfAssociation($entityOrClassOrMetadata, $property)
             : $this->getTypeOfField($entityOrClassOrMetadata, $property);
+    }
+
+    public function isCollectionOwner(object $entityOrForm, ?Collection $collection)
+    {
+        if ($collection == null) return false; 
+
+        $entity = $entityOrForm;
+        if ($entityOrForm instanceof FormInterface)
+            $entity = $entityOrForm->getParent()?->getData();
+
+        if ($entity == null || !$this->isEntity($entity)) 
+            return false;
+
+        if($collection instanceof PersistentCollection) {
+
+            $isTranslatable = class_implements_interface($collection->getOwner(), TranslationInterface::class);
+            if($isTranslatable && $entity == $collection->getOwner()->getTranslatable()) return true;
+
+            return $entity === $collection->getOwner();
+        }
+        
+        if($collection instanceof Collection)
+            return in_class($entity, $collection);
+
+        return false;
     }
 
     public function getTargetClass(null|string|object $entityOrClassOrMetadata, $fieldName)

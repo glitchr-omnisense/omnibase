@@ -1557,8 +1557,7 @@ class ServiceEntityParser
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
 
-        $qb->select('COUNT('.trim($mode.' '.$e_column).') AS count');
-
+        $qb->addSelect('COUNT('.trim($mode.' '.$e_column).') AS count');
         return $qb->getQuery();
     }
 
@@ -1577,7 +1576,7 @@ class ServiceEntityParser
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, $column);
 
-        $qb->select("LENGTH(".$e_column.") as length");
+        $qb->addSelect("LENGTH(".$e_column.") as length");
 
         return $qb->getQuery();
     }
@@ -1603,24 +1602,23 @@ class ServiceEntityParser
         if(is_string($groupBy)) $groupBy = [$groupBy];
         if(!is_array($groupBy)) throw new Exception("Unexpected \"groupBy\" argument type provided \"".gettype($groupBy)."\"");
 
-        foreach ($groupBy as $name => $column) {
+        foreach ($groupBy as $key => $column) {
 
             $aliasIdentifier = str_replace(".", "_", $column);
 
             $column = implode(".", array_map(fn ($c) => $this->getAlias($c), explode(".", $column)));
             $columnHead = explode(".", $column)[0] ?? $column;
 
-            $groupBy[$name] = $column;
+            $groupBy[$key] = $column;
             if($this->classMetadata->hasAssociation($columnHead))
-                 $groupBy[$name] = self::ALIAS_ENTITY."_".$groupBy[$name];
+                $groupBy[$key] = self::ALIAS_ENTITY."_".$groupBy[$key];
             else if($this->classMetadata->hasField($columnHead))
-                $groupBy[$name] = self::ALIAS_ENTITY.".".$groupBy[$name];
+                $groupBy[$key] = self::ALIAS_ENTITY.".".$groupBy[$key];
 
-            if($groupBy[$name] == self::ALIAS_ENTITY.".".$aliasIdentifier) $qb->addSelect($groupBy[$name]);
-            else $qb->addSelect("(".$groupBy[$name].") AS ".$aliasIdentifier);
-
-            if($this->classMetadata->hasAssociation($column))
-                $this->leftJoin($qb, self::ALIAS_ENTITY.".".$aliasIdentifier);
+            if($this->classMetadata->hasAssociation($column)) {
+                $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column, $aliasIdentifier);
+                $qb->addSelect("(".$groupBy[$key].".id) AS ".$aliasIdentifier);
+            }
         }
 
         return $qb->groupBy(implode(",", $groupBy));

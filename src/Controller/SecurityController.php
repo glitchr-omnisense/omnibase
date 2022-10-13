@@ -4,7 +4,6 @@ namespace Base\Controller;
 
 use App\Entity\User;
 
-use Base\BaseBundle;
 use Base\Entity\User\Notification;
 use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
@@ -29,6 +28,8 @@ use Base\Entity\User\Token;
 use Base\Form\Type\SecurityResetPasswordType;
 use App\Repository\UserRepository;
 use Base\Annotations\Annotation\Iconize;
+use Base\Form\FormProxy;
+use Base\Form\FormProcessorInterface;
 use Base\Service\ReferrerInterface;
 use Base\Form\Type\SecurityResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
@@ -38,17 +39,19 @@ use Base\Service\MaternityServiceInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Form\FormInterface;
 
 class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository, BaseService $baseService, TokenStorageInterface $tokenStorage, TranslatorInterface $translator)
+    public function __construct(EntityManager $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository, BaseService $baseService, FormProxy $formProxy, TokenStorageInterface $tokenStorage, TranslatorInterface $translator)
     {
         $this->baseService     = $baseService;
         $this->translator      = $translator;
         $this->tokenStorage    = $tokenStorage;
-
+        $this->formProxy     = $formProxy;
+        
         $this->entityManager   = $entityManager;
         $this->userRepository  = $userRepository;
         $this->tokenRepository = $tokenRepository;
@@ -70,6 +73,9 @@ class SecurityController extends AbstractController
         // Redirect to the right page when access denied
         if ( ($user = $this->getUser()) ) {
 
+            // Remove expired tokens
+            $user->removeExpiredTokens();
+            
             if($this->isGranted('IS_AUTHENTICATED_FULLY'))
                 return $this->redirect($referrer->getUrl() ?? $this->baseService->getAsset("/"));
 
@@ -78,16 +84,13 @@ class SecurityController extends AbstractController
         }
 
         // Generate form
-        $user = new User();
-        $form = $this->createForm(SecurityLoginType::class, $user, ["identifier" => $lastUsername]);
-        $form->handleRequest($request);
-
-        // Remove expired tokens
-        $user->removeExpiredTokens();
+        $formProcessor = $this->formProxy
+            ->createProcessor("form:login", SecurityLoginType::class, ["identifier" => $lastUsername])
+            ->handleRequest($request);
 
         return $this->render('@Base/security/login.html.twig', [
             "identifier" => $lastUsername,
-            "form" => $form->createView()
+            "form" => $formProcessor->getForm()->createView()
         ]);
     }
 
@@ -151,35 +154,36 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('user_profile');
 
         // Prepare registration form
-        $newUser = new User();
-        $form = $this->createForm(SecurityRegistrationType::class, $newUser, ['validation_groups' => ['new']]);
+        return $this->formProxy->createProcessor("form:login", SecurityRegistrationType::class, ['validation_groups' => ['new']])
+            ->onSubmit(function(FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator){
 
-        // An account might require to be verified by an admin
-        $adminApprovalRequired = $parameterBag->get("security.user.adminApproval") ?? false;
-        $newUser->approve(!$adminApprovalRequired);
+                $newUser = $formProcessor->hydrate((new User()));
 
-        $form->handleRequest($request);
+                // An account might require to be verified by an admin
+                $adminApprovalRequired = $this->parameterBag->get("security.user.adminApproval") ?? false;
+                $newUser->approve(!$adminApprovalRequired);
+                
+                $newUser->setPlainPassword($formProcessor->getData("plainPassword"));
+                
+                // Social account connection
+                if (($user = $this->getUser()) && $user->isVerified())
+                    $newUser->verify($user->isVerified());
 
-        // Registration form registered
-        if ($form->isSubmitted() && $form->isValid()) {
+                $this->entityManager->persist($newUser);
+                $this->entityManager->flush();
 
-            $newUser->setPlainPassword($form->get('plainPassword')->getData());
-            if ($user && $user->isVerified()) // Social account connection
-                $newUser->verify($user->isVerified());
+                return $userAuthenticator->authenticateUser($formProcessor->getEntity(), $authenticator, $request);
+            })
 
-            $this->entityManager->persist($newUser);
-            $this->entityManager->flush();
+            ->onDefault(function(FormProcessorInterface $formProcessor) {
 
-            return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
-        }
+                return $this->render('@Base/security/register.html.twig', [
+                    'form' => $formProcessor->getForm()->createView(),
+                    'user' => $formProcessor->getData()
+                ]);
+            })
 
-        // Retrieve form if no social account connected
-        if (!$user) $user = $newUser;
-
-        return $this->render('@Base/security/register.html.twig', [
-            'form' => $form->createView(),
-            'user' => $user
-        ]);
+            ->handleRequest($request);
     }
 
     /**
@@ -314,8 +318,7 @@ class SecurityController extends AbstractController
         } else {
 
             $user->disable();
-
-            $this->baseService->Logout();
+            $user->logout();
 
             $this->entityManager->flush();
             return $this->redirectToRoute($this->baseService->getRouteName("/"));

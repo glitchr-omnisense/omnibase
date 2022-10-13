@@ -369,6 +369,12 @@ namespace {
         return $fname !== false && strncmp($fname, $base, strlen($base)) === 0;
     }
 
+    function in_class(object $class, mixed $needle) {
+
+        $haystack = array_filter(get_object_vars($class));
+        return in_array($needle, $haystack, true);
+    }
+
     function is_uuidv4(?string $uuid) { return is_string($uuid) && !(preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/', $uuid) !== 1); }
     function synopsis(...$args) { return class_synopsis(...$args); }
     function class_synopsis(...$args)
@@ -1989,20 +1995,24 @@ namespace {
         if($reflConstr->getNumberOfParameters() && !count($args)) $newObject = $reflNewClass->newInstanceWithoutConstructor();
         else $newObject = new $newClass(...$args);
 
-        foreach ($reflNewClass->getProperties() as $reflNewProperty) {
+        do {
 
-            $reflNewProperty->setAccessible(true);
+            foreach ($reflNewClass->getProperties() as $reflNewProperty) {
 
-            $reflProperty = array_filter($reflProperties, fn($p) => $p->getName() == $reflNewProperty->getName());
-            $reflProperty = begin($reflProperty) ?? null;
-            if ($reflProperty) {
+                $reflNewProperty->setAccessible(true);
 
-                $reflProperty->setAccessible(true);
+                $reflProperty = array_filter($reflProperties, fn($p) => $p->getName() == $reflNewProperty->getName());
+                $reflProperty = begin($reflProperty) ?? null;
+                if ($reflProperty) {
 
-                $value = $reflProperty->getValue($object);
-                $reflNewProperty->setValue($newObject, $value);
+                    $reflProperty->setAccessible(true);
+
+                    $value = $reflProperty->getValue($object);
+                    $reflNewProperty->setValue($newObject, $value);
+                }
             }
-        }
+
+        } while ($reflNewClass = $reflNewClass->getParentClass());
 
         return $newObject;
     }

@@ -23,6 +23,7 @@ trait TranslationTrait
     /**
      * Translatable related methods
      */
+    public static function getEntityFqcn(): string { dump(self::getTranslatableEntityClass()); return self::getTranslatableEntityClass()::getTranslationEntityClass(); }
     public static function getTranslatableEntityClass(): string
     {
         // By default, the translatable class has the same name but without the suffix
@@ -77,14 +78,14 @@ trait TranslationTrait
             if ($value === null)
                 continue;
 
-            if($addConditions !== null && call_user_func_array($addConditions, [$var, $value]))
-                return true;
-            if (is_string($value) && trim($value) === "")
-                return true;
-            if (is_array($value) && $value === [])
-                return true;
-
-            return false;
+            if($addConditions !== null && !call_user_func_array($addConditions, [$var, $value]))
+                return false;
+            if (is_string($value) && trim($value) !== "")
+                return false;
+            if (is_array($value) && $value !== [])
+                return false;
+            if (is_bool($value) && $value === true)
+                return false;
         }
 
         return true;

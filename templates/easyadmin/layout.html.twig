@@ -341,7 +341,7 @@
                                             {% set isHtml = _content_title != (_content_title|striptags) %}
 
                                             {% if url is not empty and not isHtml %}<a href="{{url}}">{% endif %}
-                                                {{ _content_title|raw }}
+                                                {{ _content_title|mb_ucwords }}
                                             {% if url is not empty %}</a>{% endif %}
 
                                             {% set _content_help = block('content_help') ?? null %}

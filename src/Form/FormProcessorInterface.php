@@ -2,35 +2,26 @@
 
 namespace Base\Form;
 
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Form\Form;
 
 interface FormProcessorInterface
 {
-    public function onDefault($callback);
-    public function onSubmit($callback);
+    public function handleRequest(Request $request): static;
+    public function hydrate(mixed $data): mixed;
+    
+    public function get(): FormInterface;
+    public function getForm(): FormInterface;
+    public function getData()  : mixed;
+    public function setData(mixed $data): self;
+    public function getOption (string $name):mixed;
+    public function getOptions():array;
+    public function getFormType():string;
 
-    public function get();
-    public function getForm();
+    public function onDefault(callable    $callback): static;
+    public function onInvalid(callable    $callback): static;
+    public function onSubmit (callable ...$callbacks): static;
 
-    public function set(Form $form);
-    public function setForm(Form $form);
-
-    public function getData();
-    public function getOptions();
-    public function getFormType();
-
-    public function getSession();
-    public function getPost();
-    public function getFiles();
-
-    public function getUploadedFiles();
-    public function getExtras();
-
-    public function appendPost();
-    public function appendFiles();
-    public function appendExtras($extras);
-
-    public function process(Request $request): Response;
+    public function getResponse(): Response;
 }

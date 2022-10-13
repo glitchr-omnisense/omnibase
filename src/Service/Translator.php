@@ -87,7 +87,7 @@ class Translator implements TranslatorInterface
         } else if($recursive) { // Check if recursive dot structure
 
             $count = 0;
-            $fn = fn($k) => $this->trans($id, $parameters, $domain, $locale, false);
+            $fn = fn($k) => $this->trans($k, $parameters, $domain, $locale, false);
 
             $ret = preg_replace_callback("/".self::STRUCTURE_DOT."|".self::STRUCTURE_DOTBRACKET."/", $fn, $id, -1, $count);
             if ($ret != $id) return $ret;
@@ -165,6 +165,7 @@ class Translator implements TranslatorInterface
         switch($parseBy) {
 
             case self::PARSE_EXTENDS:
+                
                 $parent = class_exists($class) ? get_parent_class($class) : null;
 
                 $class = class_basename($class);
@@ -174,10 +175,11 @@ class Translator implements TranslatorInterface
 
                 return camel2snake($class);
 
-            break;
-
+            default: 
             case self::PARSE_NAMESPACE:
-            default: return camel2snake(implode(".", array_slice(explode("\\", $class), 2)));
+
+                $class = str_replace(["Proxies\\__CG__\\", "App\\Entity\\", "Base\\Entity\\"], ["", "", "",], $class);
+                return camel2snake(implode(".", array_unique(explode("\\", $class))));
         }
     }
 

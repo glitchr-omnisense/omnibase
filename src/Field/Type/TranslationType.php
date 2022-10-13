@@ -381,6 +381,5 @@ class TranslationType extends AbstractType implements DataMapperInterface
                 }
             }
         }
-
     }
 }

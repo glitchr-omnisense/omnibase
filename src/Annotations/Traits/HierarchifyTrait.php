@@ -20,14 +20,12 @@ trait HierarchifyTrait
 
     public function getHierarchyTree(?string $separator = null)
     {
-        if (!isset($this->getClassMetadata()->entityHierarchy))
-            throw new \Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
-
-        $separator = $separator ?? $this->getClassMetadata()->entityHierarchySeparator ?? "/";
-        return (is_array($this->getClassMetadata()->entityHierarchy) ?
-
-            $this->getClassMetadata()->entityHierarchy :
-            explode($separator, $this->getClassMetadata()->entityHierarchy)
-        );
+        $entityHierarchy = $this->getClassMetadataCompletor()->entityHierarchy;
+        if (empty($entityHierarchy))
+        throw new \Exception("Missing @Hierarchify for class \"" . get_class($this) . "\"");
+        
+        $entityHierarchySeparator = $this->getClassMetadataCompletor()->entityHierarchySeparator;
+        $separator = $separator ?? $entityHierarchySeparator ?? "/";
+        return (is_array($entityHierarchy) ? $entityHierarchy : explode($separator, $entityHierarchy));
     }
 }

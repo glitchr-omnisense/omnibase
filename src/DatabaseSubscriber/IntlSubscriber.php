@@ -9,6 +9,7 @@ use Base\Service\LocaleProviderInterface;
 use Base\Database\TranslatableInterface;
 use Base\Database\TranslationInterface;
 use Base\Database\Walker\TranslatableWalker;
+use Base\Entity\ThreadIntl;
 use Doctrine\Bundle\DoctrineBundle\EventSubscriber\EventSubscriberInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
@@ -18,6 +19,7 @@ use Doctrine\ORM\Events;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
+use Exception;
 use InvalidArgumentException;
 
 class IntlSubscriber implements EventSubscriberInterface
@@ -42,12 +44,31 @@ class IntlSubscriber implements EventSubscriberInterface
     {
         $uow = $this->entityManager->getUnitOfWork();
 
-        $translation = $args->getObject();
-        if (is_subclass_of($translation, TranslationInterface::class, true)) {
+        $object = $args->getObject();
+        $this->upgradeIntl($object);
 
-            if ($translation->isEmpty()) // Mark as removal for mispersistent translations..
-                $uow->scheduleOrphanRemoval($translation);
+        if (is_subclass_of($object, TranslationInterface::class, true)) {
+
+            if ($object->isEmpty()) // Mark as removal for mispersistent translations..
+                $uow->scheduleOrphanRemoval($object);
         }
+    }
+
+    public function upgradeIntl($intl) 
+    {
+        $translations = [];
+        if($intl instanceof TranslationInterface)
+            $translations[] = $intl;
+        if($intl instanceof TranslatableInterface)
+            $translations = $intl->getTranslations()->toArray();
+
+        foreach($translations as $translation) {
+
+            $translatable = $translation->getTranslatable();
+            if(! $translation instanceof ($translatable::getTranslationEntityClass()) )
+                throw new Exception("Upgrade class type required.");
+        }
+
     }
 
     public function onFlush(OnFlushEventArgs $args)

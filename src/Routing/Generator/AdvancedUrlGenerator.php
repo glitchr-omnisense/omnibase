@@ -8,6 +8,7 @@ use Base\Security\RescueFormAuthenticator;
 use Base\Traits\BaseTrait;
 use Exception;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Routing\Exception\InvalidParameterException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Symfony\Component\Routing\Generator\CompiledUrlGenerator;
 use Symfony\Component\Routing\RequestContext;
@@ -65,15 +66,28 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
             }
         }
 
+        //
+        // Lookup for lang in current group
         $routeParameters = array_filter($routeParameters, fn($p) => $p !== null);
         if(!str_ends_with($routeName, ".".$this->getRouter()->getLang())) {
             try { return parent::generate($routeName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
-            catch (RouteNotFoundException $e) { }
+            catch (InvalidParameterException|RouteNotFoundException $e) { }
         }
 
         try { return sanitize_url(parent::generate($routeName, array_filter($routeParameters), $referenceType)); }
-        catch (RouteNotFoundException $e) { throw $e; }
+        catch (InvalidParameterException|RouteNotFoundException $e) { }
 
+        //
+        // Lookup for lang in default group
+        $routeGroups  = $this->getRouter()->getRouteGroups($routeName);
+        $routeDefaultName = first($routeGroups);
+        if(!str_ends_with($routeName, ".".$this->getRouter()->getLang())) {
+            try { return parent::generate($routeDefaultName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
+            catch (InvalidParameterException|RouteNotFoundException $e) { }
+        }
+
+        try { return sanitize_url(parent::generate($routeDefaultName, array_filter($routeParameters), $referenceType)); }
+        catch (InvalidParameterException|RouteNotFoundException $e) { throw $e; }
     }
 
     public function resolveParameters(?array $routeParameters = null): ?array

@@ -8,20 +8,7 @@
         <defaults public="false" />
 
         <service id="Base\Form\FormProxy" public="true">
-            <argument type="service" id="base.form.factory" />
-            <argument type="service" id="base.form.processor" />
-        </service>
-
-        <service id="Base\Form\FormFactory" public="true" parent="Symfony\Component\Form\FormFactoryInterface">
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.database.metadata_manipulator" />
-        </service>
-
-        <service id="Base\Form\FormProcessor">
-            <argument type="service" id="base.form.factory" />
-            <argument type="service" id="base.database.entity_hydrator" />
-            <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="request_stack" />
+            <argument type="service" id="form.factory" />
         </service>
 
         <service id="Base\Service\Referrer" public="true">
@@ -150,7 +137,7 @@
             <argument type="service" id="security.csrf.token_manager" />
             <argument type="service" id="parameter_bag.hot" />
             <argument type="service" id="base.notifier" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="locale_provider" />
             <argument type="service" id="setting_bag" />
             <argument type="service" id="base.service.image" />
@@ -159,6 +146,7 @@
             <argument type="service" id="router" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.database.metadata_manipulator" />
+            <argument type="service" id="EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator" />
         </service>
 
         <service id="Base\Service\LocaleProvider" public="true">
@@ -200,10 +188,10 @@
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
-        <service id="Base\Form\Extension\FormTypeFlowExtension" >
+        <service id="Base\Form\Extension\FormTypeTranslateExtension" >
             <tag name="form.type_extension" />
         </service>
-        <service id="Base\Form\Extension\FormTypeTranslateExtension" >
+        <service id="Base\Form\Extension\FormTypeFlowExtension" >
             <tag name="form.type_extension" />
         </service>
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
@@ -309,6 +297,7 @@
             <argument type="service" id="setting_bag" />
             <argument type="service" id="twig" />
             <argument type="service" id="translator" />
+            <argument type="service" id="form.proxy" />
         </service>
 
         <service id="Base\Controller\SecurityController">
@@ -320,6 +309,7 @@
             <argument type="service" id="Base\Repository\User\TokenRepository" />
             <argument type="service" id="App\Repository\UserRepository" />
             <argument type="service" id="base.service" />
+            <argument type="service" id="form.proxy" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
         </service>
@@ -558,7 +548,7 @@
         <service id="Base\Twig\Extension\ClassTwigExtension"       ><tag name="twig.extension" /></service>
         <service id="Base\Twig\Extension\ClipboardTwigExtension"   ><tag name="twig.extension" /></service>
 
-        <service id="Base\Twig\Extension\FormTwigExtension"        ><tag name="twig.extension" /><argument type="service" id="base.form.proxy" /></service>
+        <service id="Base\Twig\Extension\FormTwigExtension"        ><tag name="twig.extension" /><argument type="service" id="form.proxy" /></service>
         <service id="Base\Twig\Extension\WidgetTwigExtension"      ><tag name="twig.extension" /><argument type="service" id="base.widget_provider" /></service>
         <service id="Base\Twig\Extension\LangTwigExtension"      ><tag name="twig.extension" /><argument type="service" id="locale_provider" /></service>
         <service id="Base\Twig\Extension\PaginatorTwigExtension"   ><tag name="twig.extension" /><argument type="service" id="translator" /></service>
@@ -569,12 +559,12 @@
         <service id="Base\Form\Extension\FormTypeCsrfExtension"     ><tag name="form.type_extension" /></service>
         <service id="Base\Form\Extension\FormTypeExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
         <service id="Base\Form\Extension\FormTypeCollectionExtension"         ><tag name="form.type_extension" />
             <argument type="service" id="base.service" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
@@ -612,7 +602,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="base.form.proxy" />
+            <argument type="service" id="form.proxy" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
@@ -620,7 +610,7 @@
             <tag name="controller.service_arguments" />
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
-            <argument type="service" id="base.form.proxy" />
+            <argument type="service" id="form.proxy" />
             <argument type="service" id="doctrine.orm.entity_manager" />
         </service>
 
@@ -753,7 +743,7 @@
 
         <service id="Base\Field\Type\SelectType">
             <tag name="form.type" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="translator" />
             <argument type="service" id="base.database.metadata_manipulator" />
@@ -774,7 +764,7 @@
 
         <service id="Base\Field\Type\AssociationType">
             <tag name="form.type" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="translator" />
@@ -782,7 +772,7 @@
 
         <service id="Base\Field\Type\AssociationFileType">
             <tag name="form.type" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="base.database.entity_hydrator" />
             <argument type="service" id="base.service.image" />
@@ -790,14 +780,14 @@
 
         <service id="Base\Field\Type\AttributeType">
             <tag name="form.type" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="twig" />
         </service>
 
         <service id="Base\Field\Type\DiscriminatorType">
             <tag name="form.type" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.database.metadata_manipulator" />
         </service>
 
@@ -860,7 +850,7 @@
 
         <service id="Base\Field\Type\QuadrantType"><tag name="form.type" /><argument type="service" id="twig" /></service>
         <service id="Base\Field\Type\CropperType"><tag name="form.type" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="parameter_bag" />
             <argument type="service" id="twig" />
@@ -875,7 +865,7 @@
             <argument type="service" id="twig" />
             <argument type="service" id="base.database.metadata_manipulator" />
             <argument type="service" id="security.csrf.token_manager" />
-            <argument type="service" id="base.form.factory" />
+            <argument type="service" id="form.factory" />
             <argument type="service" id="base.service" />
             <argument type="service" id="base.service.image" />
         </service>

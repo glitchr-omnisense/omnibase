@@ -25,7 +25,7 @@ class ProfileController extends AbstractController
     {
         if($id > 0) {
 
-            if ( !($user = $this->userRepository->find($id)) )
+            if ( !($user = $this->userRepository->cacheById($id)) )
                 throw $this->createNotFoundException('User not found.');
 
         } else {
@@ -45,7 +45,7 @@ class ProfileController extends AbstractController
     {
         if($id > 0) {
 
-            if ( !($user = $this->userRepository->find($id)) )
+            if ( !($user = $this->userRepository->cacheById($id)) )
                 throw $this->createNotFoundException('User not found.');
 
         } else {

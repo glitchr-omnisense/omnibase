@@ -123,6 +123,8 @@ final class FileTwigExtension extends AbstractExtension
 
     public function url(?string $url): ?string
     {
+        if(!$url) return null;
+
         $url = trim($url);
         $parseUrl = parse_url($url);
 

@@ -5,6 +5,7 @@ namespace Base\Form\Extension;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 use Symfony\Component\Form\AbstractTypeExtension;
@@ -50,7 +51,8 @@ class FormTypeCollectionExtension extends AbstractTypeExtension
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
-        if(!$this->formFactory->isOwningField($form)) {
+        if ($form->getData() instanceof Collection &&
+            !$this->classMetadataManipulator->isCollectionOwner($form, $form->getData())) {
 
             $view->vars["required"] = false;
             $view->vars["disabled"] = true;

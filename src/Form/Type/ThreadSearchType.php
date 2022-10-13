@@ -21,7 +21,7 @@ class ThreadSearchType extends AbstractType
     {
         $builder->add('generic', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
         $builder->add('content', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
-        $builder->add('title', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
+        $builder->add('title'  , \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
         $builder->add('excerpt', \Symfony\Component\Form\Extension\Core\Type\SearchType::class);
     }
 }

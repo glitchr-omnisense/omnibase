@@ -18,6 +18,9 @@ user:
   token:
     _singular: "jeton"
     _plural: "jetons"
+  address:
+    _singular: "adresse"
+    _plural: "adresses"
 
 extension:
   revision:

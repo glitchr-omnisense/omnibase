@@ -153,35 +153,35 @@ quadrant:
   _plural: "cadrans cardinaux"
   origin:
     _singular: centre
-    _plural: quadrant.east.singular
+    _plural: quadrant.east._singular
   east:
     _singular: est
-    _plural: quadrant.east.singular
+    _plural: quadrant.east._singular
   south:
     _singular: sud
-    _plural: quadrant.south.singular
+    _plural: quadrant.south._singular
   west:
     _singular: ouest
-    _plural: quadrant.west.singular
+    _plural: quadrant.west._singular
   north:
     _singular: nord
-    _plural: quadrant.north.singular
+    _plural: quadrant.north._singular
 
 quadrant8:
   _singular: "cadran ordinal"
   _plural: "cadrans ordinaux"
   northeast:
     _singular: nord-est
-    _plural: quadrant.northeast.singular
+    _plural: quadrant.northeast._singular
   northwest:
     _singular: nord-ouest
-    _plural: quadrant.northwest.singular
+    _plural: quadrant.northwest._singular
   southeast:
     _singular: sud-est
-    _plural: quadrant.southeast.singular
+    _plural: quadrant.southeast._singular
   southwest:
     _singular: sud-ouest
-    _plural: quadrant.southwest.singular
+    _plural: quadrant.southwest._singular
 
 quadrant16:
   _singular: "cadran intercardinal"

@@ -6,11 +6,11 @@ use App\Enum\UserRole;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 use Symfony\Component\Form\AbstractTypeExtension;
-
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 
@@ -48,8 +48,8 @@ class FormTypeExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'form2' => $this->baseService->getParameterBag("base.twig.use_form2"),
-            'easyadmin' => $this->baseService->getParameterBag("base.twig.use_ea")
+            'form2'          => $this->baseService->getParameterBag("base.twig.use_form2"),
+            'easyadmin'      => $this->baseService->getParameterBag("base.twig.use_ea")
         ]);
     }
 
@@ -167,6 +167,7 @@ class FormTypeExtension extends AbstractTypeExtension
 
         if($this->formFactory->guessSortable($form, $options)) $view->vars["is_sortable"] = true;
         if($this->formFactory->guessMultiple($form, $options)) $view->vars["is_multiple"] = true;
-        if(!$this->formFactory->isOwningField($form)) $view->vars["is_inherited"] = true;
+        if($form->getData() instanceof Collection && !$this->classMetadataManipulator->isCollectionOwner($form, $form->getData()))
+            $view->vars["is_inherited"] = true;
     }
 }

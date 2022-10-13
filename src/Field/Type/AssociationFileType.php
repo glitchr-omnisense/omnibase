@@ -192,7 +192,8 @@ class AssociationFileType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(\Traversable $forms, &$viewData): void
     {
         $parentForm = current(iterator_to_array($forms))->getParent();
-        if(!$this->formFactory->isOwningField($parentForm)) return;
+        if ($parentForm?->getData() instanceof Collection &&
+            !$this->classMetadataManipulator->isCollectionOwner($parentForm, $parentForm?->getName())) return;
 
         $parentEntity = $parentForm->getParent() ? $parentForm->getParent()->getData() : null;
 

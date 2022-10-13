@@ -30,10 +30,13 @@ class ServiceEntityRepository extends \Doctrine\Bundle\DoctrineBundle\Repository
 
         $entityManager = $this->getEntityManager();
         $classMetadataManipulator = new ClassMetadataManipulator($doctrine, $entityManager);
+        $this->classMetadataCompletor = $classMetadataManipulator->getClassMetadataCompletor( $entityName ?? $this->getFqcnEntityName());
+        
         $entityHydrator = new EntityHydrator($entityManager, $classMetadataManipulator);
-
         $this->serviceParser = new ServiceEntityParser($this, $entityManager, $classMetadataManipulator, $entityHydrator);
     }
+
+    public function getClassMetadataCompletor() { return $this->classMetadataCompletor; }
 
     public function __call   ($method, $arguments) : mixed { return $this->serviceParser->parse($method, $arguments); }
 

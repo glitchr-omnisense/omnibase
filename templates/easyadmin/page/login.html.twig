@@ -58,29 +58,31 @@
 
                 {{ form_start(form) }}
 
-                <input type="hidden" name="_target_path" value="{{ app.referrer }}"/>
+                    <input type="hidden" name="_target_path" value="{{ app.referrer }}"/>
 
-                <div class="input-group mt-4 mb-2">
-                    <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-user"></i></span>
-                    {{ form_widget(form.identifier, {attr:{placeholder:'@forms.login.identifier'|trans}}) }}
-                </div>
+                    <div class="input-group mt-4 mb-2">
+                        <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-user"></i></span>
+                        {{ form_widget(form.identifier, {attr:{placeholder:'@forms.login.identifier'|trans}}) }}
+                    </div>
 
-                <div class="input-group field-password mb">
-                    <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-lock"></i></span>
-                    {{ form_widget(form.password, {attr:{ placeholder:'@forms.login.password'|trans}}) }}
-                </div>
+                    <div class="input-group field-password mb">
+                        <span class="input-group-text h-auto" id="identifier-addons"><i class="fa fa-fw fa-lock"></i></span>
+                        {{ form_widget(form.password, {attr:{ placeholder:'@forms.login.password'|trans}}) }}
+                    </div>
 
-                <hr>
+                    <hr>
 
-                <div class="text-center form-group field-button input-group field-password">
-                        <button type="submit" class="btn btn-primary btn-block" onclick="this.form.submit(); this.disabled=true;">{{app.request.get('_route')|iconify|second|raw}} {{ _sign_in_label }}</button>
-                        <div class="remember-me form-group form-check form-switch form-switch-lg">
-                            {{ form_widget(form._remember_me) }}
-                            {{ form_label(form._remember_me, '@forms.login.rememberMe'|trans) }}
-                        </div>
-                </div>
-                {{ form_rest(form) }}
-        {{ form_end(form) }}
+                    <div class="text-center form-group field-button input-group field-password">
+                            <button type="submit" class="btn btn-primary btn-block" onclick="this.form.submit(); this.disabled=true;">{{app.request.get('_route')|iconify|second|raw}} {{ _sign_in_label }}</button>
+                            <div class="remember-me form-group form-check form-switch form-switch-lg">
+                                {{ form_widget(form._remember_me) }}
+                                {{ form_label(form._remember_me, '@forms.login.rememberMe'|trans) }}
+                            </div>
+                    </div>
+                    
+                    {{ form_rest(form) }}
+
+                {{ form_end(form) }}
 
         </section>
     </div>

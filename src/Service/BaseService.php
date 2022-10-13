@@ -3,6 +3,7 @@
 namespace Base\Service;
 
 use App\Entity\User;
+use Base\Controller\Backend\AbstractCrudController;
 use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Database\Entity\EntityHydratorInterface;
 use Base\Routing\RouterInterface;
@@ -18,7 +19,9 @@ use Base\Traits\BaseCommonTrait;
 use Doctrine\Persistence\Event\LifecycleEventArgs;
 use Doctrine\Persistence\Event\PreUpdateEventArgs;
 use Doctrine\Persistence\ManagerRegistry;
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Provider\AdminContextProvider;
+use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Exception;
 use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -116,7 +119,8 @@ class BaseService implements RuntimeExtensionInterface
         RouterInterface $router,
 
         EntityHydratorInterface $entityHydrator,
-        ClassMetadataManipulator $classMetadataManipulator)
+        ClassMetadataManipulator $classMetadataManipulator,
+        AdminUrlGenerator $adminUrlGenerator)
     {
         $this->setInstance($this);
         $this->startTime($kernel->getStartTime());
@@ -152,6 +156,7 @@ class BaseService implements RuntimeExtensionInterface
 
         // EA provider
         $this->adminContextProvider = new AdminContextProvider($requestStack);
+        $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
     public function getHomepage()  { return $this->getParameterBag()->get("base.site.homepage") ?? $this->getRouter()->getRoute("/"); }
@@ -195,6 +200,15 @@ class BaseService implements RuntimeExtensionInterface
      * Stylesheet and javascripts blocks
      */
     public function settings() { return $this->getSettingBag(); } // Used in twig environment
+    public function crudify($entity): string {
+
+        return $this->adminUrlGenerator->unsetAll()
+            ->setController(AbstractCrudController::getCrudControllerFqcn($entity))
+            ->setEntityId($entity->getId())
+            ->setAction(Crud::PAGE_EDIT)
+            ->includeReferrer()
+            ->generateUrl();
+    }
 
     public function getParameterTwig(string $name = "") { return $this->getTwig()->getParameterTwig($name); }
     public function addParameterTwig(string $name, $newValue) { return $this->getTwig()->addParameterTwig($name, $newValue); }
@@ -220,8 +234,8 @@ class BaseService implements RuntimeExtensionInterface
             $this->startTime = microtime(true);
     }
 
-    public function hasPost()    { return isset($_POST); }
     public function hasGet()     { return isset($_GET); }
+    public function hasPost()    { return isset($_POST); }
     public function hasSession() { return isset($_SESSION); }
     public function addSession($name, $value) { $this->getSession()->set($name, $value); }
     public function removeSession($name) { return ($this->getRequestStack() && $this->getRequestStack()->getSession()->has($name)) ? $this->getRequestStack()->getSession()->remove($name) : null; }
@@ -248,37 +262,31 @@ class BaseService implements RuntimeExtensionInterface
     public function hasParameter(string $name): bool { return $this->kernel->getContainer()->hasParameter($name); }
     public function setParameter(string $name, array|bool|string|int|float|null $value) { return $this->kernel->getContainer()->setParameter($name, $value); }
 
-    public function getAsset(string $url): string
-    {
-        $url = trim($url);
-        $parse = parse_url($url);
-        if($parse["scheme"] ?? false)
-            return $url;
+    public function getAsset(string $url): string { return $this->getTwig()->getAsset($url); }
+        // $url = trim($url);
+        // $parse = parse_url($url);
+        // if($parse["scheme"] ?? false)
+        //     return $url;
 
-        $request = $this->getRequestStack()->getCurrentRequest();
-        $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
-        $baseDir = $baseDir ."/";
-        $path = trim($parse["path"]);
-        if($path == "/") return $baseDir ? $baseDir : "/";
-        else if(!str_starts_with($path, "/"))
-            $path = $baseDir.$path;
+        // $request = $this->getRequestStack()->getCurrentRequest();
+        // $baseDir = $request ? $request->getBasePath() : $_SERVER["CONTEXT_PREFIX"] ?? "";
+        // $baseDir = $baseDir ."/";
+        // $path = trim($parse["path"]);
+        // if($path == "/") return $baseDir ? $baseDir : "/";
+        // else if(!str_starts_with($path, "/"))
+        //     $path = $baseDir.$path;
 
-        return $path ? $path : null;
-    }
+        // return $path ? $path : null;
 
-
-    public function getRequest(): ?Request { return $this->getRouter()->getRequest(); }
+    public function        getRequest(): ?Request { return $this->getRouter()->getRequest(); }
     public function getCurrentRequest(): ?Request { return $this->getRequest(); }
 
-    public function getRoute(?string $url): ?string { return $this->getRouter()->getRoute($url); }
+    public function        getRoute(?string $url): ?string { return $this->getRouter()->getRoute($url); }
     public function getCurrentRoute(): ?string { return $this->getRouter()->getRoute(); }
-    public function getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
+    public function         getRouteName(?string $url): ?string { return $this->getRouter()->getRouteName($url); }
     public function getCurrentRouteName(): ?string { return $this->getRouter()->getRouteName(); }
 
-    public function generateUrl(string $routeName, array $routeParameters = []): string
-    {
-        return $this->getRouter()->generate($routeName, $routeParameters);
-    }
+    public function generateUrl(string $routeName, array $routeParameters = []): string { return $this->getRouter()->generate($routeName, $routeParameters); }
 
     public function redirect(string $urlOrRoute, array $routeParameters = [], int $state = 302, array $headers = []): RedirectResponse
     {
