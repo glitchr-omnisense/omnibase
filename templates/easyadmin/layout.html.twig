@@ -245,7 +245,7 @@
                                             {% if user_analytics.label is defined %}
                                                 <li class="dropdown-appearance-label"><span>{{ user_analytics.label|mb_ucfirst }}</span></li>
                                                 {% for entry in user_analytics.default ?? [] %}
-                                                <li><a href="#" class="dropdown-item">{{ entry.icon|iconify }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
+                                                <li><a href="#" class="dropdown-item">{{ entry.icon|iconify|first|raw }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
                                                 {% endfor %}
 
                                                 {% if user_analytics.google is defined and user_analytics.google is not empty %}
@@ -254,7 +254,7 @@
                                             {% endif %}
 
                                             {% for entry in user_analytics.google ?? [] %}
-                                                <li><a href="#" class="dropdown-item">{{ entry.icon|iconify }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
+                                                <li><a href="#" class="dropdown-item">{{ entry.icon|iconify|first|raw }} <span>{{ entry.label|mb_ucfirst }}</span></a></li>
                                             {% endfor %}
                                         </ul>
                                     </div>

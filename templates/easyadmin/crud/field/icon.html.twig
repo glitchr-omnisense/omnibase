@@ -5,7 +5,7 @@
 {% set attr = color ? {"style": "color:"~color} : {} %}
 {% if field.value %}
 <span class="badge badge-secondary field-icon">
-    {{field.value|iconify(attr)}}
+    {{field.value|iconify|first|raw(attr)}}
 </span>
 {% else %}
 -

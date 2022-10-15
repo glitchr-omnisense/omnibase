@@ -93,7 +93,7 @@
             {% set icon = field.formattedValue.first.__iconizeStatic()[0] ?? null %}
         {% endif %}
 
-        {% set icon  = icon|iconify|default(null) %}
+        {% set icon  = icon|iconify|first|raw|default(null) %}
         {% if icon is not null %}
             {% set label = "<span class='label'>"~(field.formattedValue.first|capitalize)~"</span>" %}
         {% else %}

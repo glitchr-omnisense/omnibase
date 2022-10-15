@@ -17,7 +17,12 @@ class IconProvider
     {
         return $this->routeIcons[$route.".".$this->localeProvider->getLang()] 
             ?? $this->routeIcons[$route]
+
+            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getLang()] 
+            ?? $this->routeIcons[$route.".default"]
+
             ?? $this->routeIcons[$route.".".$this->localeProvider->getDefaultLang()]
+            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getDefaultLang()]
             ?? null;
     }
 
@@ -90,17 +95,16 @@ class IconProvider
             $icon = $icon->__iconize() ?? $icon->__iconizeStatic();
         else if(($routeIcons = $this->getRouteIcons($icon)))
             $icon = $routeIcons;
-        
-        
-        if(is_array($icon))
-            return array_map(fn($i) => $this->iconify($i, $attributes), $icon);
+
+        if(is_array($icon)) 
+            return array_merge(...array_map(fn($i) => $this->iconify($i, $attributes), $icon));
 
         foreach($this->adapters as $provider) {
 
             if ($provider->supports($icon))
-                return $provider->iconify($icon, $attributes);
+                return [$provider->iconify($icon, $attributes)];
         }
 
-        return $icon;
+        return $this->iconify("fas fa-question-circle", $attributes) ?? null;
     }
 }

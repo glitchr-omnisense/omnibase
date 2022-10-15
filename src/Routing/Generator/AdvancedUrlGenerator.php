@@ -83,7 +83,7 @@ class AdvancedUrlGenerator extends CompiledUrlGenerator
         $routeDefaultName = first($routeGroups);
         if(!str_ends_with($routeName, ".".$this->getRouter()->getLang())) {
             try { return parent::generate($routeDefaultName.".".$this->getRouter()->getLang(), $routeParameters, $referenceType); }
-            catch (InvalidParameterException|RouteNotFoundException $e) { }
+            catch (InvalidParameterException|RouteNotFoundException $e) { if(!$routeDefaultName) throw $e; }
         }
 
         try { return sanitize_url(parent::generate($routeDefaultName, array_filter($routeParameters), $referenceType)); }

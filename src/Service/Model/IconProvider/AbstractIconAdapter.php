@@ -65,6 +65,7 @@ abstract class AbstractIconAdapter implements IconAdapterInterface
         $options = $this->getOptions();
 
         $class = trim(implode(" ", [$attributes["class"] ?? null, $options["class"] ?? null, $icon]));
+        $class = implode(" ", array_unique(explode(" ", $class)));
         $attributes = array_key_removes($attributes, "class");
 
         return "<i ".html_attributes($attributes)." class='".$class."'></i>";

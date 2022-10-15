@@ -1,5 +1,5 @@
 
 {% set attr = attr|merge({ 'href': value}) %}
 <a {{html_attributes(attr) }} data-clipboard-copy>
-    {{ 'fas fa-fw fa-clipboard-list'|iconify }}
+    {{ 'fas fa-fw fa-clipboard-list'|iconify|first|raw }}
 </a>

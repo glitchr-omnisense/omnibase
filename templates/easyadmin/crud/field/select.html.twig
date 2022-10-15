@@ -26,7 +26,7 @@
 
             {% set icon = null %}
             {% if formattedValue.icon is defined %}
-                {% set icon = formattedValue.icon|iconify|default(null) %}
+                {% set icon = formattedValue.icon|iconify|first|raw|default(null) %}
             {% endif %}
 
             <span class="badge badge-secondary">
@@ -85,7 +85,7 @@
 
             {% set icon = null %}
             {% if formattedValue.icon is defined %}
-                {% set icon = formattedValue.icon|iconify|default(null) %}
+                {% set icon = formattedValue.icon|iconify|first|raw|default(null) %}
             {% endif %}
 
             {% set fieldLink = formattedValue['url'] ?? null %}
@@ -132,7 +132,7 @@
 
         {% set icon = null %}
         {% if formattedValue.icon is defined %}
-            {% set icon = formattedValue.icon|iconify|default(null) %}
+            {% set icon = formattedValue.icon|iconify|first|raw|default(null) %}
         {% endif %}
 
         <span class="badge badge-secondary">
@@ -171,7 +171,7 @@
 
         {% set icon = null %}
         {% if formattedValue.icon is defined %}
-            {% set icon = formattedValue.icon|iconify|default(null) %}
+            {% set icon = formattedValue.icon|iconify|first|raw|default(null) %}
         {% endif %}
 
         <span class="badge badge-secondary">
