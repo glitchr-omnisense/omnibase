@@ -6,9 +6,11 @@ use Closure;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\ORM\PersistentCollection;
 
 class OrderedArrayCollection extends ArrayCollection
 {
+    protected $persistentCollection;
     protected $ordering;
     public function __construct(ArrayCollection|array $elements = [], array $ordering = [])
     {

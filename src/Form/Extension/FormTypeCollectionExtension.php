@@ -6,6 +6,7 @@ use Base\Database\Mapping\ClassMetadataManipulator;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\PersistentCollection;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 
 use Symfony\Component\Form\AbstractTypeExtension;
@@ -51,7 +52,7 @@ class FormTypeCollectionExtension extends AbstractTypeExtension
 
     public function browseView(FormView $view, FormInterface $form, array $options)
     {
-        if ($form->getData() instanceof Collection &&
+        if ($form->getData() instanceof PersistentCollection &&
             !$this->classMetadataManipulator->isCollectionOwner($form, $form->getData())) {
 
             $view->vars["required"] = false;
