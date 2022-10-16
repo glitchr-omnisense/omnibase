@@ -73,7 +73,7 @@
                     <hr>
 
                     <div class="text-center form-group field-button input-group field-password">
-                            <button type="submit" class="btn btn-primary btn-block" onclick="this.form.submit(); this.disabled=true;">{{app.request.get('_route')|iconify|first|raw|second|raw}} {{ _sign_in_label }}</button>
+                            <button type="submit" class="btn btn-primary btn-block" onclick="this.form.submit(); this.disabled=true;">{{app.request.get('_route')|iconify|second|raw}} {{ _sign_in_label }}</button>
                             <div class="remember-me form-group form-check form-switch form-switch-lg">
                                 {{ form_widget(form._remember_me) }}
                                 {{ form_label(form._remember_me, '@forms.login.rememberMe'|trans) }}

@@ -199,8 +199,7 @@ class ServiceEntityParser
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
 
-        $fnResult = "getResult"; //($groupBy ? "getResult" : "getSingleScalarResult");
-        return $query->$fnResult();
+        return $query->getResult();
     }
 
 

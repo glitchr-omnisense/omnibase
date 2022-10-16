@@ -59,7 +59,7 @@
             {% set depth = thread.getRepository().getHierarchyDepth() %}
 
             {% if lastSection != thread.getRepository().getHierarchy() %}
-                <article class="wrapper hierarchy">
+                <article class="wrapper extended hierarchy">
                 <h1 class="title">
                     {% for section in thread.getRepository().getHierarchyTree() %}
                     > {{ section|capitalize }}
@@ -69,7 +69,7 @@
                 {% set lastSection = thread.getRepository().getHierarchy() %}
             {% endif %}
 
-            <article class="wrapper">
+            <article class="wrapper extended">
                 <div class="header">
 
                     <ul class="field-avatar">
