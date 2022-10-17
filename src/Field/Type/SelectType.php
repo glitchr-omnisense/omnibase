@@ -340,7 +340,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if(!array_key_exists($label, $choices)) $choices[$label] = $id;
                     else {
 
-                        for($i = 2; array_key_exists($label ."/" . $id, $choices); $i++)
+                        for($id = 2; array_key_exists($label ."/" . $id, $choices); $id++)
                             continue;
 
                         $choices[$label ."/" . $id] = $id;

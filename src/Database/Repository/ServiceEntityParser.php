@@ -1227,8 +1227,8 @@ class ServiceEntityParser
 
             } else if(is_array($fieldValue)) {
 
-                if(!empty($fieldValue))
-                    $qb->setParameter($fieldID, $fieldValue);
+                //if(!empty($fieldValue))
+                $qb->setParameter($fieldID, $fieldValue);
 
             } else if(!$isEmpty && !$isNotEmpty && !$isBool) {
                 $qb->setParameter($fieldID, $fieldValue);
@@ -1260,7 +1260,7 @@ class ServiceEntityParser
                 else throw new Exception("Invalid operator for field \"$fieldName\": ".$tableOperator);
 
                 if(empty($fieldValue))
-                    throw new Exception("Empty list provided for \"$fieldName\" (column:".$tableColumn.")");
+                    return $qb->expr()->eq(1,1);
 
                 return $qb->expr()->$fnExpr($tableColumn, ":${fieldID}");
 
