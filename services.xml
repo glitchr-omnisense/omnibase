@@ -9,7 +9,6 @@
 
         <service id="Base\Form\FormProxy" public="true">
             <argument type="service" id="form.factory" />
-            <argument type="service" id="form.proxy" />
         </service>
 
         <service id="Base\Service\Referrer" public="true">
