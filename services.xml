@@ -9,6 +9,7 @@
 
         <service id="Base\Form\FormProxy" public="true">
             <argument type="service" id="form.factory" />
+            <argument type="service" id="form.proxy" />
         </service>
 
         <service id="Base\Service\Referrer" public="true">
@@ -189,9 +190,6 @@
         </service>
 
         <service id="Base\Form\Extension\FormTypeTranslateExtension" >
-            <tag name="form.type_extension" />
-        </service>
-        <service id="Base\Form\Extension\FormTypeFlowExtension" >
             <tag name="form.type_extension" />
         </service>
         <service id="Base\Form\Extension\FormTypeSpamExtension" >

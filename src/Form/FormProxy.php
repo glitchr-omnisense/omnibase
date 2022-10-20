@@ -4,7 +4,7 @@ namespace Base\Form;
 
 use Base\Form\Common\FormModelInterface;
 use Base\Form\Common\FormTypeInterface;
-use Symfony\Component\Config\Definition\Exception\Exception;
+use Exception;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormTypeInterface as SymfonyFormTypeInterface;
@@ -44,16 +44,13 @@ class FormProxy implements FormProxyInterface
     }
     
     
-    public function get(string $name): ?FormInterface { return $this->has($name) ? $this->forms[$name] : null; }
-    public function add(string $name, ?FormInterface $form): self
+    public function get(string $name): ?FormInterface { return $this->forms[$name] ?? null; }
+    public function add(string $name,  ?FormInterface $form): self
     {
         if ($this->get($name) != null)
             throw new Exception("Form identifier \"$name\" already exists.");
 
-        // TBC.. Create dummy view to avoid error during twig rendering..
         $this->forms[$name] = $form;
-        $this->forms[$name]->createView();
-
         return $this;
     }
 
@@ -65,9 +62,9 @@ class FormProxy implements FormProxyInterface
         return $this;
     }
 
-    public function create(string $name, string $type = FormType::class, mixed $data = null, array $options = []): FormInterface
+    public function create(string $name, string $type = FormType::class, mixed $data = null, array $options = [], array $listeners = []): FormInterface
     {
-        $this->forms[$name] = $this->formFactory->create($type, $data, $options);
+        $this->forms[$name] = $this->formFactory->create($type, $data, $options, $listeners);
         return $this->forms[$name];
     }
 
@@ -76,20 +73,10 @@ class FormProxy implements FormProxyInterface
         return $this->get($name)?->submit($submittedData, $clearMissing);
     }
 
-    public function createProcessor(string $name, string $formTypeClass = FormType::class, array $options = []): ?FormProcessorInterface
+    public function getProcessor(string $name): ?FormProcessorInterface { return $this->formProcessors[$name] ?? null; }
+    public function createProcessor(string $name, string $formTypeClass = FormType::class, array $options = [], array $listeners = []): ?FormProcessorInterface
     {
-        $formModelClass = null;
-        if($options["data_class"] ?? null)
-            $formModelClass = $options["data_class"];
-        else if(class_implements_interface($formTypeClass, FormTypeInterface::class))
-            $formModelClass = $formTypeClass::getModelClass();
-        else if(class_implements_interface($formTypeClass, SymfonyFormTypeInterface::class))
-            $formModelClass = str_replace("\\Type\\", "\\Model\\", str_rstrip($formTypeClass, "Type")."Model");
-        
-        if($formModelClass && !class_implements_interface($formModelClass, FormModelInterface::class))
-            throw new Exception("Form model \"$formModelClass\" must exist and implement \"".FormModelInterface::class."\".");
-        
-        $form = $this->get($name) ?? $this->create($name, $formTypeClass, new $formModelClass(), $options);
-        return $this->formFactory->createProcessor($form);
+        $this->formProcessors[$name] = $this->formProcessors[$name] ?? new FormProcessor($this->get($name) ?? $this->create($name, $formTypeClass, null, $options, $listeners));
+        return $this->formProcessors[$name];
     }
 }

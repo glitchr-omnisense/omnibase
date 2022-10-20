@@ -10,10 +10,11 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Util\StringUtil;
 
 class SecurityLoginType extends AbstractType
 {
-    public function getBlockPrefix() : string { return "security_login"; }
+    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function configureOptions(OptionsResolver $resolver)
     {

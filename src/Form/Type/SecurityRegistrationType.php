@@ -12,6 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormBuilderInterface;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Util\StringUtil;
 
 class SecurityRegistrationType extends AbstractType
 {
@@ -21,6 +22,8 @@ class SecurityRegistrationType extends AbstractType
             'data_class' => SecurityRegistrationModel::class
         ]);
     }
+
+    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

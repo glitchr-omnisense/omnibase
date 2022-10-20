@@ -23,6 +23,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\Util\StringUtil;
 
 class LayoutSettingListType extends AbstractType implements DataMapperInterface
 {
@@ -42,6 +43,8 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         $this->localeProvider = $localeProvider;
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
+
+    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function configureOptions(OptionsResolver $resolver)
     {

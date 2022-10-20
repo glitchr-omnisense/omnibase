@@ -18,7 +18,7 @@ class SecurityRegistrationModel extends AbstractModel
     /**
      * @var string
      */
-    public $password;
+    public $plainPassword;
     
     /**
      * @var bool
