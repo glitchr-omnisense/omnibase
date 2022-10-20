@@ -340,7 +340,7 @@ class SelectType extends AbstractType implements DataMapperInterface
                     if(!array_key_exists($label, $choices)) $choices[$label] = $id;
                     else {
 
-                        for($i = 2; array_key_exists($label ."/" . $id, $choices); $i++)
+                        for($id = 2; array_key_exists($label ."/" . $id, $choices); $id++)
                             continue;
 
                         $choices[$label ."/" . $id] = $id;
@@ -367,7 +367,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choiceType = current(iterator_to_array($forms));
-        if ($choiceType->getParent()?->getData() instanceof Collection && 
+        if ($choiceType->getParent()?->getData() instanceof Collection &&
             !$this->classMetadataManipulator->isCollectionOwner($choiceType->getParent(), $choiceType->getParent()?->getData())) return;
 
         $options = $choiceType->getParent()->getConfig()->getOptions();
