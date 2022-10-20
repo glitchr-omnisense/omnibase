@@ -16,6 +16,7 @@ use Symfony\Component\Form\DataMapperInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\Util\StringUtil;
 
 class LayoutWidgetListType extends AbstractType implements DataMapperInterface
 {
@@ -23,6 +24,8 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
      * @var WidgetProvider
      */
     protected $widgetProvider;
+
+    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function __construct(WidgetProviderInterface $widgetProvider) { $this->widgetProvider = $widgetProvider; }
     public function configureOptions(OptionsResolver $resolver)

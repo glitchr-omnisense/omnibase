@@ -154,7 +154,10 @@ class SecurityController extends AbstractController
             return $this->redirectToRoute('user_profile');
 
         // Prepare registration form
-        return $this->formProxy->createProcessor("form:login", SecurityRegistrationType::class, ['validation_groups' => ['new']])
+        $formProcessor = $this->formProxy->createProcessor("form:login", SecurityRegistrationType::class, [
+                'validation_groups' => ['new'],
+                'validation_entity' => User::class
+            ])
             ->onSubmit(function(FormProcessorInterface $formProcessor, Request $request) use ($userAuthenticator, $authenticator){
 
                 $newUser = $formProcessor->hydrate((new User()));
@@ -184,6 +187,8 @@ class SecurityController extends AbstractController
             })
 
             ->handleRequest($request);
+
+        return $formProcessor->getResponse();
     }
 
     /**

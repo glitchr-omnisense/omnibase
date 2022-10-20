@@ -30,22 +30,23 @@ class SearchController extends AbstractController
     */
     public function Main(Request $request)
     {
-        $formProcessor = $this->formProxy
-            ->createProcessor("thread:search", ThreadSearchType::class, [])
+        $formProcessor = $this->formProxy->getProcessor("thread:searchbar") ?? $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);
+        $formProcessor
             ->setData($this->formProxy->get("thread:searchbar")?->getData())
 
             ->onDefault(function(FormProcessorInterface $formProcessor) {
 
                 $formattedData = $formProcessor->getData();
-                $formattedData->content = $formattedData->content ?? $formattedData->generic;
-                $formattedData->title   = $formattedData->title   ?? $formattedData->generic;
-                $formattedData->excerpt = $formattedData->excerpt ?? $formattedData->generic;
-
+                $formattedData->generic = str_strip("%" . $formattedData->generic . "%", "%%", "%%");
+                $formattedData->content = str_strip("%" . ($formattedData->content ?? $formattedData->generic) . "%", "%%", "%%");
+                $formattedData->title   = str_strip("%" . ($formattedData->title   ?? $formattedData->generic) . "%", "%%", "%%");
+                $formattedData->excerpt = str_strip("%" . ($formattedData->excerpt ?? $formattedData->generic) . "%", "%%", "%%");
+                
                 $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
-                    "content" => "%" . ($formattedData->content ?? $formattedData->generic) . "%",
-                    "title"   => "%" . ($formattedData->title   ?? $formattedData->generic ?? $formattedData->content) . "%",
-                    "excerpt" => "%" . ($formattedData->excerpt ?? $formattedData->generic ?? $formattedData->content) . "%"
-                ], ["translatable.state" => ThreadState::PUBLISH])->getResult());
+                    "content" => $formattedData->content,
+                    "title"   => $formattedData->title,
+                    "excerpt" => $formattedData->excerpt,
+                ], ["translatable.state" => ThreadState::PUBLISH, "translatable.parent" => $formattedData->parent_id])->getResult());
     
                 usort($threads, function ($a, $b)
                 {

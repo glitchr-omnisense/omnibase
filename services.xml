@@ -191,9 +191,6 @@
         <service id="Base\Form\Extension\FormTypeTranslateExtension" >
             <tag name="form.type_extension" />
         </service>
-        <service id="Base\Form\Extension\FormTypeFlowExtension" >
-            <tag name="form.type_extension" />
-        </service>
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
             <tag name="form.type_extension" />
             <argument type="service" id="Base\Service\SpamChecker" />
