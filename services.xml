@@ -685,9 +685,6 @@
         <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
             <tag name="doctrine.event_subscriber" />
         </service>
-        <service id="Base\EntityDispatcher\Event\ThreadIntlEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" />
-        </service>
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="base.database.entity_hydrator" />
