@@ -244,7 +244,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
      * @Assert\Locale(canonicalize = true)
      */
     protected $locale;
-    public function getLocale(): ?string { return "en_US"; } //$this->locale ?? LocaleProvider::getDefaultLocale(); }
+    public function getLocale(): ?string { return $this->locale ?? LocaleProvider::getDefaultLocale(); }
     public function setLocale(?string $locale = null): self
     {
         if(empty($locale)) $locale = null;

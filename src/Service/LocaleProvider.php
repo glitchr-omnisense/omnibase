@@ -10,6 +10,8 @@ use Symfony\Component\Intl\Locales;
 
 class LocaleProvider implements LocaleProviderInterface
 {
+    public const UNIVERSAL = "xx_XX";
+
     protected $requestStack = null;
     protected $parameterBag = null;
 

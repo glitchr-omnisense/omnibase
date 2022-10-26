@@ -24,6 +24,7 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 use Symfony\Contracts\Cache\CacheInterface;
 
 use Symfony\Contracts\EventDispatcher\Event;
+use Twig\Loader\ChainLoader;
 
 class AdvancedRouter implements RouterInterface
 {
@@ -107,6 +108,22 @@ class AdvancedRouter implements RouterInterface
         return str_starts_with($route, "ux_");
     }
 
+    public function isSecured(mixed $request = null)
+    {
+        if(!$request) $request = $this->requestStack->getCurrentRequest();
+        if ($request instanceof KernelEvent)
+            $request = $request->getRequest();
+        else if($request instanceof RequestStack)
+            $request = $request->getCurrentRequest();
+        else if(!$request instanceof Request)
+            return false;
+
+        $route = $this->getRouteName();
+        if(!$route) return false;
+
+        return str_starts_with($route, "security_");
+    }
+
     public function isWdt(mixed $request = null)
     {
         if(!$request) $request = $this->requestStack->getCurrentRequest();
@@ -150,6 +167,7 @@ class AdvancedRouter implements RouterInterface
     public function getUrl(?string $nameOrUrl = null, array $parameters = [], int $referenceType = self::ABSOLUTE_PATH): string
     {
         $nameOrUrl ??= get_url();
+        $nameOrUrl = trim($nameOrUrl);
         if($referenceType == self::ABSOLUTE_PATH) {
 
             $host = $this->getScheme()."://".$this->getHost();
@@ -157,16 +175,18 @@ class AdvancedRouter implements RouterInterface
                 $nameOrUrl = preg_replace('#^.+://[^/]+#', '', $nameOrUrl);
         }
 
-        if(filter_var($nameOrUrl, FILTER_VALIDATE_URL) || str_contains($nameOrUrl, "/"))
+        if(filter_var($nameOrUrl, FILTER_VALIDATE_URL) || str_contains($nameOrUrl, "/")) {
+
+            if(!str_contains($nameOrUrl, "://") && $referenceType == self::ABSOLUTE_URL)
+                return $this->getScheme()."://".$this->getHost()."/".str_lstrip($this->getBaseDir(),"/").str_lstrip($nameOrUrl, "/");
+
             return $nameOrUrl;
+        }
 
-        return $this->generate($nameOrUrl, $parameters, $referenceType);
+        return trim($this->generate($nameOrUrl, $parameters, $referenceType));
     }
 
-    public function getAssetUrl(string $nameOrUrl, ?string $packageName = null): string
-    {
-        return $this->assetTwigExtension->getAssetUrl($nameOrUrl ?? get_url(), $packageName);
-    }
+    public function getAssetUrl(string $nameOrUrl, ?string $packageName = null): string { return $this->assetTwigExtension->getAssetUrl($nameOrUrl ?? get_url(), $packageName); }
 
     public function keepMachine(): bool { return $this->keepMachine; }
     public function keepSubdomain(): bool { return $this->keepSubdomain; }
@@ -259,8 +279,9 @@ class AdvancedRouter implements RouterInterface
     public function getBaseDir(?string $locale = null, ?string $environment = null): string
     {
         $host = $this->getHostParameters($locale, $environment);
-        $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
+        if(!is_cli()) $baseDir = $_SERVER['PHP_SELF'] ? dirname($_SERVER['PHP_SELF']) : null;
         $baseDir ??= $host["base_dir"] ?? "";
+
         return $baseDir;
     }
 
@@ -299,8 +320,9 @@ class AdvancedRouter implements RouterInterface
         if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());
         if($routeUrl && !str_contains($routeUrl, "/")) return $routeUrl;
 
-        $routeMatch = $this->getRouteMatch($routeUrl);
-        return $routeMatch ? $routeMatch["_route"] : null;
+        $routeMatch = $this->getRouteMatch($routeUrl) ?? [];
+        $isLocalized = array_key_exists("_locale", $routeMatch) && $routeMatch["_locale"] != $this->localeProvider->getDefaultLang();
+        return $routeMatch ? $routeMatch["_route"] . ($isLocalized ? "." . $routeMatch["_locale"] : "") : null;
     }
 
     public function getRouteGroups(string $routeNameOrUrl): array
@@ -322,7 +344,7 @@ class AdvancedRouter implements RouterInterface
         catch (ResourceNotFoundException $e) { return null; }
     }
 
-    public function isRouteSecured(?string $routeUrl = null): ?bool
+    public function hasFirewall(?string $routeUrl = null): ?bool
     {
         if($routeUrl === null) $routeUrl = $this->getRequestUri();
 

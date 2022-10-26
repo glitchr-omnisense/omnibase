@@ -1,4 +1,4 @@
 {# @var ea \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext #}
 {# @var field \EasyCorp\Bundle\EasyAdminBundle\Dto\FieldDto #}
 {# @var entity \EasyCorp\Bundle\EasyAdminBundle\Dto\EntityDto #}
-{{ field.value|iconify|first|raw({class: "fa-fw"})|default("")|raw }} {{ field.formattedValue }}
+{{ field.value|iconify({class: "fa-fw"})|first|raw }} {{ field.formattedValue }}

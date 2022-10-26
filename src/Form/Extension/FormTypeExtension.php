@@ -56,9 +56,10 @@ class FormTypeExtension extends AbstractTypeExtension
         ]);
 
         $resolver->setDefaults([
-            'form_flow'    => true,
-            'form_flow_id' => '_flow_token',
-            'validation_entity' => null
+            'form_flow'         => true,
+            'form_flow_id'      => '_flow_token',
+            'validation_entity' => null,
+            'use_model'         => false
         ]);
 
         $resolver->setNormalizer('form_flow_id', function(Options $options, $value) {

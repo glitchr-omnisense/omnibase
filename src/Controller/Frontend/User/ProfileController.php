@@ -19,13 +19,13 @@ class ProfileController extends AbstractController
     }
 
     /**
-     * @Route("/profile/{id}/edit", name="user_profileEdit")
+     * @Route("/profile/{id}/edit/", name="user_profileEdit")
      */
     public function Edit(int $id = -1)
     {
         if($id > 0) {
 
-            if ( !($user = $this->userRepository->cacheById($id)) )
+            if ( !($user = $this->userRepository->cacheOneById($id)) )
                 throw $this->createNotFoundException('User not found.');
 
         } else {
@@ -45,7 +45,7 @@ class ProfileController extends AbstractController
     {
         if($id > 0) {
 
-            if ( !($user = $this->userRepository->cacheById($id)) )
+            if ( !($user = $this->userRepository->cacheOneById($id)) )
                 throw $this->createNotFoundException('User not found.');
 
         } else {

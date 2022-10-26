@@ -72,7 +72,6 @@ class FilesystemLoader extends \Twig\Loader\FilesystemLoader
 
         $this->prependPath($bundlePath."/inspector", "WebProfiler");
         $this->prependPath($bundlePath."/easyadmin", "EasyAdmin");
-        $this->prependPath($bundlePath, "Base");
         $this->prependPath($bundlePath);
 
         // Add additional @Namespace variables

@@ -24,13 +24,14 @@ use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use Symfony\Component\Notifier\Recipient\SmsRecipientInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
+use Symfony\Component\Notifier\NotifierInterface as SymfonyNotifierInterface;
 use Symfony\Component\Notifier\Notifier as SymfonyNotifier;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 class Notifier implements NotifierInterface
 {
     /**
-     * @var Notifier
+     * @var SymfonyNotifierInterface
      */
     protected $notifier;
 
@@ -70,7 +71,8 @@ class Notifier implements NotifierInterface
      */
     protected string $adminRole;
 
-    public function getAdminRecipients(): array        { return $this->notifier->getAdminRecipients(); }
+    public function getAdminRecipient($i = 0): ?Recipient { return $this->notifier->getAdminRecipients()[$i] ?? null; }
+    public function getAdminRecipients(): array { return $this->notifier->getAdminRecipients(); }
     protected function getAdminUsers()
     {
         if(!$this->adminRole) return [];
@@ -90,20 +92,19 @@ class Notifier implements NotifierInterface
         return $adminUsers;
     }
 
-    /**
-     * @var Recipient
-     */
-    protected ?Recipient $technicalRecipient;
-
-    public function getTechnicalRecipient(): ?Recipient { return $this->technicalRecipient; }
-    protected function getTechnicalSupport(): ?string
+    public function getTechnicalRecipient(): RecipientInterface
     {
         $mail = $this->settingBag->getScalar("base.settings.mail");
-        if(!$mail && $this->technicalRecipient) $mail = $this->technicalRecipient->getEmail();
-        if(!$mail) return null;
+        if(!$mail) $mail = $this->getAdminRecipient()?->getEmail();
+        if(!$mail) return new NoRecipient();
 
-        $mailName = $this->settingBag->getScalar("base.settings.mail.name") ?? mb_ucfirst(explode("@", $mail)[0]);
-        return $mailName." <".$mail.">";
+        $mailName = $this->settingBag->getScalar("base.settings.mail.name");
+        if(!$mailName) $mailName = mb_ucwords(str_replace([".", "_"], [" ", " "], explode("@", $mail)[0]));
+        
+        $phone = $this->settingBag->getScalar("base.settings.phone");
+        if(!$phone) $phone = $this->getAdminRecipient()?->getPhone();
+        
+        return new Recipient($mailName." <".$mail.">", $phone);
     }
 
     /**
@@ -145,7 +146,10 @@ class Notifier implements NotifierInterface
         $this->options            = $parameterBag->get("base.notifier.options") ?? [];
 
         $this->testRecipients     = array_map(fn($r) => new Recipient($r), $parameterBag->get("base.notifier.test_recipients"));
-        $this->technicalRecipient = $parameterBag->get("base.notifier.technical_support") ? new Recipient($parameterBag->get("base.notifier.technical_support")) : null;
+
+        $technicalEmail = $parameterBag->get("base.notifier.technical_recipient.email");
+        $technicalPhone = $parameterBag->get("base.notifier.technical_recipient.phone");
+        $this->technicalRecipient = ($technicalEmail || $technicalPhone) ? new Recipient($technicalEmail, $technicalPhone) : null;
 
         $this->entityManager  = $entityManager;
         $this->settingBag     = $settingBag;
@@ -154,7 +158,6 @@ class Notifier implements NotifierInterface
 
         // Address support only once..
         $adminRecipients = [];
-        if($this->technicalRecipient) $adminRecipients[] = $this->technicalRecipient;
         foreach ($this->getAdminUsers() as $adminUser)
             $adminRecipients[] = $adminUser->getRecipient();
 
@@ -244,7 +247,7 @@ class Notifier implements NotifierInterface
 
     public function send(\Symfony\Component\Notifier\Notification\Notification $notification, RecipientInterface ...$recipients): void
     {
-        if ($this->enable)
+        if ($this->enable) 
             $this->notifier->send($notification, ...$recipients);
     }
 
@@ -257,9 +260,7 @@ class Notifier implements NotifierInterface
         $notification->setChannels([]);
 
         // Admin recipient if test address
-        $adminRecipient = $this->getTechnicalRecipient()
-                      ?? $this->getAdminRecipients()[0]
-                      ?? new NoRecipient();
+        $technicalRecipient = $this->getTechnicalRecipient();
 
         // Determine recipient information
         foreach ($recipients as $recipient) {
@@ -274,11 +275,12 @@ class Notifier implements NotifierInterface
             $notification->markAsReadIfNeeded($channels);
 
             // Send notification with proper locale
-            $translatorLocale = $this->localeProvider->getLocale();
+            $localeBak = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
-            $this->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
-            $this->localeProvider->setLocale($translatorLocale);
+
+            $this->send($notification, $this->isTest($recipient) ? $technicalRecipient : $recipient);
+            $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
@@ -296,9 +298,7 @@ class Notifier implements NotifierInterface
         $notification->setChannels([]);
 
         // Admin recipient if test address
-        $adminRecipient = $this->getTechnicalRecipient()
-                       ?? $this->getAdminRecipients()[0]
-                       ?? new NoRecipient();
+        $technicalRecipient = $this->getTechnicalRecipient();
 
         foreach ($recipients as $recipient) {
 
@@ -310,11 +310,12 @@ class Notifier implements NotifierInterface
             $notification->setChannels($channels);
 
             // Send notification with proper locale
-            $translatorLocale = $this->localeProvider->getLocale();
+            $localeBak = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
-            $this->send($notification, $this->isTest($recipient) ? $adminRecipient : $recipient);
-            $this->localeProvider->setLocale($translatorLocale);
+
+            $this->send($notification, $this->isTest($recipient) ? $technicalRecipient : $recipient);
+            $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);
@@ -343,11 +344,12 @@ class Notifier implements NotifierInterface
             $notification->setChannels($channels);
 
             // Send notification with proper locale
-            $translatorLocale = $this->localeProvider->getLocale();
+            $localeBak = $this->localeProvider->getLocale();
             $locale = $this->localeProvider->getLocale($recipient instanceof LocaleRecipientInterface ? $recipient->getLocale() : null);
             $this->localeProvider->setLocale($locale);
+            
             $this->send($notification, $recipient);
-            $this->localeProvider->setLocale($translatorLocale);
+            $this->localeProvider->setLocale($localeBak);
         }
 
         $notification->setChannels($prevChannels);

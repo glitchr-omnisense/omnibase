@@ -21,6 +21,9 @@
         <service id="time_machine" alias="Base\Service\TimeMachine" />
         <service id="Base\Service\TimeMachineInterface" alias="time_machine"/>
 
+        <service id="spam_checker" alias="Base\Service\SpamChecker" />
+        <service id="Base\Service\SpamCheckerInterface" alias="spam_checker"/>
+
         <service id="base.service.file" alias="Base\Service\FileService" />
         <service id="Base\Service\FileServiceInterface" alias="base.service.file"/>
 

@@ -25,7 +25,7 @@ class LayoutWidgetListType extends AbstractType implements DataMapperInterface
      */
     protected $widgetProvider;
 
-    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function __construct(WidgetProviderInterface $widgetProvider) { $this->widgetProvider = $widgetProvider; }
     public function configureOptions(OptionsResolver $resolver)

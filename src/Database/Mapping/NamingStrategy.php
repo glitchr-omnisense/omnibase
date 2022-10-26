@@ -17,6 +17,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
     private $uniqueTableName = [];
     public function classToTableName($classNameWithNamespace) : string
     {
+        $classNameWithNamespace = !is_string($classNameWithNamespace) ? get_class($classNameWithNamespace) : $classNameWithNamespace;
         $classNameWithNamespace = class_exists($classNameWithNamespace)
             ? (new \ReflectionClass($classNameWithNamespace))->getName()
             : $classNameWithNamespace;
@@ -68,7 +69,7 @@ class NamingStrategy implements \Doctrine\ORM\Mapping\NamingStrategy
         if(strlen($tableName) > self::TABLE_NAME_SIZE)
             throw new \Exception("Table name will be truncated for \"".$classNameWithNamespace."\"");
 
-        if(array_key_exists($tableName, $this->uniqueTableName) && $classNameWithNamespace !=  $this->uniqueTableName[$tableName])
+        if(str_contains($classNameWithNamespace, "\\Entity\\") && array_key_exists($tableName, $this->uniqueTableName) && $classNameWithNamespace != $this->uniqueTableName[$tableName])
             throw new \Exception("Ambiguous table name \"".$tableName."\" found between \"".$this->uniqueTableName[$tableName]."\" and \"".$classNameWithNamespace."\"");
 
         $this->uniqueTableName[$tableName] = $classNameWithNamespace;

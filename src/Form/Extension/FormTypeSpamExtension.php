@@ -12,6 +12,7 @@
 namespace Base\Form\Extension;
 
 use Base\Enum\SpamScore;
+use Base\Routing\RouterInterface;
 use Base\Service\Model\SpamProtectionInterface;
 use Base\Service\BaseService;
 use Base\Service\SpamChecker;
@@ -27,11 +28,11 @@ class FormTypeSpamExtension extends AbstractTypeExtension
 {
     private $defaultEnabled;
 
-    public function __construct(SpamChecker $spamChecker, BaseService $baseService, bool $defaultEnabled = true)
+    public function __construct(SpamChecker $spamChecker, RouterInterface $router, bool $defaultEnabled = true)
     {
         $this->spamChecker      = $spamChecker;
         $this->defaultEnabled   = $defaultEnabled;
-        $this->baseService      = $baseService;
+        $this->router           = $router;
     }
 
     /**
@@ -48,7 +49,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'spam_protection' => ($this->defaultEnabled && !$this->baseService->isEasyAdmin())
+            'spam_protection' => ($this->defaultEnabled && !$this->router->isEasyAdmin())
         ]);
     }
 
@@ -65,8 +66,7 @@ class FormTypeSpamExtension extends AbstractTypeExtension
             $form = $event->getForm();
             $data = $event->getData();
 
-            $score = $this->spamChecker->getScore($data);
-            $data->getSpamCallback($score);
+            $score = $this->spamChecker->check($data);
 
             $enum = SpamScore::__toInt();
             switch($score) {

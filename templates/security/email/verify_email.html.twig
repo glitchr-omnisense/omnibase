@@ -19,7 +19,7 @@
 {% block footer_text %}
 
     {% if token.getLifetime() > 0 and token.getLifetime() < 3600*24*7 %}
-        {{ '@emails.verifyEmail.expiry' | trans([token.getLifetime()|time]) | raw }}
+        {{ '@emails.verifyEmail.expiry' | trans([token.getLifetime()|trans_time]) | raw }}
     {% endif %}
 
 {% endblock %}

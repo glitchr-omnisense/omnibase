@@ -123,7 +123,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
     }
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text")
      */
     protected $content;
 
@@ -344,8 +344,9 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         /**
          * @var EmailRecipientInterface
          */
-        $adminAddress = $notifier->getAdminRecipients()[0] ?? new NoRecipient();
-        if($adminAddress instanceof NoRecipient) throw new UnexpectedValueException("No support address found.");
+
+        $technicalRecipient = $notifier->getTechnicalRecipient();
+        if($technicalRecipient instanceof NoRecipient) throw new UnexpectedValueException("No support address found.");
 
         $title = $this->getTitle();
         $content = $this->getContent();
@@ -360,7 +361,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
             $subject = "Fwd: " . $this->getSubject();
             $title   = $notifier->getTranslator()->trans("@emails.admin_forwarding.notice", [$user, $this->getTitle()]);
             $content = $this->getContent();
-            $from    = $adminAddress->getEmail();
+            $from    = $technicalRecipient->getEmail();
 
         } else if($this->user && $this->user->getRecipient() != $recipient) {
 
@@ -372,7 +373,7 @@ class Notification extends \Symfony\Component\Notifier\Notification\Notification
         } else {
 
             $subject = $this->getSubject();
-            $from    = $adminAddress->getEmail();
+            $from    = $technicalRecipient->getEmail();
         }
 
         $notification = EmailMessage::fromNotification($this, $recipient, $transport);

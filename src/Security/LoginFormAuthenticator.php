@@ -75,20 +75,20 @@ class LoginFormAuthenticator extends AbstractAuthenticator implements Authentica
 
     public function authenticate(Request $request): Passport
     {
-        $identifier = $request->get('security_login')["identifier"] ?? $request->get("identifier") ?? "";
-        $password   = $request->get('security_login')["password"] ?? $request->get("password") ?? "";
+        $identifier = $request->get('security_login')["identifier"] ?? $request->get('_base_security_login')["identifier"] ?? $request->get("identifier") ?? "";
+        $password   = $request->get('security_login')["password"] ?? $request->get('_base_security_login')["password"] ?? $request->get("password") ?? "";
         $request->getSession()->set(Security::LAST_USERNAME, $identifier);
 
         $badges   = [];
-        if( array_key_exists("_remember_me", $request->get('security_login') ?? []) ) {
+        if( array_key_exists("_remember_me", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) ) {
             $badges[] = new RememberMeBadge();
-            if($request->get('security_login')["_remember_me"]) end($badges)->enable();
+            if($request->get('security_login')["_remember_me"] ?? $request->get('_base_security_login')["_remember_me"]) end($badges)->enable();
         }
 
-        if( array_key_exists("password", $request->get('security_login') ?? []) )
+        if( array_key_exists("password", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) )
             $badges[] = new PasswordUpgradeBadge($password, $this->userRepository);
-        if( array_key_exists("_captcha", $request->get('security_login') ?? []) && class_exists(CaptchaBadge::class) )
-            $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"]);
+        if( array_key_exists("_captcha", $request->get('security_login') ?? $request->get('_base_security_login') ?? []) && class_exists(CaptchaBadge::class) )
+            $badges[] = new CaptchaBadge("_captcha", $request->get('security_login')["_captcha"] ?? $request->get('_base_security_login')["_captcha"]);
 
         return new Passport(
             new UserBadge($identifier),

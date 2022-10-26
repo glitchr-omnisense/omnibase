@@ -2,11 +2,13 @@
 
 namespace Base\EntitySubscriber;
 
+use App\Repository\UserRepository;
 use Base\Entity\User\Notification;
 use Base\Entity\User\Token;
 use Base\EntityDispatcher\Event\UserEvent;
 use Base\Routing\RouterInterface;
 use Base\Service\BaseService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -19,10 +21,11 @@ class UserSubscriber implements EventSubscriberInterface
     protected $router;
     protected $tokenStorage;
 
-    public function __construct(TokenStorageInterface $tokenStorage, RouterInterface $router){
+    public function __construct(EntityManagerInterface $entityManager, TokenStorageInterface $tokenStorage, RouterInterface $router){
 
-        $this->router       = $router;
-        $this->tokenStorage = $tokenStorage;
+        $this->entityManager = $entityManager;
+        $this->router        = $router;
+        $this->tokenStorage  = $tokenStorage;
     }
 
     public static function getSubscribedEvents() : array
@@ -76,9 +79,8 @@ class UserSubscriber implements EventSubscriberInterface
         if ($user->isVerified()) { // Social account connection
 
             $notification = new Notification("verifyEmail.success");
+            $notification->setUser($user);
             $notification->send("success");
-
-            $this->userRepository->flush($user);
 
         } else {
 
@@ -92,7 +94,6 @@ class UserSubscriber implements EventSubscriberInterface
             $notification->setUser($user);
             $notification->setHtmlTemplate('@Base/security/email/verify_email.html.twig', ["token" => $verifyEmailToken]);
 
-            $this->userRepository->flush($user);
             $notification->send("email")->send("success");
         }
 
@@ -113,7 +114,5 @@ class UserSubscriber implements EventSubscriberInterface
             $notification->setHtmlTemplate("@Base/security/email/admin_approval_confirm.html.twig");
             $notification->send("email");
         }
-
-        $this->userRepository->flush($user);
     }
 }

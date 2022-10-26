@@ -2,32 +2,32 @@
 
 namespace Base\Service;
 
-use App\Entity\Thread;
-use Base\Entity\User\Notification;
 use Base\Enum\SpamApi;
 use Base\Enum\SpamScore;
 use Base\Service\Model\SpamProtectionInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class SpamChecker
+class SpamChecker implements SpamCheckerInterface
 {
     private $client;
 
-    public function __construct(RequestStack $requestStack, HttpClientInterface $client, BaseService $baseService)
+    public function __construct(RequestStack $requestStack, SettingBagInterface $settingBag, ParameterBagInterface $parameterBag, TranslatorInterface $translator, HttpClientInterface $client, bool $debug)
     {
         $this->requestStack = $requestStack;
-        $this->client       = $client;
+        $this->settingBag   = $settingBag;
+        $this->parameterBag = $parameterBag;
 
-        $this->baseService  = $baseService;
-        $this->settings = $baseService->getSettingBag();
+        $this->translator   = $translator;
+        $this->client       = $client;
+        $this->debug        = $debug;
     }
 
     public function getLang()
     {
-        $defaultLocale = $this->baseService->getParameterBag("kernel.default_locale");
-        $fallbacks = $this->baseService->getTranslator()->getFallbackLocales();
-        $locale = $this->baseService->getTranslator()->getLocale();
+        $defaultLocale = $this->parameterBag->get("kernel.default_locale");
+        $fallbacks = $this->translator->getFallbackLocales();
+        $locale = $this->translator->getLocale();
 
         return (in_array($locale, $fallbacks) ? $locale : $defaultLocale);
     }
@@ -47,7 +47,7 @@ class SpamChecker
         switch($api) {
 
             case SpamApi::AKISMET:
-                return $this->settings->getScalar("api.spam.akismet");
+                return $this->settingBag->getScalar("api.spam.akismet");
 
             default:
                 throw new \RuntimeException("Unknown Spam API \"".$api."\".");
@@ -58,7 +58,6 @@ class SpamChecker
     {
         $key = $this->getKey($api);
         if(!$key) return null;
-
         switch($api) {
 
             case SpamApi::AKISMET:
@@ -69,12 +68,20 @@ class SpamChecker
         }
     }
 
+    public function check(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
+    {
+        $score = $this->score($candidate, $context, $api);
+        $candidate->getSpamCallback($score);
+
+        return $score;
+    }
+
     /**
      * @return int Spam score: 0: not spam, 1: maybe spam, 2: blatant spam
      *
      * @throws \RuntimeException if the call did not work
      */
-    public function getScore(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
+    public function score(SpamProtectionInterface $candidate, array $context = [], $api = SpamApi::AKISMET): int
     {
         $enum = SpamScore::__toInt();
         if(empty($candidate->getSpamText()))
@@ -89,7 +96,7 @@ class SpamChecker
             case SpamApi::AKISMET :
                 $options = [
                     'body' => array_merge($context, [
-                        'is_test' => $this->baseService->isDebug(),
+                        'is_test' => $this->debug,
                         'user_ip' => $request->getClientIp(),
                         'user_agent' => $request->headers->get('user-agent'),
                         'referrer' => $request->headers->get('referer'),
@@ -100,8 +107,8 @@ class SpamChecker
                         'blog_lang' => $this->getLang(),
 
                         'comment_type' => 'comment',
-                        'comment_author' => $candidate->getAuthor(),
-                        'comment_author_email' => $candidate->getAuthor()?->getEmail(),
+                        'comment_author' => $candidate->getSpamBlameable(),
+                        'comment_author_email' => $candidate->getSpamBlameable()?->getEmail(),
                         'comment_content' => $candidate->getSpamText(),
                         'comment_date_gmt' => $candidate->getSpamDate()
                     ])
@@ -110,7 +117,7 @@ class SpamChecker
                 $endpoint = $this->getEndpoint($api);
                 if(!$endpoint)
                     return $enum[SpamScore::NOT_SPAM];
-
+                
                 $response = $this->client->request('POST', $endpoint, $options);
 
                 $headers = $response->getHeaders();
@@ -126,5 +133,7 @@ class SpamChecker
 
                 return $score;
         }
+
+        return $enum[SpamScore::NOT_SPAM];
     }
 }

@@ -136,7 +136,7 @@ class Vault extends AbstractAnnotation
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach($this->fields as $field) {
 
-            if(!$entity->isSecure()) continue;
+            if(!$entity->isSecured()) continue;
             if($propertyAccessor->isReadable($entity, $field)) {
 
                 $value = $propertyAccessor->getValue($entity, $field);
@@ -158,7 +158,7 @@ class Vault extends AbstractAnnotation
         $propertyAccessor = PropertyAccess::createPropertyAccessor();
         foreach($this->fields as $field) {
 
-            if(!$entity->isSecure()) continue;
+            if(!$entity->isSecured()) continue;
             if($propertyAccessor->isReadable($entity, $field)) {
 
                 $value = $propertyAccessor->getValue($entity, $field);

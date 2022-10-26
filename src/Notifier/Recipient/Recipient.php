@@ -13,9 +13,9 @@ class Recipient extends \Symfony\Component\Notifier\Recipient\Recipient implemen
         if($this->getPhone()) return $this->getPhone();
     }
 
-    public function __construct(string $email = '', string $phone = '', string $locale = '')
+    public function __construct(?string $email = null, ?string $phone = null, ?string $locale = null)
     {
-        parent::__construct($email, $phone);
+        parent::__construct($email ?? '', $phone ?? '');
 
         if(!$locale)
             $locale = LocaleProvider::getDefaultLocale();

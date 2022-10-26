@@ -107,7 +107,6 @@ class DiscriminatorEntry extends AbstractAnnotation
 
     public function loadClassMetadata(ClassMetadata $classMetadata, string $target = null, string $targetValue = null)
     {
-
         // Recompute the map discriminator
         $discriminatorValues = [];
         foreach ($classMetadata->discriminatorMap as $className) {
@@ -115,8 +114,8 @@ class DiscriminatorEntry extends AbstractAnnotation
             $annotations = $this->getAnnotationReader()->getAnnotations($className, $this);
             $annotations = $annotations[AnnotationReader::TARGET_CLASS][$className];
             $annotation = $annotations ? end($annotations) : null;
-                if($annotation === null)
-                    throw new \Exception("@DiscriminatorEntry missing for \"".$className."\".");
+            if($annotation === null)
+                throw new \Exception("@DiscriminatorEntry annotation not found for \"".$className."\".");
 
             $discriminatorValues[$className] = $annotation->getValue($className);
         }

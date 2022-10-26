@@ -17,13 +17,11 @@ class ThreadPublishableCommand extends Command
     protected function configure(): void
     {
         $this->addOption('publish', null, InputOption::VALUE_NONE, 'Should I publish them ?');
-        $this->addOption('show',    null, InputOption::VALUE_NONE, 'Should I show you the publishable ?');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $actionPublish = $input->getOption('publish');
-        $actionShow    = $input->getOption('show');
 
         $threadRepository = $this->entityManager->getRepository(Thread::class);
         $threads = $threadRepository->findByState(ThreadState::FUTURE)->getResult();
@@ -37,7 +35,7 @@ class ThreadPublishableCommand extends Command
                 $thread->setState(ThreadState::PUBLISH);
 
             // Refresh database with publishable articles
-        $this->entityManager->flush();
+            $this->entityManager->flush();
 
             return true;
         });
@@ -47,23 +45,47 @@ class ThreadPublishableCommand extends Command
         $nThreads = count($threads);
         $nPublishableThreads = count($publishableThreads);
 
-        if($actionPublish || $actionShow) {
+        if($nThreads) $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
+        foreach ($threads as $key => $thread) {
 
-            foreach ($publishableThreads as $key => $thread) {
+            $publishableStr = $thread->isPublishable() ? "<warn,bkg>[O]</warn,bkg>" : "[X]";
+            $message = $publishableStr." <info>Entry ID #" .($key+1) . "</info>: <ln>". $this->translator->transEntity($thread)." #" . $thread->getId()." \"".$thread->getTitle()."\"</ln>";
+            if ( ($parent = $thread->getParent()) )
+                $message .= " in <ln>". $this->translator->transEntity($parent)." #" . $parent->getId()." ".$parent->getTitle()." </ln>";
 
-                $message = "Entry ID #" .($key+1) . " / Thread[". get_class($thread) . "] #" . $thread->getId();
-                if ( ($parent = $thread->getParent()) )
-                    $message .= " / Parent[". get_class($parent)."] #" . $parent->getId();
+            $message .= " -- Publishable in \"".$thread->getPublishTimeStr()."\"";
 
-                $message .= " -- Title: \"".$thread->getTitle()."\"";
-
-                $output->section()->writeln($message);
-            }
+            $output->section()->writeln($message, OutputInterface::VERBOSITY_VERBOSE);
         }
 
-        $output->section()->writeln($nThreads . ' scheduled thread(s) found => ' . $nPublishableThreads . ' thread(s) publishable.');
-        if ($actionPublish && $nPublishableThreads) $output->section()->writeln('=> Threads now published.');
+        if ($actionPublish && $nPublishableThreads) {
+        
+            $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable => These are now published';
+            $output->writeln('');
+            $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+            $output->writeln($msg);
+            $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+            $output->writeln('');
+        
+        } else if($nPublishableThreads) {
 
+                $msg = ' [WARN] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable, please confirm using `--publish` option.';
+                $output->writeln('');
+                $output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
+                $output->writeln($msg);
+                $output->writeln(str_blankspace(strlen($msg)).'</warning,bkg>');
+                $output->writeln('');
+        } else {
+
+            $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable.';
+            $output->writeln('');
+            $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
+            $output->writeln($msg);
+            $output->writeln(str_blankspace(strlen($msg)).'</info,bkg>');
+            $output->writeln('');
+        }
+
+        return Command::SUCCESS;
         return Command::SUCCESS;
     }
 }

@@ -2,8 +2,10 @@
 
 namespace Base;
 
+use App\Entity\User;
 use Base\Database\Filter\TrashFilter;
 use Base\Database\Filter\VaultFilter;
+use Base\Database\Type\UTCDateTimeType;
 use Base\DependencyInjection\Compiler\AnnotationPass;
 use Base\DependencyInjection\Compiler\CurrencyApiPass;
 use Base\DependencyInjection\Compiler\EntityExtensionPass;
@@ -47,6 +49,22 @@ class BaseBundle extends Bundle
     public static function hasDoctrine():bool { return self::$doctrineStartup; }
     public function doctrineStartup():bool
     {
+        /**
+         * Turn all DateTime into UTC timezone in database
+         */
+
+        // Start session here to access client information
+        $timezone = User::getCookie("timezone");
+        if( !in_array($timezone, timezone_identifiers_list()) )
+            $timezone = "UTC";
+
+        // Set default time to UTC everywhere
+        date_default_timezone_set($timezone ?? "UTC");
+
+        Type::overrideType('date', UTCDateTimeType::class);
+        Type::overrideType('datetime', UTCDateTimeType::class);
+        Type::overrideType('datetimetz', UTCDateTimeType::class);
+
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
         $entityManager->getConfiguration()->setNamingStrategy(new \Base\Database\Mapping\NamingStrategy());
 

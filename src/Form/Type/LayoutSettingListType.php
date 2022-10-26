@@ -44,7 +44,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
         $this->classMetadataManipulator = $classMetadataManipulator;
     }
 
-    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function configureOptions(OptionsResolver $resolver)
     {

@@ -21,9 +21,9 @@
                         user.createdAt()|datetime("HH:mm")
                     ])|raw }}&nbsp
 
-                    - {% if app.user == user or is_granted("ROLE_ADMIN") %}
+                    {# - {% if app.user == user or is_granted("ROLE_ADMIN") %}
                         <a href="{{path('user_profileEdit', {'id':user.id})}}">Editer le profil</a>
-                    {% endif %}
+                    {% endif %} #}
                 </div>
             </div>
         </div>

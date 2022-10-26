@@ -33,24 +33,29 @@ use Base\Form\FormProcessorInterface;
 use Base\Service\ReferrerInterface;
 use Base\Form\Type\SecurityResetPasswordConfirmType;
 use Base\Repository\User\TokenRepository;
+
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\MaintenanceProviderInterface;
 use Base\Service\MaternityServiceInterface;
 use Base\Service\ParameterBagInterface;
 use Base\Service\TranslatorInterface;
+use DateTime;
 use Doctrine\ORM\EntityManager;
-use Symfony\Component\Form\FormInterface;
 
 class SecurityController extends AbstractController
 {
     protected $baseService;
 
-    public function __construct(EntityManager $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository, BaseService $baseService, FormProxy $formProxy, TokenStorageInterface $tokenStorage, TranslatorInterface $translator)
+    public function __construct(
+        EntityManager $entityManager, TokenRepository $tokenRepository, UserRepository $userRepository,
+        BaseService $baseService, FormProxy $formProxy, TokenStorageInterface $tokenStorage,
+        TranslatorInterface $translator, ParameterBagInterface $parameterBag)
     {
         $this->baseService     = $baseService;
         $this->translator      = $translator;
         $this->tokenStorage    = $tokenStorage;
-        $this->formProxy     = $formProxy;
+        $this->formProxy       = $formProxy;
+        $this->parameterBag    = $parameterBag;
         
         $this->entityManager   = $entityManager;
         $this->userRepository  = $userRepository;
@@ -64,7 +69,7 @@ class SecurityController extends AbstractController
     public function Login(Request $request, ReferrerInterface $referrer, AuthenticationUtils $authenticationUtils): Response
     {
         // In case of maintenance, still allow users to login
-        if($this->baseService->isGranted("EXCEPTION_ACCESS"))
+        if($this->isGranted("EXCEPTION_ACCESS"))
             return $this->redirectToRoute(RescueFormAuthenticator::LOGIN_ROUTE);
 
         // Last username entered by the user
@@ -175,7 +180,7 @@ class SecurityController extends AbstractController
                 $this->entityManager->persist($newUser);
                 $this->entityManager->flush();
 
-                return $userAuthenticator->authenticateUser($formProcessor->getEntity(), $authenticator, $request);
+                return $userAuthenticator->authenticateUser($newUser, $authenticator, $request);
             })
 
             ->onDefault(function(FormProcessorInterface $formProcessor) {
@@ -209,12 +214,12 @@ class SecurityController extends AbstractController
             $verifyEmailToken = $user->getToken("verify-email");
             if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-                $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getDeadtimeStr()]);
+                $notification = new Notification("verifyEmail.resend", [$verifyEmailToken->getRemainingTimeStr()]);
                 $notification->send("danger");
 
             } else {
 
-                $verifyEmailToken = new Token("verify-email", 24*3600);
+                $verifyEmailToken = new Token("verify-email", 24*3600, 3600);
                 $verifyEmailToken->setUser($user);
 
                 $notification = new Notification('verifyEmail.check');
@@ -477,7 +482,9 @@ class SecurityController extends AbstractController
     public function Birth(MaternityServiceInterface $maternityService): Response
     {
         $birthdate = $maternityService->getBirthdate();
-        if($birthdate == null) return $this->redirectToRoute($this->baseService->getHomepage());
+
+        if($birthdate != null && new DateTime("now") > $birthdate)
+            return $this->redirectToRoute($this->baseService->getHomepage());
 
         return $this->render('@Base/security/birthdate.html.twig', [
             'birthdate'  => $birthdate

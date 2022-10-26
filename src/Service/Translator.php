@@ -370,14 +370,15 @@ class Translator implements TranslatorInterface
             $months  = fmod  ($time, 12);
             $years   = intdiv($time, 12);
 
-            return trim(
-                $this->trans("base.years",   [$years])  ." ".
-                $this->trans("base.months",  [$months]) ." ".
-                $this->trans("base.days",    [$days])   ." ".
-                $this->trans("base.hours",   [$hours])  ." ".
-                $this->trans("base.minutes", [$minutes])." ".
-                $this->trans("base.seconds", [$seconds])
-            );
+            $str = 
+                $years . " ". $this->trans("base.years",   [$years])  ." ".
+                $months . " ". $this->trans("base.months",  [$months]) ." ".
+                $days . " ". $this->trans("base.days",    [$days])   ." ".
+                $hours . " ". $this->trans("base.hours",   [$hours])  ." ".
+                $minutes . " ". $this->trans("base.minutes", [$minutes])." ".
+                $seconds . " ". $this->trans("base.seconds", [$seconds]);
+
+            return trim($str, " 0");
         }
 
         return "";

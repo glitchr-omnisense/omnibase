@@ -81,10 +81,22 @@ class FormProcessor implements FormProcessorInterface
     }
 
     protected $response;
+    public function hasResponse(): bool { return $this->response instanceof Response; }
     public function getResponse(): Response
     {
-        if (!$this->response instanceof Response)
-            throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit()#" . ($this->getStep()-1) . ": an instance of Response() is expected");
+        if (!$this->response instanceof Response) {
+            
+            if($this->form->isSubmitted()) {
+
+                if($this->form->isValid()) {
+                    throw new Exception("Unexpected returned value from " . get_class($this) . "::onSubmit(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");                
+                }
+
+                throw new Exception("Unexpected returned value from " . get_class($this) . "::onInvalid(".$this->form->getName().")#" . ($this->getStep()-1) . ": instance of " . Response::class . " expected");
+            }
+
+            throw new Exception("Unexpected returned value from " . get_class($this) . "::onDefault(".$this->form->getName()."): instance of " . Response::class . " expected");
+        }
 
         return $this->response;
     }
@@ -150,10 +162,11 @@ class FormProcessor implements FormProcessorInterface
         if($this->form->isSubmitted()) {
 
             // Prepare response either calling onDefault or onSubmit step
-            if($this->form->isValid())
+            if($this->form->isValid()) {
                 $this->response = count($this->onSubmitCallbacks) > $step-1 ? call_user_func($this->onSubmitCallbacks[$step-1], $this, $request) : null;            
-            else
+            } else {
                 $this->response = $this->onInvalidCallback ? call_user_func($this->onInvalidCallback, $this, $request) : null;
+            }
 
             if($step >= $stepMax)
                 $this->killSession($session);
@@ -161,6 +174,9 @@ class FormProcessor implements FormProcessorInterface
 
         if(!$this->response)
             $this->response = $this->onDefaultCallback ? call_user_func($this->onDefaultCallback, $this, $request) : null;
+
+        if (is_string($this->response))
+            $this->response = new Response($this->response);
 
         return $this;
     }

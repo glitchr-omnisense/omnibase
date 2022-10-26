@@ -8,6 +8,7 @@ use Base\Entity\User\Notification;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\BaseService;
 use Base\BaseBundle;
+use Base\Routing\AdvancedRouter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Doctrine\ORM\PersistentCollection;
@@ -19,11 +20,13 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use ErrorException;
 use InvalidArgumentException;
+use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\RouterInterface;
 use TypeError;
+use Symfony\Component\Console\Event\ConsoleCommandEvent;
 
 class IntegritySubscriber implements EventSubscriberInterface
 {
@@ -60,7 +63,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         return
         [
             KernelEvents::EXCEPTION  => ['onException'],
-            RequestEvent::class      => [['onKernelRequest', 5]],
+            RequestEvent::class      => ['onKernelRequest', 5],
             LoginSuccessEvent::class => ['onLoginSuccess', 1],
         ];
     }
@@ -96,7 +99,7 @@ class IntegritySubscriber implements EventSubscriberInterface
         if(!$session->get("_integrity/secret"))
             $session->set("_integrity/secret", $this->getSecret());
 
-        if(!$this->router->isRouteSecured()) return;
+        if(!$this->router->hasFirewall()) return;
         if($this->router->getRouteName() == RescueFormAuthenticator::LOGIN_ROUTE) return;
 
         $integrity  = $this->checkUserIntegrity();

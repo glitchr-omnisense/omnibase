@@ -16,6 +16,14 @@ interface LocaleProviderInterface
     public function getCountry(?string $locale = null): string;
     public function getCountryName(?string $locale = null): string;
 
+    public static function getDefaultLang(): ?string;
+    public static function getFallbackLangs(): array;
+    public static function getAvailableLangs(): array;
+    
+    public static function getDefaultCountry(): ?string;  
+    public static function getFallbackCountries(): array; 
+    public static function getAvailableCountries(): array;
+    
     public static function getDefaultLocale(): ?string;
     public static function getFallbackLocales(): array;
     public static function getAvailableLocales(): array;

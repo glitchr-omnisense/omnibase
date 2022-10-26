@@ -32,7 +32,6 @@ class SettingBag implements SettingBagInterface, WarmableInterface
     {
         $this->all();
         $this->allRaw();
-        $this->allRaw(true);
 
         return [ get_class($this) ];
     }
@@ -146,6 +145,8 @@ class SettingBag implements SettingBagInterface, WarmableInterface
 
     public function getRaw(null|string|array $path = null, bool $useCache = BaseBundle::CACHE, bool $onlyLinkedBag = false)
     {
+        $this->clear($path);
+        
         if(is_array($paths = $path)) {
 
             $settings = [];
@@ -221,7 +222,7 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         return $this->get($path, $locale)["_self"] ?? null;
     }
 
-    protected array $settingBag;
+    protected array $settingBag = [];
     public function get(null|string|array $path = null, ?string $locale = null, ?bool $useCache = BaseBundle::CACHE): array
     {
         if(is_array($paths = $path)) {
@@ -234,16 +235,22 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         }
 
         $this->settingBag ??= $useCache && $this->cacheSettingBag !== null ? $this->cacheSettingBag->get() ?? [] : [];
-        if(array_key_exists($path.":".$locale, $this->settingBag))
-            return $this->settingBag[$path.":".$locale];
+        if(array_key_exists($path.":".($locale ?? LocaleProvider::UNIVERSAL), $this->settingBag))
+            return $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)];
 
         try { $values = $this->getRaw($path, $useCache) ?? []; }
         catch (Exception $e) { throw $e; return []; }
 
-        $this->settingBag[$path.":".$locale] = $this->settingBag[$path.":".$locale] ?? array_map_recursive(fn($v) => ($v instanceof Setting ? $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue() : $v), $values);
+        $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)] ??= array_map_recursive(function($v) use ($locale) {
+                
+            if(!$v instanceof Setting) return $v;
+            return $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue();
+
+        }, $values);
+
         if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
-        return $this->settingBag[$path.":".$locale];
+        return $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)];
     }
 
     public function clearAll() { return $this->clear(null); }
@@ -257,8 +264,18 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             return;
         }
 
-        if($path) array_pop_key($path.":".$locale, $this->settingBag);
-        else $this->settingBag = [];
+        if(!$path) $this->settingBag = [];
+        else {
+
+            $pathByArray = explode(".", $path);
+            while( !empty($pathByArray) ) {
+
+                $currentPath = implode(".", $pathByArray);
+                $this->settingBag = array_key_removes_startsWith($this->settingBag, true, $currentPath.":");
+
+                array_pop($pathByArray);
+            }
+        }
 
         if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
     }
@@ -270,12 +287,10 @@ class SettingBag implements SettingBagInterface, WarmableInterface
             throw new \Exception("Setting \"$path\" is locked and cannot be modified.");
 
         $setting->translate($locale)->setValue($value);
-        unset($this->settingBag[$path.":".$locale]);
+        $this->clear($path, $locale);
 
         if ($this->entityManager->getCache())
             $this->entityManager->getCache()->evictEntity(get_class($setting), $setting->getId());
-
-        if($useCache) $this->cache->save($this->cacheSettingBag->set($this->settingBag));
 
         $this->entityManager->flush();
         return $this;

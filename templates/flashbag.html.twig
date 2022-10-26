@@ -28,7 +28,7 @@
                             <span class="message">{{ flash|raw }}</span>
                         {% endif %}
 
-                        <button type="button" class="btn-close alert-{{label}}" aria-label="Close" onclick="this.closest('.alert').style.display='none'"></button>
+                        <button type="button" class="btn-close" aria-label="Close" onclick="this.closest('.alert').remove()"></button>
                     </div>
                 {% endfor %}
             {% endfor %}

@@ -49,7 +49,7 @@ class Token implements IconizeInterface
             $this->get(),
             $this->getCreatedAt()->getTimestamp(),
             $this->getLifetime(),
-            $this->getThrottle(),
+            $this->getThrottleTime(),
             $this->isRevoked()
         ]));
 
@@ -157,7 +157,7 @@ class Token implements IconizeInterface
 
             $allowAt = clone $now;
             $allowAt->modify(is_numeric($throttle) ? "+ ".floor($throttle)." seconds" : $throttle);
-            $this->setThrottle($allowAt);
+            $this->setThrottleTime($allowAt);
         }
 
         // Generate token value
@@ -206,7 +206,7 @@ class Token implements IconizeInterface
     public function getElapsedTime():int { return time() - $this->createdAt->getTimestamp(); }
     public function getLifetime():int { return ($this->expireAt == null ? -1 : $this->expireAt->getTimestamp() - $this->createdAt->getTimestamp()); }
     public function getRemainingTime():int { return $this->expireAt->getTimestamp() - time(); }
-    public function getRemainingTimeStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
+    public function getRemainingTimeStr(): string { return $this->getTranslator()->transTime($this->getRemainingTime()); }
 
 
     /**
@@ -228,10 +228,10 @@ class Token implements IconizeInterface
     }
 
     public function hasVeto():bool { return $this->isValid() && ($this->getAllowAt() == null ? false : new \DateTime("now") < $this->getAllowAt()); }
-    public function getThrottle():int { return $this->allowAt->getTimestamp() - time(); }
-    public function getThrottleStr(): string { return $this->getTranslator()->time($this->getRemainingTime()); }
-    public function setThrottle(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
-    public function hasThrottle():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
+    public function getThrottleTime():int { return $this->allowAt->getTimestamp() - time(); }
+    public function getThrottleTimeStr(): string { return $this->getTranslator()->transTime($this->getThrottleTime()); }
+    public function setThrottleTime(\DateTimeInterface $allowAt): self { return $this->setAllowAt($allowAt); }
+    public function isThrottled():bool { return $this->getAllowAt() != $this->getCreatedAt(); }
 
     /**
      * @ORM\Column(type="boolean")

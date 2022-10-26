@@ -24,11 +24,11 @@
 {%- block form2_label  -%}
 
     {% set badges = "" %}
-    {% set badges = badges ~ (app.debug and form.vars.is_dbcolumn  is defined ? "fas fa-fw fa-database"      |iconify|first|raw({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_multiple  is defined ? "fas fa-fw fa-clipboard-list"|iconify|first|raw({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_alias     is defined ? "fas fa-fw fa-hashtag"       |iconify|first|raw({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_sortable  is defined ? "fas fa-fw fa-repeat"        |iconify|first|raw({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)}) : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_inherited is defined ? "fas fa-fw fa-sitemap"       |iconify|first|raw({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)}) : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_dbcolumn  is defined ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_multiple  is defined ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_alias     is defined ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_sortable  is defined ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (app.debug and form.vars.is_inherited is defined ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
 
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
@@ -369,7 +369,7 @@
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
                     <span><i class="fas fa-search-plus" id="{{id}}_preview"></i></span>
                     <span>{{ clipboard("copy", form.vars.value|imagine) }}</span>
-                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify|first|raw({"style":"font-size: 0.95em;bottom:3px;position:relative"}) }}</a></span>
+                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify({"style":"font-size: 0.95em;bottom:3px;position:relative"}|first|raw) }}</a></span>
                     <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fas fa-fw fa-image"|iconify|first|raw }}</a></span>
                 {% else %}
                     <span><i class="fas fa-plus-circle"></i></span>
@@ -432,7 +432,7 @@
 
 {% set lightboxIcon = path|length > 1 ? "fas fa-2x fa-fw fa-search-plus" : "fas fa-2x fa-fw fa-image" %}
 {% set lightboxPattern = "<a href='{0}' data-lightbox='lightbox-"~id~"' loading='lazy'>"~(lightboxIcon|iconify|first|raw)~"</a>" %}
-{% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify|first|raw({"style":"font-size: 1.8em;"}))~"</a>" %}
+{% set downloadPattern = "<a href='{0}' >"~("fas fa-2x fa-fw fa-download"|iconify({"style":"font-size: 1.8em;"})|first|raw)~"</a>" %}
 {% set clipboardPattern = clipboard("copy", "{0}", {class:"fa-2x fa-fw"}) %}
 {% set gotoPattern = "<a target='_blank' href='{0}'>"~("fas fa-fw fa-2x fa-external-link-square-alt"|iconify|first|raw)~"</a>" %}
 {% set deletePattern = allow_delete ? "<a class='warning' data-dz-remove='true'>"~("far fa-fw fa-2x fa-trash-alt"|iconify|first|raw)~"</a>" : null %}
@@ -1148,11 +1148,11 @@
                 <hr>
                 <div>{{ '@fields.password.requirements.label'|trans }}</div>
                 <ul>
-                    <li>{{ 'fas fa-times-circle'|iconify|first|raw({'class': 'uncheck'}) }} {{ '@fields.password.requirements.uppercase'|trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify|first|raw({'class': 'uncheck'}) }} {{ '@fields.password.requirements.lowercase'|trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify|first|raw({'class': 'uncheck'}) }} {{ '@fields.password.requirements.numbers'  |trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify|first|raw({'class': 'uncheck'}) }} {{ '@fields.password.requirements.specials' |trans }}</li>
-                    <li>{{ 'fas fa-times-circle'|iconify|first|raw({'class': 'uncheck'}) }} {{ '@fields.password.requirements.length12' |trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.uppercase'|trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.lowercase'|trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.numbers'  |trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.specials' |trans }}</li>
+                    <li>{{ 'fas fa-times-circle'|iconify({'class': 'uncheck'})|first|raw }} {{ '@fields.password.requirements.length12' |trans }}</li>
                 </ul>
             </div>
             <footer>
@@ -1177,7 +1177,7 @@
 
                 <div class="input-group">
                     <span class="input-group-text">{{ (form.vars.repeater ? 'fas fa-unlock' : 'fas fa-lock')|iconify|first|raw }}</span>
-                    {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify|first|raw({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"}) }}{% endif%}
+                    {% if form.vars.revealer %}{{ 'fas fa-eye'|iconify({'class':'form-password-revealer', 'id': form.vars.id~"_revealer"})|first|raw }}{% endif%}
                     {{ form_widget(form.plain, {
                         required:form.vars.required and not allow_empty,
                         value:form.vars.revealer and not form.vars.secure ? form.vars.value : "",

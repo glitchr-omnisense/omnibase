@@ -36,6 +36,7 @@
 
         <service id="Base\Routing\RouterInterface" alias="Base\Routing\AdvancedRouter"/>
         <service id="Base\Routing\AdvancedRouter" decorates="router">
+            <tag name="twig.runtime" />
             <argument type="service" id=".inner" />
             <argument type="service" id="request_stack" />
             <argument type="service" id="parameter_bag" />

@@ -19,11 +19,11 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
         $thread = $event->getObject();
 
         if ($thread->isScheduled())
-            $this->events[spl_object_id($thread)][] = ThreadEvent::SCHEDULED;
+            $this->addEvent(ThreadEvent::SCHEDULED, $thread);
         if ($thread->isPublished())
-            $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISHED;
+            $this->addEvent(ThreadEvent::PUBLISHED, $thread);
         if ($thread->isPublishable())
-            $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISHABLE;
+            $this->addEvent(ThreadEvent::PUBLISHABLE, $thread);
     }
 
     public function onUpdate(LifecycleEventArgs $event)

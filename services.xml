@@ -193,8 +193,8 @@
         </service>
         <service id="Base\Form\Extension\FormTypeSpamExtension" >
             <tag name="form.type_extension" />
-            <argument type="service" id="Base\Service\SpamChecker" />
-            <argument type="service" id="base.service" />
+            <argument type="service" id="spam_checker" />
+            <argument type="service" id="router" />
         </service>
 
         <!-- Commands -->
@@ -309,6 +309,7 @@
             <argument type="service" id="form.proxy" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="translator" />
+            <argument type="service" id="parameter_bag" />
         </service>
 
         <!-- Subscriber -->
@@ -322,6 +323,10 @@
         <service id="Base\Subscriber\EagerSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="base.service" />
+        </service>
+
+        <service id="Base\Subscriber\FlashBagSubscriber">
+            <tag name="kernel.event_subscriber" />
         </service>
 
         <service id="Base\Subscriber\TimezoneSubscriber">
@@ -355,8 +360,11 @@
 
         <service id="Base\Service\SpamChecker" public="true">
             <argument type="service" id="request_stack" />
+            <argument type="service" id="setting_bag" />
+            <argument type="service" id="parameter_bag" />
+            <argument type="service" id="translator" />
             <argument type="service" id="monolog.http_client" />
-            <argument type="service" id="base.service" />
+            <bind key="$debug">%kernel.debug%</bind>
         </service>
 
         <service id="Base\Service\Sitemapper" public="true">
@@ -685,9 +693,6 @@
         <service id="Base\EntityDispatcher\Event\ThreadEventDispatcher" parent="Base\EntityDispatcher\AbstractEventDispatcher">
             <tag name="doctrine.event_subscriber" />
         </service>
-        <service id="Base\EntityDispatcher\Event\ThreadIntlEventDispatcher"   parent="Base\EntityDispatcher\AbstractEventDispatcher">
-            <tag name="doctrine.event_subscriber" />
-        </service>
         <service id="Base\EntityDispatcher\AbstractEventDispatcher" abstract="true">
             <argument type="service" id="event_dispatcher" />
             <argument type="service" id="base.database.entity_hydrator" />
@@ -701,6 +706,7 @@
         </service>
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="security.token_storage" />
             <argument type="service" id="router" />
         </service>

@@ -280,12 +280,16 @@ class SelectType extends AbstractType implements DataMapperInterface
                 // Search missing information
                 $missingData = [];
                 $knownData = array_keys($formattedData);
-                foreach($dataChoices as $data) {
 
-                    if(!in_array($data, $knownData)) {
+                if($this->classMetadataManipulator->isEntity($options["class"])) {
 
-                        $classRepository = $this->entityManager->getRepository($options["class"]);
-                        $missingData[] = $classRepository->cacheOneById($data);
+                    foreach($dataChoices as $data) {
+                        
+                        if(!in_array($data, $knownData)) {
+
+                            $classRepository = $this->entityManager->getRepository($options["class"]);
+                            $missingData[] = $classRepository->cacheOneById($data);
+                        }
                     }
                 }
 

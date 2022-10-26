@@ -5,6 +5,6 @@
 <span class="badge badge-secondary">
     <span>
         <span class="label">{{ field.formattedValue|default("@fields.stock.unlimited"|trans) }}</span>
-        {{ "fas fa-truck-loading"|iconify|first|raw({class:"fa-fw"}) | raw}}
+        {{ "fas fa-truck-loading"|iconify({class:"fa-fw"})|first|raw }}
     </span>
 </span>

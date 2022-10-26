@@ -31,11 +31,11 @@ class FileService implements FileServiceInterface
 
     public function __construct(RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem)
     {
-        $this->router        = $router;
-        $this->obfuscator    = $obfuscator;
-        $this->flysystem     = $flysystem;
-        $this->projectDir    = $flysystem->getProjectDir();
-        $this->publicDir    = $flysystem->getPublicDir();
+        $this->router     = $router;
+        $this->obfuscator = $obfuscator;
+        $this->flysystem  = $flysystem;
+        $this->projectDir = $flysystem->getProjectDir();
+        $this->publicDir  = $flysystem->getPublicDir();
 
         $this->mimeTypes = new MimeTypes();
     }
@@ -93,10 +93,16 @@ class FileService implements FileServiceInterface
     }
 
     public function public(array|string|null $path, ?string $storage = null): array|string|null { return $this->flysystem->getPublic($path, $storage); }
+    public function asset(string $path, ?string $packageName = null): ?string { return $this->router->getAssetUrl($path, $packageName); }
 
     public function isEmpty(?string $file) { return $file === null || preg_match("/application\/x-empty/", $this->getMimeType($file)); }
     public function isImage(?string $file) { return preg_match("/image\/.*/", $this->getMimeType($file)); }
     public function isSvg  (?string $file) { return $this->getMimeType($file) == "image/svg+xml"; }
+
+    public function filesize($size, array $unitPrefix = DECIMAL_PREFIX): string
+    {
+        return byte2str($size, $unitPrefix);
+    }
 
     public function obfuscate(string|null $path, array $config = []): ?string
     {

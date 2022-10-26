@@ -256,7 +256,7 @@ final class FunctionTwigExtension extends AbstractExtension
         return array_filter($array, fn($k) => in_array($k, $keys), ARRAY_FILTER_USE_KEY);
     }
 
-    public function countdown(Environment $env, DateTime|DateInterval|int|string $datetime, array $parameters = []): string
+    public function countdown(Environment $env, DateTime|DateInterval|int|string|null $datetime, array $parameters = []): string
     {
         $now = time();
         if($datetime instanceof DateTime) $timestamp = $datetime->getTimestamp();

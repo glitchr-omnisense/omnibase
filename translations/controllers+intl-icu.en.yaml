@@ -36,7 +36,10 @@ user_settings:
   title: "My Settings"
 
 security_birthdate:
-  title: "We will soon be online"
+  title: 
+    default: "We will soon be online"
+    appointment: "Please take note, launch time"
+  no_estimate: "but no precise estimate for the moment, please come back later !"
 
 security_maintenance:
   title: "Temporarily down for maintenance!"

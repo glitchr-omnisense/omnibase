@@ -2,14 +2,14 @@
 
 namespace Base\EntityDispatcher\Event;
 
-use Base\Entity\User;
-use Symfony\Contracts\EventDispatcher\Event;
+use App\Entity\User;
+use Base\EntityDispatcher\AbstractEvent;
 
 /**
  * The order.placed event is dispatched each time an order is created
  * in the system.
  */
-class UserEvent extends Event
+class UserEvent extends AbstractEvent
 {
     public const REGISTER = 'user.register';
     public const VERIFIED = 'user.verified';
@@ -22,11 +22,5 @@ class UserEvent extends Event
     public const GHOST    = 'user.ghost'   ;
     public const BANNED   = 'user.banned'  ;
 
-    public function __construct(User $user)
-    {
-        $this->user = $user;
-    }
-
-    protected $user;
-    public function getUser(): User { return $this->user; }
+    public function getUser(): User { return $this->getObject(); }
 }

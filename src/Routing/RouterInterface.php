@@ -19,6 +19,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
     public function isProfiler($request = null);
     public function isEasyAdmin($request = null);
     public function isUX($request = null);
+    public function isSecured($request = null);
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 
@@ -45,7 +46,7 @@ interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterfac
 
     public function isCli(): bool;
     public function isDebug(): bool;
-    public function isRouteSecured(?string $routeUrl = null): ?bool;
+    public function hasFirewall(?string $routeUrl = null): ?bool;
 
     public function getCache();
     public function getCacheRoutes();

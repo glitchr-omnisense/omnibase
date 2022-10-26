@@ -23,7 +23,7 @@ class SecurityRegistrationType extends AbstractType
         ]);
     }
 
-    public function getBlockPrefix():string { return "_base".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
+    public function getBlockPrefix():string { return "_base_".StringUtil::fqcnToBlockPrefix(static::class) ?: ''; }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {

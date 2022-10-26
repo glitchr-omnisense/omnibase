@@ -188,13 +188,15 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
         return $this;
     }
 
-    public function isDeleted(): bool { return str_starts_with($this->state, ThreadState::DELETE); }
-    public function isScheduled(): bool { return $this->publishedAt && !$this->isPublished(); }
-    public function isPublished(): bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
+    public function isFuture()    : bool { return str_starts_with($this->state, ThreadState::FUTURE); }
+    public function isDeleted()    : bool { return str_starts_with($this->state, ThreadState::DELETE); }
+    public function isScheduled()  : bool { return str_starts_with($this->state, ThreadState::FUTURE) && $this->publishedAt && !$this->isPublished(); }
+    public function isSecret()     : bool { return str_starts_with($this->state, ThreadState::SECRET); }
+    public function isPublished()  : bool { return str_starts_with($this->state, ThreadState::PUBLISH); }
     public function isPublishable(): bool
     {
         if(!$this->publishedAt) return false;
-        return $this->state == ThreadState::FUTURE && (time() - $this->publishedAt->getTimestamp()) >= 0;
+        return $this->state == ThreadState::FUTURE && $this->getPublishTime() < 0;
     }
 
     /**
@@ -392,6 +394,8 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $publishedAt;
     public function getPublishedAt(): ?\DateTimeInterface { return $this->publishedAt; }
+    public function getPublishTime() { return $this->publishedAt->getTimestamp() - time(); }
+    public function getPublishTimeStr() { return $this->getTranslator()->transTime($this->getPublishTime()); }
     public function setPublishedAt(?\DateTimeInterface $publishedAt): self
     {
         $this->publishedAt = $publishedAt;

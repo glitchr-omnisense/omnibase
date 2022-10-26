@@ -6,7 +6,6 @@ use App\Repository\UserRepository;
 use Base\Service\ReferrerInterface;
 use Base\Entity\User;
 
-use Base\BaseBundle;
 use Base\Service\BaseService;
 use Base\Security\LoginFormAuthenticator;
 
@@ -14,6 +13,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 use Base\Entity\User\Notification;
 use Base\Enum\UserRole;
+use Base\Routing\RouterInterface;
 use Base\Security\RescueFormAuthenticator;
 use Base\Service\LocaleProvider;
 use Base\Service\MaintenanceProviderInterface;
@@ -24,7 +24,6 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
-use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
@@ -164,7 +163,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $adminAccess      = $this->authorizationChecker->isGranted("ADMIN_ACCESS");
         $userAccess       = $this->authorizationChecker->isGranted("USER_ACCESS");
         $anonymousAccess  = $this->authorizationChecker->isGranted("ANONYMOUS_ACCESS");
-
+        
         $accessRestricted = !$adminAccess || !$userAccess || !$anonymousAccess;
         if($accessRestricted) {
 
@@ -210,19 +209,10 @@ class SecuritySubscriber implements EventSubscriberInterface
             //
             // If not, then user is redirected to a specific route
             $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
-            if(is_array($routeRestriction)) {
+            foreach($routeRestriction as $i => $route)
+                $routeRestriction[$i] = str_rstrip($route, ".".$this->localeProvider->getDefaultLang());
 
-                $routeRestrictionWithLocale = array_filter($routeRestriction, fn($a) => str_ends_with($a, ".".$this->localeProvider->getLang()));
-                if(!empty($routeRestrictionWithLocale))
-                    $routeRestriction = $routeRestrictionWithLocale;
-
-                $routeRestriction = first($routeRestriction);
-            }
-
-            if ($routeRestriction !== null && str_ends_with($routeRestriction, ".".$this->localeProvider->getLang()))
-                $routeRestriction = str_rstrip($routeRestriction, ".".$this->localeProvider->getLang());
-
-            if ($this->router->getRouteName() != $routeRestriction) {
+            if (!in_array($this->router->getRouteName(), $routeRestriction)) {
 
                 if($user && $specialGrant) {
 
@@ -233,7 +223,7 @@ class SecuritySubscriber implements EventSubscriberInterface
                     return true;
                 }
 
-                $response   = $routeRestriction ? $this->baseService->redirect($routeRestriction) : null;
+                $response   = $routeRestriction ? $this->baseService->redirect(first($routeRestriction)) : null;
                 $response ??= $this->baseService->redirect(RescueFormAuthenticator::LOGIN_ROUTE);
 
                 if($event) $event->setResponse($response);
@@ -289,14 +279,14 @@ class SecuritySubscriber implements EventSubscriberInterface
         //
         // Check if user is verified
         // (NB:exception in debut mode for user matching test_recipient emails)
-        if (!$user->isVerified() && !$user->isTester()) {
+        if (!$user->isVerified() && !$user->isTester() && !$this->router->isSecured()) {
 
                 $callbackFn = function () use ($user) {
 
                     $verifyEmailToken = $user->getToken("verify-email");
                     if($verifyEmailToken && $verifyEmailToken->hasVeto()) {
 
-                        $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getDeadtimeStr()]);
+                        $notification = new Notification("verifyEmail.alreadySent", [$verifyEmailToken->getThrottleTimeStr()]);
                         $notification->send("info");
 
                     } else {
@@ -307,9 +297,16 @@ class SecuritySubscriber implements EventSubscriberInterface
                 };
 
                 $response    = $event->getResponse();
-                $redirection = $response && $response->getStatusCode() == 302;
-                if($redirection || $this->baseService->isEasyAdmin() || $this->baseService->isProfiler()) $callbackFn();
-                else $this->baseService->redirectToRoute("user_profile", [], 302, ["event" => $event, "exceptions" => $exceptions, "callback" => $callbackFn]);
+                $alreadyRedirected = $response && $response->getStatusCode() == 302;
+                $isException =  $this->baseService->isEasyAdmin() || $this->baseService->isProfiler();
+                
+                if($alreadyRedirected || $isException) $callbackFn();
+                else $this->baseService->redirectToRoute("user_profile", [], 302, [
+                    "event" => $event, 
+                    "exceptions" => $exceptions, 
+                    "callback" => $callbackFn
+                ]);
+
         }
 
         if(!$user->isApproved()) {
@@ -428,8 +425,6 @@ class SecuritySubscriber implements EventSubscriberInterface
     public function onBirthRequest(RequestEvent $event)
     {
         if(!$event->isMainRequest()) return;
-        if(!$this->parameterBag->get("base.settings.birthdate.redirect_on_deny")) return ;
-
         if($this->maternityService->redirectOnDeny($event, $this->localeProvider->getLocale())) {
 
             if($this->profiler) $this->profiler->disable();
