@@ -5,10 +5,11 @@ namespace Base\Twig;
 use Base\Routing\RouterInterface;
 use Base\Service\ParameterBagInterface;
 use Exception;
-
+use RuntimeException;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Environment as TwigEnvironment;
 use Twig\Error\LoaderError;
+use Twig\Loader\ChainLoader;
 use Twig\Loader\LoaderInterface;
 use Twig\Template;
 use Twig\TemplateWrapper;
@@ -56,7 +57,8 @@ class Environment extends TwigEnvironment
             }
         }
 
-        return $this->load($name)->render($context);
+        try { return $this->load($name)->render($context); }
+        catch (LoaderError $e) { throw new RuntimeException("File not found `".$name."` in any of the provided templates", $e->getCode(), $e); }
     }
 
     public function getAsset(string $url): string

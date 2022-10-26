@@ -86,13 +86,13 @@ final class FileTwigExtension extends AbstractExtension
         return "<a href='".$url."' ".html_attributes($attributes).">".$label."</a>";
     }
 
-    public function linkify(LinkableInterface|string $urlOrPath)
+    public function linkify(mixed $urlOrPath)
     {
         $url   = $urlOrPath;
         if($urlOrPath instanceof LinkableInterface)
             $url   = $urlOrPath->__toLink();
 
-        return $url;
+        return is_object($url) ? null : (is_string($url) ? $url : null);
     }
     
     public function url(array $context, ?string $name, array $parameters = [], int $referenceType = AdvancedRouter::ABSOLUTE_PATH)

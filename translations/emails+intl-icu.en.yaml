@@ -47,3 +47,10 @@ accountGoodbye:
   content: "We're so sorry to see you leave. If you changed your mind just log back in !
            Click on the link below to return online"
   action_text: Sign back in !
+
+thread:
+  publish:
+    subject: "The {0} : \"{1}\" just got published"
+    content: "An {0} you scheduled just got release to the public. Here is a short abstract \"{1}\""
+    action_text: Go to see the {0}
+    

@@ -702,7 +702,6 @@
         <service id="Base\EntitySubscriber\ThreadSubscriber">
             <tag name="kernel.event_subscriber" />
             <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="base.database.entity_hydrator" />
         </service>
         <service id="Base\EntitySubscriber\UserSubscriber">
             <tag name="kernel.event_subscriber" />

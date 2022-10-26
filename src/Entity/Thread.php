@@ -33,6 +33,7 @@ use Base\Service\Model\GraphInterface;
 use Base\Enum\WorkflowState;
 use Doctrine\ORM\Mapping as ORM;
 use Base\Repository\ThreadRepository;
+use DateTime;
 
 /**
  * @ORM\Entity(repositoryClass=ThreadRepository::class)
@@ -388,6 +389,11 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $updatedAt;
     public function getUpdatedAt(): ?\DateTimeInterface { return $this->updatedAt; }
+    public function poke(): self 
+    { 
+        $this->updatedAt = new DateTime("now");
+        return $this;
+    }
 
     /**
      * @ORM\Column(type="datetime", nullable=true)

@@ -45,3 +45,9 @@ accountGoodbye:
   content: "Désolé de te voir partir, mais on espère te revoir vite ! Si tu changes d'avis tu pourras te reconnecter à tout instant.
            Clique sur le lien ci-dessous si tu veux revenir !"
   action_text: Oups, j'ai changé d'avis !
+
+thread:
+  publish:
+    subject: "{0} : \"{1}\" vient d'être publié !"
+    content: "Cette publication programmée dont tu es l'auteur vient d'être mise en ligne. Ci-après le résumé \"{1}\""
+    action_text: Voir la publication

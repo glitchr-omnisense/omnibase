@@ -4,7 +4,7 @@ namespace Base\EntityDispatcher\Event;
 
 use Base\Entity\Thread;
 use Base\EntityDispatcher\AbstractEventDispatcher;
-use Base\Enum\ThreadState;
+use DateTime;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 
 class ThreadEventDispatcher extends AbstractEventDispatcher
@@ -28,13 +28,21 @@ class ThreadEventDispatcher extends AbstractEventDispatcher
 
     public function onUpdate(LifecycleEventArgs $event)
     {
+        /**
+         * @var Thread
+         */
         $thread = $event->getObject();
 
-        // Update publishable articles
-        if ($thread->isScheduled() && $thread->isPublishable()) {
+        // Check if scheduled
+        if ($thread->isPublishedAt() > new DateTime("now") && $thread->isPublished())
+            $this->addEvent(ThreadEvent::SCHEDULED, $thread);
 
-            $thread->setState(ThreadState::PUBLISH);
-            $this->events[spl_object_id($thread)][] = ThreadEvent::PUBLISHED;
-        }
+        // Update if publishable
+        if ($thread->isPublishable())
+            $this->addEvent(ThreadEvent::PUBLISHABLE, $thread);
+
+        // Update if published
+        if ($thread->isPublished())
+            $this->addEvent(ThreadEvent::PUBLISHED, $thread);
     }
 }

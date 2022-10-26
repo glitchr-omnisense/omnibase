@@ -31,8 +31,7 @@ class ThreadPublishableCommand extends Command
 
             if (!$thread->isPublishable()) return false;
 
-            if ($actionPublish)
-                $thread->setState(ThreadState::PUBLISH);
+            if ($actionPublish) $thread->poke();
 
             // Refresh database with publishable articles
             $this->entityManager->flush();
@@ -48,7 +47,7 @@ class ThreadPublishableCommand extends Command
         if($nThreads) $output->section()->writeln("", OutputInterface::VERBOSITY_VERBOSE);
         foreach ($threads as $key => $thread) {
 
-            $publishableStr = $thread->isPublishable() ? "<warn,bkg>[O]</warn,bkg>" : "[X]";
+            $publishableStr = $thread->isPublishable() ? "<info,bkg>[O]</info,bkg>" : "[X]";
             $message = $publishableStr." <info>Entry ID #" .($key+1) . "</info>: <ln>". $this->translator->transEntity($thread)." #" . $thread->getId()." \"".$thread->getTitle()."\"</ln>";
             if ( ($parent = $thread->getParent()) )
                 $message .= " in <ln>". $this->translator->transEntity($parent)." #" . $parent->getId()." ".$parent->getTitle()." </ln>";
@@ -60,7 +59,7 @@ class ThreadPublishableCommand extends Command
 
         if ($actionPublish && $nPublishableThreads) {
         
-            $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable => These are now published';
+            $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable => These are now published. ';
             $output->writeln('');
             $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
             $output->writeln($msg);
@@ -69,7 +68,7 @@ class ThreadPublishableCommand extends Command
         
         } else if($nPublishableThreads) {
 
-                $msg = ' [WARN] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable, please confirm using `--publish` option.';
+                $msg = ' [WARN] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable, please confirm using `--publish` option. ';
                 $output->writeln('');
                 $output->writeln('<warning,bkg>'.str_blankspace(strlen($msg)));
                 $output->writeln($msg);
@@ -77,7 +76,7 @@ class ThreadPublishableCommand extends Command
                 $output->writeln('');
         } else {
 
-            $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable.';
+            $msg = ' [OK] '.$nThreads.' scheduled thread(s) found: '.$nPublishableThreads.' thread(s) publishable. ';
             $output->writeln('');
             $output->writeln('<info,bkg>'.str_blankspace(strlen($msg)));
             $output->writeln($msg);

@@ -78,6 +78,7 @@ abstract class AbstractEventDispatcher implements EventDispatcherInterface
 
         $reflush = false;
         $eventClass = $this->getEventClass();
+ 
         foreach ($this->events[$id] as $eventName => $alreadyTriggered) {
 
             if($alreadyTriggered === false) continue;
