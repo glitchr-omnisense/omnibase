@@ -15,10 +15,10 @@ class IconProvider
 
     public function getRouteIcons(string $route)
     {
-        return $this->routeIcons[$route.".".$this->localeProvider->getLang()] 
+        return $this->routeIcons[$route.".".$this->localeProvider->getLang()]
             ?? $this->routeIcons[$route]
 
-            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getLang()] 
+            ?? $this->routeIcons[$route.".default.".$this->localeProvider->getLang()]
             ?? $this->routeIcons[$route.".default"]
 
             ?? $this->routeIcons[$route.".".$this->localeProvider->getDefaultLang()]
@@ -44,7 +44,7 @@ class IconProvider
                 if(!$controller) return null;
 
                 try { list($class, $method) = explode("::", $controller); }
-                catch(\ErrorException $e) { return null; } 
+                catch(\ErrorException $e) { return null; }
                 if(!class_exists($class)) return null;
 
                 $iconAnnotations = $annotationReader->getMethodAnnotations($class, [Iconize::class])[$method] ?? [];
@@ -96,13 +96,18 @@ class IconProvider
         else if(($routeIcons = $this->getRouteIcons($icon)))
             $icon = $routeIcons;
 
-        if(is_array($icon)) 
-            return array_merge(...array_map(fn($i) => $this->iconify($i, $attributes), $icon));
+        if(is_array($icon)) {
 
-        foreach($this->adapters as $provider) {
+            $icon = array_map(fn($i) => $this->iconify($i, $attributes), $icon);
+            if($icon) return array_merge(...$icon);
 
-            if ($provider->supports($icon))
-                return [$provider->iconify($icon, $attributes)];
+        } else {
+
+            foreach($this->adapters as $provider) {
+
+                if ($provider->supports($icon))
+                    return [$provider->iconify($icon, $attributes)];
+            }
         }
 
         return $this->iconify("fas fa-question-circle", $attributes) ?? null;
