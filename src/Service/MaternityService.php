@@ -30,11 +30,12 @@ class MaternityService implements MaternityServiceInterface
         return $birthdate instanceof DateTime ? $birthdate : new DateTime($birthdate);
     }
 
-    public function isBorn(?string $locale = null) : bool
+    public function isBorn(?string $locale = null) : ?bool
     { 
         $now = new \DateTime("now");
         $birthdate = $this->getBirthdate($locale);
-
+        if($birthdate === null) return null;
+        
         return ($birthdate < $now);
     }
 
@@ -50,7 +51,9 @@ class MaternityService implements MaternityServiceInterface
 
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool
     {
-        $redirectOnDeny = $this->settingBag->getScalar("base.settings.birthdate.redirect_on_deny") ?? "security_birth";
+        if(!$this->settingBag->getScalar("base.settings.birthdate.redirect_on_deny")) return false;
+
+        $redirectOnDeny = "security_birth";
         if(is_array($redirectOnDeny)) $redirectOnDeny = first($redirectOnDeny);
 
         if($this->router->isUX()) return false;

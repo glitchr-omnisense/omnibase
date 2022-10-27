@@ -1640,7 +1640,6 @@ class ServiceEntityParser
 
         $qb->leftJoin($join, $alias ?? str_replace(".", "_", $join), $conditionType, $condition, $indexBy);
         $this->joinList[spl_object_hash($qb)][] = $join;
-
         return true;
     }
 
