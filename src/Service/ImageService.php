@@ -9,7 +9,6 @@ use Base\Imagine\Filter\Format\BitmapFilter;
 use Base\Imagine\Filter\Format\SvgFilter;
 use Base\Imagine\Filter\FormatFilterInterface;
 use Base\Routing\RouterInterface;
-use Base\Twig\Environment;
 use Exception;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Profiler\Profiler;
@@ -38,7 +37,7 @@ class ImageService extends FileService implements ImageServiceInterface
 
     public function __construct(
         RouterInterface $router, ObfuscatorInterface $obfuscator, FlysystemInterface $flysystem,
-        ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg, Profiler $profiler)
+        ParameterBagInterface $parameterBag, ImagineInterface $imagineBitmap, ImagineInterface $imagineSvg, ?Profiler $profiler)
     {
         parent::__construct($router, $obfuscator, $flysystem);
 

@@ -24,11 +24,11 @@
 {%- block form2_label  -%}
 
     {% set badges = "" %}
-    {% set badges = badges ~ (app.debug and form.vars.is_dbcolumn  is defined ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_multiple  is defined ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_alias     is defined ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_sortable  is defined ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (app.debug and form.vars.is_inherited is defined ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_dbcolumn  is defined ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_multiple  is defined ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_alias     is defined ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_sortable  is defined ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_inherited is defined ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
 
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
@@ -369,7 +369,7 @@
                 {% if form.vars.value is not empty and form.vars.lightbox is defined and form.vars.lightbox is not empty %}
                     <span><i class="fas fa-search-plus" id="{{id}}_preview"></i></span>
                     <span>{{ clipboard("copy", form.vars.value|imagine) }}</span>
-                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify({"style":"font-size: 0.95em;bottom:3px;position:relative"}|first|raw) }}</a></span>
+                    <span><a                 href='{{ form.vars.download }}'>{{ "fas fa-fw fa-download"|iconify({"style":"font-size:0.95em;bottom:3px;position:relative"})|first|raw }}</a></span>
                     <span><a target='_blank' href='{{ form.vars.value|imagine }}'>{{ "fas fa-fw fa-image"|iconify|first|raw }}</a></span>
                 {% else %}
                     <span><i class="fas fa-plus-circle"></i></span>

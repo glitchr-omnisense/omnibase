@@ -208,7 +208,7 @@ class SecuritySubscriber implements EventSubscriberInterface
 
             //
             // If not, then user is redirected to a specific route
-            $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny");
+            $routeRestriction = $this->baseService->getSettingBag()->getScalar("base.settings.access_restriction.redirect_on_deny") ?? [];
             foreach($routeRestriction as $i => $route)
                 $routeRestriction[$i] = str_rstrip($route, ".".$this->localeProvider->getDefaultLang());
 

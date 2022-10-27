@@ -110,18 +110,18 @@ class Countify extends AbstractAnnotation
         $nWords = $this->getFieldValue($entity, $property);
         if($nWords) return;
 
-        $count = $this->getCount($entity);
-        $this->setFieldValue($entity, $property, $count ? $count : null);
+        $count = $this->getCount($entity) ?? 0;
+        $this->setFieldValue($entity, $property, $count);
     }
 
     public function prePersist(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $count = $this->getCount($entity);
-        $this->setFieldValue($entity, $property, $count ? $count : null);
+        $count = $this->getCount($entity) ?? 0;
+        $this->setFieldValue($entity, $property, $count);
     }
     public function preUpdate(LifecycleEventArgs $event, ClassMetadata $classMetadata, $entity, ?string $property = null)
     {
-        $count = $this->getCount($entity);
-        $this->setFieldValue($entity, $property, $count ? $count : null);
+        $count = $this->getCount($entity) ?? 0;
+        $this->setFieldValue($entity, $property, $count);
     }
 }

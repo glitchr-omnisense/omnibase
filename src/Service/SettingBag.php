@@ -242,9 +242,9 @@ class SettingBag implements SettingBagInterface, WarmableInterface
         catch (Exception $e) { throw $e; return []; }
 
         $this->settingBag[$path.":".($locale ?? LocaleProvider::UNIVERSAL)] ??= array_map_recursive(function($v) use ($locale) {
-                
+
             if(!$v instanceof Setting) return $v;
-            return $v->translate($locale)->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())->getValue();
+            return $v->translate($locale)?->getValue() ?? $v->translate($this->localeProvider->getDefaultLocale())?->getValue();
 
         }, $values);
 

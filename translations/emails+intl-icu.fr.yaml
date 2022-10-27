@@ -18,7 +18,7 @@ resetPassword:
 
 verifyEmail:
     subject: "Vérifie ton email"
-    content: "Bravo ! Tu as reçu cet email car tu t'es correctement inscrit sur notre site.
+    content: "Bravo ! Tu as reçu cet email car tu t'es inscrit sur notre site.
               Clique sur le lien suivant pour confirmer ton inscription et ton adresse e-mail."
     action_text: "Confirmer ton compte"
     expiry: "Le lien expirera dans {0}."

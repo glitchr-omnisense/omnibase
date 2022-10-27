@@ -95,6 +95,7 @@ trait TranslatableTrait
     public function translate(?string $locale = null)
     {
         $localeProvider = BaseService::getLocaleProvider();
+        if(!$localeProvider) return null;
 
         $defaultLocale = $localeProvider->getDefaultLocale();
         $availableLocales = $localeProvider->getAvailableLocales();
