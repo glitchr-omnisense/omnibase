@@ -14,7 +14,7 @@ use Exception;
  * @Target({"PROPERTY"})
  * @Attributes({
  *   @Attribute("reference", type = "string"),
- *   @Attribute("type",      type = "integer"),
+ *   @Attribute("type",      type = "string"),
  *   @Attribute("updatable", type = "bool"),
  *   @Attribute("unique",    type = "bool"),
  *
@@ -28,11 +28,11 @@ class Countify extends AbstractAnnotation
 {
     protected string $reference;
 
-    public const COUNT_CHARS     = 0;
-    public const COUNT_LETTERS   = 1;
-    public const COUNT_WORDS     = 2;
-    public const COUNT_SENTENCES = 3;
-    public const COUNT_BLOCKS    = 4;
+    public const COUNT_CHARS     = "chars";
+    public const COUNT_LETTERS   = "letters";
+    public const COUNT_WORDS     = "words";
+    public const COUNT_SENTENCES = "sentences";
+    public const COUNT_BLOCKS    = "blocks";
     public function __construct( array $data )
     {
         $this->referenceColumn = $data['reference'] ?? null;

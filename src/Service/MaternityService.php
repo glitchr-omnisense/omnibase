@@ -52,9 +52,9 @@ class MaternityService implements MaternityServiceInterface
     public function redirectOnDeny(?RequestEvent $event = null, ?string $locale = null): bool
     {
         if(!$this->settingBag->getScalar("base.settings.birthdate.redirect_on_deny")) return false;
-
+        if(!$this->getBirthdate()) return false;
+        
         $redirectOnDeny = "security_birth";
-        if(is_array($redirectOnDeny)) $redirectOnDeny = first($redirectOnDeny);
 
         if($this->router->isUX()) return false;
         if($this->router->isProfiler() ) return false;
