@@ -211,14 +211,13 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 foreach($form->getData() as $formattedField => $translations) {
 
                     $field = str_replace("-", ".", $formattedField);
-
                     foreach($translations as $locale => $translation) {
 
                         $viewData[$field] = $viewData[$field] ?? new Setting($field);
                         if($viewData[$field]->isLocked())
                             throw new \Exception("Setting \"".$viewData[$field]->getPath()."\" is locked, you cannot edit this variable.");
 
-                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null);
+                        $viewData[$field]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
                     }
                 }
 
@@ -237,7 +236,7 @@ class LayoutSettingListType extends AbstractType implements DataMapperInterface
                 $translation = $form->getViewData();
                 $locale      = $translation->getLocale();
 
-                $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null);
+                $viewData[$formName]->translate($locale)->setValue($translation->getValue() ?? null, $locale);
             }
         }
     }

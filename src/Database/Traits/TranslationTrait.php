@@ -80,11 +80,13 @@ trait TranslationTrait
 
             if($addConditions !== null && !call_user_func_array($addConditions, [$var, $value]))
                 return false;
-            if (is_string($value) && trim($value) !== "")
+            else if (is_string($value) && trim($value) !== "")
                 return false;
-            if (is_array($value) && $value !== [])
+            else if (is_array($value) && $value !== [])
                 return false;
-            if (is_bool($value) && $value === true)
+            else if (is_bool($value) && $value === true)
+                return false;
+            else if (!empty($value))
                 return false;
         }
 
