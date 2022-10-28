@@ -12,6 +12,7 @@ security_birthdate:
   title: 
     default: "Le site ouvre bientot ses portes !"
     appointment: "À vos agendas, rendez-vous pris"
+    open: "Bienvenue !&nbsp;<a href=\"{0}\">Entrer sur le site</a>"
   no_estimate: "Revenez un petit peu plus tard"
 
 app_index:

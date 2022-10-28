@@ -3,8 +3,12 @@
 {% block content %}
 {% if birthdate is defined and birthdate is not null %}
 <div class="container text-center">
-    <h2>{{ '@controllers.security_birthdate.title.appointment' | trans }}</h2><br/>
-    <p>{{ birthdate }}</p>
+    {% if is_born %}
+        <div>{{ '@controllers.security_birthdate.title.open'|trans([app.site.homepage])|raw }}</div>
+    {% else %} 
+        <h2>{{ '@controllers.security_birthdate.title.appointment' | trans }}</h2><br/>
+        <p>{{ birthdate }}</p>
+    {% endif %}
 </div>
 {% else %}
 <div class="container text-center">

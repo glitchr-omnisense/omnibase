@@ -110,7 +110,7 @@ final class FileTwigExtension extends AbstractExtension
         if(!$src) return $src;
 
         if(!str_starts_with($src, "@")) $src = "@Public/".str_lstrip($src, [$this->projectDir."/public", "/"]);
-
+        
         try { 
             $path = $twig->getLoader()->getSourceContext($src)->getPath(); 
             $contentType = mime_content_type($path);
@@ -118,6 +118,11 @@ final class FileTwigExtension extends AbstractExtension
         catch ( LoaderError $e) { throw $e; }
 
         $email = $context["email"] ?? null;
-        return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : $src;
+       
+        return $email instanceof WrappedTemplatedEmail ? $email->image($src, $contentType) : str_lstrip($path, [
+            $this->projectDir, 
+            $this->projectDir."/public",
+            $this->projectDir."/data"
+        ]);
     }
 }

@@ -176,6 +176,14 @@ class BaseService implements RuntimeExtensionInterface
             "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.backoffice")
         ];
     }
+    public function getEmail()
+    {
+        return [
+            "title"  => $this->getSettingBag()->getScalar("base.settings.title.email"),
+            "slogan" => $this->getSettingBag()->getScalar("base.settings.slogan.email"),
+            "logo"   => $this->getSettingBag()->getScalar("base.settings.logo.email")
+        ];
+    }
 
     public function getMeta(?string $locale = null): array
     {

@@ -76,6 +76,7 @@
         <service id="twig.loader.filesystem"   alias="Base\Twig\Loader\FilesystemLoader" />
         <service id="twig.random_variable"     alias="Base\Twig\Variable\RandomVariable" />
         <service id="twig.site_variable"       alias="Base\Twig\Variable\SiteVariable" />
+        <service id="twig.email_variable"       alias="Base\Twig\Variable\EmailVariable" />
         <service id="twig.backoffice_variable" alias="Base\Twig\Variable\BackofficeVariable" />
         <service id="twig.ea_variable"         alias="Base\Twig\Variable\EasyAdminVariable" />
 

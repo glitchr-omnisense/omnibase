@@ -147,10 +147,12 @@ class Translator implements TranslatorInterface
                 $trans = $this->trans($trans, $parameters, $domainFallback, $locale, false);
             }
 
-            if(!$this->isDebug) {
+            if($locale != LocaleProvider::getDefaultLocale() && !$this->isDebug) {
 
-                $trans ??= $this->transQuiet($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
-                $trans ??= $this->transQuiet($id, $parameters, $domainFallback, LocaleProvider::getDefaultLocale());
+                if ($trans == $id)
+                    $trans = $this->transQuiet($id, $parameters, $domain, LocaleProvider::getDefaultLocale());
+                if ($trans == $id)
+                    $trans = $this->transQuiet($id, $parameters, $domainFallback, LocaleProvider::getDefaultLocale());
             }
         }
 

@@ -16,6 +16,7 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Proxy\Proxy;
 use Doctrine\ORM\Query;
+use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use ReflectionClass;
@@ -155,7 +156,7 @@ class ServiceEntityParser
     protected function __findOneBy      (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)
     {
         $results = $this->__findBy   ($criteria, $orderBy                                     , null     , null   , $groupBy, $selectAs)->getResult();
-        return first($results);
+        return first($results); // Issue when using cache if using findOneBy with LIMIT;
     }
 
     protected function __findLastOneBy  (array $criteria = [], ?array $orderBy = null                               , ?array $groupBy = null, ?array $selectAs = null)         { return $this->__findOneBy($criteria, array_merge($orderBy, ['id' => 'DESC']),                        $groupBy, $selectAs) ?? null; }
@@ -198,6 +199,11 @@ class ServiceEntityParser
         $mode ??= self::COUNT_ALL;
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
+
+        // dump($query);
+        // try { $result = $query->getResult(); }
+        // catch(QueryException $e) { dump($e); exit(1); }
+        // return $result;
 
         return $query->getResult();
     }
@@ -1227,8 +1233,8 @@ class ServiceEntityParser
 
             } else if(is_array($fieldValue)) {
 
-                //if(!empty($fieldValue))
-                $qb->setParameter($fieldID, $fieldValue);
+                if(!empty($fieldValue))
+                    $qb->setParameter($fieldID, $fieldValue);
 
             } else if(!$isEmpty && !$isNotEmpty && !$isBool) {
                 $qb->setParameter($fieldID, $fieldValue);

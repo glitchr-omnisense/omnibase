@@ -39,6 +39,7 @@ security_birthdate:
   title: 
     default: "We will soon be online"
     appointment: "Please take note, launch time"
+    open: "We are open !&nbsp;<a href=\"{0}\">Go to the website</a>"
   no_estimate: "but no precise estimate for the moment, please come back later !"
 
 security_maintenance:

@@ -32,10 +32,10 @@ class MaternityService implements MaternityServiceInterface
 
     public function isBorn(?string $locale = null) : ?bool
     { 
-        $now = new \DateTime("now");
         $birthdate = $this->getBirthdate($locale);
-        if($birthdate === null) return null;
-        
+        if($birthdate === null) return false;
+      
+        $now = new \DateTime("now");  
         return ($birthdate < $now);
     }
 
@@ -55,7 +55,6 @@ class MaternityService implements MaternityServiceInterface
         if(!$this->getBirthdate()) return false;
         
         $redirectOnDeny = "security_birth";
-
         if($this->router->isUX()) return false;
         if($this->router->isProfiler() ) return false;
         if($this->router->isEasyAdmin()) return false;

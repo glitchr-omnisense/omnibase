@@ -530,6 +530,12 @@
             <argument type="service" id="base.service.maternity" />
         </service>
 
+        <service id="Base\Twig\Variable\EmailVariable" public="true">
+            <tag name="twig.runtime" />
+            <argument type="service" id="base.service" />
+            <argument type="service" id="base.service.maternity" />
+        </service>
+
         <service id="Base\Twig\Variable\RandomVariable"     public="true"><tag name="twig.variable" /></service>
         <service id="Base\Twig\Variable\EasyAdminVariable"  public="true">
             <tag name="twig.variable" />

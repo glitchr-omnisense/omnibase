@@ -481,13 +481,9 @@ class SecurityController extends AbstractController
      */
     public function Birth(MaternityServiceInterface $maternityService): Response
     {
-        $birthdate = $maternityService->getBirthdate();
-
-        if($birthdate != null && new DateTime("now") > $birthdate)
-            return $this->redirectToRoute($this->baseService->getHomepage());
-
         return $this->render('@Base/security/birthdate.html.twig', [
-            'birthdate'  => $birthdate
+            'birthdate'  => $maternityService->getBirthdate(),
+            'is_born'    => $maternityService->isBorn()
         ]);
     }
 }
