@@ -2,8 +2,8 @@
 
 namespace Base\Form\Extension;
 
-use App\Enum\UserRole;
 use Base\Database\Mapping\ClassMetadataManipulator;
+use Base\Enum\UserRole;
 use Base\Form\Common\FormModelInterface;
 use Base\Form\FormFactory;
 use Base\Service\BaseService;

@@ -8,7 +8,7 @@ register:
     username: "Username"
     firstname: "Firstname"
     lastname: "Lastname"
-    agreeTerms: 'Agree terms'
+    agreeTerms: 'Agree with terms (coming soon !)'
 
 logout:
     title: "Sign Out"

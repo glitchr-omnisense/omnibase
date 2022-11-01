@@ -130,15 +130,15 @@
 {%- block select2_widget -%}
 
     {% set attr = attr|merge({
-        'data-select2-field'   : form.vars.id~"_choice",
-        'data-select2-options' : select2,
-        'data-select2-href'    : form.vars["select2-href"]|default("")|urldecode,
-        'data-select2-sortable': form.vars["select2-sortable"],
-        'data-select2-tabulation'      : form.vars["tabulation"]
+        'data-select2-field'     : form.vars.id~"_choice",
+        'data-select2-options'   : select2,
+        'data-select2-href'      : form.vars["select2-href"]|default("")|urldecode,
+        'data-select2-sortable'  : form.vars["select2-sortable"],
+        'data-select2-tabulation': form.vars["tabulation"]
     }) %}
 
     {%- set attr = attr|merge({'class': 'form-select2' ~ (attr.class is defined ? ' ' ~ attr.class : '')} ) -%}
-    {%- set attr = attr|merge({'disabled': form.vars.disabled} ) -%}
+    {%- set attr = attr|merge({'disabled': form.vars.disabled or (form.vars.is_inherited ?? false)} ) -%}
     {{ form_widget(form.choice, {attr: attr, row_attr:row_attr}) }}
 
     {% if form.vars.tokenSeparators is defined %}
@@ -749,11 +749,11 @@
 
                             {% set url = method_exists(form.vars.value, "__toLink") ? form.vars.value.__toLink() : null %}
                             {% if url is not empty %}
-                                {{ url ? clipboard("copy", url)|raw : "" }}<a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
+                                {{ url ? clipboard("copy", url)|raw : "" }}<a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
                             {% endif %}
 
                             {% if _href is not null %}
-                            <a target='_blank' href="{{ _href|urldecode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify}}</a>
+                            <a target='_blank' href="{{ _href|urldecode|replace({'{0}': form.vars.value.id}) }}">{{ "fas fa-fw fa-external-link-square-alt" | iconify|first|raw}}</a>
                             {% endif %}
 
                         {% endif %}
@@ -787,7 +787,7 @@
                         {% set url = form.vars.value.__toLink() ?? form.vars.href ?? null %}
                         {% if url is not empty %}
                             {{ clipboard("copy", url)|raw }}
-                            <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify}}</a>
+                            <a href="{{ url }}" target="_blank" >{{ "fas fa-fw fa-eye" | iconify|first|raw}}</a>
                         {% endif %}
                     {% endif %}
                 </label>

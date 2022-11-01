@@ -16,7 +16,6 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\ORM\Proxy\Proxy;
 use Doctrine\ORM\Query;
-use Doctrine\ORM\Query\QueryException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use ReflectionClass;
@@ -199,11 +198,6 @@ class ServiceEntityParser
         $mode ??= self::COUNT_ALL;
         $query = $this->getQueryWithCount($criteria, $mode, $orderBy, $groupBy, $selectAs);
         if(!$query) return null;
-
-        // dump($query);
-        // try { $result = $query->getResult(); }
-        // catch(QueryException $e) { dump($e); exit(1); }
-        // return $result;
 
         return $query->getResult();
     }
@@ -1037,7 +1031,7 @@ class ServiceEntityParser
         $datetimeRequested = in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER, self::OPTION_OLDER, self::OPTION_OLDER_EQUAL, self::OPTION_YOUNGER, self::OPTION_YOUNGER_EQUAL]);
         if($datetimeRequested) {
 
-            if(is_numeric($fieldValue)) $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second";
+            if(is_numeric($fieldValue)) $fieldValue = ($fieldValue > 0 ? "+" : "-") . $fieldValue . " second" . ($fieldValue > 1 ? "s" : "");
 
                    if(in_array($tableOperator, [self::OPTION_OVER, self::OPTION_NOT_OVER])) $fieldValue = new \DateTime("now");
             else if($this->validateDate($fieldValue) || $fieldValue instanceof \DateTime) $fieldValue = new \DateTime($fieldValue);
@@ -1561,7 +1555,7 @@ class ServiceEntityParser
         $qb = $this->getQueryBuilder($criteria, $orderBy ?? [], null, null, $groupBy ?? [], $selectAs ?? []);
         if($this->classMetadata->hasAssociation($column))
             $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column);
-
+       
         $qb->addSelect('COUNT('.trim($mode.' '.$e_column).') AS count');
         return $qb->getQuery();
     }
@@ -1621,7 +1615,8 @@ class ServiceEntityParser
                 $groupBy[$key] = self::ALIAS_ENTITY.".".$groupBy[$key];
 
             if($this->classMetadata->hasAssociation($column)) {
-                $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column, $aliasIdentifier);
+
+                $this->leftJoin($qb, self::ALIAS_ENTITY.".".$column, $groupBy[$key]);
                 $qb->addSelect("(".$groupBy[$key].".id) AS ".$aliasIdentifier);
             }
         }

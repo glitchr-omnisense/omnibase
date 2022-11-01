@@ -82,6 +82,10 @@
                     
                     {{ form_rest(form) }}
 
+                    <hr>
+                    <div class="text-center">
+                        <a href="{{ path(app.site.homepage) }}">{{ "Back to website"|trans(domain="backoffice") }}</a>
+                    </div>
                 {{ form_end(form) }}
 
         </section>

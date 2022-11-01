@@ -39,8 +39,8 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.service.image" />
-
             <argument type="service" id="Base\Repository\Layout\ImageCropRepository" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\Frontend\Layout\WidgetController">

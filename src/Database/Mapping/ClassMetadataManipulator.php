@@ -2,6 +2,7 @@
 
 namespace Base\Database\Mapping;
 
+use App\Entity\User;
 use Base\Database\Mapping\ClassMetadataCompletor;
 use Base\Database\TranslatableInterface;
 use Base\Database\Type\EnumType;
@@ -18,7 +19,6 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\PersistentCollection;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Persistence\Mapping\ClassMetadata;
-use Exception;
 use InvalidArgumentException;
 
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
@@ -26,7 +26,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\FormInterface;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\Cache\CacheInterface;
 
 class ClassMetadataManipulator
@@ -324,7 +324,10 @@ class ClassMetadataManipulator
         if(is_string($fieldPath)) $fieldPath = explode(".", $fieldPath);
         if(empty($fieldPath)) throw new \Exception("No field path provided for \"".get_class($entity)."\" ");
 
+        if(!$entity) return null;
+
         $entityName = get_class($entity);
+
         // Extract leading field && get metadata
         $fieldName = array_shift($fieldPath);
 
@@ -342,32 +345,42 @@ class ClassMetadataManipulator
 
         // Go get class metadata
         $classMetadata = $this->getClassMetadata($entity);
-        if(!$classMetadata) return false;
+        if(!$classMetadata) return null;
 
-        $entity = $classMetadata->getFieldValue($entity, $this->getFieldName($classMetadata, $fieldName));
-        if(class_implements_interface($entity, TranslatableInterface::class))
-            $entity = $entity->getTranslations();
+        if ($entity instanceof Proxy)
+            $entity->__load();
 
-        if(is_array($entity)) {
-
-            $entity = $fieldKey ? $entity[$fieldKey] ?? null : null;
-            $entity = $entity ?? begin($entity);
-
-        } else if(class_implements_interface($entity, Collection::class)) {
-
-            $entity = $entity->containsKey($fieldKey) ? $entity->get($fieldKey ?? 0) : null;
+        if($this->hasField($entity, $fieldName))
+           $fieldValue = $classMetadata->getFieldValue($entity, $fieldName);
+        else {
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            $fieldValue = $propertyAccessor->getValue($entity, $fieldName);  
         }
 
-        if($entity === null || !is_object($entity)) {
-            if(empty($fieldPath)) return $entity;
+        if(class_implements_interface($fieldValue, TranslatableInterface::class))
+            $fieldValue = $fieldValue->getTranslations();
+
+        if(is_array($fieldValue)) {
+
+            $entity = $fieldKey ? $fieldValue[$fieldKey] ?? null : null;
+            $fieldValue = $fieldValue ?? begin($fieldValue);
+
+        } else if(class_implements_interface($fieldValue, Collection::class)) {
+
+            $fieldValue = $fieldValue->containsKey($fieldKey) ? $fieldValue->get($fieldKey ?? 0) : null;
+        }
+
+        if($fieldValue === null || !is_object($fieldValue)) {
+            if(empty($fieldPath)) return $fieldValue;
             throw new \Exception("Failed to resolve property path \"".implode('.', array_merge([$fieldName],$fieldPath))."\" in \"".$entityName."\"");
         }
 
-        // If field path is empty
-        if(empty($fieldPath))
-            return $classMetadata->getFieldValue($entity, $fieldName);
-
-        return $this->getFieldValue($entity, implode(".", $fieldPath));
+        // If field path is not empty
+        if(!empty($fieldPath))
+            return $this->getFieldValue($fieldValue, implode(".", $fieldPath));
+        
+        // Access property
+        return $fieldValue;
     }
 
     public function setFieldValue($entity, string|array $fieldPath, $value)
@@ -389,6 +402,26 @@ class ClassMetadataManipulator
     }
 
     public function hasProperty(null|string|object $entityOrClassOrMetadata, string $fieldName): ?string { return property_exists($entityOrClassOrMetadata, $fieldName); }
+    
+    public function getPropertyValue($entity, string $property)
+    {
+        if(!$entity) return null;
+
+        $classMetadata = $this->getClassMetadata($entity);
+        $fieldName = $classMetadata->getFieldName($property);
+
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        return $this->hasProperty($entity, $fieldName) ? $propertyAccessor->getValue($entity, $fieldName) : null;
+    }
+
+    public function setPropertyValue($entity, string $property, $value)
+    {
+        $classMetadata = $this->getClassMetadata($entity);
+        $fieldName = $classMetadata->getFieldName($property);
+
+        $propertyAccessor = PropertyAccess::createPropertyAccessor();
+        return $propertyAccessor->setValue($entity, $fieldName, $value);
+    }
 
     public function getType(null|string|object $entityOrClassOrMetadata, string $property)
     {
@@ -397,16 +430,13 @@ class ClassMetadataManipulator
             : $this->getTypeOfField($entityOrClassOrMetadata, $property);
     }
 
-    public function isCollectionOwner(object $entityOrForm, ?Collection $collection)
+    public function isCollectionOwner(object $entity, ?Collection $collection)
     {
         if ($collection == null) return false; 
 
-        $entity = $entityOrForm;
-        if ($entityOrForm instanceof FormInterface)
-            $entity = $entityOrForm->getParent()?->getData();
-
-        if ($entity == null || !$this->isEntity($entity)) 
+        while ($entity == null || !$this->isEntity($entity)) {
             return false;
+        }
 
         if($collection instanceof PersistentCollection) {
 
@@ -415,11 +445,30 @@ class ClassMetadataManipulator
 
             return $entity === $collection->getOwner();
         }
-        
+
         if($collection instanceof Collection)
             return in_class($entity, $collection);
 
         return false;
+    }
+
+    public function getDeclaringEntity(null|string|object $entityOrClassOrMetadata, $fieldPath)
+    {
+        $fieldMapping = $this->getFieldMapping($entityOrClassOrMetadata, $fieldPath);
+        if(array_key_exists("declared", $fieldMapping))
+            return $fieldMapping["declared"];
+
+        if( ($dot = strpos($fieldPath, ".")) > 0 ) {
+
+            $fieldPath = trim(substr($fieldPath, 0, $dot));
+            $fieldPath = $this->getFieldName($entityOrClassOrMetadata, $fieldPath) ?? $fieldPath;
+
+            $entityOrClassOrMetadata = $this->getTargetClass($entityOrClassOrMetadata, $fieldPath);
+        
+            return $entityOrClassOrMetadata;
+        }
+
+        return $this->getClassMetadata($entityOrClassOrMetadata)?->getName();
     }
 
     public function getTargetClass(null|string|object $entityOrClassOrMetadata, $fieldName)
@@ -496,7 +545,7 @@ class ClassMetadataManipulator
         return ($classMetadata->hasAssociation($property) ? $classMetadata->getAssociationMapping($property)["type"] ?? null : null);
     }
 
-    public function fetchEntityName(string $entityName, array|string $fieldPath, ?array &$data = null): ?string { return $this->fetchEntityMapping($entityName, $fieldPath, $data)["targetEntity"] ?? null; }
+    public function fetchEntityName(string $entityName, array|string $fieldPath): ?string { return $this->fetchEntityMapping($entityName, $fieldPath)["targetEntity"] ?? null; }
     public function fetchEntityMapping(string $entityName, array|string $fieldPath): ?array
     {
         $fieldPath = is_array($fieldPath) ? $fieldPath : explode(".", $fieldPath);
@@ -513,10 +562,10 @@ class ClassMetadataManipulator
         $fieldPath = tail($fieldPath, $this->isToManySide($entityName, $fieldName) ? -2 : -1);
         if(!$fieldPath) return $entityMapping;
 
-        if(!array_key_exists("targetEntity", $entityMapping))
-            return null; // Fallback, invalid pass provided
-
-        return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
+        if(array_key_exists("targetEntity", $entityMapping))
+            return $this->fetchEntityMapping($entityMapping["targetEntity"], implode(".", $fieldPath));
+    
+        return null; // Fallback, invalid path provided
     }
 
     public function isAlias(null|object|string $entityOrClassOrMetadata, array|string $fieldPath): bool { return $this->getFieldName($entityOrClassOrMetadata, $fieldPath) != $fieldPath; }
@@ -636,8 +685,7 @@ class ClassMetadataManipulator
         $classMetadata  = $this->getClassMetadata($entityOrClassOrMetadata);
         if(!$classMetadata) return false;
 
-        $fieldName = $this->getFieldName($classMetadata, $fieldName) ?? $fieldName;
-        return $classMetadata->getFieldMapping($fieldName) ?? null;
+        return $this->fetchEntityMapping($classMetadata->getName(), $fieldName);
     }
 
     public function getAssociationMapping(null|string|object $entityOrClassOrMetadata, string $fieldName): ?array

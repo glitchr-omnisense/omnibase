@@ -3,8 +3,11 @@
 namespace Base\Form\Traits;
 
 use Base\Annotations\AnnotationReader;
+use Base\Database\Annotation\OrderColumn;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\PersistentCollection;
+use Symfony\Component\Form\ChoiceList\Loader\ChoiceLoaderInterface;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormInterface;
@@ -24,17 +27,17 @@ trait FormGuessTrait
 
         $class = null;
         $options["guess_priority"] = $options["guess_priority"] ?? [
-            self::GUESS_FROM_FORM,
-            self::GUESS_FROM_PHPDOC,
-            self::GUESS_FROM_DATA,
-            self::GUESS_FROM_VIEW
+            FormGuessInterface::GUESS_FROM_FORM,
+            FormGuessInterface::GUESS_FROM_PHPDOC,
+            FormGuessInterface::GUESS_FROM_DATA,
+            FormGuessInterface::GUESS_FROM_VIEW
         ];
 
         foreach($options["guess_priority"] as $priority) {
 
             switch($priority) {
 
-                case self::GUESS_FROM_FORM:
+                case FormGuessInterface::GUESS_FROM_FORM:
 
                     $class = $options["class"] ?? null;
                     if($class) break;
@@ -61,7 +64,7 @@ trait FormGuessTrait
 
                     break;
 
-                case self::GUESS_FROM_DATA:
+                case FormGuessInterface::GUESS_FROM_DATA:
 
                     if($data instanceof PersistentCollection) $class = $data->getTypeClass()->getName();
                     else if($data instanceof ArrayCollection || is_array($data)) $class = null;
@@ -69,7 +72,7 @@ trait FormGuessTrait
 
                     break;
 
-                case self::GUESS_FROM_VIEW:
+                case FormGuessInterface::GUESS_FROM_VIEW:
 
                     // Simple case, data view from current form (handle ORM Proxy management)
                     if (null !== $dataClass = $form->getConfig()->getDataClass()) {
@@ -103,7 +106,7 @@ trait FormGuessTrait
 
                     break;
 
-                case self::GUESS_FROM_PHPDOC:
+                case FormGuessInterface::GUESS_FROM_PHPDOC:
                     // To be implemented..
 
                     break;

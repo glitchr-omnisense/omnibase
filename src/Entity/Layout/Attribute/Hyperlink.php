@@ -6,7 +6,6 @@ use Base\Database\Annotation\ColumnAlias;
 use Base\Database\Annotation\DiscriminatorEntry;
 use Base\Database\Traits\TranslatableTrait;
 use Base\Database\TranslatableInterface;
-use Base\Entity\Layout\Attribute;
 use Base\Entity\Layout\Attribute\Adapter\AbstractAdapter;
 use Base\Entity\Layout\Attribute\Adapter\HyperpatternAdapter;
 use Base\Entity\Layout\Attribute\Common\AbstractAttribute;

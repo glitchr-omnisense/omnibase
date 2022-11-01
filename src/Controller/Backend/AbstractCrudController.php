@@ -346,11 +346,11 @@ abstract class AbstractCrudController extends \EasyCorp\Bundle\EasyAdminBundle\C
         $simpleYields      = array_values($simpleYields);
 
         $yields = [];
-        foreach($simpleYields as $_) foreach($_ as $yield)
+        foreach($simpleYields ?? [] as $_) foreach($_ ?? [] as $yield)
             $yields[] = $yield;
 
         $restYields = [];
-        foreach($associativeYields as $path => $_) foreach($_ as $i => $yield) {
+        foreach($associativeYields ?? [] as $path => $_) foreach($_ ?? [] as $i => $yield) {
 
             $property = preg_replace("/^[0-9.]+/", "", $path);
 

@@ -295,9 +295,12 @@ class Translator implements TranslatorInterface
         return $this->transExists($domain.$routeName.".title");
     }
 
-    public function transEnum(string $class, ?string $value = null, null|string|array $options = self::NOUN_SINGULAR): ?string
+    public function transEnum(string $value, string $class, null|string|array $options = self::NOUN_SINGULAR): ?string
     {
-        $declaringClass = $class;
+        if(class_exists($class)) $declaringClass = $class;
+        else if(Type::hasType($class)) $declaringClass = get_class(Type::getType($class));
+        else return $value;
+        
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
 
             $declaringClass = get_parent_class($declaringClass);
@@ -315,7 +318,7 @@ class Translator implements TranslatorInterface
         return $class ? $this->transPerms($class.$value, $options, [], self::DOMAIN_ENUM) : null;
     }
 
-    public function transEnumExists(string $class, ?string $value = null, string|array $options = self::NOUN_SINGULAR): bool
+    public function transEnumExists(string $value , string $class, string|array $options = self::NOUN_SINGULAR): bool
     {
         $declaringClass = $class;
         while(( count(array_filter($declaringClass::getPermittedValues(false), fn($c) => $c === $value)) == 0 )) {
@@ -372,15 +375,15 @@ class Translator implements TranslatorInterface
             $months  = fmod  ($time, 12);
             $years   = intdiv($time, 12);
 
-            $str = 
-                $years . " ". $this->trans("base.years",   [$years])  ." ".
-                $months . " ". $this->trans("base.months",  [$months]) ." ".
-                $days . " ". $this->trans("base.days",    [$days])   ." ".
-                $hours . " ". $this->trans("base.hours",   [$hours])  ." ".
-                $minutes . " ". $this->trans("base.minutes", [$minutes])." ".
-                $seconds . " ". $this->trans("base.seconds", [$seconds]);
+            $str =
+                ($years   ? $years : "") . " ". $this->trans("base.years",   [$years])  ." ".
+                ($months  ? $years : "") . " ". $this->trans("base.months",  [$months]) ." ".
+                ($days    ? $years : "") . " ". $this->trans("base.days",    [$days])   ." ".
+                ($hours   ? $years : "") . " ". $this->trans("base.hours",   [$hours])  ." ".
+                ($minutes ? $years : "") . " ". $this->trans("base.minutes", [$minutes])." ".
+                ($seconds ? $years : "") . " ". $this->trans("base.seconds", [$seconds]);
 
-            return trim($str, " 0");
+            return trim($str);
         }
 
         return "";

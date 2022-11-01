@@ -369,7 +369,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
             $crudController = UserRole::getCrudController($role);
             if(!$crudController) continue;
 
-            $label = $this->translator->transEnum($class, $role, Translator::NOUN_PLURAL);
+            $label = $this->translator->transEnum($role, $class, Translator::NOUN_PLURAL);
             $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
             $url = $this->adminUrlGenerator
@@ -387,7 +387,7 @@ class AbstractDashboardController extends \EasyCorp\Bundle\EasyAdminBundle\Contr
                 $subItems = [];
                 foreach($values as $role)  {
 
-                    $label = mb_ucfirst($this->translator->transEnum($class, $role, Translator::NOUN_PLURAL));
+                    $label = mb_ucfirst($this->translator->transEnum($role, $class, Translator::NOUN_PLURAL));
                     $icon  = UserRole::getIcon($role, 1) ?? "fas fa-fw fa-user";
 
                     $crudController = UserRole::getCrudController($role);

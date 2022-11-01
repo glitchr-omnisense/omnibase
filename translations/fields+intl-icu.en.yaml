@@ -3,6 +3,7 @@ debug:
   is_dbcolumn: "This field has a direct connection with database"
   is_alias: "This field is an alias to another variable name"
   is_multiple: "This field can have multiple values"
+  is_inherited: "This field is inherited from it's parent object"
 
 boolean:
   title: "Toggle switch on \"{0}\""

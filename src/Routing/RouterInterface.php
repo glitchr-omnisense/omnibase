@@ -16,10 +16,10 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
     public function useAdvancedFeatures(): bool;
-    public function isProfiler($request = null);
-    public function isEasyAdmin($request = null);
-    public function isUX($request = null);
-    public function isSecured($request = null);
+    public function isProfiler(mixed $request = null);
+    public function isEasyAdmin(mixed $request = null);
+    public function isUX(mixed $request = null);
+    public function isSecured(mixed $request = null);
     public function keepMachine(): bool;
     public function keepSubdomain(): bool;
 

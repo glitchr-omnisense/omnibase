@@ -3,10 +3,36 @@
 namespace {
 
     use Base\BaseBundle;
-    use PhpParser\Node\Expr\Array_;
+    function get_alias(array|object|string|null $arrayOrObjectOrClass): string { return BaseBundle::getAlias($arrayOrObjectOrClass); }
+    function alias_exists(mixed $objectOrClass): bool { return BaseBundle::hasAlias($objectOrClass); }
 
     if( !extension_loaded('bcmath') )
         throw new RuntimeException("bcmath is not installed");
+
+    const MAX_DIRSIZE = 255;
+    function path_subdivide($path, int $subdivision, int|array $length = 1)
+    {
+        $dirname = dirname($path);
+        $basename = basename($path);
+
+        $last = strlen($basename);
+        $length = array_pad(is_array($length) ? $length : [], $subdivision, is_array($length) ? 1 : $length);
+        
+        $remainingSubdivision = ceil(($last - array_sum($length))/MAX_DIRSIZE);
+        $length = array_pad($length, $subdivision+$remainingSubdivision, MAX_DIRSIZE);
+
+        $subPath = $dirname . "/";
+        $last = strlen($basename);
+        for($i = 0, $cursor = 0, $N = count($length); $i < $N; $i++ ) {
+
+            if($cursor > $last) break;
+            $subPath .= substr($basename, $cursor, $length[$i]) . "/";
+            $cursor += $length[$i];
+        }
+
+        $subPath .= substr($basename, $cursor);
+        return str_strip($subPath, "./", "/");
+    }
 
     function typeof(mixed $input): string { return gettype($input); }
     function interpret_link($input)
@@ -815,28 +841,6 @@ namespace {
         rename($fname, $fname .= $suffix . $extension);
 
         return fopen($fname, "w");
-    }
-
-    function get_alias(array|object|string|null $arrayOrObjectOrClass): string
-    {
-        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
-        if(is_array($arrayOrObjectOrClass))
-            return array_map(fn($a) => get_alias($a), $arrayOrObjectOrClass);
-
-        $arrayOrObjectOrClass = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
-        if(!class_exists($arrayOrObjectOrClass)) return false;
-
-        return BaseBundle::getAlias($arrayOrObjectOrClass);
-    }
-
-    function alias_exists(mixed $objectOrClass): bool
-    {
-        if(!is_object($objectOrClass) && !is_string($objectOrClass)) return false;
-
-        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
-        if(!class_exists($class)) return false;
-
-        return BaseBundle::getAlias($class) != $class;
     }
 
     define("HEADER_FOLLOW_REDIRECT", 1);
@@ -2210,7 +2214,7 @@ namespace {
         return true;
     }
 
-    function castdatetime(null|string|int|DateTime $datetime)
+    function cast_datetime(null|string|int|DateTime $datetime)
     {
         if($datetime === null) return null;
         return is_int($datetime)    ? (new DateTime())->setTimestamp($datetime) :
@@ -2221,7 +2225,7 @@ namespace {
     {
         if($datetime == null) return null;
 
-        $datetime = castdatetime($datetime);
+        $datetime = cast_datetime($datetime);
         $today = new DateTime("today");
         $diff  = $today->diff( $datetime->setTime( 0, 0, 0 ) );
         return (integer) $diff->format( "%R%a" );
@@ -2229,11 +2233,11 @@ namespace {
 
     function datetime_is_between(null|string|int|DateTime $datetime, null|string|int|DateTime $dt1 = null, null|string|int|DateTime $dt2 = null)
     {
-        $datetime  = castdatetime($datetime);
+        $datetime  = cast_datetime($datetime);
         if($datetime === null) return false;
 
-        $datetime1 = castdatetime($dt1);
-        $datetime2 = castdatetime($dt2);
+        $datetime1 = cast_datetime($dt1);
+        $datetime2 = cast_datetime($dt2);
 
         if($datetime1 !== null && $datetime <= $datetime1) return false;
         if($datetime2 !== null && $datetime > $datetime2) return false;
@@ -2242,13 +2246,13 @@ namespace {
 
     function date_is_between(null|string|DateTime $datetime, null|string|int|DateTime $d1 = null, null|string|int|DateTime $d2 = null) {
 
-        $datetime  = castdatetime($datetime);
+        $datetime  = cast_datetime($datetime);
         if($datetime === null) return false;
 
         $datetime->setTime(0,0,0);
-        $datetime1 = castdatetime($d1);
+        $datetime1 = cast_datetime($d1);
         $datetime1->setTime(0,0,0);
-        $datetime2 = castdatetime($d2);
+        $datetime2 = cast_datetime($d2);
         $datetime2->setTime(0,0,0);
 
         return datetime_is_between($datetime, $datetime1, $datetime2);
@@ -2271,13 +2275,13 @@ namespace {
 
     function time_is_between(null|string|DateTime $datetime, null|string|int|DateTime $t1 = null, null|string|int|DateTime $t2 = null)
     {
-        $datetime  = castdatetime($datetime);
+        $datetime  = cast_datetime($datetime);
         if($datetime === null) return false;
 
         $datetime->setDate(0,0,0);
-        $datetime1 = castdatetime($t1);
+        $datetime1 = cast_datetime($t1);
         $datetime1->setDate(0,0,0);
-        $datetime2 = castdatetime($t2);
+        $datetime2 = cast_datetime($t2);
         $datetime2->setDate(0,0,0);
 
         return datetime_is_between($datetime, $datetime1, $datetime2);

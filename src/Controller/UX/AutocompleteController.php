@@ -67,7 +67,7 @@ class AutocompleteController extends AbstractController
 
                 $index0 = -1;
                 $entries = $repository->findByInstanceOfAndPartialModel($filters, $fields, [],[],null,null,["id"]); // If no field, then get them all..
-
+                
                 do {
 
                     $book = $this->paginator->paginate($entries, $page);
@@ -173,6 +173,7 @@ class AutocompleteController extends AbstractController
         }
 
         $array = ["status" => "Invalid request"];
+
         return new JsonResponse($array, 500);
     }
 }

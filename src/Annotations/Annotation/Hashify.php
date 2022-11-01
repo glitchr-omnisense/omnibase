@@ -118,8 +118,7 @@ class Hashify extends AbstractAnnotation
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"reference\" missing for @Hashify in " . ClassUtils::getClass($entity));
 
-        if (property_exists($entity, $this->referenceColumn))
-            return $this->getFieldValue($entity, $this->referenceColumn);
+        return $this->getPropertyValue($entity, $this->referenceColumn);
     }
 
     private function erasePlainMessage($entity)
@@ -127,7 +126,7 @@ class Hashify extends AbstractAnnotation
         if (!$this->referenceColumn)
             throw new Exception("Attribute \"plain\" missing for @Hashify in " . ClassUtils::getClass($entity));
 
-        return $this->setFieldValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
+        return $this->setPropertyValue($entity, $this->referenceColumn, ($this->nullable ? null : ""));
     }
 
     public function supports(string $target, ?string $targetValue = null, $object = null): bool

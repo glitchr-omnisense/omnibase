@@ -8,7 +8,7 @@ register:
     username: "Pseudonyme"
     firstname: "Prénom"
     lastname: "Nom"
-    agreeTerms: "Accepter les termes d'utilisations"
+    agreeTerms: "Accepter les termes d'utilisations (bientot disponible !)"
 
 logout:
     title: "Se déconnecter"

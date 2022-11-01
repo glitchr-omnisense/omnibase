@@ -51,6 +51,20 @@ class FormFactory extends SymfonyFormFactory implements FormFactoryInterface
         $this->validator = $validator;
     }
 
+    public function getClosestEntity(FormInterface|FormEvent $form) 
+    {
+        if ($form instanceof FormEvent)
+            $form = $form->getForm();
+
+        while(!$this->classMetadataManipulator->isEntity($form->getData())) {
+
+            $form = $form->getParent();
+            if($form === null) return null;
+        }
+
+        return $form->getData();
+    }
+
     public function createBuilder(string $type = FormType::class, mixed $data = null, array $options = []) : FormBuilderInterface
     {
         // I recommend not using entity data..

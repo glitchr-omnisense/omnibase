@@ -87,8 +87,7 @@
         </div>
         {% endset %}
 
-        {% set impersonator_permission = constant('Symfony\\Component\\Security\\Core\\Authorization\\Voter\\AuthenticatedVoter::IS_IMPERSONATOR') is defined ? 'IS_IMPERSONATOR' : 'ROLE_PREVIOUS_ADMIN' %}
-
+        {% set impersonator_permission = ea.impersonator_permission %}
         {% set user_menu_dropdown %}
             <ul class="dropdown-menu dropdown-menu-end">
                 <li class="dropdown-user-details">
@@ -127,21 +126,22 @@
                 <span>{{ 'settings.appearance.label'|trans(domain = 'EasyAdminBundle') }}</span>
             </li>
             <li>
-                <a href="#" class="dropdown-item" data-ea-color-scheme="light">
+                <a href="#" class="dropdown-item dropdown-appearance-item" data-ea-color-scheme="light">
                     <i class="far fa-sun"></i> <span>{{ 'settings.appearance.light'|trans(domain = 'EasyAdminBundle') }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="dropdown-item" data-ea-color-scheme="dark">
+                <a href="#" class="dropdown-item dropdown-appearance-item" data-ea-color-scheme="dark">
                     <i class="far fa-moon"></i> <span>{{ 'settings.appearance.dark'|trans(domain = 'EasyAdminBundle') }}</span>
                 </a>
             </li>
             <li>
-                <a href="#" class="dropdown-item active" data-ea-color-scheme="auto">
+                <a href="#" class="dropdown-item dropdown-appearance-item active" data-ea-color-scheme="auto">
                     <i class="fas fa-desktop"></i> <span>{{ 'settings.appearance.auto'|trans(domain = 'EasyAdminBundle') }}</span>
                 </a>
             </li>
         </ul>
+
         {% endset %}
 
         <div class="wrapper">
@@ -158,7 +158,7 @@
                                             {% block header_logo %}
                                                 <a class="logo" title="{{ ea.dashboardTitle|striptags }}" href="{{ path(ea.dashboardRouteName) }}">
                                                     <div class="logo-custom">
-                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(500,500) }}" />
+                                                        <img class="user-avatar" src="{{ ea_extra.logo(ea.crud.getCurrentPage() ?? null)|thumbnail(250,250) }}" />
                                                     </div>
                                                     <span class="logo-compact"><i class="fas fa-home"></i></span>
                                                 </a>
@@ -289,7 +289,7 @@
                                 </div>
 
                                 {% if ea.dashboardHasDarkModeEnabled %}
-                                    <div class="dropdown dropdown-appearance user-menu-wrapper">
+                                    <div class="dropdown dropdown-settings user-menu-wrapper">
                                         <a class="dropdown-appearance-button" data-bs-toggle="dropdown" data-bs-offset="0,5" aria-expanded="false">
                                             <i class="fas fa-adjust"></i>
                                         </a>
@@ -307,7 +307,6 @@
 
                     <div class="content-wrapper">
                         {% block content_wrapper %}
-
                             <article class="content">
 
                                     {% block content_header_wrapper %}
