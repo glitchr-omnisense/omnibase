@@ -23,7 +23,7 @@ use Symfony\Component\Finder\Finder;
 
 class BaseBundle extends Bundle
 {
-    public const CACHE   = false;
+    public const CACHE   = true;
     public const VERSION = '1.0.0';
 
     protected static bool $boot = false;

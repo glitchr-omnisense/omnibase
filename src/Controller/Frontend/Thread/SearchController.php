@@ -31,10 +31,17 @@ class SearchController extends AbstractController
     public function Main(Request $request)
     {
         $formProcessor = $this->formProxy->getProcessor("thread:searchbar") ?? $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);
+        // $formProcessor->import($this->formProxy->getProcessor("thread:searchbar"));
         $formProcessor
             ->setData($this->formProxy->get("thread:searchbar")?->getData())
-
             ->onDefault(function(FormProcessorInterface $formProcessor) {
+
+                return $this->render('@Base/client/thread/search.html.twig', [
+                    "form" => $formProcessor->getForm()->createView(),
+                    "form_data" => $formProcessor->getForm()->getData()
+                ]);
+            })
+            ->onSubmit(function(FormProcessorInterface $formProcessor) {
 
                 $formattedData = $formProcessor->getData();
                 $formattedData->generic = str_strip("%" . $formattedData->generic . "%", "%%", "%%");
@@ -42,11 +49,14 @@ class SearchController extends AbstractController
                 $formattedData->title   = str_strip("%" . ($formattedData->title   ?? $formattedData->generic) . "%", "%%", "%%");
                 $formattedData->excerpt = str_strip("%" . ($formattedData->excerpt ?? $formattedData->generic) . "%", "%%", "%%");
                 
+                $states = [ThreadState::PUBLISH];
+                if($this->isGranted("ROLE_ADMIN")) $states = [];
+
                 $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
                     "content" => $formattedData->content,
                     "title"   => $formattedData->title,
                     "excerpt" => $formattedData->excerpt,
-                ], ["translatable.state" => ThreadState::PUBLISH, "translatable.parent" => $formattedData->parent_id])->getResult());
+                ], ["translatable.state" => $states, "translatable.parent" => $formattedData->parent_id])->getResult());
     
                 usort($threads, function ($a, $b)
                 {

@@ -17,7 +17,9 @@ thread:
                      =1 {# minute}
                      other {# minutes}
                   }"
-                  
+
+locale_changeto:
+  action: "The website is now displayed in {0}"
 security_login:
   title: "Login"
 

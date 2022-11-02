@@ -159,7 +159,7 @@ class Configuration implements ConfigurationInterface
 
                 ->arrayNode('site')->addDefaultsIfNotSet()
                     ->children()
-                        ->scalarNode('homepage')
+                        ->scalarNode('index')
                             ->info('Website home page')
                             ->defaultValue("app_index")
                             ->end()

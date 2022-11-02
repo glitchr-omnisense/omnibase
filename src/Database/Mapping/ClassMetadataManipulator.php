@@ -26,6 +26,8 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Contracts\Cache\CacheInterface;
 
@@ -430,15 +432,46 @@ class ClassMetadataManipulator
             : $this->getTypeOfField($entityOrClassOrMetadata, $property);
     }
 
-    public function isCollectionOwner(object $entity, ?Collection $collection)
+    public function getClosestEntity(FormInterface|FormEvent $form) 
     {
-        if ($collection == null) return false; 
+        if ($form instanceof FormEvent)
+            $form = $form->getForm();
 
-        while ($entity == null || !$this->isEntity($entity)) {
-            return false;
+        while(!$this->isEntity($form->getData())) {
+
+            $form = $form->getParent();
+            if($form === null) return null;
         }
 
+        return $form->getData();
+    }
+
+    public function getClosestEntityCollection(FormInterface|FormEvent $form) 
+    {
+        if ($form instanceof FormEvent)
+            $form = $form->getForm();
+
+        do {
+
+            $form = $form->getParent();
+            if($form === null) return null;
+
+        } while (!$this->isEntity($form->getParent()?->getData()));
+
+        return $form->getData();
+    }
+
+    public function isCollectionOwner(object $entityOrForm, ?Collection $collection = null) : ?bool
+    {
+        $entity       = $this->isEntity($entityOrForm) ? $entityOrForm : $this->getClosestEntity($entityOrForm);
+        if($entity == null) return null;
+
+        $collection ??= $this->isEntity($entityOrForm) ? null : $this->getClosestEntityCollection($entityOrForm);
+        if($collection == null) return null;
+ 
         if($collection instanceof PersistentCollection) {
+
+            if($collection->getOwner() === null) return null;
 
             $isTranslatable = class_implements_interface($collection->getOwner(), TranslationInterface::class);
             if($isTranslatable && $entity == $collection->getOwner()->getTranslatable()) return true;
@@ -449,7 +482,7 @@ class ClassMetadataManipulator
         if($collection instanceof Collection)
             return in_class($entity, $collection);
 
-        return false;
+        return null;
     }
 
     public function getDeclaringEntity(null|string|object $entityOrClassOrMetadata, $fieldPath)

@@ -159,7 +159,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
-    public function getHomepage()  { return $this->getParameterBag()->get("base.site.homepage") ?? $this->getRouter()->getRoute("/"); }
+    public function getIndexPage():string { return $this->getRouter()->getIndexPage(); }
     public function getSite()
     {
         return [

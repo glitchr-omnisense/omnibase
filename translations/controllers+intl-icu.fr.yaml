@@ -18,6 +18,8 @@ security_birthdate:
 app_index:
   title: Retour au site
   
+locale_changeto:
+  action: "Le site est à présent en {0}"
 security_login:
   title: "Se Connecter"
 security_logout:

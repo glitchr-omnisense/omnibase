@@ -18,8 +18,8 @@ words:
 
 locale:
     lang:
-        _singular: Language
-        _plural: Languages
+        _singular: Langue
+        _plural: Langues
     country:
         _singular: Pays
         _plural: Pays

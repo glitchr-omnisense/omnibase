@@ -24,12 +24,12 @@
 {%- block form2_label  -%}
 
     {% set badges = "" %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_dbcolumn  is defined ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_multiple  is defined ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_alias     is defined ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_sortable  is defined ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
-    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and form.vars.is_inherited is defined ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
-
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_dbcolumn  ?? false) ? "fas fa-fw fa-database"      |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_dbcolumn" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_multiple  ?? false) ? "fas fa-fw fa-clipboard-list"|iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_multiple" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_alias     ?? false) ? "fas fa-fw fa-hashtag"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_alias"    |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_sortable  ?? false) ? "fas fa-fw fa-repeat"        |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_sortable" |trans)})|first|raw : "") %}
+    {% set badges = badges ~ (is_granted("ROLE_SUPERADMIN") and (form.vars.is_inherited ?? false) ? "fas fa-fw fa-sitemap"       |iconify({"data-toggle":"tooltip", "title":("@fields.debug.is_inherited"|trans)})|first|raw : "") %}
+    
     {% set label     = form_label(form, null, {'label_html': true}) %}
     {% set labelTrim = (label|trim(" ")|trim("&nbsp;")) %}
 
@@ -112,7 +112,9 @@
 
 {%- block attribute_widget -%}
 <div class="form-control form-attribute">
+    
     {{ form_widget(form.choice) }}
+
     <div class="form-attribute-items">
         {% for fieldName in form.children|keys|filter(k => k != "choice") %}
         {{ form_widget(form.children[fieldName]) }}

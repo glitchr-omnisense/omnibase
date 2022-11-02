@@ -1525,6 +1525,7 @@ class ServiceEntityParser
         $query = $this->eagerly === false ? $qb->getQuery() : $this->getEagerQuery($qb);
         if($groupBy) $query->setCacheable(false);
 
+        // $query->setResultCacheId("test");
         $query->useQueryCache($this->cacheable);
         if($this->cacheable) $query->enableResultCache();
         else $query->disableResultCache();

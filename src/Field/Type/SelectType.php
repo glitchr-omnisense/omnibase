@@ -371,9 +371,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choiceType = current(iterator_to_array($forms));
-
-        if ($choiceType->getParent()?->getData() instanceof Collection &&
-            !$this->classMetadataManipulator->isCollectionOwner($choiceType->getParent(), $choiceType->getParent()?->getData())) return;
+        if($this->classMetadataManipulator->isCollectionOwner($choiceType) === false) return;
 
         $options = $choiceType->getParent()->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessClass($choiceType->getParent());

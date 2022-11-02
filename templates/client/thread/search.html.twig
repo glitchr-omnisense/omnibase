@@ -23,7 +23,8 @@
                 </button>
             </div>
 
-            {# <div class="collapse" id="collapseExample">
+            {% if form.title is defined %}
+            <div class="collapse" id="collapseExample">
             <p>
                 <div class="card card-body">
                 <div class="d-flex justify-content-center align-items-center flex-row flex-wrap">
@@ -39,97 +40,100 @@
                 </div>
                 </div>
             </p>
-            </div> #}
+            </div>
+            {% endif %}
         {{ form_end(form) }}
 
     </article>
 
-    {% if threads|length < 1 %}
+    {% if threads is defined %}
 
-    <article class="wrapper">
-        <div class="header">
-            Aucune ressource trouvée.
-        </div>
-    </article>
-    {% else %}
+        {% if threads|length < 1 %}
+        <article class="wrapper">
+            <div class="header">
+                Aucune ressource trouvée.
+            </div>
+        </article>
+        {% else %}
 
-        {% set lastSection = null %}
-        {% for thread in threads %}
+            {% set lastSection = null %}
+            {% for thread in threads %}
 
-            {% set depth = thread.getRepository().getHierarchyDepth() %}
+                {% set depth = thread.getRepository().getHierarchyDepth() %}
 
-            {% if lastSection != thread.getRepository().getHierarchy() %}
-                <article class="wrapper extended hierarchy">
-                <h1 class="title">
-                    {% for section in thread.getRepository().getHierarchyTree() %}
-                    > {{ section|capitalize }}
-                    {% endfor %}
-                </h1>
-                </article>
-                {% set lastSection = thread.getRepository().getHierarchy() %}
-            {% endif %}
-
-            <article class="wrapper extended">
-                <div class="header">
-
-                    <ul class="field-avatar">
-                        {% for owner in thread.owners|reverse %}
-                        <li>{{ owner.getFormattedAvatar()|raw }}</li>
+                {% if lastSection != thread.getRepository().getHierarchy() %}
+                    <article class="wrapper extended hierarchy">
+                    <h1 class="title">
+                        {% for section in thread.getRepository().getHierarchyTree() %}
+                        > {{ section|capitalize }}
                         {% endfor %}
-                    </ul>
+                    </h1>
+                    </article>
+                    {% set lastSection = thread.getRepository().getHierarchy() %}
+                {% endif %}
 
-                    <div class="text">
+                <article class="wrapper extended">
+                    <div class="header">
 
-                        <h1 class="title">
-                            {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
-                            {% if depth > 1 and thread.parent() != null %}
-                                {{ '@messages.thread.found'|trans([thread|trans_entity, thread.parent()|linkify]) | raw }}
-                            {% else %}
-                                {{ threadTitle |raw }}
-                            {% endif %}
-                        </h1>
-
-                        <div class="info">
-
-                            {{ '@messages.base.datetime'|trans([
-                                thread.updatedAt()|datetime("dd MMMM YYYY"),
-                                thread.updatedAt()|datetime("HH:mm")
-                            ])|raw }}&nbsp
-
-                            {% if thread.owners|length > 2 %}
-                            <br/>
-                            {% endif %}
-
-                            {{ '@messages.words.by'|trans }}
-                            {% for owner in thread.owners %}
-                                    {% if not loop.first %}
-                                    {% if loop.last %} {{ '@messages.words.and'|trans }} {% else %}, {% endif %}
-                                    {% endif %}
-                                    <a href="/profile/{{ owner.username|lower }}">{{ owner.username }}</a>
+                        <ul class="field-avatar">
+                            {% for owner in thread.owners|reverse %}
+                            <li>{{ owner.getFormattedAvatar()|raw }}</li>
                             {% endfor %}
+                        </ul>
+
+                        <div class="text">
+
+                            <h1 class="title">
+                                {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
+                                {% if depth > 1 and thread.parent() != null %}
+                                    {{ '@messages.thread.found'|trans([thread|trans_entity, thread.parent()|linkify]) | raw }}
+                                {% else %}
+                                    {{ threadTitle |raw }}
+                                {% endif %}
+                            </h1>
+
+                            <div class="info">
+
+                                {{ '@messages.base.datetime'|trans([
+                                    thread.updatedAt()|datetime("dd MMMM YYYY"),
+                                    thread.updatedAt()|datetime("HH:mm")
+                                ])|raw }}&nbsp
+
+                                {% if thread.owners|length > 2 %}
+                                <br/>
+                                {% endif %}
+
+                                {{ '@messages.words.by'|trans }}
+                                {% for owner in thread.owners %}
+                                        {% if not loop.first %}
+                                        {% if loop.last %} {{ '@messages.words.and'|trans }} {% else %}, {% endif %}
+                                        {% endif %}
+                                        <a href="/profile/{{ owner.username|lower }}">{{ owner.username }}</a>
+                                {% endfor %}
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                {% if thread.excerpt %}
-                <hr>
-                <p>{{ thread.excerpt | highlight(form_data.excerpt, -1) |default(thread.excerpt) | raw }}</p>
-                {% endif %}
+                    {% if thread.excerpt %}
+                    <hr>
+                    <p>{{ thread.excerpt | highlight(form_data.excerpt, -1) |default(thread.excerpt) | raw }}</p>
+                    {% endif %}
 
-                {% if thread.content %}
-                <hr>
-                <p>{{ thread.content | highlight(form_data.content, 5) | raw }}</p>
-                {% endif %}
+                    {% if thread.content %}
+                    <hr>
+                    <p>{{ thread.content | highlight(form_data.content, 5) | raw }}</p>
+                    {% endif %}
 
-                {# <p>
-                <div class="d-flex justify-content-end">
-                    <a href="{{ thread.getPath() }}" class="btn btn-primary">
-                        {{ ('@entities.'~get_short_class(thread)~'.see') | trans }}
-                    </a>
-                </div>
-                </p> #}
-            </article>
-        {% endfor %}
+                    {# <p>
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ thread.getPath() }}" class="btn btn-primary">
+                            {{ ('@entities.'~get_short_class(thread)~'.see') | trans }}
+                        </a>
+                    </div>
+                    </p> #}
+                </article>
+            {% endfor %}
+        {% endif %}
     {% endif %}
     </section>
 {% endblock %}

@@ -71,7 +71,8 @@ final class AssociationFileField implements FieldInterface
     public function renderAsImage(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "image")
-            ->setFormTypeOption("form_type", ImageType::class);
+             ->setFormTypeOption("form_type", ImageType::class)
+             ->setFormTypeOption("mime_types", ["image/*"]);
 
         return $this;
     }
@@ -79,7 +80,8 @@ final class AssociationFileField implements FieldInterface
     public function renderAsAvatar(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar")
-             ->setFormTypeOption("form_type", AvatarType::class);
+             ->setFormTypeOption("form_type", AvatarType::class)
+             ->setFormTypeOption("mime_types", ["image/*"]);
 
         return $this;
     }

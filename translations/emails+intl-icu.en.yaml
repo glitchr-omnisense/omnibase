@@ -7,7 +7,7 @@ fake_test:
 
 action_text: Go to the page
 unsubscribe:  "Click <a href='{0}'>here</a> to unsubscribe"
-returnHomepage:  "Click <a href='/'>here</a> to return to home page"
+returnIndex:  "Click <a href='/'>here</a> to return to home page"
 itWorks: "It works!"
 
 resetPassword:

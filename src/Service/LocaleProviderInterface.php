@@ -13,9 +13,10 @@ interface LocaleProviderInterface
     public function compatibleLocale(string $locale, string $preferredLocale, ?array $availableLocales = null): ?string;
 
     public function getLang(?string $locale = null): string;
+    public function getLangName(?string $locale = null): ?string;
     public function getCountry(?string $locale = null): string;
     public function getCountryName(?string $locale = null): string;
-
+   
     public static function getDefaultLang(): ?string;
     public static function getFallbackLangs(): array;
     public static function getAvailableLangs(): array;

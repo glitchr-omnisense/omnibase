@@ -15,6 +15,8 @@ use Symfony\Bundle\SecurityBundle\Security\FirewallConfig;
 
 interface RouterInterface extends SymfonyRouterInterface, RequestMatcherInterface, WarmableInterface
 {
+    public function getIndexPage(): string;
+
     public function useAdvancedFeatures(): bool;
     public function isProfiler(mixed $request = null);
     public function isEasyAdmin(mixed $request = null);

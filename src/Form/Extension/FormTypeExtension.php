@@ -82,7 +82,7 @@ class FormTypeExtension extends AbstractTypeExtension
         if($options["form2"]) $this->applyForm2($view);
         if($options["easyadmin"]) $this->applyEA($view, $form);
 
-        if($this->baseService->isDebug() && $this->baseService->isGranted(UserRole::ADMIN) && $this->baseService->getRouter()->isEasyAdmin()) {
+        if($this->baseService->isDebug() && $this->baseService->isGranted(UserRole::SUPERADMIN) && $this->baseService->getRouter()->isEasyAdmin()) {
             $this->markDbProperties($view, $form, $options);
             $this->markOptions($view, $form, $options);
         }
@@ -184,9 +184,11 @@ class FormTypeExtension extends AbstractTypeExtension
 
     public function markOptions(FormView $view, FormInterface $form, array $options) {
 
-        if($this->formFactory->guessSortable($form, $options)) $view->vars["is_sortable"] = true;
-        if($this->formFactory->guessMultiple($form, $options)) $view->vars["is_multiple"] = true;
-        if($form->getData() instanceof Collection && !$this->classMetadataManipulator->isCollectionOwner($form, $form->getData()))
+        if($this->formFactory->guessSortable($form, $options))
+            $view->vars["is_sortable"] = true;
+        if($this->formFactory->guessMultiple($form, $options))
+            $view->vars["is_multiple"] = true;
+        if($this->classMetadataManipulator->isCollectionOwner($form) === false)
             $view->vars["is_inherited"] = true;
     }
 

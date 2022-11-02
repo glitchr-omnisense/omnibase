@@ -315,13 +315,16 @@ class AdvancedRouter implements RouterInterface
         return in_array($port, [80, 443]) ? null : $port;
     }
 
+    public function getIndexPage():string { return $this->parameterBag->get("base.site.index") ?? $this->getUrl("/"); }
+    
     public function getRouteName(?string $routeUrl = null): ?string
     {
         if($this->getRequestUri() && !$routeUrl) return $this->getRouteName($this->getRequestUri());
         if($routeUrl && !str_contains($routeUrl, "/")) return $routeUrl;
 
         $routeMatch = $this->getRouteMatch($routeUrl) ?? [];
-        $isLocalized = array_key_exists("_locale", $routeMatch) && $routeMatch["_locale"] != $this->localeProvider->getDefaultLang();
+
+        $isLocalized = ($routeMatch["_locale"] ?? false) && $routeMatch["_locale"] != $this->localeProvider->getDefaultLang();
         return $routeMatch ? $routeMatch["_route"] . ($isLocalized ? "." . $routeMatch["_locale"] : "") : null;
     }
 

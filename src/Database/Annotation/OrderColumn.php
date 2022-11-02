@@ -4,6 +4,7 @@ namespace Base\Database\Annotation;
 
 use Base\Annotations\AbstractAnnotation;
 use Base\Annotations\AnnotationReader;
+use Base\BaseBundle;
 use Base\Database\Common\Collections\OrderedArrayCollection;
 use Base\Database\Entity\EntityExtensionInterface;
 use Base\Database\Type\SetType;
@@ -11,6 +12,7 @@ use Base\Entity\Extension\Ordering;
 use Base\Enum\EntityAction;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\ArrayType;
+use Doctrine\DBAL\Types\JsonType;
 use Doctrine\ORM\Event\LifecycleEventArgs;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Mapping\OrderBy;
@@ -43,9 +45,9 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
             $type = $this->getClassMetadataManipulator()->getTypeOfField($object, $targetValue);
             $doctrineType = $this->getClassMetadataManipulator()->getDoctrineType($type);
 
-            $isArray = is_instanceof($doctrineType, ArrayType::class);
+            $isArray = is_instanceof($doctrineType, ArrayType::class) || is_instanceof($doctrineType, JsonType::class);
             $isToMany = $this->getClassMetadataManipulator()->isToManySide($object, $targetValue);
-            // SET is not supported yet.. Select2 issue sorting settype
+            // SetType is not supported yet.. There is a sorting issue with Select2
             // $isSet  = is_instanceof($doctrineType, SetType::class);
 
             if(/*!$isSet &&*/ !$isArray && !$isToMany)
@@ -105,7 +107,8 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
         try { $entityValue = $classMetadata->getFieldValue($entity, $property); }
         catch (Exception $e) { return; }
 
-        //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
+        $cacheDriver = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
+        $cacheDriver->deleteAll();
         $ordering = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
         if($ordering === null) return;
 
@@ -134,7 +137,7 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
     public function payload(string $action, string $className, array $properties, object $entity): array
     {
         $orderingRepository = $this->getEntityManager()->getRepository(Ordering::class);
-
+        
         $id = spl_object_id($entity);
         switch($action) {
 
@@ -155,14 +158,12 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
                     }
 
                     $value = $propertyAccessor->getValue($entity, $property);
-
                     // TBD: Implement case for array.. this one might be a bit more complicate.. (periodical cycles)
                     /*if(is_array($value)) $data[$property] = array_order($value, $this->getOldEntity($entity)->getRoles());
                     else*/ if($value instanceof Collection) {
 
                         $data[$property] = $value->toArray();
                         $dataIdentifier = array_map(fn($e) => $e->getId(), $data[$property]);
-
                         uasort($dataIdentifier, fn($a,$b) => $a === null ? 1 : ($b === null ? -1 : ($a < $b ? -1 : 1)));
 
                         $data[$property] = array_flip(array_keys($dataIdentifier));
@@ -171,16 +172,17 @@ class OrderColumn extends AbstractAnnotation implements EntityExtensionInterface
 
                     if(array_key_exists($property, $data) && is_identity($data[$property]))
                         unset($data[$property]);
+
                 }
 
                 if(!array_key_exists($className, $this->ordering)) $this->ordering[$className] = [];
-                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
-                $this->ordering[$className][$id] = $this->ordering[$className][$id] ?? new Ordering();
+                $cacheDriver = $this->getEntityManager()->getConfiguration()->getResultCacheImpl();
+                $cacheDriver->deleteAll();
+                $this->ordering[$className][$id]   = $orderingRepository->cacheOneByEntityIdAndEntityClass($entity->getId(), $className);
+                $this->ordering[$className][$id] ??= new Ordering();
                 $this->ordering[$className][$id]->setEntityData($data);
 
                 $orderingId = $this->ordering[$className][$id]->getId();
-
-                //NB: Evict in AbstractExtension doesn't seems to be working.. TBC
                 if($orderingId) $this->getEntityManager()->getCache()->evictEntity(Ordering::class, $orderingId);
 
                 break;
