@@ -60,7 +60,7 @@ trait BaseTrait
         return BaseService::getObjectManager(is_object($object) ? get_class($object) : $object)->getRepository(is_object($object) ? get_class($object) : $object);
     }
 
-    public static function isEntity(mixed $entity)         : bool            { return BaseService::getClassMetadataManipulator()?->isEntity($entity); }
+    public static function isEntity(mixed $entity)         : ?bool            { return BaseService::getClassMetadataManipulator()?->isEntity($entity); }
 
     public static function getProjectDir()    : string { return (self::class === BaseService::class) ? BaseService::$projectDir   : BaseService::getProjectDir(); }
     public static function getEnvironment()   : string { return (self::class === BaseService::class) ? BaseService::$environment   : BaseService::getEnvironment(); }

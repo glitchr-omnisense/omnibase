@@ -10,7 +10,7 @@ interface FormProcessorInterface
 {
     public function handleRequest(Request $request): static;
     public function hydrate(mixed $data): mixed;
-    
+
     public function getForm(): FormInterface;
     public function getData()  : mixed;
     public function setData(mixed $data): self;

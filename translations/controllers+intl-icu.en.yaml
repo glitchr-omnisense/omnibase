@@ -5,9 +5,15 @@ widget_page:
     title: "{slug}"
 
 thread_search:
-  title: "Find in the title field"
-  content: "Find in content box.."
-  excerpt: "Find in the excerpt"
+  title: "Search for content from here.. "
+  searchbar: "Search here.."
+  fields:
+    title: "Find in the title field"
+    content: "Find in content box"
+    excerpt: "Find in the excerpt"
+  no_resources: No resources found.
+  found: "{0} found in \"{1}\""
+  placeholder: "Search here.."
 
 thread:
   in: "{0} dans \"{1}\""

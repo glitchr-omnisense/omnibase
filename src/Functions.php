@@ -735,10 +735,10 @@ namespace {
 
             $lastHaystack = null;
             while($haystack != $lastHaystack) {
+
                 $lastHaystack = $haystack;
                 foreach($needle as $n)
                     $haystack = str_rstrip($haystack, $n);
-
             }
 
             return $haystack;
@@ -1435,6 +1435,22 @@ namespace {
         $image->transformImageColorspace(\Imagick::COLORSPACE_CMYK);
         $image->writeImage($path);
         $image->destroy();
+    }
+
+    function is_emptydir($dir) 
+    {
+        $handle = opendir($dir);
+        while (false !== ($entry = readdir($handle))) {
+
+            if ($entry != "." && $entry != "..") {
+
+                closedir($handle);
+                return false;
+            }
+        }
+
+        closedir($handle);
+        return true;
     }
 
     define("ARRAY_USE_KEYS"  , 0);

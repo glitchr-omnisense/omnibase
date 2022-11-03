@@ -1,6 +1,6 @@
 {% extends 'layout1.html.twig' %}
 
-{% block title %}Search for a thread{% endblock %}
+{% block title %}{{ "@controllers.thread_search.title"|trans }}{% endblock %}
 {% block main %}
     <section>
     <article class="wrapper extended">
@@ -8,10 +8,10 @@
         {{ form_start(form, {'attr': {'class': "form-inline"}}) }}
 
             <div class="d-flex justify-content-center flex-row flex-wrap">
-                <h1 class="me-3">{{ '@messages.search.title'|trans }}</h1>
+                <h1 class="me-3">{{ '@controllers.thread_search.title'|trans }}</h1>
                 <div class="input-group w-auto me-3">
                     <div class="form-outline">
-                        {{ form_widget(form.generic, {'attr': {'placeholder': '@messages.search.placeholder'|trans}, value: form.vars.value.generic }) }}
+                        {{ form_widget(form.generic, {'attr': {'placeholder': '@controllers.thread_search.searchbar'|trans}, value: form.vars.value.generic }) }}
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search"></i>
@@ -29,13 +29,13 @@
                 <div class="card card-body">
                 <div class="d-flex justify-content-center align-items-center flex-row flex-wrap">
                     <div class="input-group w-auto m-1">
-                        {{ form_widget(form.title  , {'attr': {'placeholder': '@controllers.thread_search.title'|trans}, value: form.vars.value.title|trim("%") }) }}
-                    </div> ou
+                        {{ form_widget(form.title  , {'attr': {'placeholder': '@controllers.thread_search.title'|trans}, value: form.vars.value.title }) }}
+                    </div> {{ "@messages.words.or"|trans }}
                     <div class="input-group w-auto m-1">
-                        {{ form_widget(form.excerpt, {'attr': {'placeholder': '@controllers.thread_search.excerpt'|trans}, value: form.vars.value.excerpt|trim("%") }) }}
-                    </div> ou
+                        {{ form_widget(form.excerpt, {'attr': {'placeholder': '@controllers.thread_search.excerpt'|trans}, value: form.vars.value.excerpt }) }}
+                    </div> {{ "@messages.words.or"|trans }}
                     <div class="input-group w-auto m-1">
-                        {{ form_widget(form.content, {'attr': {'placeholder': '@controllers.thread_search.content'|trans}, value: form.vars.value.content|trim("%") }) }}
+                        {{ form_widget(form.content, {'attr': {'placeholder': '@controllers.thread_search.content'|trans}, value: form.vars.value.content }) }}
                     </div>
                 </div>
                 </div>
@@ -50,9 +50,7 @@
 
         {% if threads|length < 1 %}
         <article class="wrapper">
-            <div class="header">
-                Aucune ressource trouvée.
-            </div>
+            <div class="header">{{ "@controllers.thread_search.no_resources"|trans }}</div>
         </article>
         {% else %}
 
@@ -73,6 +71,7 @@
                 {% endif %}
 
                 <article class="wrapper extended">
+
                     <div class="header">
 
                         <ul class="field-avatar">
@@ -84,9 +83,9 @@
                         <div class="text">
 
                             <h1 class="title">
-                                {% set threadTitle = thread.title | highlight(form_data.title, -1) | default(thread.title) %}
+                                {% set threadTitle = thread.title | highlight(model.title, -1) | default(thread.title) %}
                                 {% if depth > 1 and thread.parent() != null %}
-                                    {{ '@messages.thread.found'|trans([thread|trans_entity, thread.parent()|linkify]) | raw }}
+                                    {{ '@messages.thread_search.found'|trans([thread|trans_entity, thread.parent()|linkify]) | raw }}
                                 {% else %}
                                     {{ threadTitle |raw }}
                                 {% endif %}
@@ -116,21 +115,19 @@
 
                     {% if thread.excerpt %}
                     <hr>
-                    <p>{{ thread.excerpt | highlight(form_data.excerpt, -1) |default(thread.excerpt) | raw }}</p>
+                    <div>{{ thread.excerpt | highlight(model.excerpt, -1) | default(thread.excerpt) | raw }}</div>
                     {% endif %}
 
                     {% if thread.content %}
                     <hr>
-                    <p>{{ thread.content | highlight(form_data.content, 5) | raw }}</p>
+                    <div class="ql-editor">{{ thread.content |striptags | highlight(model.content, 25) | default(thread.content) |raw }}</div>
                     {% endif %}
 
-                    {# <p>
-                    <div class="d-flex justify-content-end">
-                        <a href="{{ thread.getPath() }}" class="btn btn-primary">
-                            {{ ('@entities.'~get_short_class(thread)~'.see') | trans }}
-                        </a>
-                    </div>
-                    </p> #}
+                    <p>
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ thread.__toLink() }}" class="btn btn-primary">{{ ('@controllers.words.see_more') | trans | mb_ucfirst }}</a>
+                        </div>
+                    </p>
                 </article>
             {% endfor %}
         {% endif %}

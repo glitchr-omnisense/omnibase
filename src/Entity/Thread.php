@@ -529,7 +529,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
             $headlines[] = [
                 "tag" => $match[1],
-                "slug"  => $this->getSlugger()->slug($match[2]),
+                "slug"  => strtolower($this->getSlugger()->slug($match[2])),
                 "title" => $match[2]
             ];
 

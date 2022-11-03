@@ -12,6 +12,7 @@ paginator:
 words:
     by: by
     and: and
+    or: or
     see_also: "see also.. {0}"
     see_more: see more
     read_more: read more
@@ -38,9 +39,6 @@ logout:
 
 login:
     title: "Sign In"
-
-thread:
-    found: "{0} found in \"{1}\""
 
 base:
     return: "Previous page"

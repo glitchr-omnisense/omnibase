@@ -6,6 +6,7 @@ use Base\Service\ReferrerInterface;
 use Base\Service\LocaleProvider;
 use Base\Service\LocaleProviderInterface;
 use Base\Service\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,12 +21,13 @@ class LocaleController extends AbstractController
      */
     protected $localeProvider;
 
-    public function __construct(LocaleProviderInterface $localeProvider, RouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
+    public function __construct(LocaleProviderInterface $localeProvider, EntityManagerInterface $entityManager, RouterInterface $router, ReferrerInterface $referrer, TranslatorInterface $translator)
     {
         $this->localeProvider = $localeProvider;
         $this->router         = $router;
         $this->referrer       = $referrer;
         $this->translator     = $translator;
+        $this->entityManager  = $entityManager;
     }
 
     /**
@@ -43,8 +45,13 @@ class LocaleController extends AbstractController
 
         $availableLocales = array_merge($this->localeProvider->getAvailableLangs(), $this->localeProvider->getAvailableLocales());
         if(in_array($_locale, $availableLocales)) {
-        
+
             setcookie('_locale', $_locale);
+            if(!$this->isGranted("IS_IMPERSONATOR")){
+                $this->getUser()?->setLocale($this->localeProvider->getLocale($_locale));
+                $this->entityManager->flush();
+            }
+
             $this->addFlash("info", $this->translator->trans("@controllers.locale_changeto.action", [$this->localeProvider->getLangName($_locale)]));
 
             if(!str_starts_with($referrerName, "locale_changeto")) {
