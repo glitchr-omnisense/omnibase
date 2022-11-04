@@ -4,7 +4,7 @@ namespace Base\Service\Model;
 
 use Base\Database\Walker\CountWalker;
 use Base\Database\Walker\GroupByWalker;
-use Base\Database\Walker\MysqlWalker;
+use Base\Database\Walker\TranslatableWalker;
 use Base\Exception\InvalidPageException;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
@@ -33,12 +33,20 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
     public function __construct(array|Query $arrayOrQuery, RouterInterface $router, ?string $parameterName = "page")
     {
-        $query = $this->clone($arrayOrQuery, false);
-        $query->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [GroupByWalker::class]);
-        $query->setHint(GroupByWalker::HINT_GROUP_ARRAY, ["id"]);
+        if($arrayOrQuery instanceof Query) {
 
-        $this->paginator     = ($arrayOrQuery instanceof Query) ? new DoctrinePaginator($query) : $arrayOrQuery;
-        $this->totalCount    = ($arrayOrQuery instanceof Query) ? $this->getCountQuery($arrayOrQuery, false)->getSingleScalarResult() : count_leaves($this->paginator);
+            $query = $this->clone($arrayOrQuery, false);
+            $query->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [GroupByWalker::class]);
+            $query->setHint(GroupByWalker::HINT_GROUP_ARRAY, ["id"]);
+            $query->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
+            $this->paginator     = new DoctrinePaginator($query);
+            $this->totalCount    = $this->getCountQuery($arrayOrQuery, false)->getSingleScalarResult();
+
+        } else {
+    
+            $this->paginator     = $arrayOrQuery;
+            $this->totalCount    = count_leaves($this->paginator);
+        }
 
         $this->parameterName = $parameterName;
         $this->build = true;
@@ -51,6 +59,7 @@ class Pagination implements PaginationInterface, Iterator, Countable
 
         $clone->setCacheable(false);
         $clone->setHint(Query::HINT_CUSTOM_TREE_WALKERS, [CountWalker::class]);
+        $clone->setHint(Query::HINT_CUSTOM_OUTPUT_WALKER, TranslatableWalker::class);
         $clone->setFirstResult(null)->setMaxResults(null);
 
         return $clone;

@@ -15,8 +15,8 @@ interface TranslatorInterface extends \Symfony\Contracts\Translation\TranslatorI
 
     public function transTime(int $time): string;
 
-    public function transEnum(string $class, ?string $value = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
-    public function transEnumExists(string $class, ?string $value = null, string|array $options = Translator::NOUN_SINGULAR): bool;
+    public function transEnum(string $value, string $class, string|array $options = Translator::NOUN_SINGULAR): ?string;
+    public function transEnumExists(string $value, string $class, string|array $options = Translator::NOUN_SINGULAR): bool;
 
     public function transEntity(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): ?string;
     public function transEntityExists(mixed $entityOrClassName, ?string $property = null, string|array $options = Translator::NOUN_SINGULAR): bool;

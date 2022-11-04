@@ -3,6 +3,9 @@
         <i class="fa fa-globe"></i>
     </button>
     <ul class="dropdown-menu {{ class|default("") }}" aria-labelledby="dropdown-locale">
+    <li class="dropdown-label">
+        <span>{{ '@messages.locale.lang._plural'|trans }}</span>
+    </li>
     {% for locale in available_locales %}
         {% set current = (locale == current_locale) ? "active" : null %}
         <li><a href="{{ path(switch_route, {_locale: locale|lang}) }}" {{ html_attributes({"class": "dropdown-item "~current}) }}>

@@ -46,6 +46,11 @@ class SecuritySubscriber implements EventSubscriberInterface
      */
     private $tokenStorage;
 
+    /**
+     * @var RouterInterface
+     */
+    private $router;
+
     public function __construct(
         EntityManagerInterface $entityManager,
         UserRepository $userRepository,
@@ -258,7 +263,7 @@ class SecuritySubscriber implements EventSubscriberInterface
         $exceptions = array_merge($this->exceptions, ["/^(?:app|base)_user(?:.*)$/"]);
         if ($token instanceof SwitchUserToken) {
 
-            $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? false;
+            $switchParameter = $this->router->getRouteFirewall()->getSwitchUser()["parameter"] ?? "_switch_user";
 
             $notification = new Notification("impersonator", [$user, $switchParameter]);
             $notification->send("warning");

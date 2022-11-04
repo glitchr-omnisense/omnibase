@@ -31,7 +31,7 @@ class SiteVariable
         $this->sitemapper = $sitemapper;
     }
 
-    public function homepage() { return $this->baseService->getHomepage(); }
+    public function index() { return $this->baseService->getIndexPage(); }
     public function meta     (array $meta = [], ?string $locale = null) : array
     {
         $locale ??= $this->localeProvider->getLocale();

@@ -20,7 +20,6 @@ use Imagine\Image\Palette\CMYK;
 use Imagine\Image\Palette\RGB;
 use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class ImageService extends FileService implements ImageServiceInterface
@@ -149,7 +148,9 @@ class ImageService extends FileService implements ImageServiceInterface
             $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
         }
 
-        return $this->obfuscator->encode($config);
+        $hashid = $this->obfuscator->encode($config);
+        $hashid = path_subdivide($hashid, self::CACHE_SUBDIVISION, self::CACHE_SUBDIVISION_LENGTH);
+        return $hashid;
     }
 
     public function generate(string $proxyRoute, array $proxyRouteParameters = [], ?string $path = null, array $config = []): ?string
@@ -161,11 +162,11 @@ class ImageService extends FileService implements ImageServiceInterface
         return parent::generate($proxyRoute, $proxyRouteParameters, $path, $config);
     }
 
-    public function resolve(string $hashid, array $filters = []): ?array
+    public function resolve(string $hashid, array $filters = []): array
     {
-        $args = parent::resolve($hashid) ?? [];
-        $args["filters"]  = array_merge($args["filters"] ?? [], $filters);
-        return $args;
+        $config = parent::resolve($hashid) ?? [];
+        $config["filters"]  = array_merge($config["filters"] ?? [], $filters);
+        return $config;
     }
 
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response
@@ -185,27 +186,17 @@ class ImageService extends FileService implements ImageServiceInterface
         return parent::serve($file, $status, $headers);
     }
 
-    /**
-     * Returns a RedirectResponse to the given route with the given parameters.
-     */
-    public function redirectToRoute(string $route, array $parameters = [], int $status = 302): RedirectResponse
-    {
-        if ($this->profiler !== null)
-            $this->profiler->disable();
-
-        return new RedirectResponse($this->router->generate($route, $parameters), $status);
-    }
-
     public function isCached(?string $path, FilterInterface|array $filters = [], array $config = []): bool
     {
         if(!is_array($filters)) $filters = [$filters];
 
         //
         // Resolve nested paths
-        $args    = $this->resolve($path, $filters);
-        $path    = $args["path"] ?? $path; // Cache directory location
-        $filters = $args["filters"];
-        $storage = $args["storage"] ?? $config["storage"] ?? null;
+        $options = $this->resolve($path, $filters);
+        $path    = $config["path"]    ?? $options["path"]    ?? $path; // Cache directory location
+        $filters = $config["filters"] ?? $options["filters"] ?? [];
+        $storage = $config["storage"] ?? $options["storage"] ?? null;
+        $output  = $config["output"]  ?? $options["output"]  ?? realpath($path);
 
         //
         // Apply image resolution limitation
@@ -238,9 +229,12 @@ class ImageService extends FileService implements ImageServiceInterface
                 throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
 
-        $pathRelative = $this->flysystem->stripPrefix(realpath($path), $storage);
-        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        $pathCache    = path_suffix($pathRelative, $pathSuffixes);
+        $pathRelative = $this->flysystem->stripPrefix($output, $storage);
+        $pathCache = $pathRelative;
+        // NB: Encode path using hashid only: make sure the path is matching route generator
+        // ... Otherwise, the controller will take over
+        // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        // $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         //
         // Compute a response.. (if cache not found)
@@ -264,10 +258,11 @@ class ImageService extends FileService implements ImageServiceInterface
 
         //
         // Resolve nested paths
-        $args    = $this->resolve($path, $filters);
-        $path    = $args["path"] ?? $path; // Cache directory location
-        $filters = $args["filters"] ?? [];
-        $storage = $args["storage"] ?? $config["storage"] ?? null;
+        $options = $this->resolve($path, $filters);
+        $path    = $config["path"]    ?? $options["path"]    ?? $path; // Cache directory location
+        $filters = $config["filters"] ?? $options["filters"] ?? [];
+        $storage = $config["storage"] ?? $options["storage"] ?? null;
+        $output  = $config["output"]  ?? $options["output"]  ?? realpath($path);
 
         //
         // Apply image resolution limitation
@@ -300,9 +295,12 @@ class ImageService extends FileService implements ImageServiceInterface
                 throw new NotFoundHttpException("Only last filter must implement \"".FormatFilterInterface::class."\"");
         }
 
-        $pathRelative = $this->flysystem->stripPrefix(realpath($path), $storage);
-        $pathSuffixes = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
-        $pathCache    = path_suffix($pathRelative, $pathSuffixes);
+        $pathRelative = $this->flysystem->stripPrefix($output, $storage);
+        $pathCache = $pathRelative;
+        // Encode path using hashid only: make sure the path is matching route generator
+        // ... Otherwise, the controller will take over. Lines below make sure suffix is applied including filter operations
+        // $pathExtras   = array_map(fn ($f) => is_stringeable($f) ? strval($f) : null, $filters);
+        // $pathCache    = path_suffix($pathRelative, $pathExtras  );
 
         if(!$pathRelative) {
 

@@ -62,11 +62,8 @@ class RescueController extends \EasyCorp\Bundle\EasyAdminBundle\Controller\Abstr
         $lastUsername = $authenticationUtils->getLastUsername();
 
         // Redirect to the right page when access denied
-        if ( ($user = $this->getUser()) ) {
-
-            if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
-                return $this->redirect($referrer->getUrl() ?? $this->router->generate("backoffice"));
-        }
+        if ($this->isGranted('IS_AUTHENTICATED_FULLY'))
+            return $this->redirect($referrer->getUrl() ?? $this->router->generate("backoffice"));
 
         // Generate form
         $formProcessor = $this->formProxy

@@ -24,6 +24,8 @@
             {% set images = path is empty or null ? [] : [path] %}
         {% endif %}
     {% else %}
+
+        {% set counter = 1 %}
         {% set images = field.value is empty or null ? [] : [field.value] %}
     {% endif %}
 
@@ -34,10 +36,9 @@
     {% set entityFile    = field.formTypeOptions['entity_file'] ?? null %}
     {% for key, entity in images %}
 
-        {% set image = entity ? attribute(entity, entityFile) : null %}
+        {% set image = property_accessor(entity, entityFile) %}
         {% set image = image is iterable ? image|first : image %}
         {% set image = image is not null ? image : null %}
-
         {% if image is not null %}
 
             {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
@@ -46,7 +47,7 @@
             {% set html_id = 'ea-lightbox-' ~ field.uniqueId %}
             <a href="{{ image|imagine }}"  class="{{ class_index }} lightbox-thumbnail" data-lightbox="{{ html_id }}">
                 <div id="{{ html_id }}" class="img-fluid thumbnail-{{renderFormat}}">
-                    <img src="{{ image|thumbnail(1000,1000) }}">
+                    <img src="{{ image|thumbnail(250,250) }}">
                     {% if not showFirst and ea.crud.currentAction != 'detail' and counter > 1 %}
                         <span>+{{counter-1}}</span>
                     {% endif %}

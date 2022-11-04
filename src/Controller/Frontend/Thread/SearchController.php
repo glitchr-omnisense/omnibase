@@ -4,10 +4,8 @@ namespace Base\Controller\Frontend\Thread;
 
 use Base\Entity\ThreadIntl;
 use Base\Enum\ThreadState;
-use Base\Form\Data\Thread\SearchData;
 use Base\Form\FormProcessorInterface;
 use Base\Form\FormProxyInterface;
-use Base\Form\Model\ThreadSearchModel;
 use Base\Form\Type\ThreadSearchType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,24 +28,38 @@ class SearchController extends AbstractController
     */
     public function Main(Request $request)
     {
-        $formProcessor = $this->formProxy->getProcessor("thread:searchbar") ?? $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);
+        $formProcessor = $this->formProxy->createProcessor("thread:search", ThreadSearchType::class, []);
         $formProcessor
             ->setData($this->formProxy->get("thread:searchbar")?->getData())
-
             ->onDefault(function(FormProcessorInterface $formProcessor) {
 
-                $formattedData = $formProcessor->getData();
-                $formattedData->generic = str_strip("%" . $formattedData->generic . "%", "%%", "%%");
-                $formattedData->content = str_strip("%" . ($formattedData->content ?? $formattedData->generic) . "%", "%%", "%%");
-                $formattedData->title   = str_strip("%" . ($formattedData->title   ?? $formattedData->generic) . "%", "%%", "%%");
-                $formattedData->excerpt = str_strip("%" . ($formattedData->excerpt ?? $formattedData->generic) . "%", "%%", "%%");
-                
+                return $this->render('@Base/client/thread/search.html.twig', [
+                    "form" => $formProcessor->getForm()->createView(),
+                    "form_data" => $formProcessor->getForm()->getData()
+                ]);
+            })
+            ->onDefault(function(FormProcessorInterface $formProcessor) use ($request) {
+
+                $data = clone $formProcessor->getData();
+                $data->content = $data->content ?? $data->generic ?? "";
+                $data->title = $data->title   ?? $data->generic ?? "";
+                $data->excerpt = $data->excerpt ?? $data->generic ?? "";
+
+                $formattedData = clone $data;
+                $formattedData->content = str_strip("%" . $data->content . "%", "%%", "%%");
+                $formattedData->title   = str_strip("%" . $data->title   . "%", "%%", "%%");
+                $formattedData->excerpt = str_strip("%" . $data->excerpt . "%", "%%", "%%");
+                $formattedData->generic = str_strip("%" . $data->generic . "%", "%%", "%%");
+ 
+                $states = [ThreadState::PUBLISH];
+                if($this->isGranted("ROLE_ADMIN")) $states = [];
+
                 $threads = array_map(fn($t) => $t->getTranslatable(), $this->threadIntlRepository->cacheByInsensitivePartialModel([
                     "content" => $formattedData->content,
                     "title"   => $formattedData->title,
                     "excerpt" => $formattedData->excerpt,
-                ], ["translatable.state" => ThreadState::PUBLISH, "translatable.parent" => $formattedData->parent_id])->getResult());
-    
+                ], ["translatable.state" => $states, "translatable.parent" => $formattedData->parent_id])->getResult());
+
                 usort($threads, function ($a, $b)
                 {
                     $aRepository = $this->entityManager->getRepository(get_class($a));
@@ -55,11 +67,11 @@ class SearchController extends AbstractController
                     
                     return $aRepository->getHierarchy() < $bRepository->getHierarchy() ? -1 : 1;
                 });
-                
+    
                 return $this->render('@Base/client/thread/search.html.twig', [
                     "form" => $formProcessor->getForm()->createView(),
-                    "form_data" => $formProcessor->getForm()->getData(),
-                    "threads" => $threads
+                    "model" => $data,
+                    "threads" => $threads,
                 ]);
             })
 

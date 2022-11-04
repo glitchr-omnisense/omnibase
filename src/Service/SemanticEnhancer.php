@@ -15,7 +15,7 @@ class SemanticEnhancer implements SemanticEnhancerInterface
     {
         if($strOrArray === null) return null;
 
-        $semantics = $this->semanticRepository->cacheAll();;
+        $semantics = $this->semanticRepository->cacheAll();
 
         $array = $strOrArray;
         if(!is_array($array)) $array = [$array];

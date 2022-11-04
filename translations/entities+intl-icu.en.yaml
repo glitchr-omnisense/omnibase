@@ -21,7 +21,6 @@ user:
     _singular: "address"
     _plural: "addresses"
 
-
 extension:
   log:
     _singular: "log"

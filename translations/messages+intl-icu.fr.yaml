@@ -9,9 +9,13 @@ paginator:
     last: "Dernière page"
     page: "Page {0}"
 
+page:
+    empty: Cette page est vide !
+    
 words:
     by: par
     and: et
+    or: ou
     see_also: "à voir également: {0}"
     see_more: en voir plus
     read_more: en lire plus
@@ -33,15 +37,11 @@ profile:
     registered: "Inscrit depuis le {0} à {1}"
     edit: "Editer mon profil"
 
-thread:
-    found: "{0} dans \"{1}\""
-
 logout:
     title: "Se déconnecter"
 
 login:
     title: "Se connecter"
-
 
 base:
     return: "Page précédente"

@@ -7,7 +7,7 @@ fake_test:
 
 action_text: Go to the page
 unsubscribe:  "Click <a href='{0}'>here</a> to unsubscribe"
-returnHomepage:  "Click <a href='/'>here</a> to return to home page"
+returnIndex:  "Click <a href='/'>here</a> to return to home page"
 itWorks: "It works!"
 
 resetPassword:
@@ -17,6 +17,11 @@ resetPassword:
     If it wasn't you please consider changing your password. Please visit the following link to reset your password."
   action_text: "Reset your password"
   expiry: "The link will expire in {0}."
+
+register_notifyAdmins:
+    subject: "New user registered"
+    content: "Bravo ! A new user just registered, it is identify by {0} ({1})"
+    action_text: "See the profile"
 
 verifyEmail:
     subject: "Verify your email"

@@ -155,7 +155,28 @@ class BaseBundle extends Bundle
 
     public static $aliasList;
     public static $aliasRepositoryList = [];
-    public static function getAlias($alias) { return self::$aliasList[$alias] ?? $alias; }
+    public static function getAlias($arrayOrObjectOrClass) 
+    { 
+        if(!$arrayOrObjectOrClass) return $arrayOrObjectOrClass;
+        if(is_array($arrayOrObjectOrClass))
+            return array_map(fn($a) => self::getAlias($a), $arrayOrObjectOrClass);
+
+        $arrayOrObjectOrClass = is_object($arrayOrObjectOrClass) ? get_class($arrayOrObjectOrClass) : $arrayOrObjectOrClass;
+        if(!class_exists($arrayOrObjectOrClass)) return false;
+
+        return self::$aliasList[$arrayOrObjectOrClass] ?? $arrayOrObjectOrClass; 
+    }
+
+    public static function hasAlias(mixed $objectOrClass): bool
+    {
+        if(!is_object($objectOrClass) && !is_string($objectOrClass)) return false;
+
+        $class = is_object($objectOrClass) ? get_class($objectOrClass) : $objectOrClass;
+        if(!class_exists($class)) return false;
+
+        return self::getAlias($class) != $class;
+    }
+
     public static function getAliasRepository($aliasRepository) { return self::$aliasRepositoryList[$aliasRepository] ?? $aliasRepository; }
     public static function setAlias(array $classes)
     {

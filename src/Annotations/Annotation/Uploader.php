@@ -82,16 +82,9 @@ class Uploader extends AbstractAnnotation
     public function getPool() { return $this->pool; }
     public function getMissable() { return $this->missable; }
 
-    public function getDeclaringEntity(mixed $entity, string $fieldName)
-    {
-        $entityName = is_object($entity) ? get_class($entity) : $entity;
-        $classMetadata = $this->getClassMetadata($entityName);
-        $fieldMapping = $classMetadata->getFieldMapping($fieldName);
+    public function getDeclaringEntity(mixed $entity, string $fieldName) { return $this->getClassMetadataManipulator()->getDeclaringEntity($entity, $fieldName); }
 
-        return $fieldMapping["declared"] ?? $entityName;
-    }
-
-    public function getPath(mixed $entity, string $fieldName, ?string $uuid = null): ?string
+    public function getPath(mixed $entity, string $fieldPath, ?string $uuid = null): ?string
     {
         $pool     = $this->pool;
         $uuid     = $uuid ?? Uuid::v4();
@@ -100,7 +93,8 @@ class Uploader extends AbstractAnnotation
             return null;
 
         // Find field declaring entity
-        $entity = $this->getDeclaringEntity($entity, $fieldName);
+        $entity = $this->getDeclaringEntity($entity, $fieldPath);
+
         $namespaceDir = "";
         if($entity) {
 
@@ -111,14 +105,18 @@ class Uploader extends AbstractAnnotation
                             ));
         }
 
+        $fieldName = $fieldPath;
+        if( ($dot = strpos($fieldPath, ".")) > 0 )
+            $fieldName = trim(substr($fieldPath, $dot+1));
+
         return rtrim($pool . $namespaceDir . "/_".camel2snake($fieldName)."/" . $uuid, ".");
     }
 
     public static function getPublic($entity, $fieldName)
-    {
+    {        
         if(!self::hasAnnotation($entity, $fieldName, self::class))
-            return null;
-
+        return null;
+        
         /**
          * @var Uploader
          */
@@ -158,7 +156,7 @@ class Uploader extends AbstractAnnotation
 
             if(!is_stringeable($uuidOrFile))
                 return null;
-
+            
             $path = $that->getPath($entity, $fieldName, $uuidOrFile);
             $pathPublic = $that->getFlysystem()->getPublic($path, $that->getStorage());
             if($pathPublic) return $pathPublic;

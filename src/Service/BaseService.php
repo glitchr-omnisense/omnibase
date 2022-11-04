@@ -159,7 +159,7 @@ class BaseService implements RuntimeExtensionInterface
         $this->adminUrlGenerator = $adminUrlGenerator;
     }
 
-    public function getHomepage()  { return $this->getParameterBag()->get("base.site.homepage") ?? $this->getRouter()->getRoute("/"); }
+    public function getIndexPage():string { return $this->getRouter()->getIndexPage(); }
     public function getSite()
     {
         return [
@@ -406,10 +406,10 @@ class BaseService implements RuntimeExtensionInterface
 
     public function getToken()
     {
-        if (!isset($this->tokenStorage))
+        if ($this->getTokenStorage() === null)
             throw new Exception("No token storage found in BaseService. Did you overloaded self::__construct ?");
 
-        return $this->tokenStorage->getToken();
+        return $this->getTokenStorage()->getToken();
     }
 
     public function getUser()

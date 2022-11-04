@@ -35,7 +35,7 @@ class ThreadIntl implements TranslationInterface
      * @ORM\Column(type="string", length=255, nullable=true)
      */
     protected $headline;
-    public function getHeadline(): ?string { return $this->headline ?? $this->title; }
+    public function getHeadline(bool $fallback = false): ?string { return $this->headline ?? ($fallback ? $this->title : null); }
     public function setHeadline(?string $headline)
     {
         $this->headline = $headline;

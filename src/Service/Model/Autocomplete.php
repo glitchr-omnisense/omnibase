@@ -2,6 +2,7 @@
 
 namespace Base\Service\Model;
 
+use Base\Database\Type\EnumType;
 use Base\Service\Translator;
 use Base\Service\TranslatorInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;

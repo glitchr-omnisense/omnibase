@@ -9,6 +9,9 @@ use Symfony\Component\Mime\MimeTypes;
 
 class FileService implements FileServiceInterface
 {
+    protected const CACHE_SUBDIVISION        = 3;
+    protected const CACHE_SUBDIVISION_LENGTH = 1;
+
     /**
      * @var MimeTypes
      */
@@ -136,13 +139,14 @@ class FileService implements FileServiceInterface
 
             if ( ($pathConfig = $this->obfuscator->decode($hashid)) ) {
 
-                $config["path"] = $path = $pathConfig["path"] ?? $path;
+                $path = $pathConfig["path"] ?? $path;
+                $config["path"] = $path;
                 $config["filters"] = array_merge_recursive($pathConfig["filters"] ?? [], $config["filters"] ?? []);
                 $config["options"] = array_merge_recursive2($pathConfig["options"] ?? [], $config["options"]);
                 $config["local_cache"] = $pathConfig["local_cache"] ?? $config["local_cache"];
             }
 
-            $path = array_pop_key("path", $config);
+            $path = $path ?? array_pop_key("path", $config);
         }
 
         $hashid = $this->obfuscate($path, $config);
@@ -167,40 +171,26 @@ class FileService implements FileServiceInterface
 
     public function resolve(string $hashid): ?array
     {
-        $path = null;
-        $args = [];
+        $config = [];
 
-        $hashidBak = $hashid;
-        do {
+        $match = $this->router->getRouteMatch($hashid);
+        $hashid = $match && array_key_exists("hashid", $match) ? $match["hashid"] : $hashid;
+        $hashid = str_replace("/", "", $hashid);
 
-            // Path fallback
-            $args0 = null;
-            $hashid0 = $hashid;
-            while(strlen($hashid0) > 1) {
+        $decodedHashid = $this->obfuscator->decode($hashid);
+        foreach($decodedHashid ?? [] as $key => $el)
+            $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
+    
+        if(array_key_exists("path", $config ?? [])) {
 
-                $args0 = $this->obfuscator->decode(basename($hashid0));
-                if($args0) break;
+            $resolvedPath = $this->resolve($config["path"]);
+            foreach($resolvedPath ?? [] as $key => $el)
+                $config[$key] = is_array($el) ? array_merge($config[$key] ?? [], $el) : $el;
+        }
 
-                $hashid0 = dirname($hashid0);
-            }
+        if(!$config) return null;
 
-            if(!is_array($args0)) $path = $hashid;
-            else {
-
-                $hashid = array_pop_key("path", $args0) ?? $hashid;
-                foreach($args0 as $key => $arg0) {
-                    if(is_array($arg0)) $args[$key] = array_merge($args[$key] ?? [], $arg0);
-                    else $args[$key] = $arg0;
-                }
-            }
-
-        } while(is_array($args0));
-
-        if($hashidBak == $path) return [];
-        $args["path"]    = $path;
-        $args["options"] = $args["options"] ?? [];
-
-        return $args;
+        return array_merge($config, ["options" => $config["options"] ?? []]);
     }
 
     public function serve(?string $file, int $status = 200, array $headers = []): ?Response { return $this->serveContents(file_get_contents($file), $status, $headers); }

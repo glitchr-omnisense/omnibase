@@ -20,6 +20,6 @@ class Obfuscator implements ObfuscatorInterface
 
     public function decode(string $hash, string $compressor = null): mixed  {
 
-        if(!preg_match("/^[a-zA-Z0-9]+$/",$hash)) return false; // Only hash candidate can pass this line
+        if(!preg_match("/^[a-zA-Z0-9]+$/",$hash)) return null; // Only hash candidate can pass this line
         return unserialize(hex2bin($this->hashids->decodeHex($hash))); }
 }

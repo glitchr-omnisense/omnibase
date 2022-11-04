@@ -7,7 +7,7 @@ fake_test:
 
 action_text: Voir le lien
 unsubscribe:  "Pour se désabonner <a href=\"{0}\">cliquez ici</a>"
-returnHomepage:  "Click <a href='/'>here</a> to return to home page"
+returnIndex:  "Click <a href='/'>here</a> to return to home page"
 itWorks: "Ca fonctionne !"
 
 resetPassword:
@@ -15,6 +15,11 @@ resetPassword:
     content: Tu as reçu cet email car tu as demandé une réinitialisation de mot de passe.
     action_text: "Réinitialise ton mot de passe"
     expiry: "Le lien expirera dans {0}."
+
+register_notifyAdmins:
+    subject: "Nouvel utilisateur !"
+    content: "Un nouvel utilisateur vient de s'inscrire, il s'agit de {0} ({1})"
+    action_text: "Voir le profil"
 
 verifyEmail:
     subject: "Vérifie ton email"

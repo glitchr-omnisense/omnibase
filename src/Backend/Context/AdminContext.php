@@ -14,6 +14,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Factory\MenuFactory;
 use EasyCorp\Bundle\EasyAdminBundle\Registry\CrudControllerRegistry;
 use EasyCorp\Bundle\EasyAdminBundle\Registry\TemplateRegistry;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
@@ -37,6 +38,12 @@ class AdminContext extends \EasyCorp\Bundle\EasyAdminBundle\Context\AdminContext
     public function getTranslationDomain()
     {
         return $this->dashboardDto->getTranslationDomain();
+    }
+
+    public function impersonator_permission() :string { return $this->getImpersonatorPermission(); }
+    public function getImpersonatorPermission() : string
+    {
+        return class_exists(AuthenticatedVoter::class) ? AuthenticatedVoter::IS_IMPERSONATOR : 'ROLE_PREVIOUS_ADMIN';
     }
 
     public function isActive(string $referenceUrl, array $ignoredKeys = ["menuIndex", "submenuIndex", "filters[", "page", "sort[", "entityId", "referrer"])

@@ -4,7 +4,7 @@
 {% if birthdate is defined and birthdate is not null %}
 <div class="container text-center">
     {% if is_born %}
-        <div>{{ '@controllers.security_birthdate.title.open'|trans([app.site.homepage])|raw }}</div>
+        <p>{{ '@controllers.security_birthdate.title.open'|trans([app.site.index])|raw }}</pp>
     {% else %} 
         <h2>{{ '@controllers.security_birthdate.title.appointment' | trans }}</h2><br/>
         <p>{{ birthdate }}</p>

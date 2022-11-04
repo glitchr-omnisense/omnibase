@@ -95,9 +95,9 @@ class SelectType extends AbstractType implements DataMapperInterface
                 FormFactory::GUESS_FROM_VIEW,
             ],
 
-            // To be implemented if necessary... (currently relying on autocomplete..)
-            //'query_builder'   => null,
-            "disable" => false,
+            //'query_builder'   => null,　// To be implemented if necessary... (currently relying on Autocomplete model and Association*Type..)
+
+            "disable"          => false,
             'choices'          => null,
             'choice_loader'    => null,
             'choice_filter'    => false,
@@ -114,7 +114,7 @@ class SelectType extends AbstractType implements DataMapperInterface
 
             // Generic parameters
             'placeholder'        => "@fields.select.placeholder",
-            'capitalize'         => true,
+            'capitalize'         => null,
             'language'           => null,
             'required'           => null,
             'multiple'           => null,
@@ -242,9 +242,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null,  Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($text, $class, Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($text, $class, Translator::NOUN_PLURAL);
 
                         $text = empty($text) ? $key : $text;
                         $self = array_pop_key("_self", $choices);
@@ -301,9 +301,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                         list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
-                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
+                             if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null,  Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($text, $class, Translator::NOUN_PLURAL);
+                        else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($text, $class, Translator::NOUN_PLURAL);
 
                         $text = empty($text) ? $key : $text;
                         $self = array_pop_key("_self", $choices);
@@ -371,8 +371,7 @@ class SelectType extends AbstractType implements DataMapperInterface
     public function mapFormsToData(Traversable $forms, &$viewData)
     {
         $choiceType = current(iterator_to_array($forms));
-        if ($choiceType->getParent()?->getData() instanceof Collection &&
-            !$this->classMetadataManipulator->isCollectionOwner($choiceType->getParent(), $choiceType->getParent()?->getData())) return;
+        if($this->classMetadataManipulator->isCollectionOwner($choiceType) === false) return;
 
         $options = $choiceType->getParent()->getConfig()->getOptions();
         $options["class"] = $this->formFactory->guessClass($choiceType->getParent());
@@ -642,9 +641,9 @@ class SelectType extends AbstractType implements DataMapperInterface
 
                     list($class, $text) = array_pad(explode("::", $key), 2, null);
 
-                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null, Translator::NOUN_PLURAL);
-                    else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
-                    else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($class, $text, Translator::NOUN_PLURAL);
+                         if($this->classMetadataManipulator->isEntity  ($class)) $text = $this->translator->transEntity($class, null,  Translator::NOUN_PLURAL);
+                    else if($this->classMetadataManipulator->isEnumType($class)) $text = $this->translator->transEnum  ($text, $class, Translator::NOUN_PLURAL);
+                    else if($this->classMetadataManipulator->isSetType ($class)) $text = $this->translator->transEnum  ($text, $class, Translator::NOUN_PLURAL);
                     else $text = is_string($key) ? $key : $text;
 
                     $self = array_pop_key("_self", $choices);

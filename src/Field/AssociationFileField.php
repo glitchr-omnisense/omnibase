@@ -71,7 +71,8 @@ final class AssociationFileField implements FieldInterface
     public function renderAsImage(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "image")
-            ->setFormTypeOption("form_type", ImageType::class);
+             ->setFormTypeOption("form_type", ImageType::class)
+             ->setFormTypeOption("mime_types", ["image/*"]);
 
         return $this;
     }
@@ -79,7 +80,8 @@ final class AssociationFileField implements FieldInterface
     public function renderAsAvatar(): self
     {
         $this->setCustomOption(self::OPTION_RENDER_FORMAT, "avatar")
-             ->setFormTypeOption("form_type", AvatarType::class);
+             ->setFormTypeOption("form_type", AvatarType::class)
+             ->setFormTypeOption("mime_types", ["image/*"]);
 
         return $this;
     }
@@ -118,6 +120,24 @@ final class AssociationFileField implements FieldInterface
     public function allowDelete(bool $allow = true)
     {
         $this->setFormTypeOption("allow_delete", $allow);
+        return $this;
+    }
+
+    public function setMaxSize(int $filesize) {
+
+        $this->setFormTypeOption("max_size", $filesize);
+        return $this;
+    }
+
+    public function setMaxFiles(int $nFiles) {
+
+        $this->setFormTypeOption("max_files", $nFiles);
+        return $this;
+    }
+
+    public function setMimeTypes(array $mimeTypes) {
+
+        $this->setFormTypeOption("mime_types", $mimeTypes);
         return $this;
     }
 

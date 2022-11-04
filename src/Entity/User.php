@@ -247,7 +247,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getLocale(): ?string { return $this->locale ?? LocaleProvider::getDefaultLocale(); }
     public function setLocale(?string $locale = null): self
     {
-        if(empty($locale)) $locale = null;
+        if(empty($locale)) $locale = $this->locale ?? null;
         $this->locale = $locale ?? User::getCookie("locale") ?? LocaleProvider::getDefaultLocale();
 
         if(!$this->locale)
@@ -264,6 +264,7 @@ class User implements UserInterface, TwoFactorInterface, PasswordAuthenticatedUs
     public function getTimezone(): string { return $this->timezone ?? "UTC"; }
     public function setTimezone(string $timezone = null): self
     {
+        if(empty($timezone)) $timezone = $this->timezone ?? null;
         $this->timezone = $timezone ?? User::getCookie("timezone") ?? null;
         if( !in_array($this->timezone, timezone_identifiers_list()) )
             $this->timezone = "UTC";

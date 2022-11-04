@@ -38,7 +38,7 @@ class Page extends Widget implements IconizeInterface, LinkableInterface
 
     public function __toString() { return $this->getTitle(); }
 
-    public function __construct(string $title, ?string $slug = null)
+    public function __construct(?string $title = null, ?string $slug = null)
     {
         parent::__construct($title);
         $this->setSlug($slug);

@@ -25,7 +25,7 @@ class OrphanRemoval extends AbstractAnnotation
     public function __construct(array $data)
     {
         $this->column = $data["column"]  ?? "";
-        $this->value  = $data["value"]  ?? "";
+        $this->value  = $data["value"]  ?? true;
     }
 
     public function supports(string $target, ?string $targetValue = null, $entity = null):bool
@@ -45,7 +45,7 @@ class OrphanRemoval extends AbstractAnnotation
             throw new Exception("Invalid column property \"$column\" provided in annotation of class ".$classMetadata->getName());
 
         $associationMapping = $classMetadata->getAssociationMapping($classMetadata->getFieldName($column));
-        $associationMapping["orphanRemoval"]    = $this->value;
+        $associationMapping["orphanRemoval"]    = boolval($this->value);
 
         if(array_key_exists($column,  $classMetadata->associationMappings))
             $classMetadata->associationMappings[$column] = $associationMapping;

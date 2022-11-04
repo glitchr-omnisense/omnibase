@@ -11,14 +11,16 @@ interface FlysystemInterface
     public static function getPublicDir();
 
     public function hasStorage(string $storage):bool;
-    public function getStorageNames():array;
+    public function getStorageNames(bool $public = true):array;
     public function getDefaultStorage(): FilesystemOperator;
     public function setDefaultStorage(FilesystemOperator|string $operator);
 
     public function getPublic(mixed $path, FilesystemOperator|string|null $operator = null);
+    public function getPublicRoot(FilesystemOperator|string|null $operator = null) : ?string;
     public function getOperator(FilesystemOperator|string|null $operator = null): FilesystemOperator;
     public function getAdapter(FilesystemOperator|string|null $operator = null): FilesystemAdapter;
 
+   
     public function prefixPath(string $path, FilesystemOperator|string|null $operator = null);
     public function stripPrefix(string $path, FilesystemOperator|string|null $operator = null);
     public function read(string $path, FilesystemOperator|string|null $operator = null): ?string;

@@ -29,8 +29,10 @@
             <tag name="container.service_subscriber" />
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="locale_provider" />
+            <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="router" />
             <argument type="service" id="referrer" />
+            <argument type="service" id="translator" />
         </service>
 
         <service id="Base\Controller\UX\FileController">
@@ -39,8 +41,8 @@
             <call method="setContainer"><argument type="service" id="Psr\Container\ContainerInterface" /></call>
             <argument type="service" id="flysystem" />
             <argument type="service" id="base.service.image" />
-
             <argument type="service" id="Base\Repository\Layout\ImageCropRepository" />
+            <argument type="service" id="profiler" on-invalid="null" />
         </service>
 
         <service id="Base\Controller\Frontend\Layout\WidgetController">
@@ -209,6 +211,11 @@
             <argument type="service" id="flysystem" />
             <argument type="service" id="doctrine" />
             <argument type="service" id="parameter_bag" />
+        </service>
+
+        <service id="Base\Console\Command\CacheClearCommand" parent="console.command.cache_clear">
+            <tag name="console.command" />
+            <argument type="service" id="flysystem" />
         </service>
 
         <service id="Base\Console\Command\TimeMachineDoctrineCommand"        parent="Base\Console\Command"                          ><tag name="console.command" /><argument type="service" id="time_machine" /></service>

@@ -4,9 +4,17 @@ widget_page:
     title: "{slug}"
 
 thread_search:
-  content: "Rechercher dans le contenu"
-  excerpt: "Rechercher dans l'extrait"
-  title: "Rechercher dans le titre"
+  title: "Rechercher un contenu précis, c'est par ici.. "
+  searchbar: "Rechercher.."
+  fields:
+    content: "Rechercher dans le contenu"
+    excerpt: "Rechercher dans l'extrait"
+    title: "Rechercher dans le titre"
+
+  no_resources: Aucune resource trouvée.
+  found: "\"{0}\" trouvé dans \"{1}\""
+  placeholder: "Remplir ici.."
+
 
 security_birthdate:
   title: 
@@ -18,6 +26,8 @@ security_birthdate:
 app_index:
   title: Retour au site
   
+locale_changeto:
+  action: "Le site est à présent en {0}"
 security_login:
   title: "Se Connecter"
 security_logout:

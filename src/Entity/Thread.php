@@ -400,8 +400,12 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
      */
     protected $publishedAt;
     public function getPublishedAt(): ?\DateTimeInterface { return $this->publishedAt; }
-    public function getPublishTime() { return $this->publishedAt->getTimestamp() - time(); }
-    public function getPublishTimeStr() { return $this->getTranslator()->transTime($this->getPublishTime()); }
+    public function getPublishTime() :?int { return $this->publishedAt ? $this->publishedAt->getTimestamp() - time() : null; }
+    public function getPublishTimeStr() :?string 
+    { 
+        $publishTime = $this->getPublishTime();
+        return $publishTime ? $this->getTranslator()->transTime($publishTime) : null;
+    }
     public function setPublishedAt(?\DateTimeInterface $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
@@ -510,6 +514,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
             return "<".$tag." ".html_attributes($options["row_attr"] ?? [], ["id" => $slug])."><a ".html_attributes($options["attr"] ?? [])." href='#" . $slug . "'>".$content."</a><a href='#" . $slug . "'>".$suffix."</a></".$tag.">";
 
         }, $this->content);
+
     }
 
     /**
@@ -524,7 +529,7 @@ class Thread implements TranslatableInterface, IconizeInterface, GraphInterface
 
             $headlines[] = [
                 "tag" => $match[1],
-                "slug"  => $this->getSlugger()->slug($match[2]),
+                "slug"  => strtolower($this->getSlugger()->slug($match[2])),
                 "title" => $match[2]
             ];
 

@@ -10,10 +10,8 @@ use Base\Service\IconProvider;
 use Base\Service\ImageService;
 use Base\Twig\Environment;
 use Symfony\Bridge\Twig\Mime\WrappedTemplatedEmail;
-use Symfony\Component\Translation\Exception\NotFoundResourceException;
 use Twig\Error\LoaderError;
 use Twig\Extension\AbstractExtension;
-use Twig\Loader\ChainLoader;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 

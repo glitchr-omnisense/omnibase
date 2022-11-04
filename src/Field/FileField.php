@@ -39,6 +39,24 @@ class FileField implements FieldInterface
             ->setFormTypeOptionIfNotSet("data_class", null);
     }
 
+    public function setMaxSize(int $filesize) {
+
+        $this->setFormTypeOption("max_size", $filesize);
+        return $this;
+    }
+
+    public function setMaxFiles(int $nFiles) {
+
+        $this->setFormTypeOption("max_files", $nFiles);
+        return $this;
+    }
+
+    public function setMimeTypes(array $mimeTypes) {
+
+        $this->setFormTypeOption("mime_types", $mimeTypes);
+        return $this;
+    }
+    
     public function allowDelete(bool $allowDelete = true): self
     {
         $this->setFormTypeOption("allow_delete", $allowDelete);

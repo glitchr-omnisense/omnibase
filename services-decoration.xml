@@ -67,6 +67,7 @@
 
         <service id="Base\Twig\Environment" parent="twig" decorates="twig">
             <argument type="service" id="request_stack" />
+            <argument type="service" id="locale_provider" />
             <argument type="service" id="router" />
             <argument type="service" id="parameter_bag" />
         </service>

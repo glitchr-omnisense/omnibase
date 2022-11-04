@@ -8,6 +8,7 @@ use Base\Service\ImageService;
 use Base\Service\TranslatorInterface;
 use DateInterval;
 use DateTime;
+use Doctrine\Common\Collections\Collection;
 use ReflectionFunction;
 use Symfony\Bridge\Twig\Extension\AssetExtension;
 use Twig\Environment;
@@ -124,7 +125,7 @@ final class FunctionTwigExtension extends AbstractExtension
             new TwigFilter('empty',          "empty"),
         ];
     }
-
+    
     public function is_callable(mixed $value, bool $syntax_only = false, &$callable_name = null): bool { return is_callable($value, $syntax_only, $callable_name); }
     public function nargs(callable $fn): int { return (new ReflectionFunction($fn))->getNumberOfParameters(); }
     public function call_user_func_with_defaults(callable $fn, ...$args) { return call_user_func_with_defaults($fn, ...$args); }
@@ -151,8 +152,23 @@ final class FunctionTwigExtension extends AbstractExtension
         return $class::$$propertyName;
     }
 
-    public function property_accessor($entity, $propertyName, $enableMagicCall = false)
+    public function property_accessor(mixed $entity, array|string $propertyName, bool $enableMagicCall = false): mixed
     {
+        if($entity == null) return null;
+        
+        // Shape property path
+        $propertyPath = is_string($propertyName) ? explode(".", $propertyName) : $propertyName;
+        if(!$propertyPath) return $entity;
+
+        // Special case for array
+        if(is_array($entity) || $entity instanceof Collection ) {
+         
+            $id = array_unshift($attributes);
+            $entity = $entity[$id] ?? null;
+        }
+
+        // Extract head
+        $propertyName = first($propertyPath);
         $propertyAccessorBuilder = PropertyAccess::createPropertyAccessorBuilder();
         if($enableMagicCall) $propertyAccessorBuilder->enableMagicCall();
 
@@ -160,7 +176,8 @@ final class FunctionTwigExtension extends AbstractExtension
         if(!$propertyAccessor->isReadable($entity, $propertyName))
             return null;
 
-        return $propertyAccessor->getValue($entity, $propertyName);
+        $entity = $propertyAccessor->getValue($entity, $propertyName);
+        return $this->property_accessor($entity, tail($propertyPath)); // Recursive processing
     }
 
     public function color_name(string $hex) {
